@@ -78,6 +78,43 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
 }
 
 // ============================================================
+// Stats
+// ============================================================
+
+export interface StatsResponse {
+  count: number;
+  count_valid: number;
+  count_dnf: number;
+  best_ms: number | null;
+  best_solve_id: number | null;
+  worst_ms: number | null;
+  worst_solve_id: number | null;
+  mean_ms: number | null;
+  current_ao5: number | null;
+  current_ao12: number | null;
+  current_ao100: number | null;
+  best_ao5: number | null;
+  best_ao12: number | null;
+  best_ao100: number | null;
+  filter: { cube_type: string | null; session_id: number | null };
+}
+
+export interface StatsParams {
+  cube_type?: string;
+  session_id?: number;
+}
+
+export function useStats(params: StatsParams = {}): UseQueryResult<StatsResponse> {
+  return useQuery({
+    queryKey: ["stats", params],
+    queryFn: async (): Promise<StatsResponse> => {
+      const r = await api.get<StatsResponse>("/stats", { params });
+      return r.data;
+    },
+  });
+}
+
+// ============================================================
 // Sessions
 // ============================================================
 

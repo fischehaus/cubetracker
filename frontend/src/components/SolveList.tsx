@@ -1,19 +1,28 @@
 // Liste der Solves als Tabelle, mit Filter (Cube-Type, Session) und Loeschen-Button.
+// Markiert Best-Solve (PB) goldfarben.
 
-import { useState } from "react";
-import { useDeleteSolve, useSolves, useUpdateSolve, type SolveListParams } from "../lib/api";
+import { useDeleteSolve, useSolves, useStats, useUpdateSolve, type SolveListParams } from "../lib/api";
 import { COMMON_CUBE_TYPES, formatDate, formatSolveTime } from "../lib/format";
 
 interface Props {
   sessionId: number | null; // null = alle Sessions
+  cubeFilter: string; // gemeinsamer Cube-Filter, vom Parent verwaltet
+  onCubeFilterChange: (cube: string) => void;
 }
 
-export function SolveList({ sessionId }: Props) {
-  const [filterCube, setFilterCube] = useState<string>("");
+export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) {
   const params: SolveListParams = { limit: 100 };
-  if (filterCube) params.cube_type = filterCube;
+  if (cubeFilter) params.cube_type = cubeFilter;
   if (sessionId !== null) params.session_id = sessionId;
   const { data: solves, isLoading, error } = useSolves(params);
+
+  // Stats fuer den selben Filter — fuer Best-Marker brauchen wir nur die best_solve_id
+  const statsParams: { cube_type?: string; session_id?: number } = {};
+  if (cubeFilter) statsParams.cube_type = cubeFilter;
+  if (sessionId !== null) statsParams.session_id = sessionId;
+  const { data: stats } = useStats(statsParams);
+  const bestSolveId = stats?.best_solve_id ?? null;
+
   const del = useDeleteSolve();
   const update = useUpdateSolve();
 
@@ -36,13 +45,13 @@ export function SolveList({ sessionId }: Props) {
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
         <h2 className="text-xl font-semibold text-gray-100 mb-2">Solves</h2>
         <p className="text-gray-400">
-          {filterCube
-            ? `Keine Solves fuer "${filterCube}" vorhanden.`
-            : "Noch keine Solves. Trag oben einen ein oder importier deine csTimer-Daten (kommt in F4)."}
+          {cubeFilter
+            ? `Keine Solves fuer "${cubeFilter}" vorhanden.`
+            : "Noch keine Solves. Trag oben einen ein oder importier deine csTimer-Daten."}
         </p>
-        {filterCube && (
+        {cubeFilter && (
           <button
-            onClick={() => setFilterCube("")}
+            onClick={() => onCubeFilterChange("")}
             className="mt-3 text-sm text-purple-400 hover:text-purple-300"
           >
             Filter zuruecksetzen
@@ -56,11 +65,11 @@ export function SolveList({ sessionId }: Props) {
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-100">
-          Solves <span className="text-sm text-gray-400">({solves.length})</span>
+          Solves <span className="text-sm text-gray-400">(letzte {solves.length})</span>
         </h2>
         <select
-          value={filterCube}
-          onChange={(e) => setFilterCube(e.target.value)}
+          value={cubeFilter}
+          onChange={(e) => onCubeFilterChange(e.target.value)}
           className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
         >
           <option value="">Alle Cube-Types</option>
@@ -84,62 +93,89 @@ export function SolveList({ sessionId }: Props) {
             </tr>
           </thead>
           <tbody>
-            {solves.map((s) => (
-              <tr key={s.id} className="border-b border-gray-800 hover:bg-gray-800/50">
-                <td className="py-2 pr-3 font-mono text-gray-100">
-                  {formatSolveTime(s)}
-                </td>
-                <td className="py-2 pr-3 text-gray-300">{s.cube_type}</td>
-                <td className="py-2 pr-3 text-gray-400 text-xs">
-                  {formatDate(s.timestamp)}
-                </td>
-                <td
-                  className="py-2 pr-3 text-gray-400 text-xs max-w-xs truncate"
-                  title={s.notes ?? ""}
+            {solves.map((s) => {
+              const isBest = s.id === bestSolveId;
+              return (
+                <tr
+                  key={s.id}
+                  className={`border-b border-gray-800 hover:bg-gray-800/50 ${
+                    isBest ? "bg-yellow-500/5" : ""
+                  }`}
                 >
-                  {s.notes ?? ""}
-                </td>
-                <td className="py-2 pr-3 text-right space-x-2">
-                  {!s.dnf && (
+                  <td className="py-2 pr-3 font-mono">
+                    {isBest && (
+                      <span
+                        className="inline-block mr-1.5 text-xs"
+                        title="Persoenliche Bestzeit (PB)"
+                      >
+                        ★
+                      </span>
+                    )}
+                    <span
+                      className={
+                        isBest
+                          ? "text-yellow-300 font-semibold"
+                          : "text-gray-100"
+                      }
+                    >
+                      {formatSolveTime(s)}
+                    </span>
+                  </td>
+                  <td className="py-2 pr-3 text-gray-300">{s.cube_type}</td>
+                  <td className="py-2 pr-3 text-gray-400 text-xs">
+                    {formatDate(s.timestamp)}
+                  </td>
+                  <td
+                    className="py-2 pr-3 text-gray-400 text-xs max-w-xs truncate"
+                    title={s.notes ?? ""}
+                  >
+                    {s.notes ?? ""}
+                  </td>
+                  <td className="py-2 pr-3 text-right space-x-2">
+                    {!s.dnf && (
+                      <button
+                        onClick={() =>
+                          update.mutate({
+                            id: s.id,
+                            payload: { plus_two: !s.plus_two },
+                          })
+                        }
+                        className={`text-xs rounded px-2 py-1 ${
+                          s.plus_two
+                            ? "bg-yellow-600/30 text-yellow-300 hover:bg-yellow-600/50"
+                            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        }`}
+                        title="+2-Strafe togglen"
+                      >
+                        +2
+                      </button>
+                    )}
                     <button
                       onClick={() =>
-                        update.mutate({ id: s.id, payload: { plus_two: !s.plus_two } })
+                        update.mutate({ id: s.id, payload: { dnf: !s.dnf } })
                       }
                       className={`text-xs rounded px-2 py-1 ${
-                        s.plus_two
-                          ? "bg-yellow-600/30 text-yellow-300 hover:bg-yellow-600/50"
+                        s.dnf
+                          ? "bg-red-600/30 text-red-300 hover:bg-red-600/50"
                           : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                       }`}
-                      title="+2-Strafe togglen"
+                      title="DNF togglen"
                     >
-                      +2
+                      DNF
                     </button>
-                  )}
-                  <button
-                    onClick={() =>
-                      update.mutate({ id: s.id, payload: { dnf: !s.dnf } })
-                    }
-                    className={`text-xs rounded px-2 py-1 ${
-                      s.dnf
-                        ? "bg-red-600/30 text-red-300 hover:bg-red-600/50"
-                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                    }`}
-                    title="DNF togglen"
-                  >
-                    DNF
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm("Solve loeschen?")) del.mutate(s.id);
-                    }}
-                    className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-                    title="Loeschen"
-                  >
-                    🗑
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    <button
+                      onClick={() => {
+                        if (confirm("Solve loeschen?")) del.mutate(s.id);
+                      }}
+                      className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
+                      title="Loeschen"
+                    >
+                      🗑
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
