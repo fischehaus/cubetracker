@@ -46,10 +46,10 @@ export function ImportPanel() {
   };
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 space-y-3">
-      <h2 className="text-xl font-semibold text-gray-100">csTimer-Import</h2>
+    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 space-y-4">
+      <h2 className="text-2xl font-semibold text-gray-100">csTimer-Import</h2>
 
-      <p className="text-sm text-gray-400">
+      <p className="text-base text-gray-400">
         Lade die csTimer-Export-Datei (.txt oder .json) hoch. Re-Import
         erkennt Duplikate automatisch — nichts wird doppelt angelegt.
       </p>
@@ -64,12 +64,12 @@ export function ImportPanel() {
             const f = e.target.files?.[0];
             if (f) void handleFile(f);
           }}
-          className="block w-full text-sm text-gray-300 file:mr-3 file:rounded file:border-0 file:bg-purple-600 file:px-4 file:py-2 file:text-white file:font-medium hover:file:bg-purple-700 file:cursor-pointer disabled:opacity-50"
+          className="block w-full text-base text-gray-300 file:mr-3 file:rounded file:border-0 file:bg-purple-600 file:px-4 file:py-2 file:text-white file:font-medium hover:file:bg-purple-700 file:cursor-pointer disabled:opacity-50"
         />
       </div>
 
       {busy && (
-        <div className="text-sm text-purple-300">
+        <div className="text-base text-purple-300">
           Import laeuft … (kann bei grossen Dateien 10-30 Sekunden dauern)
         </div>
       )}
@@ -81,11 +81,11 @@ export function ImportPanel() {
       )}
 
       {result && (
-        <div className="rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200 space-y-1">
+        <div className="rounded border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-base text-emerald-200 space-y-1">
           <div className="font-medium">
             Import von „{result.filename}" abgeschlossen.
           </div>
-          <ul className="text-xs space-y-0.5 text-emerald-300/90">
+          <ul className="text-sm space-y-0.5 text-emerald-300/90">
             <li>
               <strong>{result.solves_created}</strong> neue Solves
             </li>

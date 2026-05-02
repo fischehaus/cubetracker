@@ -103,23 +103,23 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 text-gray-400">
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
         Trends werden geladen …
       </div>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-5 text-red-300">
+      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
         Fehler beim Laden: {error.message}
       </div>
     );
   }
   if (!solves || solves.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-        <h3 className="text-lg font-semibold text-gray-100 mb-2">Trends</h3>
-        <p className="text-sm text-gray-500">Keine Daten im aktuellen Filter.</p>
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+        <h3 className="text-2xl font-semibold text-gray-100 mb-2">Trends</h3>
+        <p className="text-base text-gray-500">Keine Daten im aktuellen Filter.</p>
       </div>
     );
   }
@@ -128,25 +128,25 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
   const isManual = manualMinMs !== null || manualMaxMs !== null;
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-      <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
-        <h3 className="text-lg font-semibold text-gray-100">
-          Trends <span className="text-sm text-gray-400">({chartData.length} Solves)</span>
+    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <h3 className="text-2xl font-semibold text-gray-100">
+          Trends <span className="text-base text-gray-400">({chartData.length} Solves)</span>
         </h3>
-        <div className="flex gap-2 items-center text-xs">
-          <label className="flex items-center gap-1 text-gray-400">
+        <div className="flex gap-3 items-center text-sm">
+          <label className="flex items-center gap-1.5 text-gray-400">
             <input
               type="checkbox"
               checked={showSingles}
               onChange={(e) => setShowSingles(e.target.checked)}
-              className="accent-purple-500"
+              className="accent-purple-500 w-4 h-4"
             />
             Singles
           </label>
           <select
             value={windowSize}
             onChange={(e) => setWindowSize(parseInt(e.target.value, 10))}
-            className="rounded border border-gray-600 bg-gray-800 px-2 py-1 text-gray-100 focus:border-purple-500 focus:outline-none"
+            className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
             title="Anzahl letzter Solves im Chart"
           >
             <option value={100}>100</option>
@@ -160,30 +160,30 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
       </div>
 
       {/* Y-Achsen-Controls — Auto by default, manuelle Override-Inputs */}
-      <div className="flex items-center gap-2 mb-2 text-[11px] text-gray-400 flex-wrap">
+      <div className="flex items-center gap-2 mb-3 text-sm text-gray-400 flex-wrap">
         <span>Y-Achse:</span>
         <span className="text-gray-500">
           auto {formatTime(autoDomain[0])} – {formatTime(autoDomain[1])}
         </span>
         <span className="text-gray-600">·</span>
-        <label className="flex items-center gap-1">
+        <label className="flex items-center gap-1.5">
           min
           <input
             type="text"
             value={manualMin}
             onChange={(e) => setManualMin(e.target.value)}
             placeholder="auto"
-            className="w-16 rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-gray-100 focus:border-purple-500 focus:outline-none"
+            className="w-20 rounded border border-gray-700 bg-gray-800 px-2 py-1 text-gray-100 focus:border-purple-500 focus:outline-none"
           />
         </label>
-        <label className="flex items-center gap-1">
+        <label className="flex items-center gap-1.5">
           max
           <input
             type="text"
             value={manualMax}
             onChange={(e) => setManualMax(e.target.value)}
             placeholder="auto"
-            className="w-16 rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-gray-100 focus:border-purple-500 focus:outline-none"
+            className="w-20 rounded border border-gray-700 bg-gray-800 px-2 py-1 text-gray-100 focus:border-purple-500 focus:outline-none"
           />
         </label>
         {isManual && (
@@ -192,23 +192,23 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
               setManualMin("");
               setManualMax("");
             }}
-            className="rounded bg-gray-700 px-2 py-0.5 text-gray-300 hover:bg-gray-600"
+            className="rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-600"
           >
             Reset
           </button>
         )}
-        <span className="text-gray-600 ml-1">in Sekunden, z.B. „10" oder „1:30"</span>
+        <span className="text-gray-500 ml-1 text-xs">in Sekunden, z.B. „10" oder „1:30"</span>
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={360}>
         <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="#1f2937" strokeDasharray="3 3" />
-          <XAxis dataKey="index" stroke="#6b7280" tick={{ fontSize: 11 }} />
+          <XAxis dataKey="index" stroke="#6b7280" tick={{ fontSize: 13 }} />
           <YAxis
             stroke="#6b7280"
             tickFormatter={tickFormatter}
-            tick={{ fontSize: 11 }}
-            width={50}
+            tick={{ fontSize: 13 }}
+            width={60}
             domain={effectiveDomain}
             allowDataOverflow
           />
@@ -217,7 +217,7 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
               backgroundColor: "#111827",
               border: "1px solid #374151",
               borderRadius: "0.375rem",
-              fontSize: "0.75rem",
+              fontSize: "0.875rem",
             }}
             labelStyle={{ color: "#9ca3af" }}
             formatter={(v) => {
@@ -226,7 +226,7 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
             }}
             labelFormatter={(idx) => `Solve #${idx}`}
           />
-          <Legend wrapperStyle={{ fontSize: "0.75rem" }} />
+          <Legend wrapperStyle={{ fontSize: "0.875rem" }} />
           {showSingles && (
             <Line
               type="monotone"

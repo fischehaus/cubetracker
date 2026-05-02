@@ -41,23 +41,23 @@ export function HistogramChart({ cubeType, sessionId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 text-gray-400">
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
         Histogramm wird geladen …
       </div>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-5 text-red-300">
+      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
         Fehler beim Laden: {error.message}
       </div>
     );
   }
   if (!solves || solves.length === 0 || data.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-        <h3 className="text-lg font-semibold text-gray-100 mb-2">Verteilung</h3>
-        <p className="text-sm text-gray-500">
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+        <h3 className="text-2xl font-semibold text-gray-100 mb-2">Verteilung</h3>
+        <p className="text-base text-gray-500">
           Keine validen Solves im aktuellen Filter.
         </p>
       </div>
@@ -67,32 +67,32 @@ export function HistogramChart({ cubeType, sessionId }: Props) {
   const totalValid = data.reduce((sum, b) => sum + b.count, 0);
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-gray-100">
+    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-2xl font-semibold text-gray-100">
           Verteilung{" "}
-          <span className="text-sm text-gray-400">
+          <span className="text-base text-gray-400">
             ({totalValid} valide Solves)
           </span>
         </h3>
       </div>
 
-      <ResponsiveContainer width="100%" height={250}>
+      <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="#1f2937" strokeDasharray="3 3" />
           <XAxis
             dataKey="label"
             stroke="#6b7280"
-            tick={{ fontSize: 10 }}
+            tick={{ fontSize: 12 }}
             interval="preserveStartEnd"
           />
-          <YAxis stroke="#6b7280" tick={{ fontSize: 11 }} width={40} />
+          <YAxis stroke="#6b7280" tick={{ fontSize: 13 }} width={50} />
           <Tooltip
             contentStyle={{
               backgroundColor: "#111827",
               border: "1px solid #374151",
               borderRadius: "0.375rem",
-              fontSize: "0.75rem",
+              fontSize: "0.875rem",
             }}
             labelStyle={{ color: "#9ca3af" }}
             formatter={(v) => [`${v} Solves`, ""]}
