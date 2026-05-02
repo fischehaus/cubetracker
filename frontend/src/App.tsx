@@ -9,13 +9,14 @@
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { api } from "./lib/api";
+import { BigTimerInput } from "./components/BigTimerInput";
 import { HistogramChart } from "./components/HistogramChart";
 import { ImportPanel } from "./components/ImportPanel";
+import { LastSolvesPreview } from "./components/LastSolvesPreview";
 import { MultiCubeCompareCard } from "./components/MultiCubeCompareCard";
 import { OutlierCard } from "./components/OutlierCard";
 import { ReminderCard } from "./components/ReminderCard";
 import { SessionSwitcher } from "./components/SessionSwitcher";
-import { SolveForm } from "./components/SolveForm";
 import { SolveList } from "./components/SolveList";
 import { StatsCard } from "./components/StatsCard";
 import { TabBar, type AppTab } from "./components/TabBar";
@@ -67,17 +68,29 @@ function HealthBadge() {
 // Routing-Struktur + Verteilung der existierenden Komponenten.
 // ============================================================
 
-function TimerTab({ sessionId }: { sessionId: number | null }) {
-  // TIMER soll fokussiert sein: Eingabe + letzte paar Solves zur Kontrolle.
-  // Keine Charts, keine Multi-Cube-Karten — die lenken beim Solven ab.
-  // (Branch C wird die Eingabe gross + zentriert machen.)
+function TimerTab({
+  sessionId,
+  timerCubeType,
+  setTimerCubeType,
+}: {
+  sessionId: number | null;
+  timerCubeType: string;
+  setTimerCubeType: (s: string) => void;
+}) {
+  // TIMER ist Solving-Modus: grosse zentrale Eingabe + Live-ao5/ao12 +
+  // letzte 8 Solves zur Kontrolle. Keine Charts, kein Multi-Cube-Vergleich.
+  // Cube-Type ist eigener State (nicht der globale cubeFilter), damit man
+  // hier seinen Trainings-Cube waehlt ohne den Analyse-Filter zu beruehren.
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
       <main>
-        <SolveForm />
+        <BigTimerInput
+          cubeType={timerCubeType}
+          onCubeTypeChange={setTimerCubeType}
+        />
       </main>
-      <aside className="space-y-6">
-        <StatsCard cubeType={undefined} sessionId={sessionId} />
+      <aside>
+        <LastSolvesPreview cubeType={timerCubeType} sessionId={sessionId} />
       </aside>
     </div>
   );
@@ -148,6 +161,9 @@ function loadInitialTab(): AppTab {
 function MainLayout() {
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [cubeFilter, setCubeFilter] = useState<string>("");
+  // Cube-Type fuer den TIMER-Tab — bewusst getrennt vom analyse-cubeFilter,
+  // damit eine 3x3-Trainings-Session nicht den Analyse-Filter „verbiegt".
+  const [timerCubeType, setTimerCubeType] = useState<string>("3x3");
   const [tab, setTab] = useState<AppTab>(loadInitialTab);
 
   // Tab-Wahl persistieren — Reload landet wieder auf demselben Tab.
@@ -180,7 +196,13 @@ function MainLayout() {
 
         <TabBar current={tab} onChange={setTab} />
 
-        {tab === "timer" && <TimerTab sessionId={sessionId} />}
+        {tab === "timer" && (
+          <TimerTab
+            sessionId={sessionId}
+            timerCubeType={timerCubeType}
+            setTimerCubeType={setTimerCubeType}
+          />
+        )}
         {tab === "dashboard" && <DashboardTab sessionId={sessionId} />}
         {tab === "analyse" && (
           <AnalyseTab
