@@ -38,7 +38,7 @@ def _get_solve_or_404(solve_id: int, db: OrmSession) -> Solve:
 def list_solves(
     cube_type: str | None = Query(default=None, description="Filter auf Cube-Type"),
     session_id: int | None = Query(default=None, description="Filter auf Session-ID"),
-    limit: int = Query(default=100, ge=1, le=1000),
+    limit: int = Query(default=100, ge=1, le=100_000),
     offset: int = Query(default=0, ge=0),
     db: OrmSession = Depends(get_db),
 ) -> list[Solve]:
