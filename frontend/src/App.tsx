@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { api } from "./lib/api";
 import { ActivityCard } from "./components/ActivityCard";
+import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
 import { BigTimerInput } from "./components/BigTimerInput";
 import { HistogramChart } from "./components/HistogramChart";
 import { ImportPanel } from "./components/ImportPanel";
@@ -124,24 +125,43 @@ function AnalyseTab({
   cubeFilter: string;
   setCubeFilter: (s: string) => void;
 }) {
-  // ANALYSE = Deep-Dive: alle Charts + Outlier-Pflege + volle editierbare Liste.
-  // Cube-Filter wirkt hier auf alle Anzeigen.
+  // ANALYSE = Deep-Dive. Layout:
+  //  Filter-Bar oben (cube zentral, session aus globalem header)
+  //  Trends-Chart full-width gross
+  //  Stats + Histogramm + Outlier in 3-spalten-grid
+  //  Solves-Liste full-width unten
+  //  Import-Panel ganz unten (admin-aktion)
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
-      <main className="space-y-6">
-        <TrendsChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
-        <HistogramChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
-        <SolveList
-          sessionId={sessionId}
-          cubeFilter={cubeFilter}
-          onCubeFilterChange={setCubeFilter}
-        />
-      </main>
-      <aside className="space-y-6">
-        <OutlierCard />
-        <ImportPanel />
+    <div className="space-y-6">
+      <AnalyseFilterBar
+        cubeFilter={cubeFilter}
+        onCubeFilterChange={setCubeFilter}
+      />
+
+      <TrendsChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <HistogramChart
+            cubeType={cubeFilter || undefined}
+            sessionId={sessionId}
+          />
+        </div>
+        <div>
+          <OutlierCard />
+        </div>
+      </div>
+
+      <SolveList
+        sessionId={sessionId}
+        cubeFilter={cubeFilter}
+        onCubeFilterChange={setCubeFilter}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <StatsCard cubeType={cubeFilter || undefined} sessionId={sessionId} />
-      </aside>
+        <ImportPanel />
+      </div>
     </div>
   );
 }
