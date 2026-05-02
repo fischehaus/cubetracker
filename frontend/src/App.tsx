@@ -148,7 +148,7 @@ function AnalyseTab({
           />
         </div>
         <div>
-          <OutlierCard />
+          <OutlierCard sessionId={sessionId} />
         </div>
       </div>
 
