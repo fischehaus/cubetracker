@@ -1,5 +1,7 @@
 // LastSolvesPreview: kompakte Live-Anzeige fuer den TIMER-Tab.
 //
+// Dazu eine kleine FormRow-Helper-Komponente fuer die Form-Vergleichszeilen.
+//
 // Zeigt drei Bloecke:
 //  1. LIVE-Card: letzter Solve, ao5, ao12, plus Form-Vergleich gegen das
 //     Mittel der letzten N Solves (N waehlbar: 100/500/alle).
@@ -70,16 +72,12 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
     return Math.round(valid.reduce((a, b) => a + b, 0) / valid.length);
   }, [solves]);
 
-  // Form: current_ao5 relativ zum Window-Mittel.
-  // - negativ → aktuell besser (gruen)
-  // - positiv → aktuell schlechter (rot)
-  // - rund 0  → durchschnittlich (grau)
-  const formPct: number | null = useMemo(() => {
-    if (stats?.current_ao5 == null || windowMean == null || windowMean === 0)
-      return null;
-    return (stats.current_ao5 - windowMean) / windowMean;
-  }, [stats, windowMean]);
-
+  // Form-Helper: Prozent-Vergleich aktuelles aoX vs Window-Mittel.
+  // negativ → besser (gruen), positiv → schlechter (rot), ~0 → grau.
+  function pctVsWindow(currentAvg: number | null | undefined): number | null {
+    if (currentAvg == null || windowMean == null || windowMean === 0) return null;
+    return (currentAvg - windowMean) / windowMean;
+  }
   function formColor(p: number): string {
     if (p < -0.05) return "text-emerald-400";
     if (p > 0.05) return "text-red-400";
@@ -134,40 +132,45 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
             </div>
           </div>
 
-          {/* Form-Vergleich: aktueller ao5 vs Mittel des Fensters */}
+          {/* Form-Vergleich: aktuelle ao5/ao12/ao100 vs Mittel des Fensters.
+              Selector gilt fuer alle drei Zeilen gleichzeitig. */}
           <div className="pt-2 border-t border-gray-800">
-            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-              Form vs.
-              <select
-                value={windowSize}
-                onChange={(e) => setWindowSize(parseInt(e.target.value, 10))}
-                className="rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-gray-100 focus:border-purple-500 focus:outline-none"
-              >
-                {WINDOW_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {formPct !== null ? (
-              <div className="flex items-baseline gap-3">
-                <span
-                  className={`font-mono text-2xl font-semibold ${formColor(formPct)}`}
-                  title={`ao5 ${stats?.current_ao5 != null ? formatTime(stats.current_ao5) : "–"} vs. Mittel ${windowMean != null ? formatTime(windowMean) : "–"}`}
+            <div className="flex items-center justify-between gap-2 text-xs text-gray-500 mb-2">
+              <div className="flex items-center gap-2">
+                Form vs.
+                <select
+                  value={windowSize}
+                  onChange={(e) => setWindowSize(parseInt(e.target.value, 10))}
+                  className="rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-gray-100 focus:border-purple-500 focus:outline-none"
                 >
-                  {formPct < 0 ? "▼ " : formPct > 0 ? "▲ +" : "• "}
-                  {(formPct * 100).toFixed(1)}%
-                </span>
-                <span className="text-xs text-gray-500">
-                  Mittel {windowMean != null ? formatTime(windowMean) : "–"}
-                </span>
+                  {WINDOW_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ) : (
-              <div className="text-sm text-gray-500">
-                noch nicht genug Daten
-              </div>
-            )}
+              <span className="text-gray-600">
+                Mittel {windowMean != null ? formatTime(windowMean) : "–"}
+              </span>
+            </div>
+            <div className="space-y-1">
+              <FormRow
+                label="ao5"
+                pct={pctVsWindow(stats?.current_ao5)}
+                colorFn={formColor}
+              />
+              <FormRow
+                label="ao12"
+                pct={pctVsWindow(stats?.current_ao12)}
+                colorFn={formColor}
+              />
+              <FormRow
+                label="ao100"
+                pct={pctVsWindow(stats?.current_ao100)}
+                colorFn={formColor}
+              />
+            </div>
           </div>
         </div>
 
@@ -258,6 +261,43 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Helper: eine Zeile im Form-Vergleichs-Block.
+//   pct = null  → '–' (z.B. weil current_aoX noch nicht da ist)
+//   pct < 0     → ▼ gruen (besser als baseline)
+//   pct > 0     → ▲ rot   (schlechter)
+//   pct ~ 0     → •  grau (durchschnittlich)
+// ============================================================
+function FormRow({
+  label,
+  pct,
+  colorFn,
+}: {
+  label: string;
+  pct: number | null;
+  colorFn: (p: number) => string;
+}) {
+  if (pct === null) {
+    return (
+      <div className="flex items-baseline justify-between text-sm">
+        <span className="text-gray-500">{label}</span>
+        <span className="text-gray-600 font-mono">–</span>
+      </div>
+    );
+  }
+  const arrow = pct < 0 ? "▼" : pct > 0 ? "▲" : "•";
+  const sign = pct >= 0 ? "+" : "";
+  return (
+    <div className="flex items-baseline justify-between text-sm">
+      <span className="text-gray-300">{label}</span>
+      <span className={`font-mono font-semibold ${colorFn(pct)}`}>
+        {arrow} {sign}
+        {(pct * 100).toFixed(1)}%
+      </span>
     </div>
   );
 }
