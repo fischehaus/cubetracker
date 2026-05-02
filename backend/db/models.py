@@ -1,0 +1,107 @@
+"""SQLAlchemy-ORM-Models fuer cubetracker.
+
+Aktuell: Solve + Session. Hardware-FK auf Solve ist als nullable
+Feld vorgesehen (kommt in Phase 4 mit eigenem Hardware-Model).
+
+Sessions wurden vorgezogen (urspruenglich Phase 3 / F14), weil der
+csTimer-Import sie schon als Konzept nutzt — jeder importierte Solve
+gehoert zu einer Session, und die Session traegt den Cube-Type-Kontext.
+"""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .database import Base
+
+
+class Session(Base):
+    """Eine Trainings-/Solve-Session.
+
+    `name`: User-vergebener Name (z.B. "3x3", "OH", "L4E", "pll time attack")
+    `scramble_type`: WCA-Code aus csTimer (z.B. "444wca", "pyrso", "")
+    `cstimer_session_id`: Originale Session-ID aus csTimer-Export, fuer
+        Re-Import-Idempotenz. None bei manuell angelegten Sessions.
+    """
+
+    __tablename__ = "sessions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    scramble_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    cstimer_session_id: Mapped[int | None] = mapped_column(
+        Integer, nullable=True, unique=True, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+    )
+
+    solves: Mapped[list[Solve]] = relationship(
+        "Solve", back_populates="session", cascade="save-update, merge"
+    )
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<Session id={self.id} name={self.name!r} scramble_type={self.scramble_type!r}>"
+
+
+class Solve(Base):
+    """Ein Speedcubing-Solve.
+
+    `time_ms`: Loesungs-Zeit in Millisekunden. 12340 = 12.34s.
+    `cube_type`: Kategorie wie "3x3", "4x4", "OH", "Pyra", "Skewb".
+        Wird beim Import aus Session-Kontext + scramble_type abgeleitet,
+        kann manuell gesetzt werden bei Direkt-Eingabe.
+    `plus_two`: WCA-Strafe (+2 Sekunden) — wird in der Statistik
+        beruecksichtigt; time_ms bleibt die gemessene Roh-Zeit.
+    `dnf`: Did Not Finish — Solve zaehlt als ungueltig fuer Stats.
+    `session_id`: nullable — Solves ohne Session-Zuordnung (z.B. ad-hoc
+        manuell eingetragen) sind erlaubt.
+    `hardware_id`: nullable, kommt in Phase 4.
+    """
+
+    __tablename__ = "solves"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    time_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    cube_type: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    scramble: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        index=True,
+    )
+    plus_two: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    dnf: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    session_id: Mapped[int | None] = mapped_column(
+        ForeignKey("sessions.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    session: Mapped[Session | None] = relationship("Session", back_populates="solves")
+
+    # Phase 4: Hardware-FK (noch ohne Constraint, kommt mit Hardware-Model)
+    hardware_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+
+    __table_args__ = (
+        Index("ix_solves_cube_type_timestamp", "cube_type", "timestamp"),
+        Index("ix_solves_session_timestamp", "session_id", "timestamp"),
+    )
+
+    @property
+    def effective_time_ms(self) -> int | None:
+        """Tatsaechliche Zeit nach Strafen.
+
+        Bei DNF: None. Bei +2: time_ms + 2000. Sonst: time_ms.
+        """
+        if self.dnf:
+            return None
+        return self.time_ms + 2000 if self.plus_two else self.time_ms
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<Solve id={self.id} cube={self.cube_type} time={self.time_ms}ms>"

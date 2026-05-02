@@ -1,0 +1,92 @@
+"""Pydantic-Schemas fuer cubetracker-API.
+
+Trennung Read/Create/Update analog zur FastAPI-Standard-Konvention:
+- *Create: Eingabe beim POST (ohne id, ohne timestamp falls auto)
+- *Update: PATCH-Operationen, alle Felder optional
+- *Read: Ausgabe an den Client (mit id, timestamp, abgeleiteten Werten)
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field
+
+# ============================================================
+# Session-Schemas
+# ============================================================
+
+
+class SessionBase(BaseModel):
+    """Gemeinsame Felder fuer Session-Schemas."""
+
+    name: str = Field(min_length=1, max_length=128)
+    scramble_type: str | None = Field(default=None, max_length=32)
+
+
+class SessionCreate(SessionBase):
+    """Eingabe-Schema fuer POST /sessions."""
+
+    cstimer_session_id: int | None = None
+
+
+class SessionRead(SessionBase):
+    """Ausgabe-Schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    cstimer_session_id: int | None
+    created_at: datetime
+
+
+# ============================================================
+# Solve-Schemas
+# ============================================================
+
+
+class SolveBase(BaseModel):
+    """Gemeinsame Felder fuer Solve-Schemas."""
+
+    time_ms: int = Field(ge=0, description="Loesungs-Zeit in Millisekunden")
+    cube_type: str = Field(min_length=1, max_length=32, description='z.B. "3x3"')
+    scramble: str | None = None
+    notes: str | None = None
+    plus_two: bool = False
+    dnf: bool = False
+
+
+class SolveCreate(SolveBase):
+    """Eingabe-Schema fuer POST /solves.
+
+    timestamp ist optional — wenn nicht gesetzt, nutzt der Server `now()`.
+    """
+
+    timestamp: datetime | None = None
+    session_id: int | None = None
+    hardware_id: int | None = None
+
+
+class SolveUpdate(BaseModel):
+    """PATCH-Schema — alle Felder optional."""
+
+    time_ms: int | None = Field(default=None, ge=0)
+    cube_type: str | None = Field(default=None, min_length=1, max_length=32)
+    scramble: str | None = None
+    notes: str | None = None
+    plus_two: bool | None = None
+    dnf: bool | None = None
+    session_id: int | None = None
+    hardware_id: int | None = None
+
+
+class SolveRead(SolveBase):
+    """Ausgabe-Schema — alles was der Client sehen darf."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    timestamp: datetime
+    session_id: int | None
+    hardware_id: int | None
+    effective_time_ms: int | None
