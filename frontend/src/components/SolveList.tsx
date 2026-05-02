@@ -9,7 +9,6 @@
 import { useMemo, useState } from "react";
 import { useDeleteSolve, useSolves, useStats, useUpdateSolve, type SolveListParams } from "../lib/api";
 import {
-  COMMON_CUBE_TYPES,
   formatDate,
   formatSolveTime,
   formatTime,
@@ -160,34 +159,26 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <h2 className="text-xl font-semibold text-gray-100">
-          Solves <span className="text-sm text-gray-400">({solves.length})</span>
+          Solves{" "}
+          <span className="text-sm text-gray-400">
+            ({solves.length}
+            {cubeFilter && ` · ${cubeFilter}`})
+          </span>
         </h2>
-        <div className="flex gap-2 items-center">
-          <select
-            value={limit}
-            onChange={(e) => setLimit(parseInt(e.target.value, 10))}
-            className="rounded border border-gray-600 bg-gray-800 px-2 py-1.5 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
-            title="Maximale Anzahl angezeigter Solves"
-          >
-            {LIMIT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={cubeFilter}
-            onChange={(e) => onCubeFilterChange(e.target.value)}
-            className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
-          >
-            <option value="">Alle Cube-Types</option>
-            {COMMON_CUBE_TYPES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Limit-Selektor bleibt list-spezifisch. Cube-Filter sitzt in
+            der AnalyseFilterBar oben. */}
+        <select
+          value={limit}
+          onChange={(e) => setLimit(parseInt(e.target.value, 10))}
+          className="rounded border border-gray-600 bg-gray-800 px-2 py-1.5 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
+          title="Maximale Anzahl angezeigter Solves"
+        >
+          {LIMIT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {editError && (
