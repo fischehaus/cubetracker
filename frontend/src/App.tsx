@@ -9,6 +9,7 @@
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { api } from "./lib/api";
+import { ActivityCard } from "./components/ActivityCard";
 import { BigTimerInput } from "./components/BigTimerInput";
 import { HistogramChart } from "./components/HistogramChart";
 import { ImportPanel } from "./components/ImportPanel";
@@ -20,7 +21,6 @@ import { SessionSwitcher } from "./components/SessionSwitcher";
 import { SolveList } from "./components/SolveList";
 import { StatsCard } from "./components/StatsCard";
 import { TabBar, type AppTab } from "./components/TabBar";
-import { TodayWeekCard } from "./components/TodayWeekCard";
 import { TrendsChart } from "./components/TrendsChart";
 import "./App.css";
 
@@ -97,19 +97,20 @@ function TimerTab({
 }
 
 function DashboardTab({ sessionId }: { sessionId: number | null }) {
-  // DASHBOARD = Live-Sicht beim Solven oder zwischendrin: heute + Woche,
-  // welcher Cube laeuft gerade gut, was hab ich vergessen.
-  // Bewusst keine schweren Charts — nur Karten zum Drueberblicken.
+  // DASHBOARD = Live-Sicht beim Solven oder zwischendrin. Layout:
+  //  Top-Row: 3 Quick-Cards (Heute / Diese Woche / Reminders)
+  //  Mitte:   MultiCube-Vergleich auf voller Breite
+  //  Unten:   StatsCard kompakt
+  // Bewusst keine Charts — die wohnen im ANALYSE-Tab.
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
-      <main className="space-y-6">
-        <TodayWeekCard sessionId={sessionId} />
-        <MultiCubeCompareCard sessionId={sessionId} />
-        <StatsCard cubeType={undefined} sessionId={sessionId} />
-      </main>
-      <aside className="space-y-6">
-        <ReminderCard sessionId={sessionId} />
-      </aside>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <ActivityCard sessionId={sessionId} slice="today" />
+        <ActivityCard sessionId={sessionId} slice="week" />
+        <ReminderCard sessionId={sessionId} emptyMode="visible" />
+      </div>
+      <MultiCubeCompareCard sessionId={sessionId} />
+      <StatsCard cubeType={undefined} sessionId={sessionId} />
     </div>
   );
 }
