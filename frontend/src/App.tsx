@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { api } from "./lib/api";
+import { HistogramChart } from "./components/HistogramChart";
 import { ImportPanel } from "./components/ImportPanel";
 import { SessionSwitcher } from "./components/SessionSwitcher";
 import { SolveForm } from "./components/SolveForm";
 import { SolveList } from "./components/SolveList";
 import { StatsCard } from "./components/StatsCard";
+import { TrendsChart } from "./components/TrendsChart";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -52,7 +54,7 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen p-6">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <header className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-100">cubetracker</h1>
@@ -74,7 +76,15 @@ function MainLayout() {
             />
           </aside>
 
-          <main>
+          <main className="space-y-6">
+            <TrendsChart
+              cubeType={cubeFilter || undefined}
+              sessionId={sessionId}
+            />
+            <HistogramChart
+              cubeType={cubeFilter || undefined}
+              sessionId={sessionId}
+            />
             <SolveList
               sessionId={sessionId}
               cubeFilter={cubeFilter}
@@ -84,7 +94,7 @@ function MainLayout() {
         </div>
 
         <footer className="mt-8 text-xs text-gray-500 text-center">
-          Phase 1 MVP — F5 fertig (Basis-Stats + PB-Marker). v0.1.
+          Phase 2 in Arbeit — Charts (Trends + Verteilung) live.
         </footer>
       </div>
     </div>
