@@ -44,11 +44,12 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
     },
     onSuccess: () => {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard veraltete Werte
-      // nach +2/DNF-Toggle, Create oder Delete.
+      // StatsCard, MultiCubeCompareCard, OutlierCard, TodayWeekCard
+      // veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
     },
   });
 }
@@ -66,11 +67,12 @@ export function useUpdateSolve(): UseMutationResult<
     },
     onSuccess: () => {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard veraltete Werte
-      // nach +2/DNF-Toggle, Create oder Delete.
+      // StatsCard, MultiCubeCompareCard, OutlierCard, TodayWeekCard
+      // veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
     },
   });
 }
@@ -83,11 +85,12 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
     },
     onSuccess: () => {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard veraltete Werte
-      // nach +2/DNF-Toggle, Create oder Delete.
+      // StatsCard, MultiCubeCompareCard, OutlierCard, TodayWeekCard
+      // veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
     },
   });
 }
@@ -140,8 +143,10 @@ export interface CubeStats {
   current_ao5: number | null;
   mean_ms: number | null;
   best_ms: number | null;
-  /** current_ao5 / mean_ms — < 1 = aktuell besser als Schnitt */
+  /** current_ao5 / mean_ms (lifetime) — verzerrt durch Lernkurve */
   form_factor: number | null;
+  /** current_ao5 / mean(letzte 100) — Tagesform, ehrlicher */
+  form_factor_recent: number | null;
 }
 
 export interface StatsByCubeResponse {
@@ -158,6 +163,37 @@ export function useStatsByCube(
     queryKey: ["stats-by-cube", params],
     queryFn: async (): Promise<StatsByCubeResponse> => {
       const r = await api.get<StatsByCubeResponse>("/stats/by-cube", { params });
+      return r.data;
+    },
+  });
+}
+
+// ============================================================
+// Temporal Stats (F15 — Tag/Wochen-Stats)
+// ============================================================
+
+export interface TemporalSlice {
+  count: number;
+  count_per_cube: Record<string, number>;
+  mean_ms: number | null;
+  current_ao5: number | null;
+}
+
+export interface TemporalResponse {
+  today: TemporalSlice;
+  week: TemporalSlice;
+  filter: { session_id: number | null };
+}
+
+export function useTemporalStats(
+  sessionId: number | null
+): UseQueryResult<TemporalResponse> {
+  const params: { session_id?: number } = {};
+  if (sessionId !== null) params.session_id = sessionId;
+  return useQuery({
+    queryKey: ["stats-temporal", params],
+    queryFn: async (): Promise<TemporalResponse> => {
+      const r = await api.get<TemporalResponse>("/stats/temporal", { params });
       return r.data;
     },
   });

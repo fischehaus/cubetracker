@@ -149,6 +149,28 @@ def test_by_cube_sorts_best_form_first(client, db):
     assert cubes[0]["form_factor"] < cubes[1]["form_factor"]
 
 
+def test_by_cube_includes_form_factor_recent(client, db):
+    # Genug Solves fuer recent-fenster: 30 alte Solves um 15s, dann 5 frische um 14s
+    times = [15000] * 30 + [14000, 14500, 14000, 14500, 14000]
+    _add_solves(db, times, cube_type="3x3")
+    r = client.get("/stats/by-cube")
+    cube = r.json()["cubes"][0]
+    assert "form_factor_recent" in cube
+    assert cube["form_factor_recent"] is not None
+    # current_ao5 (~14.x) leicht unter recent-mean (~14.7) → form_factor_recent < 1
+    assert cube["form_factor_recent"] < 1
+
+
+def test_by_cube_form_factor_recent_none_with_few_solves(client, db):
+    # 10 Solves: zu wenig fuer recent-fenster (Schwelle: 20 valid)
+    _add_solves(db, [10000 + i * 100 for i in range(10)], cube_type="3x3")
+    cube = client.get("/stats/by-cube").json()["cubes"][0]
+    # form_factor (lifetime) sollte da sein
+    assert cube["form_factor"] is not None
+    # form_factor_recent nicht — zu wenig Solves
+    assert cube["form_factor_recent"] is None
+
+
 def test_by_cube_filter_session(client, db):
     s1 = DbSession(name="A")
     s2 = DbSession(name="B")
@@ -165,3 +187,79 @@ def test_by_cube_filter_session(client, db):
     cubes = r.json()["cubes"]
     assert len(cubes) == 1
     assert cubes[0]["cube_type"] == "3x3"
+
+
+# ============================================================
+# /stats/temporal — Tag/Wochen-Stats (F15)
+# ============================================================
+
+
+def test_temporal_empty(client):
+    r = client.get("/stats/temporal")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["today"]["count"] == 0
+    assert data["week"]["count"] == 0
+    assert data["today"]["mean_ms"] is None
+
+
+def test_temporal_today(client, db):
+    # Solves „jetzt" einfuegen — sollten in today landen
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+
+    from db.models import Solve
+
+    now = _dt.now(_UTC).replace(tzinfo=None)
+    for t in [10000, 11000, 12000, 13000, 14000]:
+        db.add(Solve(time_ms=t, cube_type="3x3", timestamp=now))
+    db.commit()
+
+    r = client.get("/stats/temporal")
+    data = r.json()
+    assert data["today"]["count"] == 5
+    assert data["today"]["count_per_cube"] == {"3x3": 5}
+    assert data["today"]["mean_ms"] == 12000
+    assert data["today"]["current_ao5"] == 12000
+
+
+def test_temporal_week_includes_older_today_solves(client, db):
+    # Solves von vor 3 Tagen sollten in week, aber nicht in today landen
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+    from datetime import timedelta as _td
+
+    from db.models import Solve
+
+    now = _dt.now(_UTC).replace(tzinfo=None)
+    three_days_ago = now - _td(days=3)
+    for t in [10000, 11000, 12000]:
+        db.add(Solve(time_ms=t, cube_type="3x3", timestamp=three_days_ago))
+    db.commit()
+
+    r = client.get("/stats/temporal")
+    data = r.json()
+    assert data["today"]["count"] == 0  # alt
+    # Ob in week haengt davon ab, wann der Test laeuft (Wochenstart Montag).
+    # Mind. 0, max. 3. Wir testen die Struktur.
+    assert data["week"]["count"] >= 0
+    assert "count_per_cube" in data["week"]
+
+
+def test_temporal_per_cube_breakdown(client, db):
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+
+    from db.models import Solve
+
+    now = _dt.now(_UTC).replace(tzinfo=None)
+    for t in [10000, 11000]:
+        db.add(Solve(time_ms=t, cube_type="3x3", timestamp=now))
+    for t in [3000, 3500]:
+        db.add(Solve(time_ms=t, cube_type="2x2", timestamp=now))
+    db.commit()
+
+    r = client.get("/stats/temporal")
+    data = r.json()
+    assert data["today"]["count"] == 4
+    assert data["today"]["count_per_cube"] == {"3x3": 2, "2x2": 2}

@@ -9,6 +9,7 @@ import { SessionSwitcher } from "./components/SessionSwitcher";
 import { SolveForm } from "./components/SolveForm";
 import { SolveList } from "./components/SolveList";
 import { StatsCard } from "./components/StatsCard";
+import { TodayWeekCard } from "./components/TodayWeekCard";
 import { TrendsChart } from "./components/TrendsChart";
 import "./App.css";
 
@@ -80,6 +81,7 @@ function MainLayout() {
           </aside>
 
           <main className="space-y-6">
+            <TodayWeekCard sessionId={sessionId} />
             <MultiCubeCompareCard sessionId={sessionId} />
             <TrendsChart
               cubeType={cubeFilter || undefined}
