@@ -147,6 +147,14 @@ export interface CubeStats {
   form_factor: number | null;
   /** current_ao5 / mean(letzte 100) — Tagesform, ehrlicher */
   form_factor_recent: number | null;
+  /** F12: Mittel(letzte 50) - Mittel(davor 50), in ms. Negativ = besser */
+  improvement_ms: number | null;
+  /** F12: relative Verbesserung (negativ = besser) */
+  improvement_pct: number | null;
+  /** F13: ISO-Timestamp des letzten Solves */
+  last_solve_at: string | null;
+  /** F13: Tage seit dem letzten Solve dieses Cubes */
+  days_since_last: number | null;
 }
 
 export interface StatsByCubeResponse {

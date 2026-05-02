@@ -171,6 +171,42 @@ def test_by_cube_form_factor_recent_none_with_few_solves(client, db):
     assert cube["form_factor_recent"] is None
 
 
+def test_by_cube_improvement_tracking(client, db):
+    # 50 alte Solves um 15s, dann 50 neue um 12s — sollte Improvement
+    # von ~3000ms (negativ) liefern
+    _add_solves(db, [15000] * 50 + [12000] * 50, cube_type="3x3")
+    cube = client.get("/stats/by-cube").json()["cubes"][0]
+    assert cube["improvement_ms"] == -3000
+    assert cube["improvement_pct"] is not None
+    assert cube["improvement_pct"] < 0
+
+
+def test_by_cube_improvement_none_with_few_solves(client, db):
+    # 80 Solves — unter der Schwelle von 100 fuer Improvement
+    _add_solves(db, [10000] * 80, cube_type="3x3")
+    cube = client.get("/stats/by-cube").json()["cubes"][0]
+    assert cube["improvement_ms"] is None
+    assert cube["improvement_pct"] is None
+
+
+def test_by_cube_days_since_last(client, db):
+    # Solve mit timestamp = vor 5 Tagen
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+    from datetime import timedelta as _td
+
+    from db.models import Solve
+
+    five_days_ago = _dt.now(_UTC).replace(tzinfo=None) - _td(days=5)
+    for t in [10000] * 5:
+        db.add(Solve(time_ms=t, cube_type="3x3", timestamp=five_days_ago))
+    db.commit()
+
+    cube = client.get("/stats/by-cube").json()["cubes"][0]
+    assert cube["days_since_last"] == 5
+    assert cube["last_solve_at"] is not None
+
+
 def test_by_cube_filter_session(client, db):
     s1 = DbSession(name="A")
     s2 = DbSession(name="B")

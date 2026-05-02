@@ -48,6 +48,14 @@ function formatFormFactor(f: number | null): {
   };
 }
 
+function formatImprovement(pct: number | null): { text: string; color: string } | null {
+  if (pct === null) return null;
+  const p = pct * 100;
+  if (Math.abs(p) < 1) return { text: `${p >= 0 ? "+" : ""}${p.toFixed(1)}%`, color: "text-gray-500" };
+  if (p < 0) return { text: `${p.toFixed(1)}%`, color: "text-emerald-400" };
+  return { text: `+${p.toFixed(1)}%`, color: "text-red-400" };
+}
+
 function CubeRow({ cube }: { cube: CubeStats }) {
   // Tagesform bevorzugen (vs letzte 100). Fallback auf Lifetime, wenn
   // weniger als 20 valid Solves vorhanden sind.
@@ -57,6 +65,7 @@ function CubeRow({ cube }: { cube: CubeStats }) {
   const tooltip = useRecent
     ? "Aktueller ao5 vs. Mittel der letzten 100 Solves (Tagesform)"
     : "Aktueller ao5 vs. Lifetime-Schnitt — Tagesform-Vergleich braucht ≥20 valide Solves";
+  const improvement = formatImprovement(cube.improvement_pct);
   return (
     <div className="flex items-center justify-between gap-3 py-2 border-b border-gray-800/60 last:border-0">
       <div className="min-w-0 flex-1">
@@ -66,6 +75,14 @@ function CubeRow({ cube }: { cube: CubeStats }) {
           Schnitt {cube.mean_ms != null ? formatTime(cube.mean_ms) : "–"} ·{" "}
           PB {cube.best_ms != null ? formatTime(cube.best_ms) : "–"}
         </div>
+        {improvement && (
+          <div
+            className={`text-[10px] mt-0.5 ${improvement.color}`}
+            title="Verbesserung: Mittel der letzten 50 Solves vs. die 50 davor"
+          >
+            Trend {improvement.text}
+          </div>
+        )}
       </div>
       <div className={`text-right ${form.color} shrink-0`} title={tooltip}>
         <div className="text-sm font-mono font-semibold">

@@ -5,6 +5,7 @@ import { HistogramChart } from "./components/HistogramChart";
 import { ImportPanel } from "./components/ImportPanel";
 import { MultiCubeCompareCard } from "./components/MultiCubeCompareCard";
 import { OutlierCard } from "./components/OutlierCard";
+import { ReminderCard } from "./components/ReminderCard";
 import { SessionSwitcher } from "./components/SessionSwitcher";
 import { SolveForm } from "./components/SolveForm";
 import { SolveList } from "./components/SolveList";
@@ -73,6 +74,7 @@ function MainLayout() {
             <SessionSwitcher value={sessionId} onChange={setSessionId} />
             <SolveForm />
             <ImportPanel />
+            <ReminderCard sessionId={sessionId} />
             <OutlierCard />
             <StatsCard
               cubeType={cubeFilter || undefined}
