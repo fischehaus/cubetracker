@@ -5,9 +5,9 @@ Endpoints:
   die gefilterte Solve-Menge (Avg5/12/100, Best, Worst, Mean,
   current + best Averages, Best-Solve-ID fuer Frontend-Marker).
 - GET /stats/by-cube → Stats pro Cube-Type, fuer Multi-Cube-Vergleich.
-  Liefert pro cube_type: count, current_ao5, mean_ms, best_ms und
-  einen „form_factor" = current_ao5 / mean_ms (kleiner = aktuell besser
-  als Gesamtdurchschnitt).
+  Liefert form_factor (lifetime + recent), improvement_ms (letzte 50
+  vs davor), last_solve_at + days_since_last (fuer Trainings-Reminder).
+- GET /stats/temporal → Aktivitaet heute + diese Woche.
 """
 
 from __future__ import annotations
@@ -137,6 +137,32 @@ def get_stats_by_cube(
             if recent_mean > 0:
                 form_factor_recent = round(stats.current_ao5 / recent_mean, 4)
 
+        # F12 Verbesserungs-Tracking: Mittel der letzten 50 vs Mittel der
+        # 50 davorliegenden. Negativer Wert = Verbesserung (in ms).
+        # Liefert auch Prozent-Verbesserung relativ zum „davor"-Mittel.
+        improvement_ms: int | None = None
+        improvement_pct: float | None = None
+        valid_points = [p for p in points if not p.dnf]
+        if len(valid_points) >= 100:
+            last50 = valid_points[-50:]
+            prev50 = valid_points[-100:-50]
+            mean_last = sum(p.effective_ms for p in last50) / 50
+            mean_prev = sum(p.effective_ms for p in prev50) / 50
+            improvement_ms = round(mean_last - mean_prev)
+            if mean_prev > 0:
+                improvement_pct = round((mean_last - mean_prev) / mean_prev, 4)
+
+        # F13 Trainings-Reminder: letzter Solve-Zeitstempel + Tage seit dann.
+        # Naive datetime aus DB → in UTC-aware konvertieren fuer den Diff.
+        last_solve_at_iso: str | None = None
+        days_since_last: int | None = None
+        if group:
+            last_ts = group[-1].timestamp
+            # DB-timestamps sind per Konvention naive UTC
+            last_aware = last_ts.replace(tzinfo=UTC) if last_ts.tzinfo is None else last_ts
+            days_since_last = (datetime.now(UTC) - last_aware).days
+            last_solve_at_iso = last_aware.isoformat()
+
         cubes.append(
             {
                 "cube_type": cube_type,
@@ -147,6 +173,10 @@ def get_stats_by_cube(
                 "best_ms": stats.best_ms,
                 "form_factor": form_factor,  # vs Lifetime-Mittel (Lernkurve)
                 "form_factor_recent": form_factor_recent,  # vs letzte 100 (Tagesform)
+                "improvement_ms": improvement_ms,  # F12: letzte 50 vs davor 50
+                "improvement_pct": improvement_pct,
+                "last_solve_at": last_solve_at_iso,
+                "days_since_last": days_since_last,  # F13: Trainings-Reminder
             }
         )
 
