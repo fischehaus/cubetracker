@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-quer
 import { api } from "./lib/api";
 import { HistogramChart } from "./components/HistogramChart";
 import { ImportPanel } from "./components/ImportPanel";
+import { MultiCubeCompareCard } from "./components/MultiCubeCompareCard";
 import { OutlierCard } from "./components/OutlierCard";
 import { SessionSwitcher } from "./components/SessionSwitcher";
 import { SolveForm } from "./components/SolveForm";
@@ -79,6 +80,7 @@ function MainLayout() {
           </aside>
 
           <main className="space-y-6">
+            <MultiCubeCompareCard sessionId={sessionId} />
             <TrendsChart
               cubeType={cubeFilter || undefined}
               sessionId={sessionId}

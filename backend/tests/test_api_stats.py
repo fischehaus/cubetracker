@@ -95,3 +95,73 @@ def test_stats_with_realistic_avg12_avg100(client, db):
     assert data["current_ao12"] is not None
     assert data["current_ao100"] is not None
     assert data["best_ao5"] is not None
+
+
+# ============================================================
+# /stats/by-cube — Multi-Cube-Vergleich (F11)
+# ============================================================
+
+
+def test_by_cube_empty(client):
+    r = client.get("/stats/by-cube")
+    assert r.status_code == 200
+    assert r.json() == {"cubes": [], "filter": {"session_id": None}}
+
+
+def test_by_cube_skips_cubes_with_few_solves(client, db):
+    # 3 Solves von 2x2 (unter Mindestschwelle) — soll uebersprungen werden
+    _add_solves(db, [3000, 3500, 4000], cube_type="2x2")
+    # 5 Solves von 3x3 (genau am Mindest)
+    _add_solves(db, [10000, 11000, 12000, 13000, 14000], cube_type="3x3")
+    r = client.get("/stats/by-cube")
+    data = r.json()
+    cube_types = [c["cube_type"] for c in data["cubes"]]
+    assert "2x2" not in cube_types
+    assert "3x3" in cube_types
+
+
+def test_by_cube_returns_form_factor(client, db):
+    # 3x3: Trend „aktuell besser" — 10 alte Solves um 15s, dann 5 frische um 10s
+    times = [15000] * 10 + [10000, 10500, 11000, 9500, 10000]
+    _add_solves(db, times, cube_type="3x3")
+    r = client.get("/stats/by-cube")
+    data = r.json()
+    assert len(data["cubes"]) == 1
+    cube = data["cubes"][0]
+    assert cube["cube_type"] == "3x3"
+    assert cube["current_ao5"] is not None
+    assert cube["mean_ms"] is not None
+    assert cube["form_factor"] is not None
+    # current_ao5 (~10s) deutlich kleiner als mean (~13s) → form_factor < 1
+    assert cube["form_factor"] < 1
+
+
+def test_by_cube_sorts_best_form_first(client, db):
+    # 2 Cubes: einer in „guter Form" (current < mean), einer in schlechter
+    _add_solves(db, [15000] * 10 + [9000] * 5, cube_type="3x3")  # gute Form
+    _add_solves(db, [10000] * 10 + [13000] * 5, cube_type="2x2")  # schlechte Form
+    r = client.get("/stats/by-cube")
+    cubes = r.json()["cubes"]
+    assert len(cubes) == 2
+    # 3x3 (form_factor < 1) sollte vor 2x2 (form_factor > 1) liegen
+    assert cubes[0]["cube_type"] == "3x3"
+    assert cubes[1]["cube_type"] == "2x2"
+    assert cubes[0]["form_factor"] < cubes[1]["form_factor"]
+
+
+def test_by_cube_filter_session(client, db):
+    s1 = DbSession(name="A")
+    s2 = DbSession(name="B")
+    db.add_all([s1, s2])
+    db.commit()
+    db.refresh(s1)
+    db.refresh(s2)
+    _add_solves(db, [10000] * 6, cube_type="3x3", session_id=s1.id)
+    _add_solves(db, [20000] * 6, cube_type="4x4", session_id=s2.id)
+    # Ohne Filter: beide Cubes
+    assert len(client.get("/stats/by-cube").json()["cubes"]) == 2
+    # Filter auf s1: nur 3x3
+    r = client.get(f"/stats/by-cube?session_id={s1.id}")
+    cubes = r.json()["cubes"]
+    assert len(cubes) == 1
+    assert cubes[0]["cube_type"] == "3x3"
