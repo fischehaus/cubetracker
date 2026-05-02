@@ -51,12 +51,43 @@ csTimer-CSV-Import + Basis-Stats.
   - **Live-Verifikation: 3x3 PB 7.85s, Avg100 10.89s aus 1818 echten
     3x3-Solves** ✅
 
-## Phase 2 — Cube-Vielfalt + Detail (5, Tag `v0.2`)
-- [ ] **F6: Cube-Type-Filter** — Voraussetzung fuer Phase-3-Multi-Cube-Vergleiche
-- [ ] **F7: Solve-Detail mit Scramble + Notizen**
-- [ ] **F8: Trends-Chart** (Avg-Verlauf ueber Zeit, Recharts)
-- [ ] **F9: WCA-Profil-Verknuepfung** (User-ID)
-- [ ] **F10: WCA-Turnier-Import per ID**
+## Phase 2 — Visualisierung + Multi-Cube-Insights (Tag `v0.2`) ✅
+
+Neudefinition 2026-05-03: ursprueglich „WCA-Integration" → ersetzt durch
+Visualisierung der echten 6202 Solves, weil hoeherer direkter Nutzen.
+
+- [x] **F5.1: UX-Polish** ✅ done
+  - Limit-Selector (50/100/200/500/1000/Alle) in SolveList
+  - Rolling ao5/ao12 als Sub-Zeile unter jeder Solve-Zeit
+  - Datum als Tooltip (Spalte gespart)
+  - csTimer-Stackmat-Parser im SolveForm (`945` → 9.45s, etc.)
+  - **Bug-Fix:** Mutations invalidieren auch `['stats']` —
+    StatsCard war veraltet nach +2/DNF-Toggle
+- [x] **F6: Charts** (Trends + Histogramm) ✅ done
+  - `TrendsChart`: Linien-Chart mit ao5/ao12/ao100 + optional Singles,
+    Window-Selector fuer 6000+ Solves
+  - `HistogramChart`: Bar-Chart der Zeit-Verteilung,
+    Sturges-Bin-Breite + Snap-to-Round
+  - Recharts dark-themed, 8 unit-tests fuer Bin-Logik
+- [x] **F7: Outlier-Helper** ✅ done (kam aus Real-Use-Befund)
+  - `lib/outliers.ts`: pure Funktion, cube-spezifischer Median
+  - `OutlierCard`: amber-Card im Aside, Quick-Actions DNF/Loeschen
+  - Schwellen: `< 30%` Median = zu schnell, `> 5×` Median = zu langsam
+  - 9 unit-tests
+- [x] **F8: Backend-Limit-Bump** ✅ done (Hotfix)
+  - `/solves` cap von `le=1000` auf `le=100_000` — sonst 422 bei
+    Histogramm + „Alle" mit > 1000 Solves
+- [x] **F11: Multi-Cube-Vergleich** ✅ done
+  - Neuer Endpoint `GET /stats/by-cube`: pro Cube current_ao5,
+    mean_ms, best_ms, form_factor (= current_ao5 / mean_ms)
+  - `MultiCubeCompareCard`: ranked Liste + Highlight „aktuell beste
+    Form" + ▼/▲-Marker mit Prozent-Abweichung
+  - 5 neue API-Tests
+  - **User-Hauptwunsch vom 2026-05-02 erledigt**: „in welchem Wuerfel
+    bist du gerade am besten?"
+- **Verschoben** (urspruenglich Phase 2):
+  - F9 WCA-Profil-Verknuepfung — externe API, geringerer Direkt-Nutzen
+  - F10 WCA-Turnier-Import per ID — analog
 
 ## Phase 3 — Coaching + Multi-Cube-Analytics (5, Tag `v0.3`)
 
@@ -105,10 +136,13 @@ NEU mit User-Wuenschen vom 2026-05-02:
 ## Status-Tracking
 
 - ✅ Phase 1 MVP: **fertig** (5/5 Features, Tag `v0.1`)
-- ⏸ Phase 2-4: pending
+- ✅ Phase 2: **fertig** (Charts + Outlier + Multi-Cube, Tag `v0.2`)
+- ⏸ Phase 3-4: pending
 
 ## Tags
 
 - `v0.0` — Skeleton (Setup, Tooling, leere App)
 - `v0.1` — Phase 1 MVP komplett (Solves-CRUD, csTimer-Import,
   Session-Switcher, Basis-Stats + PB-Marker)
+- `v0.2` — Phase 2: UX-Polish, Trends-Chart, Histogramm,
+  Outlier-Helper, Multi-Cube-Vergleich
