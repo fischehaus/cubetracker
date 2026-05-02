@@ -7,6 +7,8 @@ registriert die API-Router.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api import sessions, solves
+
 app = FastAPI(
     title="cubetracker",
     version="0.1.0",
@@ -22,6 +24,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Router registrieren (F2)
+app.include_router(solves.router)
+app.include_router(sessions.router)
+
 
 @app.get("/")
 def root() -> dict[str, str]:
@@ -29,5 +35,6 @@ def root() -> dict[str, str]:
     return {"app": "cubetracker", "version": "0.1.0", "status": "ok"}
 
 
-# API-Router werden in spaeteren Features registriert
-# (F2: solves, F4: import, F5: stats, ...)
+# Naechste Router-Registrationen:
+# - F4: api.import_cstimer
+# - F5: api.stats

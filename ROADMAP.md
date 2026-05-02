@@ -5,11 +5,12 @@
 Ziel: App lauffaehig auf localhost, manuelle Solve-Erfassung +
 csTimer-CSV-Import + Basis-Stats.
 
-- [ ] **F1: Solve-Datenmodell + DB-Setup**
-  - SQLAlchemy-Model `Solve`
-  - Alembic-Migrationen-Setup
+- [x] **F1: Solve + Session-Datenmodell + DB-Setup** ✅ done
+  - SQLAlchemy-Models `Solve` + `Session` (Session vorgezogen aus
+    F14, weil csTimer-Import sie als Konzept braucht)
+  - Alembic-Migrations-Setup, erste Revision `1cbfe3113a0f`
   - SQLite-Datei in `backend/data/solves.db`
-  - Felder vorgesehen fuer Phase 3+4: nullable `session_id`, `hardware_id`
+  - 8 Unit-Tests, alle gruen
 - [ ] **F2: API: Solves CRUD**
   - GET /solves (mit Filter)
   - POST /solves
@@ -20,9 +21,15 @@ csTimer-CSV-Import + Basis-Stats.
   - SolveList-Component (Tabelle)
   - SolveForm-Component (Eintrag)
   - Tanstack Query fuer API-State
-- [ ] **F4: CSV-Import (csTimer-Format)**
-  - POST /import/cstimer (multipart upload)
-  - Parser fuer csTimer-CSV
+- [ ] **F4: csTimer-JSON-Import** (urspruenglich „CSV-Import" — csTimer
+      exportiert JSON, nicht CSV. Format-Analyse 2026-05-02)
+  - POST /import/cstimer (multipart upload, JSON-Body)
+  - Parser fuer csTimer-JSON-Struktur
+    (`{session1: [...], ..., properties: {sessionData: ...}}`)
+  - Cube-Type-Ableitung aus `sessionData[id].opt.scrType` mit
+    Mapping (z.B. `444wca` → "4x4", `pyrso` → "Pyraminx")
+  - Idempotenz: Re-Import via `cstimer_session_id` + timestamp+session
+    erkennt Duplikate
   - Frontend: Upload-Button mit Drop-Zone
 - [ ] **F5: Basis-Statistiken**
   - GET /stats (avg5, avg12, avg100, best, worst, mean)
