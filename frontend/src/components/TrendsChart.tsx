@@ -2,10 +2,13 @@
 // Clientseitig berechnet aus geladenen Solves (chronologisch sortiert).
 //
 // X-Achse: Solve-Index (1 = aeltester geladener Solve)
-// Y-Achse: Zeit in Sekunden
+// Y-Achse: Zeit in Sekunden — smart auto-skaliert (P2..P98 mit Padding) und
+//          manuell ueberschreibbar via min/max Inputs. Bei jedem Filter-
+//          oder Window-Wechsel: zurueck zu auto, damit man nicht eine
+//          alte Skala auf neue Daten sieht.
 // Linien: ao5 (gruen), ao12 (blau), ao100 (lila), Singles als Streupunkte (grau)
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CartesianGrid,
   Legend,
@@ -17,6 +20,7 @@ import {
   YAxis,
 } from "recharts";
 import { useSolves, type SolveListParams } from "../lib/api";
+import { computeYDomain, parseSecondsToMs } from "../lib/chart-utils";
 import { formatTime } from "../lib/format";
 import { rollingAverages, type SolvePoint } from "../lib/rolling";
 
@@ -38,6 +42,18 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
   // Selector erlaubt User, den Ausschnitt zu vergroessern.
   const [windowSize, setWindowSize] = useState<number>(500);
   const [showSingles, setShowSingles] = useState<boolean>(false);
+
+  // Manuelle Y-Achsen-Override. Beide null → Auto-Modus.
+  const [manualMin, setManualMin] = useState<string>("");
+  const [manualMax, setManualMax] = useState<string>("");
+
+  // Bei jedem Filter- oder Window-Wechsel: manuelle Werte zuruecksetzen.
+  // Ohne diesen Reset wuerde z.B. eine 3x3-Skala (10s..14s) bei Wechsel
+  // auf 2x2 die ganzen 2x2-Werte (3s..5s) abschneiden.
+  useEffect(() => {
+    setManualMin("");
+    setManualMax("");
+  }, [cubeType, sessionId, windowSize]);
 
   const params: SolveListParams = { limit: windowSize };
   if (cubeType) params.cube_type = cubeType;
@@ -65,6 +81,26 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
     }));
   }, [solves]);
 
+  // Auto-Domain: nur aus den Avgs berechnen, nicht aus Singles. Singles
+  // koennen wild streuen (DNFs, vergessene Timer) — die Avgs sind die
+  // ehrliche Bandbreite des Hauptverlaufs.
+  const autoDomain = useMemo<[number, number]>(() => {
+    if (chartData.length === 0) return [0, 1000];
+    const avgValues: (number | null)[] = [];
+    for (const p of chartData) {
+      avgValues.push(p.ao5, p.ao12, p.ao100);
+    }
+    return computeYDomain(avgValues);
+  }, [chartData]);
+
+  // Effektive Domain: manuelle Werte ueberschreiben jeweils einzeln.
+  const manualMinMs = parseSecondsToMs(manualMin);
+  const manualMaxMs = parseSecondsToMs(manualMax);
+  const effectiveDomain: [number, number] = [
+    manualMinMs ?? autoDomain[0],
+    manualMaxMs ?? autoDomain[1],
+  ];
+
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 text-gray-400">
@@ -88,8 +124,8 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
     );
   }
 
-  // Y-Achse: in Sekunden statt ms — Recharts default-Format ist sonst hoch
   const tickFormatter = (ms: number) => formatTime(ms);
+  const isManual = manualMinMs !== null || manualMaxMs !== null;
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
@@ -123,6 +159,47 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
         </div>
       </div>
 
+      {/* Y-Achsen-Controls — Auto by default, manuelle Override-Inputs */}
+      <div className="flex items-center gap-2 mb-2 text-[11px] text-gray-400 flex-wrap">
+        <span>Y-Achse:</span>
+        <span className="text-gray-500">
+          auto {formatTime(autoDomain[0])} – {formatTime(autoDomain[1])}
+        </span>
+        <span className="text-gray-600">·</span>
+        <label className="flex items-center gap-1">
+          min
+          <input
+            type="text"
+            value={manualMin}
+            onChange={(e) => setManualMin(e.target.value)}
+            placeholder="auto"
+            className="w-16 rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-gray-100 focus:border-purple-500 focus:outline-none"
+          />
+        </label>
+        <label className="flex items-center gap-1">
+          max
+          <input
+            type="text"
+            value={manualMax}
+            onChange={(e) => setManualMax(e.target.value)}
+            placeholder="auto"
+            className="w-16 rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-gray-100 focus:border-purple-500 focus:outline-none"
+          />
+        </label>
+        {isManual && (
+          <button
+            onClick={() => {
+              setManualMin("");
+              setManualMax("");
+            }}
+            className="rounded bg-gray-700 px-2 py-0.5 text-gray-300 hover:bg-gray-600"
+          >
+            Reset
+          </button>
+        )}
+        <span className="text-gray-600 ml-1">in Sekunden, z.B. „10" oder „1:30"</span>
+      </div>
+
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="#1f2937" strokeDasharray="3 3" />
@@ -132,6 +209,8 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
             tickFormatter={tickFormatter}
             tick={{ fontSize: 11 }}
             width={50}
+            domain={effectiveDomain}
+            allowDataOverflow
           />
           <Tooltip
             contentStyle={{
