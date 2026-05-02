@@ -7,7 +7,7 @@ registriert die API-Router.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import import_cstimer, sessions, solves
+from api import import_cstimer, sessions, solves, stats
 
 app = FastAPI(
     title="cubetracker",
@@ -28,6 +28,7 @@ app.add_middleware(
 app.include_router(solves.router)  # F2
 app.include_router(sessions.router)  # F2
 app.include_router(import_cstimer.router)  # F4
+app.include_router(stats.router)  # F5
 
 
 @app.get("/")

@@ -5,6 +5,7 @@ import { ImportPanel } from "./components/ImportPanel";
 import { SessionSwitcher } from "./components/SessionSwitcher";
 import { SolveForm } from "./components/SolveForm";
 import { SolveList } from "./components/SolveList";
+import { StatsCard } from "./components/StatsCard";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -45,6 +46,9 @@ function HealthBadge() {
 
 function MainLayout() {
   const [sessionId, setSessionId] = useState<number | null>(null);
+  // Cube-Filter wird hier zentral verwaltet, damit SolveList + StatsCard auf
+  // dieselbe Filter-Auswahl reagieren.
+  const [cubeFilter, setCubeFilter] = useState<string>("");
 
   return (
     <div className="min-h-screen p-6">
@@ -64,25 +68,23 @@ function MainLayout() {
             <SessionSwitcher value={sessionId} onChange={setSessionId} />
             <SolveForm />
             <ImportPanel />
-
-            {/* Stats-Platzhalter — kommt in F5 */}
-            <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-              <h2 className="text-xl font-semibold text-gray-100 mb-2">
-                Statistiken
-              </h2>
-              <p className="text-sm text-gray-500">
-                Avg5/Avg12/Avg100, Best, Worst, Mean, Rekorde — kommen in F5.
-              </p>
-            </div>
+            <StatsCard
+              cubeType={cubeFilter || undefined}
+              sessionId={sessionId}
+            />
           </aside>
 
           <main>
-            <SolveList sessionId={sessionId} />
+            <SolveList
+              sessionId={sessionId}
+              cubeFilter={cubeFilter}
+              onCubeFilterChange={setCubeFilter}
+            />
           </main>
         </div>
 
         <footer className="mt-8 text-xs text-gray-500 text-center">
-          Phase 1 MVP — F4 fertig (csTimer-Import + Session-Switcher). F5 (Stats + Rekorde) folgt.
+          Phase 1 MVP — F5 fertig (Basis-Stats + PB-Marker). v0.1.
         </footer>
       </div>
     </div>

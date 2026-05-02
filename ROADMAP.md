@@ -28,19 +28,28 @@ csTimer-CSV-Import + Basis-Stats.
   - `lib/format.ts`: Zeit-Formatierung (csTimer-Stil),
     Standard-Cube-Type-Liste
   - Health-Badge oben rechts mit Auto-Refresh alle 30s
-- [ ] **F4: csTimer-JSON-Import** (urspruenglich „CSV-Import" — csTimer
-      exportiert JSON, nicht CSV. Format-Analyse 2026-05-02)
-  - POST /import/cstimer (multipart upload, JSON-Body)
-  - Parser fuer csTimer-JSON-Struktur
-    (`{session1: [...], ..., properties: {sessionData: ...}}`)
-  - Cube-Type-Ableitung aus `sessionData[id].opt.scrType` mit
-    Mapping (z.B. `444wca` → "4x4", `pyrso` → "Pyraminx")
-  - Idempotenz: Re-Import via `cstimer_session_id` + timestamp+session
-    erkennt Duplikate
-  - Frontend: Upload-Button mit Drop-Zone
-- [ ] **F5: Basis-Statistiken**
-  - GET /stats (avg5, avg12, avg100, best, worst, mean)
-  - StatsCard-Component (Anzeige im Dashboard)
+- [x] **F4: csTimer-JSON-Import** ✅ done
+  - Backend: `importers/cstimer.py` (Parser, Cube-Type-Mapping fuer
+    18 scrType-Codes, Dedup-Check via timestamp+time_ms+session,
+    Session-Upsert via cstimer_session_id)
+  - API: `POST /import/cstimer` (multipart upload), liefert
+    Statistik-Dict zurueck
+  - Frontend: `ImportPanel` (File-Upload mit Status), `SessionSwitcher`
+    (Dropdown alle Sessions)
+  - 24 Tests (15 Unit + 5 API + 4 weitere) alle gruen
+  - **Real-Lauf: 6201 Solves + 22 Sessions importiert in einem Schwung,
+    Re-Import erkennt alle 6201 als Duplikate** ✅
+- [x] **F5: Basis-Statistiken + Rekorde-Markierung** ✅ done
+  - Backend: `stats/calc.py` (pure Funktionen, WCA-Trimmed-Mean,
+    Avg5/12/100, Best/Worst/Mean, Sliding-Window fuer Best-Avg),
+    `api/stats.py` (`GET /stats?cube_type=X&session_id=Y`)
+  - Stats-Response inkl. `best_solve_id` fuer PB-Marker
+  - Frontend: `StatsCard` (Counter Solves/Valide/DNF, Singles,
+    Aktuelle + Beste Averages), `SolveList` mit goldenem PB-Marker
+    (★ + `bg-yellow-500/5`)
+  - 25 neue Tests (19 unit + 6 API), gesamt 77 Tests gruen
+  - **Live-Verifikation: 3x3 PB 7.85s, Avg100 10.89s aus 1818 echten
+    3x3-Solves** ✅
 
 ## Phase 2 — Cube-Vielfalt + Detail (5, Tag `v0.2`)
 - [ ] **F6: Cube-Type-Filter** — Voraussetzung fuer Phase-3-Multi-Cube-Vergleiche
@@ -95,9 +104,11 @@ NEU mit User-Wuenschen vom 2026-05-02:
 
 ## Status-Tracking
 
-- ⏳ Phase 1: in Arbeit (Setup laeuft)
+- ✅ Phase 1 MVP: **fertig** (5/5 Features, Tag `v0.1`)
 - ⏸ Phase 2-4: pending
 
 ## Tags
 
-(noch keine — erster Tag `v0.0` nach Skeleton)
+- `v0.0` — Skeleton (Setup, Tooling, leere App)
+- `v0.1` — Phase 1 MVP komplett (Solves-CRUD, csTimer-Import,
+  Session-Switcher, Basis-Stats + PB-Marker)
