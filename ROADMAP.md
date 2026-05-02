@@ -89,25 +89,36 @@ Visualisierung der echten 6202 Solves, weil hoeherer direkter Nutzen.
   - F9 WCA-Profil-Verknuepfung — externe API, geringerer Direkt-Nutzen
   - F10 WCA-Turnier-Import per ID — analog
 
-## Phase 3 — Coaching + Multi-Cube-Analytics (5, Tag `v0.3`)
+## Phase 3 — Coaching + Insights (Tag `v0.3`) ✅
 
-NEU mit User-Wuenschen vom 2026-05-02:
+User-Wuensche vom 2026-05-02 + Phase-2-Befunde:
 
-- [ ] **F11: Multi-Cube-Performance-Vergleich**
-  - Pro Wuerfel: aktueller Avg5 vs. Gesamt-Durchschnitt
-  - Output: „in welchem Wuerfel bist du gerade am besten?"
-  - Dashboard-Widget mit Ranking der Wuerfel nach „Form-Faktor"
-- [ ] **F12: Verbesserungs-Tracking**
-  - Pro Wuerfel: Veraenderungs-Rate ueber Zeitfenster
-    (z.B. letzte 50 vs. davor)
-  - Output: „groesster Sprung: 4x4, -1.8s in den letzten 100 Solves"
-  - Sortierung „wo verbesserst du dich am stuerksten gerade?"
-- [ ] **F13: Trainings-Reminder-System**
-  - Erinnerung bei „lange nicht gemacht" (z.B. >7 Tage)
-  - Erinnerung bei „stagniert in letzter Zeit" (Verbesserung < Schwellwert)
-  - Dashboard-Banner + optional Browser-Notification
-- [ ] **F14: Sessions** (Trainings-Sessions gruppieren, `session_id` aktivieren)
-- [ ] **F15: Plus/Minus/DNF-Markierung + Tages-/Wochen-Statistiken**
+- [x] **F11: Multi-Cube-Performance-Vergleich** ✅ (in Phase 2 vorgezogen)
+- [x] **Form-Faktor v2** ✅ done — Tagesform statt Lernkurve
+  - `form_factor_recent` = current_ao5 / mean(letzte 100)
+  - Lifetime-Form bleibt als Fallback bei <20 Solves
+  - Bessere Antwort auf „wo bin ich aktuell am besten" — vorher
+    war es nur „wo lerne ich am steilsten"
+- [x] **F12: Verbesserungs-Tracking** ✅ done
+  - Pro Cube: `improvement_ms` (mean letzte 50 - mean davor 50)
+  - In MultiCubeCompareCard als kleine Trend-Zeile (gruen/rot)
+  - Bracht mind. 100 valide Solves im Cube
+- [x] **F13: Trainings-Reminder-System** ✅ done
+  - `last_solve_at` + `days_since_last` pro Cube im /by-cube-Endpoint
+  - `ReminderCard` (blau) im Aside, listet Cubes mit ≥7 Tagen Pause
+  - Sortiert „laengste Pause zuerst"
+  - Card rendert null wenn alle Cubes frisch sind
+- [x] **F14: Sessions** ✅ (in Phase 1 als Datenmodell + UI fertig)
+- [x] **F15: Tages-/Wochen-Statistiken** ✅ done
+  - Endpoint `GET /stats/temporal` liefert today + week slices
+  - `TodayWeekCard` als Header der Hauptspalte
+  - Pro Slice: count, count_per_cube (top 3), mean, current_ao5
+  - Kalender-Tag (UTC), ISO-Woche (Mo-So)
+- [x] **F7: Inline-Edit** ✅ done (kam aus Phase-2-Outlier-Use)
+  - Click-to-edit fuer Zeit + Notizen direkt in SolveList
+  - Enter speichert, Esc bricht ab, onBlur speichert auch
+  - Nutzt existing `parseTimeInput` → akzeptiert csTimer-Stackmat
+    Format wie im SolveForm**
 
 ## Phase 4 — Hardware-Tracking + Performance-Vergleich (5, Tag `v0.4`)
 
@@ -137,7 +148,8 @@ NEU mit User-Wuenschen vom 2026-05-02:
 
 - ✅ Phase 1 MVP: **fertig** (5/5 Features, Tag `v0.1`)
 - ✅ Phase 2: **fertig** (Charts + Outlier + Multi-Cube, Tag `v0.2`)
-- ⏸ Phase 3-4: pending
+- ✅ Phase 3: **fertig** (Coaching + Insights + Inline-Edit, Tag `v0.3`)
+- ⏸ Phase 4: pending (Hardware-Tracking)
 
 ## Tags
 
@@ -146,3 +158,5 @@ NEU mit User-Wuenschen vom 2026-05-02:
   Session-Switcher, Basis-Stats + PB-Marker)
 - `v0.2` — Phase 2: UX-Polish, Trends-Chart, Histogramm,
   Outlier-Helper, Multi-Cube-Vergleich
+- `v0.3` — Phase 3: Form-Faktor v2, Tag/Wochen-Stats,
+  Verbesserungs-Tracking, Trainings-Reminder, Inline-Edit
