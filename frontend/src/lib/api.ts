@@ -43,10 +43,12 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       return r.data;
     },
     onSuccess: () => {
-      // Solves UND Stats invalidieren — sonst zeigt StatsCard veraltete Werte
+      // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
+      // StatsCard, MultiCubeCompareCard, OutlierCard veraltete Werte
       // nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
     },
   });
 }
@@ -63,10 +65,12 @@ export function useUpdateSolve(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      // Solves UND Stats invalidieren — sonst zeigt StatsCard veraltete Werte
+      // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
+      // StatsCard, MultiCubeCompareCard, OutlierCard veraltete Werte
       // nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
     },
   });
 }
@@ -78,10 +82,12 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       await api.delete(`/solves/${id}`);
     },
     onSuccess: () => {
-      // Solves UND Stats invalidieren — sonst zeigt StatsCard veraltete Werte
+      // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
+      // StatsCard, MultiCubeCompareCard, OutlierCard veraltete Werte
       // nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
     },
   });
 }
@@ -118,6 +124,40 @@ export function useStats(params: StatsParams = {}): UseQueryResult<StatsResponse
     queryKey: ["stats", params],
     queryFn: async (): Promise<StatsResponse> => {
       const r = await api.get<StatsResponse>("/stats", { params });
+      return r.data;
+    },
+  });
+}
+
+// ============================================================
+// Stats by Cube (F11 — Multi-Cube-Vergleich)
+// ============================================================
+
+export interface CubeStats {
+  cube_type: string;
+  count: number;
+  count_valid: number;
+  current_ao5: number | null;
+  mean_ms: number | null;
+  best_ms: number | null;
+  /** current_ao5 / mean_ms — < 1 = aktuell besser als Schnitt */
+  form_factor: number | null;
+}
+
+export interface StatsByCubeResponse {
+  cubes: CubeStats[];
+  filter: { session_id: number | null };
+}
+
+export function useStatsByCube(
+  sessionId: number | null
+): UseQueryResult<StatsByCubeResponse> {
+  const params: { session_id?: number } = {};
+  if (sessionId !== null) params.session_id = sessionId;
+  return useQuery({
+    queryKey: ["stats-by-cube", params],
+    queryFn: async (): Promise<StatsByCubeResponse> => {
+      const r = await api.get<StatsByCubeResponse>("/stats/by-cube", { params });
       return r.data;
     },
   });
