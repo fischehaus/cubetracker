@@ -1,14 +1,19 @@
-// Liste der Solves als Tabelle, mit Filter (Cube-Type) und Loeschen-Button.
+// Liste der Solves als Tabelle, mit Filter (Cube-Type, Session) und Loeschen-Button.
 
 import { useState } from "react";
-import { useDeleteSolve, useSolves, useUpdateSolve } from "../lib/api";
+import { useDeleteSolve, useSolves, useUpdateSolve, type SolveListParams } from "../lib/api";
 import { COMMON_CUBE_TYPES, formatDate, formatSolveTime } from "../lib/format";
 
-export function SolveList() {
+interface Props {
+  sessionId: number | null; // null = alle Sessions
+}
+
+export function SolveList({ sessionId }: Props) {
   const [filterCube, setFilterCube] = useState<string>("");
-  const { data: solves, isLoading, error } = useSolves(
-    filterCube ? { cube_type: filterCube, limit: 100 } : { limit: 100 }
-  );
+  const params: SolveListParams = { limit: 100 };
+  if (filterCube) params.cube_type = filterCube;
+  if (sessionId !== null) params.session_id = sessionId;
+  const { data: solves, isLoading, error } = useSolves(params);
   const del = useDeleteSolve();
   const update = useUpdateSolve();
 

@@ -17,10 +17,17 @@ csTimer-CSV-Import + Basis-Stats.
   - 2 Session-Endpoints (list/get) — POST/PATCH/DELETE in F14
   - 20 API-Tests (alle Endpoints + Validation + Edge-Cases)
   - Live-Smoketest gegen laufenden Backend gruen
-- [ ] **F3: Frontend: Solves-Liste + Eintragen**
-  - SolveList-Component (Tabelle)
-  - SolveForm-Component (Eintrag)
-  - Tanstack Query fuer API-State
+- [x] **F3: Frontend: Solves-Liste + Eintragen** ✅ done
+  - `SolveForm`: Zeit-Eingabe ("12.34" oder "1:23.45"),
+    Cube-Type-Dropdown (mit „Custom"-Option), +2/DNF-Toggles,
+    optional Scramble + Notes
+  - `SolveList`: Tabelle mit Cube-Filter, Pagination, Inline-
+    Toggle fuer +2/DNF, Loeschen mit Confirm
+  - `lib/api.ts`: Tanstack-Query-Hooks fuer alle CRUD-Operationen,
+    Auto-Invalidate nach Mutationen
+  - `lib/format.ts`: Zeit-Formatierung (csTimer-Stil),
+    Standard-Cube-Type-Liste
+  - Health-Badge oben rechts mit Auto-Refresh alle 30s
 - [ ] **F4: csTimer-JSON-Import** (urspruenglich „CSV-Import" — csTimer
       exportiert JSON, nicht CSV. Format-Analyse 2026-05-02)
   - POST /import/cstimer (multipart upload, JSON-Body)

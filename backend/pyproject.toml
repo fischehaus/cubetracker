@@ -12,6 +12,10 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "RET", "SIM"]
 # B008: FastAPI nutzt Depends() in argument defaults — das ist Standard-Pattern, kein Bug
 ignore = ["B008"]
 
+[tool.ruff.lint.per-file-ignores]
+# Test-Files duerfen lange JSON-Payload-Strings haben
+"tests/*" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
