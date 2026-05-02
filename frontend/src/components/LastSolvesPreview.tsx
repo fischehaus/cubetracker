@@ -87,46 +87,46 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
   return (
     <div className="space-y-4">
       {/* Live-Stats prominent: letzter Solve + ao5/ao12 + Form-Vergleich */}
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-        <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-3">
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+        <h3 className="text-base uppercase tracking-wide text-gray-500 mb-4">
           Live ({cubeType})
         </h3>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div>
-            <div className="text-xs text-gray-500">Letzter Solve</div>
-            <div className="flex items-baseline gap-2">
+            <div className="text-sm text-gray-500">Letzter Solve</div>
+            <div className="flex items-baseline gap-3 mt-1">
               {lastSolve ? (
                 <>
                   <span
-                    className={`font-mono text-3xl ${
+                    className={`font-mono text-4xl ${
                       isLastPb ? "text-yellow-300 font-bold" : "text-gray-100"
                     }`}
                   >
                     {formatSolveTime(lastSolve)}
                   </span>
                   {isLastPb && (
-                    <span className="text-yellow-300 text-sm font-semibold">
+                    <span className="text-yellow-300 text-base font-semibold">
                       ★ neue PB!
                     </span>
                   )}
                 </>
               ) : (
-                <span className="text-gray-600 text-2xl">–</span>
+                <span className="text-gray-600 text-3xl">–</span>
               )}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <div className="text-xs text-gray-500">ao5</div>
-              <div className="font-mono text-2xl text-gray-100">
+              <div className="text-sm text-gray-500">ao5</div>
+              <div className="font-mono text-3xl text-gray-100">
                 {stats?.current_ao5 != null ? formatTime(stats.current_ao5) : "–"}
               </div>
             </div>
             <div>
-              <div className="text-xs text-gray-500">ao12</div>
-              <div className="font-mono text-2xl text-gray-100">
+              <div className="text-sm text-gray-500">ao12</div>
+              <div className="font-mono text-3xl text-gray-100">
                 {stats?.current_ao12 != null ? formatTime(stats.current_ao12) : "–"}
               </div>
             </div>
@@ -134,14 +134,14 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
 
           {/* Form-Vergleich: aktuelle ao5/ao12/ao100 vs Mittel des Fensters.
               Selector gilt fuer alle drei Zeilen gleichzeitig. */}
-          <div className="pt-2 border-t border-gray-800">
-            <div className="flex items-center justify-between gap-2 text-xs text-gray-500 mb-2">
+          <div className="pt-3 border-t border-gray-800">
+            <div className="flex items-center justify-between gap-2 text-sm text-gray-500 mb-2">
               <div className="flex items-center gap-2">
                 Form vs.
                 <select
                   value={windowSize}
                   onChange={(e) => setWindowSize(parseInt(e.target.value, 10))}
-                  className="rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-gray-100 focus:border-purple-500 focus:outline-none"
+                  className="rounded border border-gray-700 bg-gray-800 px-2 py-1 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
                 >
                   {WINDOW_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -154,7 +154,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                 Mittel {windowMean != null ? formatTime(windowMean) : "–"}
               </span>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <FormRow
                 label="ao5"
                 pct={pctVsWindow(stats?.current_ao5)}
@@ -176,8 +176,8 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
 
         {/* Quick-Actions auf den letzten Solve */}
         {lastSolve && (
-          <div className="mt-3 pt-3 border-t border-gray-800 flex gap-2 flex-wrap">
-            <span className="text-xs text-gray-500 self-center">Letzten:</span>
+          <div className="mt-4 pt-3 border-t border-gray-800 flex gap-2 flex-wrap items-center">
+            <span className="text-sm text-gray-500">Letzten:</span>
             {!lastSolve.dnf && (
               <button
                 onClick={() =>
@@ -186,7 +186,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                     payload: { plus_two: !lastSolve.plus_two },
                   })
                 }
-                className={`text-xs rounded px-2 py-1 ${
+                className={`text-sm rounded px-2.5 py-1.5 ${
                   lastSolve.plus_two
                     ? "bg-yellow-600/30 text-yellow-300 hover:bg-yellow-600/50"
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -202,7 +202,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                   payload: { dnf: !lastSolve.dnf },
                 })
               }
-              className={`text-xs rounded px-2 py-1 ${
+              className={`text-sm rounded px-2.5 py-1.5 ${
                 lastSolve.dnf
                   ? "bg-red-600/30 text-red-300 hover:bg-red-600/50"
                   : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -214,7 +214,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
               onClick={() => {
                 if (confirm("Letzten Solve loeschen?")) del.mutate(lastSolve.id);
               }}
-              className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
+              className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
             >
               🗑
             </button>
@@ -223,22 +223,22 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
       </div>
 
       {/* Letzte 8 Solves zur Kontrolle — mit Quick-Delete pro Eintrag */}
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-        <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-3">
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+        <h3 className="text-base uppercase tracking-wide text-gray-500 mb-3">
           Letzte {PREVIEW_COUNT} ({cubeType})
         </h3>
         {solves && solves.length > 0 ? (
-          <ul className="space-y-1">
+          <ul className="space-y-1.5">
             {solves.slice(0, PREVIEW_COUNT).map((s, i) => (
               <li
                 key={s.id}
-                className={`flex items-center justify-between text-sm font-mono py-1 ${
+                className={`flex items-center justify-between text-base font-mono py-1.5 ${
                   i === 0 ? "text-gray-100" : "text-gray-400"
                 }`}
               >
                 <span>{formatSolveTime(s)}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-gray-600">
+                  <span className="text-xs text-gray-600">
                     #{solves.length - i}
                   </span>
                   <button
@@ -246,7 +246,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                       if (confirm(`Solve ${formatSolveTime(s)} loeschen?`))
                         del.mutate(s.id);
                     }}
-                    className="text-xs rounded bg-gray-800 px-1.5 py-0.5 text-gray-500 hover:bg-red-700/40 hover:text-red-200"
+                    className="text-sm rounded bg-gray-800 px-2 py-1 text-gray-500 hover:bg-red-700/40 hover:text-red-200"
                     title="Solve loeschen (z.B. bei vertippter Eingabe)"
                   >
                     🗑
@@ -256,7 +256,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-gray-500">
+          <p className="text-base text-gray-500">
             Noch keine Solves fuer {cubeType}. Tipp eine Zeit links ein.
           </p>
         )}
@@ -283,7 +283,7 @@ function FormRow({
 }) {
   if (pct === null) {
     return (
-      <div className="flex items-baseline justify-between text-sm">
+      <div className="flex items-baseline justify-between text-base">
         <span className="text-gray-500">{label}</span>
         <span className="text-gray-600 font-mono">–</span>
       </div>
@@ -292,9 +292,9 @@ function FormRow({
   const arrow = pct < 0 ? "▼" : pct > 0 ? "▲" : "•";
   const sign = pct >= 0 ? "+" : "";
   return (
-    <div className="flex items-baseline justify-between text-sm">
+    <div className="flex items-baseline justify-between text-base">
       <span className="text-gray-300">{label}</span>
-      <span className={`font-mono font-semibold ${colorFn(pct)}`}>
+      <span className={`font-mono text-lg font-semibold ${colorFn(pct)}`}>
         {arrow} {sign}
         {(pct * 100).toFixed(1)}%
       </span>

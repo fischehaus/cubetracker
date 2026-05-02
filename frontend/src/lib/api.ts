@@ -44,7 +44,7 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
     },
     onSuccess: () => {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard, TodayWeekCard
+      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard
       // veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
@@ -67,7 +67,7 @@ export function useUpdateSolve(): UseMutationResult<
     },
     onSuccess: () => {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard, TodayWeekCard
+      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard
       // veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
@@ -85,7 +85,7 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
     },
     onSuccess: () => {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard, TodayWeekCard
+      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard
       // veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });

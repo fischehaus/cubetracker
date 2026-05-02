@@ -38,11 +38,11 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
   if (neglected.length === 0) {
     if (emptyMode === "hide") return null;
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-        <h3 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+        <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-2">
           Reminders
         </h3>
-        <div className="text-sm text-gray-400">
+        <div className="text-base text-gray-400">
           Alle Cubes innerhalb der letzten {REMINDER_DAYS} Tage trainiert. ✅
         </div>
       </div>
@@ -53,20 +53,20 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
   const hidden = neglected.length - visible.length;
 
   return (
-    <div className="rounded-lg border border-blue-500/40 bg-blue-500/5 p-5">
+    <div className="rounded-lg border border-blue-500/40 bg-blue-500/5 p-6">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs uppercase tracking-wide text-blue-200">
+        <h3 className="text-sm uppercase tracking-wide text-blue-200">
           Reminders
         </h3>
-        <span className="text-[10px] text-blue-300/70">
+        <span className="text-xs text-blue-300/70">
           {neglected.length} {neglected.length === 1 ? "Cube" : "Cubes"}
         </span>
       </div>
-      <ul className="space-y-1.5">
+      <ul className="space-y-2">
         {visible.map((c) => (
           <li
             key={c.cube_type}
-            className="flex items-center justify-between gap-2 text-sm"
+            className="flex items-center justify-between gap-2 text-base"
           >
             <span className="text-gray-100">{c.cube_type}</span>
             <span className="text-blue-300/80 font-mono">
@@ -76,7 +76,7 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
         ))}
       </ul>
       {hidden > 0 && (
-        <div className="mt-2 text-[11px] text-blue-300/60">
+        <div className="mt-2 text-xs text-blue-300/60">
           + {hidden} weitere
         </div>
       )}

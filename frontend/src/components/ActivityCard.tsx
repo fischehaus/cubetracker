@@ -1,11 +1,6 @@
 // ActivityCard: ein einzelner Aktivitaets-Slice (heute ODER diese Woche)
 // als eigenstaendige Card. Im DASHBOARD-Tab als Top-Row in 3 Spalten:
 // [Heute] [Diese Woche] [Reminders].
-//
-// Im Vergleich zur alten TodayWeekCard:
-// - groessere Zahlen (text-4xl statt text-2xl)
-// - Headline pro Card (klares „Heute" / „Diese Woche")
-// - mehr Padding, weniger gequetscht
 
 import { useTemporalStats } from "../lib/api";
 import { formatTime } from "../lib/format";
@@ -49,35 +44,35 @@ export function ActivityCard({ sessionId, slice }: Props) {
   const restCount = cubeEntries.length - top.length;
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-      <h3 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+      <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-2">
         {SLICE_LABELS[slice]}
       </h3>
-      <div className="text-4xl font-bold text-gray-100 leading-none mb-1">
+      <div className="text-5xl font-bold text-gray-100 leading-none mb-1">
         {s.count}
-        <span className="text-base font-normal text-gray-500 ml-2">
+        <span className="text-lg font-normal text-gray-500 ml-2">
           {s.count === 1 ? "Solve" : "Solves"}
         </span>
       </div>
 
       {s.count > 0 ? (
         <>
-          <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+          <div className="mt-4 grid grid-cols-2 gap-3 text-base">
             <div>
-              <div className="text-[11px] text-gray-500">Schnitt</div>
-              <div className="font-mono text-gray-200">
+              <div className="text-xs text-gray-500">Schnitt</div>
+              <div className="font-mono text-gray-200 text-lg">
                 {s.mean_ms != null ? formatTime(s.mean_ms) : "–"}
               </div>
             </div>
             <div>
-              <div className="text-[11px] text-gray-500">ao5</div>
-              <div className="font-mono text-gray-200">
+              <div className="text-xs text-gray-500">ao5</div>
+              <div className="font-mono text-gray-200 text-lg">
                 {s.current_ao5 != null ? formatTime(s.current_ao5) : "–"}
               </div>
             </div>
           </div>
           {top.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
+            <div className="mt-4 flex flex-wrap gap-1.5 text-sm">
               {top.map(([cube, n]) => (
                 <span
                   key={cube}
@@ -95,7 +90,7 @@ export function ActivityCard({ sessionId, slice }: Props) {
           )}
         </>
       ) : (
-        <p className="mt-3 text-sm text-gray-500">noch nichts gemacht</p>
+        <p className="mt-4 text-base text-gray-500">noch nichts gemacht</p>
       )}
     </div>
   );

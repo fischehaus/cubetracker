@@ -54,14 +54,14 @@ export function TabBar({ current, onChange }: Props) {
             key={t.id}
             onClick={() => onChange(t.id)}
             aria-current={active ? "page" : undefined}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-md px-4 h-12 text-base font-medium transition ${
+            className={`flex-1 flex items-center justify-center gap-2 rounded-md px-4 h-14 text-lg font-medium transition ${
               active
                 ? "bg-purple-600 text-white shadow-sm"
                 : "text-gray-300 hover:bg-gray-800 hover:text-gray-100"
             }`}
             title={t.description}
           >
-            <span className="text-lg" aria-hidden="true">
+            <span className="text-xl" aria-hidden="true">
               {t.icon}
             </span>
             <span>{t.label}</span>

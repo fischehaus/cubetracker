@@ -48,16 +48,16 @@ function HealthBadge() {
 
   if (error) {
     return (
-      <span className="text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded px-2 py-1">
+      <span className="text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded px-3 py-1.5">
         Backend offline
       </span>
     );
   }
   if (!data) {
-    return <span className="text-xs text-gray-500">…</span>;
+    return <span className="text-sm text-gray-500">…</span>;
   }
   return (
-    <span className="text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-2 py-1">
+    <span className="text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-3 py-1.5">
       Backend v{data.version}
     </span>
   );
@@ -201,8 +201,8 @@ function MainLayout() {
       <div className="mx-auto max-w-7xl">
         <header className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold text-gray-100">cubetracker</h1>
-            <p className="text-sm text-gray-400">
+            <h1 className="text-4xl font-bold text-gray-100">cubetracker</h1>
+            <p className="text-base text-gray-400">
               Speedcubing-Solve-Tracking, lokal.
             </p>
           </div>
@@ -233,8 +233,8 @@ function MainLayout() {
           />
         )}
 
-        <footer className="mt-8 text-xs text-gray-500 text-center">
-          Phase 3 fertig (v0.3) · Phase 4 in Vorbereitung — Tab-Routing aktiv.
+        <footer className="mt-8 text-sm text-gray-500 text-center">
+          Phase 4 fertig (v0.4) · Tab-Routing + UI-Refresh aktiv.
         </footer>
       </div>
     </div>

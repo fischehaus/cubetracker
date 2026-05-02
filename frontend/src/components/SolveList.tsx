@@ -122,23 +122,23 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 text-gray-400">
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
         Solves werden geladen …
       </div>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-5 text-red-300">
+      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
         Fehler beim Laden: {error.message}
       </div>
     );
   }
   if (!solves || solves.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-        <h2 className="text-xl font-semibold text-gray-100 mb-2">Solves</h2>
-        <p className="text-gray-400">
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+        <h2 className="text-2xl font-semibold text-gray-100 mb-2">Solves</h2>
+        <p className="text-base text-gray-400">
           {cubeFilter
             ? `Keine Solves fuer "${cubeFilter}" vorhanden.`
             : "Noch keine Solves. Trag oben einen ein oder importier deine csTimer-Daten."}
@@ -146,7 +146,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         {cubeFilter && (
           <button
             onClick={() => onCubeFilterChange("")}
-            className="mt-3 text-sm text-purple-400 hover:text-purple-300"
+            className="mt-3 text-base text-purple-400 hover:text-purple-300"
           >
             Filter zuruecksetzen
           </button>
@@ -156,11 +156,11 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
   }
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
+    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-xl font-semibold text-gray-100">
+        <h2 className="text-2xl font-semibold text-gray-100">
           Solves{" "}
-          <span className="text-sm text-gray-400">
+          <span className="text-base text-gray-400">
             ({solves.length}
             {cubeFilter && ` · ${cubeFilter}`})
           </span>
@@ -170,7 +170,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         <select
           value={limit}
           onChange={(e) => setLimit(parseInt(e.target.value, 10))}
-          className="rounded border border-gray-600 bg-gray-800 px-2 py-1.5 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
+          className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
           title="Maximale Anzahl angezeigter Solves"
         >
           {LIMIT_OPTIONS.map((o) => (
@@ -188,13 +188,13 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-base">
           <thead>
-            <tr className="border-b border-gray-700 text-left text-gray-400">
-              <th className="py-2 pr-3 font-medium">Zeit</th>
-              <th className="py-2 pr-3 font-medium">Cube</th>
-              <th className="py-2 pr-3 font-medium">Notiz</th>
-              <th className="py-2 pr-3 font-medium text-right">Aktionen</th>
+            <tr className="border-b border-gray-700 text-left text-gray-400 text-sm">
+              <th className="py-2.5 pr-3 font-medium">Zeit</th>
+              <th className="py-2.5 pr-3 font-medium">Cube</th>
+              <th className="py-2.5 pr-3 font-medium">Notiz</th>
+              <th className="py-2.5 pr-3 font-medium text-right">Aktionen</th>
             </tr>
           </thead>
           <tbody>
@@ -257,16 +257,16 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                       </div>
                     )}
                     {/* ao5/ao12 als kleine Sub-Zeile — wie csTimer-Liste */}
-                    <div className="text-[10px] text-gray-500 mt-0.5 font-normal">
+                    <div className="text-xs text-gray-500 mt-1 font-normal">
                       ao5 {ao5 !== null ? formatTime(ao5) : "–"} · ao12{" "}
                       {ao12 !== null ? formatTime(ao12) : "–"}
                     </div>
                   </td>
-                  <td className="py-2 pr-3 text-gray-300 align-top">
+                  <td className="py-3 pr-3 text-gray-300 align-top">
                     {s.cube_type}
                   </td>
                   <td
-                    className="py-2 pr-3 text-gray-400 text-xs max-w-xs align-top"
+                    className="py-3 pr-3 text-gray-400 text-sm max-w-xs align-top"
                     title={isEditingNotes ? "" : (s.notes ?? "Klick zum Bearbeiten")}
                   >
                     {isEditingNotes ? (
@@ -294,7 +294,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                       </div>
                     )}
                   </td>
-                  <td className="py-2 pr-3 text-right space-x-2 align-top">
+                  <td className="py-3 pr-3 text-right space-x-2 align-top">
                     {!s.dnf && (
                       <button
                         onClick={() =>
@@ -303,7 +303,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                             payload: { plus_two: !s.plus_two },
                           })
                         }
-                        className={`text-xs rounded px-2 py-1 ${
+                        className={`text-sm rounded px-2.5 py-1.5 ${
                           s.plus_two
                             ? "bg-yellow-600/30 text-yellow-300 hover:bg-yellow-600/50"
                             : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -317,7 +317,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                       onClick={() =>
                         update.mutate({ id: s.id, payload: { dnf: !s.dnf } })
                       }
-                      className={`text-xs rounded px-2 py-1 ${
+                      className={`text-sm rounded px-2.5 py-1.5 ${
                         s.dnf
                           ? "bg-red-600/30 text-red-300 hover:bg-red-600/50"
                           : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -330,7 +330,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                       onClick={() => {
                         if (confirm("Solve loeschen?")) del.mutate(s.id);
                       }}
-                      className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
+                      className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
                       title="Loeschen"
                     >
                       🗑
@@ -343,7 +343,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         </table>
       </div>
 
-      <p className="mt-3 text-[10px] text-gray-500">
+      <p className="mt-3 text-xs text-gray-500">
         Tipp: Klick auf Zeit oder Notiz zum Bearbeiten. Enter speichert,
         Esc bricht ab.
       </p>
