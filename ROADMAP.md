@@ -11,12 +11,12 @@ csTimer-CSV-Import + Basis-Stats.
   - Alembic-Migrations-Setup, erste Revision `1cbfe3113a0f`
   - SQLite-Datei in `backend/data/solves.db`
   - 8 Unit-Tests, alle gruen
-- [ ] **F2: API: Solves CRUD**
-  - GET /solves (mit Filter)
-  - POST /solves
-  - GET /solves/<id>
-  - DELETE /solves/<id>
-  - PATCH /solves/<id> (fuer plus_two/dnf-Toggle)
+- [x] **F2: API: Solves + Sessions CRUD** ✅ done
+  - 5 Solve-Endpoints (list/create/get/patch/delete) mit Filter
+    (cube_type, session_id) + Pagination (limit/offset)
+  - 2 Session-Endpoints (list/get) — POST/PATCH/DELETE in F14
+  - 20 API-Tests (alle Endpoints + Validation + Edge-Cases)
+  - Live-Smoketest gegen laufenden Backend gruen
 - [ ] **F3: Frontend: Solves-Liste + Eintragen**
   - SolveList-Component (Tabelle)
   - SolveForm-Component (Eintrag)
