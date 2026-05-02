@@ -27,7 +27,20 @@ export function formatSolveTime(s: Solve): string {
 }
 
 /**
- * Parst einen User-Input-String wie "12.34" oder "1:23.45" zu Millisekunden.
+ * Parst einen User-Input-String zu Millisekunden.
+ *
+ * Akzeptierte Formate:
+ *   - "12.34"    → SS.cc (klassisch mit Punkt)
+ *   - "1:23.45"  → MM:SS.cc (mit Doppelpunkt + Punkt)
+ *   - "1234"     → SS.cc nach csTimer-Stackmat-Konvention:
+ *                  rechteste 2 Stellen = Hundertstel, dann Sekunden, dann Minuten.
+ *                  Beispiele:
+ *                    "5"      → 0.05s   (50 ms)
+ *                    "945"    → 9.45s   (9450 ms)
+ *                    "1234"   → 12.34s  (12340 ms)
+ *                    "15102"  → 1:51.02 (111020 ms)
+ *                    "123456" → 12:34.56 (754560 ms)
+ *
  * Liefert null bei ungueltigem Input.
  */
 export function parseTimeInput(input: string): number | null {
@@ -43,10 +56,42 @@ export function parseTimeInput(input: string): number | null {
     return Math.round((min * 60 + sec) * 1000);
   }
 
-  // "12.34" → SS.cc
+  // Reine Ziffern → csTimer-Stackmat-Konvention
+  if (/^\d+$/.test(trimmed)) {
+    return parseDigitsOnly(trimmed);
+  }
+
+  // "12.34" → SS.cc (klassisch)
   const sec = parseFloat(trimmed);
   if (isNaN(sec) || sec < 0) return null;
   return Math.round(sec * 1000);
+}
+
+/**
+ * Interne Helper: Zifferkette nach csTimer-Stackmat-Regel parsen.
+ * - Letzte 2 Ziffern  = Hundertstel
+ * - Naechste 2 Ziffern = Sekunden
+ * - Rest             = Minuten
+ *
+ * Sekunden- und Hundertstel-Teile duerfen logisch jeden Wert annehmen
+ * (User schreibt was er tippt — z.B. "1099" → 10.99s, valide).
+ */
+function parseDigitsOnly(digits: string): number | null {
+  if (!digits) return null;
+  const padded = digits.padStart(2, "0"); // mind. 2 Ziffern fuer centi
+  const centi = parseInt(padded.slice(-2), 10);
+  const rest = padded.slice(0, -2);
+  let seconds = 0;
+  let minutes = 0;
+  if (rest.length > 0) {
+    const restPad = rest.padStart(2, "0");
+    seconds = parseInt(restPad.slice(-2), 10);
+    const minStr = restPad.slice(0, -2);
+    if (minStr.length > 0) {
+      minutes = parseInt(minStr, 10);
+    }
+  }
+  return minutes * 60_000 + seconds * 1000 + centi * 10;
 }
 
 /**
