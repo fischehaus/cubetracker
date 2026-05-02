@@ -1,11 +1,14 @@
 // MultiCubeCompareCard: Antwort auf „in welchem Wuerfel bist du gerade
-// am besten?" — vergleicht aktuellen ao5 pro Cube mit dem Gesamt-Mittel
-// und sortiert nach Form-Faktor (kleiner = aktuell besser).
+// am besten?" — vergleicht aktuellen ao5 pro Cube mit dem Mittel der
+// letzten 100 Solves (Tagesform), nicht mit dem Lifetime-Mittel.
 //
-// Form-Faktor = current_ao5 / mean_ms
-//   < 0.95 → in guter Form (gruen)
-//   ~ 1.00 → durchschnittlich
-//   > 1.05 → schwaechere Form (rot)
+// Lifetime-Form-Faktor wird trotzdem als Fallback gezeigt (z.B. wenn
+// noch keine 20 valid Solves fuer ein Cube existieren).
+//
+// Form-Faktor (recent oder lifetime):
+//   < 0.95 → in guter Form (gruen ▼)
+//   ~ 1.00 → durchschnittlich (grau •)
+//   > 1.05 → schwaechere Form (rot ▲)
 //
 // Optional auf eine Session einschraenkbar via Prop.
 
@@ -46,7 +49,14 @@ function formatFormFactor(f: number | null): {
 }
 
 function CubeRow({ cube }: { cube: CubeStats }) {
-  const form = formatFormFactor(cube.form_factor);
+  // Tagesform bevorzugen (vs letzte 100). Fallback auf Lifetime, wenn
+  // weniger als 20 valid Solves vorhanden sind.
+  const useRecent = cube.form_factor_recent !== null;
+  const factor = useRecent ? cube.form_factor_recent : cube.form_factor;
+  const form = formatFormFactor(factor);
+  const tooltip = useRecent
+    ? "Aktueller ao5 vs. Mittel der letzten 100 Solves (Tagesform)"
+    : "Aktueller ao5 vs. Lifetime-Schnitt — Tagesform-Vergleich braucht ≥20 valide Solves";
   return (
     <div className="flex items-center justify-between gap-3 py-2 border-b border-gray-800/60 last:border-0">
       <div className="min-w-0 flex-1">
@@ -57,9 +67,12 @@ function CubeRow({ cube }: { cube: CubeStats }) {
           PB {cube.best_ms != null ? formatTime(cube.best_ms) : "–"}
         </div>
       </div>
-      <div className={`text-right ${form.color} shrink-0`} title="Aktueller ao5 vs. Gesamt-Schnitt">
+      <div className={`text-right ${form.color} shrink-0`} title={tooltip}>
         <div className="text-sm font-mono font-semibold">
           {form.symbol} {form.text}
+          {!useRecent && factor !== null && (
+            <span className="ml-1 text-[9px] text-gray-500 align-top">life</span>
+          )}
         </div>
         <div className="text-[10px] text-gray-500">{cube.count_valid} Solves</div>
       </div>
@@ -95,9 +108,10 @@ export function MultiCubeCompareCard({ sessionId }: Props) {
     );
   }
 
-  // Cube mit bester Form (sofern es einen mit form_factor gibt) hervorheben
-  const withForm = data.cubes.filter((c) => c.form_factor !== null);
-  const bestCube = withForm.length > 0 ? withForm[0] : null;
+  // Cube mit bester Tagesform hervorheben (nur recent zaehlt fuer den Banner —
+  // Lifetime ist zu sehr durch Lernkurve verzerrt fuer ein „heute am besten"-Statement)
+  const withRecent = data.cubes.filter((c) => c.form_factor_recent !== null);
+  const bestCube = withRecent.length > 0 ? withRecent[0] : null;
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
@@ -106,16 +120,17 @@ export function MultiCubeCompareCard({ sessionId }: Props) {
         <span className="text-xs text-gray-500">aktuelle Form</span>
       </div>
 
-      {bestCube && (
+      {bestCube && bestCube.form_factor_recent !== null && (
         <div className="mb-3 rounded bg-emerald-500/10 border border-emerald-500/30 px-3 py-2">
-          <div className="text-xs text-emerald-200/80">Aktuell deine beste Form:</div>
+          <div className="text-xs text-emerald-200/80">
+            Aktuell deine beste Tagesform:
+          </div>
           <div className="text-sm text-emerald-100 mt-0.5">
             <span className="font-semibold">{bestCube.cube_type}</span>
-            {bestCube.form_factor !== null && (
-              <span className="text-emerald-300 ml-2 font-mono">
-                {((bestCube.form_factor - 1) * 100).toFixed(1)}% vs. Schnitt
-              </span>
-            )}
+            <span className="text-emerald-300 ml-2 font-mono">
+              {((bestCube.form_factor_recent - 1) * 100).toFixed(1)}% vs.
+              letzte 100
+            </span>
           </div>
         </div>
       )}
@@ -127,8 +142,9 @@ export function MultiCubeCompareCard({ sessionId }: Props) {
       </div>
 
       <p className="mt-3 text-[10px] text-gray-500 leading-snug">
-        ▼ aktuell besser als dein Gesamt-Schnitt · ▲ aktuell schlechter ·
-        Form = letzter ao5 ÷ Mittel aller Solves.
+        ▼ aktuell besser · ▲ schlechter — verglichen mit dem Mittel der
+        letzten 100 Solves (Tagesform). „life" = Fallback auf
+        Lifetime-Schnitt bei &lt;20 Solves.
       </p>
     </div>
   );
