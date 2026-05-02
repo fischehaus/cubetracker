@@ -2,17 +2,31 @@
 // Quick-Actions: DNF setzen oder loeschen — direkt aus der Card.
 //
 // Wird nur gerendert, wenn tatsaechlich Outliers gefunden werden — sonst
-// bleibt das Aside aufgeraeumt.
+// bleibt der Platz im aside frei.
+//
+// Akzeptiert optional einen Session-Filter: wenn der User in einer
+// bestimmten Session arbeitet, kann er sich auf deren Outliers
+// beschraenken — Cube-uebergreifend bleibt es trotzdem.
 
 import { useMemo } from "react";
-import { useDeleteSolve, useSolves, useUpdateSolve } from "../lib/api";
+import {
+  useDeleteSolve,
+  useSolves,
+  useUpdateSolve,
+  type SolveListParams,
+} from "../lib/api";
 import { formatTime } from "../lib/format";
 import { findOutliers, type OutlierInput } from "../lib/outliers";
 
-export function OutlierCard() {
-  // Wir laden ALLE Solves cube-uebergreifend, damit wir Outliers in allen
-  // Cube-Types auf einmal sehen — unabhaengig vom aktuellen Filter.
-  const { data: solves, isLoading } = useSolves({ limit: 100_000 });
+interface Props {
+  sessionId: number | null;
+}
+
+export function OutlierCard({ sessionId }: Props) {
+  // Cube-uebergreifend laden, optional auf Session einschraenken.
+  const params: SolveListParams = { limit: 100_000 };
+  if (sessionId !== null) params.session_id = sessionId;
+  const { data: solves, isLoading } = useSolves(params);
   const update = useUpdateSolve();
   const del = useDeleteSolve();
 
@@ -46,6 +60,7 @@ export function OutlierCard() {
       <p className="text-xs text-gray-400 mb-3">
         Solves, die deutlich vom typischen Tempo dieses Cubes abweichen
         (vermutlich Timer-Fehler oder vergessene Solves).
+        {sessionId !== null && " Nur die aktive Session."}
       </p>
 
       <div className="space-y-3">
