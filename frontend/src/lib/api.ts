@@ -43,7 +43,10 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       return r.data;
     },
     onSuccess: () => {
+      // Solves UND Stats invalidieren — sonst zeigt StatsCard veraltete Werte
+      // nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
+      qc.invalidateQueries({ queryKey: ["stats"] });
     },
   });
 }
@@ -60,7 +63,10 @@ export function useUpdateSolve(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
+      // Solves UND Stats invalidieren — sonst zeigt StatsCard veraltete Werte
+      // nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
+      qc.invalidateQueries({ queryKey: ["stats"] });
     },
   });
 }
@@ -72,7 +78,10 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       await api.delete(`/solves/${id}`);
     },
     onSuccess: () => {
+      // Solves UND Stats invalidieren — sonst zeigt StatsCard veraltete Werte
+      // nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
+      qc.invalidateQueries({ queryKey: ["stats"] });
     },
   });
 }

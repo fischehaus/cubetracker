@@ -27,7 +27,7 @@ export function SolveForm() {
 
     const time_ms = parseTimeInput(timeStr);
     if (time_ms === null) {
-      setError('Ungueltige Zeit. Format: "12.34" oder "1:23.45".');
+      setError('Ungueltige Zeit. Format: "12.34", "1:23.45" oder Ziffern "1234".');
       return;
     }
 
@@ -76,7 +76,7 @@ export function SolveForm() {
             type="text"
             value={timeStr}
             onChange={(e) => setTimeStr(e.target.value)}
-            placeholder='z.B. "12.34" oder "1:23.45"'
+            placeholder='"12.34", "1:23.45" oder "1234"'
             className="mt-1 w-full rounded border border-gray-600 bg-gray-800 px-3 py-2 text-gray-100 focus:border-purple-500 focus:outline-none"
             autoFocus
           />
