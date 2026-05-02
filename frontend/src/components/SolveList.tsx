@@ -1,10 +1,20 @@
 // Liste der Solves als Tabelle, mit Filter (Cube-Type, Session, Limit) und
 // Loeschen/Toggle-Buttons. Zeigt rollende ao5/ao12 unter jeder Zeit, sowie
 // PB-Marker (Best-Solve goldfarben) basierend auf Stats-API.
+//
+// F7: Inline-Edit fuer Zeit + Notizen — click auf den Wert wechselt in
+// Edit-Mode, Enter speichert, Esc bricht ab. Cube-Type bleibt
+// read-only (Aenderungen seltener; ggf. spaeter via Edit-Dialog).
 
 import { useMemo, useState } from "react";
 import { useDeleteSolve, useSolves, useStats, useUpdateSolve, type SolveListParams } from "../lib/api";
-import { COMMON_CUBE_TYPES, formatDate, formatSolveTime, formatTime } from "../lib/format";
+import {
+  COMMON_CUBE_TYPES,
+  formatDate,
+  formatSolveTime,
+  formatTime,
+  parseTimeInput,
+} from "../lib/format";
 import { rollingAverages, type SolvePoint } from "../lib/rolling";
 
 interface Props {
@@ -23,8 +33,13 @@ const LIMIT_OPTIONS: { value: number; label: string }[] = [
   { value: -1, label: "Alle" },
 ];
 
+type EditingState = { solveId: number; field: "time" | "notes" } | null;
+
 export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) {
   const [limit, setLimit] = useState<number>(100);
+  const [editing, setEditing] = useState<EditingState>(null);
+  const [draftValue, setDraftValue] = useState<string>("");
+  const [editError, setEditError] = useState<string | null>(null);
 
   const params: SolveListParams = {};
   // -1 (Alle) → wir setzen ein sehr hohes Limit. Backend verkraftet 50k+ ohne Probleme.
@@ -69,6 +84,42 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
     });
     return { ao5Map: ao5M, ao12Map: ao12M };
   }, [solves]);
+
+  // F7: Edit-Mode starten — Initialwert in den Draft setzen.
+  function startEdit(solveId: number, field: "time" | "notes", initial: string) {
+    setEditing({ solveId, field });
+    setDraftValue(initial);
+    setEditError(null);
+  }
+
+  function cancelEdit() {
+    setEditing(null);
+    setDraftValue("");
+    setEditError(null);
+  }
+
+  // F7: Save — bei time wird parseTimeInput angewendet (akzeptiert
+  // alle Formate inkl. csTimer-Stackmat). Notes wird trim'd; leer → null.
+  function saveEdit() {
+    if (!editing) return;
+    if (editing.field === "time") {
+      const ms = parseTimeInput(draftValue);
+      if (ms === null) {
+        setEditError("Ungueltiges Zeit-Format");
+        return;
+      }
+      update.mutate(
+        { id: editing.solveId, payload: { time_ms: ms } },
+        { onSuccess: cancelEdit, onError: (e) => setEditError(e.message) }
+      );
+    } else {
+      const trimmed = draftValue.trim();
+      update.mutate(
+        { id: editing.solveId, payload: { notes: trimmed || null } },
+        { onSuccess: cancelEdit, onError: (e) => setEditError(e.message) }
+      );
+    }
+  }
 
   if (isLoading) {
     return (
@@ -139,6 +190,12 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         </div>
       </div>
 
+      {editError && (
+        <div className="mb-3 rounded border border-red-500/50 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+          {editError}
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -154,6 +211,10 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
               const isBest = s.id === bestSolveId;
               const ao5 = ao5Map.get(s.id) ?? null;
               const ao12 = ao12Map.get(s.id) ?? null;
+              const isEditingTime =
+                editing?.solveId === s.id && editing.field === "time";
+              const isEditingNotes =
+                editing?.solveId === s.id && editing.field === "notes";
               return (
                 <tr
                   key={s.id}
@@ -162,25 +223,48 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                   }`}
                 >
                   <td className="py-2 pr-3 font-mono align-top">
-                    <div title={formatDate(s.timestamp)}>
-                      {isBest && (
-                        <span
-                          className="inline-block mr-1.5 text-xs"
-                          title="Persoenliche Bestzeit (PB)"
-                        >
-                          ★
-                        </span>
-                      )}
-                      <span
-                        className={
-                          isBest
-                            ? "text-yellow-300 font-semibold"
-                            : "text-gray-100"
+                    {isEditingTime ? (
+                      <input
+                        type="text"
+                        value={draftValue}
+                        autoFocus
+                        onChange={(e) => setDraftValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveEdit();
+                          if (e.key === "Escape") cancelEdit();
+                        }}
+                        onBlur={() => {
+                          if (!editError) saveEdit();
+                        }}
+                        className="w-24 rounded border border-purple-500 bg-gray-800 px-1 py-0.5 text-gray-100 text-sm focus:outline-none"
+                      />
+                    ) : (
+                      <div
+                        title={`${formatDate(s.timestamp)} — Klick zum Bearbeiten`}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          startEdit(s.id, "time", formatTime(s.time_ms))
                         }
                       >
-                        {formatSolveTime(s)}
-                      </span>
-                    </div>
+                        {isBest && (
+                          <span
+                            className="inline-block mr-1.5 text-xs"
+                            title="Persoenliche Bestzeit (PB)"
+                          >
+                            ★
+                          </span>
+                        )}
+                        <span
+                          className={
+                            isBest
+                              ? "text-yellow-300 font-semibold"
+                              : "text-gray-100"
+                          }
+                        >
+                          {formatSolveTime(s)}
+                        </span>
+                      </div>
+                    )}
                     {/* ao5/ao12 als kleine Sub-Zeile — wie csTimer-Liste */}
                     <div className="text-[10px] text-gray-500 mt-0.5 font-normal">
                       ao5 {ao5 !== null ? formatTime(ao5) : "–"} · ao12{" "}
@@ -191,10 +275,33 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                     {s.cube_type}
                   </td>
                   <td
-                    className="py-2 pr-3 text-gray-400 text-xs max-w-xs truncate align-top"
-                    title={s.notes ?? ""}
+                    className="py-2 pr-3 text-gray-400 text-xs max-w-xs align-top"
+                    title={isEditingNotes ? "" : (s.notes ?? "Klick zum Bearbeiten")}
                   >
-                    {s.notes ?? ""}
+                    {isEditingNotes ? (
+                      <input
+                        type="text"
+                        value={draftValue}
+                        autoFocus
+                        onChange={(e) => setDraftValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveEdit();
+                          if (e.key === "Escape") cancelEdit();
+                        }}
+                        onBlur={() => {
+                          if (!editError) saveEdit();
+                        }}
+                        placeholder="Notiz …"
+                        className="w-full rounded border border-purple-500 bg-gray-800 px-1 py-0.5 text-gray-100 text-xs focus:outline-none"
+                      />
+                    ) : (
+                      <div
+                        className="cursor-pointer truncate min-h-[1em]"
+                        onClick={() => startEdit(s.id, "notes", s.notes ?? "")}
+                      >
+                        {s.notes ?? <span className="text-gray-600 italic">+ Notiz</span>}
+                      </div>
+                    )}
                   </td>
                   <td className="py-2 pr-3 text-right space-x-2 align-top">
                     {!s.dnf && (
@@ -244,6 +351,11 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
           </tbody>
         </table>
       </div>
+
+      <p className="mt-3 text-[10px] text-gray-500">
+        Tipp: Klick auf Zeit oder Notiz zum Bearbeiten. Enter speichert,
+        Esc bricht ab.
+      </p>
     </div>
   );
 }
