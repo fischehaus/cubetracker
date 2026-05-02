@@ -3,10 +3,13 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-03 nachts. **Phase 3 fertig, Tag `v0.3`
-> gesetzt.** Drei Phase-3-Branches autonom durchgezogen + gemerged:
-> Form-Faktor v2 + Tag/Wochen-Stats, Verbesserungs-Tracking + Reminder,
-> Inline-Edit.
+> **Letzter Stand:** 2026-05-03 nachts. **Phase 4 fertig, Tag `v0.4`
+> gesetzt.** Sechs Branches (A-F) durchgezogen: Y-Achsen-Smart-Skala,
+> Tab-Routing (TIMER/DASHBOARD/ANALYSE), TIMER mit grosser Eingabe,
+> Dashboard mit 3 Quick-Cards, Analyse mit Filter-Bar, einheitliche
+> grosse Schriften + Padding + Cleanup. Plus 2 Bonus-Branches mit
+> User-Feedback-Tweaks (Outlier-Session-Filter, Mini-Delete,
+> Multi-Form-Vergleich).
 
 ---
 
@@ -39,26 +42,35 @@ Du musst beim naechsten Mal:
 
 ## Was beim App-Walkthrough zu pruefen ist
 
-### Funktionale Checks (Phase 3 neu)
+### Funktionale Checks (Phase 4 neu — UI/UX)
 
-- [ ] **TodayWeekCard** ganz oben in der Hauptspalte: 2 Slices
-      „Heute" + „Diese Woche" mit Counts, Mean, ao5, Cube-Breakdown
-- [ ] **MultiCubeCompareCard** zeigt jetzt **Tagesform** statt
-      Lifetime-Schnitt (Banner sagt „Aktuell deine beste Tagesform")
-- [ ] Bei Cubes mit ≥100 Solves: kleine **Trend-Zeile** „Trend -X.X%"
-      (gruen) oder „+X.X%" (rot) zeigt Verbesserung letzte 50 vs davor
-- [ ] **ReminderCard** (blau) im Aside: Cubes, die du ≥7 Tage nicht
-      gemacht hast, sortiert „laengste Pause zuerst"
-- [ ] **Inline-Edit**: Click auf Zeit-Zelle in der Solves-Liste →
-      Input. Click auf Notiz → Input. Enter speichert, Esc bricht ab.
+- [ ] **3 Tabs oben gross**: TIMER / DASHBOARD / ANALYSE (h-14, lila aktiv)
+- [ ] **Tab-Wahl persistiert** in localStorage (Reload landet wieder dort)
+- [ ] **TIMER-Tab**: grosse zentrale Eingabe (text-7xl), auto-focus,
+      Enter speichert + re-focus. Live-card rechts: Letzter Solve text-4xl,
+      ao5/ao12 text-3xl, Form-vergleich fuer ao5+ao12+ao100 mit
+      Window-Selector (letzte 100/500/alle), Mini-Liste mit Quick-Delete
+- [ ] **DASHBOARD-Tab**: 3 Quick-Cards top (Today/Week/Reminders),
+      darunter MultiCube + Stats voll-breit
+- [ ] **ANALYSE-Tab**: FilterBar oben (Cube-Filter zentral),
+      TrendsChart full-width mit Y-Achsen-Smart-Skala + manuell,
+      Histogramm + Outlier nebeneinander, SolveList full-width,
+      Stats + Import unten
+- [ ] **Y-Achse Trends**: standardmaessig P2..P98 (Outlier weggeklippt,
+      Verlauf gross sichtbar). Manuell ueberschreibbar via min/max-Inputs
+      in Sekunden („10" oder „1:30"). Reset bei Filter-Wechsel.
+- [ ] **OutlierCard session-aware**: bei aktiver Session-Wahl im Header
+      werden nur diese Session-Outliers gezeigt
+- [ ] **SessionSwitcher** sitzt im Header (App-weit)
+- [ ] Schriften deutlich groesser ueberall (Headlines 2xl, Body base)
 
-### Funktionale Checks (Phase 2)
+### Funktionale Checks (Phase 1-3 — sollten weiterhin gehen)
 
-- [ ] MultiCubeCompareCard, TrendsChart, HistogramChart, OutlierCard
-- [ ] Limit-Selector (50…Alle) + ao5/ao12 als Sub-Zeile
-- [ ] Datum als Tooltip auf der Solve-Zeit
-- [ ] csTimer-Stackmat-Eingabe: `945` -> 9.45s, `15102` -> 1:51.02
+- [ ] csTimer-Stackmat-Eingabe: `945` → 9.45s, `15102` → 1:51.02
+- [ ] csTimer-Re-Import erkennt alle als Duplikate
+- [ ] Inline-Edit in SolveList (Click auf Zeit/Notiz)
 - [ ] Sofort-Update aller Werte bei Mutations
+- [ ] Backend-Badge gruen, ao5/ao12 als Sub-Zeile in der Liste
 
 ### Funktionale Checks (Phase 1 — sollten weiterhin gruen sein)
 
@@ -82,51 +94,50 @@ Du musst beim naechsten Mal:
 
 ---
 
-## Was als naechstes ansteht (nach App-Walkthrough)
+## Was als naechstes ansteht
 
-Phase 3 ist mit Tag `v0.3` abgeschlossen. Phase-2-Diskussionspunkte
-(Form-Faktor v2 + cube-spezifische Outlier-Schwellen) sind teilweise
-abgehandelt: Form-Faktor v2 ist drin, Outlier-Schwellen sind noch das
-gleiche 30%/5×-Schema (cube-spezifisch waere noch ein
-Detail-Refinement).
+Phase 4 (Visualisierungs-Refactor) ist mit Tag `v0.4` abgeschlossen.
+Hardware-Tracking ist nach Phase 5 verschoben.
 
-**Phase-4-Kandidaten:**
+**Phase 5 — Hardware-Tracking** (Seed liegt in
+`docs/hardware-inventory-seed.md`, ~35 physische Cubes vom 2026-05-03):
 
-Hardware-Tracking (urspruenglich Phase 4 in der Roadmap):
-- **F16 Hardware-Inventar** — CRUD fuer Cube-Modelle (MGC v3, RS3M,
-  GAN 13, …)
+- **F16 Hardware-Inventar** — CRUD fuer Cube-Modelle. Schema-Frage:
+  Hardware m:n cube_types (ein Modell fuer mehrere events nutzbar)?
+  Oder 1:1 mit Wiederholungen?
 - **F17 Hardware pro Solve** — `hardware_id` FK aktivieren via
-  Alembic-Migration, Frontend-Auswahl beim Eintragen
-- **F18 Hardware-Performance-Vergleich** — „mit MGC bist du 0.8s
-  schneller als mit RS3M"
+  Alembic-Migration, Default-Hardware pro cube_type, Auswahl im
+  BigTimerInput
+- **F18 Hardware-Performance-Vergleich** — „mit Weilong v11 bist du
+  0.8s schneller als mit Gan 15 auf 3x3"
 - **F19 Aktive-Hardware-Empfehlung** pro Event
+- **F20 Custom-Reports + Backup/Sync**
 
-Plus aus Wuensche vom 2026-05-02 noch nicht erledigt:
-- **WCA-Profil-Verknuepfung** (F9/F10) — externe API
-- **Backup/Sync** (F20) — Drive oder lokaler Export
-
-Quality-of-Life-Restposten:
-- **Outlier-Schwellen cube-spezifisch** (z.B. 2x2 grosszuegiger als 3x3)
-- **Trends-Chart Y-Achse** auto-zoom (bei sehr kurzen Cubes wie 2x2 ist
-  derzeit der Massstab unguenstig)
+Plus offene Wuensche:
+- **WCA-Profil-Verknuepfung** (F9/F10) — externe API, niedrige Prio
+- **Outlier-Schwellen cube-spezifisch** (2x2 grosszuegiger als 3x3)
 - **Cube_type editierbar** in der Liste (derzeit read-only)
+- **„Into Cube"-Klaerung** beim Phase-5-Bau (siehe Seed-doku)
+- **Bundle-Splitting** fuer Recharts (heute ~200kB gzipped, koennte
+  mit code-splitting halbiert werden)
 
 ---
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-3-Features gemerged)
-- **Tags:** `v0.0`, `v0.1`, `v0.2`, **`v0.3`** (aktuell)
-- **Tests:** 91 backend + 55 frontend = **146 gruen**
+- **Branch:** `main` (sauber, alle Phase-4-Features gemerged)
+- **Tags:** `v0.0`, `v0.1`, `v0.2`, `v0.3`, **`v0.4`** (aktuell)
+- **Tests:** 91 backend + 68 frontend = **159 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber
 - **Build:** `npm run build` clean (Bundle ~200kB gzipped wegen Recharts)
 - **DB:** `backend/data/solves.db` mit 6202 Solves + 22 Sessions +
   13 Cube-Types
-- **Phase-3-Highlights aus Live-Daten:** Form-Faktor v2 zeigt jetzt
-  echte Tagesform statt Lernkurve. Verbesserungs-Trend pro Cube
-  (letzte 50 vs davor 50). Reminder-Card flaggt vergessene Cubes.
+- **Phase-4-Highlights:** 3-Tab-Architektur, BigTimerInput mit text-7xl
+  Eingabe + auto-focus, Form-vergleich fuer alle ao*, Y-Achse smart-skaliert,
+  einheitliche grosse Schriften ueberall, Dead-Code (SolveForm,
+  TodayWeekCard) entfernt.
 
 ---
 
@@ -135,8 +146,10 @@ Quality-of-Life-Restposten:
 ```
 cubetracker/
 ├── CLAUDE.md                  # Disziplin, Tech-Stack, Branching
-├── ROADMAP.md                 # Phase 1-3 done, Phase 4 pending
+├── ROADMAP.md                 # Phase 1-4 done, Phase 5 pending
 ├── NEXT_SESSION.md            # diese Datei
+├── docs/
+│   └── hardware-inventory-seed.md  # Phase-5-Seed
 ├── backend/
 │   ├── api/
 │   │   ├── solves.py          # CRUD-Endpoints (cap le=100k)
@@ -151,26 +164,30 @@ cubetracker/
 │   └── data/solves.db         # SQLite mit 6202 Solves
 └── frontend/
     └── src/
-        ├── App.tsx                            # Layout + cubeFilter-State
+        ├── App.tsx                            # Tab-Routing + State
         ├── components/
+        │   ├── TabBar.tsx                     # 3 Modi (Phase 4)
         │   ├── SessionSwitcher.tsx            # F4
         │   ├── ImportPanel.tsx                # F4
-        │   ├── SolveForm.tsx                  # F3 (mit Stackmat-Parser)
-        │   ├── SolveList.tsx                  # F3+F5+F5.1+F7 (Inline-Edit)
-        │   ├── StatsCard.tsx                  # F5
-        │   ├── TrendsChart.tsx                # F6 (Phase 2)
-        │   ├── HistogramChart.tsx             # F6 (Phase 2)
-        │   ├── OutlierCard.tsx                # F7 outlier (Phase 2)
+        │   ├── BigTimerInput.tsx              # TIMER-Tab Eingabe (Phase 4)
+        │   ├── LastSolvesPreview.tsx          # TIMER-Tab Live-card
+        │   ├── ActivityCard.tsx               # DASHBOARD Today/Week
+        │   ├── ReminderCard.tsx               # F13 + emptyMode
         │   ├── MultiCubeCompareCard.tsx       # F11 + FF2 + F12-Trend
-        │   ├── ReminderCard.tsx               # F13 (Phase 3)
-        │   └── TodayWeekCard.tsx              # F15 (Phase 3)
+        │   ├── StatsCard.tsx                  # F5
+        │   ├── AnalyseFilterBar.tsx           # ANALYSE Cube-Filter
+        │   ├── TrendsChart.tsx                # F6 + Y-Achsen-Smart (Phase 4)
+        │   ├── HistogramChart.tsx             # F6 (Phase 2)
+        │   ├── OutlierCard.tsx                # F7 outlier + sessionId
+        │   └── SolveList.tsx                  # F3+F5+F5.1+F7 (Inline-Edit)
         └── lib/
             ├── api.ts             # axios + tanstack-query Hooks
             ├── format.ts          # Zeit-Format + Cube-Liste + Stackmat-Parser
             ├── types.ts           # Solve, Session
             ├── rolling.ts         # WCA-Trimmed-Mean (TS-Port von calc.py)
             ├── histogram.ts       # Bin-Berechnung + Sturges
-            └── outliers.ts        # Cube-spezifische Outlier-Erkennung
+            ├── outliers.ts        # Cube-spezifische Outlier-Erkennung
+            └── chart-utils.ts     # Y-Domain (Phase 4)
 ```
 
 ---

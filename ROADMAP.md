@@ -120,36 +120,67 @@ User-Wuensche vom 2026-05-02 + Phase-2-Befunde:
   - Nutzt existing `parseTimeInput` → akzeptiert csTimer-Stackmat
     Format wie im SolveForm**
 
-## Phase 4 — Hardware-Tracking + Performance-Vergleich (5, Tag `v0.4`)
+## Phase 4 — Visualisierungs-Refactor + UX-Polish (Tag `v0.4`) ✅
 
-NEU mit User-Wuenschen vom 2026-05-02:
+Neudefinition 2026-05-03: ursprunglich „Hardware-Tracking", aber im
+realen Use zeigte sich vor Hardware ein viel groesseres UX-Problem:
+die App war zu dicht, zu klein, zu eindimensional fuer die drei
+realen Nutzungs-Modi (Solving, Live, Analyse). Hardware-Inventar
+ist parkt fuer Phase 5.
 
-- [ ] **F16: Hardware-Inventar**
-  - Wuerfel-Modelle (z.B. MGC v3, RS3M 2020, GAN 13, etc.)
-  - Pro Modell: Cube-Type, Anschaffungsdatum, Notizen
-  - CRUD-API + Frontend-Liste
-- [ ] **F17: Hardware-Tracking pro Solve**
-  - `hardware_id` FK aktivieren (Migration)
-  - Frontend: bei Solve-Eintrag optional Wuerfel auswaehlen
-  - „Aktiver Wuerfel pro Cube-Type"-Default-Setting
+- [x] **A: Y-Achsen smart-skaliert + manuell** ✅ done
+  - `lib/chart-utils.ts` mit `computeYDomain` (P2..P98 + Padding)
+  - manuelle min/max-Inputs ueber TrendsChart, Reset bei Filter-Wechsel
+  - 13 unit-tests
+- [x] **B: Tab-Routing** ✅ done
+  - `TabBar` (3 Tabs gross, lila aktiv-state, h-14)
+  - 3 Modi: TIMER / DASHBOARD / ANALYSE
+  - SessionSwitcher in Header gehoben (App-weit)
+  - localStorage-persistenz fuer Tab-Wahl
+- [x] **C: TIMER-Tab Redesign** ✅ done
+  - `BigTimerInput`: text-7xl/5rem zentrale Eingabe, auto-focus +
+    auto-re-focus, csTimer-stackmat-format
+  - `LastSolvesPreview`: Live-card (letzter solve text-4xl, ao5/ao12
+    text-3xl, form-vergleich vs window) + mini-list mit quick-delete
+- [x] **D: DASHBOARD-Tab Polish** ✅ done
+  - 3-Spalten-Top: ActivityCard (Heute) + ActivityCard (Woche) +
+    ReminderCard
+  - MultiCube-Vergleich + StatsCard auf voller Breite
+  - groessere Zahlen (text-5xl Counts)
+- [x] **E: ANALYSE-Tab Polish** ✅ done
+  - `AnalyseFilterBar` zentralisiert Cube-Filter
+  - TrendsChart full-width
+  - HistogramChart (2/3) + OutlierCard (1/3) nebeneinander
+  - SolveList full-width mit inline-edit
+  - Stats + Import 1/2 + 1/2 unten
+- [x] **F: Globaler Font + Padding Pass + Cleanup** ✅ done
+  - einheitliche Stufung (h2 2xl, h3 xl, body base, sub sm)
+  - Card-padding p-5 -> p-6
+  - dead code entfernt (SolveForm + TodayWeekCard)
+- [x] **Bonus tweaks aus user-feedback** ✅ done
+  - OutlierCard akzeptiert sessionId-prop
+  - Mini-Liste delete pro Solve
+  - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
+    (letzte 100/500/alle)
+
+## Phase 5 — Hardware-Tracking (verschoben aus urspruenglicher Phase 4)
+
+Seed-Daten aus 2026-05-03 user-eingabe liegen in
+`docs/hardware-inventory-seed.md` (35 physische Cubes ueber 11 Cube-Types).
+
+- [ ] **F16: Hardware-Inventar** (CRUD)
+- [ ] **F17: Hardware-Tracking pro Solve** (FK aktivieren, default per cube_type)
 - [ ] **F18: Hardware-Performance-Vergleich**
-  - „Mit MGC bist du im Schnitt 0.8s schneller als mit RS3M auf 3x3"
-  - Pro Cube-Type: Avg + Best pro Hardware-Modell
-  - Visualisierung als Vergleichs-Chart
 - [ ] **F19: Aktive-Hardware-Empfehlung pro Event**
-  - „Fuer 3x3-Race nimm aktuell MGC" (basierend auf Avg5/Avg12 der letzten Solves)
-  - Pro Cube-Type ein Recommend-Widget
 - [ ] **F20: Custom-Reports + Backup/Sync**
-  - Export-Reports nach Zeitraum, Cube-Type, Hardware
-  - Backup als JSON/SQLite-Dump
-  - Optional Cloud-Sync (Drive)
 
 ## Status-Tracking
 
 - ✅ Phase 1 MVP: **fertig** (5/5 Features, Tag `v0.1`)
 - ✅ Phase 2: **fertig** (Charts + Outlier + Multi-Cube, Tag `v0.2`)
 - ✅ Phase 3: **fertig** (Coaching + Insights + Inline-Edit, Tag `v0.3`)
-- ⏸ Phase 4: pending (Hardware-Tracking)
+- ✅ Phase 4: **fertig** (Visualisierungs-Refactor + UX-Polish, Tag `v0.4`)
+- ⏸ Phase 5: pending (Hardware-Tracking, Seed in `docs/`)
 
 ## Tags
 
@@ -160,3 +191,5 @@ NEU mit User-Wuenschen vom 2026-05-02:
   Outlier-Helper, Multi-Cube-Vergleich
 - `v0.3` — Phase 3: Form-Faktor v2, Tag/Wochen-Stats,
   Verbesserungs-Tracking, Trainings-Reminder, Inline-Edit
+- `v0.4` — Phase 4: 3-Tab-Architektur, Y-Achse smart, BigTimerInput,
+  Form-Vergleich, einheitliche Schriftgroessen + Padding
