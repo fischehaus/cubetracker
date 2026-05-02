@@ -3,8 +3,9 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-02, abends. Phase 1 MVP fertig, Tag `v0.1`
-> gesetzt. User wollte App vor naechstem Feature anschauen.
+> **Letzter Stand:** 2026-05-03 nachts. Phase 2 fertig, Tag `v0.2`
+> gesetzt. User hat F11 (Multi-Cube-Vergleich) live gesehen — naechster
+> Schritt offen.
 
 ---
 
@@ -37,66 +38,71 @@ Du musst beim naechsten Mal:
 
 ## Was beim App-Walkthrough zu pruefen ist
 
-### Funktionale Checks (sollten alle gruen sein)
+### Funktionale Checks (Phase 2 neu)
 
-- [ ] **Backend-Badge** oben rechts zeigt „Backend v0.1.0" gruen
-- [ ] **Solves-Liste** zeigt 6202 Solves (paginiert auf letzte 100)
-- [ ] **Cube-Filter-Dropdown** rechts oben in der Liste — Auswahl
-      „3x3" filtert sowohl Liste ALS AUCH StatsCard links
-- [ ] **Session-Switcher** links oben — Auswahl filtert Liste + Stats
-- [ ] **PB-Marker** beim besten Solve: ★ + goldener Hintergrund + gelber
-      Zeitwert (z.B. bei Cube=3x3 sollte 7.85s markiert sein)
-- [ ] **+2-Toggle** auf einem normalen Solve klicken → Zeit aendert sich
-      um +2s, Best-Marker bleibt korrekt
-- [ ] **DNF-Toggle** klicken → Zeit zeigt „DNF", Solve faellt aus Stats
-      raus
-- [ ] **Neuen Solve eintragen** (Form links) — taucht oben in Liste
-      auf, Stats aktualisieren sich
-- [ ] **Solve loeschen** (🗑) — verschwindet, Stats aktualisieren sich
-- [ ] **csTimer-Re-Import** mit derselben Datei → 0 neue, 6201 dupliziert
+- [ ] **MultiCubeCompareCard** ganz oben in der Hauptspalte: ranked Liste
+      aller Cubes mit Form-Faktor (▼ gruen / ▲ rot)
+- [ ] **TrendsChart** darunter: ao5/ao12/ao100-Linien, Window-Selector
+      (100…Alle), Singles optional
+- [ ] **HistogramChart** darunter: Verteilung mit Auto-Bin-Breite
+- [ ] **OutlierCard** im Aside: amber-farben, listet verdaechtige
+      Solves pro Cube mit Quick-Actions DNF/Loeschen
+- [ ] **Limit-Selector** in SolveList (50/100/200/500/1000/Alle)
+- [ ] **ao5/ao12 als Sub-Zeile** unter jeder Solve-Zeit
+- [ ] **Datum als Tooltip** auf der Solve-Zeit
+- [ ] **csTimer-Stackmat-Eingabe**: `945` -> 9.45s, `15102` -> 1:51.02
+- [ ] **Sofort-Update**: +2/DNF/Loeschen/Create aktualisiert ALLE
+      sichtbaren Werte (Stats, Charts, MultiCube, Outlier) sofort
 
-### Was du eventuell vermissen wirst (potentielle naechste Features)
+### Funktionale Checks (Phase 1 — sollten weiterhin gruen sein)
 
-- **Keine Charts** — nur Zahlen. Histogramm + Trends-Verlauf kommen in
-  Phase 2.
-- **Keine Inline-Edits** fuer Scramble/Notes — nur +2/DNF/Loeschen.
-- **Pagination ist hart auf 100** — keine „mehr laden"-Button.
-- **Keine Tag/Wochen-Aggregation** — z.B. „heute 47 Solves".
-- **Kein Multi-Cube-Vergleich** — Hauptwunsch vom 2026-05-02, kommt in
-  Phase 2/3.
-- **Keine Suche/Filter nach Datum** oder Notiz-Inhalt.
-- **Cube-Filter ist Dropdown mit fixer Liste** (`COMMON_CUBE_TYPES`) —
-  exotische Cube-Types aus deinem Import (z.B. „Gear", „Ivy") fehlen
-  evtl. im Dropdown, sind aber in der DB.
+- [ ] Backend-Badge gruen
+- [ ] Cube-Filter-Dropdown filtert Liste + Stats + Charts synchron
+- [ ] Session-Switcher filtert alles synchron
+- [ ] PB-Marker (★ + gold) auf der besten Zeit des aktuellen Filters
+- [ ] csTimer-Re-Import: alle als Duplikate erkannt
 
-### Bekannte Schoenheits-Aspekte (kein Bug, nur Beobachtung)
+### Was du jetzt eventuell vermissen wirst (Phase-3-Kandidaten)
 
-- Stats-Card unten links wirkt evtl. „leer" bei wenigen Solves — bei
-  Filter auf seltene Cube-Types (z.B. „7x7" mit nur 9 Solves) sind
-  Avg100 = null.
-- Zeit-Formatierung im Form: „12.34" oder „1:23.45" — beides
-  akzeptiert.
+- **Form-Faktor fuer Lernkurve verzerrt**: bei kontinuierlicher
+  Verbesserung ist current_ao5 immer < mean — das misst eher
+  Lernkurve als Tagesform. Alternative: Bezug auf letzte 100 Solves.
+- **Keine Inline-Edits** fuer Scramble/Notes/time_ms
+- **Keine Tag/Wochen-Aggregation** („heute 47 Solves")
+- **Kein Trainings-Reminder** (lange-nicht-gemacht-Banner)
+- **Kein Hardware-Tracking** (Welcher Wuerfel war benutzt?)
+- **WCA-Profil-Verknuepfung** ist verschoben — nicht in Roadmap-
+  Hochprio.
 
 ---
 
 ## Was als naechstes ansteht (nach App-Walkthrough)
 
-User-Entscheidung steht aus. Letzter Vorschlag von Claude:
+Phase 2 ist mit Tag `v0.2` abgeschlossen. User hat alle Komponenten live
+gesehen und bestaetigt, dass sie funktionieren.
 
-**Empfehlung:** Phase 2 als „Visualisierung" definieren statt urspr.
-WCA-Integration. Konkret:
+**Offene Diskussionspunkte aus Phase-2-Use:**
+1. **Form-Faktor-Metrik** in MultiCubeCompareCard misst eher Lernkurve
+   als Tagesform — bei dauerhaft besser werdenden Cubern ist
+   current_ao5 IMMER < gesamt-mean. Eventuell auf „letzte 100 Solves
+   als Bezug" umstellen.
+2. **Outliers haben dem User noch nicht alle Beweggrunde** — Verdacht
+   bei 2x2-Solves um 0.67-0.78s ist echt grenzwertig (WR 0.43s).
+   Schwellwerte ggf. cube-spezifisch definieren.
 
-1. **F8 Trends-Chart** (Avg5/12/100-Verlauf ueber Zeit, Recharts) —
-   nutzt 6202 Datenpunkte, hoher Wow-Faktor.
-2. **F-neu Histogramm** (Solve-Zeit-Verteilung) — zeigt
-   Form-Konsistenz.
-3. **F11 Multi-Cube-Vergleich** („wo bist du gerade am besten?") —
-   expliziter User-Hauptwunsch vom 2026-05-02.
+**Phase-3-Kandidaten (bewusst noch nicht angefangen):**
 
-→ Tag `v0.2` nach diesen drei.
+aus User-Wuenschen vom 2026-05-02:
+- **F12 Verbesserungs-Tracking** — letzte 50 vs. davor pro Cube,
+  „wo wirst du am staerksten besser?"
+- **F13 Trainings-Reminder** — banner bei „lange nicht gemacht"
+- **F14 Sessions** — eigenes Konzept (existiert schon als FK, aber
+  keine eigene UI fuer Trainingsgruppierung)
+- **F15 Tag/Wochen-Statistiken** — „heute 47 Solves, Wochen-Avg 11.2s"
 
-User wollte aber zuerst die App benutzen, um zu sehen, was wirklich
-fehlt. Die obige Reihenfolge kann sich also noch aendern.
+Quality-of-Life-Wuensche:
+- **Inline-Edit** fuer Scramble + Notes + time_ms (F7-Vorzug)
+- **Form-Faktor** alternativ als Bezug auf letzte 100
 
 **Bewusst NICHT als naechstes:**
 - WCA-API-Integration (F9/F10) — externe Abhaengigkeit, hoher Aufwand
@@ -107,17 +113,19 @@ fehlt. Die obige Reihenfolge kann sich also noch aendern.
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Features gemerged)
-- **Tags:** `v0.0` (Skeleton), `v0.1` (MVP komplett)
-- **Letzter Commit:** `49ff1f9` — merge feature/f5-stats into main
-- **Tests:** 77/77 gruen (`backend/.venv/Scripts/python.exe -m pytest -q`)
+- **Branch:** `main` (sauber, alle Phase-2-Features gemerged)
+- **Tags:** `v0.0`, `v0.1`, **`v0.2`** (aktuell)
+- **Tests:** 82 backend + 55 frontend = **137 gruen**
+  - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
+  - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber
-- **Build:** `npm run build` im frontend laeuft sauber durch
+- **Build:** `npm run build` clean (Bundle ~200kB gzipped wegen Recharts)
 - **DB:** `backend/data/solves.db` mit 6202 Solves + 22 Sessions +
   13 Cube-Types (3x3: 1818, 2x2: 1505, Skewb: 741, Pyraminx: 629,
   OH: 592, Square-1: 252, 4x4: 235, Clock: 131, Gear: 119, 5x5: 97,
   Ivy: 44, Megaminx: 30, 7x7: 9)
-- **Live-PBs:** 3x3 PB 7.85s, current Avg100 10.89s, best Avg100 10.85s
+- **Live-Form (von by-cube):** Square-1 aktuell beste Form (22% des
+  Schnitts), gefolgt von Gear, dann 3x3
 
 ---
 
@@ -126,39 +134,41 @@ fehlt. Die obige Reihenfolge kann sich also noch aendern.
 ```
 cubetracker/
 ├── CLAUDE.md                  # Disziplin, Tech-Stack, Branching
-├── ROADMAP.md                 # F1-F20, Phase 1 = done, Rest pending
+├── ROADMAP.md                 # Phase 1 + 2 done, Phase 3-4 pending
 ├── NEXT_SESSION.md            # diese Datei
 ├── backend/
 │   ├── api/
-│   │   ├── solves.py          # CRUD-Endpoints
+│   │   ├── solves.py          # CRUD-Endpoints (cap le=100k)
 │   │   ├── sessions.py        # GET-Endpoints
-│   │   ├── stats.py           # GET /stats (F5)
+│   │   ├── stats.py           # GET /stats + GET /stats/by-cube (F11)
 │   │   └── import_cstimer.py  # POST /import/cstimer (F4)
 │   ├── stats/
 │   │   └── calc.py            # WCA-Trimmed-Mean, pure functions (F5)
-│   ├── importers/
-│   │   └── cstimer.py         # JSON-Parser + Cube-Type-Mapping (F4)
-│   ├── db/
-│   │   ├── models.py          # Solve + Session
-│   │   └── session.py         # SQLAlchemy-Setup
+│   ├── importers/cstimer.py   # JSON-Parser (F4)
+│   ├── db/                    # models, schemas, database
 │   ├── alembic/               # Migrations
-│   ├── tests/                 # 77 Tests
-│   ├── data/solves.db         # SQLite-DB mit echten Daten
-│   └── main.py                # FastAPI-App
+│   ├── tests/                 # 82 Tests
+│   └── data/solves.db         # SQLite mit 6202 Solves
 └── frontend/
     └── src/
-        ├── App.tsx                       # MainLayout + cubeFilter-State
+        ├── App.tsx                            # Layout + cubeFilter-State
         ├── components/
-        │   ├── HealthBadge.tsx           # (in App.tsx inline)
-        │   ├── SessionSwitcher.tsx       # F4
-        │   ├── ImportPanel.tsx           # F4
-        │   ├── SolveForm.tsx             # F3
-        │   ├── SolveList.tsx             # F3 + PB-Marker (F5)
-        │   └── StatsCard.tsx             # F5
+        │   ├── SessionSwitcher.tsx            # F4
+        │   ├── ImportPanel.tsx                # F4
+        │   ├── SolveForm.tsx                  # F3 (mit Stackmat-Parser)
+        │   ├── SolveList.tsx                  # F3+F5+F5.1 (limit, ao5/12)
+        │   ├── StatsCard.tsx                  # F5
+        │   ├── TrendsChart.tsx                # F6 (Phase 2)
+        │   ├── HistogramChart.tsx             # F6 (Phase 2)
+        │   ├── OutlierCard.tsx                # F7 (Phase 2)
+        │   └── MultiCubeCompareCard.tsx       # F11 (Phase 2)
         └── lib/
-            ├── api.ts                    # axios + tanstack-query Hooks
-            ├── format.ts                 # Zeit-Format + Cube-Liste
-            └── types.ts                  # Solve, Session, etc.
+            ├── api.ts             # axios + tanstack-query Hooks
+            ├── format.ts          # Zeit-Format + Cube-Liste + Stackmat-Parser
+            ├── types.ts           # Solve, Session
+            ├── rolling.ts         # WCA-Trimmed-Mean (TS-Port von calc.py)
+            ├── histogram.ts       # Bin-Berechnung + Sturges
+            └── outliers.ts        # Cube-spezifische Outlier-Erkennung
 ```
 
 ---
