@@ -299,3 +299,150 @@ def test_temporal_per_cube_breakdown(client, db):
     data = r.json()
     assert data["today"]["count"] == 4
     assert data["today"]["count_per_cube"] == {"3x3": 2, "2x2": 2}
+
+
+# ============================================================
+# /stats/activity — Aggregierte Counts ueber Zeit
+# ============================================================
+
+
+def test_activity_empty_range(client):
+    r = client.get("/stats/activity?days=7&granularity=day")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["granularity"] == "day"
+    assert len(data["buckets"]) == 7  # gap-filled, alle 7 Tage da
+    assert all(b["count"] == 0 for b in data["buckets"])
+    assert data["total_count"] == 0
+
+
+def test_activity_day_granularity_gap_filled(client, db):
+    """3 Solves heute, 0 Solves gestern → beide Buckets im Output, einer mit count=0."""
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+
+    from db.models import Solve
+
+    now = _dt.now(_UTC).replace(tzinfo=None)
+    for t in [10000, 11000, 12000]:
+        db.add(Solve(time_ms=t, cube_type="3x3", timestamp=now))
+    db.commit()
+
+    r = client.get("/stats/activity?days=2&granularity=day")
+    data = r.json()
+    assert len(data["buckets"]) == 2
+    # Letzter Bucket = heute, sollte 3 Solves haben
+    today_bucket = data["buckets"][-1]
+    assert today_bucket["count"] == 3
+    assert today_bucket["count_valid"] == 3
+    # Gestern leer
+    assert data["buckets"][0]["count"] == 0
+    assert data["total_count"] == 3
+
+
+def test_activity_week_granularity(client, db):
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+    from datetime import timedelta as _td
+
+    from db.models import Solve
+
+    now = _dt.now(_UTC).replace(tzinfo=None)
+    # 2 Solves diese Woche, 1 Solve vor 8 Tagen (vorletzte Woche oder so)
+    db.add(Solve(time_ms=10000, cube_type="3x3", timestamp=now))
+    db.add(Solve(time_ms=11000, cube_type="3x3", timestamp=now))
+    db.add(Solve(time_ms=12000, cube_type="3x3", timestamp=now - _td(days=10)))
+    db.commit()
+
+    r = client.get("/stats/activity?days=21&granularity=week")
+    data = r.json()
+    assert data["granularity"] == "week"
+    # Buckets >= 3 Wochen ueber 21 Tage (kann je nach Wochentag variieren)
+    assert len(data["buckets"]) >= 3
+    assert data["total_count"] == 3
+    # Mindestens ein Bucket hat 2 Solves (diese Woche)
+    counts = sorted(b["count"] for b in data["buckets"])
+    assert counts[-1] == 2  # diese Woche
+
+
+def test_activity_month_granularity(client, db):
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+
+    from db.models import Solve
+
+    now = _dt.now(_UTC).replace(tzinfo=None)
+    for t in [10000, 11000, 12000]:
+        db.add(Solve(time_ms=t, cube_type="3x3", timestamp=now))
+    db.commit()
+
+    r = client.get("/stats/activity?days=90&granularity=month")
+    data = r.json()
+    assert data["granularity"] == "month"
+    # Mind. 3-4 Monatsbuckets bei 90 Tagen Lookback
+    assert 3 <= len(data["buckets"]) <= 5
+    # Letzter Monat hat unsere Solves
+    assert data["buckets"][-1]["count"] == 3
+    # Period-format YYYY-MM
+    import re
+
+    assert re.match(r"\d{4}-\d{2}", data["buckets"][-1]["period"])
+
+
+def test_activity_dnf_separated(client, db):
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+
+    from db.models import Solve
+
+    now = _dt.now(_UTC).replace(tzinfo=None)
+    db.add(Solve(time_ms=10000, cube_type="3x3", timestamp=now))
+    db.add(Solve(time_ms=11000, cube_type="3x3", timestamp=now, dnf=True))
+    db.commit()
+
+    r = client.get("/stats/activity?days=1&granularity=day")
+    data = r.json()
+    today_bucket = data["buckets"][-1]
+    assert today_bucket["count"] == 2
+    assert today_bucket["count_valid"] == 1
+    assert today_bucket["count_dnf"] == 1
+
+
+def test_activity_filter_cube_type(client, db):
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+
+    from db.models import Solve
+
+    now = _dt.now(_UTC).replace(tzinfo=None)
+    db.add(Solve(time_ms=10000, cube_type="3x3", timestamp=now))
+    db.add(Solve(time_ms=3000, cube_type="2x2", timestamp=now))
+    db.commit()
+
+    r = client.get("/stats/activity?days=1&granularity=day&cube_type=3x3")
+    assert r.json()["total_count"] == 1
+
+
+def test_activity_filter_session(client, db):
+    from datetime import UTC as _UTC
+    from datetime import datetime as _dt
+
+    from db.models import Session as DbSession
+    from db.models import Solve
+
+    s = DbSession(name="A")
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    now = _dt.now(_UTC).replace(tzinfo=None)
+    db.add(Solve(time_ms=10000, cube_type="3x3", session_id=s.id, timestamp=now))
+    db.add(Solve(time_ms=11000, cube_type="3x3", timestamp=now))  # andere session
+    db.commit()
+
+    r = client.get(f"/stats/activity?days=1&granularity=day&session_id={s.id}")
+    assert r.json()["total_count"] == 1
+
+
+def test_activity_invalid_granularity_rejected(client):
+    r = client.get("/stats/activity?days=7&granularity=year")
+    assert r.status_code == 422  # Pydantic-Validation

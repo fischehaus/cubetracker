@@ -8,12 +8,15 @@ Endpoints:
   Liefert form_factor (lifetime + recent), improvement_ms (letzte 50
   vs davor), last_solve_at + days_since_last (fuer Trainings-Reminder).
 - GET /stats/temporal → Aktivitaet heute + diese Woche.
+- GET /stats/activity → Aggregierte Solve-Counts pro Periode
+  (day/week/month) ueber einen waehlbaren Zeitraum. Gap-gefuellt,
+  damit Charts kontinuierliche x-Achse haben.
 """
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
-from typing import Any
+from datetime import UTC, date, datetime, timedelta
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
@@ -261,4 +264,121 @@ def get_temporal_stats(
         "today": aggregate(today_solves),
         "week": aggregate(week_solves),
         "filter": {"session_id": session_id},
+    }
+
+
+# ============================================================
+# /stats/activity — Aggregierte Solve-Counts ueber Zeit
+# ============================================================
+
+Granularity = Literal["day", "week", "month"]
+
+
+def _bucket_key_and_label(dt: datetime, gran: Granularity) -> tuple[Any, str]:
+    """Bucket-Key (sortierbar, hashbar) + Label fuer einen Solve-Zeitstempel.
+
+    - day:   key = date, label = ISO-date "YYYY-MM-DD"
+    - week:  key = (iso_year, iso_week), label = "YYYY-Www"
+    - month: key = (year, month), label = "YYYY-MM"
+    """
+    if gran == "day":
+        d = dt.date()
+        return d, d.isoformat()
+    if gran == "week":
+        y, w, _ = dt.isocalendar()
+        return (y, w), f"{y}-W{w:02d}"
+    return (dt.year, dt.month), f"{dt.year}-{dt.month:02d}"
+
+
+def _all_buckets_in_range(from_d: date, to_d: date, gran: Granularity) -> list[tuple[Any, str]]:
+    """Alle Bucket-Keys im Range, fuer Gap-Filling (auch leere Tage/Wochen/Monate)."""
+    out: list[tuple[Any, str]] = []
+    if gran == "day":
+        d = from_d
+        while d <= to_d:
+            out.append((d, d.isoformat()))
+            d += timedelta(days=1)
+        return out
+    if gran == "week":
+        # Wir iterieren wochenweise von der ISO-Woche von from_d bis to_d.
+        cur_y, cur_w, _ = from_d.isocalendar()
+        end_y, end_w, _ = to_d.isocalendar()
+        while (cur_y, cur_w) <= (end_y, end_w):
+            out.append(((cur_y, cur_w), f"{cur_y}-W{cur_w:02d}"))
+            # Naechste Woche: spring 7 Tage vom Montag dieser Woche
+            mon = date.fromisocalendar(cur_y, cur_w, 1)
+            nxt = mon + timedelta(days=7)
+            cur_y, cur_w, _ = nxt.isocalendar()
+        return out
+    # month
+    cur_y, cur_m = from_d.year, from_d.month
+    end_y, end_m = to_d.year, to_d.month
+    while (cur_y, cur_m) <= (end_y, end_m):
+        out.append(((cur_y, cur_m), f"{cur_y}-{cur_m:02d}"))
+        cur_m += 1
+        if cur_m > 12:
+            cur_m = 1
+            cur_y += 1
+    return out
+
+
+@router.get("/activity")
+def get_activity(
+    granularity: Granularity = Query("day", description="day | week | month"),
+    days: int = Query(30, ge=1, le=10000, description="Lookback in Tagen (max 10000 ~ 27 Jahre)"),
+    cube_type: str | None = Query(default=None),
+    session_id: int | None = Query(default=None),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Aggregierte Solve-Counts pro Periode ueber den gewaehlten Zeitraum.
+
+    Gap-gefuellt: leere Tage/Wochen/Monate werden mit count=0 zurueckgegeben,
+    damit Bar-Charts eine kontinuierliche x-Achse haben.
+    """
+    # Naive UTC fuer DB-Vergleich (DB-Konvention)
+    now = datetime.now(UTC).replace(tzinfo=None)
+    to_d = now.date()
+    from_d = to_d - timedelta(days=days - 1)
+    from_dt = datetime(from_d.year, from_d.month, from_d.day)
+
+    stmt = select(Solve).where(Solve.timestamp >= from_dt)
+    if cube_type is not None:
+        stmt = stmt.where(Solve.cube_type == cube_type)
+    if session_id is not None:
+        stmt = stmt.where(Solve.session_id == session_id)
+    rows = db.scalars(stmt).all()
+
+    # Pre-fill alle Buckets mit 0
+    all_buckets = _all_buckets_in_range(from_d, to_d, granularity)
+    counts: dict[Any, dict[str, int]] = {
+        key: {"count": 0, "count_valid": 0, "count_dnf": 0} for key, _ in all_buckets
+    }
+
+    for s in rows:
+        key, _ = _bucket_key_and_label(s.timestamp, granularity)
+        if key in counts:  # Sicherheits-check (sollte immer drin sein)
+            counts[key]["count"] += 1
+            if s.dnf:
+                counts[key]["count_dnf"] += 1
+            else:
+                counts[key]["count_valid"] += 1
+
+    buckets = [
+        {
+            "period": label,
+            "count": counts[key]["count"],
+            "count_valid": counts[key]["count_valid"],
+            "count_dnf": counts[key]["count_dnf"],
+        }
+        for key, label in all_buckets
+    ]
+    total = sum(b["count"] for b in buckets)
+
+    return {
+        "granularity": granularity,
+        "from": from_d.isoformat(),
+        "to": to_d.isoformat(),
+        "buckets": buckets,
+        "total_count": total,
+        "filter": {"cube_type": cube_type, "session_id": session_id},
     }

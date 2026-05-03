@@ -44,12 +44,13 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
     },
     onSuccess: () => {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard
-      // veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
+      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard,
+      // ActivityChart veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
+      qc.invalidateQueries({ queryKey: ["stats-activity"] });
     },
   });
 }
@@ -67,12 +68,13 @@ export function useUpdateSolve(): UseMutationResult<
     },
     onSuccess: () => {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard
-      // veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
+      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard,
+      // ActivityChart veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
+      qc.invalidateQueries({ queryKey: ["stats-activity"] });
     },
   });
 }
@@ -85,12 +87,13 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
     },
     onSuccess: () => {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard
-      // veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
+      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard,
+      // ActivityChart veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
+      qc.invalidateQueries({ queryKey: ["stats-activity"] });
     },
   });
 }
@@ -202,6 +205,58 @@ export function useTemporalStats(
     queryKey: ["stats-temporal", params],
     queryFn: async (): Promise<TemporalResponse> => {
       const r = await api.get<TemporalResponse>("/stats/temporal", { params });
+      return r.data;
+    },
+  });
+}
+
+// ============================================================
+// Activity (aggregierte Solve-Counts ueber Zeit, day/week/month)
+// ============================================================
+
+export type ActivityGranularity = "day" | "week" | "month";
+
+export interface ActivityBucket {
+  /** Label-String, je nach Granularitaet:
+   *   day:   "YYYY-MM-DD"
+   *   week:  "YYYY-Www"
+   *   month: "YYYY-MM"
+   */
+  period: string;
+  count: number;
+  count_valid: number;
+  count_dnf: number;
+}
+
+export interface ActivityResponse {
+  granularity: ActivityGranularity;
+  from: string; // ISO date
+  to: string; // ISO date
+  buckets: ActivityBucket[];
+  total_count: number;
+  filter: { cube_type: string | null; session_id: number | null };
+}
+
+export interface ActivityParams {
+  granularity: ActivityGranularity;
+  days: number;
+  cube_type?: string;
+  session_id?: number | null;
+}
+
+export function useActivity(p: ActivityParams): UseQueryResult<ActivityResponse> {
+  const params: Record<string, string | number> = {
+    granularity: p.granularity,
+    days: p.days,
+  };
+  if (p.cube_type) params.cube_type = p.cube_type;
+  if (p.session_id !== null && p.session_id !== undefined) {
+    params.session_id = p.session_id;
+  }
+  return useQuery({
+    queryKey: ["stats-activity", params],
+    queryFn: async (): Promise<ActivityResponse> => {
+      const r = await api.get<ActivityResponse>("/stats/activity", { params });
       return r.data;
     },
   });

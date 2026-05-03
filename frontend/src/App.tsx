@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { api } from "./lib/api";
 import { ActivityCard } from "./components/ActivityCard";
+import { ActivityChart } from "./components/ActivityChart";
 import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
 import { BigTimerInput } from "./components/BigTimerInput";
 import { HistogramChart } from "./components/HistogramChart";
@@ -139,6 +140,8 @@ function AnalyseTab({
       />
 
       <TrendsChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
+
+      <ActivityChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
