@@ -34,11 +34,21 @@
 > - **Datenuebertragung Dev↔Prod via Backup/Restore-Endpoint** (Pflicht
 >   in Phase 9)
 >
-> **Letzter Stand:** 2026-05-03. **Phase 8.5.1 fertig, Tag `v0.15.1`
-> gesetzt.** 4 PB-Pattern-Achievements via chronologisches Tracking:
-> pb_double, pb_synchronized, pb_triple_day, consistency_5_under_ao12.
-> Alle 4 auf Bestand getriggert (jetzt 27 von 35 unlocked). 367 Tests
-> gruen (255 backend + 112 frontend).
+> **Letzter Stand:** 2026-05-03. **Phase 8.3.1 fertig, Tag `v0.16`
+> gesetzt.** OLL-Visualisierung im Trainer (alle 57 Cases) — User
+> hat in einem anderen Chat die PNGs generiert, ich habe sie nur
+> integriert. PLL fehlt noch (User-Frage offen).
+>
+> **Phase 9 ist WIP auf branch `feature/9-distribution`** —
+> Restore-Endpoint ist geschrieben (commit `142ff45`), Rest pending
+> (DB-Pfad-Konfig, StaticFiles, PyInstaller, Inno-Setup).
+> Bei Wiederaufnahme einfach `git checkout feature/9-distribution`
+> und ab restore-Endpoint-Tests weitermachen.
+>
+> **Phase 8.5.1 (Tag `v0.15.1`)** war 4 PB-Pattern-Achievements via
+> chronologisches Tracking: pb_double, pb_synchronized, pb_triple_day,
+> consistency_5_under_ao12. Alle 4 auf Bestand getriggert (jetzt 27
+> von 35 unlocked). 367 Tests gruen (255 backend + 112 frontend).
 >
 > **Phase 8.5 (Tag `v0.15`)** war 14 neue Volume/Speed/Streak-
 > Achievements + Backfill (6 neu unlocked):
@@ -176,8 +186,13 @@ Phase 8 + 8.1 + 8.2 + 8.3 + 8.4 + 8.5 abgeschlossen. Geplante Reihenfolge:
 - PyInstaller-Bundle, Inno-Setup-Installer
 - Achievement-Trigger nach Import explizit verifizieren
 
-**Optional vor v1.0** (Aufwand ~1 Tag):
-- Phase 8.3.1 — 2D-Algorithm-Visualisierung mit echtem 3x3-Sim
+**Nach v1.0**:
+- Phase 8.3.2 — PLL-Visualisierung (User-Festlegung 2026-05-04:
+  Bilder fuer alle 21 PLLs kommen im naechsten Rollout). Implementierung
+  analog zu OLL: PNGs in src/assets/pll/, lib/pll-images.ts
+  (21 statische Imports), `getPllImage()` in CubeStateView.tsx
+  ergaenzen, evtl. groessere Drill-Bilder weil PLL-Cycle-Diagramme
+  detailreicher sind als OLL-Orientation-Diagramme.
 
 **Nach v1.0**:
 - Phase 11 — WCA-Ranking-Lookup (hardcoded WR-Tabelle, „Top X% weltweit")
@@ -254,8 +269,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-8.5.1-Features gemerged)
-- **Tags:** `v0.0` … `v0.15`, **`v0.15.1`** (aktuell)
+- **Branch:** `main` (sauber, alle Phase-8.3.1-Features gemerged)
+- **Aktive Feature-Branch:** `feature/9-distribution` (WIP, Restore-Endpoint)
+- **Tags:** `v0.0` … `v0.15.1`, **`v0.16`** (aktuell auf main)
 - **Tests:** 255 backend + 112 frontend = **367 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`

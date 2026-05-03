@@ -25,8 +25,9 @@ import {
   scrambleForCase,
 } from "../lib/algs";
 import { formatSolveTime, formatTime, parseTimeInput } from "../lib/format";
-import { useAppSettings } from "../lib/settings";
+import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import type { Solve } from "../lib/types";
+import { CubeStateView } from "./CubeStateView";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
 import type { TimerPenalty } from "../hooks/useSpacebarTimer";
 
@@ -89,10 +90,10 @@ export function AlgTrainerPanel() {
 
       <p className="mb-4 text-sm text-gray-500">{subsetData.name}</p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-        {/* Cases-Liste */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-6">
+        {/* Cases-Liste — User-Wunsch: max 2 Spalten */}
         <div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {subsetData.cases.map((c) => {
               const s = statsMap.get(c.id);
               const isActive = c.id === activeCaseId;
@@ -101,7 +102,7 @@ export function AlgTrainerPanel() {
                   key={c.id}
                   onClick={() => pickCase(c.id)}
                   aria-current={isActive ? "true" : undefined}
-                  className={`text-left rounded border p-2 transition ${
+                  className={`text-left rounded border p-2 transition flex gap-2 items-center ${
                     isActive
                       ? "border-purple-500 bg-purple-500/10"
                       : s
@@ -110,6 +111,8 @@ export function AlgTrainerPanel() {
                   }`}
                   title={c.alg}
                 >
+                  <CubeStateView caseId={c.id} size="small" />
+                  <div className="flex-1 min-w-0">
                   <div
                     className={`text-sm font-semibold ${
                       isActive ? "text-purple-100" : "text-gray-200"
@@ -130,6 +133,7 @@ export function AlgTrainerPanel() {
                       noch nie geuebt
                     </div>
                   )}
+                  </div>
                 </button>
               );
             })}
@@ -248,15 +252,21 @@ function DrillCard({
       <div className="text-xs text-purple-300 uppercase tracking-wide mb-1">
         Drill
       </div>
-      <div className="text-lg font-semibold text-purple-100 mb-3">
-        {caseDef.name}
+      <div className="flex items-center gap-3 mb-3">
+        <CubeStateView caseId={caseDef.id} size="large" />
+        <div className="text-lg font-semibold text-purple-100">
+          {caseDef.name}
+        </div>
       </div>
 
       <div className="rounded border border-gray-700 bg-gray-900/50 p-3 mb-3">
         <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
           Scramble
         </div>
-        <div className="font-mono text-sm text-gray-100 break-words leading-relaxed select-all">
+        <div
+          className="font-mono text-gray-100 break-words leading-relaxed select-all"
+          style={{ fontSize: TIMER_FONT_SCALE[settings.drill_font_size].scramble }}
+        >
           {scramble}
         </div>
       </div>
@@ -268,7 +278,10 @@ function DrillCard({
         {showAlg ? "▼ Algorithmus verbergen" : "▶ Algorithmus zeigen"}
       </button>
       {showAlg && (
-        <div className="rounded border border-gray-700 bg-gray-900/30 p-2 mb-3 font-mono text-xs text-gray-300 break-words">
+        <div
+          className="rounded border border-gray-700 bg-gray-900/30 p-2 mb-3 font-mono text-gray-300 break-words"
+          style={{ fontSize: TIMER_FONT_SCALE[settings.drill_font_size].scramble }}
+        >
           {caseDef.alg}
         </div>
       )}
@@ -280,6 +293,7 @@ function DrillCard({
           phaseNames={settings.phase_names}
           onSave={saveFromSpacebar}
           resetSeed={spacebarResetSeed}
+          fontSizeOverride={settings.drill_font_size}
         />
       ) : (
         <input
@@ -298,7 +312,11 @@ function DrillCard({
           }}
           placeholder="0.00"
           autoFocus
-          className="w-full text-center font-mono bg-transparent border-0 border-b-2 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-2 text-2xl"
+          className="w-full text-center font-mono bg-transparent border-0 border-b-2 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-2"
+          style={{
+            fontSize: TIMER_FONT_SCALE[settings.drill_font_size].timer,
+            lineHeight: 1,
+          }}
         />
       )}
 

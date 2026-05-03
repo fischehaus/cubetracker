@@ -49,13 +49,13 @@ export function SettingsPanel() {
       <Section title="Spacebar-Timer">
         <Toggle
           label="Spacebar-Modus aktivieren"
-          hint="WCA-Standard-Flow: Space halten → loslassen startet, Space druecken stoppt. Klassischer Text-Input bleibt parallel verfuegbar."
+          hint="WCA-Standard-Flow: Space halten → loslassen startet, Space drücken stoppt. Klassischer Text-Input bleibt parallel verfügbar."
           value={settings.spacebar_enabled}
           onChange={(v) => setSettings({ ...settings, spacebar_enabled: v })}
         />
         <NumberField
           label="Hold-Time bevor 'go' (ms)"
-          hint="Wie lange Space gehalten werden muss, bis er gruen wird. WCA-Empfehlung 550ms."
+          hint="Wie lange Space gehalten werden muss, bis er grün wird. WCA-Empfehlung 550ms."
           value={settings.hold_time_ms}
           min={100}
           max={2000}
@@ -83,6 +83,10 @@ export function SettingsPanel() {
             (loslassen startet); +2 ab 15s, DNF ab 17s.<br />
             <strong className="text-gray-300">Pragmatisch:</strong> Single Space (250ms Latenz) startet
             Solve direkt; Double-Tap = Reset; Auto-DNF bei 0.
+            <br />
+            <span className="text-gray-500">
+              Hinweis: dein Cube muss nicht gleichzeitig auf der Tastatur liegen — Pause ist OK.
+            </span>
           </div>
           <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 inline-flex">
             <button
@@ -130,10 +134,10 @@ export function SettingsPanel() {
       </Section>
 
       {/* Multi-Phase-Splits */}
-      <Section title="Multi-Phase-Splits (Variante A)">
+      <Section title="Multi-Phase-Splits">
         <Toggle
           label="Splits aktivieren"
-          hint="Mehrere Spacebar-Presses pro Solve, jeder Press registriert eine Zwischenzeit. Klassische CFOP: Cross / F2L / OLL / PLL."
+          hint="Mehrere Spacebar-Presses pro Solve, jeder Press registriert eine Zwischenzeit. Klassische CFOP-Aufteilung: Cross / F2L / OLL / PLL."
           value={settings.splits_enabled}
           onChange={(v) => setSettings({ ...settings, splits_enabled: v })}
           disabled={!settings.spacebar_enabled}
@@ -166,30 +170,30 @@ export function SettingsPanel() {
         </div>
       </Section>
 
-      {/* Schrift-Groesse Timer + Scramble */}
-      <Section title="Schrift-Groesse (Timer + Scramble)">
+      {/* Schrift-Größe Timer + Scramble */}
+      <Section title="Schrift-Größe — Timer & Scramble">
         <div>
           <div className="text-sm text-gray-300 mb-2">
-            Aenderung wirkt auf TIMER-Eingabefeld und ScrambleCard.
+            Wirkt auf das Eingabefeld im /timer und auf die Scramble-Anzeige.
           </div>
-          <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 inline-flex flex-wrap">
-            {(["sm", "md", "lg", "xl", "xxl"] as TimerFontSize[]).map((fs) => {
-              const active = settings.timer_font_size === fs;
-              return (
-                <button
-                  key={fs}
-                  onClick={() => setSettings({ ...settings, timer_font_size: fs })}
-                  className={`rounded px-3 py-1.5 text-sm font-medium transition ${
-                    active
-                      ? "bg-purple-600 text-white"
-                      : "text-gray-300 hover:bg-gray-700"
-                  }`}
-                >
-                  {FONT_SIZE_LABELS[fs]}
-                </button>
-              );
-            })}
+          <FontSizeToggle
+            value={settings.timer_font_size}
+            onChange={(fs) => setSettings({ ...settings, timer_font_size: fs })}
+          />
+        </div>
+      </Section>
+
+      {/* Schrift-Größe Drill-Fenster (User-Wunsch) */}
+      <Section title="Schrift-Größe — Drill-Fenster">
+        <div>
+          <div className="text-sm text-gray-300 mb-2">
+            Gilt für ALLE Drill-Fenster im Trainer (aktuell: PLL/OLL-Drill).
+            Separat einstellbar von der Timer-Größe.
           </div>
+          <FontSizeToggle
+            value={settings.drill_font_size}
+            onChange={(fs) => setSettings({ ...settings, drill_font_size: fs })}
+          />
         </div>
       </Section>
 
@@ -198,7 +202,7 @@ export function SettingsPanel() {
           onClick={reset}
           className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-200 hover:bg-gray-600"
         >
-          Auf Standard zuruecksetzen
+          Auf Standard zurücksetzen
         </button>
       </div>
     </div>
@@ -208,6 +212,35 @@ export function SettingsPanel() {
 // ============================================================
 // Form-Helpers
 // ============================================================
+
+function FontSizeToggle({
+  value,
+  onChange,
+}: {
+  value: TimerFontSize;
+  onChange: (fs: TimerFontSize) => void;
+}) {
+  return (
+    <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 inline-flex flex-wrap">
+      {(["sm", "md", "lg", "xl", "xxl"] as TimerFontSize[]).map((fs) => {
+        const active = value === fs;
+        return (
+          <button
+            key={fs}
+            onClick={() => onChange(fs)}
+            className={`rounded px-3 py-1.5 text-sm font-medium transition ${
+              active
+                ? "bg-purple-600 text-white"
+                : "text-gray-300 hover:bg-gray-700"
+            }`}
+          >
+            {FONT_SIZE_LABELS[fs]}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
