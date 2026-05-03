@@ -326,7 +326,7 @@ function MainLayout() {
         {tab === "trainer" && <TrainerTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          v0.10 · 5 Tabs · Personal Trainer (Achievements + Daily Challenges)
+          v0.11 · 5 Tabs · Trainer (Heute + Algs + Erfolge) + Scramble im Timer
         </footer>
       </div>
 

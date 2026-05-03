@@ -565,3 +565,79 @@ def get_stats_by_session(
         "filter": {"cube_type": cube_type},
         "sessions": out,
     }
+
+
+# ============================================================
+# Phase 8b: Stats by Algorithm-Case (PLL/OLL-Trainer)
+# ============================================================
+
+
+@router.get("/by-alg-case")
+def get_stats_by_alg_case(
+    subset: str = Query(..., description="Case-Praefix-Filter, z.B. 'PLL' oder 'OLL'"),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Liefert per-case-Stats fuer alle Solves mit alg_case-Tag im
+    angegebenen Subset.
+
+    Beispiel: subset="PLL" → liefert pro PLL-case (T-perm, Y-perm, ...)
+    eine Zeile mit count, mean_ms, best_ms, current_ao5.
+
+    Cases ohne Solves sind NICHT enthalten — Frontend rendert die
+    leeren Slots aus der statischen alg-Liste.
+    """
+    prefix = f"{subset}-"
+    stmt = (
+        select(Solve)
+        .where(Solve.alg_case.is_not(None))
+        .where(Solve.alg_case.startswith(prefix))
+        .order_by(Solve.timestamp.asc())
+    )
+    rows = list(db.scalars(stmt).all())
+
+    # Gruppieren nach alg_case
+    groups: dict[str, list[Solve]] = {}
+    for s in rows:
+        if s.alg_case is None:
+            continue
+        groups.setdefault(s.alg_case, []).append(s)
+
+    out: list[dict[str, Any]] = []
+    for case_id, solves in groups.items():
+        points = [
+            SolvePoint(
+                time_ms=s.time_ms,
+                dnf=s.dnf,
+                plus_two=s.plus_two,
+                solve_id=s.id,
+            )
+            for s in solves
+        ]
+        stats = compute_stats(points)
+        last_solve = solves[-1]
+        last_ts = last_solve.timestamp
+        last_aware = last_ts.replace(tzinfo=UTC) if last_ts.tzinfo is None else last_ts
+        out.append(
+            {
+                "alg_case": case_id,
+                "count": stats.count,
+                "count_valid": stats.count_valid,
+                "mean_ms": stats.mean_ms,
+                "best_ms": stats.best_ms,
+                "current_ao5": stats.current_ao5,
+                "last_solve_at": last_aware.isoformat(),
+            }
+        )
+
+    # Sortieren: schwaechste Form zuerst (groesster current_ao5 → wo der
+    # User trainieren sollte). None ans Ende.
+    def sort_key(s: dict[str, Any]) -> tuple[bool, float]:
+        v = s["current_ao5"]
+        return (v is None, -(v or 0))
+
+    out.sort(key=sort_key)
+
+    return {
+        "filter": {"subset": subset},
+        "cases": out,
+    }

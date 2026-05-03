@@ -1,17 +1,19 @@
-// TrainerTab: Personal Trainer (Phase 7).
+// TrainerTab: Personal Trainer (Phase 7 + 8b).
 //
-// Phase 7a: Sub-Bereich „Erfolge" mit AchievementsCard.
-// Phase 7b: Sub-Bereich „Heute" mit DailyChallengesPanel.
+// Sub-Bereiche:
+//   - „Heute"   (Phase 7b): DailyChallengesPanel
+//   - „Algs"    (Phase 8b): AlgTrainerPanel (PLL/OLL-Drill mit per-case-Stats)
+//   - „Erfolge" (Phase 7a): AchievementsCard
 //
-// Sub-Tab-Bar analog zu VerwaltungTab. Die aktuelle Wahl bleibt nicht
-// ueber app-reload erhalten — bewusst, weil „Heute" der primaere
-// Einstieg sein soll.
+// Sub-Tab-Bar analog zu VerwaltungTab. Wahl persistiert NICHT ueber
+// app-reload — bewusst, „Heute" soll der primaere Einstieg bleiben.
 
 import { useState } from "react";
 import { AchievementsCard } from "./AchievementsCard";
+import { AlgTrainerPanel } from "./AlgTrainerPanel";
 import { DailyChallengesPanel } from "./DailyChallengesPanel";
 
-type TrainerSection = "heute" | "erfolge";
+type TrainerSection = "heute" | "algs" | "erfolge";
 
 interface SubTab {
   id: TrainerSection;
@@ -21,6 +23,7 @@ interface SubTab {
 
 const SUB_TABS: SubTab[] = [
   { id: "heute", label: "Heute", icon: "🎯" },
+  { id: "algs", label: "Algs", icon: "🧩" },
   { id: "erfolge", label: "Erfolge", icon: "🏆" },
 ];
 
@@ -55,6 +58,7 @@ export function TrainerTab() {
       </nav>
 
       {section === "heute" && <DailyChallengesPanel />}
+      {section === "algs" && <AlgTrainerPanel />}
       {section === "erfolge" && <AchievementsCard />}
     </div>
   );
