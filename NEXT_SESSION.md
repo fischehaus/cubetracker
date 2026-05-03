@@ -12,6 +12,19 @@
 > normal weitergebaut und als Updates ausgerollt. KEIN feature-freeze
 > nach v1.0.
 >
+> **Parallel-Betrieb Dev + Prod auf demselben Rechner (User-Anforderung):**
+> Phase 9 muss so konfiguriert werden, dass die ausgerollte App OHNE
+> Konflikt parallel zur Dev-Umgebung laeuft. Saubere Trennung erforderlich:
+> - **Port**: Dev=8000, Prod=8765 (Default, falls belegt nächster freier)
+> - **DB**: Dev=backend/data/solves.db, Prod=%LOCALAPPDATA%\cubetracker\solves.db
+>   — getrennt via `CUBETRACKER_DB_PATH`-Env oder Code-Default
+> - **localStorage**: automatisch getrennt durch unterschiedliche Origins
+>   (Browser isoliert per Origin)
+> - **Versions-Badge im Header** zeigt klar welche Variante laeuft
+>   (z.B. `v0.16-dev` vs `v1.0-installed`)
+> - **Datenuebertragung Dev↔Prod via Backup/Restore-Endpoint** (Pflicht
+>   in Phase 9)
+>
 > **Letzter Stand:** 2026-05-03. **Phase 8.5.1 fertig, Tag `v0.15.1`
 > gesetzt.** 4 PB-Pattern-Achievements via chronologisches Tracking:
 > pb_double, pb_synchronized, pb_triple_day, consistency_5_under_ao12.
