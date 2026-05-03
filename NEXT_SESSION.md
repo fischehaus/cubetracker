@@ -221,6 +221,27 @@ cubetracker/
 
 ---
 
+## Layout-Rollback (Phase 5b → v0.6 = klassisches 3-Tab-Layout)
+
+Falls das neue 4-Tab-Layout (Phase L) nicht gefaellt, drei Wege zurueck:
+
+```powershell
+# Option 1: zum Tag wechseln (detached HEAD)
+git checkout v0.6
+
+# Option 2: zum legacy-branch wechseln (mutable HEAD, kann commits aufnehmen)
+git checkout legacy/v0.6-classic-layout
+
+# Option 3: main zurueck-rollen (DESTRUKTIV — verwirft neue Commits)
+git checkout main && git reset --hard v0.6
+```
+
+Empfohlen: **Option 1** (`git checkout v0.6`) zum bloss-anschauen. Vite-
+Restart + Browser-Refresh, dann siehst du die alte UI. Mit
+`git checkout main` kommst du zur neuen UI zurueck — ohne Datenverlust,
+da die SQLite-DB unter `backend/data/solves.db` von der Layout-Aenderung
+nicht beruehrt wird.
+
 ## Wenn etwas nicht startet
 
 | Problem | Loesung |
