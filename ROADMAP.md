@@ -163,6 +163,27 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 7a — Personal Trainer / Achievements (Tag `v0.9`) ✅
+
+User-Wunsch nach Gamification. Achievements als ersten Teil; Daily
+Challenges (7b) folgen separat.
+
+- [x] **Backend**: Achievement-Model + Migration + Definitions (18 in
+      4 Kategorien) + pure check-funktion + Service + API
+- [x] **Auto-Trigger**: Solve-Mutations + Hardware-Create + csTimer-
+      Import + Hardware-Seed loesen check aus
+- [x] **Notification-Channel**: Response-Header X-Achievements-Unlocked
+      + Pub/Sub im Frontend (axios-interceptor → AchievementToaster)
+- [x] **Frontend**: TrainerTab (5. Tab 🏆), AchievementsCard (Grid
+      mit 4 Kategorien), AchievementsMiniCard im Dashboard, Toaster
+- [x] **Backup-aware**: Achievements im JSON-Backup mit-aufgenommen
+- [x] **Live-Backfill**: 17 von 18 Achievements auf Bestandsdaten
+      (6202 Solves) freigeschaltet
+- [x] **Disziplin 6 angewandt**: Layout, Datensicherung,
+      Cross-Modul-Auswirkung explizit durchdacht
+
+**Tests:** 176 backend + 68 frontend = 244 gruen.
+
 ## Phase L+ — Daten-Workflows (Tag `v0.8`) ✅
 
 User-feedback-runde nach Phase L: vier konkrete wuensche zu
@@ -358,7 +379,8 @@ Feature-Set bewegen.
 - ✅ Phase 5b: **fertig** (Quick-Wins + Sessions Merge + Hardware-Vergleich + Dashboard-Toggle, Tag `v0.6`)
 - ✅ Phase L: **fertig** (Layout-Refactor: 4 Tabs + Filter pro Bereich + Onboarding + Detail-Modal + Hash-Routing, Tag `v0.7`)
 - ✅ Phase L+: **fertig** (HW-Vergleich sortierbar+ao12 + Voll-Backup + csTimer-Export, Tag `v0.8`)
-- ⏸ Phase 7: pending (Personal Trainer — Achievements + Daily Challenges)
+- ✅ Phase 7a: **fertig** (Achievements — 18 Definitionen + Toast + Backfill, Tag `v0.9`)
+- ⏸ Phase 7b: pending (Daily Challenges — Generator + Tracking)
 - ⏸ Phase 8: pending (Distribution / Installer → Tag `v1.0`)
 
 ## Tags
@@ -385,3 +407,6 @@ Feature-Set bewegen.
 - `v0.8` — Phase L+: HW-Vergleich sortierbar mit ao12-Spalten,
   Voll-Backup (SQLite + JSON), csTimer-Export. Disziplin 6 (Modul-
   Check vor Bau) als CLAUDE.md-Regel verankert.
+- `v0.9` — Phase 7a: Achievements (18 Definitionen, Auto-Trigger nach
+  Solve/Hardware-Mutations, Toast-System, AchievementsCard im Trainer-
+  Tab, Mini-Card im Dashboard). Live-Backfill: 17/18 unlocked.

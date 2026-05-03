@@ -3,12 +3,14 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-04 nachmittag. **Phase L+ fertig, Tag
-> `v0.8` gesetzt.** Vier User-Wuensche umgesetzt:
-> - HardwareCompareCard sortierbar mit ao12-Spalten dazu
-> - Voll-Backup (SQLite-Datei + JSON-Voll-Export)
-> - csTimer-Export (round-trip-safe spiegel zum importer)
-> - Disziplin 6 (Modul-Check vor Bau) als CLAUDE.md-Regel
+> **Letzter Stand:** 2026-05-04 abend. **Phase 7a fertig, Tag `v0.9`
+> gesetzt.** Personal Trainer / Achievements:
+> - 18 vordefinierte Achievements in 4 Kategorien
+> - Auto-Trigger nach Solve/Hardware-Mutations + Toast-Notification
+> - 5. Tab „Trainer" mit AchievementsCard
+> - Mini-Card im Dashboard (Top 3 letzte Erfolge)
+> - Live-Backfill: 17/18 Achievements freigeschaltet
+> - Disziplin 6 (Modul-Check vor Bau) konsequent angewandt
 >
 > **Snapshot v0.6 Layout** weiter verfuegbar: tag `v0.6` + branch
 > `legacy/v0.6-classic-layout`.
@@ -157,9 +159,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-L+-Features gemerged)
-- **Tags:** `v0.0` … `v0.7`, **`v0.8`** (aktuell)
-- **Tests:** 156 backend + 68 frontend = **224 gruen**
+- **Branch:** `main` (sauber, alle Phase-7a-Features gemerged)
+- **Tags:** `v0.0` … `v0.8`, **`v0.9`** (aktuell)
+- **Tests:** 176 backend + 68 frontend = **244 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber
