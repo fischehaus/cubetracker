@@ -3,9 +3,19 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-03. **Phase 8.2 fertig, Tag `v0.12`
-> gesetzt.** Speedcubing-Timer mit Spacebar + WCA-Inspection + Sound
-> + Multi-Phase-Splits (Variante A) + Settings-Panel:
+> **Letzter Stand:** 2026-05-03. **Phase 8.3 fertig, Tag `v0.13`
+> gesetzt.** PB-Konfetti — visueller Effekt bei neuem Personal Best:
+> - Backend X-PB-Achieved-Header (single/ao5/ao12)
+> - canvas-confetti + PbConfettiOverlay + Toast-Banner
+> - Single = burst, Double = 2 bursts, Triple = 2s storm
+> - 332 Tests gruen (220 backend + 112 frontend)
+>
+> **Phase 8.2 (Tag `v0.12`)** war Speedcubing-Timer mit Spacebar +
+> WCA-Inspection (Mode-Toggle WCA/Pragmatisch) + Sound + Multi-Phase-
+> Splits (Variante A) + Settings-Panel. Solve.split_times_ms-Spalte
+> + Migration; csTimer-Import/Export unveraendert.
+>
+> **Bisheriger Phase-8.2-Header (zur Kontext-Erhaltung):**
 > - useSpacebarTimer-Hook: WCA-State-Machine
 >   (idle → inspection → ready → running → stopped)
 > - Inspection 15s default, Sound bei 8s + 12s, Penalty +2/DNF
@@ -115,9 +125,9 @@ Du musst beim naechsten Mal:
 
 ## Was als naechstes ansteht
 
-Phase 8 + 8.1 + 8.2 abgeschlossen. Geplante Reihenfolge:
+Phase 8 + 8.1 + 8.2 + 8.3 abgeschlossen. Geplante Reihenfolge bis v1.0:
 
-**Phase 8.3 — Algorithm-Visualisierung** (Tag `v0.13`, ~0.5-1 Tag):
+**Phase 8.3.1 — 2D-Algorithm-Visualisierung** (~1 Tag):
 - 2D-Cube-State-Bilder im AlgTrainerPanel + DrillCard
 - Lib `sr-visualizer` oder selbst-gebaute SVG aus state-pattern
 - KEIN Hotlinking auf jperm.net (urheberrechtlich)
@@ -191,9 +201,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-8.2-Features gemerged)
-- **Tags:** `v0.0` … `v0.11.1`, **`v0.12`** (aktuell)
-- **Tests:** 215 backend + 112 frontend = **327 gruen**
+- **Branch:** `main` (sauber, alle Phase-8.3-Features gemerged)
+- **Tags:** `v0.0` … `v0.12`, **`v0.13`** (aktuell)
+- **Tests:** 220 backend + 112 frontend = **332 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber

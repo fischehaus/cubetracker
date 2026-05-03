@@ -163,6 +163,30 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 8.3 — PB-Konfetti (Tag `v0.13`) ✅
+
+User-Wunsch: visueller Effekt wenn PB erreicht wird.
+
+- [x] **Backend PB-Detection**: `_detect_pbs(db, solve)` rechnet
+      ob solve neuer PB im selben cube_type (single/ao5/ao12).
+      DNF-Solves koennen kein single-PB ausloesen.
+- [x] **Header X-PB-Achieved** bei create + update wenn mind. ein PB.
+      Wird auch bei +2/DNF-toggle via PATCH neu berechnet.
+- [x] **canvas-confetti + types** als Frontend-Lib (~7kB).
+- [x] **onPbAchieved-Pub/Sub** im axios-interceptor (analog
+      Achievement + Challenge).
+- [x] **PbConfettiOverlay** global in App: Single → einfacher
+      burst, Double → 2 bursts (links + rechts), Perfect Storm
+      (alle 3 PBs) → 2s mehrfarbiger storm.
+- [x] **Toast-Banner top-center**, 4s auto-dismiss.
+- [x] **5 neue API-Tests** fuer PB-Header-Logik
+
+**NICHT enthalten**: 2D-Algorithm-Visualisierung (war urspruenglich
+Teil von 8.3, braucht aber korrekten 3x3-State-Simulator —
+eigener Tagesaufwand). Verschoben auf eigene Phase 8.3.1.
+
+**Tests:** 220 backend + 112 frontend = 332 gruen.
+
 ## Phase 8.2 — Speedcubing-Timer (Tag `v0.12`) ✅
 
 WCA-Standard-Spacebar-Flow + Inspection + Sound + Multi-Phase-Splits
@@ -528,8 +552,12 @@ Feature-Set bewegen.
 - ✅ Phase 8: **fertig** (Scramble im TIMER + PLL/OLL-Algorithm-Trainer, Tag `v0.11`)
 - ✅ Phase 8.1: **fertig** (UX-Quick-Wins aus Live-Smoke-Test, Tag `v0.11.1`)
 - ✅ Phase 8.2: **fertig** (Speedcubing-Timer: Spacebar + Inspection + Sound + Multi-Phase + Settings, Tag `v0.12`)
-- ⏸ Phase 8.3: pending (Algorithm-Visualisierung: 2D-State-Bilder im Trainer)
-- ⏸ Phase 9: pending (Distribution / Installer → Tag `v1.0`)
+- ✅ Phase 8.3: **fertig** (PB-Konfetti, Tag `v0.13`)
+- ⏸ Phase 8.3.1: pending (Algorithm-Visualisierung — 2D-State-Bilder im Trainer mit echtem 3x3-Sim)
+- ⏸ Phase 8.4: pending (Session-Plan + Schrift-Slider + Best-Average-Timestamps)
+- ⏸ Phase 8.5: pending (Achievement-Erweiterung — ~14 neue Definitionen + Backfill)
+- ⏸ Phase 9: pending (Distribution / Installer + Restore → Tag `v1.0`)
+- ⏸ Phase 11: pending (WCA-Ranking-Lookup, optional nach v1.0)
 
 ## Tags
 
@@ -582,3 +610,9 @@ Feature-Set bewegen.
   Splits Variante A mit frei editierbaren Phasen-Namen, Settings-
   Panel als 5. Sub-Tab in VERWALTUNG, Solve.split_times_ms-Spalte
   + Migration). csTimer-Import/Export unveraendert. 327 Tests gruen.
+- `v0.12-pre-vis` — Snapshot vor Phase 8.3, + branch
+  `legacy/v0.12-pre-vis`.
+- `v0.13` — Phase 8.3: PB-Konfetti (Backend X-PB-Achieved-Header,
+  Frontend canvas-confetti + PbConfettiOverlay mit Toast). Single =
+  einfacher burst, Double = 2 bursts, Triple = 2s mehrfarbiger storm.
+  332 Tests gruen.
