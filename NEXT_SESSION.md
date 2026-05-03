@@ -3,14 +3,20 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-04 abend. **Phase 7a fertig, Tag `v0.9`
-> gesetzt.** Personal Trainer / Achievements:
-> - 18 vordefinierte Achievements in 4 Kategorien
-> - Auto-Trigger nach Solve/Hardware-Mutations + Toast-Notification
-> - 5. Tab „Trainer" mit AchievementsCard
-> - Mini-Card im Dashboard (Top 3 letzte Erfolge)
-> - Live-Backfill: 17/18 Achievements freigeschaltet
-> - Disziplin 6 (Modul-Check vor Bau) konsequent angewandt
+> **Letzter Stand:** 2026-05-03. **Phase 7b fertig, Tag `v0.10`
+> gesetzt.** Personal Trainer komplett (Achievements + Daily Challenges):
+> - 4 Challenge-Kinds (volume/speed/comeback/diversity), monotonic-progress
+> - Auto-Trigger nach Solve-Mutationen, Header `X-Challenges-Completed`
+> - TrainerTab jetzt mit Sub-Tab-Bar Heute / Erfolge
+> - Dashboard top-row 3-spaltig (Today/Week/Reminder), darunter
+>   2-spaltige Mini-Card-Reihe (Challenges + Erfolge)
+> - ChallengeCompletionToaster (gruen, links unten) parallel zum
+>   AchievementToaster (gelb, rechts unten)
+> - JSON-Backup um challenges erweitert (counts + array)
+> - Disziplin 6 erneut konsequent angewandt
+>
+> **Phase 7a (Tag `v0.9`)** war der erste Teil: 18 Achievements,
+> Live-Backfill 17/18 auf Bestandsdaten.
 >
 > **Snapshot v0.6 Layout** weiter verfuegbar: tag `v0.6` + branch
 > `legacy/v0.6-classic-layout`.
@@ -100,6 +106,19 @@ Du musst beim naechsten Mal:
 
 ## Was als naechstes ansteht
 
+Phase 7 (Personal Trainer) ist mit Tag `v0.10` komplett abgeschlossen
+(7a Achievements + 7b Daily Challenges). Naechster grosser Strang:
+**Phase 8 — Distribution / Installer** (Tag `v1.0`). Siehe ROADMAP.md
+fuer F21–F25 (Backend serviert dist/, PyInstaller-Bundle,
+%LOCALAPPDATA%-Persistenz, Inno-Setup-Installer, optional Auto-Update).
+
+Aufwand-Schaetzung weiterhin: ~1 Tag POC-Installer, ~2-3 Tage
+poliertes Endprodukt.
+
+---
+
+### Historische Notizen aus frueheren Phasen (zur Kontext-Einordnung)
+
 Phase 4 (Visualisierungs-Refactor) ist mit Tag `v0.4` abgeschlossen.
 Hardware-Tracking ist nach Phase 5 verschoben.
 
@@ -159,9 +178,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-7a-Features gemerged)
-- **Tags:** `v0.0` … `v0.8`, **`v0.9`** (aktuell)
-- **Tests:** 176 backend + 68 frontend = **244 gruen**
+- **Branch:** `main` (sauber, alle Phase-7b-Features gemerged)
+- **Tags:** `v0.0` … `v0.9`, **`v0.10`** (aktuell)
+- **Tests:** 203 backend + 68 frontend = **271 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber

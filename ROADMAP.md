@@ -163,6 +163,40 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 7b — Daily Challenges (Tag `v0.10`) ✅
+
+User-Wunsch nach Gamification, zweiter Teil. Daily Challenges als
+Sub-Bereich „Heute" im Trainer-Tab plus Mini-Card im Dashboard.
+
+- [x] **Backend Logik**: pure generator (volume/speed/comeback/diversity,
+      mit Schwellwerten am Datei-Anfang tunbar) + pure tracker (monotonic-
+      progress) + Service-Bridge `get_or_generate_today` /
+      `regenerate_today` / `update_today_progress_for_solve`
+- [x] **Backend API**: 4 Endpoints (`GET /challenges/today`, `POST
+      /today/regenerate`, `POST /{id}/dismiss`, `GET /history?days=N`)
+- [x] **Auto-Trigger**: Solve-Mutations updaten challenge-progress
+      und setzen Header `X-Challenges-Completed` mit IDs frisch erfuellter
+      Challenges
+- [x] **JSON-Backup um challenges erweitert** (counts + challenges-array)
+- [x] **Alembic-Migration `251693e1a6b2`** fuer challenges-Tabelle
+- [x] **Frontend Hooks + Interceptor**: `useChallengesToday` /
+      `useChallengesHistory` / `useRegenerateChallenges` /
+      `useDismissChallenge` + axios-interceptor liest neuen Header und
+      feuert `onChallengeCompleted`-Listener
+- [x] **Frontend Components**: `ChallengeCard` (mit progress-bar +
+      dismiss), `DailyChallengesPanel` (Trainer-Sub „Heute"),
+      `ChallengesMiniCard` (Dashboard), `ChallengeCompletionToaster`
+      (global, links unten in gruen — Achievement-Toaster bleibt rechts)
+- [x] **TrainerTab Sub-Tab-Bar** Heute / Erfolge (zwei Sektionen)
+- [x] **Dashboard Layout-Refactor**: Top-Row jetzt 3-Spalten
+      (Today/Week/Reminder), darunter 2-Spalten-Reihe Challenges +
+      Achievements
+- [x] **Solve-Mutations invalidieren `['challenges-today']`**
+- [x] **Disziplin 6 angewandt**: Layout, Datensicherung,
+      Cross-Modul-Auswirkung explizit dokumentiert in Commit-Message
+
+**Tests:** 203 backend + 68 frontend = 271 gruen.
+
 ## Phase 7a — Personal Trainer / Achievements (Tag `v0.9`) ✅
 
 User-Wunsch nach Gamification. Achievements als ersten Teil; Daily
@@ -380,7 +414,7 @@ Feature-Set bewegen.
 - ✅ Phase L: **fertig** (Layout-Refactor: 4 Tabs + Filter pro Bereich + Onboarding + Detail-Modal + Hash-Routing, Tag `v0.7`)
 - ✅ Phase L+: **fertig** (HW-Vergleich sortierbar+ao12 + Voll-Backup + csTimer-Export, Tag `v0.8`)
 - ✅ Phase 7a: **fertig** (Achievements — 18 Definitionen + Toast + Backfill, Tag `v0.9`)
-- ⏸ Phase 7b: pending (Daily Challenges — Generator + Tracking)
+- ✅ Phase 7b: **fertig** (Daily Challenges — Generator + Tracker + Toast + Mini, Tag `v0.10`)
 - ⏸ Phase 8: pending (Distribution / Installer → Tag `v1.0`)
 
 ## Tags
@@ -410,3 +444,8 @@ Feature-Set bewegen.
 - `v0.9` — Phase 7a: Achievements (18 Definitionen, Auto-Trigger nach
   Solve/Hardware-Mutations, Toast-System, AchievementsCard im Trainer-
   Tab, Mini-Card im Dashboard). Live-Backfill: 17/18 unlocked.
+- `v0.10` — Phase 7b: Daily Challenges (4 kinds: volume/speed/comeback/
+  diversity, monotonic-progress, Auto-Trigger via Solve-Mutations,
+  X-Challenges-Completed Header, Toast in gruen links unten,
+  DailyChallengesPanel im Trainer-Sub „Heute", ChallengesMiniCard im
+  Dashboard, JSON-Backup um challenges erweitert). 271 Tests gruen.
