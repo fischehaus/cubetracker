@@ -53,6 +53,32 @@ Trainings-Reminder und Hardware-Performance-Analyse.
 5. **Bei Tooling-Ausfall, Quellen-Widerspruch oder Architektur-
    Schnitt-Frage:** nicht eigenmaechtig pivotieren, sondern fragen.
 
+6. **Modul-Check vor Bau.** Bei jedem neuen Modul / jeder neuen
+   Funktion / jeder Anpassung VOR dem Code drei Dimensionen explizit
+   durchdenken — nicht ueberspringen, auch wenn das modul "klein"
+   wirkt:
+
+   a) **Layout-Impact**: Wo erscheint das Modul? Braucht es einen
+      neuen Reiter? Passt es in eine bestehende Sektion? Aendert
+      sich die Tab-Anzahl oder Sub-Tab-Struktur?
+
+   b) **Datensicherung + Export**: Aendert sich das DB-Schema
+      (neue Tabelle, neue Spalte)? Muessen Backup-Routinen
+      angepasst werden? Wenn JSON-Export existiert: muss das neue
+      Modul mit-exportiert werden? Idempotent bei Re-Import?
+
+   c) **Cross-Modul-Auswirkung**: Triggert das neue Modul
+      Aenderungen in anderen Modulen (z.B. Solve-Save loest
+      Achievement-Check aus)? Reagieren bestehende Endpoints/
+      Komponenten anders? Brauchen Mutation-Hooks zusaetzliche
+      Cache-Invalidierung?
+
+   Ergebnis dieser Ueberlegung wird in der Antwort an User
+   sichtbar dokumentiert (z.B. „Layout: neuer Tab", „Backup:
+   neue Tabelle muss in /export aufgenommen werden", etc.) —
+   und bei strittigen Punkten wird gefragt, nicht eigenmaechtig
+   entschieden.
+
 ## Sub-Agent-Nutzung
 
 Bei spezialisierten Aufgaben **bevorzuge Sub-Agents** mit
