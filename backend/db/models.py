@@ -25,6 +25,8 @@ class Session(Base):
     `scramble_type`: WCA-Code aus csTimer (z.B. "444wca", "pyrso", "")
     `cstimer_session_id`: Originale Session-ID aus csTimer-Export, fuer
         Re-Import-Idempotenz. None bei manuell angelegten Sessions.
+    `notes`: Freie User-Notizen zur Session (Phase 5b — Trainings-Kontext,
+        Schwerpunkte, Cross-Cube-Kommentare, …)
     """
 
     __tablename__ = "sessions"
@@ -35,6 +37,7 @@ class Session(Base):
     cstimer_session_id: Mapped[int | None] = mapped_column(
         Integer, nullable=True, unique=True, index=True
     )
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

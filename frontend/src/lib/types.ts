@@ -42,8 +42,22 @@ export interface Session {
   id: number;
   name: string;
   scramble_type: string | null;
+  notes: string | null;
   cstimer_session_id: number | null;
   created_at: string;
+}
+
+export interface SessionCreate {
+  name: string;
+  scramble_type?: string | null;
+  notes?: string | null;
+  cstimer_session_id?: number | null;
+}
+
+export interface SessionUpdate {
+  name?: string;
+  scramble_type?: string | null;
+  notes?: string | null;
 }
 
 export interface Hardware {
