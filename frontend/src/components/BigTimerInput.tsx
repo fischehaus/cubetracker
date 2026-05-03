@@ -21,7 +21,7 @@ import {
   useSuggestSession,
 } from "../lib/api";
 import { COMMON_CUBE_TYPES, parseTimeInput } from "../lib/format";
-import { useAppSettings } from "../lib/settings";
+import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
 import type { TimerPenalty } from "../hooks/useSpacebarTimer";
 
@@ -393,7 +393,10 @@ export function BigTimerInput({
             placeholder="0.00"
             aria-label="Solve-Zeit"
             className="w-full text-center font-mono bg-transparent border-0 border-b-4 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-4"
-            style={{ fontSize: "5rem", lineHeight: 1 }}
+            style={{
+              fontSize: TIMER_FONT_SCALE[settings.timer_font_size].timer,
+              lineHeight: 1,
+            }}
           />
           <p className="mt-3 text-center text-sm text-gray-500">
             „1234" = 12.34s · „15102" = 1:51.02 · oder klassisch „12.34" / „1:23.45"

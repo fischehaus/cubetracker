@@ -2,7 +2,7 @@
 // aktuell gefilterte Solve-Menge (cube_type + session_id).
 
 import { useStats } from "../lib/api";
-import { formatTime } from "../lib/format";
+import { formatDate, formatTime } from "../lib/format";
 
 interface Props {
   cubeType?: string;
@@ -13,16 +13,25 @@ interface StatRow {
   label: string;
   value: number | null;
   highlight?: boolean;
+  /** Phase 8.4: optionaler ISO-Timestamp wann der Best-Avg erreicht wurde. */
+  achievedAt?: string | null;
 }
 
-function Stat({ label, value, highlight }: StatRow) {
+function Stat({ label, value, highlight, achievedAt }: StatRow) {
   return (
     <div
       className={`flex justify-between items-baseline border-b border-gray-800/60 py-2 ${
         highlight ? "border-purple-500/40" : ""
       }`}
     >
-      <span className="text-base text-gray-400">{label}</span>
+      <span className="text-base text-gray-400">
+        {label}
+        {achievedAt && value !== null && (
+          <span className="ml-2 text-xs text-gray-500">
+            am {formatDate(achievedAt).split(" ")[0]}
+          </span>
+        )}
+      </span>
       <span
         className={`font-mono text-base ${
           value === null ? "text-gray-600" : "text-gray-100"
@@ -127,9 +136,24 @@ export function StatsCard({ cubeType, sessionId }: Props) {
         <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-2">
           Beste Averages (PB)
         </h3>
-        <Stat label="Best Ao5" value={data.best_ao5} highlight />
-        <Stat label="Best Ao12" value={data.best_ao12} highlight />
-        <Stat label="Best Ao100" value={data.best_ao100} highlight />
+        <Stat
+          label="Best Ao5"
+          value={data.best_ao5}
+          achievedAt={data.best_ao5_at}
+          highlight
+        />
+        <Stat
+          label="Best Ao12"
+          value={data.best_ao12}
+          achievedAt={data.best_ao12_at}
+          highlight
+        />
+        <Stat
+          label="Best Ao100"
+          value={data.best_ao100}
+          achievedAt={data.best_ao100_at}
+          highlight
+        />
       </div>
     </div>
   );

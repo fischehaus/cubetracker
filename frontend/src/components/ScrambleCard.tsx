@@ -15,6 +15,7 @@ import {
   generateScramble,
   resolveScrambleTypeOverride,
 } from "../lib/scramble";
+import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 
 interface Props {
   /** App-cube_type ("3x3", "Pyraminx", …) oder Subset-Override ("pll"/"oll" → Phase 8b) */
@@ -41,6 +42,8 @@ export function ScrambleCard({
 }: Props) {
   const [scramble, setScramble] = useState<string>("");
   const [skipCounter, setSkipCounter] = useState(0);
+  const [settings] = useAppSettings();
+  const fontPx = TIMER_FONT_SCALE[settings.timer_font_size].scramble;
 
   // Override schlaegt cube_type — aber nur wenn er sich auf einen
   // scrambow-bekannten Code aufloesen laesst. csTimer-Codes wie
@@ -79,7 +82,8 @@ export function ScrambleCard({
         </button>
       </div>
       <div
-        className="font-mono text-lg md:text-xl text-gray-100 leading-relaxed break-words select-all"
+        className="font-mono text-gray-100 leading-relaxed break-words select-all"
+        style={{ fontSize: fontPx }}
         aria-live="polite"
       >
         {scramble || (

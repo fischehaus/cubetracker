@@ -84,6 +84,31 @@ def best_average_window(solves: list[SolvePoint], window: int) -> int | None:
     return best
 
 
+def best_average_window_with_anchor(
+    solves: list[SolvePoint], window: int
+) -> tuple[int, int] | None:
+    """Wie best_average_window, liefert zusaetzlich die solve_id des
+    LETZTEN Solves im besten Window (= Ankerpunkt fuer den Zeitstempel
+    „wann wurde dieser Best-Avg erzielt").
+
+    Phase 8.4: erlaubt dem Frontend Anzeige „Best Ao5 12.34 (am 03.05.)".
+    """
+    n = len(solves)
+    if n < window:
+        return None
+    best_avg: int | None = None
+    best_anchor_id: int | None = None
+    for i in range(n - window + 1):
+        avg = average_of_n(solves[i : i + window])
+        if avg is not None and (best_avg is None or avg < best_avg):
+            best_avg = avg
+            # Anker = letzter Solve im Window
+            best_anchor_id = solves[i + window - 1].solve_id
+    if best_avg is None or best_anchor_id is None:
+        return None
+    return (best_avg, best_anchor_id)
+
+
 @dataclass
 class StatsResult:
     """Vollstaendige Statistik-Antwort fuer eine Solve-Menge."""
@@ -109,6 +134,12 @@ class StatsResult:
     best_ao12: int | None
     best_ao100: int | None
 
+    # Phase 8.4: Anker-Solve-IDs (letzter Solve im besten Window)
+    # → Frontend resolved daraus den Timestamp fuer Anzeige.
+    best_ao5_solve_id: int | None
+    best_ao12_solve_id: int | None
+    best_ao100_solve_id: int | None
+
 
 def compute_stats(solves: list[SolvePoint]) -> StatsResult:
     """Vollstaendige Statistik aus einer Solve-Liste.
@@ -133,6 +164,9 @@ def compute_stats(solves: list[SolvePoint]) -> StatsResult:
             best_ao5=None,
             best_ao12=None,
             best_ao100=None,
+            best_ao5_solve_id=None,
+            best_ao12_solve_id=None,
+            best_ao100_solve_id=None,
         )
 
     valid = [s for s in solves if not s.dnf]
@@ -154,10 +188,10 @@ def compute_stats(solves: list[SolvePoint]) -> StatsResult:
     current_ao12 = average_of_n(solves[-12:]) if n >= 12 else None
     current_ao100 = average_of_n(solves[-100:]) if n >= 100 else None
 
-    # Beste Avgs (sliding window, alle Solves)
-    best_ao5 = best_average_window(solves, 5) if n >= 5 else None
-    best_ao12 = best_average_window(solves, 12) if n >= 12 else None
-    best_ao100 = best_average_window(solves, 100) if n >= 100 else None
+    # Beste Avgs (sliding window, alle Solves) — mit Anker-Solve-ID
+    ao5_anchor = best_average_window_with_anchor(solves, 5) if n >= 5 else None
+    ao12_anchor = best_average_window_with_anchor(solves, 12) if n >= 12 else None
+    ao100_anchor = best_average_window_with_anchor(solves, 100) if n >= 100 else None
 
     return StatsResult(
         count=n,
@@ -171,7 +205,10 @@ def compute_stats(solves: list[SolvePoint]) -> StatsResult:
         current_ao5=current_ao5,
         current_ao12=current_ao12,
         current_ao100=current_ao100,
-        best_ao5=best_ao5,
-        best_ao12=best_ao12,
-        best_ao100=best_ao100,
+        best_ao5=ao5_anchor[0] if ao5_anchor else None,
+        best_ao12=ao12_anchor[0] if ao12_anchor else None,
+        best_ao100=ao100_anchor[0] if ao100_anchor else None,
+        best_ao5_solve_id=ao5_anchor[1] if ao5_anchor else None,
+        best_ao12_solve_id=ao12_anchor[1] if ao12_anchor else None,
+        best_ao100_solve_id=ao100_anchor[1] if ao100_anchor else None,
     )

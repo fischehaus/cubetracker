@@ -239,6 +239,13 @@ export interface StatsResponse {
   best_ao5: number | null;
   best_ao12: number | null;
   best_ao100: number | null;
+  /** Phase 8.4: Anker-Solve-IDs + ISO-timestamps der besten Averages */
+  best_ao5_solve_id: number | null;
+  best_ao12_solve_id: number | null;
+  best_ao100_solve_id: number | null;
+  best_ao5_at: string | null;
+  best_ao12_at: string | null;
+  best_ao100_at: string | null;
   filter: { cube_type: string | null; session_id: number | null };
 }
 

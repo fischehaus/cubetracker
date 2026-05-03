@@ -21,6 +21,7 @@ import { ChallengesMiniCard } from "./components/ChallengesMiniCard";
 import { DashboardFilterBar } from "./components/DashboardFilterBar";
 import { PbConfettiOverlay } from "./components/PbConfettiOverlay";
 import { ScrambleCard } from "./components/ScrambleCard";
+import { SessionPlanCard } from "./components/SessionPlanCard";
 import { useSessions } from "./lib/api";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HistogramChart } from "./components/HistogramChart";
@@ -123,6 +124,10 @@ function TimerTab({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
       <main className="space-y-4">
+        <SessionPlanCard
+          cubeType={timerCubeType}
+          sessionId={timerSessionId}
+        />
         <ScrambleCard
           cubeType={timerCubeType}
           scrambleTypeOverride={scrambleTypeOverride}
@@ -327,7 +332,7 @@ function MainLayout() {
         {tab === "trainer" && <TrainerTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          v0.13 · PB-Konfetti · Spacebar-Timer · Trainer · Backup
+          v0.14 · Trainings-Sets · Schrift-Slider · PB-Timestamps · PB-Konfetti
         </footer>
       </div>
 
