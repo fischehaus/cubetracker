@@ -19,6 +19,7 @@ import { BigTimerInput } from "./components/BigTimerInput";
 import { ChallengeCompletionToaster } from "./components/ChallengeCompletionToaster";
 import { ChallengesMiniCard } from "./components/ChallengesMiniCard";
 import { DashboardFilterBar } from "./components/DashboardFilterBar";
+import { PbConfettiOverlay } from "./components/PbConfettiOverlay";
 import { ScrambleCard } from "./components/ScrambleCard";
 import { useSessions } from "./lib/api";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
@@ -326,13 +327,14 @@ function MainLayout() {
         {tab === "trainer" && <TrainerTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          v0.12 · Spacebar-Timer + WCA-Inspection + Multi-Phase-Splits + Settings
+          v0.13 · PB-Konfetti · Spacebar-Timer · Trainer · Backup
         </footer>
       </div>
 
       {/* Globale Toaster — bleiben auf jedem Tab sichtbar */}
       <AchievementToaster />
       <ChallengeCompletionToaster />
+      <PbConfettiOverlay />
     </div>
   );
 }

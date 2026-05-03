@@ -36,7 +36,7 @@ def _set_unlock_header(response: Response, db: OrmSession) -> None:
 
 
 def _set_unlock_header_with_solve(response: Response, db: OrmSession, solve: Solve | None) -> None:
-    """Achievement-Check + Challenge-Progress fuer create/update.
+    """Achievement-Check + Challenge-Progress + PB-Detect fuer create/update.
     Bei delete reicht der achievement-check (es gibt keinen 'solve' mehr).
     """
     _set_unlock_header(response, db)
@@ -44,6 +44,63 @@ def _set_unlock_header_with_solve(response: Response, db: OrmSession, solve: Sol
         completed_ids = update_today_progress_for_solve(db, solve)
         if completed_ids:
             response.headers["X-Challenges-Completed"] = ",".join(str(i) for i in completed_ids)
+        pb_kinds = _detect_pbs(db, solve)
+        if pb_kinds:
+            response.headers["X-PB-Achieved"] = ",".join(pb_kinds)
+
+
+def _detect_pbs(db: OrmSession, solve: Solve) -> list[str]:
+    """Phase 8.3: prueft ob dieser Solve einen PB im selben cube_type
+    gesetzt hat. Liefert Liste der PB-Typen: 'single', 'ao5', 'ao12'.
+    Nur valide Solves (kein DNF) koennen Single-PB ausloesen.
+    """
+    from stats.calc import SolvePoint, compute_stats
+
+    rows = db.scalars(
+        select(Solve).where(Solve.cube_type == solve.cube_type).order_by(Solve.timestamp.asc())
+    ).all()
+    if len(rows) < 1:
+        return []
+
+    points_with = [
+        SolvePoint(time_ms=s.time_ms, dnf=s.dnf, plus_two=s.plus_two, solve_id=s.id) for s in rows
+    ]
+    stats_with = compute_stats(points_with)
+
+    # Stats OHNE den aktuellen Solve, um zu vergleichen ob ER der best ist
+    points_without = [p for p in points_with if p.solve_id != solve.id]
+    stats_without = compute_stats(points_without) if points_without else None
+
+    pbs: list[str] = []
+
+    # Single-PB: aktueller solve.effective_time_ms == stats_with.best_ms
+    # UND (entweder erste Solve ueberhaupt ODER besser als vorher)
+    if not solve.dnf:
+        eff = solve.time_ms + (2000 if solve.plus_two else 0)
+        is_best = stats_with.best_ms is not None and eff == stats_with.best_ms
+        improved_single = (
+            stats_without is None or stats_without.best_ms is None or eff < stats_without.best_ms
+        )
+        if is_best and improved_single:
+            pbs.append("single")
+
+    # Ao5-PB: best_ao5 hat sich verbessert (oder ist erstmals gesetzt)
+    if stats_with.best_ao5 is not None and (
+        stats_without is None
+        or stats_without.best_ao5 is None
+        or stats_with.best_ao5 < stats_without.best_ao5
+    ):
+        pbs.append("ao5")
+
+    # Ao12-PB analog
+    if stats_with.best_ao12 is not None and (
+        stats_without is None
+        or stats_without.best_ao12 is None
+        or stats_with.best_ao12 < stats_without.best_ao12
+    ):
+        pbs.append("ao12")
+
+    return pbs
 
 
 def _get_solve_or_404(solve_id: int, db: OrmSession) -> Solve:

@@ -60,6 +60,19 @@ export function onChallengeCompleted(
   return () => challengeListeners.delete(fn);
 }
 
+// Phase 8.3: PB-Confetti-Pub-Sub
+// Backend setzt X-PB-Achieved: "single,ao5,ao12" wenn der Solve einen
+// neuen PB getriggert hat. Frontend feuert visuellen Konfetti-Effekt.
+
+export type PbKind = "single" | "ao5" | "ao12";
+type PbListener = (kinds: PbKind[]) => void;
+const pbListeners: Set<PbListener> = new Set();
+
+export function onPbAchieved(fn: PbListener): () => void {
+  pbListeners.add(fn);
+  return () => pbListeners.delete(fn);
+}
+
 api.interceptors.response.use((response) => {
   const achHeader = response.headers["x-achievements-unlocked"] as
     | string
@@ -82,6 +95,16 @@ api.interceptors.response.use((response) => {
       .filter((n) => !Number.isNaN(n));
     if (ids.length > 0) {
       challengeListeners.forEach((fn) => fn(ids));
+    }
+  }
+  const pbHeader = response.headers["x-pb-achieved"] as string | undefined;
+  if (pbHeader) {
+    const kinds = pbHeader
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s): s is PbKind => s === "single" || s === "ao5" || s === "ao12");
+    if (kinds.length > 0) {
+      pbListeners.forEach((fn) => fn(kinds));
     }
   }
   return response;

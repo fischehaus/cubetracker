@@ -339,3 +339,53 @@ def test_cstimer_import_keeps_split_times_null(client, db):
     refetched = db.get(Solve, sid)
     assert refetched is not None
     assert refetched.split_times_ms == "[2500,5000,1500,1000]"
+
+
+# ============================================================
+# Phase 8.3: PB-Detection (X-PB-Achieved Header)
+# ============================================================
+
+
+def test_first_solve_no_pb_header(client):
+    """Erster Solve liefert KEINEN PB-header — eine einzelne Zeit ist
+    automatisch der best, aber wir wollen Confetti nur bei Verbesserungen.
+    Ausnahme: per Definition ist der erste Single auch der erste PB.
+    """
+    r = client.post("/solves", json={"time_ms": 12000, "cube_type": "3x3"})
+    assert r.status_code == 201
+    # Erster Solve = Single-PB (es gab vorher keinen)
+    header = r.headers.get("X-PB-Achieved", "")
+    assert "single" in header.split(",")
+
+
+def test_slower_solve_no_pb(client, db):
+    db.add(Solve(time_ms=10000, cube_type="3x3"))
+    db.commit()
+    r = client.post("/solves", json={"time_ms": 12000, "cube_type": "3x3"})
+    assert r.headers.get("X-PB-Achieved", "") == ""
+
+
+def test_faster_solve_triggers_single_pb(client, db):
+    db.add(Solve(time_ms=12000, cube_type="3x3"))
+    db.commit()
+    r = client.post("/solves", json={"time_ms": 10000, "cube_type": "3x3"})
+    pbs = r.headers.get("X-PB-Achieved", "").split(",")
+    assert "single" in pbs
+
+
+def test_dnf_no_single_pb(client):
+    r = client.post("/solves", json={"time_ms": 0, "cube_type": "3x3", "dnf": True})
+    pbs = r.headers.get("X-PB-Achieved", "").split(",")
+    assert "single" not in pbs
+
+
+def test_ao5_pb_when_5th_solve_improves_avg(client, db):
+    """5 Solves: erste 4 haben keine ao5; der 5. setzt erstmal ao5 ein
+    Single-PB-Header ist da, ao5-Header auch (erstmals gesetzt)."""
+    for t in [10000, 11000, 12000, 13000]:
+        db.add(Solve(time_ms=t, cube_type="3x3"))
+    db.commit()
+    r = client.post("/solves", json={"time_ms": 9000, "cube_type": "3x3"})
+    pbs = r.headers.get("X-PB-Achieved", "").split(",")
+    assert "single" in pbs
+    assert "ao5" in pbs
