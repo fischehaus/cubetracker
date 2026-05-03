@@ -12,7 +12,7 @@ from api import backup, export_cstimer, hardware, import_cstimer, sessions, solv
 # Zentrale Version — wird beim setzen eines neuen tags hier gebumpt.
 # Wird sowohl von FastAPI(version=) als auch vom /-health-endpoint genutzt,
 # damit der Frontend-Badge den korrekten Tag spiegelt.
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 app = FastAPI(
     title="cubetracker",

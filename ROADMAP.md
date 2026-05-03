@@ -163,6 +163,37 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase L+ — Daten-Workflows (Tag `v0.8`) ✅
+
+User-feedback-runde nach Phase L: vier konkrete wuensche zu
+hardware-vergleich, csTimer-export und backup. zusammen als
+minor-version v0.8.
+
+- [x] **b: HardwareCompareCard sortierbar + ao12-Spalten**
+  - Backend `/stats/by-hardware` liefert zusaetzlich current_ao12 +
+    best_ao12
+  - Card hat jetzt 8 spalten (PB, Schnitt, ao5, Best ao5, ao12,
+    Best ao12, Solves, Hardware)
+  - Click auf jeden Spalten-Header sortiert (asc <-> desc)
+  - Visueller Indikator ▲▼⇅, aktive spalte lila gefaerbt
+- [x] **c: Voll-Backup B.1 (SQLite-Datei) + B.2 (JSON-Voll-Export)**
+  - GET /backup/sqlite → komplette DB als download
+  - GET /backup/json → schema-versionierter JSON-Voll-Export aller
+    Tabellen (solves, sessions, hardware)
+  - BackupPanel mit zwei karten in VerwaltungTab/Daten
+  - Restore via file-replace + backend-restart (kein upload-endpoint)
+- [x] **d: csTimer-Export**
+  - GET /export/cstimer → exakter csTimer-format-spiegel zum importer
+  - Round-trip-getestet (export → re-import = idempotent bei
+    sekunden-genauen timestamps)
+  - Sessions ohne csTimer-id bekommen freie IDs, orphan-solves
+    landen in pseudo-session 'Ohne Session'
+  - CsTimerExportPanel im VerwaltungTab/Daten
+- [x] **Disziplin 6 (Modul-Check vor Bau) eingefuehrt** — gilt
+      ab jetzt fuer jedes neue Modul
+
+**Tests:** 156 backend + 68 frontend = 224 gruen.
+
 ## Phase L — Layout-Refactor (Tag `v0.7`) ✅
 
 Komplettes Frontend-Re-Konzept nach feature-explosion in Phase 5+5b.
@@ -326,6 +357,7 @@ Feature-Set bewegen.
 - ✅ Phase 5: **fertig** (Hardware-Inventar + Session-Aware Timer, Tag `v0.5`)
 - ✅ Phase 5b: **fertig** (Quick-Wins + Sessions Merge + Hardware-Vergleich + Dashboard-Toggle, Tag `v0.6`)
 - ✅ Phase L: **fertig** (Layout-Refactor: 4 Tabs + Filter pro Bereich + Onboarding + Detail-Modal + Hash-Routing, Tag `v0.7`)
+- ✅ Phase L+: **fertig** (HW-Vergleich sortierbar+ao12 + Voll-Backup + csTimer-Export, Tag `v0.8`)
 - ⏸ Phase 7: pending (Personal Trainer — Achievements + Daily Challenges)
 - ⏸ Phase 8: pending (Distribution / Installer → Tag `v1.0`)
 
@@ -350,3 +382,6 @@ Feature-Set bewegen.
   Filter pro Bereich, Onboarding-Banner, Solve-Detail-Modal,
   URL-Hash-Routing). Snapshot v0.6-Layout liegt unter branch
   `legacy/v0.6-classic-layout`.
+- `v0.8` — Phase L+: HW-Vergleich sortierbar mit ao12-Spalten,
+  Voll-Backup (SQLite + JSON), csTimer-Export. Disziplin 6 (Modul-
+  Check vor Bau) als CLAUDE.md-Regel verankert.

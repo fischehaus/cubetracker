@@ -3,15 +3,15 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-04 mittag. **Phase L fertig, Tag `v0.7`
-> gesetzt.** Komplettes Layout-Refactor: 4 Tabs (Verwaltung neu),
-> Filter pro Bereich (kein globaler Header-Filter mehr),
-> Onboarding-Banner bei leerer DB, Solve-Detail-Modal (ℹ-button
-> in SolveList), URL-Hash-Routing (`#dashboard` etc.).
+> **Letzter Stand:** 2026-05-04 nachmittag. **Phase L+ fertig, Tag
+> `v0.8` gesetzt.** Vier User-Wuensche umgesetzt:
+> - HardwareCompareCard sortierbar mit ao12-Spalten dazu
+> - Voll-Backup (SQLite-Datei + JSON-Voll-Export)
+> - csTimer-Export (round-trip-safe spiegel zum importer)
+> - Disziplin 6 (Modul-Check vor Bau) als CLAUDE.md-Regel
 >
-> **Snapshot vorheriger Layout-Version**: tag `v0.6` + branch
-> `legacy/v0.6-classic-layout` — Rollback jederzeit moeglich
-> (siehe Sektion „Layout-Rollback" unten).
+> **Snapshot v0.6 Layout** weiter verfuegbar: tag `v0.6` + branch
+> `legacy/v0.6-classic-layout`.
 
 ---
 
@@ -157,9 +157,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-L-Features gemerged)
-- **Tags:** `v0.0` … `v0.6`, **`v0.7`** (aktuell)
-- **Tests:** 146 backend + 68 frontend = **214 gruen**
+- **Branch:** `main` (sauber, alle Phase-L+-Features gemerged)
+- **Tags:** `v0.0` … `v0.7`, **`v0.8`** (aktuell)
+- **Tests:** 156 backend + 68 frontend = **224 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber
