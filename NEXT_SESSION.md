@@ -34,12 +34,14 @@
 > - **Datenuebertragung Dev↔Prod via Backup/Restore-Endpoint** (Pflicht
 >   in Phase 9)
 >
-> **Letzter Stand:** 2026-05-04. **Phase 9 fertig, Tag `v1.0`
-> gesetzt.** Distribution-faehig: PyInstaller-Bundle (33 MB), Inno-
-> Setup-Installer-Script, POST /backup/restore mit Dry-Run + Confirm,
-> Restore-UI im BackupPanel, DB-Pfad-Resolution mit 4 Stufen,
-> /api/health mit mode-Feld, Versions-Badge zeigt dev/prod. csTimer-
-> Compat unveraendert. 372 Tests gruen.
+> **Letzter Stand:** 2026-05-04. **Phase 9 fertig, Tag `v1.0.1`
+> (Hotfix) gesetzt.** Distribution-faehig + ausgerollt + live verifiziert.
+> v1.0 hatte einen API-baseURL-Bug (hardcoded localhost:8000) — in v1.0.1
+> behoben (relative URL via `import.meta.env.DEV`-check).
+>
+> **Lesson learned (Klassiker-Bug)**: bei SPA-mit-Backend in der
+> ausgerollten App IMMER Frontend-API-baseURL durch env-vars steuern,
+> NIE hardcoden. Faellt erst beim Distribution-Test auf, nicht im Dev.
 >
 > **Wie ein neuer Installer gebaut wird:** siehe `backend/BUILD.md`
 > (3 Schritte: npm run build → PyInstaller → Inno Setup Compiler).
@@ -272,8 +274,8 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-9-Features gemerged)
-- **Tags:** `v0.0` … `v0.16`, **`v1.0`** (aktuell auf main)
+- **Branch:** `main` (sauber)
+- **Tags:** `v0.0` … `v1.0`, **`v1.0.1`** (aktuell, Hotfix)
 - **Tests:** 260 backend + 112 frontend = **372 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`

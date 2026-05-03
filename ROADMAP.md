@@ -801,3 +801,8 @@ Feature-Set bewegen.
   fuer Dev + Prod parallel, /api/health mit mode-Feld, Versions-
   Badge mit Dev/Prod-Distinction, BUILD.md Bauanleitung. csTimer-
   Compat unveraendert. 372 Tests gruen.
+- `v1.0.1` — Hotfix: Frontend-axios baseURL war hardcoded auf
+  `http://localhost:8000` → in der ausgerollten App (Backend auf :8765)
+  gingen alle API-Calls ins Leere. Fix: dynamisch via
+  `import.meta.env.DEV` (Dev=:8000, Prod=relative URL). Klassiker-
+  Bug der erst beim Distribution-Test auffaellt.
