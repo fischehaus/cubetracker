@@ -163,6 +163,44 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 5b — Quick-Wins + Stats-Bundle (Tag `v0.6`) ✅
+
+User-feedback-runde nach phase 5. Bewusst als eigene minor-version
+markiert, weil mehrere related features in stats + sessions/hardware-
+verwaltung dazugekommen sind.
+
+- [x] **Quick-Wins**:
+  - „Aktivität" mit umlaut (ActivityChart-headline + loading-text)
+  - X-Achse kompakt: pro Tag „03" statt „2026-05-03", pro Woche
+    „W18" statt „2026-W18"
+  - Backend-Version zentralisiert (`__version__` in main.py) und auf
+    `0.6.0` gebumpt — vorher hartkodiert „0.1.0" an zwei stellen
+  - Hardware-Name editierbar in HardwareList (war nur notes editierbar)
+- [x] **5c: Sessions Merge + Delete-Migration**
+  - Backend: `POST /sessions/{id}/merge?target_id=Y` (atomic: solves
+    umlegen, notes appenden, source loeschen)
+  - Backend: `DELETE /sessions/{id}?move_solves_to=Y` — solves
+    optional auf andere session verschieben statt verwaisen
+  - Frontend: SessionList mit Modals fuer beide aktionen
+  - 9 neue api-tests
+- [x] **5d: Hardware-Performance-Vergleich**
+  - Backend: `GET /stats/by-hardware?cube_type=X` — pro hardware:
+    count, mean, best, ao5; sortiert nach pb
+  - „Ohne Hardware" als pseudo-gruppe fuer csTimer-importe
+  - Frontend: HardwareCompareCard im ANALYSE-tab (nur sichtbar wenn
+    cube-filter gesetzt — ohne filter waere vergleich bedeutungslos)
+  - 6 neue api-tests
+- [x] **6: Dashboard Cube/Session-Vergleich + Hardware-Drilldown**
+  - Backend: `GET /stats/by-session` analog zu by-cube
+  - Frontend: neue MultiCompareCard mit toggle [Cube|Session]
+    - mode-wechsel schliesst aktive drilldowns
+    - klick auf cube-zeile → inline hardware-vergleich (mit ★ pb-marker)
+    - klick auf session-zeile → inline cubes-in-session-tabelle
+  - alte MultiCubeCompareCard.tsx ersetzt + geloescht
+  - 5 neue api-tests
+
+**Tests gesamt:** 146 backend + 68 frontend = 214 gruen.
+
 ## Phase 5 — Hardware-Tracking + Session-Aware Timer (Tag `v0.5`) ✅
 
 Seed-Daten in `docs/hardware-inventory-seed.md` (37 physische Cubes
@@ -254,7 +292,9 @@ Feature-Set bewegen.
 - ✅ Phase 3: **fertig** (Coaching + Insights + Inline-Edit, Tag `v0.3`)
 - ✅ Phase 4: **fertig** (Visualisierungs-Refactor + UX-Polish, Tag `v0.4`)
 - ✅ Phase 5: **fertig** (Hardware-Inventar + Session-Aware Timer, Tag `v0.5`)
-- ⏸ Phase 6: pending (Distribution / Installer → Tag `v1.0`)
+- ✅ Phase 5b: **fertig** (Quick-Wins + Sessions Merge + Hardware-Vergleich + Dashboard-Toggle, Tag `v0.6`)
+- ⏸ Phase 7: pending (Personal Trainer — Achievements + Daily Challenges)
+- ⏸ Phase 8: pending (Distribution / Installer → Tag `v1.0`)
 
 ## Tags
 
@@ -270,3 +310,6 @@ Feature-Set bewegen.
 - `v0.5` — Phase 5: Hardware-Inventar (CRUD + Seed), Session-Aware
   Timer (Selektoren mit Auto-Pick + neue Session inline), SessionList
   + HardwareList im ANALYSE-Tab, ActivityChart pro Tag/Woche/Monat
+- `v0.6` — Phase 5b: Quick-Wins (Umlaut, Tag-Achse, Backend-Version,
+  HW-Rename), Session-Merge + Delete-Migration, Hardware-Performance-
+  Vergleich, Dashboard-Toggle Cube/Session mit Hardware-Drilldown

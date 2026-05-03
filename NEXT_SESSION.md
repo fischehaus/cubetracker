@@ -3,11 +3,12 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-04. **Phase 5 fertig, Tag `v0.5`
-> gesetzt.** Hardware-Inventar (CRUD + Seed mit 37 Cubes), Session-
-> Aware Timer (3 Selektoren cube/session/hardware mit Auto-Pick,
-> Inline-„Neue Session"), SessionList im ANALYSE-Tab, Hardware-Anzeige
-> in SolveList, ActivityChart pro Tag/Woche/Monat.
+> **Letzter Stand:** 2026-05-04 spaeter Vormittag. **Phase 5b fertig,
+> Tag `v0.6` gesetzt.** Quick-Wins (Umlaut, Tag-Achse kompakt,
+> Backend-Version zentralisiert, HW-Rename), Session-Merge + Delete-
+> Migration mit Modal, Hardware-Performance-Vergleich (`/stats/by-hardware`
+> + Card im ANALYSE), Dashboard-Toggle Cube/Session mit Hardware-
+> Drilldown beim Klick.
 
 ---
 
@@ -111,7 +112,20 @@ Hardware-Tracking ist nach Phase 5 verschoben.
 - **F19 Aktive-Hardware-Empfehlung** pro Event
 - **F20 Custom-Reports + Backup/Sync**
 
-**Phase 6 — Distribution** (Tag `v1.0`, neu hinzugefuegt 2026-05-03):
+**Phase 7 — Personal Trainer MVP** (neu geplant 2026-05-04):
+
+User-Wunsch nach Gamification-Modul. Aufgeteilt in zwei branches:
+
+- **7a Achievements**: ~15 vordefinierte achievements (Volume,
+  Speed-PBs, Variety, Hardware), Auto-Check nach jedem Solve,
+  AchievementsCard im DASHBOARD mit unlocked/locked-grid
+- **7b Daily Challenges**: 3 challenges pro tag generiert basierend
+  auf user-stats (Volume / Speed / Comeback / Diversity / Consistency),
+  fortschritts-tracking, expiry am tagesende, Card im DASHBOARD
+
+aufwand-schaetzung: ~1 tag MVP komplett.
+
+**Phase 8 — Distribution** (Tag `v1.0`, neu hinzugefuegt 2026-05-03):
 
 App als Windows-Installer fuer fremde Rechner — User-Wunsch, damit
 die App z.B. an Familien-/Freunde-Test verteilbar ist.
@@ -140,9 +154,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-5-Features gemerged)
-- **Tags:** `v0.0`, `v0.1`, `v0.2`, `v0.3`, `v0.4`, **`v0.5`** (aktuell)
-- **Tests:** 126 backend + 68 frontend = **194 gruen**
+- **Branch:** `main` (sauber, alle Phase-5b-Features gemerged)
+- **Tags:** `v0.0` … `v0.5`, **`v0.6`** (aktuell)
+- **Tests:** 146 backend + 68 frontend = **214 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber
