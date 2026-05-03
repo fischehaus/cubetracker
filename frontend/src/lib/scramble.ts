@@ -10,7 +10,13 @@
 // Instanz. Das ist OK weil scrambow keine teure Initialisierung hat
 // und wir so race-conditions zwischen concurrent generations vermeiden.
 
-import { Scrambow } from "scrambow";
+// Wir importieren NICHT von "scrambow" direkt, weil dessen UMD-Bundle
+// von Vite 8 / Rolldown wegen scope-uebergreifender `f`-Wiederverwendung
+// nicht geparst werden kann. Stattdessen patched-vendor-copy unter
+// src/vendor/, die das zweite `f` zu `_F` umbenennt (semantisch
+// identisch, im skewb-Scrambler-Loop). Types kommen aus dem npm-Paket
+// via *.d.ts-Stub im selben vendor-Ordner.
+import { Scrambow } from "../vendor/scrambow-patched";
 
 /**
  * Mappt einen App-cube_type ("3x3", "OH", "Pyraminx", …) auf den
