@@ -12,6 +12,15 @@
 > normal weitergebaut und als Updates ausgerollt. KEIN feature-freeze
 > nach v1.0.
 >
+> **TODO fuer spaeter (User-Notiz 2026-05-03):** Code-Orchestrator-
+> Plan vs. Cubetracker-Praxis ehrlich vergleichen. Cubetracker wurde
+> ohne strikte Anwendung des Code-Orchestrator-Workflows gebaut, hat
+> aber organisch sehr aehnliche Disziplinen entwickelt (Snapshots vor
+> Phasen, Modul-Check vor Bau, ROADMAP-/NEXT-SESSION-Pflicht-Updates,
+> Test-Pyramide pure→service→api). Vor naechstem Projekt: `project_
+> code_orchestrator.md` lesen + Diff zwischen Plan und unserer Praxis
+> erstellen, um den Plan auf Basis der Erfahrung nachzuschaerfen.
+>
 > **Parallel-Betrieb Dev + Prod auf demselben Rechner (User-Anforderung):**
 > Phase 9 muss so konfiguriert werden, dass die ausgerollte App OHNE
 > Konflikt parallel zur Dev-Umgebung laeuft. Saubere Trennung erforderlich:
