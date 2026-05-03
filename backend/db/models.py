@@ -138,6 +138,47 @@ class Achievement(Base):
         return f"<Achievement code={self.code!r}>"
 
 
+class Challenge(Base):
+    """Eine Daily Challenge (Phase 7b).
+
+    Wird taeglich generiert (max 3 pro Tag). Progress wird nach jedem
+    Solve aktualisiert. Monotonic: Progress kann nur steigen, nicht
+    sinken (wie mit User abgesprochen).
+
+    `kind` legt Logik fest:
+      - "volume":   target = anzahl-solves, optional cube_type-filter
+      - "speed":    target = ziel-zeit-ms in cube_type — progress=1 wenn erreicht
+      - "comeback": target = 1, ein solve in cube_type genuegt
+      - "diversity": target = anzahl-distinct-cubes heute
+
+    `params_json` haelt zusaetzliche kind-spezifische Felder (selten genutzt,
+    aber erlaubt erweiterungen ohne schema-aenderung).
+    """
+
+    __tablename__ = "challenges"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    kind: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    cube_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    params_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    target_value: Mapped[int] = mapped_column(Integer, nullable=False)
+    progress: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    generated_for_date: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    dismissed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return (
+            f"<Challenge id={self.id} kind={self.kind!r} "
+            f"progress={self.progress}/{self.target_value}>"
+        )
+
+
 class Hardware(Base):
     """Ein physischer Wuerfel im Inventar.
 

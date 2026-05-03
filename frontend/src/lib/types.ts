@@ -69,6 +69,19 @@ export interface AchievementItem {
   unlocked_at: string | null;
 }
 
+export type ChallengeKind = "volume" | "speed" | "comeback" | "diversity";
+
+export interface ChallengeItem {
+  id: number;
+  kind: ChallengeKind;
+  cube_type: string | null;
+  target_value: number;
+  progress: number;
+  generated_for_date: string;
+  completed_at: string | null;
+  dismissed: boolean;
+}
+
 export interface Hardware {
   id: number;
   name: string;

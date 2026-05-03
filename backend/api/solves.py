@@ -17,6 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session as OrmSession
 
 from achievements.service import run_achievement_check
+from challenges.service import update_today_progress_for_solve
 from db.database import get_db
 from db.models import Solve
 from db.schemas import SolveCreate, SolveRead, SolveUpdate
@@ -25,13 +26,24 @@ router = APIRouter(prefix="/solves", tags=["solves"])
 
 
 def _set_unlock_header(response: Response, db: OrmSession) -> None:
-    """Nach Solve-Mutation: Achievement-Check ausfuehren. Wenn etwas
-    neu unlocked wurde, im Response-Header zurueckgeben — Frontend zeigt
-    Toast. Header-Format: kommagetrennte codes.
+    """Nach Solve-Mutation: Achievement-Check + Challenge-Progress.
+    Beides via Response-Header zurueck, sodass Frontend Toasts feuern
+    kann.
     """
     new_unlocks = run_achievement_check(db)
     if new_unlocks:
         response.headers["X-Achievements-Unlocked"] = ",".join(new_unlocks)
+
+
+def _set_unlock_header_with_solve(response: Response, db: OrmSession, solve: Solve | None) -> None:
+    """Achievement-Check + Challenge-Progress fuer create/update.
+    Bei delete reicht der achievement-check (es gibt keinen 'solve' mehr).
+    """
+    _set_unlock_header(response, db)
+    if solve is not None:
+        completed_ids = update_today_progress_for_solve(db, solve)
+        if completed_ids:
+            response.headers["X-Challenges-Completed"] = ",".join(str(i) for i in completed_ids)
 
 
 def _get_solve_or_404(solve_id: int, db: OrmSession) -> Solve:
@@ -77,7 +89,7 @@ def create_solve(
     db.add(solve)
     db.commit()
     db.refresh(solve)
-    _set_unlock_header(response, db)
+    _set_unlock_header_with_solve(response, db, solve)
     return solve
 
 
@@ -101,7 +113,8 @@ def update_solve(
         setattr(solve, key, value)
     db.commit()
     db.refresh(solve)
-    _set_unlock_header(response, db)
+    # PATCH kann auch DNF/+2-Toggle sein → Challenge-Progress neu rechnen
+    _set_unlock_header_with_solve(response, db, solve)
     return solve
 
 

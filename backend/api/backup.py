@@ -27,7 +27,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session as OrmSession
 
 from db.database import get_db
-from db.models import Achievement, Hardware, Solve
+from db.models import Achievement, Challenge, Hardware, Solve
 from db.models import Session as DbSession
 
 router = APIRouter(prefix="/backup", tags=["backup"])
@@ -81,6 +81,7 @@ def backup_json(db: OrmSession = Depends(get_db)) -> dict[str, Any]:
     sessions = db.scalars(select(DbSession)).all()
     hardware = db.scalars(select(Hardware)).all()
     achievements = db.scalars(select(Achievement)).all()
+    challenges = db.scalars(select(Challenge)).all()
 
     return {
         "schema_version": __version__,
@@ -90,11 +91,13 @@ def backup_json(db: OrmSession = Depends(get_db)) -> dict[str, Any]:
             "sessions": len(sessions),
             "hardware": len(hardware),
             "achievements": len(achievements),
+            "challenges": len(challenges),
         },
         "solves": [_solve_to_dict(s) for s in solves],
         "sessions": [_session_to_dict(s) for s in sessions],
         "hardware": [_hardware_to_dict(h) for h in hardware],
         "achievements": [_achievement_to_dict(a) for a in achievements],
+        "challenges": [_challenge_to_dict(c) for c in challenges],
     }
 
 
@@ -134,6 +137,21 @@ def _achievement_to_dict(a: Achievement) -> dict[str, Any]:
         "id": a.id,
         "code": a.code,
         "unlocked_at": a.unlocked_at.isoformat() if a.unlocked_at else None,
+    }
+
+
+def _challenge_to_dict(c: Challenge) -> dict[str, Any]:
+    return {
+        "id": c.id,
+        "kind": c.kind,
+        "cube_type": c.cube_type,
+        "params_json": c.params_json,
+        "target_value": c.target_value,
+        "progress": c.progress,
+        "generated_for_date": c.generated_for_date.isoformat() if c.generated_for_date else None,
+        "completed_at": c.completed_at.isoformat() if c.completed_at else None,
+        "dismissed": c.dismissed,
+        "created_at": c.created_at.isoformat() if c.created_at else None,
     }
 
 

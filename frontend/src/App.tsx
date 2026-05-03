@@ -16,6 +16,8 @@ import { ActivityCard } from "./components/ActivityCard";
 import { ActivityChart } from "./components/ActivityChart";
 import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
 import { BigTimerInput } from "./components/BigTimerInput";
+import { ChallengeCompletionToaster } from "./components/ChallengeCompletionToaster";
+import { ChallengesMiniCard } from "./components/ChallengesMiniCard";
 import { DashboardFilterBar } from "./components/DashboardFilterBar";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HistogramChart } from "./components/HistogramChart";
@@ -128,18 +130,21 @@ function DashboardTab({
 }) {
   // DASHBOARD = Live-Sicht. Optionaler Session-Filter (default 'alle').
   // Cube-Filter bewusst NICHT — Dashboard vergleicht cube-uebergreifend.
-  // Phase 7a: AchievementsMiniCard kompakt im Top-Row, Klick fuehrt
-  // zum Trainer-Tab.
+  // Phase 7a: AchievementsMiniCard kompakt — Klick fuehrt zum Trainer-Tab.
+  // Phase 7b: ChallengesMiniCard daneben, ebenfalls Klick → Trainer-Tab.
   return (
     <div className="space-y-6">
       <DashboardFilterBar
         sessionId={sessionId}
         onSessionIdChange={setSessionId}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ActivityCard sessionId={sessionId} slice="today" />
         <ActivityCard sessionId={sessionId} slice="week" />
         <ReminderCard sessionId={sessionId} emptyMode="visible" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ChallengesMiniCard onSwitchTab={onSwitchTab} />
         <AchievementsMiniCard onSwitchTab={onSwitchTab} />
       </div>
       <MultiCompareCard sessionId={sessionId} />
@@ -296,12 +301,13 @@ function MainLayout() {
         {tab === "trainer" && <TrainerTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          v0.9 · 5 Tabs · Personal Trainer (Achievements)
+          v0.10 · 5 Tabs · Personal Trainer (Achievements + Daily Challenges)
         </footer>
       </div>
 
-      {/* Globaler Achievement-Toaster — bleibt auf jedem Tab sichtbar */}
+      {/* Globale Toaster — bleiben auf jedem Tab sichtbar */}
       <AchievementToaster />
+      <ChallengeCompletionToaster />
     </div>
   );
 }
