@@ -56,6 +56,28 @@ function tickInterval(bucketCount: number): number | "preserveStartEnd" {
   return "preserveStartEnd";
 }
 
+/**
+ * Tick-Label kompakt formatieren je nach Granularitaet:
+ *   day   "2026-05-03"  → "03" (Tag im Monat)
+ *   week  "2026-W18"    → "W18"
+ *   month "2026-05"     → "2026-05" (bleibt wie ist)
+ *
+ * Tooltip + Legend zeigen das volle Label, nur die Achse wird platzsparend.
+ */
+function formatTick(period: string, gran: ActivityGranularity): string {
+  if (gran === "day") {
+    // ISO-date YYYY-MM-DD → Tag
+    const parts = period.split("-");
+    return parts.length === 3 ? parts[2] : period;
+  }
+  if (gran === "week") {
+    // YYYY-Www → Www (kuerzt Jahr weg)
+    const m = period.match(/W\d+/);
+    return m ? m[0] : period;
+  }
+  return period; // month bleibt als YYYY-MM
+}
+
 export function ActivityChart({ cubeType, sessionId }: Props) {
   const [granularity, setGranularity] = useState<ActivityGranularity>("day");
   const [days, setDays] = useState<number>(30);
@@ -88,7 +110,7 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
-        Aktivitaet wird geladen …
+        Aktivität wird geladen …
       </div>
     );
   }
@@ -105,7 +127,7 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <h3 className="text-2xl font-semibold text-gray-100">
-          Aktivitaet{" "}
+          Aktivität{" "}
           <span className="text-base text-gray-400">
             ({data.total_count} Solves)
           </span>
@@ -174,6 +196,7 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
             stroke="#6b7280"
             tick={{ fontSize: 12 }}
             interval={tickInterval(data.buckets.length)}
+            tickFormatter={(v) => formatTick(String(v), granularity)}
           />
           <YAxis stroke="#6b7280" tick={{ fontSize: 13 }} width={50} allowDecimals={false} />
           <Tooltip

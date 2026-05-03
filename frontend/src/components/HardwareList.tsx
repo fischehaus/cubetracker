@@ -29,8 +29,10 @@ export function HardwareList() {
   const [newName, setNewName] = useState("");
   const [newCube, setNewCube] = useState("3x3");
   const [seedMessage, setSeedMessage] = useState<string | null>(null);
-  const [editingNotes, setEditingNotes] = useState<{
+  // Edit-State unterscheidet zwischen Name- und Notes-Edit pro Eintrag.
+  const [editing, setEditing] = useState<{
     id: number;
+    field: "name" | "notes";
     value: string;
   } | null>(null);
 
@@ -186,7 +188,10 @@ export function HardwareList() {
             </h3>
             <ul className="space-y-1.5">
               {items.map((h) => {
-                const isEditingThis = editingNotes?.id === h.id;
+                const isEditingName =
+                  editing?.id === h.id && editing.field === "name";
+                const isEditingNotes =
+                  editing?.id === h.id && editing.field === "notes";
                 return (
                   <li
                     key={h.id}
@@ -196,27 +201,59 @@ export function HardwareList() {
                         : "border-gray-800 bg-gray-900/20 opacity-60"
                     }`}
                   >
-                    <span className="text-base text-gray-100 font-medium min-w-[12rem]">
-                      {h.name}
-                    </span>
-                    {isEditingThis ? (
+                    {/* Name (click-to-edit) */}
+                    {isEditingName ? (
                       <input
                         type="text"
-                        value={editingNotes!.value}
+                        value={editing!.value}
                         onChange={(e) =>
-                          setEditingNotes({ ...editingNotes!, value: e.target.value })
+                          setEditing({ ...editing!, value: e.target.value })
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            const newName = editing!.value.trim();
+                            if (!newName) return;
+                            update.mutate(
+                              { id: h.id, payload: { name: newName } },
+                              { onSuccess: () => setEditing(null) }
+                            );
+                          }
+                          if (e.key === "Escape") setEditing(null);
+                        }}
+                        autoFocus
+                        className="rounded border border-purple-500 bg-gray-800 px-2 py-1 text-base text-gray-100 focus:outline-none min-w-[12rem]"
+                      />
+                    ) : (
+                      <span
+                        className="text-base text-gray-100 font-medium min-w-[12rem] cursor-pointer hover:text-purple-300"
+                        onClick={() =>
+                          setEditing({ id: h.id, field: "name", value: h.name })
+                        }
+                        title="Click zum Umbenennen"
+                      >
+                        {h.name}
+                      </span>
+                    )}
+
+                    {/* Notes (click-to-edit) */}
+                    {isEditingNotes ? (
+                      <input
+                        type="text"
+                        value={editing!.value}
+                        onChange={(e) =>
+                          setEditing({ ...editing!, value: e.target.value })
                         }
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             update.mutate(
                               {
                                 id: h.id,
-                                payload: { notes: editingNotes!.value || null },
+                                payload: { notes: editing!.value.trim() || null },
                               },
-                              { onSuccess: () => setEditingNotes(null) }
+                              { onSuccess: () => setEditing(null) }
                             );
                           }
-                          if (e.key === "Escape") setEditingNotes(null);
+                          if (e.key === "Escape") setEditing(null);
                         }}
                         autoFocus
                         className="flex-1 rounded border border-purple-500 bg-gray-800 px-2 py-1 text-sm text-gray-100 focus:outline-none"
@@ -225,7 +262,11 @@ export function HardwareList() {
                       <span
                         className="flex-1 text-sm text-gray-400 cursor-pointer truncate"
                         onClick={() =>
-                          setEditingNotes({ id: h.id, value: h.notes ?? "" })
+                          setEditing({
+                            id: h.id,
+                            field: "notes",
+                            value: h.notes ?? "",
+                          })
                         }
                         title="Click zum Bearbeiten"
                       >
@@ -234,6 +275,7 @@ export function HardwareList() {
                         )}
                       </span>
                     )}
+
                     <button
                       onClick={() =>
                         update.mutate({
@@ -252,11 +294,15 @@ export function HardwareList() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm(`„${h.name}" wirklich loeschen?`))
+                        if (
+                          confirm(
+                            `Hardware „${h.name}" wirklich loeschen?\n\nBetroffene Solves bleiben erhalten, verlieren aber ihre Hardware-Zuordnung.`
+                          )
+                        )
                           del.mutate(h.id);
                       }}
                       className="text-sm rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-                      title="Loeschen — betroffene Solves verlieren ihre Hardware-Zuordnung"
+                      title="Loeschen — Solves bleiben, hardware_id wird NULL"
                     >
                       🗑
                     </button>
@@ -269,9 +315,9 @@ export function HardwareList() {
       </div>
 
       <p className="mt-4 text-xs text-gray-500">
-        Click auf eine Notiz zum Bearbeiten (Enter speichert). Loeschen
-        entfernt nur den Hardware-Eintrag — alte Solves bleiben erhalten,
-        verlieren aber die Hardware-Zuordnung.
+        Click auf Name oder Notiz zum Bearbeiten (Enter speichert,
+        Esc bricht ab). Loeschen entfernt nur den Hardware-Eintrag —
+        alte Solves bleiben erhalten, verlieren aber die Hardware-Zuordnung.
       </p>
     </div>
   );
