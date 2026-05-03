@@ -22,7 +22,7 @@ export function CubeStateView({ caseId, size = "small", alt }: Props) {
 
   const dims =
     size === "large"
-      ? "w-48 h-32" // 192px x 128px (DrillCard)
+      ? "w-72 h-52" // 288px x 208px (DrillCard) — Phase 8.4-Update: groesseres Drill-Fenster
       : "w-16 h-11"; // 64px x 44px (case-grid)
 
   if (!url) {

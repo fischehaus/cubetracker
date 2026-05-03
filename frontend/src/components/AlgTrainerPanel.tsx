@@ -90,10 +90,10 @@ export function AlgTrainerPanel() {
 
       <p className="mb-4 text-sm text-gray-500">{subsetData.name}</p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-        {/* Cases-Liste */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-6">
+        {/* Cases-Liste — User-Wunsch: max 2 Spalten */}
         <div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {subsetData.cases.map((c) => {
               const s = statsMap.get(c.id);
               const isActive = c.id === activeCaseId;
