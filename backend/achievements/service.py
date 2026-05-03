@@ -9,6 +9,8 @@ Verantwortlich fuer:
 
 from __future__ import annotations
 
+from datetime import date, timedelta
+
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session as OrmSession
 
@@ -48,6 +50,40 @@ def _build_snapshot(db: OrmSession) -> AchievementInput:
 
     hardware_count = db.scalar(select(func.count(Hardware.id))) or 0
 
+    # Phase 8.5: Tages-Volume-Aggregation
+    # Wir gruppieren nach DATE(timestamp) + cube_type → counts, dann
+    # nehmen pro cube den maximalen Tageswert.
+    day_rows = db.execute(
+        select(
+            func.date(Solve.timestamp).label("day"),
+            Solve.cube_type,
+            func.count(Solve.id),
+        )
+        .where(Solve.dnf.is_(False))
+        .group_by("day", Solve.cube_type)
+    ).all()
+
+    max_per_cube: dict[str, int] = {}
+    per_day_total: dict[str, int] = {}  # day → total count over all cubes
+    days_with_3x3_100plus: set[str] = set()
+    all_active_days: set[str] = set()
+    for day, cube_type, cnt in day_rows:
+        cnt = int(cnt)
+        day_str = str(day)
+        cur = max_per_cube.get(cube_type, 0)
+        if cnt > cur:
+            max_per_cube[cube_type] = cnt
+        per_day_total[day_str] = per_day_total.get(day_str, 0) + cnt
+        if cube_type == "3x3" and cnt >= 100:
+            days_with_3x3_100plus.add(day_str)
+        all_active_days.add(day_str)
+
+    max_one_day_any = max(per_day_total.values(), default=0)
+
+    # Phase 8.5: Streak-Detection.
+    max_consec_3x3_100 = _longest_consecutive_day_streak(days_with_3x3_100plus)
+    max_solve_streak = _longest_consecutive_day_streak(all_active_days)
+
     return AchievementInput(
         total_solves=int(total_solves),
         total_valid_solves=int(total_valid),
@@ -55,7 +91,32 @@ def _build_snapshot(db: OrmSession) -> AchievementInput:
         best_ms_per_cube=best_per_cube,
         distinct_cube_types=int(distinct_cubes),
         hardware_count=int(hardware_count),
+        max_solves_one_day_per_cube=max_per_cube,
+        max_solves_one_day_any=max_one_day_any,
+        max_consecutive_days_3x3_100plus=max_consec_3x3_100,
+        max_solve_streak_days=max_solve_streak,
     )
+
+
+def _longest_consecutive_day_streak(date_strings: set[str]) -> int:
+    """Pure helper: nimmt eine Menge ISO-date-Strings (YYYY-MM-DD) und
+    liefert die laengste Streak von aufeinanderfolgenden Tagen.
+
+    Beispiel: {2026-01-01, 2026-01-02, 2026-01-03, 2026-01-05} → 3.
+    """
+    if not date_strings:
+        return 0
+    days = sorted(date.fromisoformat(d) for d in date_strings)
+    longest = 1
+    current = 1
+    for i in range(1, len(days)):
+        if days[i] - days[i - 1] == timedelta(days=1):
+            current += 1
+            if current > longest:
+                longest = current
+        else:
+            current = 1
+    return longest
 
 
 def run_achievement_check(db: OrmSession) -> list[str]:

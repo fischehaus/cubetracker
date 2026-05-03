@@ -67,10 +67,15 @@ VOLUME_ANY_CUBE: list[AchievementDef] = [
 # ============================================================
 
 SPEED_3X3: list[AchievementDef] = [
+    AchievementDef("pb_3x3_sub_30", "Sub-30", "3x3-Solve unter 30 Sekunden", "speed", "🐌"),
+    AchievementDef(
+        "pb_3x3_sub_22_95", "Sub-22.95", "3x3-Solve unter 22.95 Sekunden", "speed", "🦔"
+    ),
     AchievementDef("pb_3x3_sub_15", "Sub-15", "3x3-Solve unter 15 Sekunden", "speed", "🐢"),
     AchievementDef("pb_3x3_sub_12", "Sub-12", "3x3-Solve unter 12 Sekunden", "speed", "🐇"),
     AchievementDef("pb_3x3_sub_10", "Sub-10", "3x3-Solve unter 10 Sekunden", "speed", "⚡"),
     AchievementDef("pb_3x3_sub_8", "Sub-8", "3x3-Solve unter 8 Sekunden", "speed", "🚀"),
+    AchievementDef("pb_3x3_sub_6_66", "Hex-Master", "3x3-Solve unter 6.66 Sekunden", "speed", "🔥"),
 ]
 
 # ============================================================
@@ -112,11 +117,74 @@ HARDWARE: list[AchievementDef] = [
 ]
 
 # ============================================================
+# Phase 8.5 — Tages-Volume + Marathon + Wochen-Disziplin + Streaks
+# ============================================================
+
+VOLUME_DAY: list[AchievementDef] = [
+    AchievementDef(
+        "volume_day_3x3_100", "100er-Tag (3x3)", "100 3x3-Solves an einem Tag", "volume", "📅"
+    ),
+    AchievementDef(
+        "volume_day_2x2_100", "100er-Tag (2x2)", "100 2x2-Solves an einem Tag", "volume", "📅"
+    ),
+    AchievementDef(
+        "volume_day_4x4_100", "100er-Tag (4x4)", "100 4x4-Solves an einem Tag", "volume", "📅"
+    ),
+    AchievementDef(
+        "volume_day_5x5_100", "100er-Tag (5x5)", "100 5x5-Solves an einem Tag", "volume", "📅"
+    ),
+    AchievementDef(
+        "volume_day_oh_100", "100er-Tag (OH)", "100 OH-Solves an einem Tag", "volume", "📅"
+    ),
+    AchievementDef(
+        "volume_day_any_200",
+        "Marathon-Tag",
+        "200 Solves an einem Tag (egal welcher Cube)",
+        "volume",
+        "🏃",
+    ),
+    AchievementDef(
+        "volume_week_3x3_100daily",
+        "Wochen-Disziplin",
+        "7 Tage in Folge je ≥100 3x3-Solves",
+        "volume",
+        "📈",
+    ),
+]
+
+STREAKS: list[AchievementDef] = [
+    AchievementDef(
+        "streak_solve_7", "Wochen-Aktiv", "7 Tage in Folge mit mind. 1 Solve", "consistency", "🔥"
+    ),
+    AchievementDef(
+        "streak_solve_30",
+        "Monats-Disziplin",
+        "30 Tage in Folge mit mind. 1 Solve",
+        "consistency",
+        "💪",
+    ),
+    AchievementDef(
+        "streak_solve_100",
+        "Cuber-Lifestyle",
+        "100 Tage in Folge mit mind. 1 Solve",
+        "consistency",
+        "👑",
+    ),
+]
+
+# ============================================================
 # Alle zusammen — single source of truth
 # ============================================================
 
 ALL_ACHIEVEMENTS: list[AchievementDef] = (
-    VOLUME_TOTAL + VOLUME_3X3 + VOLUME_ANY_CUBE + SPEED_3X3 + VARIETY + HARDWARE
+    VOLUME_TOTAL
+    + VOLUME_3X3
+    + VOLUME_ANY_CUBE
+    + VOLUME_DAY
+    + SPEED_3X3
+    + VARIETY
+    + HARDWARE
+    + STREAKS
 )
 
 

@@ -14,6 +14,7 @@ const CATEGORY_LABELS: Record<AchievementItem["category"], string> = {
   speed: "Geschwindigkeit (3x3)",
   variety: "Vielseitigkeit",
   hardware: "Hardware",
+  consistency: "Konsistenz & Streaks",
 };
 
 const CATEGORY_ORDER: AchievementItem["category"][] = [
@@ -21,6 +22,7 @@ const CATEGORY_ORDER: AchievementItem["category"][] = [
   "speed",
   "variety",
   "hardware",
+  "consistency",
 ];
 
 export function AchievementsCard() {
