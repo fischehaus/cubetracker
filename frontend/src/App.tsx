@@ -14,19 +14,16 @@ import { ActivityChart } from "./components/ActivityChart";
 import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
 import { BigTimerInput } from "./components/BigTimerInput";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
-import { HardwareList } from "./components/HardwareList";
 import { HistogramChart } from "./components/HistogramChart";
-import { ImportPanel } from "./components/ImportPanel";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
 import { MultiCompareCard } from "./components/MultiCompareCard";
-import { OutlierCard } from "./components/OutlierCard";
 import { ReminderCard } from "./components/ReminderCard";
-import { SessionList } from "./components/SessionList";
 import { SessionSwitcher } from "./components/SessionSwitcher";
 import { SolveList } from "./components/SolveList";
 import { StatsCard } from "./components/StatsCard";
 import { TabBar, type AppTab } from "./components/TabBar";
 import { TrendsChart } from "./components/TrendsChart";
+import { VerwaltungTab } from "./components/VerwaltungTab";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -131,12 +128,18 @@ function AnalyseTab({
   cubeFilter: string;
   setCubeFilter: (s: string) => void;
 }) {
-  // ANALYSE = Deep-Dive. Layout:
-  //  Filter-Bar oben (cube zentral, session aus globalem header)
-  //  Trends-Chart full-width gross
-  //  Stats + Histogramm + Outlier in 3-spalten-grid
-  //  Solves-Liste full-width unten
-  //  Import-Panel ganz unten (admin-aktion)
+  // ANALYSE = NUR Auswertung (kein Datenpflege-Krempel mehr).
+  // Layout:
+  //  Filter-Bar oben
+  //  Stats kompakt (eine Zeile, fasst den Filter zusammen)
+  //  Trends-Chart (full-width)
+  //  Activity-Chart (full-width)
+  //  Histogramm + Hardware-Vergleich (2-spalten, Hardware nur bei
+  //    aktivem cube-filter — sonst nimmt Histogramm volle Breite)
+  //  Solveliste (mit Inline-Edit + Limit-Selektor)
+  //
+  // Sessions/Hardware/Import/Outliers sind in den VERWALTUNG-Tab
+  // gewandert (Phase L-1).
   return (
     <div className="space-y-6">
       <AnalyseFilterBar
@@ -144,41 +147,32 @@ function AnalyseTab({
         onCubeFilterChange={setCubeFilter}
       />
 
+      <StatsCard cubeType={cubeFilter || undefined} sessionId={sessionId} />
+
       <TrendsChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
 
       <ActivityChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
 
-      {cubeFilter && (
-        <HardwareCompareCard cubeType={cubeFilter} sessionId={sessionId} />
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      {cubeFilter ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <HistogramChart
             cubeType={cubeFilter || undefined}
             sessionId={sessionId}
           />
+          <HardwareCompareCard cubeType={cubeFilter} sessionId={sessionId} />
         </div>
-        <div>
-          <OutlierCard sessionId={sessionId} />
-        </div>
-      </div>
+      ) : (
+        <HistogramChart
+          cubeType={cubeFilter || undefined}
+          sessionId={sessionId}
+        />
+      )}
 
       <SolveList
         sessionId={sessionId}
         cubeFilter={cubeFilter}
         onCubeFilterChange={setCubeFilter}
       />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <StatsCard cubeType={cubeFilter || undefined} sessionId={sessionId} />
-        <ImportPanel />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SessionList />
-        <HardwareList />
-      </div>
     </div>
   );
 }
@@ -190,7 +184,12 @@ function AnalyseTab({
 function loadInitialTab(): AppTab {
   if (typeof window === "undefined") return "dashboard";
   const stored = window.localStorage.getItem(TAB_STORAGE_KEY);
-  if (stored === "timer" || stored === "dashboard" || stored === "analyse") {
+  if (
+    stored === "timer" ||
+    stored === "dashboard" ||
+    stored === "analyse" ||
+    stored === "verwaltung"
+  ) {
     return stored;
   }
   return "dashboard";
@@ -248,9 +247,10 @@ function MainLayout() {
             setCubeFilter={setCubeFilter}
           />
         )}
+        {tab === "verwaltung" && <VerwaltungTab sessionId={sessionId} />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          Phase 4 fertig (v0.4) · Tab-Routing + UI-Refresh aktiv.
+          v0.6 · L-1 Layout (4 Tabs)
         </footer>
       </div>
     </div>
