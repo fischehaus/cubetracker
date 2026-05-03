@@ -2,7 +2,12 @@
 // Persistiert via lib/settings.ts → localStorage. Nicht im JSON-Backup
 // enthalten (per-Geraet-Konfiguration; aenderbar in Phase 8.5 falls Bedarf).
 
-import { SETTINGS_DEFAULTS, useAppSettings } from "../lib/settings";
+import {
+  FONT_SIZE_LABELS,
+  SETTINGS_DEFAULTS,
+  type TimerFontSize,
+  useAppSettings,
+} from "../lib/settings";
 
 const MAX_PHASES = 8;
 
@@ -157,6 +162,33 @@ export function SettingsPanel() {
                 className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none disabled:opacity-50"
               />
             ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* Schrift-Groesse Timer + Scramble */}
+      <Section title="Schrift-Groesse (Timer + Scramble)">
+        <div>
+          <div className="text-sm text-gray-300 mb-2">
+            Aenderung wirkt auf TIMER-Eingabefeld und ScrambleCard.
+          </div>
+          <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 inline-flex flex-wrap">
+            {(["sm", "md", "lg", "xl", "xxl"] as TimerFontSize[]).map((fs) => {
+              const active = settings.timer_font_size === fs;
+              return (
+                <button
+                  key={fs}
+                  onClick={() => setSettings({ ...settings, timer_font_size: fs })}
+                  className={`rounded px-3 py-1.5 text-sm font-medium transition ${
+                    active
+                      ? "bg-purple-600 text-white"
+                      : "text-gray-300 hover:bg-gray-700"
+                  }`}
+                >
+                  {FONT_SIZE_LABELS[fs]}
+                </button>
+              );
+            })}
           </div>
         </div>
       </Section>

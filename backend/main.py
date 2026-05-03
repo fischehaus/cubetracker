@@ -22,7 +22,7 @@ from api import (
 # Zentrale Version — wird beim setzen eines neuen tags hier gebumpt.
 # Wird sowohl von FastAPI(version=) als auch vom /-health-endpoint genutzt,
 # damit der Frontend-Badge den korrekten Tag spiegelt.
-__version__ = "0.13.0"
+__version__ = "0.14.0"
 
 app = FastAPI(
     title="cubetracker",

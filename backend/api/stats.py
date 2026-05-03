@@ -63,6 +63,21 @@ def get_stats(
     ]
     result = compute_stats(points)
 
+    # Phase 8.4: Timestamps fuer best-Avg-Anker-Solves auflossen.
+    # Anker-IDs koennen None sein (zu wenig Solves) → kein Lookup noetig.
+    by_id = {s.id: s for s in rows}
+
+    def _ts(sid: int | None) -> str | None:
+        if sid is None:
+            return None
+        s = by_id.get(sid)
+        if s is None or s.timestamp is None:
+            return None
+        ts = s.timestamp
+        # naive UTC -> aware
+        ts_aware = ts.replace(tzinfo=UTC) if ts.tzinfo is None else ts
+        return ts_aware.isoformat()
+
     return {
         "count": result.count,
         "count_valid": result.count_valid,
@@ -78,6 +93,13 @@ def get_stats(
         "best_ao5": result.best_ao5,
         "best_ao12": result.best_ao12,
         "best_ao100": result.best_ao100,
+        # Phase 8.4: Anker-IDs + ISO-Timestamps der besten Averages
+        "best_ao5_solve_id": result.best_ao5_solve_id,
+        "best_ao12_solve_id": result.best_ao12_solve_id,
+        "best_ao100_solve_id": result.best_ao100_solve_id,
+        "best_ao5_at": _ts(result.best_ao5_solve_id),
+        "best_ao12_at": _ts(result.best_ao12_solve_id),
+        "best_ao100_at": _ts(result.best_ao100_solve_id),
         "filter": {"cube_type": cube_type, "session_id": session_id},
     }
 

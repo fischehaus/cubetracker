@@ -13,7 +13,7 @@
 
 import { useEffect } from "react";
 import { formatTime } from "../lib/format";
-import type { AppSettings } from "../lib/settings";
+import { TIMER_FONT_SCALE, type AppSettings } from "../lib/settings";
 import {
   useSpacebarTimer,
   type TimerPenalty,
@@ -97,7 +97,11 @@ export function SpacebarTimerCard({
       {/* Mitte: grosser Timer */}
       <div
         className={`text-center font-mono ${timerColorClass(timer.state)}`}
-        style={{ fontSize: "5rem", lineHeight: 1, padding: "1rem 0" }}
+        style={{
+          fontSize: TIMER_FONT_SCALE[settings.timer_font_size].timer,
+          lineHeight: 1,
+          padding: "1rem 0",
+        }}
         aria-live="polite"
       >
         {timer.state === "inspection" ? (

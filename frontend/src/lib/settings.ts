@@ -28,6 +28,12 @@ import { useEffect, useState } from "react";
  */
 export type InspectionMode = "wca" | "pragmatic";
 
+/**
+ * Schrift-Groesse fuer Timer + ScrambleCard. Default `lg`.
+ * Wirkt auf font-size + line-height beider Karten konsistent.
+ */
+export type TimerFontSize = "sm" | "md" | "lg" | "xl" | "xxl";
+
 export interface AppSettings {
   /** Spacebar-Timer aktiviert (statt Tastatur-Eingabe). */
   spacebar_enabled: boolean;
@@ -52,6 +58,8 @@ export interface AppSettings {
    * Mind. 1, max. 8 (UI clipped).
    */
   phase_names: string[];
+  /** Phase 8.4: Schrift-Groesse fuer Timer + ScrambleCard. */
+  timer_font_size: TimerFontSize;
 }
 
 export const SETTINGS_DEFAULTS: AppSettings = {
@@ -63,6 +71,28 @@ export const SETTINGS_DEFAULTS: AppSettings = {
   hold_time_ms: 550,
   splits_enabled: false,
   phase_names: ["Cross", "F2L", "OLL", "PLL"], // 3x3-CFOP default
+  timer_font_size: "lg",
+};
+
+/**
+ * Tailwind-style font-size + line-height pro TimerFontSize-Stufe.
+ * Wird vom ScrambleCard, BigTimerInput, SpacebarTimerCard inline
+ * gesetzt — wir vermeiden CSS-Variables fuer Build-Einfachheit.
+ */
+export const TIMER_FONT_SCALE: Record<TimerFontSize, { timer: string; scramble: string }> = {
+  sm: { timer: "3rem", scramble: "1rem" },
+  md: { timer: "4rem", scramble: "1.125rem" },
+  lg: { timer: "5rem", scramble: "1.25rem" },
+  xl: { timer: "6.5rem", scramble: "1.5rem" },
+  xxl: { timer: "8rem", scramble: "1.875rem" },
+};
+
+export const FONT_SIZE_LABELS: Record<TimerFontSize, string> = {
+  sm: "Klein",
+  md: "Mittel",
+  lg: "Gross",
+  xl: "Sehr gross",
+  xxl: "XXL",
 };
 
 const STORAGE_KEY = "cubetracker.settings.v1";

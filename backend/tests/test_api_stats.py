@@ -603,3 +603,42 @@ def test_by_hardware_filter_by_session(client, db):
     data = r.json()
     assert data["hardware"][0]["count"] == 1
     assert data["hardware"][0]["best_ms"] == 10000
+
+
+# ============================================================
+# Phase 8.4: best-Avg-Anchor-IDs + Timestamps
+# ============================================================
+
+
+def test_stats_returns_best_avg_timestamps(client, db):
+    """GET /stats liefert best_ao5_at als ISO-timestamp."""
+    from datetime import UTC, datetime, timedelta
+
+    base = datetime(2026, 5, 1, 12, 0, 0, tzinfo=UTC)
+    # 6 Solves: 5 erste sind ein hoher Avg, der 6. macht ein neues
+    # Best-Window (letzte 5 sind besser).
+    times = [20000, 21000, 22000, 23000, 24000, 5000]
+    for i, t in enumerate(times):
+        db.add(Solve(time_ms=t, cube_type="3x3", timestamp=base + timedelta(seconds=i)))
+    db.commit()
+
+    r = client.get("/stats?cube_type=3x3")
+    data = r.json()
+    assert data["best_ao5"] is not None
+    assert data["best_ao5_solve_id"] is not None
+    assert data["best_ao5_at"] is not None  # ISO-timestamp
+
+
+def test_stats_best_avg_at_none_when_too_few_solves(client, db):
+    """< 5 Solves → best_ao5 = None UND best_ao5_at = None."""
+    from datetime import UTC, datetime
+
+    base = datetime(2026, 5, 1, tzinfo=UTC)
+    db.add(Solve(time_ms=10000, cube_type="3x3", timestamp=base))
+    db.add(Solve(time_ms=11000, cube_type="3x3", timestamp=base))
+    db.commit()
+
+    data = client.get("/stats?cube_type=3x3").json()
+    assert data["best_ao5"] is None
+    assert data["best_ao5_at"] is None
+    assert data["best_ao5_solve_id"] is None
