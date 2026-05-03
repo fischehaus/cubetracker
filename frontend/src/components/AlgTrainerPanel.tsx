@@ -263,7 +263,10 @@ function DrillCard({
         <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
           Scramble
         </div>
-        <div className="font-mono text-sm text-gray-100 break-words leading-relaxed select-all">
+        <div
+          className="font-mono text-gray-100 break-words leading-relaxed select-all"
+          style={{ fontSize: TIMER_FONT_SCALE[settings.drill_font_size].scramble }}
+        >
           {scramble}
         </div>
       </div>
@@ -275,7 +278,10 @@ function DrillCard({
         {showAlg ? "▼ Algorithmus verbergen" : "▶ Algorithmus zeigen"}
       </button>
       {showAlg && (
-        <div className="rounded border border-gray-700 bg-gray-900/30 p-2 mb-3 font-mono text-xs text-gray-300 break-words">
+        <div
+          className="rounded border border-gray-700 bg-gray-900/30 p-2 mb-3 font-mono text-gray-300 break-words"
+          style={{ fontSize: TIMER_FONT_SCALE[settings.drill_font_size].scramble }}
+        >
           {caseDef.alg}
         </div>
       )}

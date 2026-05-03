@@ -77,8 +77,8 @@ export const SETTINGS_DEFAULTS: AppSettings = {
   hold_time_ms: 550,
   splits_enabled: false,
   phase_names: ["Cross", "F2L", "OLL", "PLL"], // 3x3-CFOP default
-  timer_font_size: "lg",
-  drill_font_size: "md", // Drill ist bei lg defaultmäßig kleiner als Timer
+  timer_font_size: "xxl",
+  drill_font_size: "xxl",
 };
 
 /**
