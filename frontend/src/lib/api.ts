@@ -242,6 +242,8 @@ export interface HardwareCubeStats {
   best_ms: number | null;
   current_ao5: number | null;
   best_ao5: number | null;
+  current_ao12: number | null;
+  best_ao12: number | null;
 }
 
 export interface StatsByHardwareResponse {
