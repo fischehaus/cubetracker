@@ -3,12 +3,18 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-03. **Phase 8.3 fertig, Tag `v0.13`
-> gesetzt.** PB-Konfetti — visueller Effekt bei neuem Personal Best:
-> - Backend X-PB-Achieved-Header (single/ao5/ao12)
-> - canvas-confetti + PbConfettiOverlay + Toast-Banner
-> - Single = burst, Double = 2 bursts, Triple = 2s storm
-> - 332 Tests gruen (220 backend + 112 frontend)
+> **Letzter Stand:** 2026-05-03. **Phase 8.4 fertig, Tag `v0.14`
+> gesetzt.** Drei zusammen: Trainings-Sets + Schrift-Slider + Best-Avg-
+> Timestamps:
+> - SessionPlanCard im TIMER ueber Scramble: Plan-Wahl 5/12/25/50/100/∞,
+>   Counter live, End-Feedback-Modal mit Set-Stats + heuristisches Coaching
+> - 5-Stufen-Schrift-Slider (sm/md/lg/xl/xxl) wirkt auf Scramble + Timer
+> - Backend liefert best_ao5/12/100_at als ISO-Timestamps, StatsCard zeigt
+>   das Datum inline neben den Best-Avg-Werten
+> - 334 Tests gruen (222 backend + 112 frontend)
+>
+> **Phase 8.3 (Tag `v0.13`)** war PB-Konfetti (Backend X-PB-Achieved-
+> Header + canvas-confetti + Toast-Banner).
 >
 > **Phase 8.2 (Tag `v0.12`)** war Speedcubing-Timer mit Spacebar +
 > WCA-Inspection (Mode-Toggle WCA/Pragmatisch) + Sound + Multi-Phase-
@@ -125,7 +131,13 @@ Du musst beim naechsten Mal:
 
 ## Was als naechstes ansteht
 
-Phase 8 + 8.1 + 8.2 + 8.3 abgeschlossen. Geplante Reihenfolge bis v1.0:
+Phase 8 + 8.1 + 8.2 + 8.3 + 8.4 abgeschlossen. Geplante Reihenfolge bis v1.0:
+
+**Phase 8.5 — Achievement-Erweiterung** (~0.5-1 Tag):
+- ~14 neue Definitions: Volume-Day-Achievements (3x3/2x2/4x4/5x5/OH separat),
+  Speed-Schwellen 3x3 (sub30/22.95/15/10/6.66), PB-Patterns (Double/
+  Synchronized/Triple-Day), Streaks (7/30/100 Tage), Konsistenz.
+- Live-Backfill auf Bestandsdaten.
 
 **Phase 8.3.1 — 2D-Algorithm-Visualisierung** (~1 Tag):
 - 2D-Cube-State-Bilder im AlgTrainerPanel + DrillCard
@@ -201,9 +213,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-8.3-Features gemerged)
-- **Tags:** `v0.0` … `v0.12`, **`v0.13`** (aktuell)
-- **Tests:** 220 backend + 112 frontend = **332 gruen**
+- **Branch:** `main` (sauber, alle Phase-8.4-Features gemerged)
+- **Tags:** `v0.0` … `v0.13`, **`v0.14`** (aktuell)
+- **Tests:** 222 backend + 112 frontend = **334 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber

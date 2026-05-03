@@ -163,6 +163,28 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 8.4 — Trainings-Sets + Schrift + PB-Timestamps (Tag `v0.14`) ✅
+
+User-Wuensche aus Test-Feedback. Drei zusammen:
+
+- [x] **Trainings-Sets im TIMER**: SessionPlanCard ueber dem Scramble.
+  Plan-Wahl 5/12/25/50/100 oder ∞. Counter „X / N" live, gruen wenn
+  isComplete. End-Feedback-Modal mit Set-Stats (count, valid/dnf,
+  best, worst, mean, set-Ao5/12) + heuristisches Coaching-Feedback
+  (DNF-Quote, Konsistenz, Best/Mean-Ratio).
+  Pure UI-Layer, keine DB-Aenderung — Reload beendet Set bewusst.
+- [x] **Schrift-Slider Timer + Scramble**: 5 Stufen (sm/md/lg/xl/xxl).
+  AppSettings.timer_font_size. TIMER_FONT_SCALE pro Stufe konkrete
+  rem-Werte fuer beide Komponenten. Wirkt auf ScrambleCard +
+  BigTimerInput + SpacebarTimerCard.
+- [x] **Best-Average-Timestamps**: Backend liefert pro best_ao5/12/100
+  zusaetzlich `_solve_id` + `_at` (ISO). Frontend StatsCard zeigt
+  „am DD.MM.YYYY" inline neben den Best-Avg-Werten.
+- [x] **5. Section in SettingsPanel** „Schrift-Groesse" mit 5-Stufen-
+  Toggle.
+
+**Tests:** 222 backend + 112 frontend = 334 gruen.
+
 ## Phase 8.3 — PB-Konfetti (Tag `v0.13`) ✅
 
 User-Wunsch: visueller Effekt wenn PB erreicht wird.
@@ -553,8 +575,8 @@ Feature-Set bewegen.
 - ✅ Phase 8.1: **fertig** (UX-Quick-Wins aus Live-Smoke-Test, Tag `v0.11.1`)
 - ✅ Phase 8.2: **fertig** (Speedcubing-Timer: Spacebar + Inspection + Sound + Multi-Phase + Settings, Tag `v0.12`)
 - ✅ Phase 8.3: **fertig** (PB-Konfetti, Tag `v0.13`)
+- ✅ Phase 8.4: **fertig** (Trainings-Sets + Schrift + PB-Timestamps, Tag `v0.14`)
 - ⏸ Phase 8.3.1: pending (Algorithm-Visualisierung — 2D-State-Bilder im Trainer mit echtem 3x3-Sim)
-- ⏸ Phase 8.4: pending (Session-Plan + Schrift-Slider + Best-Average-Timestamps)
 - ⏸ Phase 8.5: pending (Achievement-Erweiterung — ~14 neue Definitionen + Backfill)
 - ⏸ Phase 9: pending (Distribution / Installer + Restore → Tag `v1.0`)
 - ⏸ Phase 11: pending (WCA-Ranking-Lookup, optional nach v1.0)
@@ -616,3 +638,9 @@ Feature-Set bewegen.
   Frontend canvas-confetti + PbConfettiOverlay mit Toast). Single =
   einfacher burst, Double = 2 bursts, Triple = 2s mehrfarbiger storm.
   332 Tests gruen.
+- `v0.13-pre-8.4` — Snapshot vor Phase 8.4, + branch
+  `legacy/v0.13-pre-8.4`.
+- `v0.14` — Phase 8.4: Trainings-Sets im TIMER + Schrift-Slider
+  (5 Stufen, AppSettings.timer_font_size) + Best-Avg-Timestamps
+  (Backend liefert *_at + *_solve_id pro best_ao5/12/100, Frontend
+  StatsCard zeigt das Datum). 334 Tests gruen.
