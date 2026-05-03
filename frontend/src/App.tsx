@@ -19,6 +19,7 @@ import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HistogramChart } from "./components/HistogramChart";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
 import { MultiCompareCard } from "./components/MultiCompareCard";
+import { OnboardingBanner } from "./components/OnboardingBanner";
 import { ReminderCard } from "./components/ReminderCard";
 import { SolveList } from "./components/SolveList";
 import { StatsCard } from "./components/StatsCard";
@@ -34,6 +35,17 @@ const queryClient = new QueryClient({
 });
 
 const TAB_STORAGE_KEY = "cubetracker.tab";
+
+// Hash-Routing fuer Tabs (Phase L-3c). URL-Hash <-> AppTab.
+// Vorteile: Browser-Back, Bookmarks, Reload landet auf gleicher Sicht.
+// Bewusst einfach via window.location.hash — keine Router-Lib noetig.
+const VALID_TABS: AppTab[] = ["timer", "dashboard", "analyse", "verwaltung"];
+
+function tabFromHash(): AppTab | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.location.hash.replace(/^#\/?/, "").trim();
+  return (VALID_TABS as string[]).includes(raw) ? (raw as AppTab) : null;
+}
 
 interface Health {
   app: string;
@@ -179,14 +191,13 @@ function AnalyseTab({
 
 function loadInitialTab(): AppTab {
   if (typeof window === "undefined") return "dashboard";
+  // Prio 1: URL-Hash (z.B. #analyse) — Bookmark/Reload-Wahl
+  const fromHash = tabFromHash();
+  if (fromHash) return fromHash;
+  // Prio 2: localStorage (zuletzt genutzt)
   const stored = window.localStorage.getItem(TAB_STORAGE_KEY);
-  if (
-    stored === "timer" ||
-    stored === "dashboard" ||
-    stored === "analyse" ||
-    stored === "verwaltung"
-  ) {
-    return stored;
+  if ((VALID_TABS as string[]).includes(stored ?? "")) {
+    return stored as AppTab;
   }
   return "dashboard";
 }
@@ -203,13 +214,30 @@ function MainLayout() {
   const [analyseCubeFilter, setAnalyseCubeFilter] = useState<string>("");
   const [tab, setTab] = useState<AppTab>(loadInitialTab);
 
-  // Tab-Wahl persistieren — Reload landet wieder auf demselben Tab.
+  // Tab-Wahl persistieren — localStorage + URL-Hash, damit
+  // Reload + Browser-Back beide funktionieren.
   useEffect(() => {
     try {
       window.localStorage.setItem(TAB_STORAGE_KEY, tab);
     } catch {
       // localStorage kann blockiert sein (private mode, etc.) — egal.
     }
+    // URL-Hash setzen ohne page-reload. Nur wenn wirklich anders,
+    // sonst gibt es overschuessige history-eintraege.
+    const target = `#${tab}`;
+    if (window.location.hash !== target) {
+      window.history.replaceState(null, "", target);
+    }
+  }, [tab]);
+
+  // Browser-Back/Forward: hash-aenderung von aussen reagieren.
+  useEffect(() => {
+    function onHashChange() {
+      const t = tabFromHash();
+      if (t && t !== tab) setTab(t);
+    }
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
   }, [tab]);
 
   return (
@@ -224,6 +252,8 @@ function MainLayout() {
           </div>
           <HealthBadge />
         </header>
+
+        <OnboardingBanner onSwitchTab={setTab} />
 
         <TabBar current={tab} onChange={setTab} />
 
@@ -250,7 +280,7 @@ function MainLayout() {
         {tab === "verwaltung" && <VerwaltungTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          v0.6 · L-2 Layout (4 Tabs · Filter pro Bereich)
+          v0.6 · L-3 Layout (4 Tabs · Filter pro Bereich · Hash-Routing)
         </footer>
       </div>
     </div>
