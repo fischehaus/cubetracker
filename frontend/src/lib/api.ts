@@ -22,8 +22,17 @@ import type {
   SolveUpdate,
 } from "./types";
 
+// baseURL dynamisch:
+// - Dev (Vite-Server auf :5173): explizit http://localhost:8000 (Cross-Origin zum Backend)
+// - Prod (PyInstaller-Bundle, Backend serviert Frontend same-origin):
+//   leerer String → relative URLs → Browser nutzt aktuelles Origin
+//   (typischerweise http://127.0.0.1:8765 oder :<freier-Port>)
+//
+// Phase 9 (Distribution-Bug-Fix): vorher war baseURL hardcoded auf
+// localhost:8000, was in der ausgerollten App alle API-Calls auf den
+// nicht-existenten Dev-Port schickte → Import/Stats/alles tot.
 export const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: import.meta.env.DEV ? "http://localhost:8000" : "",
 });
 
 // ============================================================

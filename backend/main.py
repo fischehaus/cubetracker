@@ -34,7 +34,7 @@ from api import (
 # Zentrale Version — wird beim setzen eines neuen tags hier gebumpt.
 # Wird sowohl von FastAPI(version=) als auch vom /-health-endpoint genutzt,
 # damit der Frontend-Badge den korrekten Tag spiegelt.
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 # ============================================================

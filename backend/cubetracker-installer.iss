@@ -17,7 +17,7 @@
 ;     (User-Daten bleiben — bewusst, damit Reinstall nicht alles wegputzt)
 
 #define MyAppName "cubetracker"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Solo-Dev"
 #define MyAppExeName "cubetracker.exe"
 
