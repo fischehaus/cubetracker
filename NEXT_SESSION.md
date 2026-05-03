@@ -3,20 +3,23 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-03. **Phase 7b fertig, Tag `v0.10`
-> gesetzt.** Personal Trainer komplett (Achievements + Daily Challenges):
-> - 4 Challenge-Kinds (volume/speed/comeback/diversity), monotonic-progress
-> - Auto-Trigger nach Solve-Mutationen, Header `X-Challenges-Completed`
-> - TrainerTab jetzt mit Sub-Tab-Bar Heute / Erfolge
-> - Dashboard top-row 3-spaltig (Today/Week/Reminder), darunter
->   2-spaltige Mini-Card-Reihe (Challenges + Erfolge)
-> - ChallengeCompletionToaster (gruen, links unten) parallel zum
->   AchievementToaster (gelb, rechts unten)
-> - JSON-Backup um challenges erweitert (counts + array)
-> - Disziplin 6 erneut konsequent angewandt
+> **Letzter Stand:** 2026-05-03. **Phase 8 fertig, Tag `v0.11`
+> gesetzt.** Scramble im TIMER + PLL/OLL-Algorithm-Trainer:
+> - scrambow im TIMER (mit Auto-Next + Skip), Cube-Type-aware,
+>   Session.scramble_type-Override fuer Trainings-Modi
+> - Solve.alg_case-Schema (Migration db68e5f4cdae) + Backup-Update
+> - PLL (21) + OLL (57) als pure data + scrambleForCase via Inversion
+> - AlgTrainerPanel im neuen Trainer-Sub-Tab „Algs": case-grid mit
+>   per-case-Stats + DrillCard mit auto-tag
+> - /stats/by-alg-case?subset=PLL Endpoint (sortiert schwaechste-form-zuerst)
+> - vendor-patched scrambow.js wegen Vite8/Rolldown-Inkompat (zwei
+>   `f`-Identifier; lokale Patch im skewb-Loop)
+> - Snapshot vor TIMER-Layout-Eingriff: tag `v0.10-pre-scramble` +
+>   branch `legacy/v0.10-pre-scramble`
 >
-> **Phase 7a (Tag `v0.9`)** war der erste Teil: 18 Achievements,
-> Live-Backfill 17/18 auf Bestandsdaten.
+> **Phase 7 (Tag `v0.10`)** war Personal Trainer Teil 1+2 (Achievements
+> + Daily Challenges). **Phase 7a (Tag `v0.9`)** war Teil 1 mit
+> 18 Achievements + Live-Backfill 17/18.
 >
 > **Snapshot v0.6 Layout** weiter verfuegbar: tag `v0.6` + branch
 > `legacy/v0.6-classic-layout`.
@@ -106,14 +109,21 @@ Du musst beim naechsten Mal:
 
 ## Was als naechstes ansteht
 
-Phase 7 (Personal Trainer) ist mit Tag `v0.10` komplett abgeschlossen
-(7a Achievements + 7b Daily Challenges). Naechster grosser Strang:
-**Phase 8 — Distribution / Installer** (Tag `v1.0`). Siehe ROADMAP.md
-fuer F21–F25 (Backend serviert dist/, PyInstaller-Bundle,
-%LOCALAPPDATA%-Persistenz, Inno-Setup-Installer, optional Auto-Update).
+Phase 8 (Scramble + Algorithm-Trainer) mit Tag `v0.11` komplett
+abgeschlossen. Naechster grosser Strang: **Phase 9 — Distribution /
+Installer** (Tag `v1.0`). Siehe ROADMAP.md unter „Phase 6 —
+Distribution" (alte Phasen-Numerierung — Inhalte F21–F25 unveraendert:
+Backend serviert dist/, PyInstaller-Bundle, %LOCALAPPDATA%-Persistenz,
+Inno-Setup-Installer, optional Auto-Update).
 
 Aufwand-Schaetzung weiterhin: ~1 Tag POC-Installer, ~2-3 Tage
 poliertes Endprodukt.
+
+Optionale 8.x-Polishs vor Phase 9 falls gewuenscht:
+- 2D-Scramble-Visualisierung (color net) — Tier 4 aus Scramble-Plan
+- Erweiterung Algorithm-Trainer um F2L (41), ZBLL (493) — pure data
+- BLD-Memo-Mode mit Inspektions-Timer
+- Achievement-Kategorie „algs" (z.B. „alle PLLs sub-3s")
 
 ---
 
@@ -178,9 +188,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-7b-Features gemerged)
-- **Tags:** `v0.0` … `v0.9`, **`v0.10`** (aktuell)
-- **Tests:** 203 backend + 68 frontend = **271 gruen**
+- **Branch:** `main` (sauber, alle Phase-8-Features gemerged)
+- **Tags:** `v0.0` … `v0.10`, **`v0.11`** (aktuell)
+- **Tests:** 210 backend + 84 frontend = **294 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber

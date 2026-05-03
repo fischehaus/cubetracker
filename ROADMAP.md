@@ -163,6 +163,49 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 8 — Scramble &amp; Algorithm-Trainer (Tag `v0.11`) ✅
+
+User-Wunsch: csTimer-Style-Scramble-Generator + Algorithm-Trainer
+fuer PLL + OLL. Aufgeteilt in 8a (TIMER) + 8b (Trainer), beide
+gemeinsam als v0.11 gemerged.
+
+### 8a — Scramble im TIMER
+
+- [x] **scrambow-Lib** als Frontend-Scramble-Generator (csTimer-Port,
+      ~70kB gzipped). Vendor-patched unter `src/vendor/scrambow-patched.js`
+      weil scrambow's UMD-Bundle zwei `f`-Identifier hat, die Vite8/
+      Rolldown's strikter Parser fehlinterpretiert. Fix: zweites `f`
+      im skewb-Loop zu `_F` umbenannt (semantisch identisch).
+- [x] **lib/scramble.ts**: cubeTypeToScrambowType-mapping (3x3→333,
+      OH→333, Pyraminx→pyraminx, …) + ALG_TRAINER_SUBSETS-Liste
+- [x] **ScrambleCard.tsx**: monospace, Skip-Button, Auto-Next nach Save
+      via regenerationSeed-prop. Session.scramble_type-Override aktiv —
+      eine Session „PLL Training" liefert PLL-Scrambles, ohne Cube-Type
+      zu wechseln.
+- [x] **BigTimerInput**: scramble + onSolveSaved props, save attached
+      scramble + bumpt regen-counter
+- [x] **TimerTab**: ScrambleCard ueber BigTimerInput im Main-Block
+- [x] **Backend Schema**: `Solve.alg_case` (nullable string, indexed)
+      + Alembic-Migration `db68e5f4cdae` + Backup-Serializer-Update
+- [x] **3 neue API-Tests fuer alg_case-Persistierung**
+
+### 8b — Algorithm-Trainer (PLL + OLL)
+
+- [x] **lib/algs.ts**: 21 PLL-cases + 57 OLL-cases als pure data
+      (id + name + Standard-Algorithm). 16 Unit-Tests fuer
+      `inverseAlg` + `scrambleForCase`.
+- [x] **Backend Endpoint**: `GET /stats/by-alg-case?subset=PLL` →
+      pro alg_case (count, count_valid, mean, best, current_ao5,
+      last_solve_at), sortiert schwaechste-form-zuerst. 4 API-Tests.
+- [x] **AlgTrainerPanel**: 2-spaltig — links case-grid mit per-case-
+      Stats, rechts DrillCard (scramble = invers(alg) + random AUF +
+      mini-timer + auto-tag alg_case beim save)
+- [x] **TrainerTab Sub-Tab „Algs"**: dritter Sub-Tab (Heute/Algs/Erfolge)
+- [x] **Solve-Mutations invalidieren `['stats-by-alg-case']`**
+- [x] **Disziplin 6 angewandt** in beiden Phasen
+
+**Tests:** 210 backend + 84 frontend = 294 gruen.
+
 ## Phase 7b — Daily Challenges (Tag `v0.10`) ✅
 
 User-Wunsch nach Gamification, zweiter Teil. Daily Challenges als
@@ -415,7 +458,8 @@ Feature-Set bewegen.
 - ✅ Phase L+: **fertig** (HW-Vergleich sortierbar+ao12 + Voll-Backup + csTimer-Export, Tag `v0.8`)
 - ✅ Phase 7a: **fertig** (Achievements — 18 Definitionen + Toast + Backfill, Tag `v0.9`)
 - ✅ Phase 7b: **fertig** (Daily Challenges — Generator + Tracker + Toast + Mini, Tag `v0.10`)
-- ⏸ Phase 8: pending (Distribution / Installer → Tag `v1.0`)
+- ✅ Phase 8: **fertig** (Scramble im TIMER + PLL/OLL-Algorithm-Trainer, Tag `v0.11`)
+- ⏸ Phase 9: pending (Distribution / Installer → Tag `v1.0`)
 
 ## Tags
 
@@ -449,3 +493,10 @@ Feature-Set bewegen.
   X-Challenges-Completed Header, Toast in gruen links unten,
   DailyChallengesPanel im Trainer-Sub „Heute", ChallengesMiniCard im
   Dashboard, JSON-Backup um challenges erweitert). 271 Tests gruen.
+- `v0.10-pre-scramble` — Snapshot vor Phase 8 (TIMER-Layout-Eingriff),
+  + branch `legacy/v0.10-pre-scramble` zum jederzeit-rollback.
+- `v0.11` — Phase 8: Scramble im TIMER (scrambow vendor-patched +
+  ScrambleCard mit Auto-Next + Skip + Session.scramble_type-Override) +
+  Algorithm-Trainer (PLL 21 + OLL 57, AlgTrainerPanel mit per-case-
+  Stats, DrillCard mit auto-tag alg_case, /stats/by-alg-case-Endpoint,
+  alg_case-Schema + Migration). 294 Tests gruen.
