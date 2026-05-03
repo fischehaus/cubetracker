@@ -60,6 +60,15 @@ export interface SessionUpdate {
   notes?: string | null;
 }
 
+export interface AchievementItem {
+  code: string;
+  name: string;
+  description: string;
+  category: "volume" | "speed" | "variety" | "hardware";
+  icon: string;
+  unlocked_at: string | null;
+}
+
 export interface Hardware {
   id: number;
   name: string;

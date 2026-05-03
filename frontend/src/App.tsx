@@ -10,6 +10,8 @@
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { api } from "./lib/api";
+import { AchievementsMiniCard } from "./components/AchievementsMiniCard";
+import { AchievementToaster } from "./components/AchievementToaster";
 import { ActivityCard } from "./components/ActivityCard";
 import { ActivityChart } from "./components/ActivityChart";
 import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
@@ -24,6 +26,7 @@ import { ReminderCard } from "./components/ReminderCard";
 import { SolveList } from "./components/SolveList";
 import { StatsCard } from "./components/StatsCard";
 import { TabBar, type AppTab } from "./components/TabBar";
+import { TrainerTab } from "./components/TrainerTab";
 import { TrendsChart } from "./components/TrendsChart";
 import { VerwaltungTab } from "./components/VerwaltungTab";
 import "./App.css";
@@ -39,7 +42,13 @@ const TAB_STORAGE_KEY = "cubetracker.tab";
 // Hash-Routing fuer Tabs (Phase L-3c). URL-Hash <-> AppTab.
 // Vorteile: Browser-Back, Bookmarks, Reload landet auf gleicher Sicht.
 // Bewusst einfach via window.location.hash — keine Router-Lib noetig.
-const VALID_TABS: AppTab[] = ["timer", "dashboard", "analyse", "verwaltung"];
+const VALID_TABS: AppTab[] = [
+  "timer",
+  "dashboard",
+  "analyse",
+  "verwaltung",
+  "trainer",
+];
 
 function tabFromHash(): AppTab | null {
   if (typeof window === "undefined") return null;
@@ -111,22 +120,27 @@ function TimerTab({
 function DashboardTab({
   sessionId,
   setSessionId,
+  onSwitchTab,
 }: {
   sessionId: number | null;
   setSessionId: (id: number | null) => void;
+  onSwitchTab: (tab: AppTab) => void;
 }) {
   // DASHBOARD = Live-Sicht. Optionaler Session-Filter (default 'alle').
   // Cube-Filter bewusst NICHT — Dashboard vergleicht cube-uebergreifend.
+  // Phase 7a: AchievementsMiniCard kompakt im Top-Row, Klick fuehrt
+  // zum Trainer-Tab.
   return (
     <div className="space-y-6">
       <DashboardFilterBar
         sessionId={sessionId}
         onSessionIdChange={setSessionId}
       />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <ActivityCard sessionId={sessionId} slice="today" />
         <ActivityCard sessionId={sessionId} slice="week" />
         <ReminderCard sessionId={sessionId} emptyMode="visible" />
+        <AchievementsMiniCard onSwitchTab={onSwitchTab} />
       </div>
       <MultiCompareCard sessionId={sessionId} />
       <StatsCard cubeType={undefined} sessionId={sessionId} />
@@ -267,6 +281,7 @@ function MainLayout() {
           <DashboardTab
             sessionId={dashboardSessionId}
             setSessionId={setDashboardSessionId}
+            onSwitchTab={setTab}
           />
         )}
         {tab === "analyse" && (
@@ -278,11 +293,15 @@ function MainLayout() {
           />
         )}
         {tab === "verwaltung" && <VerwaltungTab />}
+        {tab === "trainer" && <TrainerTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          v0.6 · L-3 Layout (4 Tabs · Filter pro Bereich · Hash-Routing)
+          v0.9 · 5 Tabs · Personal Trainer (Achievements)
         </footer>
       </div>
+
+      {/* Globaler Achievement-Toaster — bleibt auf jedem Tab sichtbar */}
+      <AchievementToaster />
     </div>
   );
 }

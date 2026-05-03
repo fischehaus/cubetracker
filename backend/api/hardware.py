@@ -16,10 +16,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session as OrmSession
 
+from achievements.service import run_achievement_check
 from db.database import get_db
 from db.models import Hardware, Solve
 from db.schemas import HardwareCreate, HardwareRead, HardwareUpdate
@@ -56,7 +57,11 @@ def list_hardware(
 
 
 @router.post("", response_model=HardwareRead, status_code=status.HTTP_201_CREATED)
-def create_hardware(payload: HardwareCreate, db: OrmSession = Depends(get_db)) -> Hardware:
+def create_hardware(
+    payload: HardwareCreate,
+    response: Response,
+    db: OrmSession = Depends(get_db),
+) -> Hardware:
     """Neuen Hardware-Eintrag anlegen.
 
     Namen sind nicht unique — derselbe Modellname in zwei cube_types
@@ -66,6 +71,9 @@ def create_hardware(payload: HardwareCreate, db: OrmSession = Depends(get_db)) -
     db.add(hw)
     db.commit()
     db.refresh(hw)
+    new_unlocks = run_achievement_check(db)
+    if new_unlocks:
+        response.headers["X-Achievements-Unlocked"] = ",".join(new_unlocks)
     return hw
 
 
@@ -163,7 +171,7 @@ def seed_hardware(
         "Eintraege werden zusaetzlich angelegt (kann Duplikate erzeugen).",
     ),
     db: OrmSession = Depends(get_db),
-) -> dict[str, int | bool]:
+) -> dict[str, Any]:
     """Lade die Standard-Hardware aus seeds/hardware.py.
 
     Verwendet die User-Liste vom 2026-05-03 (~37 Eintraege ueber 11 Cube-Types).
@@ -189,4 +197,9 @@ def seed_hardware(
             )
             created += 1
     db.commit()
-    return {"loaded": created, "skipped_because_not_empty": False}
+    new_unlocks = run_achievement_check(db)
+    return {
+        "loaded": created,
+        "skipped_because_not_empty": False,
+        "newly_unlocked_achievements": new_unlocks,
+    }

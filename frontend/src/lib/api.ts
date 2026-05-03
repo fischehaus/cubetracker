@@ -9,6 +9,7 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 import type {
+  AchievementItem,
   Hardware,
   HardwareCreate,
   HardwareUpdate,
@@ -22,6 +23,35 @@ import type {
 
 export const api = axios.create({
   baseURL: "http://localhost:8000",
+});
+
+// ============================================================
+// Achievement-Toast-Pub-Sub (Phase 7a)
+// ============================================================
+//
+// Backend setzt nach Mutationen den Header X-Achievements-Unlocked
+// mit kommagetrennten codes. Wir lesen das im response-interceptor
+// und feuern an Listener (z.B. Toast-Provider).
+
+type AchievementListener = (codes: string[]) => void;
+const achievementListeners: Set<AchievementListener> = new Set();
+
+export function onAchievementUnlocked(fn: AchievementListener): () => void {
+  achievementListeners.add(fn);
+  return () => achievementListeners.delete(fn);
+}
+
+api.interceptors.response.use((response) => {
+  const header = response.headers["x-achievements-unlocked"] as
+    | string
+    | undefined;
+  if (header) {
+    const codes = header.split(",").map((c) => c.trim()).filter(Boolean);
+    if (codes.length > 0) {
+      achievementListeners.forEach((fn) => fn(codes));
+    }
+  }
+  return response;
 });
 
 // ============================================================
@@ -66,6 +96,7 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
       qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
+      qc.invalidateQueries({ queryKey: ["achievements"] });
     },
   });
 }
@@ -95,6 +126,7 @@ export function useUpdateSolve(): UseMutationResult<
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
       qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
+      qc.invalidateQueries({ queryKey: ["achievements"] });
     },
   });
 }
@@ -119,6 +151,7 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
       qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
+      qc.invalidateQueries({ queryKey: ["achievements"] });
     },
   });
 }
@@ -554,6 +587,7 @@ export function useUpdateHardware(): UseMutationResult<
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
+      qc.invalidateQueries({ queryKey: ["achievements"] });
     },
   });
 }
@@ -569,6 +603,7 @@ export function useDeleteHardware(): UseMutationResult<void, Error, number> {
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
+      qc.invalidateQueries({ queryKey: ["achievements"] });
     },
   });
 }
@@ -621,5 +656,39 @@ export function useSuggestHardware(
       return r.data;
     },
     enabled: !!cubeType,
+  });
+}
+
+// ============================================================
+// Achievements (Phase 7a)
+// ============================================================
+
+export function useAchievements(): UseQueryResult<AchievementItem[]> {
+  return useQuery({
+    queryKey: ["achievements"],
+    queryFn: async () => (await api.get<AchievementItem[]>("/achievements")).data,
+  });
+}
+
+export interface RecheckResult {
+  newly_unlocked: string[];
+  newly_unlocked_count: number;
+  total_unlocked: number;
+}
+
+export function useRecheckAchievements(): UseMutationResult<
+  RecheckResult,
+  Error,
+  void
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const r = await api.post<RecheckResult>("/achievements/recheck");
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["achievements"] });
+    },
   });
 }
