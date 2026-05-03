@@ -163,6 +163,35 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 8.1 — UX-Quick-Wins (Tag `v0.11.1`) ✅
+
+Befunde aus dem Live-Smoke-Test der App nach v0.11. Drei Quick-Wins
+zusammen als patch-version v0.11.1.
+
+- [x] **Scramble-Bug** bei csTimer-importierten Sessions
+  - Phase 8a hat `Session.scramble_type` unveraendert als Override an
+    scrambow gegeben → leerer Scramble bei 4x4/5x5/Pyra etc. weil
+    scrambow die csTimer-Codes nicht kennt
+  - Fix: `resolveScrambleTypeOverride()` mappt csTimer-Codes
+    (`444wca`→`444`, `pyrso`→`pyraminx`, …) analog zur SCRTYPE_TO_CUBE
+    im Backend; unbekannte Strings fallen auf cube_type-Mapping zurueck
+  - Vendor-Bundle robuster: UMD in shadowing IIFE gewrappt + ESM-export
+    angehaengt + `globalThis.self` pre-installiert (sonst crashte
+    vitest's Modul-Eval)
+  - 25 neue Tests + happy-dom als devDep installiert
+- [x] **OutlierCard**: Toggle „pro Cube" / „pro Session"
+  - Median pro Session ist ehrlicher wenn man mehrere Sessions
+    desselben Cubes hat (Training/Speed/OH-3x3)
+  - `findOutliersBySession()` neu, gemeinsamer `findOutliersByKey`-helper
+  - Toggle-Buttons rechts oben, Group-Label dynamisch
+  - 3 neue unit-tests
+- [x] **DrillCard**: Liste der letzten Solves dieses Cases
+  - Backend: `GET /solves?alg_case=X` Filter (2 neue API-Tests)
+  - Frontend: `useSolves` akzeptiert `alg_case`-param
+  - DrillSolveList unter dem Mini-Timer mit +2/DNF/Loeschen
+
+**Tests:** 212 backend + 112 frontend = 324 gruen.
+
 ## Phase 8 — Scramble &amp; Algorithm-Trainer (Tag `v0.11`) ✅
 
 User-Wunsch: csTimer-Style-Scramble-Generator + Algorithm-Trainer
@@ -459,6 +488,9 @@ Feature-Set bewegen.
 - ✅ Phase 7a: **fertig** (Achievements — 18 Definitionen + Toast + Backfill, Tag `v0.9`)
 - ✅ Phase 7b: **fertig** (Daily Challenges — Generator + Tracker + Toast + Mini, Tag `v0.10`)
 - ✅ Phase 8: **fertig** (Scramble im TIMER + PLL/OLL-Algorithm-Trainer, Tag `v0.11`)
+- ✅ Phase 8.1: **fertig** (UX-Quick-Wins aus Live-Smoke-Test, Tag `v0.11.1`)
+- ⏸ Phase 8.2: pending (Speedcubing-Timer: Spacebar + Inspection + Sound + Settings)
+- ⏸ Phase 8.3: pending (Algorithm-Visualisierung: 2D-State-Bilder im Trainer)
 - ⏸ Phase 9: pending (Distribution / Installer → Tag `v1.0`)
 
 ## Tags
@@ -500,3 +532,8 @@ Feature-Set bewegen.
   Algorithm-Trainer (PLL 21 + OLL 57, AlgTrainerPanel mit per-case-
   Stats, DrillCard mit auto-tag alg_case, /stats/by-alg-case-Endpoint,
   alg_case-Schema + Migration). 294 Tests gruen.
+- `v0.11-pre-uxpolish` — Snapshot vor Phase 8.1, + branch
+  `legacy/v0.11-pre-uxpolish` zum jederzeit-rollback.
+- `v0.11.1` — Phase 8.1: UX-Quick-Wins aus Live-Smoke-Test (csTimer-
+  Code-Mapping fix + OutlierCard-Toggle pro-Cube/pro-Session +
+  DrillCard-Solve-Liste). 324 Tests gruen.

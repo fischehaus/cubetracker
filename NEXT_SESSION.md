@@ -3,19 +3,22 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-03. **Phase 8 fertig, Tag `v0.11`
-> gesetzt.** Scramble im TIMER + PLL/OLL-Algorithm-Trainer:
-> - scrambow im TIMER (mit Auto-Next + Skip), Cube-Type-aware,
->   Session.scramble_type-Override fuer Trainings-Modi
-> - Solve.alg_case-Schema (Migration db68e5f4cdae) + Backup-Update
-> - PLL (21) + OLL (57) als pure data + scrambleForCase via Inversion
-> - AlgTrainerPanel im neuen Trainer-Sub-Tab „Algs": case-grid mit
->   per-case-Stats + DrillCard mit auto-tag
-> - /stats/by-alg-case?subset=PLL Endpoint (sortiert schwaechste-form-zuerst)
-> - vendor-patched scrambow.js wegen Vite8/Rolldown-Inkompat (zwei
->   `f`-Identifier; lokale Patch im skewb-Loop)
-> - Snapshot vor TIMER-Layout-Eingriff: tag `v0.10-pre-scramble` +
->   branch `legacy/v0.10-pre-scramble`
+> **Letzter Stand:** 2026-05-03. **Phase 8.1 fertig, Tag `v0.11.1`
+> gesetzt.** UX-Quick-Wins aus Live-Smoke-Test:
+> - csTimer-Code-Mapping in ScrambleCard (Sessions aus csTimer-Import
+>   liefern jetzt korrekte Scrambles bei 4x4/5x5/Pyra/etc.)
+> - vendor-Bundle robuster (UMD-IIFE-shadowing + ESM-export +
+>   globalThis.self-shim) — vitest crashte vorher beim Modul-Eval
+> - OutlierCard: Toggle „pro Cube" / „pro Session" — Median pro Session
+>   ist ehrlicher bei Multi-Session-Setup
+> - DrillCard: Liste der letzten 20 Solves dieses Cases mit
+>   +2/DNF/Loeschen
+> - 324 Tests gruen (212 backend + 112 frontend)
+>
+> **Phase 8 (Tag `v0.11`)**: Scramble im TIMER + PLL/OLL-Trainer
+> (alg_case-Schema, /stats/by-alg-case-Endpoint, AlgTrainerPanel
+> mit DrillCard, scrambow vendor-patched). Snapshots vor Phase 8 +
+> 8.1 jeweils als tag + legacy-branch verfuegbar.
 >
 > **Phase 7 (Tag `v0.10`)** war Personal Trainer Teil 1+2 (Achievements
 > + Daily Challenges). **Phase 7a (Tag `v0.9`)** war Teil 1 mit
@@ -109,21 +112,27 @@ Du musst beim naechsten Mal:
 
 ## Was als naechstes ansteht
 
-Phase 8 (Scramble + Algorithm-Trainer) mit Tag `v0.11` komplett
-abgeschlossen. Naechster grosser Strang: **Phase 9 — Distribution /
-Installer** (Tag `v1.0`). Siehe ROADMAP.md unter „Phase 6 —
-Distribution" (alte Phasen-Numerierung — Inhalte F21–F25 unveraendert:
-Backend serviert dist/, PyInstaller-Bundle, %LOCALAPPDATA%-Persistenz,
-Inno-Setup-Installer, optional Auto-Update).
+Phase 8 + 8.1 abgeschlossen. Geplante Reihenfolge:
 
-Aufwand-Schaetzung weiterhin: ~1 Tag POC-Installer, ~2-3 Tage
-poliertes Endprodukt.
+**Phase 8.2 — Speedcubing-Timer** (Tag `v0.12`, ~1-2 Tage):
+- Spacebar-State-Machine (idle → inspection → ready → holding → running → stopped)
+- WCA-Inspection 15s default, einstellbar, Sound bei 8s+12s, +2 ab 15s, DNF ab 17s
+- Multi-Phase-Splits (User waehlt N Phasen, jeder Spacebar = Split-Punkt)
+- Settings-Panel als neuer Sub-Tab in VERWALTUNG (sound on/off,
+  inspection-time, splits-anzahl, default-cube)
+- Wahrscheinlich neue Spalte `Solve.split_times_ms` (JSON-array)
+- Funktioniert sowohl im TIMER-Tab als auch in der DrillCard im Trainer
 
-Optionale 8.x-Polishs vor Phase 9 falls gewuenscht:
-- 2D-Scramble-Visualisierung (color net) — Tier 4 aus Scramble-Plan
-- Erweiterung Algorithm-Trainer um F2L (41), ZBLL (493) — pure data
-- BLD-Memo-Mode mit Inspektions-Timer
-- Achievement-Kategorie „algs" (z.B. „alle PLLs sub-3s")
+**Phase 8.3 — Algorithm-Visualisierung** (Tag `v0.13`, ~0.5-1 Tag):
+- 2D-Cube-State-Bilder im AlgTrainerPanel + DrillCard
+- Lib `sr-visualizer` oder selbst-gebaute SVG aus state-pattern
+- KEIN Hotlinking auf jperm.net (urheberrechtlich)
+
+**Phase 9 — Distribution** (Tag `v1.0`, ~2-3 Tage):
+- F21-F25 in ROADMAP (PyInstaller, %LOCALAPPDATA%, Inno-Setup, …)
+
+Bewusst skippt: Light-Mode (User-Entscheidung — Speedcubing-Timer
+sind standardmaessig dark).
 
 ---
 
@@ -188,9 +197,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-8-Features gemerged)
-- **Tags:** `v0.0` … `v0.10`, **`v0.11`** (aktuell)
-- **Tests:** 210 backend + 84 frontend = **294 gruen**
+- **Branch:** `main` (sauber, alle Phase-8.1-Features gemerged)
+- **Tags:** `v0.0` … `v0.11`, **`v0.11.1`** (aktuell)
+- **Tests:** 212 backend + 112 frontend = **324 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber
