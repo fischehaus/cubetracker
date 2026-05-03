@@ -20,6 +20,7 @@ import { LastSolvesPreview } from "./components/LastSolvesPreview";
 import { MultiCubeCompareCard } from "./components/MultiCubeCompareCard";
 import { OutlierCard } from "./components/OutlierCard";
 import { ReminderCard } from "./components/ReminderCard";
+import { SessionList } from "./components/SessionList";
 import { SessionSwitcher } from "./components/SessionSwitcher";
 import { SolveList } from "./components/SolveList";
 import { StatsCard } from "./components/StatsCard";
@@ -169,7 +170,10 @@ function AnalyseTab({
         <ImportPanel />
       </div>
 
-      <HardwareList />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SessionList />
+        <HardwareList />
+      </div>
     </div>
   );
 }
