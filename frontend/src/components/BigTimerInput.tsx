@@ -17,6 +17,7 @@ import {
   useCreateSolve,
   useHardware,
   useSessions,
+  useSuggestHardware,
   useSuggestSession,
 } from "../lib/api";
 import { COMMON_CUBE_TYPES, parseTimeInput } from "../lib/format";
@@ -45,6 +46,7 @@ export function BigTimerInput({
   // Override mehr. Reset bei Cube-Wechsel, sodass der naechste Cube wieder
   // seinen eigenen Suggest bekommt.
   const [userPickedSession, setUserPickedSession] = useState(false);
+  const [userPickedHardware, setUserPickedHardware] = useState(false);
 
   // Inline „neue Session anlegen"
   const [showNewSessionForm, setShowNewSessionForm] = useState(false);
@@ -59,26 +61,33 @@ export function BigTimerInput({
   const createSession = useCreateSession();
   const { data: sessions } = useSessions();
   const { data: hardware } = useHardware({ cube_type: cubeType, active_only: true });
-  const { data: suggestion } = useSuggestSession(cubeType);
+  const { data: sessionSuggestion } = useSuggestSession(cubeType);
+  const { data: hardwareSuggestion } = useSuggestHardware(cubeType);
 
   // Auto-Focus beim Mounten
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  // Bei Cube-Wechsel: User-Pick-Flag reset, Suggest neu anwenden
+  // Bei Cube-Wechsel: User-Pick-Flags reset
   useEffect(() => {
     setUserPickedSession(false);
-    // Hardware-Pick auch reset, weil Hardware ueblicherweise cube-spezifisch
-    setHardwareId(null);
+    setUserPickedHardware(false);
   }, [cubeType]);
 
-  // Wenn Suggestion eintrifft + User noch nicht manuell gewaehlt: anwenden
+  // Session-Suggest anwenden, wenn User nicht manuell gewaehlt hat
   useEffect(() => {
-    if (suggestion && !userPickedSession) {
-      onSessionIdChange(suggestion.session_id);
+    if (sessionSuggestion && !userPickedSession) {
+      onSessionIdChange(sessionSuggestion.session_id);
     }
-  }, [suggestion, userPickedSession, onSessionIdChange]);
+  }, [sessionSuggestion, userPickedSession, onSessionIdChange]);
+
+  // Hardware-Suggest anwenden, wenn User nicht manuell gewaehlt hat
+  useEffect(() => {
+    if (hardwareSuggestion && !userPickedHardware) {
+      setHardwareId(hardwareSuggestion.hardware_id);
+    }
+  }, [hardwareSuggestion, userPickedHardware]);
 
   function save() {
     setError(null);
@@ -147,9 +156,13 @@ export function BigTimerInput({
   }
 
   // Hilfs-Variablen fuer UI-Hints
-  const suggestedLabel =
-    suggestion && suggestion.session_id !== null
-      ? sessions?.find((s) => s.id === suggestion.session_id)?.name ?? null
+  const suggestedSessionLabel =
+    sessionSuggestion && sessionSuggestion.session_id !== null
+      ? sessions?.find((s) => s.id === sessionSuggestion.session_id)?.name ?? null
+      : null;
+  const suggestedHardwareLabel =
+    hardwareSuggestion && hardwareSuggestion.hardware_id !== null
+      ? hardware?.find((h) => h.id === hardwareSuggestion.hardware_id)?.name ?? null
       : null;
 
   return (
@@ -176,7 +189,7 @@ export function BigTimerInput({
         <label className="flex flex-col text-sm text-gray-400">
           <span className="flex items-center justify-between">
             Session
-            {suggestion?.session_id !== null && !userPickedSession && (
+            {sessionSuggestion?.session_id !== null && !userPickedSession && (
               <span
                 className="text-[10px] text-emerald-400"
                 title={`Vorgeschlagen: meiste Solves fuer ${cubeType}`}
@@ -198,20 +211,35 @@ export function BigTimerInput({
             ))}
             <option value="__new__">+ Neue Session anlegen …</option>
           </select>
-          {suggestedLabel && !userPickedSession && (
+          {suggestedSessionLabel && !userPickedSession && (
             <span className="mt-1 text-[11px] text-emerald-400/80 truncate">
-              → „{suggestedLabel}" ({suggestion?.count} {cubeType}-Solves)
+              → „{suggestedSessionLabel}" ({sessionSuggestion?.count} {cubeType}-Solves)
             </span>
           )}
         </label>
 
         {/* Hardware */}
         <label className="flex flex-col text-sm text-gray-400">
-          Hardware
+          <span className="flex items-center justify-between">
+            Hardware
+            {hardwareSuggestion?.hardware_id !== null && !userPickedHardware && (
+              <span
+                className="text-[10px] text-emerald-400"
+                title={
+                  hardwareSuggestion?.reason === "most_used"
+                    ? `Vorgeschlagen: am haeufigsten fuer ${cubeType} verwendet`
+                    : `Vorgeschlagen: erste aktive ${cubeType}-Hardware`
+                }
+              >
+                ★ auto
+              </span>
+            )}
+          </span>
           <select
             value={hardwareId === null ? "__none__" : String(hardwareId)}
             onChange={(e) => {
               const v = e.target.value;
+              setUserPickedHardware(true);
               setHardwareId(v === "__none__" ? null : parseInt(v, 10));
             }}
             className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-lg text-gray-100 focus:border-purple-500 focus:outline-none"
@@ -226,6 +254,13 @@ export function BigTimerInput({
           {hardware && hardware.length === 0 && (
             <span className="mt-1 text-[11px] text-gray-500">
               Kein {cubeType}-Cube im Inventar
+            </span>
+          )}
+          {suggestedHardwareLabel && !userPickedHardware && (
+            <span className="mt-1 text-[11px] text-emerald-400/80 truncate">
+              → „{suggestedHardwareLabel}"
+              {hardwareSuggestion?.reason === "most_used" &&
+                ` (${hardwareSuggestion.count}×)`}
             </span>
           )}
         </label>
