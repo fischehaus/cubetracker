@@ -72,28 +72,30 @@ function HealthBadge() {
 // ============================================================
 
 function TimerTab({
-  sessionId,
   timerCubeType,
   setTimerCubeType,
 }: {
-  sessionId: number | null;
   timerCubeType: string;
   setTimerCubeType: (s: string) => void;
 }) {
-  // TIMER ist Solving-Modus: grosse zentrale Eingabe + Live-ao5/ao12 +
-  // letzte 8 Solves zur Kontrolle. Keine Charts, kein Multi-Cube-Vergleich.
-  // Cube-Type ist eigener State (nicht der globale cubeFilter), damit man
-  // hier seinen Trainings-Cube waehlt ohne den Analyse-Filter zu beruehren.
+  // TIMER = Solving-Modus mit eigener Session/Hardware-Wahl pro Cube.
+  // BigTimerInput managed sessionId/hardwareId intern und ruft onSessionChange,
+  // damit LastSolvesPreview parallel auf dieselbe Session filtert (sonst
+  // siehst du andere Solves als die, die du gerade speicherst).
+  // Globaler Header-SessionSwitcher beeinflusst diesen Tab bewusst NICHT.
+  const [timerSessionId, setTimerSessionId] = useState<number | null>(null);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
       <main>
         <BigTimerInput
           cubeType={timerCubeType}
           onCubeTypeChange={setTimerCubeType}
+          sessionId={timerSessionId}
+          onSessionIdChange={setTimerSessionId}
         />
       </main>
       <aside>
-        <LastSolvesPreview cubeType={timerCubeType} sessionId={sessionId} />
+        <LastSolvesPreview cubeType={timerCubeType} sessionId={timerSessionId} />
       </aside>
     </div>
   );
@@ -225,7 +227,6 @@ function MainLayout() {
 
         {tab === "timer" && (
           <TimerTab
-            sessionId={sessionId}
             timerCubeType={timerCubeType}
             setTimerCubeType={setTimerCubeType}
           />
