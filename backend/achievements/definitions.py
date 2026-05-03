@@ -152,6 +152,37 @@ VOLUME_DAY: list[AchievementDef] = [
     ),
 ]
 
+PB_PATTERNS: list[AchievementDef] = [
+    AchievementDef(
+        "pb_double",
+        "Doppel-PB",
+        "Zwei Single-PBs in zwei aufeinanderfolgenden Solves",
+        "consistency",
+        "⚡⚡",
+    ),
+    AchievementDef(
+        "pb_synchronized",
+        "Perfect Storm",
+        "Single-PB und Ao5-PB im selben Solve",
+        "consistency",
+        "🌪",
+    ),
+    AchievementDef(
+        "pb_triple_day",
+        "Komplett-Bestform",
+        "An einem Tag: Single-PB + Ao5-PB + Ao12-PB",
+        "consistency",
+        "🌟",
+    ),
+    AchievementDef(
+        "consistency_5_under_ao12",
+        "Konstant",
+        "5 Solves in Folge unter persoenlichem Ao12",
+        "consistency",
+        "📏",
+    ),
+]
+
 STREAKS: list[AchievementDef] = [
     AchievementDef(
         "streak_solve_7", "Wochen-Aktiv", "7 Tage in Folge mit mind. 1 Solve", "consistency", "🔥"
@@ -185,6 +216,7 @@ ALL_ACHIEVEMENTS: list[AchievementDef] = (
     + VARIETY
     + HARDWARE
     + STREAKS
+    + PB_PATTERNS
 )
 
 
