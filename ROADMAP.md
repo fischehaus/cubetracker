@@ -163,16 +163,39 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
-## Phase 5 — Hardware-Tracking (verschoben aus urspruenglicher Phase 4)
+## Phase 5 — Hardware-Tracking + Session-Aware Timer (Tag `v0.5`) ✅
 
-Seed-Daten aus 2026-05-03 user-eingabe liegen in
-`docs/hardware-inventory-seed.md` (35 physische Cubes ueber 11 Cube-Types).
+Seed-Daten in `docs/hardware-inventory-seed.md` (37 physische Cubes
+ueber 11 Cube-Types). Im Verlauf erweitert um Session-Verwaltung
+(User-Wunsch 2026-05-04 fuer Session-Selektor im Timer).
 
-- [ ] **F16: Hardware-Inventar** (CRUD)
-- [ ] **F17: Hardware-Tracking pro Solve** (FK aktivieren, default per cube_type)
-- [ ] **F18: Hardware-Performance-Vergleich**
-- [ ] **F19: Aktive-Hardware-Empfehlung pro Event**
-- [ ] **F20: Custom-Reports + Backup/Sync**
+- [x] **F16: Hardware-Inventar (CRUD)** ✅ done
+  - Hardware-Model + Alembic-Migration (FK Solve.hardware_id mit
+    ondelete=SET NULL via batch_alter_table fuer SQLite)
+  - REST-API: GET/POST/PATCH/DELETE /hardware + /seed
+  - Seed-Modul: 37 Cubes vom 2026-05-03 als Python-Daten
+  - Frontend: HardwareList im ANALYSE-Tab (gruppiert pro cube_type,
+    inline-edit notes, aktiv-toggle, seed-button bei empty-state)
+- [x] **F17: Hardware-Tracking pro Solve** ✅ done
+  - hardware_id-FK ist jetzt echte ForeignKey (Phase-1-Vorsicht
+    aufgehoben)
+  - GET /hardware/suggest?cube_type=X liefert most_used / first_active
+  - BigTimerInput: Hardware-Selektor mit Auto-Pick + ★auto-tag
+  - SolveList: Hardware-Name als sub-zeile unter cube_type
+- [x] **F-NEU: Session-Aware Timer** ✅ done
+  - Session.notes Feld + Alembic
+  - POST/PATCH/DELETE /sessions endpoints
+  - GET /sessions/suggest?cube_type=X (analog zu hardware-suggest)
+  - BigTimerInput: Session-Selektor mit Auto-Pick + Inline-„Neue
+    Session anlegen"
+  - SessionList im ANALYSE-Tab (Liste, edit name+notes, loeschen)
+  - TimerTab managed eigenen sessionId-state, sodass
+    LastSolvesPreview parallel auf dieselbe Session filtert
+
+**Verschoben in spaetere Phase:**
+- F18: Hardware-Performance-Vergleich (eigener Endpoint /stats/by-hardware)
+- F19: Aktive-Hardware-Empfehlung pro Event (kann auf F17-Daten aufbauen)
+- F20: Custom-Reports + Backup/Sync
 
 ## Phase 6 — Distribution (Tag `v1.0`)
 
@@ -230,8 +253,8 @@ Feature-Set bewegen.
 - ✅ Phase 2: **fertig** (Charts + Outlier + Multi-Cube, Tag `v0.2`)
 - ✅ Phase 3: **fertig** (Coaching + Insights + Inline-Edit, Tag `v0.3`)
 - ✅ Phase 4: **fertig** (Visualisierungs-Refactor + UX-Polish, Tag `v0.4`)
-- ⏸ Phase 5: pending (Hardware-Tracking, Seed in `docs/`)
-- ⏸ Phase 6: pending (Distribution / Installer, geplant nach Phase 5 → Tag `v1.0`)
+- ✅ Phase 5: **fertig** (Hardware-Inventar + Session-Aware Timer, Tag `v0.5`)
+- ⏸ Phase 6: pending (Distribution / Installer → Tag `v1.0`)
 
 ## Tags
 
@@ -244,3 +267,6 @@ Feature-Set bewegen.
   Verbesserungs-Tracking, Trainings-Reminder, Inline-Edit
 - `v0.4` — Phase 4: 3-Tab-Architektur, Y-Achse smart, BigTimerInput,
   Form-Vergleich, einheitliche Schriftgroessen + Padding
+- `v0.5` — Phase 5: Hardware-Inventar (CRUD + Seed), Session-Aware
+  Timer (Selektoren mit Auto-Pick + neue Session inline), SessionList
+  + HardwareList im ANALYSE-Tab, ActivityChart pro Tag/Woche/Monat

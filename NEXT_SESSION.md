@@ -3,13 +3,11 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-03 nachts. **Phase 4 fertig, Tag `v0.4`
-> gesetzt.** Sechs Branches (A-F) durchgezogen: Y-Achsen-Smart-Skala,
-> Tab-Routing (TIMER/DASHBOARD/ANALYSE), TIMER mit grosser Eingabe,
-> Dashboard mit 3 Quick-Cards, Analyse mit Filter-Bar, einheitliche
-> grosse Schriften + Padding + Cleanup. Plus 2 Bonus-Branches mit
-> User-Feedback-Tweaks (Outlier-Session-Filter, Mini-Delete,
-> Multi-Form-Vergleich).
+> **Letzter Stand:** 2026-05-04. **Phase 5 fertig, Tag `v0.5`
+> gesetzt.** Hardware-Inventar (CRUD + Seed mit 37 Cubes), Session-
+> Aware Timer (3 Selektoren cube/session/hardware mit Auto-Pick,
+> Inline-„Neue Session"), SessionList im ANALYSE-Tab, Hardware-Anzeige
+> in SolveList, ActivityChart pro Tag/Woche/Monat.
 
 ---
 
@@ -142,9 +140,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-4-Features gemerged)
-- **Tags:** `v0.0`, `v0.1`, `v0.2`, `v0.3`, **`v0.4`** (aktuell)
-- **Tests:** 91 backend + 68 frontend = **159 gruen**
+- **Branch:** `main` (sauber, alle Phase-5-Features gemerged)
+- **Tags:** `v0.0`, `v0.1`, `v0.2`, `v0.3`, `v0.4`, **`v0.5`** (aktuell)
+- **Tests:** 126 backend + 68 frontend = **194 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber
