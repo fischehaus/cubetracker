@@ -186,9 +186,13 @@ Phase 8 + 8.1 + 8.2 + 8.3 + 8.4 + 8.5 abgeschlossen. Geplante Reihenfolge:
 - PyInstaller-Bundle, Inno-Setup-Installer
 - Achievement-Trigger nach Import explizit verifizieren
 
-**Optional vor v1.0**:
-- Phase 8.3.2 — PLL-Visualisierung (analog zu OLL, falls User die
-  21 PLL-Bilder im Chat generiert)
+**Nach v1.0**:
+- Phase 8.3.2 — PLL-Visualisierung (User-Festlegung 2026-05-04:
+  Bilder fuer alle 21 PLLs kommen im naechsten Rollout). Implementierung
+  analog zu OLL: PNGs in src/assets/pll/, lib/pll-images.ts
+  (21 statische Imports), `getPllImage()` in CubeStateView.tsx
+  ergaenzen, evtl. groessere Drill-Bilder weil PLL-Cycle-Diagramme
+  detailreicher sind als OLL-Orientation-Diagramme.
 
 **Nach v1.0**:
 - Phase 11 — WCA-Ranking-Lookup (hardcoded WR-Tabelle, „Top X% weltweit")
