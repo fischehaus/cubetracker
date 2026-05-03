@@ -113,13 +113,30 @@ Hardware-Tracking ist nach Phase 5 verschoben.
 - **F19 Aktive-Hardware-Empfehlung** pro Event
 - **F20 Custom-Reports + Backup/Sync**
 
+**Phase 6 — Distribution** (Tag `v1.0`, neu hinzugefuegt 2026-05-03):
+
+App als Windows-Installer fuer fremde Rechner — User-Wunsch, damit
+die App z.B. an Familien-/Freunde-Test verteilbar ist.
+
+- **F21 Backend serviert Frontend statisch** (`npm run build` +
+  StaticFiles in FastAPI)
+- **F22 PyInstaller-Bundle + Auto-Browser-Open** (eine .exe, ~70 MB)
+- **F23 Persistenz auf %LOCALAPPDATA%** (DB ueberlebt updates)
+- **F24 Inno-Setup-Installer** (start-menue, uninstaller,
+  optional code-signing gegen Defender-FP)
+- **F25 Auto-Update** (optional, github-releases-API)
+
+Aufwand ~1 tag POC, ~2-3 tage poliert. **Bewusst nach Phase 5**, weil
+sich vorher das DB-Schema (hardware_id) noch bewegt.
+
 Plus offene Wuensche:
 - **WCA-Profil-Verknuepfung** (F9/F10) — externe API, niedrige Prio
 - **Outlier-Schwellen cube-spezifisch** (2x2 grosszuegiger als 3x3)
 - **Cube_type editierbar** in der Liste (derzeit read-only)
 - **„Into Cube"-Klaerung** beim Phase-5-Bau (siehe Seed-doku)
 - **Bundle-Splitting** fuer Recharts (heute ~200kB gzipped, koennte
-  mit code-splitting halbiert werden)
+  mit code-splitting halbiert werden) — wird Pflicht spaetestens
+  in Phase 6
 
 ---
 

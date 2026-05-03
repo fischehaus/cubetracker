@@ -174,6 +174,56 @@ Seed-Daten aus 2026-05-03 user-eingabe liegen in
 - [ ] **F19: Aktive-Hardware-Empfehlung pro Event**
 - [ ] **F20: Custom-Reports + Backup/Sync**
 
+## Phase 6 — Distribution (Tag `v1.0`)
+
+Aus User-Wunsch 2026-05-03: app als installer-paket fuer fremde
+Windows-Rechner (z.B. fuer Familien-/Freunde-Test). **Bewusst nach
+Phase 5**, weil sich vorher noch DB-Schema (hardware_id) und
+Feature-Set bewegen.
+
+- [ ] **F21: Backend serviert Frontend statisch**
+  - `npm run build` -> `frontend/dist/`
+  - FastAPI mountet `dist/` via StaticFiles
+  - Production-mode: nur ein Prozess statt zwei (kein Vite mehr noetig)
+- [ ] **F22: PyInstaller-Bundle + Auto-Browser-Open**
+  - PyInstaller-spec: bundlet python-runtime + uvicorn + fastapi +
+    sqlalchemy + alembic + frontend-dist + alle deps in eine .exe
+  - Beim start: freier port suchen, uvicorn binden, default-browser
+    auf `http://localhost:<port>` oeffnen
+  - Erwartete .exe-groesse: ~50-80 MB
+- [ ] **F23: Persistenz auf %LOCALAPPDATA%**
+  - DB-pfad nicht mehr `backend/data/solves.db`, sondern
+    `%LOCALAPPDATA%\cubetracker\solves.db` (ueberlebt updates)
+  - Alembic-migrations laufen beim ersten start auf der user-DB
+  - Optional: alte dev-DB auf migration ueber UI importierbar
+- [ ] **F24: Inno-Setup-Installer**
+  - Installer-script (.iss): start-menue-eintrag, desktop-icon,
+    add/remove-programs, uninstaller
+  - Icon-set (16/32/48/256 px) fuer .exe + installer
+  - Versions-info (file-properties)
+  - **Optional Code-Signing-Zertifikat** (~70-200€/jahr) gegen
+    Defender-False-Positives
+- [ ] **F25: Auto-Update (optional)**
+  - Beim start: github-releases-API checken auf neuere version
+  - User-prompt 'neue version verfuegbar — installieren?'
+  - Squirrel oder eigener simpler updater
+
+**Stolpersteine vorab dokumentiert:**
+- Antivirus-False-Positives bei PyInstaller-exes (heuristisch),
+  Loesung Code-Signing oder User-Toleranz
+- Bundle-Groesse ~70 MB ist gross fuer eine Speedcube-app, aber
+  fuer Solo-Einsatz akzeptabel
+- DB-Migrationen muessen beim ersten installer-start sauber laufen
+- Browser-Abhaengigkeit: jeder Windows hat Edge → kein Problem
+
+**Aufwand-Schaetzung:** ~1 ehrlicher Arbeitstag fuer POC-Installer,
+~2-3 Tage fuer poliertes Endprodukt mit Icon + Signing.
+
+**Alternativen bewusst verworfen:**
+- Tauri (Rust-Shell, ~10-20 MB): Python-Sidecar-Komplexitaet zu hoch
+- Electron: ~150-200 MB Installer, overkill
+- Portable ZIP: einfacher, aber kein 'echter' installer-eindruck
+
 ## Status-Tracking
 
 - ✅ Phase 1 MVP: **fertig** (5/5 Features, Tag `v0.1`)
@@ -181,6 +231,7 @@ Seed-Daten aus 2026-05-03 user-eingabe liegen in
 - ✅ Phase 3: **fertig** (Coaching + Insights + Inline-Edit, Tag `v0.3`)
 - ✅ Phase 4: **fertig** (Visualisierungs-Refactor + UX-Polish, Tag `v0.4`)
 - ⏸ Phase 5: pending (Hardware-Tracking, Seed in `docs/`)
+- ⏸ Phase 6: pending (Distribution / Installer, geplant nach Phase 5 → Tag `v1.0`)
 
 ## Tags
 
