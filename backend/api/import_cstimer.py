@@ -11,6 +11,7 @@ import json
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session as OrmSession
 
+from achievements.service import run_achievement_check
 from db.database import get_db
 from importers.cstimer import import_cstimer_json
 
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/import", tags=["import"])
 async def import_cstimer(
     file: UploadFile = File(..., description="csTimer-Export-Datei (.txt oder .json)"),
     db: OrmSession = Depends(get_db),
-) -> dict[str, int | str]:
+) -> dict[str, object]:
     """csTimer-Export-Datei importieren.
 
     Liest die Datei (UTF-8), parst als JSON, importiert Sessions + Solves
@@ -60,4 +61,10 @@ async def import_cstimer(
         )
 
     result = import_cstimer_json(payload, db)
-    return result.to_dict() | {"filename": file.filename or "unknown"}
+    # Nach Bulk-Import: Achievement-Check (kann viele unlocks ergeben)
+    new_unlocks = run_achievement_check(db)
+    return (
+        result.to_dict()
+        | {"filename": file.filename or "unknown"}
+        | {"newly_unlocked_achievements": new_unlocks}
+    )

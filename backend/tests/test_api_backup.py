@@ -12,10 +12,16 @@ def test_backup_json_empty(client):
     data = r.json()
     assert "schema_version" in data
     assert "exported_at" in data
-    assert data["counts"] == {"solves": 0, "sessions": 0, "hardware": 0}
+    assert data["counts"] == {
+        "solves": 0,
+        "sessions": 0,
+        "hardware": 0,
+        "achievements": 0,
+    }
     assert data["solves"] == []
     assert data["sessions"] == []
     assert data["hardware"] == []
+    assert data["achievements"] == []
 
 
 def test_backup_json_full(client, db):
@@ -42,7 +48,12 @@ def test_backup_json_full(client, db):
 
     data = client.get("/backup/json").json()
 
-    assert data["counts"] == {"solves": 2, "sessions": 1, "hardware": 1}
+    assert data["counts"] == {
+        "solves": 2,
+        "sessions": 1,
+        "hardware": 1,
+        "achievements": 0,
+    }
     assert len(data["solves"]) == 2
     assert len(data["sessions"]) == 1
     assert len(data["hardware"]) == 1

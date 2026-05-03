@@ -115,6 +115,29 @@ class Solve(Base):
         return f"<Solve id={self.id} cube={self.cube_type} time={self.time_ms}ms>"
 
 
+class Achievement(Base):
+    """Ein freigeschaltetes Achievement (Phase 7a).
+
+    Definitionen (name, description, category, target) leben im Code
+    unter `achievements/definitions.py`. Die DB speichert NUR welche
+    codes der User bereits unlocked hat — minimal-state.
+
+    Einmal unlocked = bleibt unlocked („monotonic" wie Daily Challenges).
+    Selbst wenn User Solves nachtraeglich loescht, bleibt das Achievement.
+    """
+
+    __tablename__ = "achievements"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    unlocked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<Achievement code={self.code!r}>"
+
+
 class Hardware(Base):
     """Ein physischer Wuerfel im Inventar.
 

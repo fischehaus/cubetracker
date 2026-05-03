@@ -27,7 +27,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session as OrmSession
 
 from db.database import get_db
-from db.models import Hardware, Solve
+from db.models import Achievement, Hardware, Solve
 from db.models import Session as DbSession
 
 router = APIRouter(prefix="/backup", tags=["backup"])
@@ -80,6 +80,7 @@ def backup_json(db: OrmSession = Depends(get_db)) -> dict[str, Any]:
     solves = db.scalars(select(Solve)).all()
     sessions = db.scalars(select(DbSession)).all()
     hardware = db.scalars(select(Hardware)).all()
+    achievements = db.scalars(select(Achievement)).all()
 
     return {
         "schema_version": __version__,
@@ -88,10 +89,12 @@ def backup_json(db: OrmSession = Depends(get_db)) -> dict[str, Any]:
             "solves": len(solves),
             "sessions": len(sessions),
             "hardware": len(hardware),
+            "achievements": len(achievements),
         },
         "solves": [_solve_to_dict(s) for s in solves],
         "sessions": [_session_to_dict(s) for s in sessions],
         "hardware": [_hardware_to_dict(h) for h in hardware],
+        "achievements": [_achievement_to_dict(a) for a in achievements],
     }
 
 
@@ -123,6 +126,14 @@ def _session_to_dict(s: DbSession) -> dict[str, Any]:
         "cstimer_session_id": s.cstimer_session_id,
         "notes": s.notes,
         "created_at": s.created_at.isoformat() if s.created_at else None,
+    }
+
+
+def _achievement_to_dict(a: Achievement) -> dict[str, Any]:
+    return {
+        "id": a.id,
+        "code": a.code,
+        "unlocked_at": a.unlocked_at.isoformat() if a.unlocked_at else None,
     }
 
 

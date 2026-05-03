@@ -1,12 +1,18 @@
-// TabBar: Top-Level-Navigation zwischen den 4 Haupt-Modi der App.
+// TabBar: Top-Level-Navigation zwischen den 5 Haupt-Modi der App.
 // - TIMER:      Solving-Modus, Eingabe gross + zentriert
 // - DASHBOARD:  Live-Uebersicht, Tagesform + Reminders
 // - ANALYSE:    Deep-Dive, Charts + volle Solveliste (NUR Auswertung)
 // - VERWALTUNG: Sessions, Hardware, Import, Outlier-Pflege (Daten-Pflege)
+// - TRAINER:    Personal Trainer — Erfolge + (spaeter) Daily Challenges
 //
 // Aktiver Tab ist klar hervorgehoben (lila Akzent + Hintergrund).
 
-export type AppTab = "timer" | "dashboard" | "analyse" | "verwaltung";
+export type AppTab =
+  | "timer"
+  | "dashboard"
+  | "analyse"
+  | "verwaltung"
+  | "trainer";
 
 interface TabDef {
   id: AppTab;
@@ -39,6 +45,12 @@ export const TABS: TabDef[] = [
     label: "Verwaltung",
     icon: "⚙",
     description: "Sessions, Hardware, Import, Outliers",
+  },
+  {
+    id: "trainer",
+    label: "Trainer",
+    icon: "🏆",
+    description: "Erfolge + Daily Challenges (Phase 7)",
   },
 ];
 
