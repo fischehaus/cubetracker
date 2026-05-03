@@ -5,8 +5,13 @@ Endpoints:
 - POST   /sessions                       — Neue Session anlegen
 - GET    /sessions/{id}                  — Einzelne Session
 - PATCH  /sessions/{id}                  — Session umbenennen / Notizen aendern
-- DELETE /sessions/{id}                  — Session loeschen (Solves bleiben,
-                                            session_id wird NULL via FK)
+- DELETE /sessions/{id}?move_solves_to=Y — Loeschen. Default: Solves bleiben
+                                            mit session_id=NULL. Mit
+                                            move_solves_to: Solves wandern
+                                            erst zu Y, dann wird X geloescht.
+- POST   /sessions/{id}/merge?target_id=Y — Alle Solves von id zu target_id
+                                             umlegen, source loeschen. Notizen
+                                             werden in target appended.
 - GET    /sessions/suggest?cube_type=X   — empfohlene Session fuer einen
                                             Cube-Type (jene, in der der User
                                             die meisten Solves dieses Cubes hat)
@@ -17,7 +22,7 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session as OrmSession
 
 from db.database import get_db
@@ -109,12 +114,82 @@ def update_session(
 
 
 @router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_session(session_id: int, db: OrmSession = Depends(get_db)) -> None:
+def delete_session(
+    session_id: int,
+    move_solves_to: int | None = Query(
+        default=None,
+        description="Wenn gesetzt: Solves der zu loeschenden Session werden "
+        "VOR dem Loeschen auf diese Ziel-Session umgelegt. Sonst: "
+        "session_id wird NULL (FK SET NULL).",
+    ),
+    db: OrmSession = Depends(get_db),
+) -> None:
     """Session loeschen.
 
-    Betroffene Solves verlieren ihre session_id (FK ondelete=SET NULL),
-    bleiben aber erhalten.
+    Default: Betroffene Solves verlieren ihre session_id (FK SET NULL).
+    Mit `move_solves_to=Y`: Solves werden VOR dem Loeschen zu Y umgelegt.
+
+    Validation:
+    - move_solves_to darf nicht == session_id sein (kein Self-Move)
+    - Ziel-Session muss existieren
     """
     s = _get_or_404(session_id, db)
+
+    if move_solves_to is not None:
+        if move_solves_to == session_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="move_solves_to darf nicht die zu loeschende Session sein",
+            )
+        # Ziel existiert? sonst 404
+        _get_or_404(move_solves_to, db)
+        # Solves umlegen
+        db.execute(
+            update(Solve).where(Solve.session_id == session_id).values(session_id=move_solves_to)
+        )
+
     db.delete(s)
     db.commit()
+
+
+@router.post("/{session_id}/merge", response_model=SessionRead)
+def merge_session(
+    session_id: int,
+    target_id: int = Query(..., description="Ziel-Session, in die gemerged wird"),
+    db: OrmSession = Depends(get_db),
+) -> DbSession:
+    """Source-Session in target mergen.
+
+    Schritte (atomic):
+    1. Alle Solves von source.session_id = target_id setzen
+    2. Source-notes in target-notes appenden (mit Trenner) — falls vorhanden
+    3. Source-Session loeschen
+
+    Validation:
+    - source != target (kein Self-Merge)
+    - beide Sessions muessen existieren
+    """
+    if session_id == target_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Source und Target duerfen nicht gleich sein",
+        )
+    source = _get_or_404(session_id, db)
+    target = _get_or_404(target_id, db)
+
+    # 1. Solves umlegen
+    db.execute(update(Solve).where(Solve.session_id == session_id).values(session_id=target_id))
+
+    # 2. Notes appenden (wenn source notes hat)
+    if source.notes:
+        prefix = f"[merged from '{source.name}']"
+        if target.notes:
+            target.notes = f"{target.notes}\n\n{prefix} {source.notes}"
+        else:
+            target.notes = f"{prefix} {source.notes}"
+
+    # 3. Source loeschen
+    db.delete(source)
+    db.commit()
+    db.refresh(target)
+    return target

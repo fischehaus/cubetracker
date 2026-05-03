@@ -166,3 +166,126 @@ def test_suggest_ignores_session_less_solves(client, db):
 
     r = client.get("/sessions/suggest?cube_type=3x3")
     assert r.json()["session_id"] is None
+
+
+# ============================================================
+# DELETE mit move_solves_to + MERGE (Phase 5c)
+# ============================================================
+
+
+def test_delete_with_move_solves_to(client, db):
+    """Solves wandern zur Ziel-Session statt verwaisen zu lassen."""
+    from db.models import Solve
+
+    src = DbSession(name="Quelle")
+    dst = DbSession(name="Ziel")
+    db.add_all([src, dst])
+    db.commit()
+    db.refresh(src)
+    db.refresh(dst)
+    db.add(Solve(time_ms=10000, cube_type="3x3", session_id=src.id))
+    db.add(Solve(time_ms=11000, cube_type="3x3", session_id=src.id))
+    db.commit()
+
+    r = client.delete(f"/sessions/{src.id}?move_solves_to={dst.id}")
+    assert r.status_code == 204
+    # source weg
+    assert client.get(f"/sessions/{src.id}").status_code == 404
+    # solves jetzt bei target
+    solves = client.get(f"/solves?session_id={dst.id}").json()
+    assert len(solves) == 2
+
+
+def test_delete_move_to_self_forbidden(client, db):
+    s = DbSession(name="X")
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    r = client.delete(f"/sessions/{s.id}?move_solves_to={s.id}")
+    assert r.status_code == 400
+
+
+def test_delete_move_to_unknown_target_404(client, db):
+    s = DbSession(name="X")
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    r = client.delete(f"/sessions/{s.id}?move_solves_to=9999")
+    assert r.status_code == 404
+
+
+def test_merge_basic(client, db):
+    from db.models import Solve
+
+    src = DbSession(name="Quelle")
+    dst = DbSession(name="Ziel")
+    db.add_all([src, dst])
+    db.commit()
+    db.refresh(src)
+    db.refresh(dst)
+    db.add(Solve(time_ms=10000, cube_type="3x3", session_id=src.id))
+    db.add(Solve(time_ms=11000, cube_type="3x3", session_id=dst.id))
+    db.commit()
+
+    r = client.post(f"/sessions/{src.id}/merge?target_id={dst.id}")
+    assert r.status_code == 200
+    # source weg, target enthaelt jetzt 2 solves
+    assert client.get(f"/sessions/{src.id}").status_code == 404
+    solves = client.get(f"/solves?session_id={dst.id}").json()
+    assert len(solves) == 2
+
+
+def test_merge_appends_notes(client, db):
+    src = DbSession(name="A", notes="alte notiz")
+    dst = DbSession(name="B", notes="ziel notiz")
+    db.add_all([src, dst])
+    db.commit()
+    db.refresh(src)
+    db.refresh(dst)
+
+    client.post(f"/sessions/{src.id}/merge?target_id={dst.id}")
+    target = client.get(f"/sessions/{dst.id}").json()
+    assert "ziel notiz" in target["notes"]
+    assert "alte notiz" in target["notes"]
+    assert "[merged from" in target["notes"]
+
+
+def test_merge_target_without_notes(client, db):
+    src = DbSession(name="A", notes="info")
+    dst = DbSession(name="B")  # ohne notes
+    db.add_all([src, dst])
+    db.commit()
+    db.refresh(src)
+    db.refresh(dst)
+
+    client.post(f"/sessions/{src.id}/merge?target_id={dst.id}")
+    target = client.get(f"/sessions/{dst.id}").json()
+    assert target["notes"] is not None
+    assert "info" in target["notes"]
+
+
+def test_merge_self_forbidden(client, db):
+    s = DbSession(name="X")
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    r = client.post(f"/sessions/{s.id}/merge?target_id={s.id}")
+    assert r.status_code == 400
+
+
+def test_merge_unknown_source_404(client, db):
+    s = DbSession(name="dst")
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    r = client.post(f"/sessions/9999/merge?target_id={s.id}")
+    assert r.status_code == 404
+
+
+def test_merge_unknown_target_404(client, db):
+    s = DbSession(name="src")
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    r = client.post(f"/sessions/{s.id}/merge?target_id=9999")
+    assert r.status_code == 404
