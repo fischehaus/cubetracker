@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { BackupPanel } from "./BackupPanel";
+import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
 import { ImportPanel } from "./ImportPanel";
 import { OutlierCard } from "./OutlierCard";
@@ -64,6 +65,7 @@ export function VerwaltungTab() {
       {section === "daten" && (
         <div className="space-y-4">
           <ImportPanel />
+          <CsTimerExportPanel />
           <BackupPanel />
         </div>
       )}

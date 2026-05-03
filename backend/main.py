@@ -7,7 +7,7 @@ registriert die API-Router.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import backup, hardware, import_cstimer, sessions, solves, stats
+from api import backup, export_cstimer, hardware, import_cstimer, sessions, solves, stats
 
 # Zentrale Version — wird beim setzen eines neuen tags hier gebumpt.
 # Wird sowohl von FastAPI(version=) als auch vom /-health-endpoint genutzt,
@@ -36,6 +36,7 @@ app.include_router(import_cstimer.router)  # F4
 app.include_router(stats.router)  # F5
 app.include_router(hardware.router)  # F16 (Phase 5)
 app.include_router(backup.router)  # Phase L+ (B.1 + B.2)
+app.include_router(export_cstimer.router)  # Phase L+ d (csTimer-Export)
 
 
 @app.get("/")
