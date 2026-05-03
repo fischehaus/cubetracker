@@ -524,6 +524,64 @@ def test_by_hardware_filters_by_cube_type(client, db):
     assert data["hardware"][0]["count"] == 1  # 4x4-solve nicht dabei
 
 
+def test_by_session_empty(client):
+    r = client.get("/stats/by-session")
+    assert r.status_code == 200
+    assert r.json() == {"filter": {"cube_type": None}, "sessions": []}
+
+
+def test_by_session_skips_session_less_solves(client, db):
+    """Solves ohne session_id werden ignoriert."""
+    _add_solves(db, [10000] * 10, cube_type="3x3", session_id=None)
+    r = client.get("/stats/by-session")
+    assert r.json()["sessions"] == []
+
+
+def test_by_session_groups(client, db):
+    s1 = DbSession(name="A")
+    s2 = DbSession(name="B")
+    db.add_all([s1, s2])
+    db.commit()
+    db.refresh(s1)
+    db.refresh(s2)
+
+    _add_solves(db, [15000] * 10 + [9000] * 5, cube_type="3x3", session_id=s1.id)
+    _add_solves(db, [10000] * 10 + [13000] * 5, cube_type="3x3", session_id=s2.id)
+
+    r = client.get("/stats/by-session")
+    sessions = r.json()["sessions"]
+    assert len(sessions) == 2
+    # s1 in besserer Form (current 9k < mean 13k), s2 schlechter
+    assert sessions[0]["session_name"] == "A"
+    assert sessions[1]["session_name"] == "B"
+
+
+def test_by_session_filter_cube_type(client, db):
+    s = DbSession(name="A")
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    _add_solves(db, [10000] * 6, cube_type="3x3", session_id=s.id)
+    _add_solves(db, [60000] * 6, cube_type="4x4", session_id=s.id)
+
+    # Mit cube_type-Filter: nur 3x3-Solves zaehlen
+    r = client.get("/stats/by-session?cube_type=3x3")
+    sessions = r.json()["sessions"]
+    assert len(sessions) == 1
+    assert sessions[0]["count"] == 6
+    assert sessions[0]["best_ms"] == 10000
+
+
+def test_by_session_min_solves_threshold(client, db):
+    s = DbSession(name="X")
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    _add_solves(db, [10000] * 3, session_id=s.id)
+    r = client.get("/stats/by-session")
+    assert r.json()["sessions"] == []  # nur 3 Solves, unter Schwelle 5
+
+
 def test_by_hardware_filter_by_session(client, db):
     from db.models import Hardware, Solve
     from db.models import Session as DbSession

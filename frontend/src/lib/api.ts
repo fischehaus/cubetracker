@@ -60,6 +60,7 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-session"] });
       qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
@@ -88,6 +89,7 @@ export function useUpdateSolve(): UseMutationResult<
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-session"] });
       qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
@@ -111,6 +113,7 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-session"] });
       qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
@@ -185,6 +188,45 @@ export interface CubeStats {
 export interface StatsByCubeResponse {
   cubes: CubeStats[];
   filter: { session_id: number | null };
+}
+
+// ============================================================
+// Stats by Session (Phase 6 — Multi-Session-Vergleich)
+// ============================================================
+
+export interface SessionStats {
+  session_id: number;
+  session_name: string;
+  count: number;
+  count_valid: number;
+  current_ao5: number | null;
+  mean_ms: number | null;
+  best_ms: number | null;
+  form_factor: number | null;
+  form_factor_recent: number | null;
+  last_solve_at: string | null;
+  days_since_last: number | null;
+}
+
+export interface StatsBySessionResponse {
+  filter: { cube_type: string | null };
+  sessions: SessionStats[];
+}
+
+export function useStatsBySession(
+  cubeType: string | undefined
+): UseQueryResult<StatsBySessionResponse> {
+  const params: Record<string, string> = {};
+  if (cubeType) params.cube_type = cubeType;
+  return useQuery({
+    queryKey: ["stats-by-session", params],
+    queryFn: async (): Promise<StatsBySessionResponse> => {
+      const r = await api.get<StatsBySessionResponse>("/stats/by-session", {
+        params,
+      });
+      return r.data;
+    },
+  });
 }
 
 // ============================================================

@@ -18,7 +18,7 @@ import { HardwareList } from "./components/HardwareList";
 import { HistogramChart } from "./components/HistogramChart";
 import { ImportPanel } from "./components/ImportPanel";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
-import { MultiCubeCompareCard } from "./components/MultiCubeCompareCard";
+import { MultiCompareCard } from "./components/MultiCompareCard";
 import { OutlierCard } from "./components/OutlierCard";
 import { ReminderCard } from "./components/ReminderCard";
 import { SessionList } from "./components/SessionList";
@@ -116,7 +116,7 @@ function DashboardTab({ sessionId }: { sessionId: number | null }) {
         <ActivityCard sessionId={sessionId} slice="week" />
         <ReminderCard sessionId={sessionId} emptyMode="visible" />
       </div>
-      <MultiCubeCompareCard sessionId={sessionId} />
+      <MultiCompareCard sessionId={sessionId} />
       <StatsCard cubeType={undefined} sessionId={sessionId} />
     </div>
   );
