@@ -3,18 +3,18 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-03. **Phase 8.4 fertig, Tag `v0.14`
-> gesetzt.** Drei zusammen: Trainings-Sets + Schrift-Slider + Best-Avg-
-> Timestamps:
-> - SessionPlanCard im TIMER ueber Scramble: Plan-Wahl 5/12/25/50/100/∞,
->   Counter live, End-Feedback-Modal mit Set-Stats + heuristisches Coaching
-> - 5-Stufen-Schrift-Slider (sm/md/lg/xl/xxl) wirkt auf Scramble + Timer
-> - Backend liefert best_ao5/12/100_at als ISO-Timestamps, StatsCard zeigt
->   das Datum inline neben den Best-Avg-Werten
-> - 334 Tests gruen (222 backend + 112 frontend)
+> **Letzter Stand:** 2026-05-03. **Phase 8.5 fertig, Tag `v0.15`
+> gesetzt.** 14 neue Achievement-Definitionen + Live-Backfill auf
+> Bestand (6 neu unlocked, jetzt 23 von 31 total):
+> - Volume-Tages-Patterns separat pro Event (3x3/2x2/4x4/5x5/OH × 100er-Tag)
+> - Marathon-Tag (200 any cube), Wochen-Disziplin (7 Tage je 100+ 3x3)
+> - Speed-Schwellen sub_30, sub_22.95, sub_6_66 (Hex-Master)
+> - Streaks 7/30/100 Tage (neue Category „consistency")
+> - Sanity-Floor 1000ms im Speed-Check schuetzt vor degenerierten Daten
+> - 349 Tests gruen (237 backend + 112 frontend)
 >
-> **Phase 8.3 (Tag `v0.13`)** war PB-Konfetti (Backend X-PB-Achieved-
-> Header + canvas-confetti + Toast-Banner).
+> **Phase 8.4 (Tag `v0.14`)** war Trainings-Sets + Schrift-Slider +
+> Best-Avg-Timestamps. **Phase 8.3 (Tag `v0.13`)** war PB-Konfetti.
 >
 > **Phase 8.2 (Tag `v0.12`)** war Speedcubing-Timer mit Spacebar +
 > WCA-Inspection (Mode-Toggle WCA/Pragmatisch) + Sound + Multi-Phase-
@@ -131,15 +131,22 @@ Du musst beim naechsten Mal:
 
 ## Was als naechstes ansteht
 
-Phase 8 + 8.1 + 8.2 + 8.3 + 8.4 abgeschlossen. Geplante Reihenfolge bis v1.0:
+Phase 8 + 8.1 + 8.2 + 8.3 + 8.4 + 8.5 abgeschlossen. Geplante Reihenfolge:
 
-**Phase 8.5 — Achievement-Erweiterung** (~0.5-1 Tag):
-- ~14 neue Definitions: Volume-Day-Achievements (3x3/2x2/4x4/5x5/OH separat),
-  Speed-Schwellen 3x3 (sub30/22.95/15/10/6.66), PB-Patterns (Double/
-  Synchronized/Triple-Day), Streaks (7/30/100 Tage), Konsistenz.
-- Live-Backfill auf Bestandsdaten.
+**Phase 9 — Distribution + Restore → v1.0** (~2-3 Tage):
+- POST /backup/restore Endpoint + UI im BackupPanel
+- Backend serviert Frontend statisch (StaticFiles)
+- DB nach %LOCALAPPDATA%, Migrations beim ersten Start
+- PyInstaller-Bundle, Inno-Setup-Installer
+- Achievement-Trigger nach Import explizit verifizieren
 
-**Phase 8.3.1 — 2D-Algorithm-Visualisierung** (~1 Tag):
+**Optional vor v1.0** (Aufwand jeweils ~0.5-1 Tag):
+- Phase 8.5.1 — PB-Patterns + Konsistenz-Achievements (chronologisches
+  Tracking: pb_double, pb_synchronized, pb_triple_day, consistency_5_under_avg)
+- Phase 8.3.1 — 2D-Algorithm-Visualisierung mit echtem 3x3-Sim
+
+**Nach v1.0**:
+- Phase 11 — WCA-Ranking-Lookup (hardcoded WR-Tabelle, „Top X% weltweit")
 - 2D-Cube-State-Bilder im AlgTrainerPanel + DrillCard
 - Lib `sr-visualizer` oder selbst-gebaute SVG aus state-pattern
 - KEIN Hotlinking auf jperm.net (urheberrechtlich)
@@ -213,9 +220,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-8.4-Features gemerged)
-- **Tags:** `v0.0` … `v0.13`, **`v0.14`** (aktuell)
-- **Tests:** 222 backend + 112 frontend = **334 gruen**
+- **Branch:** `main` (sauber, alle Phase-8.5-Features gemerged)
+- **Tags:** `v0.0` … `v0.14`, **`v0.15`** (aktuell)
+- **Tests:** 237 backend + 112 frontend = **349 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber

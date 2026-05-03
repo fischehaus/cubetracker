@@ -163,6 +163,29 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 8.5 — Achievement-Erweiterung (Tag `v0.15`) ✅
+
+14 neue Achievement-Definitionen, neue Category „consistency", Live-
+Backfill auf Bestand. PB-Patterns + Konsistenz brauchen chronologisches
+Tracking → eigene Mini-Phase 8.5.1.
+
+- [x] **Volume-Tages-Patterns** (separat pro Event):
+  volume_day_3x3_100 / 2x2_100 / 4x4_100 / 5x5_100 / oh_100,
+  volume_day_any_200 (Marathon), volume_week_3x3_100daily.
+- [x] **Speed-Schwellen 3x3**: pb_3x3_sub_30, pb_3x3_sub_22_95
+  (User-Wunsch), pb_3x3_sub_6_66 (Hex-Master).
+- [x] **Streaks** (neue Category „consistency"):
+  streak_solve_7 / 30 / 100 (Tage in Folge mit ≥1 Solve).
+- [x] **Backend**: AchievementInput um 4 neue Felder, Service-Layer
+  mit SQL DATE-Aggregation + pure helper `_longest_consecutive_day_streak`.
+- [x] **Sanity-Floor 1000ms** im Speed-PB-Check — schuetzt vor
+  degenerierten Daten (z.B. time_ms=0 ohne DNF-Flag).
+- [x] **Frontend**: Category „consistency" + 5. Sektion in
+  AchievementsCard.
+- [x] **Live-Backfill**: 6 neue Achievements unlocked (jetzt 23 von 31).
+
+**Tests:** 237 backend + 112 frontend = 349 gruen.
+
 ## Phase 8.4 — Trainings-Sets + Schrift + PB-Timestamps (Tag `v0.14`) ✅
 
 User-Wuensche aus Test-Feedback. Drei zusammen:
@@ -576,8 +599,9 @@ Feature-Set bewegen.
 - ✅ Phase 8.2: **fertig** (Speedcubing-Timer: Spacebar + Inspection + Sound + Multi-Phase + Settings, Tag `v0.12`)
 - ✅ Phase 8.3: **fertig** (PB-Konfetti, Tag `v0.13`)
 - ✅ Phase 8.4: **fertig** (Trainings-Sets + Schrift + PB-Timestamps, Tag `v0.14`)
+- ✅ Phase 8.5: **fertig** (14 neue Achievements + Backfill, Tag `v0.15`)
 - ⏸ Phase 8.3.1: pending (Algorithm-Visualisierung — 2D-State-Bilder im Trainer mit echtem 3x3-Sim)
-- ⏸ Phase 8.5: pending (Achievement-Erweiterung — ~14 neue Definitionen + Backfill)
+- ⏸ Phase 8.5.1: pending (PB-Patterns + Konsistenz-Achievements mit chronologischem Tracking)
 - ⏸ Phase 9: pending (Distribution / Installer + Restore → Tag `v1.0`)
 - ⏸ Phase 11: pending (WCA-Ranking-Lookup, optional nach v1.0)
 
@@ -644,3 +668,10 @@ Feature-Set bewegen.
   (5 Stufen, AppSettings.timer_font_size) + Best-Avg-Timestamps
   (Backend liefert *_at + *_solve_id pro best_ao5/12/100, Frontend
   StatsCard zeigt das Datum). 334 Tests gruen.
+- `v0.14-pre-achievements` — Snapshot vor Phase 8.5, + branch
+  `legacy/v0.14-pre-achievements`.
+- `v0.15` — Phase 8.5: 14 neue Achievements (Volume-Tages-Patterns
+  separat pro Event, Speed-Schwellen sub_30/22.95/6.66, Streaks 7/30/100
+  Tage in neuer Category „consistency"). Sanity-Floor 1000ms im Speed-
+  Check schuetzt vor degenerierten Daten. Live-Backfill: 6 neu unlocked.
+  349 Tests gruen.
