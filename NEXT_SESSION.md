@@ -3,12 +3,15 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-04 spaeter Vormittag. **Phase 5b fertig,
-> Tag `v0.6` gesetzt.** Quick-Wins (Umlaut, Tag-Achse kompakt,
-> Backend-Version zentralisiert, HW-Rename), Session-Merge + Delete-
-> Migration mit Modal, Hardware-Performance-Vergleich (`/stats/by-hardware`
-> + Card im ANALYSE), Dashboard-Toggle Cube/Session mit Hardware-
-> Drilldown beim Klick.
+> **Letzter Stand:** 2026-05-04 mittag. **Phase L fertig, Tag `v0.7`
+> gesetzt.** Komplettes Layout-Refactor: 4 Tabs (Verwaltung neu),
+> Filter pro Bereich (kein globaler Header-Filter mehr),
+> Onboarding-Banner bei leerer DB, Solve-Detail-Modal (ℹ-button
+> in SolveList), URL-Hash-Routing (`#dashboard` etc.).
+>
+> **Snapshot vorheriger Layout-Version**: tag `v0.6` + branch
+> `legacy/v0.6-classic-layout` — Rollback jederzeit moeglich
+> (siehe Sektion „Layout-Rollback" unten).
 
 ---
 
@@ -154,8 +157,8 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-5b-Features gemerged)
-- **Tags:** `v0.0` … `v0.5`, **`v0.6`** (aktuell)
+- **Branch:** `main` (sauber, alle Phase-L-Features gemerged)
+- **Tags:** `v0.0` … `v0.6`, **`v0.7`** (aktuell)
 - **Tests:** 146 backend + 68 frontend = **214 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`

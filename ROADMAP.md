@@ -163,6 +163,38 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase L — Layout-Refactor (Tag `v0.7`) ✅
+
+Komplettes Frontend-Re-Konzept nach feature-explosion in Phase 5+5b.
+Architektur-Prinzip „eine Sektion = eine Aufgabe", Filter pro Bereich
+statt global, Quality-of-Life-Polish.
+
+Snapshot der vorherigen Layout-version: tag `v0.6` + branch
+`legacy/v0.6-classic-layout` zum jederzeit-rollback.
+
+- [x] **L-1: 4. Tab „Verwaltung" einfuehren** ✅ done
+  - TabBar erweitert: TIMER / DASHBOARD / ANALYSE / VERWALTUNG
+  - VerwaltungTab mit eigener sub-tab-bar (Sessions/Hardware/Import/Outliers)
+  - aus ANALYSE entfernt: SessionList, HardwareList, ImportPanel, OutlierCard
+  - ANALYSE jetzt deutlich kuerzer und klar fokussiert auf Auswertung
+- [x] **L-2: Filter pro Bereich** ✅ done
+  - SessionSwitcher aus Header entfernt
+  - AnalyseFilterBar erweitert um Session
+  - DashboardFilterBar neu (nur Session, Cube nicht — dashboard
+    vergleicht cube-uebergreifend)
+  - OutlierCard managed eigenen session-filter inline
+  - jeder tab hat eigenen state in App.tsx (analyseSessionId,
+    analyseCubeFilter, dashboardSessionId — persistent ueber tab-wechsel)
+  - kein verwirrender „globaler" filter mehr
+- [x] **L-3: Onboarding + Detail-Modal + Hash-Routing** ✅ done
+  - OnboardingBanner: bei leerer DB drei quick-aktionen, dismissable
+  - SolveDetailModal: ℹ-button in SolveList oeffnet vollbild-detail
+    (scramble komplett, notiz, hardware-name, session-name, ao5/ao12-
+    kontext, +2/dnf/loeschen aktionen)
+  - URL-Hash-Routing fuer Tab: #timer/#dashboard/#analyse/#verwaltung
+    - bookmarks + reload landen auf gewaehlter sicht
+    - browser back/forward zwischen tabs
+
 ## Phase 5b — Quick-Wins + Stats-Bundle (Tag `v0.6`) ✅
 
 User-feedback-runde nach phase 5. Bewusst als eigene minor-version
@@ -293,6 +325,7 @@ Feature-Set bewegen.
 - ✅ Phase 4: **fertig** (Visualisierungs-Refactor + UX-Polish, Tag `v0.4`)
 - ✅ Phase 5: **fertig** (Hardware-Inventar + Session-Aware Timer, Tag `v0.5`)
 - ✅ Phase 5b: **fertig** (Quick-Wins + Sessions Merge + Hardware-Vergleich + Dashboard-Toggle, Tag `v0.6`)
+- ✅ Phase L: **fertig** (Layout-Refactor: 4 Tabs + Filter pro Bereich + Onboarding + Detail-Modal + Hash-Routing, Tag `v0.7`)
 - ⏸ Phase 7: pending (Personal Trainer — Achievements + Daily Challenges)
 - ⏸ Phase 8: pending (Distribution / Installer → Tag `v1.0`)
 
@@ -313,3 +346,7 @@ Feature-Set bewegen.
 - `v0.6` — Phase 5b: Quick-Wins (Umlaut, Tag-Achse, Backend-Version,
   HW-Rename), Session-Merge + Delete-Migration, Hardware-Performance-
   Vergleich, Dashboard-Toggle Cube/Session mit Hardware-Drilldown
+- `v0.7` — Phase L: Layout-Refactor (4 Tabs incl. Verwaltung,
+  Filter pro Bereich, Onboarding-Banner, Solve-Detail-Modal,
+  URL-Hash-Routing). Snapshot v0.6-Layout liegt unter branch
+  `legacy/v0.6-classic-layout`.
