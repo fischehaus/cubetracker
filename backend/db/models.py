@@ -1,7 +1,7 @@
 """SQLAlchemy-ORM-Models fuer cubetracker.
 
-Aktuell: Solve + Session. Hardware-FK auf Solve ist als nullable
-Feld vorgesehen (kommt in Phase 4 mit eigenem Hardware-Model).
+Aktuell: Solve + Session + Hardware. Hardware-FK auf Solve ist nullable
+und wurde in Phase 5 / F16 aktiviert.
 
 Sessions wurden vorgezogen (urspruenglich Phase 3 / F14), weil der
 csTimer-Import sie schon als Konzept nutzt — jeder importierte Solve
@@ -61,7 +61,8 @@ class Solve(Base):
     `dnf`: Did Not Finish — Solve zaehlt als ungueltig fuer Stats.
     `session_id`: nullable — Solves ohne Session-Zuordnung (z.B. ad-hoc
         manuell eingetragen) sind erlaubt.
-    `hardware_id`: nullable, kommt in Phase 4.
+    `hardware_id`: nullable, FK auf Hardware — Phase 5/F17 aktiviert die
+        Auswahl im Frontend. Existierende Solves bleiben ohne Hardware.
     """
 
     __tablename__ = "solves"
@@ -85,8 +86,12 @@ class Solve(Base):
     )
     session: Mapped[Session | None] = relationship("Session", back_populates="solves")
 
-    # Phase 4: Hardware-FK (noch ohne Constraint, kommt mit Hardware-Model)
-    hardware_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    # Phase 5/F16: FK auf Hardware. Wenn ein Hardware-Eintrag geloescht
+    # wird, behalten betroffene Solves ihre Daten (hardware_id -> NULL).
+    hardware_id: Mapped[int | None] = mapped_column(
+        ForeignKey("hardware.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    hardware: Mapped[Hardware | None] = relationship("Hardware", back_populates="solves")
 
     __table_args__ = (
         Index("ix_solves_cube_type_timestamp", "cube_type", "timestamp"),
@@ -105,3 +110,36 @@ class Solve(Base):
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Solve id={self.id} cube={self.cube_type} time={self.time_ms}ms>"
+
+
+class Hardware(Base):
+    """Ein physischer Wuerfel im Inventar.
+
+    Phase 5 / F16. Ein Hardware-Eintrag = ein konkreter Wuerfel
+    (z.B. „mein Weilong v11 fuer 3x3"). Der `primary_cube_type` ist
+    die Default-Sortierung — nichts hindert daran, denselben 3x3-Wuerfel
+    auch fuer einen OH-Solve auszuwaehlen.
+
+    Namen sind bewusst NICHT unique: dieselbe Modell-Bezeichnung
+    (z.B. „QiYi Stickered") kann fuer mehrere physische Wuerfel
+    verwendet werden (3x3-Stickered, 2x2-Stickered, …).
+    """
+
+    __tablename__ = "hardware"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    primary_cube_type: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    acquired_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+    solves: Mapped[list[Solve]] = relationship(
+        "Solve", back_populates="hardware", cascade="save-update, merge"
+    )
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<Hardware id={self.id} name={self.name!r} cube={self.primary_cube_type}>"

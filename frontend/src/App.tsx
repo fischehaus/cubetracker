@@ -13,6 +13,7 @@ import { ActivityCard } from "./components/ActivityCard";
 import { ActivityChart } from "./components/ActivityChart";
 import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
 import { BigTimerInput } from "./components/BigTimerInput";
+import { HardwareList } from "./components/HardwareList";
 import { HistogramChart } from "./components/HistogramChart";
 import { ImportPanel } from "./components/ImportPanel";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
@@ -165,6 +166,8 @@ function AnalyseTab({
         <StatsCard cubeType={cubeFilter || undefined} sessionId={sessionId} />
         <ImportPanel />
       </div>
+
+      <HardwareList />
     </div>
   );
 }
