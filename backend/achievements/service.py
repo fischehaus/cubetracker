@@ -9,6 +9,7 @@ Verantwortlich fuer:
 
 from __future__ import annotations
 
+import math
 from datetime import date, timedelta
 
 from sqlalchemy import distinct, func, select
@@ -17,6 +18,7 @@ from sqlalchemy.orm import Session as OrmSession
 from db.models import Achievement, Hardware, Solve
 
 from .check import AchievementInput, check_achievements
+from .patterns import ChronoSolve, detect_patterns, merge_patterns
 
 
 def _build_snapshot(db: OrmSession) -> AchievementInput:
@@ -84,6 +86,29 @@ def _build_snapshot(db: OrmSession) -> AchievementInput:
     max_consec_3x3_100 = _longest_consecutive_day_streak(days_with_3x3_100plus)
     max_solve_streak = _longest_consecutive_day_streak(all_active_days)
 
+    # Phase 8.5.1: PB-Pattern-Detection — chronologischer pass pro cube_type.
+    # Wir laden alle Solves chronologisch sortiert + gruppieren clientseitig,
+    # da SQL-window-funktionen in SQLite umstaendlich.
+    pattern_results = []
+    all_solves_chrono = list(db.scalars(select(Solve).order_by(Solve.timestamp.asc())).all())
+    by_cube_chrono: dict[str, list[ChronoSolve]] = {}
+    for s in all_solves_chrono:
+        if s.timestamp is None:
+            continue
+        eff = math.inf if s.dnf else float(s.time_ms + (2000 if s.plus_two else 0))
+        by_cube_chrono.setdefault(s.cube_type, []).append(
+            ChronoSolve(
+                day=s.timestamp.date(),
+                effective_ms=eff,
+                dnf=s.dnf,
+                plus_two=s.plus_two,
+                time_ms=s.time_ms,
+            )
+        )
+    for chrono_solves in by_cube_chrono.values():
+        pattern_results.append(detect_patterns(chrono_solves))
+    merged_patterns = merge_patterns(pattern_results)
+
     return AchievementInput(
         total_solves=int(total_solves),
         total_valid_solves=int(total_valid),
@@ -95,6 +120,10 @@ def _build_snapshot(db: OrmSession) -> AchievementInput:
         max_solves_one_day_any=max_one_day_any,
         max_consecutive_days_3x3_100plus=max_consec_3x3_100,
         max_solve_streak_days=max_solve_streak,
+        had_pb_double=merged_patterns.had_pb_double,
+        had_pb_synchronized=merged_patterns.had_pb_synchronized,
+        had_pb_triple_day=merged_patterns.had_pb_triple_day,
+        had_5_consecutive_under_ao12=merged_patterns.had_5_consecutive_under_ao12,
     )
 
 

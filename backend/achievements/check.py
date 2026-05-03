@@ -43,6 +43,15 @@ class AchievementInput:
     """Laengste Streak von Tagen in Folge mit ≥100 3x3-Solves."""
     max_solve_streak_days: int = 0
     """Laengste Streak von Tagen in Folge mit ≥1 Solve (egal welcher Cube)."""
+    # Phase 8.5.1 — PB-Patterns (chronologisch detektiert pro cube_type, ge-OR-t)
+    had_pb_double: bool = False
+    """Jemals 2 single-PBs in Folge in IRGENDEINEM cube_type."""
+    had_pb_synchronized: bool = False
+    """Jemals single-PB UND ao5-PB im selben Solve."""
+    had_pb_triple_day: bool = False
+    """Jemals an einem Tag alle 3 PB-Events (single + ao5 + ao12)."""
+    had_5_consecutive_under_ao12: bool = False
+    """Jemals 5 valide Solves in Folge unter dem damals-running-Ao12."""
 
 
 def check_achievements(snapshot: AchievementInput) -> list[str]:
@@ -132,6 +141,16 @@ def check_achievements(snapshot: AchievementInput) -> list[str]:
         unlocked.append("streak_solve_30")
     if snapshot.max_solve_streak_days >= 100:
         unlocked.append("streak_solve_100")
+
+    # --- 8.5.1: PB-Patterns + Konsistenz
+    if snapshot.had_pb_double:
+        unlocked.append("pb_double")
+    if snapshot.had_pb_synchronized:
+        unlocked.append("pb_synchronized")
+    if snapshot.had_pb_triple_day:
+        unlocked.append("pb_triple_day")
+    if snapshot.had_5_consecutive_under_ao12:
+        unlocked.append("consistency_5_under_ao12")
 
     return unlocked
 

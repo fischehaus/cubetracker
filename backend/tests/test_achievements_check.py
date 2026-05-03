@@ -212,3 +212,30 @@ def test_speed_pb_sanity_floor_blocks_degenerate_zero_ms():
     out = check_achievements(make_input(best_ms_per_cube={"3x3": 1_500}))
     assert "pb_3x3_sub_30" in out
     assert "pb_3x3_sub_6_66" in out
+
+
+# ============================================================
+# Phase 8.5.1: PB-Patterns + Konsistenz
+# ============================================================
+
+
+def test_pb_double_unlocked():
+    assert "pb_double" not in check_achievements(make_input())
+    assert "pb_double" in check_achievements(make_input(had_pb_double=True))
+
+
+def test_pb_synchronized_unlocked():
+    assert "pb_synchronized" not in check_achievements(make_input())
+    assert "pb_synchronized" in check_achievements(make_input(had_pb_synchronized=True))
+
+
+def test_pb_triple_day_unlocked():
+    assert "pb_triple_day" not in check_achievements(make_input())
+    assert "pb_triple_day" in check_achievements(make_input(had_pb_triple_day=True))
+
+
+def test_consistency_5_under_ao12_unlocked():
+    assert "consistency_5_under_ao12" not in check_achievements(make_input())
+    assert "consistency_5_under_ao12" in check_achievements(
+        make_input(had_5_consecutive_under_ao12=True)
+    )
