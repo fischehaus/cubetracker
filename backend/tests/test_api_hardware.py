@@ -150,3 +150,57 @@ def test_seed_force_inserts_anyway(client):
     assert r.json()["loaded"] > 0
     second_count = len(client.get("/hardware").json())
     assert second_count == 2 * first_count
+
+
+# ============================================================
+# Suggest-Endpoint (Phase 5b-4)
+# ============================================================
+
+
+def test_suggest_empty_no_hardware(client):
+    r = client.get("/hardware/suggest?cube_type=3x3")
+    data = r.json()
+    assert data["hardware_id"] is None
+    assert data["reason"] == "none"
+
+
+def test_suggest_first_active_when_no_solves_yet(client, db):
+    """Wenn Hardware existiert, aber keine Solves: erste aktive vorschlagen."""
+    db.add(Hardware(name="Default 3x3", primary_cube_type="3x3"))
+    db.add(Hardware(name="Andere", primary_cube_type="3x3"))
+    db.commit()
+    r = client.get("/hardware/suggest?cube_type=3x3")
+    data = r.json()
+    assert data["hardware_id"] is not None
+    assert data["reason"] == "first_active"
+
+
+def test_suggest_picks_most_used(client, db):
+    from db.models import Solve
+
+    hw1 = Hardware(name="Selten", primary_cube_type="3x3")
+    hw2 = Hardware(name="Oft", primary_cube_type="3x3")
+    db.add_all([hw1, hw2])
+    db.commit()
+    db.refresh(hw1)
+    db.refresh(hw2)
+
+    db.add(Solve(time_ms=10000, cube_type="3x3", hardware_id=hw1.id))
+    for _ in range(5):
+        db.add(Solve(time_ms=11000, cube_type="3x3", hardware_id=hw2.id))
+    db.commit()
+
+    r = client.get("/hardware/suggest?cube_type=3x3")
+    data = r.json()
+    assert data["hardware_id"] == hw2.id
+    assert data["count"] == 5
+    assert data["reason"] == "most_used"
+
+
+def test_suggest_inactive_skipped_in_fallback(client, db):
+    """Inaktive werden im fallback (first_active) ignoriert."""
+    db.add(Hardware(name="Inaktiv", primary_cube_type="3x3", is_active=False))
+    db.commit()
+    r = client.get("/hardware/suggest?cube_type=3x3")
+    assert r.json()["hardware_id"] is None
+    assert r.json()["reason"] == "none"

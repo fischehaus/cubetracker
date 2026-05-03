@@ -56,11 +56,14 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
       // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard,
       // ActivityChart veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
+      // Auch suggest-queries (most-used) sind betroffen.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
+      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
+      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
     },
   });
 }
@@ -80,11 +83,14 @@ export function useUpdateSolve(): UseMutationResult<
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
       // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard,
       // ActivityChart veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
+      // Auch suggest-queries (most-used) sind betroffen.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
+      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
+      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
     },
   });
 }
@@ -99,11 +105,14 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
       // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard,
       // ActivityChart veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
+      // Auch suggest-queries (most-used) sind betroffen.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
+      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
+      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
     },
   });
 }
@@ -452,5 +461,37 @@ export function useSeedHardware(): UseMutationResult<SeedResult, Error, boolean>
       return r.data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["hardware"] }),
+  });
+}
+
+export interface HardwareSuggestion {
+  hardware_id: number | null;
+  count: number;
+  cube_type: string;
+  /** "most_used" | "first_active" | "none" */
+  reason: "most_used" | "first_active" | "none";
+}
+
+/**
+ * Empfohlene Hardware fuer einen Cube-Type:
+ * - meiste Solves dieses Cubes (most_used), oder
+ * - erste aktive Hardware mit passendem primary_cube_type (first_active),
+ *   wenn noch keine Solves vorliegen.
+ */
+export function useSuggestHardware(
+  cubeType: string | undefined
+): UseQueryResult<HardwareSuggestion> {
+  return useQuery({
+    queryKey: ["hardware-suggest", cubeType],
+    queryFn: async (): Promise<HardwareSuggestion> => {
+      if (!cubeType) {
+        return { hardware_id: null, count: 0, cube_type: "", reason: "none" };
+      }
+      const r = await api.get<HardwareSuggestion>("/hardware/suggest", {
+        params: { cube_type: cubeType },
+      });
+      return r.data;
+    },
+    enabled: !!cubeType,
   });
 }

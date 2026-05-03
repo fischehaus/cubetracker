@@ -7,7 +7,14 @@
 // read-only (Aenderungen seltener; ggf. spaeter via Edit-Dialog).
 
 import { useMemo, useState } from "react";
-import { useDeleteSolve, useSolves, useStats, useUpdateSolve, type SolveListParams } from "../lib/api";
+import {
+  useDeleteSolve,
+  useHardware,
+  useSolves,
+  useStats,
+  useUpdateSolve,
+  type SolveListParams,
+} from "../lib/api";
 import {
   formatDate,
   formatSolveTime,
@@ -57,6 +64,14 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
 
   const del = useDeleteSolve();
   const update = useUpdateSolve();
+
+  // Hardware-Lookup: id → name, fuer Anzeige in der Cube-Spalte
+  const { data: hardware } = useHardware();
+  const hardwareById = useMemo(() => {
+    const m = new Map<number, string>();
+    for (const h of hardware ?? []) m.set(h.id, h.name);
+    return m;
+  }, [hardware]);
 
   // Rolling ao5/ao12 berechnen — der API-Output ist DESC (neueste zuerst).
   // Fuer rollende Avgs brauchen wir chronologisch (alt → neu), also reversed.
@@ -263,7 +278,15 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                     </div>
                   </td>
                   <td className="py-3 pr-3 text-gray-300 align-top">
-                    {s.cube_type}
+                    <div>{s.cube_type}</div>
+                    {s.hardware_id !== null && hardwareById.has(s.hardware_id) && (
+                      <div
+                        className="text-xs text-gray-500 mt-0.5"
+                        title="Verwendete Hardware"
+                      >
+                        {hardwareById.get(s.hardware_id)}
+                      </div>
+                    )}
                   </td>
                   <td
                     className="py-3 pr-3 text-gray-400 text-sm max-w-xs align-top"

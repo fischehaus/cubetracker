@@ -1,24 +1,27 @@
-"""Hardware-CRUD-API (Phase 5 / F16).
+"""Hardware-CRUD-API (Phase 5 / F16, F17).
 
 Endpoints:
-- GET    /hardware                 — Liste aller Hardware-Eintraege
-- POST   /hardware                 — Neuer Eintrag
-- GET    /hardware/{id}            — Einzelner Eintrag
-- PATCH  /hardware/{id}            — Teil-Update
-- DELETE /hardware/{id}            — Loeschen (Solve.hardware_id wird NULL)
-- POST   /hardware/seed?force=...  — Seed-Daten aus seeds/hardware.py
-                                     anlegen. Default ohne force: nur wenn
-                                     Tabelle leer.
+- GET    /hardware                       — Liste aller Hardware-Eintraege
+- POST   /hardware                       — Neuer Eintrag
+- GET    /hardware/{id}                  — Einzelner Eintrag
+- PATCH  /hardware/{id}                  — Teil-Update
+- DELETE /hardware/{id}                  — Loeschen (Solve.hardware_id wird NULL)
+- POST   /hardware/seed?force=...        — Seed aus seeds/hardware.py
+- GET    /hardware/suggest?cube_type=X   — Hardware-Default fuer einen
+                                            Cube-Type (jene mit den meisten
+                                            Solves in diesem Cube)
 """
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session as OrmSession
 
 from db.database import get_db
-from db.models import Hardware
+from db.models import Hardware, Solve
 from db.schemas import HardwareCreate, HardwareRead, HardwareUpdate
 from seeds.hardware import HARDWARE_SEED
 
@@ -64,6 +67,63 @@ def create_hardware(payload: HardwareCreate, db: OrmSession = Depends(get_db)) -
     db.commit()
     db.refresh(hw)
     return hw
+
+
+@router.get("/suggest")
+def suggest_hardware_for_cube(
+    cube_type: str = Query(..., min_length=1, description="Cube-Type"),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Empfehle die Hardware, die der User am haeufigsten fuer diesen
+    Cube-Type benutzt hat (analog zu /sessions/suggest).
+
+    Heuristik: COUNT(solves) GROUP BY hardware_id WHERE cube_type=X.
+    Beschraenkt auf aktive Hardware. Wenn keine Daten vorliegen,
+    wird stattdessen die ERSTE aktive Hardware mit passendem
+    primary_cube_type vorgeschlagen.
+
+    Liefert {hardware_id: null} wenn nichts passt.
+    """
+    # 1. Versuch: meiste Solves
+    stmt = (
+        select(Solve.hardware_id, func.count().label("n"))
+        .where(Solve.cube_type == cube_type)
+        .where(Solve.hardware_id.is_not(None))
+        .group_by(Solve.hardware_id)
+        .order_by(func.count().desc())
+        .limit(1)
+    )
+    row = db.execute(stmt).first()
+    if row is not None and row[0] is not None:
+        return {
+            "hardware_id": row[0],
+            "count": int(row[1]),
+            "cube_type": cube_type,
+            "reason": "most_used",
+        }
+
+    # 2. Fallback: erste aktive Hardware mit passendem primary_cube_type
+    fallback = db.scalar(
+        select(Hardware.id)
+        .where(Hardware.primary_cube_type == cube_type)
+        .where(Hardware.is_active.is_(True))
+        .order_by(Hardware.name)
+        .limit(1)
+    )
+    if fallback is not None:
+        return {
+            "hardware_id": fallback,
+            "count": 0,
+            "cube_type": cube_type,
+            "reason": "first_active",
+        }
+
+    return {
+        "hardware_id": None,
+        "count": 0,
+        "cube_type": cube_type,
+        "reason": "none",
+    }
 
 
 @router.get("/{hw_id}", response_model=HardwareRead)
