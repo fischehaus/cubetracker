@@ -1,12 +1,12 @@
-// TabBar: Top-Level-Navigation zwischen den 3 Haupt-Modi der App.
-// - TIMER:     Solving-Modus, Eingabe gross + zentriert
-// - DASHBOARD: Live-Uebersicht, Tagesform + Reminders
-// - ANALYSE:   Deep-Dive, Charts + Outliers + volle Liste
+// TabBar: Top-Level-Navigation zwischen den 4 Haupt-Modi der App.
+// - TIMER:      Solving-Modus, Eingabe gross + zentriert
+// - DASHBOARD:  Live-Uebersicht, Tagesform + Reminders
+// - ANALYSE:    Deep-Dive, Charts + volle Solveliste (NUR Auswertung)
+// - VERWALTUNG: Sessions, Hardware, Import, Outlier-Pflege (Daten-Pflege)
 //
 // Aktiver Tab ist klar hervorgehoben (lila Akzent + Hintergrund).
-// Tasten-Targets sind gross (h-12), damit auch Touch funktioniert.
 
-export type AppTab = "timer" | "dashboard" | "analyse";
+export type AppTab = "timer" | "dashboard" | "analyse" | "verwaltung";
 
 interface TabDef {
   id: AppTab;
@@ -31,8 +31,14 @@ export const TABS: TabDef[] = [
   {
     id: "analyse",
     label: "Analyse",
-    icon: "🔍",
-    description: "Charts, Outliers, volle Liste",
+    icon: "📈",
+    description: "Charts + Solveliste",
+  },
+  {
+    id: "verwaltung",
+    label: "Verwaltung",
+    icon: "⚙",
+    description: "Sessions, Hardware, Import, Outliers",
   },
 ];
 
