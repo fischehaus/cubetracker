@@ -329,21 +329,60 @@ export function useUpdateSession(): UseMutationResult<
   });
 }
 
-export function useDeleteSession(): UseMutationResult<void, Error, number> {
+export function useDeleteSession(): UseMutationResult<
+  void,
+  Error,
+  { id: number; moveSolvesTo?: number | null }
+> {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id) => {
-      await api.delete(`/sessions/${id}`);
+    mutationFn: async ({ id, moveSolvesTo }) => {
+      const params: Record<string, number> = {};
+      if (moveSolvesTo !== undefined && moveSolvesTo !== null) {
+        params.move_solves_to = moveSolvesTo;
+      }
+      await api.delete(`/sessions/${id}`, { params });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["sessions"] });
-      // Solves verlieren ihre session_id (FK SET NULL)
+      // Solves wandern oder verlieren ihre session_id
       qc.invalidateQueries({ queryKey: ["solves"] });
-      // Stats potentiell betroffen, alle invalidieren
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
+      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
+    },
+  });
+}
+
+/**
+ * Mergt source-Session in target — Solves wandern, source wird geloescht,
+ * Notes werden in target appended.
+ */
+export function useMergeSession(): UseMutationResult<
+  Session,
+  Error,
+  { sourceId: number; targetId: number }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ sourceId, targetId }) => {
+      const r = await api.post<Session>(
+        `/sessions/${sourceId}/merge`,
+        null,
+        { params: { target_id: targetId } }
+      );
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sessions"] });
+      qc.invalidateQueries({ queryKey: ["solves"] });
+      qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
+      qc.invalidateQueries({ queryKey: ["stats-activity"] });
+      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
     },
   });
 }
