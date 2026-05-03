@@ -58,8 +58,14 @@ export interface AppSettings {
    * Mind. 1, max. 8 (UI clipped).
    */
   phase_names: string[];
-  /** Phase 8.4: Schrift-Groesse fuer Timer + ScrambleCard. */
+  /** Phase 8.4: Schrift-Größe für Timer + ScrambleCard. */
   timer_font_size: TimerFontSize;
+  /**
+   * Schrift-Größe für ALLE Drill-Fenster (aktuell: AlgTrainer-DrillCard).
+   * Separat einstellbar von timer_font_size, damit User im Trainer
+   * andere Größe wählen kann als im Haupt-Timer.
+   */
+  drill_font_size: TimerFontSize;
 }
 
 export const SETTINGS_DEFAULTS: AppSettings = {
@@ -72,6 +78,7 @@ export const SETTINGS_DEFAULTS: AppSettings = {
   splits_enabled: false,
   phase_names: ["Cross", "F2L", "OLL", "PLL"], // 3x3-CFOP default
   timer_font_size: "lg",
+  drill_font_size: "md", // Drill ist bei lg defaultmäßig kleiner als Timer
 };
 
 /**
@@ -90,8 +97,8 @@ export const TIMER_FONT_SCALE: Record<TimerFontSize, { timer: string; scramble: 
 export const FONT_SIZE_LABELS: Record<TimerFontSize, string> = {
   sm: "Klein",
   md: "Mittel",
-  lg: "Gross",
-  xl: "Sehr gross",
+  lg: "Groß",
+  xl: "Sehr groß",
   xxl: "XXL",
 };
 

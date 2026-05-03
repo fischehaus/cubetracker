@@ -13,7 +13,11 @@
 
 import { useEffect } from "react";
 import { formatTime } from "../lib/format";
-import { TIMER_FONT_SCALE, type AppSettings } from "../lib/settings";
+import {
+  TIMER_FONT_SCALE,
+  type AppSettings,
+  type TimerFontSize,
+} from "../lib/settings";
 import {
   useSpacebarTimer,
   type TimerPenalty,
@@ -40,6 +44,12 @@ interface Props {
    * counter hoch.
    */
   resetSeed: number;
+  /**
+   * Optional: überschreibt settings.timer_font_size. Genutzt vom
+   * DrillCard im Trainer um drill_font_size zu nutzen statt
+   * timer_font_size. Wenn null/undefined → settings.timer_font_size.
+   */
+  fontSizeOverride?: TimerFontSize | null;
 }
 
 export function SpacebarTimerCard({
@@ -48,7 +58,9 @@ export function SpacebarTimerCard({
   phaseNames,
   onSave,
   resetSeed,
+  fontSizeOverride,
 }: Props) {
+  const effectiveFontSize = fontSizeOverride ?? settings.timer_font_size;
   const timer = useSpacebarTimer({
     enabled,
     settings,
@@ -98,7 +110,7 @@ export function SpacebarTimerCard({
       <div
         className={`text-center font-mono ${timerColorClass(timer.state)}`}
         style={{
-          fontSize: TIMER_FONT_SCALE[settings.timer_font_size].timer,
+          fontSize: TIMER_FONT_SCALE[effectiveFontSize].timer,
           lineHeight: 1,
           padding: "1rem 0",
         }}

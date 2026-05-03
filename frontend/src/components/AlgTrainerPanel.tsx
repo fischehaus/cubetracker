@@ -25,7 +25,7 @@ import {
   scrambleForCase,
 } from "../lib/algs";
 import { formatSolveTime, formatTime, parseTimeInput } from "../lib/format";
-import { useAppSettings } from "../lib/settings";
+import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import type { Solve } from "../lib/types";
 import { CubeStateView } from "./CubeStateView";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
@@ -287,6 +287,7 @@ function DrillCard({
           phaseNames={settings.phase_names}
           onSave={saveFromSpacebar}
           resetSeed={spacebarResetSeed}
+          fontSizeOverride={settings.drill_font_size}
         />
       ) : (
         <input
@@ -305,7 +306,11 @@ function DrillCard({
           }}
           placeholder="0.00"
           autoFocus
-          className="w-full text-center font-mono bg-transparent border-0 border-b-2 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-2 text-2xl"
+          className="w-full text-center font-mono bg-transparent border-0 border-b-2 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-2"
+          style={{
+            fontSize: TIMER_FONT_SCALE[settings.drill_font_size].timer,
+            lineHeight: 1,
+          }}
         />
       )}
 
