@@ -70,6 +70,13 @@ class Solve(Base):
         einer Trainings-Session zu einem konkreten Subset-Case gehoert
         (z.B. "PLL-Tperm", "OLL-21"), wird der Code hier abgelegt.
         Erlaubt per-case-Stats im Trainer-Tab.
+    `split_times_ms`: nullable — Phase 8.2 (Multi-Phase-Splits). JSON-array
+        of int (ms) mit den Phasen-Dauern. None = klassischer Solve ohne
+        Splits. Beispiel 4-Phase-3x3: [1200, 3300, 1800, 1200]
+        (Cross 1.2s, F2L 3.3s, OLL 1.8s, PLL 1.2s, Total 7.5s).
+        sum() == time_ms (Total-Konsistenz, Caller verantwortlich).
+        csTimer kennt das Konzept nicht → bei Import bleibt None,
+        bei Export wird ignoriert (Round-Trip-OK weil dedup-keys gleich).
     """
 
     __tablename__ = "solves"
@@ -80,6 +87,7 @@ class Solve(Base):
     scramble: Mapped[str | None] = mapped_column(Text, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     alg_case: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    split_times_ms: Mapped[str | None] = mapped_column(Text, nullable=True)
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

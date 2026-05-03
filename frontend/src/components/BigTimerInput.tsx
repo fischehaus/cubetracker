@@ -21,6 +21,9 @@ import {
   useSuggestSession,
 } from "../lib/api";
 import { COMMON_CUBE_TYPES, parseTimeInput } from "../lib/format";
+import { useAppSettings } from "../lib/settings";
+import { SpacebarTimerCard } from "./SpacebarTimerCard";
+import type { TimerPenalty } from "../hooks/useSpacebarTimer";
 
 interface Props {
   cubeType: string;
@@ -53,6 +56,10 @@ export function BigTimerInput({
   const [plusTwo, setPlusTwo] = useState(false);
   const [dnf, setDnf] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Phase 8.2: Spacebar-Timer-Modus
+  const [settings] = useAppSettings();
+  // Reset-Counter fuer SpacebarTimerCard nach erfolgreichem Save
+  const [spacebarResetSeed, setSpacebarResetSeed] = useState(0);
 
   // „User hat in diesem Cube manuell gewaehlt" → wenn ja, kein Auto-Suggest-
   // Override mehr. Reset bei Cube-Wechsel, sodass der naechste Cube wieder
@@ -142,6 +149,36 @@ export function BigTimerInput({
         },
         onError: (e) => setError(`Fehler: ${e.message}`),
       }
+    );
+  }
+
+  // Phase 8.2: Spacebar-Timer-Save-Pfad. Mappt Penalty zu plus_two/dnf.
+  function saveFromSpacebar(
+    finalMs: number,
+    penalty: TimerPenalty,
+    splitTimesMs: number[] | null,
+  ) {
+    setError(null);
+    create.mutate(
+      {
+        time_ms: finalMs,
+        cube_type: cubeType,
+        plus_two: penalty === "+2",
+        dnf: penalty === "DNF",
+        session_id: sessionId,
+        hardware_id: hardwareId,
+        scramble: scramble && scramble.trim() !== "" ? scramble : null,
+        split_times_ms:
+          splitTimesMs && splitTimesMs.length > 0 ? JSON.stringify(splitTimesMs) : null,
+      },
+      {
+        onSuccess: () => {
+          // Auto-Reset des SpacebarTimer + neuer Scramble
+          setSpacebarResetSeed((s) => s + 1);
+          onSolveSaved?.();
+        },
+        onError: (e) => setError(`Fehler: ${e.message}`),
+      },
     );
   }
 
@@ -321,65 +358,84 @@ export function BigTimerInput({
         </div>
       )}
 
-      {/* Riesiges Eingabefeld */}
-      <div className="my-6">
-        <input
-          ref={inputRef}
-          type="text"
-          inputMode="decimal"
-          value={timeStr}
-          onChange={(e) => {
-            setTimeStr(e.target.value);
-            if (error) setError(null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              save();
-            }
-          }}
-          placeholder="0.00"
-          aria-label="Solve-Zeit"
-          className="w-full text-center font-mono bg-transparent border-0 border-b-4 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-4"
-          style={{ fontSize: "5rem", lineHeight: 1 }}
-        />
-        <p className="mt-3 text-center text-sm text-gray-500">
-          „1234" = 12.34s · „15102" = 1:51.02 · oder klassisch „12.34" / „1:23.45"
-        </p>
-      </div>
-
-      {/* Toggles + Save */}
-      <div className="flex items-center justify-center gap-3 flex-wrap">
-        <label className="flex items-center gap-2 rounded border border-gray-700 bg-gray-800/50 px-4 py-2 text-base text-gray-200 cursor-pointer hover:bg-gray-800">
-          <input
-            type="checkbox"
-            checked={plusTwo}
-            onChange={(e) => setPlusTwo(e.target.checked)}
-            className="accent-purple-500 w-4 h-4"
-            disabled={dnf}
+      {/* Phase 8.2: wenn Spacebar-Timer aktiv → SpacebarTimerCard,
+          sonst klassisches Text-Eingabefeld. */}
+      {settings.spacebar_enabled ? (
+        <div className="my-6">
+          <SpacebarTimerCard
+            enabled={true}
+            settings={settings}
+            phaseNames={settings.phase_names}
+            onSave={saveFromSpacebar}
+            resetSeed={spacebarResetSeed}
           />
-          +2 Strafe
-        </label>
-        <label className="flex items-center gap-2 rounded border border-gray-700 bg-gray-800/50 px-4 py-2 text-base text-gray-200 cursor-pointer hover:bg-gray-800">
+          <p className="mt-3 text-center text-sm text-gray-500">
+            Spacebar-Modus: aenderbar in Verwaltung → Einstellungen
+          </p>
+        </div>
+      ) : (
+        <div className="my-6">
           <input
-            type="checkbox"
-            checked={dnf}
+            ref={inputRef}
+            type="text"
+            inputMode="decimal"
+            value={timeStr}
             onChange={(e) => {
-              setDnf(e.target.checked);
-              if (e.target.checked) setPlusTwo(false);
+              setTimeStr(e.target.value);
+              if (error) setError(null);
             }}
-            className="accent-purple-500 w-4 h-4"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                save();
+              }
+            }}
+            placeholder="0.00"
+            aria-label="Solve-Zeit"
+            className="w-full text-center font-mono bg-transparent border-0 border-b-4 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-4"
+            style={{ fontSize: "5rem", lineHeight: 1 }}
           />
-          DNF
-        </label>
-        <button
-          onClick={save}
-          disabled={create.isPending}
-          className="rounded bg-purple-600 px-6 py-3 text-base font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-        >
-          {create.isPending ? "Speichere …" : "Speichern (Enter)"}
-        </button>
-      </div>
+          <p className="mt-3 text-center text-sm text-gray-500">
+            „1234" = 12.34s · „15102" = 1:51.02 · oder klassisch „12.34" / „1:23.45"
+          </p>
+        </div>
+      )}
+
+      {/* Toggles + Save — nur im Text-Mode (Spacebar regelt +2/DNF
+          automatisch ueber Inspection-Penalty + auto-save). */}
+      {!settings.spacebar_enabled && (
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <label className="flex items-center gap-2 rounded border border-gray-700 bg-gray-800/50 px-4 py-2 text-base text-gray-200 cursor-pointer hover:bg-gray-800">
+            <input
+              type="checkbox"
+              checked={plusTwo}
+              onChange={(e) => setPlusTwo(e.target.checked)}
+              className="accent-purple-500 w-4 h-4"
+              disabled={dnf}
+            />
+            +2 Strafe
+          </label>
+          <label className="flex items-center gap-2 rounded border border-gray-700 bg-gray-800/50 px-4 py-2 text-base text-gray-200 cursor-pointer hover:bg-gray-800">
+            <input
+              type="checkbox"
+              checked={dnf}
+              onChange={(e) => {
+                setDnf(e.target.checked);
+                if (e.target.checked) setPlusTwo(false);
+              }}
+              className="accent-purple-500 w-4 h-4"
+            />
+            DNF
+          </label>
+          <button
+            onClick={save}
+            disabled={create.isPending}
+            className="rounded bg-purple-600 px-6 py-3 text-base font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+          >
+            {create.isPending ? "Speichere …" : "Speichern (Enter)"}
+          </button>
+        </div>
+      )}
 
       {error && (
         <div className="mt-4 rounded border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm text-red-300 text-center">

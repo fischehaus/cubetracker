@@ -12,8 +12,14 @@ import { HardwareList } from "./HardwareList";
 import { ImportPanel } from "./ImportPanel";
 import { OutlierCard } from "./OutlierCard";
 import { SessionList } from "./SessionList";
+import { SettingsPanel } from "./SettingsPanel";
 
-type VerwaltungSection = "sessions" | "hardware" | "daten" | "outliers";
+type VerwaltungSection =
+  | "sessions"
+  | "hardware"
+  | "daten"
+  | "outliers"
+  | "settings";
 
 interface SubTab {
   id: VerwaltungSection;
@@ -26,6 +32,7 @@ const SUB_TABS: SubTab[] = [
   { id: "hardware", label: "Hardware", icon: "🧊" },
   { id: "daten", label: "Daten", icon: "📥" },
   { id: "outliers", label: "Outliers", icon: "⚠" },
+  { id: "settings", label: "Einstellungen", icon: "⚙" },
 ];
 
 export function VerwaltungTab() {
@@ -70,6 +77,7 @@ export function VerwaltungTab() {
         </div>
       )}
       {section === "outliers" && <OutlierCard />}
+      {section === "settings" && <SettingsPanel />}
     </div>
   );
 }

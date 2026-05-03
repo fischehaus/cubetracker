@@ -44,6 +44,7 @@ def test_backup_json_full(client, db):
             scramble="R U R'",
             notes="solid",
             alg_case="PLL-Tperm",
+            split_times_ms="[1500,5000,2000,1500]",
         )
     )
     db.add(Solve(time_ms=11500, cube_type="3x3", plus_two=True))
@@ -86,11 +87,13 @@ def test_backup_json_full(client, db):
     assert solves[0]["scramble"] == "R U R'"
     assert solves[0]["notes"] == "solid"
     assert solves[0]["alg_case"] == "PLL-Tperm"
+    assert solves[0]["split_times_ms"] == "[1500,5000,2000,1500]"
     assert solves[1]["time_ms"] == 11500
     assert solves[1]["plus_two"] is True
     assert solves[1]["session_id"] is None
     assert solves[1]["hardware_id"] is None
     assert solves[1]["alg_case"] is None
+    assert solves[1]["split_times_ms"] is None
 
 
 def test_backup_json_schema_version(client):

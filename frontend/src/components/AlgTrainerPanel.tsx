@@ -25,7 +25,10 @@ import {
   scrambleForCase,
 } from "../lib/algs";
 import { formatSolveTime, formatTime, parseTimeInput } from "../lib/format";
+import { useAppSettings } from "../lib/settings";
 import type { Solve } from "../lib/types";
+import { SpacebarTimerCard } from "./SpacebarTimerCard";
+import type { TimerPenalty } from "../hooks/useSpacebarTimer";
 
 const SUBSETS: { id: AlgSubsetId; label: string }[] = [
   { id: "pll", label: "PLL (21)" },
@@ -174,6 +177,37 @@ function DrillCard({
   const [timeStr, setTimeStr] = useState("");
   const [error, setError] = useState<string | null>(null);
   const create = useCreateSolve();
+  // Phase 8.2: Spacebar-Modus aktiv?
+  const [settings] = useAppSettings();
+  const [spacebarResetSeed, setSpacebarResetSeed] = useState(0);
+
+  function saveFromSpacebar(
+    finalMs: number,
+    penalty: TimerPenalty,
+    splitTimesMs: number[] | null,
+  ) {
+    setError(null);
+    create.mutate(
+      {
+        time_ms: finalMs,
+        cube_type: "3x3",
+        scramble,
+        alg_case: caseDef.id,
+        plus_two: penalty === "+2",
+        dnf: penalty === "DNF",
+        split_times_ms:
+          splitTimesMs && splitTimesMs.length > 0 ? JSON.stringify(splitTimesMs) : null,
+      },
+      {
+        onSuccess: () => {
+          setSpacebarResetSeed((s) => s + 1);
+          setScrambleSeed((s) => s + 1);
+          onSaved();
+        },
+        onError: (e) => setError(`Fehler: ${e.message}`),
+      },
+    );
+  }
 
   // scramble wird hier per-render neu erzeugt sobald sich case oder
   // seed aendert — useMemo macht das preisgunstig + deterministisch
@@ -239,24 +273,34 @@ function DrillCard({
         </div>
       )}
 
-      <input
-        type="text"
-        inputMode="decimal"
-        value={timeStr}
-        onChange={(e) => {
-          setTimeStr(e.target.value);
-          if (error) setError(null);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            save();
-          }
-        }}
-        placeholder="0.00"
-        autoFocus
-        className="w-full text-center font-mono bg-transparent border-0 border-b-2 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-2 text-2xl"
-      />
+      {settings.spacebar_enabled ? (
+        <SpacebarTimerCard
+          enabled={true}
+          settings={settings}
+          phaseNames={settings.phase_names}
+          onSave={saveFromSpacebar}
+          resetSeed={spacebarResetSeed}
+        />
+      ) : (
+        <input
+          type="text"
+          inputMode="decimal"
+          value={timeStr}
+          onChange={(e) => {
+            setTimeStr(e.target.value);
+            if (error) setError(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              save();
+            }
+          }}
+          placeholder="0.00"
+          autoFocus
+          className="w-full text-center font-mono bg-transparent border-0 border-b-2 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-2 text-2xl"
+        />
+      )}
 
       <div className="mt-3 flex gap-2">
         <button
