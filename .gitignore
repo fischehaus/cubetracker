@@ -18,6 +18,10 @@ dist/
 build/
 .vite/
 
+# Phase 9 Distribution-Build-Artefakte
+installer-output/
+*.spec.bak
+
 # Datenbank
 *.db
 *.sqlite
