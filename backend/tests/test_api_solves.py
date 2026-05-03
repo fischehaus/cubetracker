@@ -191,3 +191,47 @@ def test_delete_solve(client, db):
 def test_delete_solve_404(client):
     r = client.delete("/solves/9999")
     assert r.status_code == 404
+
+
+# ============================================================
+# Phase 8: alg_case (Algorithm-Trainer-Tag)
+# ============================================================
+
+
+def test_create_solve_with_alg_case(client):
+    """alg_case kann beim POST mitgegeben werden und kommt im read zurueck."""
+    r = client.post(
+        "/solves",
+        json={
+            "time_ms": 12340,
+            "cube_type": "3x3",
+            "scramble": "R U R U",
+            "alg_case": "PLL-Tperm",
+        },
+    )
+    assert r.status_code == 201
+    data = r.json()
+    assert data["alg_case"] == "PLL-Tperm"
+    assert data["scramble"] == "R U R U"
+
+
+def test_create_solve_without_alg_case_defaults_null(client):
+    r = client.post("/solves", json={"time_ms": 10000, "cube_type": "3x3"})
+    assert r.status_code == 201
+    assert r.json()["alg_case"] is None
+
+
+def test_patch_solve_alg_case(client, db):
+    """PATCH kann alg_case nachtraeglich setzen oder loeschen."""
+    solve = Solve(time_ms=12340, cube_type="3x3")
+    db.add(solve)
+    db.commit()
+    db.refresh(solve)
+
+    r = client.patch(f"/solves/{solve.id}", json={"alg_case": "OLL-21"})
+    assert r.status_code == 200
+    assert r.json()["alg_case"] == "OLL-21"
+
+    r2 = client.patch(f"/solves/{solve.id}", json={"alg_case": None})
+    assert r2.status_code == 200
+    assert r2.json()["alg_case"] is None

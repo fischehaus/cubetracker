@@ -13,6 +13,7 @@ export interface Solve {
   session_id: number | null;
   hardware_id: number | null;
   effective_time_ms: number | null;
+  alg_case: string | null;
 }
 
 export interface SolveCreate {
@@ -25,6 +26,7 @@ export interface SolveCreate {
   timestamp?: string | null;
   session_id?: number | null;
   hardware_id?: number | null;
+  alg_case?: string | null;
 }
 
 export interface SolveUpdate {
@@ -36,6 +38,7 @@ export interface SolveUpdate {
   dnf?: boolean;
   session_id?: number | null;
   hardware_id?: number | null;
+  alg_case?: string | null;
 }
 
 export interface Session {

@@ -66,6 +66,10 @@ class Solve(Base):
         manuell eingetragen) sind erlaubt.
     `hardware_id`: nullable, FK auf Hardware — Phase 5/F17 aktiviert die
         Auswahl im Frontend. Existierende Solves bleiben ohne Hardware.
+    `alg_case`: nullable — Phase 8 (Algorithm-Trainer). Wenn der Solve in
+        einer Trainings-Session zu einem konkreten Subset-Case gehoert
+        (z.B. "PLL-Tperm", "OLL-21"), wird der Code hier abgelegt.
+        Erlaubt per-case-Stats im Trainer-Tab.
     """
 
     __tablename__ = "solves"
@@ -75,6 +79,7 @@ class Solve(Base):
     cube_type: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
     scramble: Mapped[str | None] = mapped_column(Text, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    alg_case: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

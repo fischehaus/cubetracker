@@ -63,6 +63,11 @@ class SolveBase(BaseModel):
     notes: str | None = None
     plus_two: bool = False
     dnf: bool = False
+    alg_case: str | None = Field(
+        default=None,
+        max_length=64,
+        description="Phase 8: Subset-Case-Code, z.B. 'PLL-Tperm' / 'OLL-21'",
+    )
 
 
 class SolveCreate(SolveBase):
@@ -87,6 +92,7 @@ class SolveUpdate(BaseModel):
     dnf: bool | None = None
     session_id: int | None = None
     hardware_id: int | None = None
+    alg_case: str | None = Field(default=None, max_length=64)
 
 
 class SolveRead(SolveBase):

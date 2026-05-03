@@ -118,6 +118,7 @@ def _solve_to_dict(s: Solve) -> dict[str, Any]:
         "dnf": s.dnf,
         "session_id": s.session_id,
         "hardware_id": s.hardware_id,
+        "alg_case": s.alg_case,
     }
 
 

@@ -29,6 +29,16 @@ interface Props {
    *  LastSolvesPreview parallel auf dieselbe Session filtert. */
   sessionId: number | null;
   onSessionIdChange: (id: number | null) => void;
+  /**
+   * Phase 8a: aktueller Scramble-String — wird beim Save mit dem
+   * Solve persistiert. null/empty wenn keiner verfuegbar (kein crash).
+   */
+  scramble: string | null;
+  /**
+   * Phase 8a: Callback nach erfolgreichem Save — Parent triggert
+   * neuen Scramble (Auto-Next).
+   */
+  onSolveSaved?: () => void;
 }
 
 export function BigTimerInput({
@@ -36,6 +46,8 @@ export function BigTimerInput({
   onCubeTypeChange,
   sessionId,
   onSessionIdChange,
+  scramble,
+  onSolveSaved,
 }: Props) {
   const [timeStr, setTimeStr] = useState("");
   const [plusTwo, setPlusTwo] = useState(false);
@@ -117,6 +129,7 @@ export function BigTimerInput({
         dnf,
         session_id: sessionId,
         hardware_id: hardwareId,
+        scramble: scramble && scramble.trim() !== "" ? scramble : null,
       },
       {
         onSuccess: () => {
@@ -124,6 +137,8 @@ export function BigTimerInput({
           setPlusTwo(false);
           setDnf(false);
           requestAnimationFrame(() => inputRef.current?.focus());
+          // Phase 8a: Auto-Next-Scramble triggern
+          onSolveSaved?.();
         },
         onError: (e) => setError(`Fehler: ${e.message}`),
       }
