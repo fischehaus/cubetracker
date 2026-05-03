@@ -163,6 +163,31 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 8.3.1 — OLL-Visualisierung (Tag `v0.16`) ✅
+
+User hat in einem anderen Chat alle 57 OLL-Diagramme als PNGs erzeugt
+(dark-theme-konform: 9 Top-Stickers gelb/grau + 12 Side-Indicator-Balken).
+Damit konnte ich mir den 3x3-State-Simulator komplett sparen.
+
+- [x] **57 OLL-PNGs** unter `src/assets/oll/OLL_01.png` .. `OLL_57.png`
+  (~205 kB total, ~3.6 kB pro Bild).
+- [x] **lib/oll-images.ts**: 57 statische Vite-PNG-Imports +
+  `getOllImage(caseId)`-Map.
+- [x] **CubeStateView.tsx**: laedt + zeigt das passende Bild,
+  size-prop „small" (case-grid) oder „large" (DrillCard). Bei
+  nicht-OLL-cases dezenter ∅-Placeholder.
+- [x] **AlgTrainerPanel-Integration**: case-grid-tile mit kleinem
+  Bild + Text nebeneinander; DrillCard hat das grosse Bild prominent
+  oben.
+- [x] **vite-env.d.ts** angelegt fuer `*.png`-import-Types.
+
+PLL-Bilder fehlen — User-Frage am Ende offen.
+
+Bundle: 859 kB → 1135 kB / 250 kB → 356 kB gzipped (+106 kB gzipped
+fuer inline-encoded PNGs unter Vite's 4 kB-Threshold).
+
+**Tests:** 255 backend + 112 frontend = 367 gruen.
+
 ## Phase 8.5.1 — PB-Patterns + Konsistenz-Achievements (Tag `v0.15.1`) ✅
 
 4 weitere Achievements via chronologischem Tracking pro cube_type:
@@ -628,8 +653,9 @@ Feature-Set bewegen.
 - ✅ Phase 8.4: **fertig** (Trainings-Sets + Schrift + PB-Timestamps, Tag `v0.14`)
 - ✅ Phase 8.5: **fertig** (14 neue Achievements + Backfill, Tag `v0.15`)
 - ✅ Phase 8.5.1: **fertig** (4 PB-Pattern-Achievements + Backfill, Tag `v0.15.1`)
-- ⏸ Phase 8.3.1: pending (Algorithm-Visualisierung — 2D-State-Bilder im Trainer mit echtem 3x3-Sim)
-- ⏸ Phase 9: pending (Distribution / Installer + Restore → Tag `v1.0`)
+- ✅ Phase 8.3.1: **fertig** (OLL-Visualisierung — User-generierte PNGs, Tag `v0.16`)
+- ⏸ Phase 8.3.2: pending (PLL-Visualisierung analog, falls User die 21 PLLs generiert)
+- 🔧 Phase 9: WIP auf `feature/9-distribution` (Restore-Endpoint geschrieben, Rest pending → Tag `v1.0`)
 - ⏸ Phase 11: pending (WCA-Ranking-Lookup, optional nach v1.0)
 
 ## Tags
@@ -708,3 +734,10 @@ Feature-Set bewegen.
   pb_synchronized, pb_triple_day, consistency_5_under_ao12) via
   chronologischen Single-Pass pro cube_type in achievements/patterns.py.
   Live-Backfill: alle 4 getriggert. 367 Tests gruen.
+- `v0.15.1-pre-distribution` — Snapshot vor Phase 9 (Distribution).
+- `v0.15.1-pre-oll-images` — Snapshot vor Phase 8.3.1 (OLL-Vis).
+- `v0.16` — Phase 8.3.1: OLL-Visualisierung (alle 57 Cases als
+  user-generierte PNGs, lib/oll-images.ts mit 57 statischen Vite-
+  Imports, CubeStateView-Component, Integration in AlgTrainerPanel
+  case-grid + DrillCard). 367 Tests gruen. Bundle 1135kB / 356kB
+  gzipped.
