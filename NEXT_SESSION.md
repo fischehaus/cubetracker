@@ -3,6 +3,15 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
+> **WICHTIG (User-Festlegung 2026-05-03):** Phase 9 (Distribution → v1.0)
+> ist KEIN End-Punkt. **Nach v1.0 wird weiter an der App gebaut.**
+> Phase 9 ist nicht-destruktiv: Source-Code aenderungen sind minimal
+> (StaticFiles-Mount, %LOCALAPPDATA% statt backend/data/, PyInstaller-
+> spec). Dev-Workflow `uvicorn --reload` + `npm run dev` bleibt parallel
+> zur ausgerollten App nutzbar. Neue Phasen 10/11/... werden danach
+> normal weitergebaut und als Updates ausgerollt. KEIN feature-freeze
+> nach v1.0.
+>
 > **Letzter Stand:** 2026-05-03. **Phase 8.5.1 fertig, Tag `v0.15.1`
 > gesetzt.** 4 PB-Pattern-Achievements via chronologisches Tracking:
 > pb_double, pb_synchronized, pb_triple_day, consistency_5_under_ao12.
