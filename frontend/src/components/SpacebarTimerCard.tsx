@@ -193,7 +193,7 @@ function hintLabel(state: TimerState, inspectionEnabled: boolean): string {
         ? "Space druecken fuer Inspektion"
         : "Space halten und loslassen zum Starten";
     case "inspection":
-      return "Space druecken: Inspektion neu starten · sonst Solve startet bei 0";
+      return "Space = Solve starten · Double-Tap = Inspektion neu · 0 = DNF";
     case "ready":
       return "Loslassen wenn bereit";
     case "running":

@@ -103,6 +103,10 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
   // Multi-Phase: kumulative split-times (vom Start in ms) der bereits
   // abgeschlossenen Phasen. length = aktuelle Phase die noch laeuft.
   const splitsRef = useRef<number[]>([]);
+  // Inspection double-tap detection: erster Press schedulet single-tap
+  // mit Latenz, zweiter Press im Fenster cancelt + reset Inspection.
+  const lastInspectionPressRef = useRef<number>(0);
+  const pendingSingleTapTimeoutRef = useRef<number | null>(null);
 
   const reset = useCallback(() => {
     stateRef.current = "idle";
@@ -115,6 +119,11 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
     splitsRef.current = [];
     playedWarn8Ref.current = false;
     playedWarn12Ref.current = false;
+    lastInspectionPressRef.current = 0;
+    if (pendingSingleTapTimeoutRef.current !== null) {
+      window.clearTimeout(pendingSingleTapTimeoutRef.current);
+      pendingSingleTapTimeoutRef.current = null;
+    }
     if (tickIdRef.current !== null) {
       cancelAnimationFrame(tickIdRef.current);
       tickIdRef.current = null;
@@ -152,15 +161,20 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
           playInspectionWarn12s();
           playedWarn12Ref.current = true;
         }
-        // Trainings-Flow: wenn Countdown auf 0, Solve auto-starten.
-        // Kein Hold/Release noetig — User hat sich Bedenkzeit genommen,
-        // jetzt geht es direkt los.
+        // User-Wunsch: wenn Countdown auf 0 ohne dass User gestartet
+        // hat → Auto-DNF. Solve wird mit time_ms=0 + DNF-Penalty
+        // gespeichert. Pending single-tap cancelen falls vorhanden.
         if (left <= 0) {
-          runStartRef.current = now;
-          stateRef.current = "running";
-          setState("running");
+          if (pendingSingleTapTimeoutRef.current !== null) {
+            window.clearTimeout(pendingSingleTapTimeoutRef.current);
+            pendingSingleTapTimeoutRef.current = null;
+          }
+          stateRef.current = "stopped";
+          setState("stopped");
           setDisplayMs(0);
           setInspectionLeftMs(0);
+          setPenalty("DNF");
+          if (onComplete) onComplete(0, "DNF", null);
         }
       }
       tickIdRef.current = requestAnimationFrame(tick);
@@ -173,7 +187,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
         tickIdRef.current = null;
       }
     };
-  }, [state, settings.inspection_seconds, settings.sound_enabled]);
+  }, [state, settings.inspection_seconds, settings.sound_enabled, onComplete]);
 
   // Keydown / Keyup handlers — nur aktiv wenn enabled
   useEffect(() => {
@@ -215,14 +229,44 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       }
 
       if (cur === "inspection") {
-        // Trainings-Flow (User-decision): Space waehrend Inspection
-        // setzt den Countdown auf voll zurueck. Mehrfach erlaubt
-        // („ich schau nochmal"). Solve startet automatisch wenn der
-        // Countdown bei 0 ankommt (siehe RAF-tick unten).
-        inspectionStartRef.current = performance.now();
-        playedWarn8Ref.current = false;
-        playedWarn12Ref.current = false;
-        setInspectionLeftMs(settings.inspection_seconds * 1000);
+        // Inspection-Verhalten (User-Spec):
+        //   - Single Space → Solve startet (mit 250ms Verzoegerung,
+        //     damit Double-Tap noch erkannt werden kann)
+        //   - Double-Tap (2x Space innerhalb DOUBLE_TAP_WINDOW_MS) →
+        //     Inspection-Reset (cancel pending single-tap)
+        //   - Countdown auf 0 → Auto-DNF (im RAF-tick gehandhabt)
+        const DOUBLE_TAP_WINDOW_MS = 250;
+        const now = performance.now();
+        const sinceLast = now - lastInspectionPressRef.current;
+
+        if (
+          sinceLast < DOUBLE_TAP_WINDOW_MS &&
+          pendingSingleTapTimeoutRef.current !== null
+        ) {
+          // DOUBLE TAP: pending single-tap cancelen + Inspection neu starten
+          window.clearTimeout(pendingSingleTapTimeoutRef.current);
+          pendingSingleTapTimeoutRef.current = null;
+          inspectionStartRef.current = performance.now();
+          playedWarn8Ref.current = false;
+          playedWarn12Ref.current = false;
+          setInspectionLeftMs(settings.inspection_seconds * 1000);
+          lastInspectionPressRef.current = 0; // Triple-Tap zurueckfallen
+          return;
+        }
+
+        // FIRST PRESS: Single-tap-Action mit Verzoegerung schedulen
+        lastInspectionPressRef.current = now;
+        pendingSingleTapTimeoutRef.current = window.setTimeout(() => {
+          pendingSingleTapTimeoutRef.current = null;
+          // Single-tap: Solve starten — aber nur wenn wir noch in
+          // inspection sind (sonst hat z.B. Auto-DNF schon getriggered)
+          if (stateRef.current !== "inspection") return;
+          runStartRef.current = performance.now();
+          stateRef.current = "running";
+          setState("running");
+          setDisplayMs(0);
+          setInspectionLeftMs(0);
+        }, DOUBLE_TAP_WINDOW_MS);
         return;
       }
 
