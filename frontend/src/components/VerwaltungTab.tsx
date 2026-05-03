@@ -6,12 +6,13 @@
 // reload erhalten, das ist OK fuer einen verwaltungs-tab).
 
 import { useState } from "react";
+import { BackupPanel } from "./BackupPanel";
 import { HardwareList } from "./HardwareList";
 import { ImportPanel } from "./ImportPanel";
 import { OutlierCard } from "./OutlierCard";
 import { SessionList } from "./SessionList";
 
-type VerwaltungSection = "sessions" | "hardware" | "import" | "outliers";
+type VerwaltungSection = "sessions" | "hardware" | "daten" | "outliers";
 
 interface SubTab {
   id: VerwaltungSection;
@@ -22,7 +23,7 @@ interface SubTab {
 const SUB_TABS: SubTab[] = [
   { id: "sessions", label: "Sessions", icon: "📁" },
   { id: "hardware", label: "Hardware", icon: "🧊" },
-  { id: "import", label: "Daten-Import", icon: "📥" },
+  { id: "daten", label: "Daten", icon: "📥" },
   { id: "outliers", label: "Outliers", icon: "⚠" },
 ];
 
@@ -56,10 +57,16 @@ export function VerwaltungTab() {
         })}
       </nav>
 
-      {/* Aktive Sektion — Outliers managed Session-Filter intern. */}
+      {/* Aktive Sektion — Outliers managed Session-Filter intern.
+          „Daten" enthaelt Import + Backup/Export untereinander. */}
       {section === "sessions" && <SessionList />}
       {section === "hardware" && <HardwareList />}
-      {section === "import" && <ImportPanel />}
+      {section === "daten" && (
+        <div className="space-y-4">
+          <ImportPanel />
+          <BackupPanel />
+        </div>
+      )}
       {section === "outliers" && <OutlierCard />}
     </div>
   );
