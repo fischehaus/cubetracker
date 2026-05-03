@@ -34,21 +34,19 @@
 > - **Datenuebertragung Dev↔Prod via Backup/Restore-Endpoint** (Pflicht
 >   in Phase 9)
 >
-> **Letzter Stand:** 2026-05-03. **Phase 8.3.1 fertig, Tag `v0.16`
-> gesetzt.** OLL-Visualisierung im Trainer (alle 57 Cases) — User
-> hat in einem anderen Chat die PNGs generiert, ich habe sie nur
-> integriert. PLL fehlt noch (User-Frage offen).
+> **Letzter Stand:** 2026-05-04. **Phase 9 fertig, Tag `v1.0`
+> gesetzt.** Distribution-faehig: PyInstaller-Bundle (33 MB), Inno-
+> Setup-Installer-Script, POST /backup/restore mit Dry-Run + Confirm,
+> Restore-UI im BackupPanel, DB-Pfad-Resolution mit 4 Stufen,
+> /api/health mit mode-Feld, Versions-Badge zeigt dev/prod. csTimer-
+> Compat unveraendert. 372 Tests gruen.
 >
-> **Phase 9 ist WIP auf branch `feature/9-distribution`** —
-> Restore-Endpoint ist geschrieben (commit `142ff45`), Rest pending
-> (DB-Pfad-Konfig, StaticFiles, PyInstaller, Inno-Setup).
-> Bei Wiederaufnahme einfach `git checkout feature/9-distribution`
-> und ab restore-Endpoint-Tests weitermachen.
+> **Wie ein neuer Installer gebaut wird:** siehe `backend/BUILD.md`
+> (3 Schritte: npm run build → PyInstaller → Inno Setup Compiler).
 >
-> **Phase 8.5.1 (Tag `v0.15.1`)** war 4 PB-Pattern-Achievements via
-> chronologisches Tracking: pb_double, pb_synchronized, pb_triple_day,
-> consistency_5_under_ao12. Alle 4 auf Bestand getriggert (jetzt 27
-> von 35 unlocked). 367 Tests gruen (255 backend + 112 frontend).
+> **Naechster Strang: Phase 8.3.2 — PLL-Visualisierung.** User hat
+> festgelegt dass die 21 PLL-Bilder im naechsten Rollout kommen.
+> Implementierung analog zu OLL.
 >
 > **Phase 8.5 (Tag `v0.15`)** war 14 neue Volume/Speed/Streak-
 > Achievements + Backfill (6 neu unlocked):
@@ -186,13 +184,18 @@ Phase 8 + 8.1 + 8.2 + 8.3 + 8.4 + 8.5 abgeschlossen. Geplante Reihenfolge:
 - PyInstaller-Bundle, Inno-Setup-Installer
 - Achievement-Trigger nach Import explizit verifizieren
 
-**Nach v1.0**:
-- Phase 8.3.2 — PLL-Visualisierung (User-Festlegung 2026-05-04:
-  Bilder fuer alle 21 PLLs kommen im naechsten Rollout). Implementierung
-  analog zu OLL: PNGs in src/assets/pll/, lib/pll-images.ts
-  (21 statische Imports), `getPllImage()` in CubeStateView.tsx
-  ergaenzen, evtl. groessere Drill-Bilder weil PLL-Cycle-Diagramme
-  detailreicher sind als OLL-Orientation-Diagramme.
+**Phase 8.3.2 — PLL-Visualisierung** (Aufwand ~30min nach Bild-Lieferung):
+User-Festlegung 2026-05-04: Bilder fuer alle 21 PLLs kommen im
+naechsten Rollout. Implementierung analog zu OLL:
+- PNGs nach `frontend/src/assets/pll/` kopieren
+- `lib/pll-images.ts` mit 21 statischen Vite-Imports + `getPllImage()`
+- `CubeStateView.tsx` `getPllImage()`-call ergaenzen (PLL-Pfad)
+- evtl. groessere Drill-Bilder weil PLL-Cycle-Diagramme detailreicher
+  sind als OLL-Orientation-Diagramme
+
+**Phase 11 — WCA-Ranking** (optional):
+Hardcoded WR-Tabelle pro Event, Anzeige „Du waerst Top X% weltweit"
+in StatsCard.
 
 **Nach v1.0**:
 - Phase 11 — WCA-Ranking-Lookup (hardcoded WR-Tabelle, „Top X% weltweit")
@@ -269,10 +272,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-8.3.1-Features gemerged)
-- **Aktive Feature-Branch:** `feature/9-distribution` (WIP, Restore-Endpoint)
-- **Tags:** `v0.0` … `v0.15.1`, **`v0.16`** (aktuell auf main)
-- **Tests:** 255 backend + 112 frontend = **367 gruen**
+- **Branch:** `main` (sauber, alle Phase-9-Features gemerged)
+- **Tags:** `v0.0` … `v0.16`, **`v1.0`** (aktuell auf main)
+- **Tests:** 260 backend + 112 frontend = **372 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber

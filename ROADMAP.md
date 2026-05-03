@@ -163,6 +163,58 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 9 — Distribution → v1.0 (Tag `v1.0`) ✅
+
+PyInstaller-Bundle + Inno-Setup-Installer + Restore-Endpoint — die App
+ist jetzt **als .exe-Installer ausrollbar**.
+
+**Backend**:
+- [x] **POST /backup/restore**: JSON-Upload, Schema-Version-Check,
+  Dry-Run + Confirm-Modus, transaction-wrap mit rollback bei error.
+  5 neue API-Tests.
+- [x] **DB-Pfad-Resolution mit 4 Stufen**: `CUBETRACKER_DATABASE_URL`
+  (URL) → `CUBETRACKER_DB_PATH` (file) → `CUBETRACKER_PROD=1` /
+  `sys.frozen` → `%LOCALAPPDATA%` / `~/.local/share/` → Dev-Default
+  `backend/data/`. Damit Dev + Prod-App **parallel** auf demselben
+  Rechner moeglich (keine Konflikte).
+- [x] **main.py**: `IS_PROD`-Detection, lifespan-event mit `alembic
+  upgrade head` (für Erst-Start in Prod), StaticFiles-Mount fuer
+  `dist/` wenn vorhanden, neuer `/api/health`-Endpoint mit `mode`-Feld.
+
+**Frontend**:
+- [x] **HealthBadge**: Dev=lila, Prod=gruen, mit `[dev]`/`[prod]`-suffix.
+  Backwards-compat fallback auf altem `/`-endpoint.
+- [x] **BackupPanel** um **Restore-Block** erweitert: File-Upload +
+  2-Stufen-Workflow (Dry-Run → Confirm), Cache-invalidierung nach
+  erfolgreichem Restore.
+
+**Distribution-Build**:
+- [x] **launcher.py**: PyInstaller-Entry-Point, freier Port (8765
+  default), Browser-Open nach 1.5s. Env `CUBETRACKER_NO_BROWSER=1`
+  fuer headless-tests.
+- [x] **cubetracker.spec**: PyInstaller one-folder-build,
+  `frontend/dist/` + `alembic/` mit-bundle, hidden-imports fuer
+  SQLite-Dialekt + uvicorn-Lifespan.
+- [x] **cubetracker-installer.iss**: Inno-Setup-Script. Stable AppId
+  fuer Update-Pfad, Per-User-install, User-DB unter `%LOCALAPPDATA%`
+  bleibt bei Uninstall erhalten.
+- [x] **BUILD.md**: Bauanleitung + Smoke-Test + Stolpersteine.
+
+**Live-Verifikation**:
+- [x] PyInstaller-Bundle gebaut: 33 MB unkompressed.
+- [x] EXE gestartet, `/api/health` antwortet `mode=prod`, Frontend
+  wird same-origin via StaticFiles serviert.
+- [x] Restore-Endpoint live getestet.
+- [x] 260 backend + 112 frontend = 372 Tests gruen.
+
+**Erfuellte User-Anforderungen** aus Phase-9-Vorbereitung:
+- Dev + Prod parallel ohne Konflikt (verschiedene Ports + DBs +
+  localStorage-Origins) ✓
+- csTimer-Import + -Export funktionieren weiter ✓
+- Achievements werden nach Restore neu gerechnet ✓
+- Backup → Reinstall → Restore-Workflow vollstaendig ✓
+- Nach v1.0 wird weiterentwickelt (kein Feature-Freeze) ✓
+
 ## Phase 8.3.1 — OLL-Visualisierung (Tag `v0.16`) ✅
 
 User hat in einem anderen Chat alle 57 OLL-Diagramme als PNGs erzeugt
@@ -654,8 +706,9 @@ Feature-Set bewegen.
 - ✅ Phase 8.5: **fertig** (14 neue Achievements + Backfill, Tag `v0.15`)
 - ✅ Phase 8.5.1: **fertig** (4 PB-Pattern-Achievements + Backfill, Tag `v0.15.1`)
 - ✅ Phase 8.3.1: **fertig** (OLL-Visualisierung — User-generierte PNGs, Tag `v0.16`)
-- ⏸ Phase 8.3.2: pending (PLL-Visualisierung analog, falls User die 21 PLLs generiert)
-- 🔧 Phase 9: WIP auf `feature/9-distribution` (Restore-Endpoint geschrieben, Rest pending → Tag `v1.0`)
+- ✅ Phase 9: **fertig** (Distribution-faehig: PyInstaller + Inno-Setup + Restore, Tag `v1.0`)
+- ⏸ Phase 8.3.2: pending (PLL-Visualisierung — User-Festlegung: Bilder kommen im naechsten Rollout)
+- ⏸ Phase 11: pending (WCA-Ranking-Lookup, optional)
 - ⏸ Phase 11: pending (WCA-Ranking-Lookup, optional nach v1.0)
 
 ## Tags
@@ -741,3 +794,10 @@ Feature-Set bewegen.
   Imports, CubeStateView-Component, Integration in AlgTrainerPanel
   case-grid + DrillCard). 367 Tests gruen. Bundle 1135kB / 356kB
   gzipped.
+- `v0.15.1-pre-distribution` — Snapshot vor Phase 9.
+- `v1.0` — Phase 9: Distribution-faehig. PyInstaller-Bundle (33 MB),
+  Inno-Setup-Installer-Script, POST /backup/restore-Endpoint mit
+  Dry-Run + Confirm, Restore-UI im BackupPanel, DB-Pfad-Resolution
+  fuer Dev + Prod parallel, /api/health mit mode-Feld, Versions-
+  Badge mit Dev/Prod-Distinction, BUILD.md Bauanleitung. csTimer-
+  Compat unveraendert. 372 Tests gruen.
