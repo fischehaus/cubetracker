@@ -163,6 +163,44 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 8.2 — Speedcubing-Timer (Tag `v0.12`) ✅
+
+WCA-Standard-Spacebar-Flow + Inspection + Sound + Multi-Phase-Splits
+(Variante A) + Settings-Panel. Macht den Timer zum echten csTimer-Ersatz.
+
+- [x] **Spacebar-Timer** (`useSpacebarTimer`-Hook) mit State-Machine
+  - idle → inspection → ready → running → stopped
+  - Hold-Time einstellbar (default 550ms), gelb→gruen-Uebergang
+  - Globale window.keydown-listener, Input/Textarea-Targets
+    werden ignoriert (kein Konflikt mit Eingabefeldern)
+- [x] **WCA-Inspection** (15s default, einstellbar)
+  - Sound bei 8s + 12s (Web Audio API mit Sinus-Toenen, kein Asset)
+  - Penalty-Logic: +2 ab 15s, DNF ab 17s, automatisch beim Save
+- [x] **Multi-Phase-Splits** (Variante A — klassisches csTimer-Split-Timer)
+  - Settings: Anzahl Phasen + Phasen-Namen frei editierbar
+    (default 4-Phase-CFOP: Cross/F2L/OLL/PLL)
+  - Jeder Spacebar-Press waehrend running registriert einen Split,
+    beim N-ten Press wird der Solve gespeichert
+  - Display: Phase X/N + Splits-Liste live + final-summary
+- [x] **Settings-Panel** als 5. Sub-Tab in VERWALTUNG
+  - localStorage-backed (kein DB-Schema, kein Backup-Update — bewusst
+    per-Geraet-Konfiguration)
+  - Toggles fuer Spacebar / Inspection / Sound / Splits + numeric
+    fields fuer hold-time + inspection-seconds + phase-count + freie
+    phase-name-Editierung
+- [x] **Backend** Solve.split_times_ms (nullable Text, JSON-array of
+  ms-Werten) + Migration `593bfa59e08b` + Backup-Update
+- [x] **csTimer-Compat sichergestellt**: Importer/Exporter unveraendert
+  (split_times_ms ist nullable, csTimer kennt das Konzept nicht);
+  Re-Import erkennt duplicates via dedup-key (timestamp+time_ms+
+  session) und ueberschreibt split_times_ms NICHT — explizit
+  getestet in `test_cstimer_import_keeps_split_times_null`.
+- [x] **Integration**: BigTimerInput + DrillCard schalten zwischen
+  text-input und SpacebarTimerCard via `settings.spacebar_enabled`.
+  Beide Pfade speichern split_times_ms wenn aktiv.
+
+**Tests:** 215 backend + 112 frontend = 327 gruen.
+
 ## Phase 8.1 — UX-Quick-Wins (Tag `v0.11.1`) ✅
 
 Befunde aus dem Live-Smoke-Test der App nach v0.11. Drei Quick-Wins
@@ -489,7 +527,7 @@ Feature-Set bewegen.
 - ✅ Phase 7b: **fertig** (Daily Challenges — Generator + Tracker + Toast + Mini, Tag `v0.10`)
 - ✅ Phase 8: **fertig** (Scramble im TIMER + PLL/OLL-Algorithm-Trainer, Tag `v0.11`)
 - ✅ Phase 8.1: **fertig** (UX-Quick-Wins aus Live-Smoke-Test, Tag `v0.11.1`)
-- ⏸ Phase 8.2: pending (Speedcubing-Timer: Spacebar + Inspection + Sound + Settings)
+- ✅ Phase 8.2: **fertig** (Speedcubing-Timer: Spacebar + Inspection + Sound + Multi-Phase + Settings, Tag `v0.12`)
 - ⏸ Phase 8.3: pending (Algorithm-Visualisierung: 2D-State-Bilder im Trainer)
 - ⏸ Phase 9: pending (Distribution / Installer → Tag `v1.0`)
 
@@ -537,3 +575,10 @@ Feature-Set bewegen.
 - `v0.11.1` — Phase 8.1: UX-Quick-Wins aus Live-Smoke-Test (csTimer-
   Code-Mapping fix + OutlierCard-Toggle pro-Cube/pro-Session +
   DrillCard-Solve-Liste). 324 Tests gruen.
+- `v0.11.1-pre-spacebar` — Snapshot vor Phase 8.2, + branch
+  `legacy/v0.11.1-pre-spacebar`.
+- `v0.12` — Phase 8.2: Speedcubing-Timer (WCA-Spacebar-Flow mit
+  State-Machine, Inspection 15s + Sound bei 8s/12s, Multi-Phase-
+  Splits Variante A mit frei editierbaren Phasen-Namen, Settings-
+  Panel als 5. Sub-Tab in VERWALTUNG, Solve.split_times_ms-Spalte
+  + Migration). csTimer-Import/Export unveraendert. 327 Tests gruen.

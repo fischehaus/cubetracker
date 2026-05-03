@@ -3,17 +3,20 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-03. **Phase 8.1 fertig, Tag `v0.11.1`
-> gesetzt.** UX-Quick-Wins aus Live-Smoke-Test:
-> - csTimer-Code-Mapping in ScrambleCard (Sessions aus csTimer-Import
->   liefern jetzt korrekte Scrambles bei 4x4/5x5/Pyra/etc.)
-> - vendor-Bundle robuster (UMD-IIFE-shadowing + ESM-export +
->   globalThis.self-shim) — vitest crashte vorher beim Modul-Eval
-> - OutlierCard: Toggle „pro Cube" / „pro Session" — Median pro Session
->   ist ehrlicher bei Multi-Session-Setup
-> - DrillCard: Liste der letzten 20 Solves dieses Cases mit
->   +2/DNF/Loeschen
-> - 324 Tests gruen (212 backend + 112 frontend)
+> **Letzter Stand:** 2026-05-03. **Phase 8.2 fertig, Tag `v0.12`
+> gesetzt.** Speedcubing-Timer mit Spacebar + WCA-Inspection + Sound
+> + Multi-Phase-Splits (Variante A) + Settings-Panel:
+> - useSpacebarTimer-Hook: WCA-State-Machine
+>   (idle → inspection → ready → running → stopped)
+> - Inspection 15s default, Sound bei 8s + 12s, Penalty +2/DNF
+> - Multi-Phase: jeder Spacebar-Press = Split, beim N-ten Press stop
+> - SettingsPanel als 5. Sub-Tab in VERWALTUNG
+> - Solve.split_times_ms-Spalte + Migration 593bfa59e08b
+> - csTimer-Importer/Exporter unveraendert (compat-test gruen)
+> - 327 Tests gruen (215 backend + 112 frontend), Bundle 846kB / 248kB
+>
+> **Phase 8.1 (Tag `v0.11.1`)** war UX-Quick-Wins (csTimer-Mapping
+> fix + Outlier-Toggle + DrillCard-Solve-Liste).
 >
 > **Phase 8 (Tag `v0.11`)**: Scramble im TIMER + PLL/OLL-Trainer
 > (alg_case-Schema, /stats/by-alg-case-Endpoint, AlgTrainerPanel
@@ -112,16 +115,7 @@ Du musst beim naechsten Mal:
 
 ## Was als naechstes ansteht
 
-Phase 8 + 8.1 abgeschlossen. Geplante Reihenfolge:
-
-**Phase 8.2 — Speedcubing-Timer** (Tag `v0.12`, ~1-2 Tage):
-- Spacebar-State-Machine (idle → inspection → ready → holding → running → stopped)
-- WCA-Inspection 15s default, einstellbar, Sound bei 8s+12s, +2 ab 15s, DNF ab 17s
-- Multi-Phase-Splits (User waehlt N Phasen, jeder Spacebar = Split-Punkt)
-- Settings-Panel als neuer Sub-Tab in VERWALTUNG (sound on/off,
-  inspection-time, splits-anzahl, default-cube)
-- Wahrscheinlich neue Spalte `Solve.split_times_ms` (JSON-array)
-- Funktioniert sowohl im TIMER-Tab als auch in der DrillCard im Trainer
+Phase 8 + 8.1 + 8.2 abgeschlossen. Geplante Reihenfolge:
 
 **Phase 8.3 — Algorithm-Visualisierung** (Tag `v0.13`, ~0.5-1 Tag):
 - 2D-Cube-State-Bilder im AlgTrainerPanel + DrillCard
@@ -197,9 +191,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-8.1-Features gemerged)
-- **Tags:** `v0.0` … `v0.11`, **`v0.11.1`** (aktuell)
-- **Tests:** 212 backend + 112 frontend = **324 gruen**
+- **Branch:** `main` (sauber, alle Phase-8.2-Features gemerged)
+- **Tags:** `v0.0` … `v0.11.1`, **`v0.12`** (aktuell)
+- **Tests:** 215 backend + 112 frontend = **327 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber
