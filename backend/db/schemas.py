@@ -22,12 +22,21 @@ class SessionBase(BaseModel):
 
     name: str = Field(min_length=1, max_length=128)
     scramble_type: str | None = Field(default=None, max_length=32)
+    notes: str | None = None
 
 
 class SessionCreate(SessionBase):
     """Eingabe-Schema fuer POST /sessions."""
 
     cstimer_session_id: int | None = None
+
+
+class SessionUpdate(BaseModel):
+    """PATCH-Schema fuer /sessions/{id} — alle Felder optional."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=128)
+    scramble_type: str | None = Field(default=None, max_length=32)
+    notes: str | None = None
 
 
 class SessionRead(SessionBase):

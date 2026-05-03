@@ -13,6 +13,8 @@ import type {
   HardwareCreate,
   HardwareUpdate,
   Session,
+  SessionCreate,
+  SessionUpdate,
   Solve,
   SolveCreate,
   SolveUpdate,
@@ -281,6 +283,87 @@ export function useSessions(): UseQueryResult<Session[]> {
       const r = await api.get<Session[]>("/sessions");
       return r.data;
     },
+  });
+}
+
+export function useCreateSession(): UseMutationResult<
+  Session,
+  Error,
+  SessionCreate
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload) => {
+      const r = await api.post<Session>("/sessions", payload);
+      return r.data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["sessions"] }),
+  });
+}
+
+export function useUpdateSession(): UseMutationResult<
+  Session,
+  Error,
+  { id: number; payload: SessionUpdate }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, payload }) => {
+      const r = await api.patch<Session>(`/sessions/${id}`, payload);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sessions"] });
+      // Solves haengen am Session-Namen → invalidieren falls UI Name zeigt
+      qc.invalidateQueries({ queryKey: ["solves"] });
+    },
+  });
+}
+
+export function useDeleteSession(): UseMutationResult<void, Error, number> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id) => {
+      await api.delete(`/sessions/${id}`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sessions"] });
+      // Solves verlieren ihre session_id (FK SET NULL)
+      qc.invalidateQueries({ queryKey: ["solves"] });
+      // Stats potentiell betroffen, alle invalidieren
+      qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
+      qc.invalidateQueries({ queryKey: ["stats-activity"] });
+    },
+  });
+}
+
+export interface SessionSuggestion {
+  session_id: number | null;
+  count: number;
+  cube_type: string;
+}
+
+/**
+ * Empfohlene Session fuer einen Cube-Type (jene mit den meisten Solves).
+ * Liefert session_id=null wenn es keinen passenden Solve gibt.
+ */
+export function useSuggestSession(
+  cubeType: string | undefined
+): UseQueryResult<SessionSuggestion> {
+  return useQuery({
+    queryKey: ["sessions-suggest", cubeType],
+    queryFn: async (): Promise<SessionSuggestion> => {
+      if (!cubeType) {
+        return { session_id: null, count: 0, cube_type: "" };
+      }
+      const r = await api.get<SessionSuggestion>("/sessions/suggest", {
+        params: { cube_type: cubeType },
+      });
+      return r.data;
+    },
+    enabled: !!cubeType,
   });
 }
 
