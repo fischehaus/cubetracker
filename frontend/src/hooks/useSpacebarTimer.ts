@@ -152,6 +152,16 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
           playInspectionWarn12s();
           playedWarn12Ref.current = true;
         }
+        // Trainings-Flow: wenn Countdown auf 0, Solve auto-starten.
+        // Kein Hold/Release noetig — User hat sich Bedenkzeit genommen,
+        // jetzt geht es direkt los.
+        if (left <= 0) {
+          runStartRef.current = now;
+          stateRef.current = "running";
+          setState("running");
+          setDisplayMs(0);
+          setInspectionLeftMs(0);
+        }
       }
       tickIdRef.current = requestAnimationFrame(tick);
     }
@@ -205,17 +215,14 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       }
 
       if (cur === "inspection") {
-        // User druckt jetzt space (will starten) → ready
-        holdStartRef.current = performance.now();
-        // WCA-Penalty: wenn inspection > 15s war
-        const elapsed = performance.now() - inspectionStartRef.current;
-        if (elapsed > 17000) {
-          setPenalty("DNF");
-        } else if (elapsed > 15000) {
-          setPenalty("+2");
-        }
-        stateRef.current = "ready";
-        setState("ready");
+        // Trainings-Flow (User-decision): Space waehrend Inspection
+        // setzt den Countdown auf voll zurueck. Mehrfach erlaubt
+        // („ich schau nochmal"). Solve startet automatisch wenn der
+        // Countdown bei 0 ankommt (siehe RAF-tick unten).
+        inspectionStartRef.current = performance.now();
+        playedWarn8Ref.current = false;
+        playedWarn12Ref.current = false;
+        setInspectionLeftMs(settings.inspection_seconds * 1000);
         return;
       }
 

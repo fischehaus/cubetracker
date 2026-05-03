@@ -190,10 +190,10 @@ function hintLabel(state: TimerState, inspectionEnabled: boolean): string {
   switch (state) {
     case "idle":
       return inspectionEnabled
-        ? "Space druecken fuer Inspektion (15s)"
+        ? "Space druecken fuer Inspektion"
         : "Space halten und loslassen zum Starten";
     case "inspection":
-      return "Space druecken um zu starten";
+      return "Space druecken: Inspektion neu starten · sonst Solve startet bei 0";
     case "ready":
       return "Loslassen wenn bereit";
     case "running":
