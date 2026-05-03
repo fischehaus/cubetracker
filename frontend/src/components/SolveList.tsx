@@ -22,6 +22,8 @@ import {
   parseTimeInput,
 } from "../lib/format";
 import { rollingAverages, type SolvePoint } from "../lib/rolling";
+import type { Solve } from "../lib/types";
+import { SolveDetailModal } from "./SolveDetailModal";
 
 interface Props {
   sessionId: number | null; // null = alle Sessions
@@ -46,6 +48,8 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
   const [editing, setEditing] = useState<EditingState>(null);
   const [draftValue, setDraftValue] = useState<string>("");
   const [editError, setEditError] = useState<string | null>(null);
+  // Solve, der gerade im Detail-Modal angezeigt wird (Phase L-3b)
+  const [detailSolve, setDetailSolve] = useState<Solve | null>(null);
 
   const params: SolveListParams = {};
   // -1 (Alle) → wir setzen ein sehr hohes Limit. Backend verkraftet 50k+ ohne Probleme.
@@ -318,6 +322,13 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                     )}
                   </td>
                   <td className="py-3 pr-3 text-right space-x-2 align-top">
+                    <button
+                      onClick={() => setDetailSolve(s)}
+                      className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-purple-700/40 hover:text-purple-100"
+                      title="Details anzeigen (Scramble, Notiz, Hardware, Session)"
+                    >
+                      ℹ
+                    </button>
                     {!s.dnf && (
                       <button
                         onClick={() =>
@@ -367,9 +378,19 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
       </div>
 
       <p className="mt-3 text-xs text-gray-500">
-        Tipp: Klick auf Zeit oder Notiz zum Bearbeiten. Enter speichert,
-        Esc bricht ab.
+        Tipp: Klick auf Zeit oder Notiz zum Bearbeiten · ℹ fuer Detail
+        (Scramble, Notiz, Hardware, Session). Enter speichert, Esc bricht ab.
       </p>
+
+      {detailSolve && (
+        <SolveDetailModal
+          solve={detailSolve}
+          ao5={ao5Map.get(detailSolve.id) ?? null}
+          ao12={ao12Map.get(detailSolve.id) ?? null}
+          isPb={detailSolve.id === bestSolveId}
+          onClose={() => setDetailSolve(null)}
+        />
+      )}
     </div>
   );
 }
