@@ -235,3 +235,29 @@ def test_patch_solve_alg_case(client, db):
     r2 = client.patch(f"/solves/{solve.id}", json={"alg_case": None})
     assert r2.status_code == 200
     assert r2.json()["alg_case"] is None
+
+
+def test_list_solves_filtered_by_alg_case(client, db):
+    """Phase 8.1: GET /solves?alg_case=X liefert nur Solves dieses Cases."""
+    db.add(Solve(time_ms=12000, cube_type="3x3", alg_case="PLL-Tperm"))
+    db.add(Solve(time_ms=13000, cube_type="3x3", alg_case="PLL-Tperm"))
+    db.add(Solve(time_ms=10000, cube_type="3x3", alg_case="PLL-Y"))
+    db.add(Solve(time_ms=8000, cube_type="3x3", alg_case=None))
+    db.commit()
+
+    r = client.get("/solves?alg_case=PLL-Tperm")
+    data = r.json()
+    assert len(data) == 2
+    assert all(s["alg_case"] == "PLL-Tperm" for s in data)
+
+
+def test_list_solves_filter_alg_case_combinable_with_cube_type(client, db):
+    """alg_case-Filter kann mit cube_type kombiniert werden."""
+    db.add(Solve(time_ms=12000, cube_type="3x3", alg_case="PLL-Tperm"))
+    db.add(Solve(time_ms=60000, cube_type="4x4", alg_case="PLL-Tperm"))  # nonsens, aber ok
+    db.commit()
+
+    r = client.get("/solves?alg_case=PLL-Tperm&cube_type=3x3")
+    data = r.json()
+    assert len(data) == 1
+    assert data[0]["cube_type"] == "3x3"

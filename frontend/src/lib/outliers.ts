@@ -15,6 +15,8 @@ export interface OutlierInput {
   cube_type: string;
   dnf: boolean;
   plus_two: boolean;
+  /** Phase 8.1: nur fuer findOutliersBySession noetig, sonst optional */
+  session_id?: number | null;
 }
 
 export interface OutlierEntry {
@@ -27,7 +29,14 @@ export interface OutlierEntry {
 }
 
 export interface OutlierGroup {
+  /** Bei findOutliers (cube-mode) gleich dem cube_type. Bei
+   *  findOutliersBySession (session-mode) gleich der session-id-as-string
+   *  oder "no-session". UI nutzt das fuer das group-Label-Lookup. */
+  group_key: string;
+  /** Backwards-compat: bei cube-mode der cube_type, bei session-mode leer. */
   cube_type: string;
+  /** Bei session-mode gefuellt mit der session-id (oder null fuer „ohne Session"). */
+  session_id?: number | null;
   median_ms: number;
   count_total: number;
   outliers: OutlierEntry[];
@@ -57,26 +66,26 @@ function effectiveMs(s: OutlierInput): number {
 }
 
 /**
- * Findet Outlier-Solves, gruppiert nach Cube-Type.
- *
- * Cube-Types mit < MIN_SOLVES_PER_CUBE validen (non-DNF) Solves werden
- * uebersprungen — sonst gibt es bei wenigen Solves zu viele False-Positives.
- *
- * Rueckgabe: Array von Gruppen, sortiert nach Anzahl Outliers (most-suspicious first).
- * Gruppen ohne Outliers werden weggelassen.
+ * Pure helper — gruppiert solves nach einem beliebigen key und findet
+ * Outliers innerhalb jeder Gruppe. Wird von findOutliers + findOutliersBySession
+ * geteilt.
  */
-export function findOutliers(solves: OutlierInput[]): OutlierGroup[] {
-  // Gruppieren nach cube_type, DNFs raus
-  const byCube = new Map<string, OutlierInput[]>();
+function findOutliersByKey(
+  solves: OutlierInput[],
+  keyFn: (s: OutlierInput) => string,
+  buildGroup: (key: string, group: OutlierInput[]) => Pick<OutlierGroup, "group_key" | "cube_type" | "session_id">,
+): OutlierGroup[] {
+  const byKey = new Map<string, OutlierInput[]>();
   for (const s of solves) {
     if (s.dnf) continue;
-    const arr = byCube.get(s.cube_type) ?? [];
+    const k = keyFn(s);
+    const arr = byKey.get(k) ?? [];
     arr.push(s);
-    byCube.set(s.cube_type, arr);
+    byKey.set(k, arr);
   }
 
   const result: OutlierGroup[] = [];
-  for (const [cube_type, group] of byCube.entries()) {
+  for (const [k, group] of byKey.entries()) {
     if (group.length < MIN_SOLVES_PER_CUBE) continue;
     const med = median(group.map(effectiveMs));
     if (med <= 0) continue;
@@ -88,7 +97,7 @@ export function findOutliers(solves: OutlierInput[]): OutlierGroup[] {
       if (eff < lo) {
         outliers.push({
           id: s.id,
-          cube_type,
+          cube_type: s.cube_type,
           effective_ms: eff,
           reason: "too_fast",
           factor: eff / med,
@@ -96,7 +105,7 @@ export function findOutliers(solves: OutlierInput[]): OutlierGroup[] {
       } else if (eff > hi) {
         outliers.push({
           id: s.id,
-          cube_type,
+          cube_type: s.cube_type,
           effective_ms: eff,
           reason: "too_slow",
           factor: eff / med,
@@ -104,15 +113,12 @@ export function findOutliers(solves: OutlierInput[]): OutlierGroup[] {
       }
     }
     if (outliers.length > 0) {
-      // Innerhalb der Gruppe: extremste zuerst (kleinster oder groesster factor)
       outliers.sort((a, b) => {
-        // too_fast: kleinster factor zuerst (extremster)
-        // too_slow: groesster factor zuerst
         if (a.reason !== b.reason) return a.reason === "too_fast" ? -1 : 1;
         return a.reason === "too_fast" ? a.factor - b.factor : b.factor - a.factor;
       });
       result.push({
-        cube_type,
+        ...buildGroup(k, group),
         median_ms: Math.round(med),
         count_total: group.length,
         outliers,
@@ -120,7 +126,45 @@ export function findOutliers(solves: OutlierInput[]): OutlierGroup[] {
     }
   }
 
-  // Gruppen mit den meisten Outliers zuerst
   result.sort((a, b) => b.outliers.length - a.outliers.length);
   return result;
+}
+
+/**
+ * Findet Outlier-Solves, gruppiert nach Cube-Type.
+ *
+ * Cube-Types mit < MIN_SOLVES_PER_CUBE validen (non-DNF) Solves werden
+ * uebersprungen — sonst gibt es bei wenigen Solves zu viele False-Positives.
+ *
+ * Rueckgabe: Array von Gruppen, sortiert nach Anzahl Outliers (most-suspicious first).
+ * Gruppen ohne Outliers werden weggelassen.
+ */
+export function findOutliers(solves: OutlierInput[]): OutlierGroup[] {
+  return findOutliersByKey(
+    solves,
+    (s) => s.cube_type,
+    (key) => ({ group_key: key, cube_type: key, session_id: undefined }),
+  );
+}
+
+/**
+ * Phase 8.1: Outlier-Detection gruppiert nach Session-ID.
+ *
+ * Use-case: User hat mehrere 3x3-Sessions (Training / Speed / OH-3x3 etc.) —
+ * der „Median pro Cube" ist dann oft irrefuehrend, weil eine reine OH-Session
+ * langsamer ist als das normale 3x3-Training. „Median pro Session" misst
+ * Anomalien innerhalb des Trainings-Kontexts.
+ *
+ * Solves ohne session_id werden in eine eigene Gruppe „no-session" gepoolt.
+ */
+export function findOutliersBySession(solves: OutlierInput[]): OutlierGroup[] {
+  return findOutliersByKey(
+    solves,
+    (s) => (s.session_id == null ? "no-session" : String(s.session_id)),
+    (key) => ({
+      group_key: key,
+      cube_type: "",
+      session_id: key === "no-session" ? null : parseInt(key, 10),
+    }),
+  );
 }

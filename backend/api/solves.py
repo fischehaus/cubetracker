@@ -61,6 +61,10 @@ def _get_solve_or_404(solve_id: int, db: OrmSession) -> Solve:
 def list_solves(
     cube_type: str | None = Query(default=None, description="Filter auf Cube-Type"),
     session_id: int | None = Query(default=None, description="Filter auf Session-ID"),
+    alg_case: str | None = Query(
+        default=None,
+        description="Phase 8.1: Filter auf alg_case (z.B. 'PLL-Tperm') fuer DrillCard-Liste",
+    ),
     limit: int = Query(default=100, ge=1, le=100_000),
     offset: int = Query(default=0, ge=0),
     db: OrmSession = Depends(get_db),
@@ -71,6 +75,8 @@ def list_solves(
         stmt = stmt.where(Solve.cube_type == cube_type)
     if session_id is not None:
         stmt = stmt.where(Solve.session_id == session_id)
+    if alg_case is not None:
+        stmt = stmt.where(Solve.alg_case == alg_case)
     stmt = stmt.limit(limit).offset(offset)
     return list(db.scalars(stmt).all())
 

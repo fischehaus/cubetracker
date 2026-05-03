@@ -1,7 +1,7 @@
 // Tests fuer Outlier-Detection.
 
 import { describe, expect, it } from "vitest";
-import { findOutliers, type OutlierInput } from "./outliers";
+import { findOutliers, findOutliersBySession, type OutlierInput } from "./outliers";
 
 const mk = (
   id: number,
@@ -116,5 +116,58 @@ describe("findOutliers — Sortierung", () => {
     const result = findOutliers([...cube3x3, ...cube4x4]);
     expect(result[0].cube_type).toBe("3x3");
     expect(result[1].cube_type).toBe("4x4");
+  });
+});
+
+
+describe("findOutliersBySession (Phase 8.1)", () => {
+  const mkS = (
+    id: number,
+    time_ms: number,
+    session_id: number | null,
+    cube_type: string = "3x3",
+    opts: { dnf?: boolean } = {}
+  ): OutlierInput => ({
+    id,
+    time_ms,
+    cube_type,
+    session_id,
+    dnf: opts.dnf ?? false,
+    plus_two: false,
+  });
+
+  it("gruppiert per session_id statt cube_type", () => {
+    // Session 1: 10 normale 3x3-Solves, 1 verdaechtig
+    const s1 = Array.from({ length: 10 }, (_, i) => mkS(i, 10000 + i * 100, 1));
+    s1.push(mkS(100, 500, 1));
+    // Session 2: 10 normale OH-Solves (langsamer), keine Outliers
+    const s2 = Array.from({ length: 10 }, (_, i) => mkS(i + 200, 25000 + i * 100, 2, "OH"));
+
+    const result = findOutliersBySession([...s1, ...s2]);
+    expect(result).toHaveLength(1);
+    expect(result[0].session_id).toBe(1);
+    expect(result[0].outliers[0].id).toBe(100);
+  });
+
+  it("solves ohne session_id landen in 'no-session'-Gruppe", () => {
+    const orphans = Array.from({ length: 10 }, (_, i) => mkS(i, 10000 + i * 100, null));
+    orphans.push(mkS(100, 500, null));
+    const result = findOutliersBySession(orphans);
+    expect(result).toHaveLength(1);
+    expect(result[0].group_key).toBe("no-session");
+    expect(result[0].session_id).toBeNull();
+  });
+
+  it("session-mode trennt Cube-uebergreifend (3x3 + OH in einer Session)", () => {
+    // Session 1 mischt 3x3 und OH — beim cube-mode waeren das zwei Gruppen,
+    // beim session-mode eine. Median verschwimmt → andere Outlier-Detection.
+    const mixed = [
+      ...Array.from({ length: 5 }, (_, i) => mkS(i, 10000 + i * 100, 1, "3x3")),
+      ...Array.from({ length: 5 }, (_, i) => mkS(i + 100, 25000 + i * 100, 1, "OH")),
+    ];
+    mixed.push(mkS(999, 200, 1, "3x3")); // verdaechtig schnell vs gemischtem Median
+    const result = findOutliersBySession(mixed);
+    expect(result).toHaveLength(1);
+    expect(result[0].outliers.some((o) => o.id === 999)).toBe(true);
   });
 });
