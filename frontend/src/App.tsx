@@ -332,7 +332,7 @@ function MainLayout() {
         {tab === "trainer" && <TrainerTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          v0.14 · Trainings-Sets · Schrift-Slider · PB-Timestamps · PB-Konfetti
+          v0.15 · 14 neue Achievements · Trainings-Sets · PB-Konfetti
         </footer>
       </div>
 

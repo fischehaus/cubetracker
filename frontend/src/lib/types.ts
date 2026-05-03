@@ -71,7 +71,7 @@ export interface AchievementItem {
   code: string;
   name: string;
   description: string;
-  category: "volume" | "speed" | "variety" | "hardware";
+  category: "volume" | "speed" | "variety" | "hardware" | "consistency";
   icon: string;
   unlocked_at: string | null;
 }

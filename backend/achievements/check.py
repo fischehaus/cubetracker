@@ -13,7 +13,12 @@ Vorteile:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+# Sanity-Floor: time_ms unter 1000ms (1s) sind realistisch nicht erreichbar
+# (Welt-Single-Rekord ist ~3s). Schuetzt vor degenerierten Daten-Eintraegen
+# (z.B. time_ms=0 ohne DNF-Flag, wie bei manchem Import-Edge-Case).
+SPEED_3X3_SANITY_FLOOR_MS = 1_000
 
 
 @dataclass(frozen=True)
@@ -29,6 +34,15 @@ class AchievementInput:
     best_ms_per_cube: dict[str, int]  # cube_type → best_ms (effective)
     distinct_cube_types: int  # wie viele verschiedene cubes wurden geuebt
     hardware_count: int  # eintraege in hardware-tabelle
+    # Phase 8.5
+    max_solves_one_day_per_cube: dict[str, int] = field(default_factory=dict)
+    """Bestes Tagesvolumen pro Cube-Type (ueber alle Tage gerechnet)."""
+    max_solves_one_day_any: int = 0
+    """Bestes Tagesvolumen ueber alle Cubes zusammen (an EINEM Tag)."""
+    max_consecutive_days_3x3_100plus: int = 0
+    """Laengste Streak von Tagen in Folge mit ≥100 3x3-Solves."""
+    max_solve_streak_days: int = 0
+    """Laengste Streak von Tagen in Folge mit ≥1 Solve (egal welcher Cube)."""
 
 
 def check_achievements(snapshot: AchievementInput) -> list[str]:
@@ -68,9 +82,13 @@ def check_achievements(snapshot: AchievementInput) -> list[str]:
     if max_per_cube >= 1000:
         unlocked.append("cube_any_1000")
 
-    # --- Speed 3x3 (PBs in ms)
+    # --- Speed 3x3 (PBs in ms) — Sanity-Floor schuetzt vor time_ms=0-Edge-Cases
     best_3x3 = snapshot.best_ms_per_cube.get("3x3")
-    if best_3x3 is not None:
+    if best_3x3 is not None and best_3x3 >= SPEED_3X3_SANITY_FLOOR_MS:
+        if best_3x3 < 30_000:
+            unlocked.append("pb_3x3_sub_30")  # 8.5
+        if best_3x3 < 22_950:
+            unlocked.append("pb_3x3_sub_22_95")  # 8.5 (User-Wunsch)
         if best_3x3 < 15_000:
             unlocked.append("pb_3x3_sub_15")
         if best_3x3 < 12_000:
@@ -79,6 +97,8 @@ def check_achievements(snapshot: AchievementInput) -> list[str]:
             unlocked.append("pb_3x3_sub_10")
         if best_3x3 < 8_000:
             unlocked.append("pb_3x3_sub_8")
+        if best_3x3 < 6_660:
+            unlocked.append("pb_3x3_sub_6_66")  # 8.5 (User-Wunsch / Hex)
 
     # --- Variety
     if snapshot.distinct_cube_types >= 5:
@@ -92,4 +112,30 @@ def check_achievements(snapshot: AchievementInput) -> list[str]:
     if snapshot.hardware_count >= 5:
         unlocked.append("hardware_5")
 
+    # --- Phase 8.5: 100er-Tag pro Event (≥100 Solves an einem Tag)
+    for event in ["3x3", "2x2", "4x4", "5x5", "OH"]:
+        if snapshot.max_solves_one_day_per_cube.get(event, 0) >= 100:
+            unlocked.append(f"volume_day_{_event_code(event)}_100")
+
+    # --- 8.5: Marathon-Tag (≥200 Solves egal welcher Cube an einem Tag)
+    if snapshot.max_solves_one_day_any >= 200:
+        unlocked.append("volume_day_any_200")
+
+    # --- 8.5: Wochen-Disziplin 3x3 (7+ Tage in Folge je ≥100 3x3-Solves)
+    if snapshot.max_consecutive_days_3x3_100plus >= 7:
+        unlocked.append("volume_week_3x3_100daily")
+
+    # --- 8.5: Solve-Streaks (Tage in Folge mit ≥1 Solve)
+    if snapshot.max_solve_streak_days >= 7:
+        unlocked.append("streak_solve_7")
+    if snapshot.max_solve_streak_days >= 30:
+        unlocked.append("streak_solve_30")
+    if snapshot.max_solve_streak_days >= 100:
+        unlocked.append("streak_solve_100")
+
     return unlocked
+
+
+def _event_code(event: str) -> str:
+    """Cube-Type-Name in achievement-code-friendly Form."""
+    return event.lower().replace("x", "x")  # Identitaet, ein-Konventions-Hook

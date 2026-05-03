@@ -109,6 +109,9 @@ def test_realistic_user_profile():
         "cube_3x3_1000",
         "cube_any_500",
         "cube_any_1000",
+        # Phase 8.5: alle PB-Schwellen die ein 7.85s-Single trifft
+        "pb_3x3_sub_30",
+        "pb_3x3_sub_22_95",
         "pb_3x3_sub_15",
         "pb_3x3_sub_12",
         "pb_3x3_sub_10",
@@ -119,5 +122,93 @@ def test_realistic_user_profile():
         "hardware_5",
     }
     assert set(out) == expected
-    # NICHT unlocked: volume_10000 (nur 6200)
+    # NICHT unlocked: volume_10000 (nur 6200), Hex-Master (7.85 > 6.66)
     assert "volume_10000" not in out
+    assert "pb_3x3_sub_6_66" not in out
+
+
+# ============================================================
+# Phase 8.5: Tages-Volume + Streaks + neue Speed-Schwellen
+# ============================================================
+
+
+def test_volume_day_per_event_locked_when_max_under_100():
+    out = check_achievements(make_input(max_solves_one_day_per_cube={"3x3": 99}))
+    assert "volume_day_3x3_100" not in out
+
+
+def test_volume_day_per_event_unlocked_at_100():
+    out = check_achievements(make_input(max_solves_one_day_per_cube={"3x3": 100}))
+    assert "volume_day_3x3_100" in out
+
+
+def test_volume_day_per_event_for_each_event():
+    out = check_achievements(
+        make_input(
+            max_solves_one_day_per_cube={
+                "2x2": 100,
+                "4x4": 100,
+                "5x5": 100,
+                "OH": 100,
+            }
+        )
+    )
+    assert "volume_day_2x2_100" in out
+    assert "volume_day_4x4_100" in out
+    assert "volume_day_5x5_100" in out
+    assert "volume_day_oh_100" in out
+
+
+def test_marathon_day_unlocked_at_200():
+    assert "volume_day_any_200" not in check_achievements(make_input(max_solves_one_day_any=199))
+    assert "volume_day_any_200" in check_achievements(make_input(max_solves_one_day_any=200))
+
+
+def test_week_3x3_discipline_unlocked_at_7_consecutive():
+    assert "volume_week_3x3_100daily" not in check_achievements(
+        make_input(max_consecutive_days_3x3_100plus=6)
+    )
+    assert "volume_week_3x3_100daily" in check_achievements(
+        make_input(max_consecutive_days_3x3_100plus=7)
+    )
+
+
+def test_solve_streaks():
+    assert "streak_solve_7" not in check_achievements(make_input(max_solve_streak_days=6))
+    assert "streak_solve_7" in check_achievements(make_input(max_solve_streak_days=7))
+    assert "streak_solve_30" in check_achievements(make_input(max_solve_streak_days=30))
+    assert "streak_solve_100" in check_achievements(make_input(max_solve_streak_days=100))
+    assert "streak_solve_100" not in check_achievements(make_input(max_solve_streak_days=99))
+
+
+def test_speed_3x3_sub_30_22_95_6_66():
+    out = check_achievements(make_input(best_ms_per_cube={"3x3": 29_999}))
+    assert "pb_3x3_sub_30" in out
+    assert "pb_3x3_sub_22_95" not in out
+    assert "pb_3x3_sub_6_66" not in out
+
+    out = check_achievements(make_input(best_ms_per_cube={"3x3": 22_949}))
+    assert "pb_3x3_sub_22_95" in out
+
+    out = check_achievements(make_input(best_ms_per_cube={"3x3": 6_659}))
+    assert "pb_3x3_sub_6_66" in out
+
+
+def test_speed_pb_sanity_floor_blocks_degenerate_zero_ms():
+    """Phase 8.5 fix: ein 3x3-Solve mit time_ms=0 (Daten-Edge-Case)
+    darf KEINE Speed-Schwellen triggern. Floor = 1000ms.
+    """
+    out = check_achievements(make_input(best_ms_per_cube={"3x3": 0}))
+    assert "pb_3x3_sub_6_66" not in out
+    assert "pb_3x3_sub_8" not in out
+    assert "pb_3x3_sub_10" not in out
+    assert "pb_3x3_sub_30" not in out
+
+    # Solve unter Floor (z.B. 500ms) ebenfalls geblockt
+    out = check_achievements(make_input(best_ms_per_cube={"3x3": 500}))
+    assert all(c not in out for c in ["pb_3x3_sub_6_66", "pb_3x3_sub_8", "pb_3x3_sub_30"])
+
+    # Knapp ueber Floor (1.5s) → alle zutreffenden Schwellen freigeschaltet
+    out = check_achievements(make_input(best_ms_per_cube={"3x3": 1_500}))
+    assert "pb_3x3_sub_30" in out
+    assert "pb_3x3_sub_6_66" in out
