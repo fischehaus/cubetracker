@@ -8,7 +8,15 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from "@tanstack/react-query";
-import type { Session, Solve, SolveCreate, SolveUpdate } from "./types";
+import type {
+  Hardware,
+  HardwareCreate,
+  HardwareUpdate,
+  Session,
+  Solve,
+  SolveCreate,
+  SolveUpdate,
+} from "./types";
 
 export const api = axios.create({
   baseURL: "http://localhost:8000",
@@ -273,5 +281,93 @@ export function useSessions(): UseQueryResult<Session[]> {
       const r = await api.get<Session[]>("/sessions");
       return r.data;
     },
+  });
+}
+
+// ============================================================
+// Hardware (Phase 5 / F16)
+// ============================================================
+
+export interface HardwareListParams {
+  cube_type?: string;
+  active_only?: boolean;
+}
+
+export function useHardware(
+  params: HardwareListParams = {}
+): UseQueryResult<Hardware[]> {
+  return useQuery({
+    queryKey: ["hardware", params],
+    queryFn: async (): Promise<Hardware[]> => {
+      const r = await api.get<Hardware[]>("/hardware", { params });
+      return r.data;
+    },
+  });
+}
+
+export function useCreateHardware(): UseMutationResult<
+  Hardware,
+  Error,
+  HardwareCreate
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload) => {
+      const r = await api.post<Hardware>("/hardware", payload);
+      return r.data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["hardware"] }),
+  });
+}
+
+export function useUpdateHardware(): UseMutationResult<
+  Hardware,
+  Error,
+  { id: number; payload: HardwareUpdate }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, payload }) => {
+      const r = await api.patch<Hardware>(`/hardware/${id}`, payload);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["hardware"] });
+      // Solves zeigen evtl. hardware_id → invalidieren falls referenziert
+      qc.invalidateQueries({ queryKey: ["solves"] });
+    },
+  });
+}
+
+export function useDeleteHardware(): UseMutationResult<void, Error, number> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id) => {
+      await api.delete(`/hardware/${id}`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["hardware"] });
+      // Solves verlieren ihre hardware_id (FK SET NULL) → invalidieren
+      qc.invalidateQueries({ queryKey: ["solves"] });
+    },
+  });
+}
+
+export interface SeedResult {
+  loaded: number;
+  skipped_because_not_empty: boolean;
+  use_force_to_load_anyway?: boolean;
+}
+
+export function useSeedHardware(): UseMutationResult<SeedResult, Error, boolean> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (force: boolean) => {
+      const r = await api.post<SeedResult>(`/hardware/seed`, null, {
+        params: { force },
+      });
+      return r.data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["hardware"] }),
   });
 }

@@ -90,3 +90,45 @@ class SolveRead(SolveBase):
     session_id: int | None
     hardware_id: int | None
     effective_time_ms: int | None
+
+
+# ============================================================
+# Hardware-Schemas (Phase 5 / F16)
+# ============================================================
+
+
+class HardwareBase(BaseModel):
+    """Gemeinsame Felder fuer Hardware-Schemas."""
+
+    name: str = Field(min_length=1, max_length=128, description='z.B. "Weilong v11"')
+    primary_cube_type: str = Field(
+        min_length=1,
+        max_length=32,
+        description='Primaerer Cube-Type (z.B. "3x3"). Default-Sortierung.',
+    )
+    notes: str | None = None
+    is_active: bool = True
+    acquired_at: datetime | None = None
+
+
+class HardwareCreate(HardwareBase):
+    """Eingabe-Schema fuer POST /hardware."""
+
+
+class HardwareUpdate(BaseModel):
+    """PATCH-Schema fuer /hardware/{id} — alle Felder optional."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=128)
+    primary_cube_type: str | None = Field(default=None, min_length=1, max_length=32)
+    notes: str | None = None
+    is_active: bool | None = None
+    acquired_at: datetime | None = None
+
+
+class HardwareRead(HardwareBase):
+    """Ausgabe-Schema fuer Hardware."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    created_at: datetime

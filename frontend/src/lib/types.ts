@@ -45,3 +45,29 @@ export interface Session {
   cstimer_session_id: number | null;
   created_at: string;
 }
+
+export interface Hardware {
+  id: number;
+  name: string;
+  primary_cube_type: string;
+  notes: string | null;
+  is_active: boolean;
+  acquired_at: string | null;
+  created_at: string;
+}
+
+export interface HardwareCreate {
+  name: string;
+  primary_cube_type: string;
+  notes?: string | null;
+  is_active?: boolean;
+  acquired_at?: string | null;
+}
+
+export interface HardwareUpdate {
+  name?: string;
+  primary_cube_type?: string;
+  notes?: string | null;
+  is_active?: boolean;
+  acquired_at?: string | null;
+}
