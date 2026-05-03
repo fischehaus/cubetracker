@@ -68,6 +68,13 @@ class SolveBase(BaseModel):
         max_length=64,
         description="Phase 8: Subset-Case-Code, z.B. 'PLL-Tperm' / 'OLL-21'",
     )
+    split_times_ms: str | None = Field(
+        default=None,
+        description=(
+            "Phase 8.2: JSON-array of phase-durations in ms (z.B. '[1200,3300,1800,1200]'). "
+            "Sum sollte time_ms entsprechen. None = klassischer Solve ohne Splits."
+        ),
+    )
 
 
 class SolveCreate(SolveBase):
@@ -93,6 +100,7 @@ class SolveUpdate(BaseModel):
     session_id: int | None = None
     hardware_id: int | None = None
     alg_case: str | None = Field(default=None, max_length=64)
+    split_times_ms: str | None = None
 
 
 class SolveRead(SolveBase):

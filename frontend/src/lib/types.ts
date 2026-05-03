@@ -14,6 +14,8 @@ export interface Solve {
   hardware_id: number | null;
   effective_time_ms: number | null;
   alg_case: string | null;
+  /** Phase 8.2: JSON-array string mit Phasen-Dauern in ms, z.B. "[1500,5000,1500,1000]" */
+  split_times_ms: string | null;
 }
 
 export interface SolveCreate {
@@ -27,6 +29,7 @@ export interface SolveCreate {
   session_id?: number | null;
   hardware_id?: number | null;
   alg_case?: string | null;
+  split_times_ms?: string | null;
 }
 
 export interface SolveUpdate {
@@ -39,6 +42,7 @@ export interface SolveUpdate {
   session_id?: number | null;
   hardware_id?: number | null;
   alg_case?: string | null;
+  split_times_ms?: string | null;
 }
 
 export interface Session {

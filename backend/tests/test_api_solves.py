@@ -261,3 +261,81 @@ def test_list_solves_filter_alg_case_combinable_with_cube_type(client, db):
     data = r.json()
     assert len(data) == 1
     assert data[0]["cube_type"] == "3x3"
+
+
+def test_create_solve_with_split_times_ms(client):
+    """Phase 8.2: split_times_ms wird als JSON-string persistiert."""
+    r = client.post(
+        "/solves",
+        json={
+            "time_ms": 9000,
+            "cube_type": "3x3",
+            "split_times_ms": "[1500,5000,1500,1000]",
+        },
+    )
+    assert r.status_code == 201
+    data = r.json()
+    assert data["split_times_ms"] == "[1500,5000,1500,1000]"
+
+
+def test_solve_default_split_times_null(client):
+    r = client.post("/solves", json={"time_ms": 10000, "cube_type": "3x3"})
+    assert r.status_code == 201
+    assert r.json()["split_times_ms"] is None
+
+
+def test_cstimer_import_keeps_split_times_null(client, db):
+    """Phase 8.2 Compat: csTimer kennt split_times nicht.
+    Re-Import eines Solves mit existing split_times darf den Wert
+    nicht ueberschreiben — Importer findet duplicate via dedup-key
+    (timestamp+time_ms+session) und macht KEIN update auf split_times.
+    """
+    from datetime import UTC, datetime
+
+    from db.models import Session as DbSession
+
+    # Session mit cstimer_session_id=1 vorab anlegen, damit der Importer
+    # dieselbe Session matcht — sonst landet der Import in einer neuen
+    # Session und der Original-Solve waere nicht in der dedup-Set.
+    sess = DbSession(name="3x3", cstimer_session_id=1)
+    db.add(sess)
+    db.commit()
+    db.refresh(sess)
+
+    s = Solve(
+        time_ms=10000,
+        cube_type="3x3",
+        session_id=sess.id,
+        timestamp=datetime(2026, 5, 1, 12, 0, 0),
+        split_times_ms="[2500,5000,1500,1000]",
+    )
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+    sid = s.id
+
+    # csTimer-style import-payload mit demselben dedup-key
+    import io
+    import json
+
+    # WICHTIG: timestamp explizit als UTC ausdruecken, sonst interpretiert
+    # datetime.timestamp() naive als lokale TZ → dedup-key matched nicht.
+    unix_ts = int(datetime(2026, 5, 1, 12, 0, 0, tzinfo=UTC).timestamp())
+    payload = {
+        # csTimer-format: [[penalty, time_ms], scramble, comment, unix_ts]
+        "session1": [[[0, 10000], "R U", "", unix_ts]],
+        "properties": {"sessionData": '{"1":{"name":"3x3","opt":{"scrType":"333"},"rank":1}}'},
+    }
+    r = client.post(
+        "/import/cstimer",
+        files={"file": ("x.json", io.BytesIO(json.dumps(payload).encode()), "application/json")},
+    )
+    assert r.status_code == 200
+    # Solve sollte als duplicate erkannt sein
+    assert r.json()["solves_skipped_duplicate"] == 1
+
+    # split_times_ms muss erhalten geblieben sein
+    db.expire_all()
+    refetched = db.get(Solve, sid)
+    assert refetched is not None
+    assert refetched.split_times_ms == "[2500,5000,1500,1000]"
