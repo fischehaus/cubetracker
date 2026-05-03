@@ -60,6 +60,7 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
       qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
@@ -87,6 +88,7 @@ export function useUpdateSolve(): UseMutationResult<
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
       qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
@@ -109,6 +111,7 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
       qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
@@ -182,6 +185,46 @@ export interface CubeStats {
 export interface StatsByCubeResponse {
   cubes: CubeStats[];
   filter: { session_id: number | null };
+}
+
+// ============================================================
+// Stats by Hardware (Phase 5d — Hardware-Performance-Vergleich)
+// ============================================================
+
+export interface HardwareCubeStats {
+  hardware_id: number | null;
+  hardware_name: string;
+  count: number;
+  count_valid: number;
+  mean_ms: number | null;
+  best_ms: number | null;
+  current_ao5: number | null;
+  best_ao5: number | null;
+}
+
+export interface StatsByHardwareResponse {
+  cube_type: string;
+  filter: { session_id: number | null };
+  hardware: HardwareCubeStats[];
+}
+
+export function useStatsByHardware(
+  cubeType: string | undefined,
+  sessionId: number | null
+): UseQueryResult<StatsByHardwareResponse> {
+  const params: Record<string, string | number> = {};
+  if (cubeType) params.cube_type = cubeType;
+  if (sessionId !== null) params.session_id = sessionId;
+  return useQuery({
+    queryKey: ["stats-by-hardware", params],
+    queryFn: async (): Promise<StatsByHardwareResponse> => {
+      const r = await api.get<StatsByHardwareResponse>("/stats/by-hardware", {
+        params,
+      });
+      return r.data;
+    },
+    enabled: !!cubeType,
+  });
 }
 
 export function useStatsByCube(
@@ -464,8 +507,9 @@ export function useUpdateHardware(): UseMutationResult<
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["hardware"] });
-      // Solves zeigen evtl. hardware_id → invalidieren falls referenziert
       qc.invalidateQueries({ queryKey: ["solves"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
+      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
     },
   });
 }
@@ -478,8 +522,9 @@ export function useDeleteHardware(): UseMutationResult<void, Error, number> {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["hardware"] });
-      // Solves verlieren ihre hardware_id (FK SET NULL) → invalidieren
       qc.invalidateQueries({ queryKey: ["solves"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
+      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
     },
   });
 }

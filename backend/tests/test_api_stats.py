@@ -446,3 +446,102 @@ def test_activity_filter_session(client, db):
 def test_activity_invalid_granularity_rejected(client):
     r = client.get("/stats/activity?days=7&granularity=year")
     assert r.status_code == 422  # Pydantic-Validation
+
+
+# ============================================================
+# /stats/by-hardware (Phase 5d)
+# ============================================================
+
+
+def test_by_hardware_requires_cube_type(client):
+    r = client.get("/stats/by-hardware")
+    assert r.status_code == 422  # Pydantic-Validation: cube_type required
+
+
+def test_by_hardware_empty(client):
+    r = client.get("/stats/by-hardware?cube_type=3x3")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["cube_type"] == "3x3"
+    assert data["hardware"] == []
+
+
+def test_by_hardware_groups_by_hardware_id(client, db):
+    from db.models import Hardware, Solve
+
+    hw1 = Hardware(name="A", primary_cube_type="3x3")
+    hw2 = Hardware(name="B", primary_cube_type="3x3")
+    db.add_all([hw1, hw2])
+    db.commit()
+    db.refresh(hw1)
+    db.refresh(hw2)
+
+    db.add(Solve(time_ms=10000, cube_type="3x3", hardware_id=hw1.id))
+    db.add(Solve(time_ms=11000, cube_type="3x3", hardware_id=hw1.id))
+    db.add(Solve(time_ms=20000, cube_type="3x3", hardware_id=hw2.id))
+    db.commit()
+
+    r = client.get("/stats/by-hardware?cube_type=3x3")
+    data = r.json()
+    assert len(data["hardware"]) == 2
+    # Sortiert nach best_ms asc → hw1 (10000) zuerst
+    assert data["hardware"][0]["hardware_name"] == "A"
+    assert data["hardware"][0]["count"] == 2
+    assert data["hardware"][0]["best_ms"] == 10000
+    assert data["hardware"][1]["hardware_name"] == "B"
+
+
+def test_by_hardware_includes_no_hardware_group(client, db):
+    """Solves ohne hardware_id (z.B. csTimer-Importe) als 'Ohne Hardware' gruppiert."""
+    from db.models import Solve
+
+    db.add(Solve(time_ms=15000, cube_type="3x3", hardware_id=None))
+    db.commit()
+
+    r = client.get("/stats/by-hardware?cube_type=3x3")
+    data = r.json()
+    assert len(data["hardware"]) == 1
+    assert data["hardware"][0]["hardware_id"] is None
+    assert data["hardware"][0]["hardware_name"] == "Ohne Hardware"
+    assert data["hardware"][0]["best_ms"] == 15000
+
+
+def test_by_hardware_filters_by_cube_type(client, db):
+    from db.models import Hardware, Solve
+
+    hw = Hardware(name="X", primary_cube_type="3x3")
+    db.add(hw)
+    db.commit()
+    db.refresh(hw)
+
+    db.add(Solve(time_ms=10000, cube_type="3x3", hardware_id=hw.id))
+    db.add(Solve(time_ms=60000, cube_type="4x4", hardware_id=hw.id))
+    db.commit()
+
+    r = client.get("/stats/by-hardware?cube_type=3x3")
+    data = r.json()
+    assert len(data["hardware"]) == 1
+    assert data["hardware"][0]["count"] == 1  # 4x4-solve nicht dabei
+
+
+def test_by_hardware_filter_by_session(client, db):
+    from db.models import Hardware, Solve
+    from db.models import Session as DbSession
+
+    s1 = DbSession(name="A")
+    s2 = DbSession(name="B")
+    hw = Hardware(name="X", primary_cube_type="3x3")
+    db.add_all([s1, s2, hw])
+    db.commit()
+    db.refresh(s1)
+    db.refresh(s2)
+    db.refresh(hw)
+
+    db.add(Solve(time_ms=10000, cube_type="3x3", hardware_id=hw.id, session_id=s1.id))
+    db.add(Solve(time_ms=11000, cube_type="3x3", hardware_id=hw.id, session_id=s2.id))
+    db.commit()
+
+    r = client.get(f"/stats/by-hardware?cube_type=3x3&session_id={s1.id}")
+    data = r.json()
+    assert data["hardware"][0]["count"] == 1
+    assert data["hardware"][0]["best_ms"] == 10000

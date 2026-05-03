@@ -13,6 +13,7 @@ import { ActivityCard } from "./components/ActivityCard";
 import { ActivityChart } from "./components/ActivityChart";
 import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
 import { BigTimerInput } from "./components/BigTimerInput";
+import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HardwareList } from "./components/HardwareList";
 import { HistogramChart } from "./components/HistogramChart";
 import { ImportPanel } from "./components/ImportPanel";
@@ -146,6 +147,10 @@ function AnalyseTab({
       <TrendsChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
 
       <ActivityChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
+
+      {cubeFilter && (
+        <HardwareCompareCard cubeType={cubeFilter} sessionId={sessionId} />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">

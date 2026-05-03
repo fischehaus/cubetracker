@@ -7,6 +7,9 @@ Endpoints:
 - GET /stats/by-cube → Stats pro Cube-Type, fuer Multi-Cube-Vergleich.
   Liefert form_factor (lifetime + recent), improvement_ms (letzte 50
   vs davor), last_solve_at + days_since_last (fuer Trainings-Reminder).
+- GET /stats/by-hardware?cube_type=X[&session_id=Y] → Stats pro
+  Hardware-Eintrag innerhalb eines Cube-Types. Vergleich der
+  verwendeten Cubes (z.B. Weilong v11 vs Gan 15 fuer 3x3).
 - GET /stats/temporal → Aktivitaet heute + diese Woche.
 - GET /stats/activity → Aggregierte Solve-Counts pro Periode
   (day/week/month) ueber einen waehlbaren Zeitraum. Gap-gefuellt,
@@ -381,4 +384,79 @@ def get_activity(
         "buckets": buckets,
         "total_count": total,
         "filter": {"cube_type": cube_type, "session_id": session_id},
+    }
+
+
+# ============================================================
+# /stats/by-hardware — Hardware-Performance-Vergleich (Phase 5d)
+# ============================================================
+
+
+@router.get("/by-hardware")
+def get_stats_by_hardware(
+    cube_type: str = Query(
+        ..., description="Cube-Type — Pflicht, sonst macht der Vergleich keinen Sinn"
+    ),
+    session_id: int | None = Query(default=None),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Stats gruppiert pro Hardware-Eintrag innerhalb eines Cube-Types.
+
+    Antwort auf „mit welchem meiner 3x3-Cubes bin ich am schnellsten?".
+    Solves ohne hardware_id werden als eigene Pseudo-Gruppe „Ohne Hardware"
+    gefuehrt — sonst sieht der User csTimer-Importe nicht (die haben kein
+    hardware_id).
+
+    Pro Hardware geliefert:
+      - hardware_id (oder null fuer „Ohne Hardware")
+      - hardware_name
+      - count, count_valid
+      - mean_ms, best_ms, current_ao5, best_ao5
+
+    Sortierung: Best-PB aufsteigend (schnellster Cube zuerst). Eintraege
+    ohne best_ms (alle DNF) ans Ende.
+    """
+    from db.models import Hardware
+
+    stmt = select(Solve).where(Solve.cube_type == cube_type).order_by(Solve.timestamp.asc())
+    if session_id is not None:
+        stmt = stmt.where(Solve.session_id == session_id)
+    rows = db.scalars(stmt).all()
+
+    # Hardware-name-lookup fuer hardware_id im Output
+    hw_names: dict[int, str] = {h.id: h.name for h in db.scalars(select(Hardware)).all()}
+
+    # Gruppieren nach hardware_id (None = „Ohne Hardware")
+    grouped: dict[int | None, list[Solve]] = {}
+    for s in rows:
+        grouped.setdefault(s.hardware_id, []).append(s)
+
+    out: list[dict[str, Any]] = []
+    for hw_id, group in grouped.items():
+        points = [
+            SolvePoint(time_ms=s.time_ms, dnf=s.dnf, plus_two=s.plus_two, solve_id=s.id)
+            for s in group
+        ]
+        stats = compute_stats(points)
+        name = "Ohne Hardware" if hw_id is None else hw_names.get(hw_id, f"Hardware #{hw_id}")
+        out.append(
+            {
+                "hardware_id": hw_id,
+                "hardware_name": name,
+                "count": stats.count,
+                "count_valid": stats.count_valid,
+                "mean_ms": stats.mean_ms,
+                "best_ms": stats.best_ms,
+                "current_ao5": stats.current_ao5,
+                "best_ao5": stats.best_ao5,
+            }
+        )
+
+    # Sortieren: best_ms ASC, None ans Ende
+    out.sort(key=lambda h: (h["best_ms"] is None, h["best_ms"] or 0))
+
+    return {
+        "cube_type": cube_type,
+        "filter": {"session_id": session_id},
+        "hardware": out,
     }
