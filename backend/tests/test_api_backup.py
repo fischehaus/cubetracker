@@ -17,11 +17,13 @@ def test_backup_json_empty(client):
         "sessions": 0,
         "hardware": 0,
         "achievements": 0,
+        "challenges": 0,
     }
     assert data["solves"] == []
     assert data["sessions"] == []
     assert data["hardware"] == []
     assert data["achievements"] == []
+    assert data["challenges"] == []
 
 
 def test_backup_json_full(client, db):
@@ -53,6 +55,7 @@ def test_backup_json_full(client, db):
         "sessions": 1,
         "hardware": 1,
         "achievements": 0,
+        "challenges": 0,
     }
     assert len(data["solves"]) == 2
     assert len(data["sessions"]) == 1

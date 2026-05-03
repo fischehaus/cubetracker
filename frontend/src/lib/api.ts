@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-query";
 import type {
   AchievementItem,
+  ChallengeItem,
   Hardware,
   HardwareCreate,
   HardwareUpdate,
@@ -41,14 +42,46 @@ export function onAchievementUnlocked(fn: AchievementListener): () => void {
   return () => achievementListeners.delete(fn);
 }
 
+// ============================================================
+// Challenge-Completion-Pub-Sub (Phase 7b)
+// ============================================================
+//
+// Backend setzt nach Solve-Mutationen den Header X-Challenges-Completed
+// mit kommagetrennten challenge-IDs. Wir lesen das im response-interceptor
+// und feuern an Listener (z.B. ChallengeCompletionToaster).
+
+type ChallengeCompletionListener = (ids: number[]) => void;
+const challengeListeners: Set<ChallengeCompletionListener> = new Set();
+
+export function onChallengeCompleted(
+  fn: ChallengeCompletionListener
+): () => void {
+  challengeListeners.add(fn);
+  return () => challengeListeners.delete(fn);
+}
+
 api.interceptors.response.use((response) => {
-  const header = response.headers["x-achievements-unlocked"] as
+  const achHeader = response.headers["x-achievements-unlocked"] as
     | string
     | undefined;
-  if (header) {
-    const codes = header.split(",").map((c) => c.trim()).filter(Boolean);
+  if (achHeader) {
+    const codes = achHeader.split(",").map((c) => c.trim()).filter(Boolean);
     if (codes.length > 0) {
       achievementListeners.forEach((fn) => fn(codes));
+    }
+  }
+  const chHeader = response.headers["x-challenges-completed"] as
+    | string
+    | undefined;
+  if (chHeader) {
+    const ids = chHeader
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => parseInt(s, 10))
+      .filter((n) => !Number.isNaN(n));
+    if (ids.length > 0) {
+      challengeListeners.forEach((fn) => fn(ids));
     }
   }
   return response;
@@ -97,6 +130,7 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
       qc.invalidateQueries({ queryKey: ["achievements"] });
+      qc.invalidateQueries({ queryKey: ["challenges-today"] });
     },
   });
 }
@@ -127,6 +161,7 @@ export function useUpdateSolve(): UseMutationResult<
       qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
       qc.invalidateQueries({ queryKey: ["achievements"] });
+      qc.invalidateQueries({ queryKey: ["challenges-today"] });
     },
   });
 }
@@ -152,6 +187,7 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
       qc.invalidateQueries({ queryKey: ["achievements"] });
+      qc.invalidateQueries({ queryKey: ["challenges-today"] });
     },
   });
 }
@@ -689,6 +725,81 @@ export function useRecheckAchievements(): UseMutationResult<
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["achievements"] });
+    },
+  });
+}
+
+// ============================================================
+// Daily Challenges (Phase 7b)
+// ============================================================
+
+export interface ChallengesTodayResponse {
+  date: string; // ISO-Date
+  challenges: ChallengeItem[];
+}
+
+export interface ChallengesHistoryResponse {
+  from: string;
+  to: string;
+  challenges: ChallengeItem[];
+}
+
+export function useChallengesToday(): UseQueryResult<ChallengesTodayResponse> {
+  return useQuery({
+    queryKey: ["challenges-today"],
+    queryFn: async () =>
+      (await api.get<ChallengesTodayResponse>("/challenges/today")).data,
+  });
+}
+
+export function useChallengesHistory(
+  days: number = 30
+): UseQueryResult<ChallengesHistoryResponse> {
+  return useQuery({
+    queryKey: ["challenges-history", days],
+    queryFn: async () =>
+      (
+        await api.get<ChallengesHistoryResponse>("/challenges/history", {
+          params: { days },
+        })
+      ).data,
+  });
+}
+
+export function useRegenerateChallenges(): UseMutationResult<
+  ChallengesTodayResponse,
+  Error,
+  void
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const r = await api.post<ChallengesTodayResponse>(
+        "/challenges/today/regenerate"
+      );
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["challenges-today"] });
+      qc.invalidateQueries({ queryKey: ["challenges-history"] });
+    },
+  });
+}
+
+export function useDismissChallenge(): UseMutationResult<
+  ChallengeItem,
+  Error,
+  number
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const r = await api.post<ChallengeItem>(`/challenges/${id}/dismiss`);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["challenges-today"] });
+      qc.invalidateQueries({ queryKey: ["challenges-history"] });
     },
   });
 }

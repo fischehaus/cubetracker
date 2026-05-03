@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api import (
     achievements,
     backup,
+    challenges,
     export_cstimer,
     hardware,
     import_cstimer,
@@ -47,6 +48,7 @@ app.include_router(hardware.router)  # F16 (Phase 5)
 app.include_router(backup.router)  # Phase L+ (B.1 + B.2)
 app.include_router(export_cstimer.router)  # Phase L+ d (csTimer-Export)
 app.include_router(achievements.router)  # Phase 7a
+app.include_router(challenges.router)  # Phase 7b
 
 
 @app.get("/")
