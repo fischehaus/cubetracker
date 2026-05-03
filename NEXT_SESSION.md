@@ -3,9 +3,14 @@
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
 >
-> **Letzter Stand:** 2026-05-03. **Phase 8.5 fertig, Tag `v0.15`
-> gesetzt.** 14 neue Achievement-Definitionen + Live-Backfill auf
-> Bestand (6 neu unlocked, jetzt 23 von 31 total):
+> **Letzter Stand:** 2026-05-03. **Phase 8.5.1 fertig, Tag `v0.15.1`
+> gesetzt.** 4 PB-Pattern-Achievements via chronologisches Tracking:
+> pb_double, pb_synchronized, pb_triple_day, consistency_5_under_ao12.
+> Alle 4 auf Bestand getriggert (jetzt 27 von 35 unlocked). 367 Tests
+> gruen (255 backend + 112 frontend).
+>
+> **Phase 8.5 (Tag `v0.15`)** war 14 neue Volume/Speed/Streak-
+> Achievements + Backfill (6 neu unlocked):
 > - Volume-Tages-Patterns separat pro Event (3x3/2x2/4x4/5x5/OH × 100er-Tag)
 > - Marathon-Tag (200 any cube), Wochen-Disziplin (7 Tage je 100+ 3x3)
 > - Speed-Schwellen sub_30, sub_22.95, sub_6_66 (Hex-Master)
@@ -140,9 +145,7 @@ Phase 8 + 8.1 + 8.2 + 8.3 + 8.4 + 8.5 abgeschlossen. Geplante Reihenfolge:
 - PyInstaller-Bundle, Inno-Setup-Installer
 - Achievement-Trigger nach Import explizit verifizieren
 
-**Optional vor v1.0** (Aufwand jeweils ~0.5-1 Tag):
-- Phase 8.5.1 — PB-Patterns + Konsistenz-Achievements (chronologisches
-  Tracking: pb_double, pb_synchronized, pb_triple_day, consistency_5_under_avg)
+**Optional vor v1.0** (Aufwand ~1 Tag):
 - Phase 8.3.1 — 2D-Algorithm-Visualisierung mit echtem 3x3-Sim
 
 **Nach v1.0**:
@@ -220,9 +223,9 @@ Plus offene Wuensche:
 
 ## Repo-Stand (Snapshot)
 
-- **Branch:** `main` (sauber, alle Phase-8.5-Features gemerged)
-- **Tags:** `v0.0` … `v0.14`, **`v0.15`** (aktuell)
-- **Tests:** 237 backend + 112 frontend = **349 gruen**
+- **Branch:** `main` (sauber, alle Phase-8.5.1-Features gemerged)
+- **Tags:** `v0.0` … `v0.15`, **`v0.15.1`** (aktuell)
+- **Tests:** 255 backend + 112 frontend = **367 gruen**
   - backend: `cd backend && .venv\Scripts\python.exe -m pytest -q`
   - frontend: `cd frontend && npm test`
 - **Lint:** Pre-commit-Hooks (Black + Ruff) sauber

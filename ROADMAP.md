@@ -163,6 +163,33 @@ ist parkt fuer Phase 5.
   - Form-Vergleich fuer ao5+ao12+ao100 mit gemeinsamem Window-Selector
     (letzte 100/500/alle)
 
+## Phase 8.5.1 — PB-Patterns + Konsistenz-Achievements (Tag `v0.15.1`) ✅
+
+4 weitere Achievements via chronologischem Tracking pro cube_type:
+
+- [x] **pb_double** — 2 Single-PBs in zwei aufeinanderfolgenden Solves
+- [x] **pb_synchronized** („Perfect Storm") — Single-PB UND Ao5-PB im
+  selben Solve
+- [x] **pb_triple_day** („Komplett-Bestform") — Single-PB + Ao5-PB +
+  Ao12-PB an einem Tag
+- [x] **consistency_5_under_ao12** („Konstant") — 5 Solves in Folge
+  unter dem damals-geltenden persoenlichen Ao12
+
+Implementation:
+- `achievements/patterns.py`: pure helper mit `ChronoSolve`-dataclass
+  und `detect_patterns(solves)`-Single-Pass durch chronologisch
+  sortierte Solves pro cube_type. `merge_patterns()` ODert ueber
+  alle cube_types.
+- Wichtige Designentscheidung: erste Setzung von best_X zaehlt nicht
+  als „PB-Event" fuer Double (sonst Doppel-PB bei jeder 2-Solve-
+  Sequenz), aber als Event fuer Triple-Day.
+- Konsistenz-Check nutzt PRE-Window-Ao12 (12 Solves VOR dem aktuellen).
+- Service-Layer-Performance: 232ms fuer 6220 Solves auf 13 cubes.
+- Live-Backfill: alle 4 Patterns getriggert (27/35 Achievements
+  unlocked).
+
+**Tests:** 255 backend + 112 frontend = 367 gruen.
+
 ## Phase 8.5 — Achievement-Erweiterung (Tag `v0.15`) ✅
 
 14 neue Achievement-Definitionen, neue Category „consistency", Live-
@@ -600,8 +627,8 @@ Feature-Set bewegen.
 - ✅ Phase 8.3: **fertig** (PB-Konfetti, Tag `v0.13`)
 - ✅ Phase 8.4: **fertig** (Trainings-Sets + Schrift + PB-Timestamps, Tag `v0.14`)
 - ✅ Phase 8.5: **fertig** (14 neue Achievements + Backfill, Tag `v0.15`)
+- ✅ Phase 8.5.1: **fertig** (4 PB-Pattern-Achievements + Backfill, Tag `v0.15.1`)
 - ⏸ Phase 8.3.1: pending (Algorithm-Visualisierung — 2D-State-Bilder im Trainer mit echtem 3x3-Sim)
-- ⏸ Phase 8.5.1: pending (PB-Patterns + Konsistenz-Achievements mit chronologischem Tracking)
 - ⏸ Phase 9: pending (Distribution / Installer + Restore → Tag `v1.0`)
 - ⏸ Phase 11: pending (WCA-Ranking-Lookup, optional nach v1.0)
 
@@ -675,3 +702,9 @@ Feature-Set bewegen.
   Tage in neuer Category „consistency"). Sanity-Floor 1000ms im Speed-
   Check schuetzt vor degenerierten Daten. Live-Backfill: 6 neu unlocked.
   349 Tests gruen.
+- `v0.15-pre-pb-patterns` — Snapshot vor Phase 8.5.1, + branch
+  `legacy/v0.15-pre-pb-patterns`.
+- `v0.15.1` — Phase 8.5.1: 4 PB-Pattern-Achievements (pb_double,
+  pb_synchronized, pb_triple_day, consistency_5_under_ao12) via
+  chronologischen Single-Pass pro cube_type in achievements/patterns.py.
+  Live-Backfill: alle 4 getriggert. 367 Tests gruen.
