@@ -131,6 +131,7 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
       qc.invalidateQueries({ queryKey: ["achievements"] });
       qc.invalidateQueries({ queryKey: ["challenges-today"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-alg-case"] });
     },
   });
 }
@@ -162,6 +163,7 @@ export function useUpdateSolve(): UseMutationResult<
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
       qc.invalidateQueries({ queryKey: ["achievements"] });
       qc.invalidateQueries({ queryKey: ["challenges-today"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-alg-case"] });
     },
   });
 }
@@ -188,6 +190,7 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
       qc.invalidateQueries({ queryKey: ["achievements"] });
       qc.invalidateQueries({ queryKey: ["challenges-today"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-alg-case"] });
     },
   });
 }
@@ -726,6 +729,39 @@ export function useRecheckAchievements(): UseMutationResult<
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["achievements"] });
     },
+  });
+}
+
+// ============================================================
+// Stats by Alg-Case (Phase 8b — Algorithm-Trainer)
+// ============================================================
+
+export interface AlgCaseStats {
+  alg_case: string;
+  count: number;
+  count_valid: number;
+  mean_ms: number | null;
+  best_ms: number | null;
+  current_ao5: number | null;
+  last_solve_at: string;
+}
+
+export interface StatsByAlgCaseResponse {
+  filter: { subset: string };
+  cases: AlgCaseStats[];
+}
+
+export function useStatsByAlgCase(
+  subset: string
+): UseQueryResult<StatsByAlgCaseResponse> {
+  return useQuery({
+    queryKey: ["stats-by-alg-case", subset],
+    queryFn: async () =>
+      (
+        await api.get<StatsByAlgCaseResponse>("/stats/by-alg-case", {
+          params: { subset },
+        })
+      ).data,
   });
 }
 

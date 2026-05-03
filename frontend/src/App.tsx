@@ -19,6 +19,8 @@ import { BigTimerInput } from "./components/BigTimerInput";
 import { ChallengeCompletionToaster } from "./components/ChallengeCompletionToaster";
 import { ChallengesMiniCard } from "./components/ChallengesMiniCard";
 import { DashboardFilterBar } from "./components/DashboardFilterBar";
+import { ScrambleCard } from "./components/ScrambleCard";
+import { useSessions } from "./lib/api";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HistogramChart } from "./components/HistogramChart";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
@@ -102,14 +104,37 @@ function TimerTab({
   // TIMER hat keine externe Filter-Leiste — Cube/Session/Hardware
   // werden im BigTimerInput gewaehlt.
   const [timerSessionId, setTimerSessionId] = useState<number | null>(null);
+
+  // Phase 8a: Scramble-State im TimerTab orchestriert.
+  // - currentScramble: aktueller String, an BigTimerInput fuer Save
+  // - regenSeed: counter den BigTimerInput nach jedem Save bumpt,
+  //              damit ScrambleCard re-generiert
+  const [currentScramble, setCurrentScramble] = useState<string>("");
+  const [regenSeed, setRegenSeed] = useState(0);
+
+  // Session-Override: wenn die gewaehlte Session einen scramble_type
+  // setzt (Phase 8b — z.B. "pll" oder "oll"), nutzt ScrambleCard den
+  // statt cube_type. So kann man eine PLL-Trainings-Session anlegen.
+  const { data: sessions } = useSessions();
+  const activeSession = sessions?.find((s) => s.id === timerSessionId);
+  const scrambleTypeOverride = activeSession?.scramble_type ?? null;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-      <main>
+      <main className="space-y-4">
+        <ScrambleCard
+          cubeType={timerCubeType}
+          scrambleTypeOverride={scrambleTypeOverride}
+          regenerationSeed={regenSeed}
+          onScrambleGenerated={setCurrentScramble}
+        />
         <BigTimerInput
           cubeType={timerCubeType}
           onCubeTypeChange={setTimerCubeType}
           sessionId={timerSessionId}
           onSessionIdChange={setTimerSessionId}
+          scramble={currentScramble}
+          onSolveSaved={() => setRegenSeed((s) => s + 1)}
         />
       </main>
       <aside>
@@ -301,7 +326,7 @@ function MainLayout() {
         {tab === "trainer" && <TrainerTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          v0.10 · 5 Tabs · Personal Trainer (Achievements + Daily Challenges)
+          v0.11 · 5 Tabs · Trainer (Heute + Algs + Erfolge) + Scramble im Timer
         </footer>
       </div>
 
