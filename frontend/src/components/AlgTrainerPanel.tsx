@@ -27,6 +27,7 @@ import {
 import { formatSolveTime, formatTime, parseTimeInput } from "../lib/format";
 import { useAppSettings } from "../lib/settings";
 import type { Solve } from "../lib/types";
+import { CubeStateView } from "./CubeStateView";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
 import type { TimerPenalty } from "../hooks/useSpacebarTimer";
 
@@ -101,7 +102,7 @@ export function AlgTrainerPanel() {
                   key={c.id}
                   onClick={() => pickCase(c.id)}
                   aria-current={isActive ? "true" : undefined}
-                  className={`text-left rounded border p-2 transition ${
+                  className={`text-left rounded border p-2 transition flex gap-2 items-center ${
                     isActive
                       ? "border-purple-500 bg-purple-500/10"
                       : s
@@ -110,6 +111,8 @@ export function AlgTrainerPanel() {
                   }`}
                   title={c.alg}
                 >
+                  <CubeStateView caseId={c.id} size="small" />
+                  <div className="flex-1 min-w-0">
                   <div
                     className={`text-sm font-semibold ${
                       isActive ? "text-purple-100" : "text-gray-200"
@@ -130,6 +133,7 @@ export function AlgTrainerPanel() {
                       noch nie geuebt
                     </div>
                   )}
+                  </div>
                 </button>
               );
             })}
@@ -248,8 +252,11 @@ function DrillCard({
       <div className="text-xs text-purple-300 uppercase tracking-wide mb-1">
         Drill
       </div>
-      <div className="text-lg font-semibold text-purple-100 mb-3">
-        {caseDef.name}
+      <div className="flex items-center gap-3 mb-3">
+        <CubeStateView caseId={caseDef.id} size="large" />
+        <div className="text-lg font-semibold text-purple-100">
+          {caseDef.name}
+        </div>
       </div>
 
       <div className="rounded border border-gray-700 bg-gray-900/50 p-3 mb-3">
