@@ -16,6 +16,18 @@
 
 import { useEffect, useState } from "react";
 
+/**
+ * Inspection-Verhalten:
+ *   - "wca":        WCA-Standard. Single Space waehrend Inspection geht
+ *                   in ready (Hold halten → Release startet Solve).
+ *                   Penalty +2 ab 15s, DNF ab 17s.
+ *   - "pragmatic":  User-Trainings-Flow. Single Space waehrend Inspection
+ *                   startet Solve direkt (mit 250ms Latenz fuer Double-Tap-
+ *                   Erkennung). Double-Tap = Inspection-Reset. Auto-DNF
+ *                   bei Countdown 0.
+ */
+export type InspectionMode = "wca" | "pragmatic";
+
 export interface AppSettings {
   /** Spacebar-Timer aktiviert (statt Tastatur-Eingabe). */
   spacebar_enabled: boolean;
@@ -23,6 +35,11 @@ export interface AppSettings {
   inspection_enabled: boolean;
   /** Inspection-Dauer in Sekunden. */
   inspection_seconds: number;
+  /**
+   * Verhalten waehrend Inspection. „pragmatic" = User-Trainings-Flow,
+   * „wca" = WCA-Wettkampf-Standard. Siehe InspectionMode-Doku.
+   */
+  inspection_mode: InspectionMode;
   /** Sound-Signale (Inspection-Warnings, Start/Stop). */
   sound_enabled: boolean;
   /** Hold-Time in ms bevor „go" (gruen) wird. WCA-Empfehlung 550ms. */
@@ -41,6 +58,7 @@ export const SETTINGS_DEFAULTS: AppSettings = {
   spacebar_enabled: false, // erst opt-in — bestehende User verlieren nichts
   inspection_enabled: true,
   inspection_seconds: 15,
+  inspection_mode: "pragmatic", // aktuelles Verhalten als Default
   sound_enabled: true,
   hold_time_ms: 550,
   splits_enabled: false,

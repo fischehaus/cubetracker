@@ -70,7 +70,7 @@ export function SpacebarTimerCard({
       {/* Top: state-Hint + ggf. phase indicator */}
       <div className="flex items-center justify-between mb-2 gap-2 text-sm">
         <div className={hintClass(timer.state)}>
-          {hintLabel(timer.state, settings.inspection_enabled)}
+          {hintLabel(timer.state, settings.inspection_enabled, settings.inspection_mode)}
         </div>
         {settings.splits_enabled && timer.state === "running" && totalPhases > 1 && (
           <div className="text-purple-200 font-medium">
@@ -186,14 +186,20 @@ function hintClass(state: TimerState): string {
   }
 }
 
-function hintLabel(state: TimerState, inspectionEnabled: boolean): string {
+function hintLabel(
+  state: TimerState,
+  inspectionEnabled: boolean,
+  inspectionMode: "wca" | "pragmatic",
+): string {
   switch (state) {
     case "idle":
       return inspectionEnabled
         ? "Space druecken fuer Inspektion"
         : "Space halten und loslassen zum Starten";
     case "inspection":
-      return "Space = Solve starten · Double-Tap = Inspektion neu · 0 = DNF";
+      return inspectionMode === "wca"
+        ? "Space druecken: Solve in Halten-Modus · Penalty +2 ab 15s, DNF ab 17s"
+        : "Space = Solve starten · Double-Tap = Inspektion neu · 0 = DNF";
     case "ready":
       return "Loslassen wenn bereit";
     case "running":

@@ -161,20 +161,34 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
           playInspectionWarn12s();
           playedWarn12Ref.current = true;
         }
-        // User-Wunsch: wenn Countdown auf 0 ohne dass User gestartet
-        // hat → Auto-DNF. Solve wird mit time_ms=0 + DNF-Penalty
-        // gespeichert. Pending single-tap cancelen falls vorhanden.
-        if (left <= 0) {
-          if (pendingSingleTapTimeoutRef.current !== null) {
-            window.clearTimeout(pendingSingleTapTimeoutRef.current);
-            pendingSingleTapTimeoutRef.current = null;
+        if (settings.inspection_mode === "wca") {
+          // WCA: Penalty live setzen, NICHT auto-DNFen — User soll
+          // weiter Space druecken koennen, Penalty bleibt fuer Save.
+          if (elapsed > 17000) setPenalty("DNF");
+          else if (elapsed > 15000) setPenalty("+2");
+          // Safety: nach 30s ohne reaktion stop the show, Auto-DNF
+          if (elapsed > 30000) {
+            stateRef.current = "stopped";
+            setState("stopped");
+            setDisplayMs(0);
+            setInspectionLeftMs(0);
+            setPenalty("DNF");
+            if (onComplete) onComplete(0, "DNF", null);
           }
-          stateRef.current = "stopped";
-          setState("stopped");
-          setDisplayMs(0);
-          setInspectionLeftMs(0);
-          setPenalty("DNF");
-          if (onComplete) onComplete(0, "DNF", null);
+        } else {
+          // PRAGMATIC: Auto-DNF bei Countdown 0
+          if (left <= 0) {
+            if (pendingSingleTapTimeoutRef.current !== null) {
+              window.clearTimeout(pendingSingleTapTimeoutRef.current);
+              pendingSingleTapTimeoutRef.current = null;
+            }
+            stateRef.current = "stopped";
+            setState("stopped");
+            setDisplayMs(0);
+            setInspectionLeftMs(0);
+            setPenalty("DNF");
+            if (onComplete) onComplete(0, "DNF", null);
+          }
         }
       }
       tickIdRef.current = requestAnimationFrame(tick);
@@ -187,7 +201,13 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
         tickIdRef.current = null;
       }
     };
-  }, [state, settings.inspection_seconds, settings.sound_enabled, onComplete]);
+  }, [
+    state,
+    settings.inspection_seconds,
+    settings.sound_enabled,
+    settings.inspection_mode,
+    onComplete,
+  ]);
 
   // Keydown / Keyup handlers — nur aktiv wenn enabled
   useEffect(() => {
@@ -229,12 +249,22 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       }
 
       if (cur === "inspection") {
-        // Inspection-Verhalten (User-Spec):
-        //   - Single Space → Solve startet (mit 250ms Verzoegerung,
-        //     damit Double-Tap noch erkannt werden kann)
-        //   - Double-Tap (2x Space innerhalb DOUBLE_TAP_WINDOW_MS) →
-        //     Inspection-Reset (cancel pending single-tap)
-        //   - Countdown auf 0 → Auto-DNF (im RAF-tick gehandhabt)
+        // Verhalten je nach inspection_mode (siehe lib/settings.ts).
+        if (settings.inspection_mode === "wca") {
+          // WCA-Standard: Single Space → in ready (User haelt jetzt
+          // Space). Penalty wird im RAF-tick basierend auf inspection-
+          // elapsed gesetzt (oder hier nochmal als sicherheits-set).
+          const elapsed = performance.now() - inspectionStartRef.current;
+          if (elapsed > 17000) setPenalty("DNF");
+          else if (elapsed > 15000) setPenalty("+2");
+          holdStartRef.current = performance.now();
+          stateRef.current = "ready";
+          setState("ready");
+          return;
+        }
+
+        // PRAGMATIC: Single-Tap (mit Latency) startet Solve;
+        // Double-Tap resettet Inspection.
         const DOUBLE_TAP_WINDOW_MS = 250;
         const now = performance.now();
         const sinceLast = now - lastInspectionPressRef.current;

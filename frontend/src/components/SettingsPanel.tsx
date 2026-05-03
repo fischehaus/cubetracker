@@ -61,17 +61,53 @@ export function SettingsPanel() {
       </Section>
 
       {/* Inspection */}
-      <Section title="Inspection (WCA)">
+      <Section title="Inspection">
         <Toggle
           label="Inspection-Phase aktivieren"
-          hint="Vor dem Solve laeuft ein Countdown. WCA-Default 15s mit +2 ab 15s und DNF ab 17s."
+          hint="Vor dem Solve laeuft ein Countdown."
           value={settings.inspection_enabled}
           onChange={(v) => setSettings({ ...settings, inspection_enabled: v })}
           disabled={!settings.spacebar_enabled}
         />
+
+        {/* Inspection-Mode-Toggle */}
+        <div className={!settings.spacebar_enabled || !settings.inspection_enabled ? "opacity-50" : ""}>
+          <div className="text-base text-gray-100 mb-1">Inspection-Verhalten</div>
+          <div className="text-xs text-gray-500 mb-2">
+            <strong className="text-gray-300">WCA-Empfehlung:</strong> Single Space → Solve in „Halten"
+            (loslassen startet); +2 ab 15s, DNF ab 17s.<br />
+            <strong className="text-gray-300">Pragmatisch:</strong> Single Space (250ms Latenz) startet
+            Solve direkt; Double-Tap = Reset; Auto-DNF bei 0.
+          </div>
+          <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 inline-flex">
+            <button
+              onClick={() => setSettings({ ...settings, inspection_mode: "wca" })}
+              disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
+              className={`rounded px-3 py-1.5 text-sm font-medium transition ${
+                settings.inspection_mode === "wca"
+                  ? "bg-purple-600 text-white"
+                  : "text-gray-300 hover:bg-gray-700"
+              }`}
+            >
+              WCA-Empfehlung
+            </button>
+            <button
+              onClick={() => setSettings({ ...settings, inspection_mode: "pragmatic" })}
+              disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
+              className={`rounded px-3 py-1.5 text-sm font-medium transition ${
+                settings.inspection_mode === "pragmatic"
+                  ? "bg-purple-600 text-white"
+                  : "text-gray-300 hover:bg-gray-700"
+              }`}
+            >
+              Pragmatisch
+            </button>
+          </div>
+        </div>
+
         <NumberField
           label="Inspection-Dauer (Sekunden)"
-          hint="WCA-Standard 15s. +2-Penalty ab Sekunde 15, DNF ab 17."
+          hint="WCA-Standard 15s."
           value={settings.inspection_seconds}
           min={5}
           max={60}
