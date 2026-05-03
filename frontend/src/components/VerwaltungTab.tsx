@@ -26,12 +26,7 @@ const SUB_TABS: SubTab[] = [
   { id: "outliers", label: "Outliers", icon: "⚠" },
 ];
 
-interface Props {
-  /** Globaler Header-Session-Filter — nur fuer Outliers relevant */
-  sessionId: number | null;
-}
-
-export function VerwaltungTab({ sessionId }: Props) {
+export function VerwaltungTab() {
   const [section, setSection] = useState<VerwaltungSection>("sessions");
 
   return (
@@ -61,11 +56,11 @@ export function VerwaltungTab({ sessionId }: Props) {
         })}
       </nav>
 
-      {/* Aktive Sektion */}
+      {/* Aktive Sektion — Outliers managed Session-Filter intern. */}
       {section === "sessions" && <SessionList />}
       {section === "hardware" && <HardwareList />}
       {section === "import" && <ImportPanel />}
-      {section === "outliers" && <OutlierCard sessionId={sessionId} />}
+      {section === "outliers" && <OutlierCard />}
     </div>
   );
 }

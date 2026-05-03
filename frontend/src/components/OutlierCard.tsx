@@ -1,16 +1,14 @@
 // OutlierCard: zeigt verdaechtige Solve-Zeiten gruppiert nach Cube-Type.
 // Quick-Actions: DNF setzen oder loeschen — direkt aus der Card.
 //
-// Wird nur gerendert, wenn tatsaechlich Outliers gefunden werden — sonst
-// bleibt der Platz im aside frei.
-//
-// Akzeptiert optional einen Session-Filter: wenn der User in einer
-// bestimmten Session arbeitet, kann er sich auf deren Outliers
-// beschraenken — Cube-uebergreifend bleibt es trotzdem.
+// Phase L-2: managed eigenen Session-Filter intern (vorher vom Aussen
+// per prop) — die Card lebt jetzt im VERWALTUNG-Tab und hat dort
+// keinen globalen Header-Filter mehr.
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   useDeleteSolve,
+  useSessions,
   useSolves,
   useUpdateSolve,
   type SolveListParams,
@@ -18,11 +16,11 @@ import {
 import { formatTime } from "../lib/format";
 import { findOutliers, type OutlierInput } from "../lib/outliers";
 
-interface Props {
-  sessionId: number | null;
-}
+export function OutlierCard() {
+  // Eigener session-filter (default 'alle')
+  const [sessionId, setSessionId] = useState<number | null>(null);
+  const { data: sessions } = useSessions();
 
-export function OutlierCard({ sessionId }: Props) {
   // Cube-uebergreifend laden, optional auf Session einschraenken.
   const params: SolveListParams = { limit: 100_000 };
   if (sessionId !== null) params.session_id = sessionId;
@@ -42,26 +40,69 @@ export function OutlierCard({ sessionId }: Props) {
     return findOutliers(inputs);
   }, [solves]);
 
-  if (isLoading) return null; // still — andere Cards zeigen das Loading
-  if (groups.length === 0) return null; // nichts Verdaechtiges → Card weglassen
+  // Bei aktivem Filter aber leeren Daten zeigen wir trotzdem die card
+  // mit dem selektor — sonst kann der user nicht zuruckwechseln.
+  if (isLoading)
+    return (
+      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-base text-gray-400">
+        Outliers werden geladen …
+      </div>
+    );
 
   const totalOutliers = groups.reduce((sum, g) => sum + g.outliers.length, 0);
 
   return (
-    <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-6">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xl font-semibold text-amber-200">
+    <div className={
+      groups.length === 0
+        ? "rounded-lg border border-gray-700 bg-gray-900/50 p-6"
+        : "rounded-lg border border-amber-500/40 bg-amber-500/5 p-6"
+    }>
+      <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+        <h2 className={
+          groups.length === 0
+            ? "text-2xl font-semibold text-gray-100"
+            : "text-2xl font-semibold text-amber-200"
+        }>
           Verdaechtige Zeiten
+          {groups.length > 0 && (
+            <span className="ml-2 text-sm text-amber-300/70 font-normal">
+              ({totalOutliers} {totalOutliers === 1 ? "Solve" : "Solves"})
+            </span>
+          )}
         </h2>
-        <span className="text-sm text-amber-300/70">
-          {totalOutliers} {totalOutliers === 1 ? "Solve" : "Solves"}
-        </span>
+        <label className="flex items-center gap-2 text-sm text-gray-400">
+          Session:
+          <select
+            value={sessionId === null ? "__all__" : String(sessionId)}
+            onChange={(e) =>
+              setSessionId(
+                e.target.value === "__all__" ? null : parseInt(e.target.value, 10)
+              )
+            }
+            className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
+          >
+            <option value="__all__">Alle Sessions</option>
+            {sessions?.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
-      <p className="text-sm text-gray-400 mb-4">
-        Solves, die deutlich vom typischen Tempo dieses Cubes abweichen
-        (vermutlich Timer-Fehler oder vergessene Solves).
-        {sessionId !== null && " Nur die aktive Session."}
-      </p>
+
+      {groups.length === 0 ? (
+        <p className="text-base text-gray-400">
+          Keine verdaechtigen Zeiten in
+          {sessionId !== null ? " der gewaehlten Session" : " den Daten"}. ✅
+        </p>
+      ) : (
+        <p className="text-sm text-gray-400 mb-4">
+          Solves, die deutlich vom typischen Tempo dieses Cubes abweichen
+          (vermutlich Timer-Fehler oder vergessene Solves).
+          {sessionId !== null && " Nur die aktive Session."}
+        </p>
+      )}
 
       <div className="space-y-4">
         {groups.map((g) => (
