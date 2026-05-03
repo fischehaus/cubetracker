@@ -7,6 +7,8 @@ Endpoints:
 - GET /stats/by-cube → Stats pro Cube-Type, fuer Multi-Cube-Vergleich.
   Liefert form_factor (lifetime + recent), improvement_ms (letzte 50
   vs davor), last_solve_at + days_since_last (fuer Trainings-Reminder).
+- GET /stats/by-session → Stats pro Session, fuer Multi-Session-Vergleich
+  (Phase 6). Analog zu by-cube, aber Aggregation nach session_id.
 - GET /stats/by-hardware?cube_type=X[&session_id=Y] → Stats pro
   Hardware-Eintrag innerhalb eines Cube-Types. Vergleich der
   verwendeten Cubes (z.B. Weilong v11 vs Gan 15 fuer 3x3).
@@ -459,4 +461,105 @@ def get_stats_by_hardware(
         "cube_type": cube_type,
         "filter": {"session_id": session_id},
         "hardware": out,
+    }
+
+
+# ============================================================
+# /stats/by-session — Multi-Session-Vergleich (Phase 6)
+# ============================================================
+
+# Mindest-Solves pro Session, damit form_factor sinnvoll ist (analog zu by-cube)
+MIN_SOLVES_FOR_BY_SESSION = 5
+
+
+@router.get("/by-session")
+def get_stats_by_session(
+    cube_type: str | None = Query(
+        default=None, description="Optional auf einen Cube-Type einschraenken"
+    ),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Stats gruppiert pro Session — fuer Multi-Session-Vergleich im Dashboard.
+
+    Antwort auf „in welcher Session bin ich gerade in welcher Form?".
+    Analog zu /stats/by-cube, aber Aggregation nach session_id (Solves
+    ohne session_id werden uebersprungen — ohne Session ist kein
+    sinnvoller Vergleichs-Eintrag).
+
+    Optional cube_type-Filter — sinnvoll wenn Sessions verschiedene
+    Cubes mischen und User nur 3x3-Performance pro Session sehen will.
+    """
+    from db.models import Session as DbSession
+
+    stmt = select(Solve).where(Solve.session_id.is_not(None)).order_by(Solve.timestamp.asc())
+    if cube_type is not None:
+        stmt = stmt.where(Solve.cube_type == cube_type)
+    rows = db.scalars(stmt).all()
+
+    # Session-name-lookup
+    session_names: dict[int, str] = {s.id: s.name for s in db.scalars(select(DbSession)).all()}
+
+    # Gruppieren nach session_id
+    by_session: dict[int, list[Solve]] = {}
+    for s in rows:
+        if s.session_id is None:
+            continue
+        by_session.setdefault(s.session_id, []).append(s)
+
+    out: list[dict[str, Any]] = []
+    for session_id, group in by_session.items():
+        if len(group) < MIN_SOLVES_FOR_BY_SESSION:
+            continue
+        points = [
+            SolvePoint(time_ms=s.time_ms, dnf=s.dnf, plus_two=s.plus_two, solve_id=s.id)
+            for s in group
+        ]
+        stats = compute_stats(points)
+
+        form_factor: float | None = None
+        if stats.current_ao5 is not None and stats.mean_ms is not None and stats.mean_ms > 0:
+            form_factor = round(stats.current_ao5 / stats.mean_ms, 4)
+
+        form_factor_recent: float | None = None
+        valid_recent = [p for p in points[-100:] if not p.dnf]
+        if stats.current_ao5 is not None and len(valid_recent) >= 20 and len(valid_recent) > 5:
+            recent_mean = sum(p.effective_ms for p in valid_recent) / len(valid_recent)
+            if recent_mean > 0:
+                form_factor_recent = round(stats.current_ao5 / recent_mean, 4)
+
+        # Last solve + days_since_last (analog zu by-cube)
+        last_solve_at_iso: str | None = None
+        days_since_last: int | None = None
+        if group:
+            last_ts = group[-1].timestamp
+            last_aware = last_ts.replace(tzinfo=UTC) if last_ts.tzinfo is None else last_ts
+            days_since_last = (datetime.now(UTC) - last_aware).days
+            last_solve_at_iso = last_aware.isoformat()
+
+        out.append(
+            {
+                "session_id": session_id,
+                "session_name": session_names.get(session_id, f"Session #{session_id}"),
+                "count": stats.count,
+                "count_valid": stats.count_valid,
+                "current_ao5": stats.current_ao5,
+                "mean_ms": stats.mean_ms,
+                "best_ms": stats.best_ms,
+                "form_factor": form_factor,
+                "form_factor_recent": form_factor_recent,
+                "last_solve_at": last_solve_at_iso,
+                "days_since_last": days_since_last,
+            }
+        )
+
+    # Sortieren: form_factor_recent asc (beste Form zuerst), Fallback form_factor
+    def sort_key(s: dict[str, Any]) -> tuple[bool, float]:
+        f = s["form_factor_recent"] if s["form_factor_recent"] is not None else s["form_factor"]
+        return (f is None, f or 0)
+
+    out.sort(key=sort_key)
+
+    return {
+        "filter": {"cube_type": cube_type},
+        "sessions": out,
     }
