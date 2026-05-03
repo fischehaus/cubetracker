@@ -80,6 +80,63 @@ export function isAlgTrainerSubset(s: string): s is AlgTrainerSubset {
 }
 
 /**
+ * Phase 8.1: csTimer-WCA-Codes (444wca, pyrso, etc.) → scrambow-Codes.
+ *
+ * Hintergrund: Sessions die aus csTimer-Import stammen haben in
+ * `scramble_type` den csTimer-internen Code. Mein Phase-8a-Code hat
+ * den unveraendert an scrambow weitergegeben → leerer Scramble bei
+ * 4x4/5x5/Pyra/etc. weil scrambow diese Codes nicht kennt.
+ *
+ * Liste analog zu backend/importers/cstimer.py SCRTYPE_TO_CUBE.
+ */
+const CSTIMER_TO_SCRAMBOW: Record<string, string> = {
+  "": "333",
+  "333wca": "333",
+  "333oh": "333",
+  "333bld": "333",
+  "333fm": "333",
+  "333mbf": "333",
+  "222so": "222",
+  "444wca": "444",
+  "444bld": "444",
+  "555wca": "555",
+  "555bld": "555",
+  "666wca": "666",
+  "777wca": "777",
+  "pyrso": "pyraminx",
+  "skbso": "skewb",
+  "sqrs": "square-1",
+  "mgmp": "megaminx",
+  "clkwca": "clock",
+};
+
+/**
+ * Loest einen Session.scramble_type-Override auf den scrambow-Code auf.
+ * Reihenfolge:
+ *   1. csTimer-Code (z.B. "444wca") → scrambow-Code aus der Map
+ *   2. Bereits scrambow-Code oder Trainer-Subset (z.B. "pll", "333") → direkt
+ *   3. Unbekannter String → null (Caller faellt auf cube_type-Mapping zurueck)
+ */
+export function resolveScrambleTypeOverride(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (trimmed === "") return null; // leer = kein Override
+  // 1) csTimer-Code
+  if (trimmed in CSTIMER_TO_SCRAMBOW) {
+    return CSTIMER_TO_SCRAMBOW[trimmed];
+  }
+  // 2) Bereits scrambow-Code? Wir akzeptieren alles was scrambow kennt
+  //    und alles aus der Trainer-Subset-Liste. Whitelist statt Blackbox.
+  const knownScrambow = new Set([
+    "222", "333", "444", "555", "666", "777",
+    "pyraminx", "skewb", "square-1", "megaminx", "clock",
+    ...ALG_TRAINER_SUBSETS,
+  ]);
+  if (knownScrambow.has(trimmed)) return trimmed;
+  // 3) Unbekannt → Caller soll Override ignorieren
+  return null;
+}
+
+/**
  * Generiert einen Scramble-String fuer den gegebenen Typ (cube_type
  * oder scramble_type-override aus Session).
  *

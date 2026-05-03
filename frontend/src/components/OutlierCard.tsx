@@ -14,11 +14,19 @@ import {
   type SolveListParams,
 } from "../lib/api";
 import { formatTime } from "../lib/format";
-import { findOutliers, type OutlierInput } from "../lib/outliers";
+import {
+  findOutliers,
+  findOutliersBySession,
+  type OutlierInput,
+} from "../lib/outliers";
+
+type GroupMode = "cube" | "session";
 
 export function OutlierCard() {
   // Eigener session-filter (default 'alle')
   const [sessionId, setSessionId] = useState<number | null>(null);
+  // Phase 8.1: Toggle Median-Berechnung pro Cube vs pro Session
+  const [groupMode, setGroupMode] = useState<GroupMode>("cube");
   const { data: sessions } = useSessions();
 
   // Cube-uebergreifend laden, optional auf Session einschraenken.
@@ -28,6 +36,12 @@ export function OutlierCard() {
   const update = useUpdateSolve();
   const del = useDeleteSolve();
 
+  const sessionNameById = useMemo(() => {
+    const m = new Map<number, string>();
+    sessions?.forEach((s) => m.set(s.id, s.name));
+    return m;
+  }, [sessions]);
+
   const groups = useMemo(() => {
     if (!solves || solves.length === 0) return [];
     const inputs: OutlierInput[] = solves.map((s) => ({
@@ -36,9 +50,12 @@ export function OutlierCard() {
       cube_type: s.cube_type,
       dnf: s.dnf,
       plus_two: s.plus_two,
+      session_id: s.session_id,
     }));
-    return findOutliers(inputs);
-  }, [solves]);
+    return groupMode === "session"
+      ? findOutliersBySession(inputs)
+      : findOutliers(inputs);
+  }, [solves, groupMode]);
 
   // Bei aktivem Filter aber leeren Daten zeigen wir trotzdem die card
   // mit dem selektor — sonst kann der user nicht zuruckwechseln.
@@ -70,25 +87,55 @@ export function OutlierCard() {
             </span>
           )}
         </h2>
-        <label className="flex items-center gap-2 text-sm text-gray-400">
-          Session:
-          <select
-            value={sessionId === null ? "__all__" : String(sessionId)}
-            onChange={(e) =>
-              setSessionId(
-                e.target.value === "__all__" ? null : parseInt(e.target.value, 10)
-              )
-            }
-            className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
-          >
-            <option value="__all__">Alle Sessions</option>
-            {sessions?.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Phase 8.1: Toggle Median-pro-Cube vs Median-pro-Session.
+              Sinnvoll wenn man mehrere Sessions desselben Cubes hat
+              (z.B. „3x3 Training" + „3x3 Speed") — pro-Session-Median
+              ist ehrlicher fuer Anomalie-Erkennung. */}
+          <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 text-xs">
+            <button
+              onClick={() => setGroupMode("cube")}
+              className={`rounded px-2 py-1 font-medium transition ${
+                groupMode === "cube"
+                  ? "bg-purple-600 text-white"
+                  : "text-gray-300 hover:bg-gray-700"
+              }`}
+              title="Median pro Cube-Type"
+            >
+              pro Cube
+            </button>
+            <button
+              onClick={() => setGroupMode("session")}
+              className={`rounded px-2 py-1 font-medium transition ${
+                groupMode === "session"
+                  ? "bg-purple-600 text-white"
+                  : "text-gray-300 hover:bg-gray-700"
+              }`}
+              title="Median pro Session"
+            >
+              pro Session
+            </button>
+          </div>
+          <label className="flex items-center gap-2 text-sm text-gray-400">
+            Session:
+            <select
+              value={sessionId === null ? "__all__" : String(sessionId)}
+              onChange={(e) =>
+                setSessionId(
+                  e.target.value === "__all__" ? null : parseInt(e.target.value, 10)
+                )
+              }
+              className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
+            >
+              <option value="__all__">Alle Sessions</option>
+              {sessions?.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
       {groups.length === 0 ? (
@@ -105,10 +152,19 @@ export function OutlierCard() {
       )}
 
       <div className="space-y-4">
-        {groups.map((g) => (
-          <div key={g.cube_type}>
+        {groups.map((g) => {
+          // Label je nach groupMode: cube-mode → cube-name; session-mode →
+          // session-name (oder „ohne Session"). Lookup via sessionNameById.
+          const label =
+            groupMode === "cube"
+              ? g.cube_type
+              : g.session_id == null
+              ? "Ohne Session"
+              : sessionNameById.get(g.session_id) ?? `Session #${g.session_id}`;
+          return (
+          <div key={g.group_key}>
             <div className="text-sm text-gray-400 mb-2">
-              <span className="text-gray-200 font-medium">{g.cube_type}</span>
+              <span className="text-gray-200 font-medium">{label}</span>
               <span className="ml-2">
                 Median {formatTime(g.median_ms)} ueber {g.count_total} Solves
               </span>
@@ -161,7 +217,8 @@ export function OutlierCard() {
               ))}
             </ul>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

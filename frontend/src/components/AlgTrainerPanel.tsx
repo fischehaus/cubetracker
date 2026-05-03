@@ -11,14 +11,21 @@
 // hochzaehlen → ScrambleCard regeneriert (klassisches Drill-Verhalten).
 
 import { useMemo, useState } from "react";
-import { useCreateSolve, useStatsByAlgCase } from "../lib/api";
+import {
+  useCreateSolve,
+  useDeleteSolve,
+  useSolves,
+  useStatsByAlgCase,
+  useUpdateSolve,
+} from "../lib/api";
 import {
   ALG_SUBSETS,
   type AlgCase,
   type AlgSubsetId,
   scrambleForCase,
 } from "../lib/algs";
-import { formatTime, parseTimeInput } from "../lib/format";
+import { formatSolveTime, formatTime, parseTimeInput } from "../lib/format";
+import type { Solve } from "../lib/types";
 
 const SUBSETS: { id: AlgSubsetId; label: string }[] = [
   { id: "pll", label: "PLL (21)" },
@@ -273,6 +280,94 @@ function DrillCard({
           {error}
         </div>
       )}
+
+      {/* Phase 8.1: Liste der letzten Drill-Solves dieses Cases */}
+      <DrillSolveList caseId={caseDef.id} />
+    </div>
+  );
+}
+
+// ============================================================
+// DrillSolveList — letzte N Solves dieses cases mit +2/DNF/Loeschen
+// ============================================================
+
+function DrillSolveList({ caseId }: { caseId: string }) {
+  const { data: solves, isLoading } = useSolves({ alg_case: caseId, limit: 20 });
+  const update = useUpdateSolve();
+  const del = useDeleteSolve();
+
+  if (isLoading) return null;
+  if (!solves || solves.length === 0) {
+    return (
+      <div className="mt-4 text-xs text-gray-500 text-center">
+        Noch keine Drill-Solves fuer diesen Case.
+      </div>
+    );
+  }
+
+  function togglePlusTwo(s: Solve) {
+    update.mutate({ id: s.id, payload: { plus_two: !s.plus_two, dnf: false } });
+  }
+  function toggleDnf(s: Solve) {
+    update.mutate({ id: s.id, payload: { dnf: !s.dnf } });
+  }
+  function remove(id: number) {
+    if (confirm(`Solve #${id} wirklich loeschen?`)) del.mutate(id);
+  }
+
+  return (
+    <div className="mt-4">
+      <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+        Letzte {solves.length} Solves
+      </div>
+      <ul className="space-y-1 max-h-72 overflow-y-auto">
+        {solves.map((s) => (
+          <li
+            key={s.id}
+            className={`flex items-center gap-2 rounded px-2 py-1 text-xs ${
+              s.dnf ? "bg-red-500/10" : "bg-gray-900/40"
+            }`}
+          >
+            <span
+              className={`font-mono flex-1 ${
+                s.dnf ? "text-red-300 line-through" : "text-gray-100"
+              }`}
+            >
+              {formatSolveTime(s)}
+            </span>
+            <button
+              onClick={() => togglePlusTwo(s)}
+              className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                s.plus_two
+                  ? "bg-amber-600 text-white"
+                  : "bg-gray-700 text-gray-400 hover:text-gray-200"
+              }`}
+              disabled={s.dnf}
+              title="+2 Strafe togglen"
+            >
+              +2
+            </button>
+            <button
+              onClick={() => toggleDnf(s)}
+              className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                s.dnf
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-700 text-gray-400 hover:text-gray-200"
+              }`}
+              title="DNF togglen"
+            >
+              DNF
+            </button>
+            <button
+              onClick={() => remove(s.id)}
+              className="rounded px-1.5 py-0.5 text-[10px] text-gray-400 hover:bg-red-700/50 hover:text-red-200"
+              title="Solve loeschen"
+            >
+              🗑
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

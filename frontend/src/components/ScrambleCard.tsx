@@ -10,7 +10,11 @@
 // faellig ist, via `seed`-prop (z.B. solve-counter erhoehen → re-gen).
 
 import { useEffect, useState } from "react";
-import { generateScramble, cubeTypeToScrambowType } from "../lib/scramble";
+import {
+  cubeTypeToScrambowType,
+  generateScramble,
+  resolveScrambleTypeOverride,
+} from "../lib/scramble";
 
 interface Props {
   /** App-cube_type ("3x3", "Pyraminx", …) oder Subset-Override ("pll"/"oll" → Phase 8b) */
@@ -38,12 +42,17 @@ export function ScrambleCard({
   const [scramble, setScramble] = useState<string>("");
   const [skipCounter, setSkipCounter] = useState(0);
 
-  // Override schlaegt cube_type. So kann eine PLL-Session "pll"
-  // setzen, ohne den App-cube_type zu aendern (bleibt 3x3 fuer Stats).
-  const effectiveType =
-    scrambleTypeOverride && scrambleTypeOverride.trim() !== ""
-      ? scrambleTypeOverride
-      : cubeTypeToScrambowType(cubeType);
+  // Override schlaegt cube_type — aber nur wenn er sich auf einen
+  // scrambow-bekannten Code aufloesen laesst. csTimer-Codes wie
+  // "444wca" werden via resolveScrambleTypeOverride zu scrambow-Codes
+  // ("444"). Unbekannte Strings → fallback auf cube_type-Mapping.
+  // Vor Phase 8.1 wurde der raw-Override an scrambow weitergegeben →
+  // leerer Scramble bei 4x4/5x5/Pyra/etc. mit csTimer-importierten
+  // Sessions.
+  const resolvedOverride = scrambleTypeOverride
+    ? resolveScrambleTypeOverride(scrambleTypeOverride)
+    : null;
+  const effectiveType = resolvedOverride ?? cubeTypeToScrambowType(cubeType);
 
   useEffect(() => {
     const next = generateScramble(effectiveType);

@@ -94,6 +94,8 @@ api.interceptors.response.use((response) => {
 export interface SolveListParams {
   cube_type?: string;
   session_id?: number;
+  /** Phase 8.1: Filter auf alg_case (z.B. "PLL-Tperm") fuer DrillCard-Liste */
+  alg_case?: string;
   limit?: number;
   offset?: number;
 }
