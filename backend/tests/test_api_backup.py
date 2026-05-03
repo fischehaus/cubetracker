@@ -117,3 +117,161 @@ def test_backup_sqlite_returns_file(client):
         assert "cubetracker_backup_" in cd
         assert ".db" in cd
         assert r.headers.get("content-type") == "application/x-sqlite3"
+
+
+# ============================================================
+# Phase 9: Restore-Endpoint Tests
+# ============================================================
+
+
+def test_restore_dry_run_does_not_modify_db(client, db):
+    """Ohne ?confirm=true ist restore ein dry-run — DB bleibt unveraendert."""
+    import io
+    import json
+
+    from main import __version__
+
+    # Eine Test-Session anlegen (damit wir checken koennen dass sie BLEIBT)
+    s = DbSession(name="ExistingSession")
+    db.add(s)
+    db.commit()
+    db.refresh(s)
+
+    payload = {
+        "schema_version": __version__,
+        "exported_at": "2026-05-01T12:00:00+00:00",
+        "counts": {"solves": 0, "sessions": 0, "hardware": 0, "achievements": 0, "challenges": 0},
+        "solves": [],
+        "sessions": [],
+        "hardware": [],
+        "achievements": [],
+        "challenges": [],
+    }
+    r = client.post(
+        "/backup/restore",
+        files={
+            "file": ("backup.json", io.BytesIO(json.dumps(payload).encode()), "application/json")
+        },
+    )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["dry_run"] is True
+
+    # Existierende Session muss unveraendert sein
+    db.expire_all()
+    still_there = db.get(DbSession, s.id)
+    assert still_there is not None
+    assert still_there.name == "ExistingSession"
+
+
+def test_restore_with_confirm_replaces_db(client, db):
+    """Mit ?confirm=true wird DB komplett ersetzt."""
+    import io
+    import json
+
+    from main import __version__
+
+    # Vorher: 1 existierende Session, danach soll sie WEG sein
+    s = DbSession(name="WillBeWiped")
+    db.add(s)
+    db.commit()
+
+    payload = {
+        "schema_version": __version__,
+        "exported_at": "2026-05-01T12:00:00+00:00",
+        "counts": {"solves": 1, "sessions": 1, "hardware": 0, "achievements": 0, "challenges": 0},
+        "solves": [
+            {
+                "id": 9001,
+                "time_ms": 12345,
+                "cube_type": "3x3",
+                "scramble": None,
+                "notes": None,
+                "timestamp": "2026-05-01T10:00:00+00:00",
+                "plus_two": False,
+                "dnf": False,
+                "session_id": 5001,
+                "hardware_id": None,
+                "alg_case": None,
+                "split_times_ms": None,
+            }
+        ],
+        "sessions": [
+            {
+                "id": 5001,
+                "name": "RestoredSession",
+                "scramble_type": None,
+                "cstimer_session_id": None,
+                "notes": None,
+                "created_at": "2026-05-01T09:00:00+00:00",
+            }
+        ],
+        "hardware": [],
+        "achievements": [],
+        "challenges": [],
+    }
+    r = client.post(
+        "/backup/restore?confirm=true",
+        files={
+            "file": ("backup.json", io.BytesIO(json.dumps(payload).encode()), "application/json")
+        },
+    )
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert data["dry_run"] is False
+    assert data["restored"]["sessions"] == 1
+    assert data["restored"]["solves"] == 1
+
+    # Original-Session muss WEG sein
+    db.expire_all()
+    sessions = db.query(DbSession).all()
+    assert len(sessions) == 1
+    assert sessions[0].name == "RestoredSession"
+    assert sessions[0].id == 5001
+
+    solves = db.query(Solve).all()
+    assert len(solves) == 1
+    assert solves[0].id == 9001
+    assert solves[0].time_ms == 12345
+    assert solves[0].session_id == 5001
+
+
+def test_restore_rejects_invalid_json(client):
+    import io
+
+    r = client.post(
+        "/backup/restore?confirm=true",
+        files={"file": ("backup.json", io.BytesIO(b"not valid json"), "application/json")},
+    )
+    assert r.status_code == 400
+    assert "JSON" in r.json()["detail"]
+
+
+def test_restore_rejects_missing_schema_version(client):
+    import io
+    import json
+
+    payload = {"solves": [], "sessions": []}
+    r = client.post(
+        "/backup/restore?confirm=true",
+        files={
+            "file": ("backup.json", io.BytesIO(json.dumps(payload).encode()), "application/json")
+        },
+    )
+    assert r.status_code == 400
+    assert "schema_version" in r.json()["detail"]
+
+
+def test_restore_rejects_version_mismatch(client):
+    import io
+    import json
+
+    payload = {"schema_version": "0.1.0", "solves": [], "sessions": []}
+    r = client.post(
+        "/backup/restore?confirm=true",
+        files={
+            "file": ("backup.json", io.BytesIO(json.dumps(payload).encode()), "application/json")
+        },
+    )
+    assert r.status_code == 400
+    assert "Schema-Version mismatch" in r.json()["detail"]

@@ -1,18 +1,15 @@
-// BackupPanel: Voll-Backup der App-Daten — zwei Strategien.
+// BackupPanel: Voll-Backup + Restore der App-Daten.
 //
-// SQLite-File: vollstaendig, binaer, gut fuer Migration zwischen
-// Rechnern (auf neuem Rechner Datei unter backend/data/solves.db
-// ablegen + Backend neu starten).
-//
-// JSON-Voll-Export: lesbar, schema-versioniert, gut fuer Drittwerkzeuge
-// oder Migration zwischen App-Versionen mit Schema-Aenderungen.
-//
-// Restore ist bewusst NICHT als Upload-Endpoint implementiert — DB-
-// Replace waehrend laufendem Server ist fragil. Restore-Anleitung
-// (manuelles File-Replace) ist im Hilfe-Text dokumentiert.
+// Drei Funktionen:
+// - SQLite-Download: vollstaendige binaere DB-Kopie. Restore via
+//   manuellem File-Replace (im Installer-Modus geht das nicht easy).
+// - JSON-Download: lesbar, schema-versioniert.
+// - JSON-Restore (Phase 9): Upload eines JSON-Backups, ersetzt die
+//   gesamte DB. DESTRUKTIV — mit Confirm-Dialog gesichert.
 
 import { useState } from "react";
-import { api } from "../lib/api";
+import { api, useStats } from "../lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ExportSummary {
   schema_version: string;
@@ -20,10 +17,90 @@ interface ExportSummary {
   counts: { solves: number; sessions: number; hardware: number };
 }
 
+interface RestoreDryRun {
+  dry_run: true;
+  message: string;
+  would_restore: { solves: number; sessions: number; hardware: number; achievements: number; challenges: number };
+  schema_version: string;
+}
+
+interface RestoreDone {
+  dry_run: false;
+  message: string;
+  restored: { solves: number; sessions: number; hardware: number; achievements: number; challenges: number };
+  schema_version: string;
+}
+
 export function BackupPanel() {
-  const [busy, setBusy] = useState<"sqlite" | "json" | null>(null);
+  const [busy, setBusy] = useState<"sqlite" | "json" | "restore-dry" | "restore" | null>(null);
   const [lastSummary, setLastSummary] = useState<ExportSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [restoreFile, setRestoreFile] = useState<File | null>(null);
+  const [dryRunResult, setDryRunResult] = useState<RestoreDryRun | null>(null);
+  const [restoreDone, setRestoreDone] = useState<RestoreDone | null>(null);
+  const qc = useQueryClient();
+  // useStats hier nicht direkt benoetigt — aber wir invalidieren nach restore
+  void useStats;
+
+  async function runRestoreDryRun() {
+    if (!restoreFile) return;
+    setBusy("restore-dry");
+    setError(null);
+    setDryRunResult(null);
+    setRestoreDone(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", restoreFile);
+      const r = await api.post<RestoreDryRun>("/backup/restore", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setDryRunResult(r.data);
+    } catch (e: unknown) {
+      const msg =
+        // axios-Style: e.response.data.detail
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (e as any)?.response?.data?.detail ||
+        (e instanceof Error ? e.message : "Dry-Run fehlgeschlagen");
+      setError(String(msg));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function runRestoreConfirmed() {
+    if (!restoreFile) return;
+    if (
+      !confirm(
+        "ACHTUNG: Wiederherstellen löscht ALLE aktuellen Daten und ersetzt sie durch das Backup. " +
+          "Vorgang kann NICHT rückgängig gemacht werden (außer du hast ein vorheriges Backup).\n\n" +
+          "Wirklich fortfahren?",
+      )
+    ) {
+      return;
+    }
+    setBusy("restore");
+    setError(null);
+    setRestoreDone(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", restoreFile);
+      const r = await api.post<RestoreDone>("/backup/restore?confirm=true", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setRestoreDone(r.data);
+      setDryRunResult(null);
+      // Alle Caches invalidieren — DB ist komplett anders jetzt
+      qc.invalidateQueries();
+    } catch (e: unknown) {
+      const msg =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (e as any)?.response?.data?.detail ||
+        (e instanceof Error ? e.message : "Restore fehlgeschlagen");
+      setError(String(msg));
+    } finally {
+      setBusy(null);
+    }
+  }
 
   async function downloadSqlite() {
     setBusy("sqlite");
@@ -136,11 +213,71 @@ export function BackupPanel() {
       )}
 
       <p className="text-xs text-gray-500">
-        Hinweis: Backups enthalten alle Daten auch dieser App (Solves,
-        Sessions, Hardware) — sowie spaetere Erweiterungen wie
-        Achievements + Challenges. csTimer-Export gibt es separat (nur
-        Solves + Sessions, csTimer-Format).
+        Hinweis: Backups enthalten alle Daten dieser App (Solves,
+        Sessions, Hardware, Achievements, Challenges). csTimer-Export
+        gibt es separat (nur Solves + Sessions, csTimer-Format).
       </p>
+
+      {/* ============================================================
+          Phase 9: JSON-Restore-Upload
+          ============================================================ */}
+      <div className="rounded border-2 border-amber-500/40 bg-amber-500/5 p-4 space-y-3">
+        <h3 className="text-lg font-semibold text-amber-200">
+          🔄 JSON-Backup wiederherstellen
+        </h3>
+        <p className="text-sm text-amber-200/80">
+          <strong>DESTRUKTIV</strong>: ersetzt ALLE aktuellen Daten durch
+          das Backup. Schema-Version muss zur App-Version passen.
+          Erst Dry-Run, dann Bestätigen.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="file"
+            accept="application/json,.json"
+            onChange={(e) => {
+              const f = e.target.files?.[0] ?? null;
+              setRestoreFile(f);
+              setDryRunResult(null);
+              setRestoreDone(null);
+              setError(null);
+            }}
+            className="text-sm text-gray-300 file:mr-3 file:rounded file:border-0 file:bg-purple-600 file:px-3 file:py-1.5 file:text-white hover:file:bg-purple-700"
+          />
+          <button
+            onClick={runRestoreDryRun}
+            disabled={!restoreFile || busy !== null}
+            className="text-sm rounded border border-gray-600 px-3 py-1.5 text-gray-200 hover:bg-gray-800 disabled:opacity-50"
+          >
+            {busy === "restore-dry" ? "Prüfe …" : "1. Dry-Run prüfen"}
+          </button>
+          <button
+            onClick={runRestoreConfirmed}
+            disabled={!restoreFile || !dryRunResult || busy !== null}
+            className="text-sm rounded bg-red-600 px-3 py-1.5 text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            {busy === "restore" ? "Wiederherstelle …" : "2. ⚠ Wiederherstellen (DESTRUKTIV)"}
+          </button>
+        </div>
+
+        {dryRunResult && (
+          <div className="rounded bg-blue-500/10 border border-blue-500/30 px-3 py-2 text-sm text-blue-200">
+            <strong>Dry-Run OK</strong> — Schema {dryRunResult.schema_version},
+            würde wiederherstellen: {dryRunResult.would_restore.solves} Solves,
+            {dryRunResult.would_restore.sessions} Sessions,
+            {dryRunResult.would_restore.hardware} Hardware,
+            {dryRunResult.would_restore.achievements} Achievements,
+            {dryRunResult.would_restore.challenges} Challenges.
+          </div>
+        )}
+
+        {restoreDone && (
+          <div className="rounded bg-emerald-500/10 border border-emerald-500/30 px-3 py-2 text-sm text-emerald-200">
+            ✅ <strong>Wiederherstellung erfolgreich</strong> — {restoreDone.restored.solves} Solves,
+            {restoreDone.restored.sessions} Sessions importiert. Seite ggf. neu laden.
+          </div>
+        )}
+      </div>
     </div>
   );
 }

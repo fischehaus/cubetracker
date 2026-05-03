@@ -66,12 +66,20 @@ interface Health {
   app: string;
   version: string;
   status: string;
+  mode?: "dev" | "prod"; // Phase 9 — neu, kann fehlen bei alten Backends
 }
 
 function HealthBadge() {
   const { data, error } = useQuery<Health>({
     queryKey: ["health"],
-    queryFn: async () => (await api.get<Health>("/")).data,
+    // Phase 9: bevorzugt /api/health (neue Route), fallback / (alt).
+    queryFn: async () => {
+      try {
+        return (await api.get<Health>("/api/health")).data;
+      } catch {
+        return (await api.get<Health>("/")).data;
+      }
+    },
     refetchInterval: 30_000,
   });
 
@@ -85,9 +93,22 @@ function HealthBadge() {
   if (!data) {
     return <span className="text-sm text-gray-500">…</span>;
   }
+  const isProd = data.mode === "prod";
+  // Visuell unterschiedlich: Dev = Lila-Border (Entwickler-Hinweis),
+  // Prod = klassisches gruen. So sieht User sofort welche Variante.
   return (
-    <span className="text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-3 py-1.5">
-      Backend v{data.version}
+    <span
+      className={
+        isProd
+          ? "text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-3 py-1.5"
+          : "text-sm text-purple-300 bg-purple-500/10 border border-purple-500/30 rounded px-3 py-1.5"
+      }
+      title={isProd ? "Installierte App" : "Entwicklungs-Modus"}
+    >
+      v{data.version}
+      {data.mode && (
+        <span className="ml-1 text-xs opacity-70">[{data.mode}]</span>
+      )}
     </span>
   );
 }
@@ -332,7 +353,7 @@ function MainLayout() {
         {tab === "trainer" && <TrainerTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
-          v0.16 · OLL-Visualisierung · 31 Achievements · PB-Konfetti
+          v1.0 · Distribution-faehig · OLL-Visualisierung · 31 Achievements
         </footer>
       </div>
 
