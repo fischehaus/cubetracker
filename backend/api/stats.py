@@ -451,6 +451,8 @@ def get_stats_by_hardware(
                 "best_ms": stats.best_ms,
                 "current_ao5": stats.current_ao5,
                 "best_ao5": stats.best_ao5,
+                "current_ao12": stats.current_ao12,
+                "best_ao12": stats.best_ao12,
             }
         )
 
