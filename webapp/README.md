@@ -151,7 +151,7 @@ Falls User die Web-Variante einstellen will:
 | W.0 | Setup, Architektur-Doku, leere Verzeichnis-Struktur | ✅ |
 | W.1 | DB-Schema mit User-Model, lokale SQLite-Test-DB (Alembic-Init in W.7) | ✅ |
 | W.2 | Auth-Module (register/login/JWT) + Live-Smoke-Test + ad-hoc security-review | ✅ |
-| W.2.1 | **Security-Review-Findings 🔴 KRITISCH abarbeiten** (vor Live-Deploy Pflicht) | ⏳ |
+| W.2.1 | **Security-Review-Findings 🔴 KRITISCH abarbeiten** (vor Live-Deploy Pflicht) | ✅ |
 | W.3 | Solve/Session/Hardware-Endpoints mit user_id-Filter, alle Tests anpassen | ⏳ |
 | W.4 | Achievements/Challenges/Stats per-User | ⏳ |
 | W.5 | Backup/Restore + csTimer-Import/Export per-User | ⏳ |
@@ -166,23 +166,27 @@ Falls User die Web-Variante einstellen will:
 Ad-hoc security-review per `Agent`-Tool. 14 Findings. **🔴-Punkte sind
 Pflicht vor Live-Deploy** (W.2.1):
 
-### 🔴 KRITISCH
-1. **Refresh-Token in Request-Body statt HttpOnly-Cookie** — XSS-exfiltrierbar.
-   Fix: `set_cookie(httponly=True, secure=True, samesite="lax")` im /login,
-   `request.cookies` im /refresh.
-2. **Keine Refresh-Token-Revocation** — gestohlener Token 30d gueltig, kein
+### 🔴 KRITISCH — alle erledigt in W.2.1 (2026-05-10)
+1. ✅ **Refresh-Token in Request-Body statt HttpOnly-Cookie** — XSS-exfiltrierbar.
+   Fix: `set_cookie(httponly=True, secure=IS_PROD, samesite="lax", path="/auth")` im /login,
+   `Cookie(alias=REFRESH_COOKIE_NAME)`-Param im /refresh. Smoke-getestet.
+2. ✅ **Keine Refresh-Token-Revocation** — gestohlener Token 30d gueltig, kein
    Logout, Password-Change invalidiert nichts.
-   Fix: `token_version`-Spalte am User, in JWT-Claim, im decode pruefen.
-3. **Kein Rate-Limiting** — Brute-Force trivial, CPU-Cost gegen dich.
-   Fix: `slowapi` mit `5/minute` auf /login + /register, per-IP + per-Email.
+   Fix: `token_version`-Spalte am User, `ver`-Claim in JWT, Check in
+   `get_current_user` + `/refresh`. `/auth/logout` zaehlt hoch -> alle Tokens tot.
+   Smoke verifiziert: Access + Refresh nach Logout 401.
+3. ✅ **Kein Rate-Limiting** — Brute-Force trivial, CPU-Cost gegen dich.
+   Fix: `slowapi` mit `5/minute` auf /login + /register, `20/minute` auf /refresh
+   (legitimer Client refresht alle ~14min, viel Spielraum). Per-IP via
+   `get_remote_address`. 6. Versuch -> 429 verifiziert.
 
 ### 🟡 SOLLTE (vor Public, nach Friends-Launch OK)
 4. /refresh rotiert Refresh-Token nicht (best practice: rotation + reuse-detection)
-5. JWT_ALGORITHM aus Env → koennte auf "none" gesetzt werden. Hardcode.
+5. ✅ JWT_ALGORITHM hardcoded ("HS256") in auth/config.py — Env-Override-Angriff weg.
 6. Password-Min 8 Zeichen + keine HIBP-Pruefung. Auf 10 + HIBP-k-anonymity.
-7. /refresh leakt Fehler-Detail (`f"Refresh-Token ungueltig: {e}"`) — generisch machen
+7. ✅ /refresh-Error generisch: "Refresh-Token ungueltig oder abgelaufen." (kein {e}-Leak)
 8. Timing-Defense unvollstaendig (DB-Roundtrip-Zeit messbar)
-9. `_DUMMY_HASH` blockiert ~250ms beim Modul-Import → lazy-init via @cache
+9. ✅ `_dummy_hash()` lazy-init via `@lru_cache` — kein Import-Time-Hit mehr.
 
 ### 🟢 NICE
 10. `extract_user_id` doppelter int-cast in jwt.py + api/auth.py

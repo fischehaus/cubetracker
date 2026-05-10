@@ -8,13 +8,17 @@ kommen in Sub-Phasen W.3+.
 
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from api import auth as auth_api
 from auth.config import IS_PROD, require_strong_secret
+from auth.rate_limit import limiter
 
 __version__ = "2.0.0a0"
 
@@ -44,9 +48,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS: Production = nur eigene Subdomain (per Env), Dev = alles
-import os  # noqa: E402
+# Rate-Limiter (slowapi) — Brute-Force-Schutz fuer /login + /register.
+# Limiter selbst kommt aus auth.rate_limit, hier nur die App-Verdrahtung.
+app.state.limiter = limiter
+# Default-Handler liefert 429 + Retry-After-Header.
+from slowapi import _rate_limit_exceeded_handler  # noqa: E402
 
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
+# CORS: Production = nur eigene Subdomain (per Env), Dev = alles
 allowed_origins = (
     [os.getenv("WEBAPP_FRONTEND_ORIGIN", "")]
     if IS_PROD

@@ -4,6 +4,11 @@ Zwei Token-Typen:
 - Access-Token: kurz (15 min), in Authorization-Header
 - Refresh-Token: lang (30 Tage), in HttpOnly-Cookie
 
+Token-Revocation via `ver`-Claim:
+Jeder Token traegt das `token_version` des Users zum Ausgabezeitpunkt.
+Wird der Wert in der DB hochgezaehlt (Logout, Password-Change), invalidieren
+alle ausgegebenen Tokens dieses Users — der Decode prueft den Wert.
+
 Pure Funktionen + minimaler State — leicht testbar.
 """
 
@@ -27,12 +32,16 @@ TokenType = Literal["access", "refresh"]
 def create_token(
     subject: str | int,
     token_type: TokenType,
+    token_version: int,
     expires_delta: timedelta | None = None,
 ) -> str:
     """Liefert einen signierten JWT.
 
     `subject` ist typischerweise die User-ID. JWT-spec sagt es muss string sein,
-    int → str konvertieren wir automatisch.
+    int -> str konvertieren wir automatisch.
+
+    `token_version` ist der aktuelle Wert von User.token_version. Beim Decode
+    wird gegen den DB-Wert verglichen — Mismatch = Token revoked.
     """
     if expires_delta is None:
         expires_delta = (
@@ -45,6 +54,7 @@ def create_token(
     payload: dict[str, Any] = {
         "sub": str(subject),
         "type": token_type,
+        "ver": token_version,
         "iat": int(now.timestamp()),
         "exp": int((now + expires_delta).timestamp()),
     }
@@ -56,6 +66,9 @@ def decode_token(token: str, expected_type: TokenType | None = None) -> dict[str
 
     Wenn `expected_type` gesetzt: zusaetzliche Validierung dass der Token-Typ
     passt (verhindert dass jemand einen Refresh-Token als Access nutzt).
+
+    Hinweis: `ver`-Check (Token-Revocation) passiert NICHT hier — der braucht
+    den DB-Wert und gehoert in die get_current_user-Dependency / Refresh-Endpoint.
     """
     payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
     if expected_type is not None:
@@ -65,13 +78,18 @@ def decode_token(token: str, expected_type: TokenType | None = None) -> dict[str
     return payload
 
 
-def extract_user_id(token: str, expected_type: TokenType = "access") -> int:
-    """Convenience: User-ID aus einem validen Access-Token ziehen.
+def extract_user_id_and_version(
+    token: str, expected_type: TokenType = "access"
+) -> tuple[int, int]:
+    """Convenience: User-ID + token_version aus einem validen Token ziehen.
 
-    Wirft JWTError bei invalid/expired/falscher-Typ.
+    Wirft JWTError bei invalid/expired/falscher-Typ oder fehlendem Claim.
     """
     payload = decode_token(token, expected_type=expected_type)
     sub = payload.get("sub")
+    ver = payload.get("ver")
     if sub is None:
         raise JWTError("Token hat kein 'sub' (User-ID)")
-    return int(sub)
+    if ver is None:
+        raise JWTError("Token hat kein 'ver' (Token-Version)")
+    return int(sub), int(ver)

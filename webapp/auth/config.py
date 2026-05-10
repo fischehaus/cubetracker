@@ -17,9 +17,16 @@ import secrets
 # MUSS JWT_SECRET via Env gesetzt werden, sonst werden Tokens beim
 # Server-Restart ungueltig (alle User ausgeloggt).
 JWT_SECRET = os.getenv("JWT_SECRET", secrets.token_urlsafe(64))
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+# WARNUNG: Algorithm BEWUSST hardcoded. NICHT aus Env lesen — ein Angreifer
+# der Env-Vars setzen kann, koennte sonst "none" einsetzen und damit alle
+# Token-Validierungen umgehen. (Security-Finding #5)
+JWT_ALGORITHM = "HS256"
 JWT_ACCESS_EXPIRE_MIN = int(os.getenv("JWT_ACCESS_EXPIRE_MIN", "15"))
 JWT_REFRESH_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_EXPIRE_DAYS", "30"))
+
+# Cookie-Settings fuer Refresh-Token (HttpOnly, in Prod: Secure)
+REFRESH_COOKIE_NAME = "cubetracker_refresh"
+REFRESH_COOKIE_PATH = "/auth"  # nur an /auth/* geschickt
 
 # Production-Mode-Detection (fuer secure-cookies + andere Defaults)
 IS_PROD = os.getenv("CUBETRACKER_PROD") == "1"

@@ -34,16 +34,12 @@ class UserRead(BaseModel):
     created_at: datetime
 
 
-class TokenPair(BaseModel):
-    """Login-Response: Access + Refresh."""
-
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-
-
 class AccessTokenOnly(BaseModel):
-    """Refresh-Response (nur neuer Access)."""
+    """Login + Refresh + Logout-Renew Response.
+
+    Nur Access-Token im Body — der Refresh-Token wird ausschliesslich
+    als HttpOnly-Cookie gesetzt (XSS-sicher, Security-Finding #1).
+    """
 
     access_token: str
     token_type: str = "bearer"
