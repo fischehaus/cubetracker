@@ -1,6 +1,6 @@
 /**
  * Login + Register kombiniert auf einer Seite — Tab-Switch.
- * Bewusst spartanisch: ein Form, Email + Password, Fehler-Anzeige, Submit-Button.
+ * Dunkles Theme passend zur App.
  */
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../auth/AuthContext";
@@ -26,18 +26,17 @@ export function LoginPage() {
         await register(email, password);
       }
     } catch (err: unknown) {
-      const message = extractErrorMessage(err);
-      setError(message);
+      setError(extractErrorMessage(err));
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-md p-6">
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">cubetracker</h1>
-        <p className="text-sm text-slate-500 mb-6">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-sm bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
+        <h1 className="text-3xl font-bold text-gray-100 mb-1">cubetracker</h1>
+        <p className="text-sm text-gray-400 mb-6">
           {mode === "login" ? "Willkommen zurueck." : "Account erstellen."}
         </p>
 
@@ -52,18 +51,18 @@ export function LoginPage() {
 
         <form onSubmit={onSubmit} className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
             <input
               type="email"
               required
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Passwort</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Passwort</label>
             <input
               type="password"
               required
@@ -71,15 +70,15 @@ export function LoginPage() {
               autoComplete={mode === "login" ? "current-password" : "new-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             {mode === "register" && (
-              <p className="text-xs text-slate-500 mt-1">Mindestens 8 Zeichen.</p>
+              <p className="text-xs text-gray-500 mt-1">Mindestens 8 Zeichen.</p>
             )}
           </div>
 
           {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">
+            <div className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm px-3 py-2">
               {error}
             </div>
           )}
@@ -87,13 +86,13 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-lg bg-blue-600 text-white font-medium py-2 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-purple-600 text-white font-medium py-2 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {busy ? "Bitte warten…" : mode === "login" ? "Anmelden" : "Registrieren"}
           </button>
         </form>
 
-        <p className="text-xs text-slate-400 mt-6 text-center">
+        <p className="text-xs text-gray-500 mt-6 text-center">
           Tipp: Render-Free schlaeft nach 15 Min Idle. Erste Anmeldung kann ~50s dauern.
         </p>
       </div>
@@ -115,7 +114,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition ${
-        active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+        active ? "bg-purple-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
       }`}
     >
       {children}

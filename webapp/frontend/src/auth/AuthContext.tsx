@@ -15,11 +15,17 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import * as authApi from "../api/auth";
-import { getAccessToken } from "../api/client";
+import { api, clearAccessToken, getAccessToken, setAccessToken } from "../lib/api";
+
+export interface UserRead {
+  id: number;
+  email: string;
+  is_active: boolean;
+  created_at: string;
+}
 
 export interface AuthState {
-  user: authApi.UserRead | null;
+  user: UserRead | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -29,8 +35,39 @@ export interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+interface AccessTokenOnly {
+  access_token: string;
+  token_type: string;
+}
+
+async function apiRegister(email: string, password: string): Promise<UserRead> {
+  const r = await api.post<UserRead>("/auth/register", { email, password });
+  return r.data;
+}
+
+async function apiLogin(email: string, password: string): Promise<UserRead> {
+  const r = await api.post<AccessTokenOnly>("/auth/login", { email, password });
+  setAccessToken(r.data.access_token);
+  const me = await api.get<UserRead>("/auth/me");
+  return me.data;
+}
+
+async function apiLogout(): Promise<void> {
+  try {
+    await api.post("/auth/logout");
+  } catch {
+    /* ignore — wir loggen client-side trotzdem aus */
+  }
+  clearAccessToken();
+}
+
+async function apiMe(): Promise<UserRead> {
+  const r = await api.get<UserRead>("/auth/me");
+  return r.data;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<authApi.UserRead | null>(null);
+  const [user, setUser] = useState<UserRead | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Beim App-Start: wenn ein Access-Token im Storage liegt, /auth/me probieren.
@@ -43,10 +80,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       try {
-        const me = await authApi.fetchMe();
+        const me = await apiMe();
         if (!cancelled) setUser(me);
       } catch {
-        // Token kaputt/abgelaufen, refresh hat auch nicht geholfen
         if (!cancelled) setUser(null);
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -58,9 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Wenn der apiClient feststellt dass der Refresh fehlgeschlagen ist
-  // (Token revoked/abgelaufen), setzt er ein "cubetracker:logged-out"-Event.
-  // Wir hoeren mit + setzen dann user=null -> AuthGuard zeigt Login.
+  // apiClient feuert "cubetracker:logged-out" wenn Refresh fehlschlaegt.
   useEffect(() => {
     const handler = () => setUser(null);
     window.addEventListener("cubetracker:logged-out", handler);
@@ -68,20 +102,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const me = await authApi.login(email, password);
+    const me = await apiLogin(email, password);
     setUser(me);
   }, []);
 
   const register = useCallback(async (email: string, password: string) => {
-    await authApi.register(email, password);
-    // Nach Register direkt einloggen (Render-Free hat Cold-Starts, schon mit
-    // dem Register-Call ist der Container hot).
-    const me = await authApi.login(email, password);
+    await apiRegister(email, password);
+    const me = await apiLogin(email, password);
     setUser(me);
   }, []);
 
   const logout = useCallback(async () => {
-    await authApi.logout();
+    await apiLogout();
     setUser(null);
   }, []);
 
