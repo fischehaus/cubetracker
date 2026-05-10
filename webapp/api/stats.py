@@ -221,14 +221,13 @@ def get_temporal_stats(
             "current_ao5": current_ao5_total,
         }
 
-    def to_naive(dt: datetime) -> datetime:
-        return dt.replace(tzinfo=None) if dt.tzinfo else dt
+    # Postgres liefert aware timestamps; SQLite liefert naive. Wir
+    # normalisieren beide Seiten auf aware (UTC), dann ist der Vergleich safe.
+    def to_aware(dt: datetime) -> datetime:
+        return dt.replace(tzinfo=UTC) if dt.tzinfo is None else dt
 
-    today_naive = to_naive(today_start)
-    week_naive = to_naive(week_start)
-
-    today_solves = [s for s in rows if s.timestamp >= today_naive]
-    week_solves = [s for s in rows if s.timestamp >= week_naive]
+    today_solves = [s for s in rows if to_aware(s.timestamp) >= today_start]
+    week_solves = [s for s in rows if to_aware(s.timestamp) >= week_start]
 
     return {
         "today": aggregate(today_solves),
@@ -292,10 +291,11 @@ def get_activity(
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Aggregierte Solve-Counts pro Periode, eigene Solves, gap-gefuellt."""
-    now = datetime.now(UTC).replace(tzinfo=None)
+    # UTC-aware fuer Postgres-Kompatibilitaet
+    now = datetime.now(UTC)
     to_d = now.date()
     from_d = to_d - timedelta(days=days - 1)
-    from_dt = datetime(from_d.year, from_d.month, from_d.day)
+    from_dt = datetime(from_d.year, from_d.month, from_d.day, tzinfo=UTC)
 
     stmt = (
         select(Solve)

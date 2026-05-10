@@ -21,8 +21,17 @@ ACTIVE_DAYS_WINDOW = 30
 
 
 def _today_start_naive_utc() -> datetime:
+    """Tagesanfang heute als UTC-AWARE datetime.
+
+    Postgres (Render) hat alle datetimes mit timezone=True. Naive vs aware
+    Vergleich wirft TypeError in psycopg2. SQLite ist da nachgiebiger,
+    aber wir muessen Postgres-kompatibel sein.
+
+    Trotz Funktionsname `_naive_utc` (aus Desktop-Erbe): wir liefern
+    UTC-aware. Datums-Mathematik bleibt identisch.
+    """
     now = datetime.now(UTC)
-    return datetime(now.year, now.month, now.day)
+    return datetime(now.year, now.month, now.day, tzinfo=UTC)
 
 
 def _today_date() -> date:
@@ -31,7 +40,8 @@ def _today_date() -> date:
 
 def _build_generator_snapshot(db: OrmSession, user_id: int) -> GeneratorInput:
     """Snapshot fuer den Generator aus DB-queries (user-scoped)."""
-    now = datetime.now(UTC).replace(tzinfo=None)
+    # UTC-aware fuer Postgres (Solve.timestamp = DateTime(timezone=True))
+    now = datetime.now(UTC)
     window_start = now - timedelta(days=ACTIVE_DAYS_WINDOW)
 
     rows_recent = list(
