@@ -1,0 +1,59 @@
+# Render.com Blueprint — cubetracker-webapp (Phase W.7).
+#
+# Definiert in einem Rutsch:
+#   - cubetracker-db: PostgreSQL Free-Tier (1 GB, ⚠️ 90-Tage-Limit)
+#   - cubetracker-webapp: FastAPI-Web-Service (Free-Tier, Cold-Starts nach 15min Idle)
+#
+# Deploy via Render-Dashboard:
+#   1. New + → Blueprint
+#   2. GitHub-Repo verbinden (fischehaus/cubetracker)
+#   3. Render erkennt diese render.yaml automatisch
+#   4. Bestaetigen → Render baut + provisioniert
+#
+# Webapp-Code lebt unter `webapp/` im Repo. `rootDir` weist Render an,
+# nur diesen Subordner zu bauen (Build/Start-Commands relativ dazu).
+
+databases:
+  - name: cubetracker-db
+    plan: free
+    databaseName: cubetracker
+    user: cubetracker
+    # postgresMajorVersion: weglassen → Render-Default (aktuell 16)
+
+services:
+  - type: web
+    name: cubetracker-webapp
+    runtime: python
+    plan: free
+    rootDir: webapp
+    # `pip install .` baut aus pyproject.toml (kein editable-mode in Prod).
+    buildCommand: pip install .
+    # $PORT setzt Render automatisch. host=0.0.0.0 ist Pflicht (sonst
+    # listet uvicorn nur auf localhost).
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeploy: true  # bei Push auf den Branch automatisch neu deployen
+    envVars:
+      # Python-Version explizit. pyproject.toml sagt >=3.12;
+      # 3.12.x ist Render-stabil unterstuetzt.
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      # Production-Mode: aktiviert require_strong_secret() +
+      # Cookie secure-Flag + alembic-Upgrade.
+      - key: CUBETRACKER_PROD
+        value: "1"
+      # JWT-Secret: Render generiert einen kryptografisch starken Wert
+      # und persistiert ihn ueber Deploys. NIE im Repo, NIE im Log.
+      - key: JWT_SECRET
+        generateValue: true
+      # DATABASE_URL kommt automatisch aus der oben definierten DB
+      # (Render setzt postgresql://...).
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cubetracker-db
+          property: connectionString
+      # CORS-Origin fuer das Frontend. Vorerst leer — beim Frontend-Deploy
+      # auf die echte URL setzen (z.B. https://cubetracker-frontend.onrender.com
+      # oder spaeter https://cubetracker.iiiiii.org).
+      - key: WEBAPP_FRONTEND_ORIGIN
+        value: ""

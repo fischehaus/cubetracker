@@ -28,19 +28,27 @@ __version__ = "2.0.0a0"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup-Hook: secret-check + alembic-upgrade."""
+    """Startup-Hook: secret-check + DB-Schema-Init.
+
+    Aktuell nutzen wir `Base.metadata.create_all(engine)` als pragmatischen
+    Initial-Setup — legt fehlende Tabellen an, laesst existierende in Ruhe.
+
+    Sobald das erste Schema-Aenderung auf bestehende Live-Daten kommt,
+    wird auf Alembic umgestellt (Phase W.7+):
+        from alembic import command
+        from alembic.config import Config
+        command.upgrade(Config("alembic.ini"), "head")
+    """
     require_strong_secret()
     if IS_PROD:
         try:
-            from pathlib import Path
+            # Local-import damit Tests die DB nicht beim main-Import anfassen
+            from db.database import Base, engine
+            import db.models  # noqa: F401  - Models registrieren bei Base
 
-            from alembic import command
-            from alembic.config import Config
-
-            alembic_cfg = Config(str(Path(__file__).resolve().parent / "alembic.ini"))
-            command.upgrade(alembic_cfg, "head")
+            Base.metadata.create_all(engine)
         except Exception as e:  # noqa: BLE001
-            print(f"WARN: alembic upgrade failed: {e}")
+            print(f"WARN: DB schema-init failed: {e}")
     yield
 
 
