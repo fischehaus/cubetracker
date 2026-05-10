@@ -68,15 +68,21 @@ from slowapi import _rate_limit_exceeded_handler  # noqa: E402
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-# CORS: Production = nur eigene Subdomain (per Env), Dev = alles
-allowed_origins = (
-    [os.getenv("WEBAPP_FRONTEND_ORIGIN", "")]
-    if IS_PROD
-    else ["http://localhost:5173", "http://127.0.0.1:5173"]
-)
+# CORS-Setup
+# - Prod: WEBAPP_FRONTEND_ORIGIN comma-separated, z.B.
+#   "https://cubetracker-frontend.onrender.com,https://cubetracker.iiiiii.org"
+# - Dev: localhost:5173 + 127.0.0.1:5173 (Vite-Default)
+# allow_credentials=True ist Pflicht damit der HttpOnly-Refresh-Cookie
+# ueberhaupt mit cross-origin Requests gesendet wird.
+if IS_PROD:
+    raw = os.getenv("WEBAPP_FRONTEND_ORIGIN", "")
+    allowed_origins = [o.strip() for o in raw.split(",") if o.strip()]
+else:
+    allowed_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o for o in allowed_origins if o],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

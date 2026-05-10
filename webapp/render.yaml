@@ -2,13 +2,16 @@
 #
 # Definiert in einem Rutsch:
 #   - cubetracker-db: PostgreSQL Free-Tier (1 GB, ⚠️ 90-Tage-Limit)
-#   - cubetracker-webapp: FastAPI-Web-Service (Free-Tier, Cold-Starts nach 15min Idle)
+#   - cubetracker-webapp: FastAPI-Backend (Free-Tier, Cold-Starts nach 15min Idle)
+#   - cubetracker-frontend: Vite-React-Static-Site (Free-Tier, KEINE Cold-Starts)
 #
 # Deploy via Render-Dashboard:
 #   1. New + → Blueprint
 #   2. GitHub-Repo verbinden (fischehaus/cubetracker)
-#   3. Render erkennt diese render.yaml automatisch
-#   4. Bestaetigen → Render baut + provisioniert
+#   3. Branch: feature/W-multi-user-web
+#   4. Blueprint Path: webapp/render.yaml
+#   5. Render erkennt diese render.yaml automatisch
+#   6. Apply → Render baut + provisioniert
 #
 # Webapp-Code lebt unter `webapp/` im Repo. `rootDir` weist Render an,
 # nur diesen Subordner zu bauen (Build/Start-Commands relativ dazu).
@@ -21,6 +24,9 @@ databases:
     # postgresMajorVersion: weglassen → Render-Default (aktuell 16)
 
 services:
+  # ============================================================
+  # Backend — FastAPI
+  # ============================================================
   - type: web
     name: cubetracker-webapp
     runtime: python
@@ -52,8 +58,32 @@ services:
         fromDatabase:
           name: cubetracker-db
           property: connectionString
-      # CORS-Origin fuer das Frontend. Vorerst leer — beim Frontend-Deploy
-      # auf die echte URL setzen (z.B. https://cubetracker-frontend.onrender.com
-      # oder spaeter https://cubetracker.iiiiii.org).
+      # CORS-Origins fuer das Frontend. Comma-separated unterstuetzt
+      # (siehe main.py). Default: die Render-Frontend-URL. Falls Render
+      # einen Suffix an die Subdomain haengt, hier im Dashboard editieren.
+      # Spaeter ergaenzbar um eigene Subdomain (z.B. cubetracker.iiiiii.org).
       - key: WEBAPP_FRONTEND_ORIGIN
-        value: ""
+        value: https://cubetracker-frontend.onrender.com
+
+  # ============================================================
+  # Frontend — Vite/React Static Site
+  # ============================================================
+  - type: web
+    name: cubetracker-frontend
+    runtime: static
+    rootDir: webapp/frontend
+    buildCommand: npm install && npm run build
+    # Vite baut nach dist/ (relativ zu rootDir).
+    staticPublishPath: ./dist
+    # SPA-Routing: alle Pfade auf index.html rewriten.
+    # (Wir haben aktuell nur eine Route, aber Future-Proof.)
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    autoDeploy: true
+    envVars:
+      # Backend-URL ins Build-Bundle kompilieren. Vite ersetzt
+      # import.meta.env.VITE_API_BASE zur Build-Zeit.
+      - key: VITE_API_BASE
+        value: https://cubetracker-webapp.onrender.com
