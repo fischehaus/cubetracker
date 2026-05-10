@@ -6,14 +6,10 @@
 // reload erhalten, das ist OK fuer einen verwaltungs-tab).
 
 import { useState } from "react";
-// Phase W: BackupPanel + ImportPanel + CsTimerExportPanel rufen Endpoints
-// auf, die im Webapp-Backend (W.5) noch nicht existieren. Wir zeigen
-// stattdessen einen "Coming-Soon"-Hinweis. Sobald W.5 deployed ist,
-// reaktiveren wir die Imports + return-Block unten.
-// import { BackupPanel } from "./BackupPanel";
-// import { CsTimerExportPanel } from "./CsTimerExportPanel";
-// import { ImportPanel } from "./ImportPanel";
+import { BackupPanel } from "./BackupPanel";
+import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
+import { ImportPanel } from "./ImportPanel";
 import { OutlierCard } from "./OutlierCard";
 import { SessionList } from "./SessionList";
 import { SettingsPanel } from "./SettingsPanel";
@@ -74,17 +70,10 @@ export function VerwaltungTab() {
       {section === "sessions" && <SessionList />}
       {section === "hardware" && <HardwareList />}
       {section === "daten" && (
-        <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-center">
-          <h3 className="text-lg font-semibold text-gray-100 mb-2">
-            Daten-Import / -Export
-          </h3>
-          <p className="text-sm text-gray-400 mb-1">
-            csTimer-Import, Backup und Export kommen mit Phase&nbsp;W.5.
-          </p>
-          <p className="text-xs text-gray-500">
-            (In der Desktop-Variante v1.0.1 schon verfuegbar — fuer die
-            Multi-User-Web-Variante muss der Backend-Code per-User gemacht werden.)
-          </p>
+        <div className="space-y-4">
+          <ImportPanel />
+          <CsTimerExportPanel />
+          <BackupPanel />
         </div>
       )}
       {section === "outliers" && <OutlierCard />}
