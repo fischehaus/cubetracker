@@ -16,10 +16,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
+from api import achievements as achievements_api
 from api import auth as auth_api
+from api import challenges as challenges_api
 from api import hardware as hardware_api
 from api import sessions as sessions_api
 from api import solves as solves_api
+from api import stats as stats_api
 from auth.config import IS_PROD, require_strong_secret
 from auth.rate_limit import limiter
 
@@ -86,6 +89,13 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # W.4: damit Frontend die X-Achievement-/Challenge-/PB-Header lesen kann.
+    # CORS blockt sonst Custom-Headers selbst bei korrektem allow_origin.
+    expose_headers=[
+        "X-Achievements-Unlocked",
+        "X-Challenges-Completed",
+        "X-PB-Achieved",
+    ],
 )
 
 # Router
@@ -93,6 +103,9 @@ app.include_router(auth_api.router)
 app.include_router(solves_api.router)
 app.include_router(sessions_api.router)
 app.include_router(hardware_api.router)
+app.include_router(stats_api.router)
+app.include_router(achievements_api.router)
+app.include_router(challenges_api.router)
 
 
 @app.get("/api/health")

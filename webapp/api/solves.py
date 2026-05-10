@@ -9,24 +9,98 @@ Cross-Tenant-Sicherheits-Checks:
 - GET/PATCH/DELETE /solves/{id}: Solve muss dem User gehoeren (sonst 404,
   NICHT 403 — verhindert Probing fremder IDs)
 
-Achievement-Check + PB-Detection sind DEAKTIVIERT in W.3 — kommen in W.4
-wenn der Achievement/Challenge-Stack per-User portiert ist.
+Phase W.4: Nach Solve-Mutation laeuft fuer den aktuellen User
+- Achievement-Check (X-Achievements-Unlocked-Header)
+- Challenge-Progress (X-Challenges-Completed-Header)
+- PB-Detection (X-PB-Achieved-Header)
+Frontend liest die Header und feuert Toaster/Confetti.
 """
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session as OrmSession
 
+from achievements.service import run_achievement_check
 from auth.deps import get_current_user
+from challenges.service import update_today_progress_for_solve
 from db.database import get_db
 from db.models import Hardware, Session as DbSession, Solve, User
 from db.schemas import SolveCreate, SolveRead, SolveUpdate
+from stats.calc import SolvePoint, compute_stats
 
 router = APIRouter(prefix="/solves", tags=["solves"])
+
+
+def _detect_pbs_for_user(db: OrmSession, user_id: int, solve: Solve) -> list[str]:
+    """Liefert Liste der PB-Typen die DIESER Solve gerade gesetzt hat.
+    Mogliche Typen: 'single', 'ao5', 'ao12'. Nur eigene Solves zaehlen.
+    """
+    rows = db.scalars(
+        select(Solve)
+        .where(Solve.user_id == user_id)
+        .where(Solve.cube_type == solve.cube_type)
+        .order_by(Solve.timestamp.asc())
+    ).all()
+    if len(rows) < 1:
+        return []
+
+    points_with = [
+        SolvePoint(time_ms=s.time_ms, dnf=s.dnf, plus_two=s.plus_two, solve_id=s.id) for s in rows
+    ]
+    stats_with = compute_stats(points_with)
+    points_without = [p for p in points_with if p.solve_id != solve.id]
+    stats_without = compute_stats(points_without) if points_without else None
+
+    pbs: list[str] = []
+    if not solve.dnf:
+        eff = solve.time_ms + (2000 if solve.plus_two else 0)
+        is_best = stats_with.best_ms is not None and eff == stats_with.best_ms
+        improved_single = (
+            stats_without is None
+            or stats_without.best_ms is None
+            or eff < stats_without.best_ms
+        )
+        if is_best and improved_single:
+            pbs.append("single")
+
+    if stats_with.best_ao5 is not None and (
+        stats_without is None
+        or stats_without.best_ao5 is None
+        or stats_with.best_ao5 < stats_without.best_ao5
+    ):
+        pbs.append("ao5")
+
+    if stats_with.best_ao12 is not None and (
+        stats_without is None
+        or stats_without.best_ao12 is None
+        or stats_with.best_ao12 < stats_without.best_ao12
+    ):
+        pbs.append("ao12")
+
+    return pbs
+
+
+def _set_post_mutation_headers(
+    response: Response, db: OrmSession, user: User, solve: Solve | None
+) -> None:
+    """Achievement-Check + Challenge-Progress + PB-Detect, fuer den aktuellen
+    User. Setzt entsprechende X-Header damit das Frontend Toaster/Confetti
+    triggern kann.
+    """
+    new_unlocks = run_achievement_check(db, user.id)
+    if new_unlocks:
+        response.headers["X-Achievements-Unlocked"] = ",".join(new_unlocks)
+    if solve is not None:
+        completed_ids = update_today_progress_for_solve(db, user.id, solve)
+        if completed_ids:
+            response.headers["X-Challenges-Completed"] = ",".join(str(i) for i in completed_ids)
+        pb_kinds = _detect_pbs_for_user(db, user.id, solve)
+        if pb_kinds:
+            response.headers["X-PB-Achieved"] = ",".join(pb_kinds)
 
 
 def _get_solve_or_404(solve_id: int, user: User, db: OrmSession) -> Solve:
@@ -102,12 +176,14 @@ def list_solves(
 @router.post("", response_model=SolveRead, status_code=status.HTTP_201_CREATED)
 def create_solve(
     payload: SolveCreate,
+    response: Response,
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> Solve:
     """Neuen Solve fuer aktuellen User anlegen.
 
     Cross-Refs (session_id, hardware_id) werden auf Ownership geprueft.
+    Achievement-Check + Challenge-Progress + PB-Detect via X-Header.
     """
     _verify_session_ownership(payload.session_id, current_user, db)
     _verify_hardware_ownership(payload.hardware_id, current_user, db)
@@ -119,6 +195,7 @@ def create_solve(
     db.add(solve)
     db.commit()
     db.refresh(solve)
+    _set_post_mutation_headers(response, db, current_user, solve)
     return solve
 
 
@@ -136,14 +213,18 @@ def get_solve(
 def update_solve(
     solve_id: int,
     payload: SolveUpdate,
+    response: Response,
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> Solve:
-    """Teil-Update eines Solves (alle Felder optional, nur eigene)."""
+    """Teil-Update eines Solves (alle Felder optional, nur eigene).
+
+    PATCH (z.B. +2/DNF-Toggle) kann Stats + Challenge-Progress aendern,
+    daher Header-Helper auch hier aufrufen.
+    """
     solve = _get_solve_or_404(solve_id, current_user, db)
     update_data = payload.model_dump(exclude_unset=True)
 
-    # Cross-Refs revalidieren wenn geaendert
     if "session_id" in update_data:
         _verify_session_ownership(update_data["session_id"], current_user, db)
     if "hardware_id" in update_data:
@@ -153,16 +234,23 @@ def update_solve(
         setattr(solve, key, value)
     db.commit()
     db.refresh(solve)
+    _set_post_mutation_headers(response, db, current_user, solve)
     return solve
 
 
 @router.delete("/{solve_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_solve(
     solve_id: int,
+    response: Response,
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
-    """Solve loeschen (nur eigene)."""
+    """Solve loeschen (nur eigene). Achievements bleiben unlocked
+    (monotonic), aber Recheck damit ggf. neu unlockte sichtbar werden
+    (z.B. wenn Delete andere Schwellwerte unterschreitet).
+    """
     solve = _get_solve_or_404(solve_id, current_user, db)
     db.delete(solve)
     db.commit()
+    # Bei delete gibt's keinen Solve fuer PB/Challenge-Progress
+    _set_post_mutation_headers(response, db, current_user, None)
