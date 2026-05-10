@@ -61,6 +61,9 @@ class User(Base):
     challenges: Mapped[list[Challenge]] = relationship(
         "Challenge", back_populates="user", cascade="all, delete-orphan"
     )
+    snapshots: Mapped[list[Snapshot]] = relationship(
+        "Snapshot", back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<User id={self.id} email={self.email!r}>"
@@ -195,3 +198,40 @@ class Challenge(Base):
     )
 
     user: Mapped[User] = relationship("User", back_populates="challenges")
+
+
+class Snapshot(Base):
+    """Wiederherstellungspunkt — Voll-JSON eines User-Datenbestands.
+
+    Wird AUTOMATISCH erzeugt vor destruktiven Ops:
+    - /backup/restore?mode=replace
+    - /import/cstimer mit grossem Volumen (>100 neuen Solves)
+
+    Plus MANUELL via /backup/snapshots POST.
+
+    Pro User max 2 Snapshots — beim Anlegen wird der aelteste verworfen.
+    Storage: das ganze Backup-JSON als Text-Blob in Postgres.
+    Schaetzung: 100k Solves ~30MB; 2*30MB pro User ist ok bis ~30 User
+    auf Free-Tier (1GB).
+    """
+
+    __tablename__ = "snapshots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC), index=True
+    )
+    # Klassifizierung: warum wurde dieser Snapshot angelegt?
+    # "manual" | "before_restore" | "before_bulk_import"
+    reason: Mapped[str] = mapped_column(String(32), nullable=False, default="manual")
+    # Anzahl Solves im Snapshot — fuers UI ohne JSON-Parse abrufbar.
+    solve_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    session_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    hardware_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Voll-Backup als JSON-Text (sqlalchemy Text fuer arbitrary length).
+    payload_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+    user: Mapped[User] = relationship("User", back_populates="snapshots")

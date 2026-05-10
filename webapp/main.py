@@ -18,8 +18,11 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from api import achievements as achievements_api
 from api import auth as auth_api
+from api import backup as backup_api
 from api import challenges as challenges_api
+from api import export_cstimer as export_api
 from api import hardware as hardware_api
+from api import import_cstimer as import_api
 from api import sessions as sessions_api
 from api import solves as solves_api
 from api import stats as stats_api
@@ -106,6 +109,9 @@ app.include_router(hardware_api.router)
 app.include_router(stats_api.router)
 app.include_router(achievements_api.router)
 app.include_router(challenges_api.router)
+app.include_router(backup_api.router)
+app.include_router(import_api.router)
+app.include_router(export_api.router)
 
 
 @app.get("/api/health")

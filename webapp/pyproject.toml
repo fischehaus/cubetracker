@@ -27,7 +27,17 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["api", "auth", "db", "achievements", "challenges", "stats"]
+packages = [
+    "api",
+    "auth",
+    "db",
+    "achievements",
+    "challenges",
+    "stats",
+    "backup",
+    "importers",
+    "exporters",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
