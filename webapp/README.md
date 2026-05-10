@@ -152,7 +152,7 @@ Falls User die Web-Variante einstellen will:
 | W.1 | DB-Schema mit User-Model, lokale SQLite-Test-DB (Alembic-Init in W.7) | ✅ |
 | W.2 | Auth-Module (register/login/JWT) + Live-Smoke-Test + ad-hoc security-review | ✅ |
 | W.2.1 | **Security-Review-Findings 🔴 KRITISCH abarbeiten** (vor Live-Deploy Pflicht) | ✅ |
-| W.3 | Solve/Session/Hardware-Endpoints mit user_id-Filter, alle Tests anpassen | ⏳ |
+| W.3 | Solve/Session/Hardware-Endpoints mit user_id-Filter, alle Tests anpassen | ✅ |
 | W.4 | Achievements/Challenges/Stats per-User | ⏳ |
 | W.5 | Backup/Restore + csTimer-Import/Export per-User | ⏳ |
 | W.6 | Frontend-Adaption (Login-Page, Token-Storage, Auth-Wrapper) | ⏳ |

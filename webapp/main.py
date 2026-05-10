@@ -17,6 +17,9 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from api import auth as auth_api
+from api import hardware as hardware_api
+from api import sessions as sessions_api
+from api import solves as solves_api
 from auth.config import IS_PROD, require_strong_secret
 from auth.rate_limit import limiter
 
@@ -73,6 +76,9 @@ app.add_middleware(
 
 # Router
 app.include_router(auth_api.router)
+app.include_router(solves_api.router)
+app.include_router(sessions_api.router)
+app.include_router(hardware_api.router)
 
 
 @app.get("/api/health")
