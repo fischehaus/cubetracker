@@ -40,8 +40,17 @@ from db.models import (
 
 SCHEMA_VERSION = "webapp-2.0"
 MAX_SNAPSHOTS_PER_USER = 2
+# Hartes Limit fuer Snapshot-Payload-Size (Storage-DoS-Schutz auf
+# Render-Free). 30 MB entspricht ~100k Solves; 2 Snapshots * Postgres-Free
+# 1GB = max ~16 User die einen vollen Datensatz haben koennen.
+MAX_SNAPSHOT_PAYLOAD_BYTES = 30 * 1024 * 1024
 
 RestoreMode = Literal["merge", "replace"]
+
+
+class BackupServiceError(ValueError):
+    """Eigene Exception fuer Backup-Service-Validation, damit das
+    API-Layer sie 400-mappen kann."""
 
 
 # ============================================================
@@ -217,6 +226,19 @@ def restore_user_data(
     Loeschung automatisch ein Snapshot angelegt. Bei dry_run=True
     natuerlich nicht.
     """
+    # Security-Fix W.5-finding-5: leerer Replace-Payload haette ALLE
+    # eigenen Daten geloescht ohne neue zu importieren. Verhindern.
+    if mode == "replace" and not dry_run:
+        has_data = bool(
+            payload.get("solves")
+            or payload.get("sessions")
+            or payload.get("hardware")
+        )
+        if not has_data:
+            raise BackupServiceError(
+                "Backup-Payload ist leer — destruktiver Replace abgelehnt."
+            )
+
     snapshot_id: int | None = None
     if mode == "replace" and not dry_run and auto_snapshot:
         snap = create_snapshot(db, user, reason="before_restore")
@@ -270,11 +292,18 @@ def restore_user_data(
             result.sessions_imported += 1
             continue
 
+        # Security-Fix W.5-finding-6: cstimer_session_id validieren
+        # (manipuliertes Backup koennte negative/nicht-int Werte haben)
+        raw_cs_id = s_data.get("cstimer_session_id")
+        cstimer_session_id = (
+            raw_cs_id if isinstance(raw_cs_id, int) and raw_cs_id > 0 else None
+        )
+
         new_session = DbSession(
             user_id=user.id,  # IGNORIERE alten user_id, nimm current_user
             name=s_data.get("name") or "Unbenannt",
             scramble_type=s_data.get("scramble_type"),
-            cstimer_session_id=s_data.get("cstimer_session_id"),
+            cstimer_session_id=cstimer_session_id,
             notes=s_data.get("notes"),
         )
         db.add(new_session)
@@ -434,9 +463,18 @@ def _parse_dt(s: str | None) -> datetime | None:
 
 
 def create_snapshot(db: OrmSession, user: User, reason: str = "manual") -> Snapshot:
-    """Snapshot anlegen + ggf. aelteste verwerfen (max 2/User)."""
+    """Snapshot anlegen + ggf. aelteste verwerfen (max 2/User).
+
+    Security-Fix W.5-finding-3: Hartes Size-Limit (Storage-DoS-Schutz).
+    Bei sehr grossen Datensaetzen wuerde sonst Postgres-Free vollaufen.
+    """
     payload = export_user_data(db, user)
     payload_str = json.dumps(payload, ensure_ascii=False)
+    if len(payload_str.encode("utf-8")) > MAX_SNAPSHOT_PAYLOAD_BYTES:
+        raise BackupServiceError(
+            f"Snapshot-Payload zu gross ({len(payload_str)} bytes; "
+            f"max {MAX_SNAPSHOT_PAYLOAD_BYTES})."
+        )
     snap = Snapshot(
         user_id=user.id,
         reason=reason,

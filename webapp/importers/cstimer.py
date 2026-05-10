@@ -144,7 +144,11 @@ def parse_solve_entry(entry: list[Any]) -> dict[str, Any] | None:
 
 
 def parse_session_data(properties: dict[str, Any]) -> dict[int, dict[str, Any]]:
-    """Liest properties.sessionData (JSON-String) zu {session_id: {name, scrType, rank}}."""
+    """Liest properties.sessionData (JSON-String) zu {session_id: {name, scrType, rank}}.
+
+    Security-Fix W.5-finding-7: defensiv gegen manipulierte JSON. Akzeptiert
+    nur dict-Strukturen, ignoriert alles andere (statt 500-Crash).
+    """
     raw = properties.get("sessionData")
     if not raw:
         return {}
@@ -153,13 +157,20 @@ def parse_session_data(properties: dict[str, Any]) -> dict[int, dict[str, Any]]:
     except json.JSONDecodeError:
         return {}
 
+    if not isinstance(data, dict):
+        return {}
+
     result: dict[int, dict[str, Any]] = {}
     for key, val in data.items():
         try:
             session_id = int(key)
-        except ValueError:
+        except (ValueError, TypeError):
             continue
-        opt = val.get("opt", {}) if isinstance(val, dict) else {}
+        if not isinstance(val, dict):
+            continue
+        opt = val.get("opt", {})
+        if not isinstance(opt, dict):
+            opt = {}
         result[session_id] = {
             "name": val.get("name", f"Session {session_id}"),
             "scramble_type": opt.get("scrType", ""),

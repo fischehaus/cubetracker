@@ -36,6 +36,7 @@ from achievements.service import run_achievement_check
 from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from backup.service import (
+    BackupServiceError,
     create_snapshot,
     delete_snapshot,
     export_user_data,
@@ -111,11 +112,15 @@ async def restore_backup(
             ),
         )
 
-    raw = await file.read()
+    # Security-Fix W.5-finding-1: chunked read mit hard limit damit
+    # nicht erst 500MB in den Worker-Memory geladen werden bevor wir 413
+    # antworten. Wir lesen MAX_UPLOAD_BYTES+1, so erkennen wir Overflow
+    # mit minimalem Memory-Hit ueber dem Limit.
+    raw = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Upload zu gross: {len(raw)} bytes (max {MAX_UPLOAD_BYTES}).",
+            detail=f"Upload zu gross (max {MAX_UPLOAD_BYTES} bytes).",
         )
     try:
         payload = json.loads(raw.decode("utf-8"))
@@ -130,7 +135,12 @@ async def restore_backup(
             detail="Backup-JSON-Root muss ein Object sein.",
         )
 
-    result = restore_user_data(db, current_user, payload, mode=mode, dry_run=dry_run)
+    try:
+        result = restore_user_data(db, current_user, payload, mode=mode, dry_run=dry_run)
+    except BackupServiceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     response: dict[str, Any] = result.to_dict()
 
     if not dry_run and (result.solves_imported or result.achievements_imported):
@@ -182,7 +192,12 @@ def create_snapshot_endpoint(
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Manueller Snapshot eigener Daten. Aelteste wird ggf. verworfen."""
-    snap = create_snapshot(db, current_user, reason="manual")
+    try:
+        snap = create_snapshot(db, current_user, reason="manual")
+    except BackupServiceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
     return _snapshot_to_dict(snap)
 
 

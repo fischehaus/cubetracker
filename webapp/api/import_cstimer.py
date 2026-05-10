@@ -55,11 +55,13 @@ async def import_cstimer(
     dry_run=true: liefert dieselben Stats wie ein echter Import, aber ohne
     DB-Aenderung. Empfehlung: erst ?dry_run=true ausfuehren, dann ohne.
     """
-    raw = await file.read()
+    # Security-Fix: chunked read damit grosse Uploads nicht erst voll
+    # in Memory landen, bevor sie verworfen werden.
+    raw = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Upload zu gross: {len(raw)} bytes (max {MAX_UPLOAD_BYTES}).",
+            detail=f"Upload zu gross (max {MAX_UPLOAD_BYTES} bytes).",
         )
     try:
         text = raw.decode("utf-8")
