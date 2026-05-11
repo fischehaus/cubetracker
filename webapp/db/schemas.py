@@ -42,8 +42,14 @@ class UserRead(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    """PATCH /auth/me — Profil-Updates (display_name aktuell, kein email)."""
+    """PATCH /auth/me — Profil-Updates (display_name aktuell, kein email).
 
+    Sub-Agent-Finding K4: extra="forbid" als zweite Defense-Schicht gegen
+    Mass-Assignment. Zusammen mit Whitelist im Endpoint defensiv genug
+    auch wenn diese Klasse spaeter erweitert wird.
+    """
+
+    model_config = ConfigDict(extra="forbid")
     display_name: str | None = Field(default=None, max_length=64)
 
 

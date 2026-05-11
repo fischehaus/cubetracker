@@ -17,9 +17,19 @@ import secrets
 from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Cookie,
+    Depends,
+    HTTPException,
+    Request,
+    Response,
+    status,
+)
 from jose import JWTError
-from sqlalchemy import select
+from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as OrmSession
 
 from auth.config import (
@@ -72,6 +82,21 @@ def _generate_token() -> str:
 
 def _now_utc() -> datetime:
     return datetime.now(UTC)
+
+
+def _bump_token_version(db: OrmSession, user_id: int) -> None:
+    """Atomares Increment fuer User.token_version — race-safe.
+
+    Sub-Agent-Finding K5: `user.token_version += 1` via ORM-read-modify-
+    write kann bei parallelen Requests (Logout + Change-Password gleich-
+    zeitig) ein Increment verlieren. SQL-side UPDATE garantiert dass
+    JEDER Aufruf den Zaehler erhoeht.
+    """
+    db.execute(
+        update(User)
+        .where(User.id == user_id)
+        .values(token_version=User.token_version + 1)
+    )
 
 
 @lru_cache(maxsize=1)
@@ -269,7 +294,7 @@ def logout(
     Auch wenn der Angreifer Access- oder Refresh-Tokens kopiert hat:
     sobald token_version hochgezaehlt ist, schlagen alle alten Tokens fehl.
     """
-    current_user.token_version += 1
+    _bump_token_version(db, current_user.id)
     db.commit()
     _clear_refresh_cookie(response)
     response.status_code = status.HTTP_204_NO_CONTENT
@@ -292,10 +317,15 @@ def update_me(
     """Profil-Update: aktuell nur display_name. Email-Change geht ueber
     /auth/change-email (mit Re-Verification), Passwort-Change ueber
     /auth/change-password (mit alter-Passwort-Pruefung).
+
+    Sub-Agent-Finding K4: explizite Whitelist als zweite Defense-Schicht
+    zusaetzlich zum UserUpdate-Schema (das `extra=forbid` hat).
     """
+    _ALLOWED_FIELDS = {"display_name"}
     data = payload.model_dump(exclude_unset=True)
     for key, value in data.items():
-        setattr(current_user, key, value)
+        if key in _ALLOWED_FIELDS:
+            setattr(current_user, key, value)
     db.commit()
     db.refresh(current_user)
     return current_user
@@ -348,7 +378,7 @@ def change_password(
         )
 
     current_user.hashed_password = hash_password(payload.new_password)
-    current_user.token_version += 1  # alle JWTs revoken
+    _bump_token_version(db, current_user.id)  # alle JWTs revoken
     db.commit()
     _clear_refresh_cookie(response)
     response.status_code = status.HTTP_204_NO_CONTENT
@@ -360,20 +390,31 @@ def change_password(
 def forgot_password(
     request: Request,
     payload: ForgotPasswordRequest,
+    background: BackgroundTasks,
     db: OrmSession = Depends(get_db),
 ) -> Response:
     """User vergisst Passwort -> kriegt Reset-Link per Mail.
 
     Sicherheit:
-    - Antwortet IMMER 204, egal ob Email existiert oder nicht (verhindert
-      Email-Enumeration-Attack — Angreifer kann nicht checken welche
-      Emails registriert sind)
+    - Antwortet IMMER 204 + sofort (Mail-Send via BackgroundTask),
+      egal ob Email existiert. Verhindert Email-Enumeration ueber
+      Response-Timing (Sub-Agent-Finding K3 + S7).
     - Token ist 288-bit secrets.token_urlsafe, in DB als Single-Use
     - Expires after 1h
+    - Beim Erzeugen eines neuen Reset-Tokens werden ALLE bestehenden
+      offenen Tokens dieses Users invalidiert (Finding S4) — sonst
+      koennten alte (geleakte) Tokens noch bis Expiry genutzt werden.
     """
     email_lc = payload.email.lower().strip()
     user = db.scalar(select(User).where(User.email == email_lc))
     if user is not None and user.is_active:
+        # S4: alte offene Reset-Tokens dieses Users zumachen
+        db.execute(
+            update(PasswordResetToken)
+            .where(PasswordResetToken.user_id == user.id)
+            .where(PasswordResetToken.used_at.is_(None))
+            .values(used_at=_now_utc())
+        )
         reset_token = PasswordResetToken(
             user_id=user.id,
             token=_generate_token(),
@@ -381,8 +422,9 @@ def forgot_password(
         )
         db.add(reset_token)
         db.commit()
-        send_password_reset_email(email_lc, reset_token.token)
-    # Immer 204 — kein Leak
+        # K3: Mail-Send in BackgroundTask -> Response sofort, kein Timing-Leak
+        background.add_task(send_password_reset_email, email_lc, reset_token.token)
+    # Immer 204 — kein Leak ueber Existenz
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -396,36 +438,40 @@ def reset_password(
 ) -> Response:
     """Token aus Mail-Link + neues Passwort -> Passwort setzen.
 
-    Sicherheit:
-    - Token muss in DB existieren, nicht abgelaufen, nicht benutzt
-    - Bei Erfolg: used_at gesetzt (Single-Use)
-    - token_version++ am User -> alle bestehenden JWTs revoked
-    - Generische Fehler-Meldung (kein Leak ob Token existiert/expired/used)
+    Sicherheit (Sub-Agent-Finding K2):
+    - Atomares conditional UPDATE auf den Token: gleichzeitig pruefen
+      (used_at IS NULL + expires_at > now) UND used_at setzen. Zwei
+      parallele Requests koennen nur einer durch.
+    - Generische Fehler (kein Leak ob Token existiert/expired/used)
+    - token_version atomar inkrementiert
     """
     invalid = HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Reset-Link ist ungueltig oder abgelaufen.",
     )
 
-    reset = db.scalar(
-        select(PasswordResetToken).where(PasswordResetToken.token == payload.token)
+    # Atomares "claim" des Tokens: nur ein paralleler Aufruf gewinnt.
+    now = _now_utc()
+    result = db.execute(
+        update(PasswordResetToken)
+        .where(PasswordResetToken.token == payload.token)
+        .where(PasswordResetToken.used_at.is_(None))
+        .where(PasswordResetToken.expires_at > now)
+        .values(used_at=now)
+        .returning(PasswordResetToken.user_id)
     )
-    if reset is None or reset.used_at is not None:
-        raise invalid
-    # Aware vs naive Datetime fuer Postgres-Kompatibilitaet
-    expires = reset.expires_at
-    if expires.tzinfo is None:
-        expires = expires.replace(tzinfo=UTC)
-    if _now_utc() > expires:
+    row = result.first()
+    if row is None:
         raise invalid
 
-    user = db.get(User, reset.user_id)
+    user_id = row[0]
+    user = db.get(User, user_id)
     if user is None or not user.is_active:
+        # Sehr unwahrscheinlich (Token + User Cascade), aber defensiv
         raise invalid
 
     user.hashed_password = hash_password(payload.new_password)
-    user.token_version += 1
-    reset.used_at = _now_utc()
+    _bump_token_version(db, user.id)
     db.commit()
     _clear_refresh_cookie(response)
     response.status_code = status.HTTP_204_NO_CONTENT
@@ -446,44 +492,50 @@ def verify_email(
 
     Bei Email-Change-Flow: setzt zusaetzlich die neue Email-Adresse
     (token.new_email kann von user.email abweichen).
+
+    Sicherheit (Sub-Agent-Findings K1+K2):
+    - Atomares conditional UPDATE auf den Token (Race-frei)
+    - Email-Change wird in try/except IntegrityError gewickelt:
+      wenn zwischen Conflict-Check und Commit die Adresse von jemand
+      anderem registriert wird, antwortet die DB-Unique-Constraint mit
+      Conflict -> wir mappen auf 409.
     """
     invalid = HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Verifikations-Link ist ungueltig oder abgelaufen.",
     )
 
-    token = db.scalar(
-        select(EmailVerificationToken).where(EmailVerificationToken.token == payload.token)
+    # Atomares Token-Claim
+    now = _now_utc()
+    result = db.execute(
+        update(EmailVerificationToken)
+        .where(EmailVerificationToken.token == payload.token)
+        .where(EmailVerificationToken.used_at.is_(None))
+        .where(EmailVerificationToken.expires_at > now)
+        .values(used_at=now)
+        .returning(EmailVerificationToken.user_id, EmailVerificationToken.new_email)
     )
-    if token is None or token.used_at is not None:
-        raise invalid
-    expires = token.expires_at
-    if expires.tzinfo is None:
-        expires = expires.replace(tzinfo=UTC)
-    if _now_utc() > expires:
+    row = result.first()
+    if row is None:
         raise invalid
 
-    user = db.get(User, token.user_id)
+    user_id, new_email = row[0], row[1]
+    user = db.get(User, user_id)
     if user is None or not user.is_active:
         raise invalid
 
-    # Email-Change-Flow: token.new_email kann anders sein als user.email
-    if token.new_email and token.new_email != user.email:
-        # Doppel-Check: ist die neue Email zwischenzeitlich von jemand
-        # anderem registriert worden? Dann 409.
-        existing = db.scalar(
-            select(User).where(User.email == token.new_email).where(User.id != user.id)
-        )
-        if existing is not None:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Diese Email-Adresse ist inzwischen anderweitig registriert.",
-            )
-        user.email = token.new_email
-
-    user.email_verified = True
-    token.used_at = _now_utc()
-    db.commit()
+    try:
+        if new_email and new_email != user.email:
+            user.email = new_email
+        user.email_verified = True
+        db.commit()
+    except IntegrityError:
+        # Race: jemand anderes hat zwischenzeitlich die neue Adresse registriert.
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Diese Email-Adresse ist inzwischen anderweitig registriert.",
+        ) from None
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
