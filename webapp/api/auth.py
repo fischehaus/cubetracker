@@ -13,7 +13,8 @@ Sicherheits-Architektur:
 
 from __future__ import annotations
 
-from datetime import timedelta
+import secrets
+from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
@@ -32,10 +33,45 @@ from auth.jwt import create_token, decode_token
 from auth.password import hash_password, verify_password
 from auth.rate_limit import LOGIN_LIMIT, REFRESH_LIMIT, REGISTER_LIMIT, limiter
 from db.database import get_db
-from db.models import User
-from db.schemas import AccessTokenOnly, UserCreate, UserLogin, UserRead
+from db.models import EmailVerificationToken, PasswordResetToken, User
+from db.schemas import (
+    AccessTokenOnly,
+    EmailChangeRequest,
+    ForgotPasswordRequest,
+    PasswordChange,
+    ResetPasswordRequest,
+    UserCreate,
+    UserLogin,
+    UserRead,
+    UserUpdate,
+    VerifyEmailRequest,
+)
+from emailing.service import (
+    send_email_change_verification,
+    send_password_reset_email,
+    send_verification_email,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Token-Lifetimes (W.8)
+PASSWORD_RESET_TOKEN_LIFETIME = timedelta(hours=1)
+EMAIL_VERIFICATION_TOKEN_LIFETIME = timedelta(days=7)
+
+# Rate-Limits fuer Email-Endpoints (Spam-Schutz, jede Mail kostet Resend-Quota)
+FORGOT_PASSWORD_LIMIT = "3/hour"  # pro IP
+VERIFY_RESEND_LIMIT = "3/hour"
+CHANGE_PASSWORD_LIMIT = "10/hour"
+CHANGE_EMAIL_LIMIT = "5/hour"
+
+
+def _generate_token() -> str:
+    """288-bit Token via secrets — kollisions-/brute-force-sicher."""
+    return secrets.token_urlsafe(48)
+
+
+def _now_utc() -> datetime:
+    return datetime.now(UTC)
 
 
 @lru_cache(maxsize=1)
@@ -87,6 +123,9 @@ def register(
 
     Email wird zu Lowercase normalisiert. Wenn Email schon existiert: 409.
     Password wird via bcrypt gehasht (work-factor 12).
+    W.8: nach Anlegen wird ein EmailVerificationToken erzeugt + Verify-
+    Mail verschickt. User kann sich trotzdem schon einloggen, aber UI
+    zeigt einen "Email noch nicht bestaetigt"-Banner bis er klickt.
 
     Rate-Limit: 5/min per IP (Brute-Force + Spam-Schutz).
     """
@@ -103,8 +142,22 @@ def register(
         hashed_password=hash_password(payload.password),
     )
     db.add(user)
+    db.flush()  # user.id
+
+    # Email-Verification-Token + Mail
+    verify_token = EmailVerificationToken(
+        user_id=user.id,
+        token=_generate_token(),
+        new_email=email_lc,
+        expires_at=_now_utc() + EMAIL_VERIFICATION_TOKEN_LIFETIME,
+    )
+    db.add(verify_token)
     db.commit()
     db.refresh(user)
+
+    # Mail fail-soft (Account ist trotzdem angelegt wenn Resend down ist)
+    send_verification_email(email_lc, verify_token.token)
+
     return user
 
 
@@ -230,6 +283,24 @@ def me(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
+@router.patch("/me", response_model=UserRead)
+def update_me(
+    payload: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> User:
+    """Profil-Update: aktuell nur display_name. Email-Change geht ueber
+    /auth/change-email (mit Re-Verification), Passwort-Change ueber
+    /auth/change-password (mit alter-Passwort-Pruefung).
+    """
+    data = payload.model_dump(exclude_unset=True)
+    for key, value in data.items():
+        setattr(current_user, key, value)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 def delete_me(
     response: Response,
@@ -239,8 +310,254 @@ def delete_me(
     """DSGVO: User loescht sich selbst inkl. ALLER Daten.
 
     Cascade in den Models loescht alle Solves/Sessions/Hardware/
-    Achievements/Challenges automatisch mit. Refresh-Cookie wird gecleart.
+    Achievements/Challenges/Snapshots/Tokens automatisch mit.
+    Refresh-Cookie wird gecleart.
     """
     db.delete(current_user)
     db.commit()
     _clear_refresh_cookie(response)
+
+
+# ============================================================
+# W.8: Password Change / Reset
+# ============================================================
+
+
+@router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(CHANGE_PASSWORD_LIMIT)
+def change_password(
+    request: Request,
+    payload: PasswordChange,
+    response: Response,
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> Response:
+    """Eingeloggter User aendert sein Passwort.
+
+    Sicherheits-Workflow:
+    1. current_password muss korrekt sein (sonst koennte gestohlener
+       Access-Token zum Passwort-Hijack benutzt werden)
+    2. Nach Erfolg: token_version++ -> ALLE bestehenden JWTs (auch der
+       gerade verwendete!) werden ungueltig
+    3. Refresh-Cookie wird auch geloescht -> User muss neu einloggen
+    """
+    if not verify_password(payload.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Aktuelles Passwort ist falsch.",
+        )
+
+    current_user.hashed_password = hash_password(payload.new_password)
+    current_user.token_version += 1  # alle JWTs revoken
+    db.commit()
+    _clear_refresh_cookie(response)
+    response.status_code = status.HTTP_204_NO_CONTENT
+    return response
+
+
+@router.post("/forgot-password", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(FORGOT_PASSWORD_LIMIT)
+def forgot_password(
+    request: Request,
+    payload: ForgotPasswordRequest,
+    db: OrmSession = Depends(get_db),
+) -> Response:
+    """User vergisst Passwort -> kriegt Reset-Link per Mail.
+
+    Sicherheit:
+    - Antwortet IMMER 204, egal ob Email existiert oder nicht (verhindert
+      Email-Enumeration-Attack — Angreifer kann nicht checken welche
+      Emails registriert sind)
+    - Token ist 288-bit secrets.token_urlsafe, in DB als Single-Use
+    - Expires after 1h
+    """
+    email_lc = payload.email.lower().strip()
+    user = db.scalar(select(User).where(User.email == email_lc))
+    if user is not None and user.is_active:
+        reset_token = PasswordResetToken(
+            user_id=user.id,
+            token=_generate_token(),
+            expires_at=_now_utc() + PASSWORD_RESET_TOKEN_LIFETIME,
+        )
+        db.add(reset_token)
+        db.commit()
+        send_password_reset_email(email_lc, reset_token.token)
+    # Immer 204 — kein Leak
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/reset-password", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(CHANGE_PASSWORD_LIMIT)
+def reset_password(
+    request: Request,
+    payload: ResetPasswordRequest,
+    response: Response,
+    db: OrmSession = Depends(get_db),
+) -> Response:
+    """Token aus Mail-Link + neues Passwort -> Passwort setzen.
+
+    Sicherheit:
+    - Token muss in DB existieren, nicht abgelaufen, nicht benutzt
+    - Bei Erfolg: used_at gesetzt (Single-Use)
+    - token_version++ am User -> alle bestehenden JWTs revoked
+    - Generische Fehler-Meldung (kein Leak ob Token existiert/expired/used)
+    """
+    invalid = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Reset-Link ist ungueltig oder abgelaufen.",
+    )
+
+    reset = db.scalar(
+        select(PasswordResetToken).where(PasswordResetToken.token == payload.token)
+    )
+    if reset is None or reset.used_at is not None:
+        raise invalid
+    # Aware vs naive Datetime fuer Postgres-Kompatibilitaet
+    expires = reset.expires_at
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=UTC)
+    if _now_utc() > expires:
+        raise invalid
+
+    user = db.get(User, reset.user_id)
+    if user is None or not user.is_active:
+        raise invalid
+
+    user.hashed_password = hash_password(payload.new_password)
+    user.token_version += 1
+    reset.used_at = _now_utc()
+    db.commit()
+    _clear_refresh_cookie(response)
+    response.status_code = status.HTTP_204_NO_CONTENT
+    return response
+
+
+# ============================================================
+# W.8: Email Verification + Change
+# ============================================================
+
+
+@router.post("/verify-email", status_code=status.HTTP_204_NO_CONTENT)
+def verify_email(
+    payload: VerifyEmailRequest,
+    db: OrmSession = Depends(get_db),
+) -> Response:
+    """Token aus Mail-Link -> Email als verifiziert markieren.
+
+    Bei Email-Change-Flow: setzt zusaetzlich die neue Email-Adresse
+    (token.new_email kann von user.email abweichen).
+    """
+    invalid = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Verifikations-Link ist ungueltig oder abgelaufen.",
+    )
+
+    token = db.scalar(
+        select(EmailVerificationToken).where(EmailVerificationToken.token == payload.token)
+    )
+    if token is None or token.used_at is not None:
+        raise invalid
+    expires = token.expires_at
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=UTC)
+    if _now_utc() > expires:
+        raise invalid
+
+    user = db.get(User, token.user_id)
+    if user is None or not user.is_active:
+        raise invalid
+
+    # Email-Change-Flow: token.new_email kann anders sein als user.email
+    if token.new_email and token.new_email != user.email:
+        # Doppel-Check: ist die neue Email zwischenzeitlich von jemand
+        # anderem registriert worden? Dann 409.
+        existing = db.scalar(
+            select(User).where(User.email == token.new_email).where(User.id != user.id)
+        )
+        if existing is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Diese Email-Adresse ist inzwischen anderweitig registriert.",
+            )
+        user.email = token.new_email
+
+    user.email_verified = True
+    token.used_at = _now_utc()
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/resend-verification", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(VERIFY_RESEND_LIMIT)
+def resend_verification(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> Response:
+    """Eingeloggter User fordert eine neue Verify-Mail an (z.B. wenn
+    erste Mail nicht angekommen ist).
+    """
+    if current_user.email_verified:
+        # No-op: schon verifiziert. Trotzdem 204 antworten, kein Leak.
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    token = EmailVerificationToken(
+        user_id=current_user.id,
+        token=_generate_token(),
+        new_email=current_user.email,
+        expires_at=_now_utc() + EMAIL_VERIFICATION_TOKEN_LIFETIME,
+    )
+    db.add(token)
+    db.commit()
+    send_verification_email(current_user.email, token.token)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/change-email", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(CHANGE_EMAIL_LIMIT)
+def change_email(
+    request: Request,
+    payload: EmailChangeRequest,
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> Response:
+    """User aendert Email. Workflow:
+
+    1. current_password muss korrekt sein (verhindert Email-Hijack
+       bei gestohlenem Access-Token)
+    2. Token wird mit der NEUEN Email gespeichert, NICHT in user.email
+    3. User klickt Link in der Mail an die neue Adresse -> ueberschreibe
+       user.email (erst dann ist die Aenderung aktiv)
+    4. Alte Email bleibt aktiv + funktional bis Klick
+
+    Wenn die neue Adresse schon registriert ist: 409. Aber: wir
+    antworten 204 falls die alte Email = die neue Email (keine Aktion).
+    """
+    if not verify_password(payload.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Aktuelles Passwort ist falsch.",
+        )
+
+    new_email_lc = payload.new_email.lower().strip()
+    if new_email_lc == current_user.email:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    # Schon vergeben?
+    existing = db.scalar(select(User).where(User.email == new_email_lc))
+    if existing is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Diese Email-Adresse ist bereits registriert.",
+        )
+
+    token = EmailVerificationToken(
+        user_id=current_user.id,
+        token=_generate_token(),
+        new_email=new_email_lc,
+        expires_at=_now_utc() + EMAIL_VERIFICATION_TOKEN_LIFETIME,
+    )
+    db.add(token)
+    db.commit()
+    send_email_change_verification(new_email_lc, token.token)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

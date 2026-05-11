@@ -36,7 +36,48 @@ class UserRead(BaseModel):
     id: int
     email: EmailStr
     is_active: bool
+    email_verified: bool
+    display_name: str | None
     created_at: datetime
+
+
+class UserUpdate(BaseModel):
+    """PATCH /auth/me — Profil-Updates (display_name aktuell, kein email)."""
+
+    display_name: str | None = Field(default=None, max_length=64)
+
+
+class PasswordChange(BaseModel):
+    """POST /auth/change-password — eingeloggter User aendert Passwort."""
+
+    current_password: str
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+class ForgotPasswordRequest(BaseModel):
+    """POST /auth/forgot-password — User triggert Reset-Mail."""
+
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    """POST /auth/reset-password — Token aus Mail-Link + neues Passwort."""
+
+    token: str
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+class EmailChangeRequest(BaseModel):
+    """POST /auth/change-email — eingeloggter User aendert Email."""
+
+    current_password: str
+    new_email: EmailStr
+
+
+class VerifyEmailRequest(BaseModel):
+    """POST /auth/verify-email — Token aus Mail-Link."""
+
+    token: str
 
 
 class AccessTokenOnly(BaseModel):

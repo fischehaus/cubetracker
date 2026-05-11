@@ -37,6 +37,12 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # Phase W.8: User-Management.
+    # email_verified=False bei Register, wird True nach Klick auf Verify-Link.
+    # Nicht-verifizierte User koennen sich trotzdem einloggen (sonst chicken-egg
+    # wenn Mail nicht ankommt), aber UI zeigt einen Hinweis-Banner.
+    email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    display_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
     # Token-Revocation: jeder ausgegebene JWT enthaelt das aktuelle token_version
     # in seinen Claims. Wird die Spalte hochgezaehlt (Logout, Password-Change),
     # invalidiert das alle bestehenden Tokens dieses Users sofort.
@@ -63,6 +69,12 @@ class User(Base):
     )
     snapshots: Mapped[list[Snapshot]] = relationship(
         "Snapshot", back_populates="user", cascade="all, delete-orphan"
+    )
+    password_reset_tokens: Mapped[list[PasswordResetToken]] = relationship(
+        "PasswordResetToken", back_populates="user", cascade="all, delete-orphan"
+    )
+    email_verification_tokens: Mapped[list[EmailVerificationToken]] = relationship(
+        "EmailVerificationToken", back_populates="user", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -235,3 +247,69 @@ class Snapshot(Base):
     payload_json: Mapped[str] = mapped_column(Text, nullable=False)
 
     user: Mapped[User] = relationship("User", back_populates="snapshots")
+
+
+class PasswordResetToken(Base):
+    """Single-Use-Token fuer Password-Reset-Flow (Phase W.8).
+
+    Vom User per /auth/forgot-password angefordert -> Mail mit Link
+    https://www.cubetracker.de/reset-password?token=<token-hex> -> Klick
+    -> Frontend fordert neues Passwort an + POSTet token + neues Passwort
+    an /auth/reset-password.
+
+    Sicherheit:
+    - token = secrets.token_urlsafe(48) (288 Bit Entropie, brute-force-sicher)
+    - expires_at: 1h nach Erstellung
+    - used_at: timestamp wenn benutzt -> kein Re-Use moeglich
+    - Pro Password-Change: token_version++ am User -> alle alten JWTs revoked
+    """
+
+    __tablename__ = "password_reset_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    token: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    user: Mapped[User] = relationship("User", back_populates="password_reset_tokens")
+
+
+class EmailVerificationToken(Base):
+    """Single-Use-Token fuer Email-Verification (Phase W.8).
+
+    Wird beim Register + bei /auth/resend-verification erstellt.
+    Mail-Link: https://www.cubetracker.de/verify-email?token=<token-hex>
+    Bei Klick: Frontend POSTet token an /auth/verify-email
+    -> User.email_verified = True.
+
+    Sicherheit:
+    - token = secrets.token_urlsafe(48)
+    - expires_at: 7 Tage nach Erstellung (User lange Zeit fuer Verify)
+    - used_at: timestamp wenn benutzt -> kein Re-Use
+    """
+
+    __tablename__ = "email_verification_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    token: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    # Bei Email-Change-Flow: hier steht die NEUE Email-Adresse. Bei Register-
+    # Flow: gleich user.email. Wir speichern explizit damit Email-Change
+    # sauber funktioniert (User klickt Link -> ueberschreibe email mit dem
+    # Wert hier, nicht mit aktuellem user.email).
+    new_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    user: Mapped[User] = relationship("User", back_populates="email_verification_tokens")

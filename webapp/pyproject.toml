@@ -17,6 +17,7 @@ dependencies = [
     "python-multipart>=0.0.9",  # FormData (login-Form)
     "email-validator>=2.0",  # EmailStr-Validierung
     "slowapi>=0.1.9",  # Rate-Limiting (Brute-Force-Schutz auf /login + /register)
+    "resend>=2.0",  # Email-Versand fuer Password-Reset + Email-Verification (W.8)
 ]
 
 [project.optional-dependencies]
@@ -37,6 +38,7 @@ packages = [
     "backup",
     "importers",
     "exporters",
+    "emailing",
 ]
 
 [tool.pytest.ini_options]
