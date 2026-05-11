@@ -91,6 +91,46 @@ Bei spezialisierten Aufgaben **bevorzuge Sub-Agents** mit
 Bei kleinen Edits, kurzen Frage-Antwort-Loops oder wenn der
 Kontext minimal ist: direkt im Hauptkontext, ohne Sub-Agent.
 
+## QA nach jeder wesentlichen Aenderung (verbindlich seit 2026-05-11)
+
+**User-Anweisung 2026-05-11:** Nach JEDER wesentlichen Aenderung
+einen Security-Sub-Agent-Review starten — nicht erst am Ende einer
+Phase.
+
+**Was ist "wesentlich"** (Trigger fuer QA-Pass):
+- Neue API-Endpoints (POST/PATCH/DELETE die DB schreiben)
+- Schema-Aenderung (neue Tabelle, neue Spalte, neue FK)
+- Auth- oder Permission-relevanter Code (Login, Token, current_user-
+  Dep, Cross-User-Filter)
+- File-Upload oder External-Service-Integration (Email, Storage,
+  Payment, ...)
+- Bulk-Operations (Import, Backup-Restore, Achievement-Recheck)
+- Komplette Sub-Phase abgeschlossen (z.B. W.4, W.5, W.8)
+
+**Was ist NICHT wesentlich** (kein QA-Pass noetig):
+- UI-/Styling-Polish
+- Doku-/README-Updates
+- Tippfehler-/Kleinst-Fixes
+- ENV-Var-Aenderungen ohne Code
+
+**QA-Workflow:**
+1. Code committed (oder push-bereit)
+2. Sub-Agent (general-purpose oder spezialisiert) mit klarem
+   Review-Auftrag starten, structured Findings
+   (🔴 KRITISCH / 🟡 SOLLTE / 🟢 NICE / ✅ Positiv)
+3. KRITISCH-Findings sofort fixen vor Live-Deploy
+4. SOLLTE-Findings dokumentieren + priorisieren (oft vor v2.x)
+5. NICE-Findings nur falls billig
+
+**Bisherige QA-Findings + Fixes (Audit-Trail):**
+- W.2 (Auth-Skeleton, 2026-05-10) -> 14 Findings, 3 KRITISCH gefixt
+  (HttpOnly-Cookie, token_version, Rate-Limit)
+- W.5 (Backup/csTimer, 2026-05-10) -> 7 KRITISCH+SOLLTE-Findings
+  gefixt (Upload-DoS, Achievement-Recheck-Cap, Snapshot-Size etc.)
+- W.8 (User-Management, 2026-05-11) -> 5 KRITISCH-Findings gefixt
+  (BackgroundTask gegen Email-Enumeration, atomare Token-Claims,
+  Mass-Assignment-Whitelist, atomares token_version-Increment)
+
 ## Branching-Strategie
 
 - `main`: immer deployable, nur gemergte Features
