@@ -1,7 +1,8 @@
-// SettingsPanel (Phase 8.2) — Sub-Tab in VERWALTUNG.
-// Persistiert via lib/settings.ts → localStorage. Nicht im JSON-Backup
-// enthalten (per-Geraet-Konfiguration; aenderbar in Phase 8.5 falls Bedarf).
+// SettingsPanel (Phase 8.2 + W.8) — Sub-Tab in VERWALTUNG.
+// W.8: AccountSettingsPanel oben drueber gerendert (Profil + Passwort +
+// Email + Account-Loeschen). Drunter dann die App-/Timer-/Drill-Settings.
 
+import { AccountSettingsPanel } from "./AccountSettingsPanel";
 import {
   FONT_SIZE_LABELS,
   SETTINGS_DEFAULTS,
@@ -45,7 +46,10 @@ export function SettingsPanel() {
 
   return (
     <div className="space-y-4">
-      {/* Spacebar-Timer */}
+      {/* W.8: Account-Settings (Profil, Passwort, Email, Account-Loeschen) */}
+      <AccountSettingsPanel />
+
+      {/* App-Settings (Spacebar, Drills, Font-Size) — Geraete-spezifisch */}
       <Section title="Spacebar-Timer">
         <Toggle
           label="Spacebar-Modus aktivieren"

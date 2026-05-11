@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
+import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { api } from "./lib/api";
 import { AchievementsMiniCard } from "./components/AchievementsMiniCard";
 import { AchievementToaster } from "./components/AchievementToaster";
@@ -341,6 +343,15 @@ function MainLayout() {
           </div>
         </header>
 
+        {user && !user.email_verified && (
+          <div className="mb-4 rounded-lg bg-amber-500/10 border border-amber-500/30 px-4 py-3 text-sm text-amber-200">
+            ⚠ Deine Email-Adresse ist noch nicht bestaetigt. Wir haben dir
+            eine Verifikations-Mail geschickt — pruefe deinen Posteingang
+            (auch Spam). Unter Verwaltung → Einstellungen kannst du die
+            Mail erneut senden.
+          </div>
+        )}
+
         <OnboardingBanner onSwitchTab={setTab} />
 
         <TabBar current={tab} onChange={setTab} />
@@ -384,6 +395,19 @@ function MainLayout() {
 
 function AuthGuard() {
   const { isAuthenticated, isLoading } = useAuth();
+
+  // W.8: spezielle URL-Routen, die OHNE Login erreichbar sein muessen
+  // (Mail-Links: ResetPassword + VerifyEmail). Render-Static-Site liefert
+  // index.html fuer alle Pfade aus (siehe routes-rewrite in render.yaml),
+  // wir checken hier auf pathname.
+  const pathname = window.location.pathname;
+  if (pathname === "/reset-password") {
+    return <ResetPasswordPage />;
+  }
+  if (pathname === "/verify-email") {
+    return <VerifyEmailPage />;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">

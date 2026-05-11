@@ -21,6 +21,8 @@ export interface UserRead {
   id: number;
   email: string;
   is_active: boolean;
+  email_verified: boolean;
+  display_name: string | null;
   created_at: string;
 }
 
@@ -31,6 +33,7 @@ export interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshMe: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -117,6 +120,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  // Nach Profil-Aenderungen via PATCH /me / verify-email etc: User reloaden.
+  const refreshMe = useCallback(async () => {
+    try {
+      const me = await apiMe();
+      setUser(me);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
   const value = useMemo<AuthState>(
     () => ({
       user,
@@ -125,8 +138,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       register,
       logout,
+      refreshMe,
     }),
-    [user, isLoading, login, register, logout],
+    [user, isLoading, login, register, logout, refreshMe],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
