@@ -51,8 +51,24 @@ async def lifespan(app: FastAPI):
             # Local-import damit Tests die DB nicht beim main-Import anfassen
             from db.database import Base, engine
             import db.models  # noqa: F401  - Models registrieren bei Base
+            from sqlalchemy import text
 
             Base.metadata.create_all(engine)
+
+            # Mini-Migration W.8: create_all fuegt nur fehlende Tabellen an,
+            # aber keine neuen Spalten zu existierenden Tabellen. Postgres
+            # unterstuetzt `ADD COLUMN IF NOT EXISTS` -> idempotent + safe.
+            # SQLite (lokal) braucht das nicht weil DB beim Dev-Reset eh neu.
+            migrations = [
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(64)",
+            ]
+            with engine.begin() as conn:
+                for sql in migrations:
+                    try:
+                        conn.execute(text(sql))
+                    except Exception as me:  # noqa: BLE001
+                        print(f"WARN: migration failed ({sql[:60]}...): {me}")
         except Exception as e:  # noqa: BLE001
             print(f"WARN: DB schema-init failed: {e}")
     yield
