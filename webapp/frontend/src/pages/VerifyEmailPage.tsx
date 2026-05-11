@@ -5,7 +5,7 @@
  * Triggert auto den Verify-Call. Falls erfolgreich + User bereits
  * eingeloggt: refreshMe damit email_verified-Status in der UI aktuell wird.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 
@@ -19,10 +19,18 @@ export function VerifyEmailPage() {
   const [state, setState] = useState<State>(token ? "running" : "fail");
   const [error, setError] = useState<string | null>(null);
 
+  // Single-Shot-Flag: verhindert doppeltes Feuern in React-19-StrictMode
+  // (DEV-only) ODER wenn deps wie isAuthenticated/refreshMe sich aendern
+  // nachdem der erste Call schon den Token "used" markiert hat. Sonst
+  // sieht die UI 400 "abgelaufen" trotz erfolgreicher Verifizierung.
+  const attemptedRef = useRef(false);
+
   useEffect(() => {
     if (!token) return;
-    let cancelled = false;
+    if (attemptedRef.current) return;
+    attemptedRef.current = true;
 
+    let cancelled = false;
     async function run() {
       try {
         await api.post("/auth/verify-email", { token });
@@ -43,7 +51,10 @@ export function VerifyEmailPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, isAuthenticated, refreshMe]);
+    // Nur token als dep — isAuthenticated/refreshMe nutzen wir aus
+    // closure (waeren sonst weitere Re-Runs nach Mount).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
