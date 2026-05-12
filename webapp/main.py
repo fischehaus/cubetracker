@@ -17,6 +17,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from api import achievements as achievements_api
+from api import admin as admin_api
 from api import auth as auth_api
 from api import backup as backup_api
 from api import challenges as challenges_api
@@ -128,6 +129,7 @@ app.include_router(challenges_api.router)
 app.include_router(backup_api.router)
 app.include_router(import_api.router)
 app.include_router(export_api.router)
+app.include_router(admin_api.router)
 
 
 @app.get("/api/health")
