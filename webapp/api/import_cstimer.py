@@ -37,7 +37,7 @@ from sqlalchemy.orm import Session as OrmSession
 from achievements.service import run_achievement_check
 from auth.deps import get_current_user
 from auth.rate_limit import limiter
-from backup.service import create_snapshot
+from backup.service import BackupServiceError, check_json_bomb, create_snapshot
 from db.database import SessionLocal, get_db
 from db.models import User
 from importers.cstimer import import_cstimer_json
@@ -53,30 +53,43 @@ IMPORT_LIMIT = "5/hour"
 
 def _post_import_background(user_id: int, did_import_solves: bool) -> None:
     """Background-Task nach erfolgreichem Bulk-Import:
-    - Auto-Snapshot (sichert den NEUEN Stand, nicht den alten — funktional
-      ein "after-bulk-import"-Snapshot, der User kann darauf zurueck wenn
-      der Import doch nicht das war was er wollte)
+    - Auto-Snapshot ("after_bulk_import"-Reason)
     - Achievement-Recheck
 
     Eigene DB-Session, da BackgroundTask die HTTP-Request-Session nicht
     mehr nutzen kann (die ist beim Response-Send schon geschlossen).
+
+    Security-Fix K3: defensive Exception-Handling + User-Lookup-Check.
+    Wenn User zwischenzeitlich geloescht wurde (CASCADE): silent return.
+    Wenn beliebige Exception: rollback + log + continue (verhindert
+    Worker-Crash bei BG-Task-Fail).
     """
     db = SessionLocal()
     try:
         user = db.get(User, user_id)
-        if user is None:
+        if user is None or not user.is_active:
+            # User geloescht oder deaktiviert -> kein Snapshot/Recheck
             return
-        if did_import_solves:
-            try:
-                create_snapshot(db, user, reason="after_bulk_import")
-            except Exception as e:  # noqa: BLE001
-                logger.error("background snapshot for user %s failed: %s", user_id, e)
-            try:
-                run_achievement_check(db, user_id)
-            except Exception as e:  # noqa: BLE001
-                logger.error(
-                    "background achievement-recheck for user %s failed: %s", user_id, e
-                )
+        if not did_import_solves:
+            return
+        try:
+            create_snapshot(db, user, reason="after_bulk_import")
+        except Exception as e:  # noqa: BLE001
+            logger.error("background snapshot for user %s failed: %s", user_id, e)
+            db.rollback()
+        try:
+            run_achievement_check(db, user_id)
+        except Exception as e:  # noqa: BLE001
+            logger.error(
+                "background achievement-recheck for user %s failed: %s", user_id, e
+            )
+            db.rollback()
+    except Exception as e:  # noqa: BLE001
+        logger.error("background task for user %s crashed unexpectedly: %s", user_id, e)
+        try:
+            db.rollback()
+        except Exception:  # noqa: BLE001
+            pass
     finally:
         db.close()
 
@@ -104,6 +117,13 @@ async def import_cstimer(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"Upload zu gross (max {MAX_UPLOAD_BYTES} bytes).",
         )
+    # Security-Fix K2: JSON-Bomb-Pre-Check vor json.loads()
+    try:
+        check_json_bomb(raw)
+    except BackupServiceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail=str(e)
+        ) from e
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError as e:

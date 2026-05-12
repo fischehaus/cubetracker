@@ -237,7 +237,11 @@ class Snapshot(Base):
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC), index=True
     )
     # Klassifizierung: warum wurde dieser Snapshot angelegt?
-    # "manual" | "before_restore" | "before_bulk_import"
+    # "manual" | "before_restore" | "after_bulk_import"
+    # (W.5-Fix 2026-05-12: "before_bulk_import" obsolet — csTimer-Import
+    # ist non-destructive, Snapshot wird jetzt NACH dem Bulk-Import als
+    # neuer Restore-Punkt angelegt, weil der Vor-Import-Stand via
+    # Solve-Delete erreichbar bleibt + der Bulk-Import sonst Worker-blockt.)
     reason: Mapped[str] = mapped_column(String(32), nullable=False, default="manual")
     # Anzahl Solves im Snapshot — fuers UI ohne JSON-Parse abrufbar.
     solve_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

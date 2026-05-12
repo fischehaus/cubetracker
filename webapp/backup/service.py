@@ -44,6 +44,11 @@ MAX_SNAPSHOTS_PER_USER = 2
 # Render-Free). 30 MB entspricht ~100k Solves; 2 Snapshots * Postgres-Free
 # 1GB = max ~16 User die einen vollen Datensatz haben koennen.
 MAX_SNAPSHOT_PAYLOAD_BYTES = 30 * 1024 * 1024
+# Security-Fix K2: JSON-Bomb-Schutz. Pre-Check vor json.loads(). 100k
+# Solves haben ~12 Tokens pro Solve = 1.2M Tokens fuers Solve-Array,
+# plus Sessions/Hardware/Achievements/Challenges = ~1.5M Tokens worst
+# case. 200k erlaubt das gleiche + Reserve, aber blockt Mio-Nest-Bomben.
+MAX_JSON_STRUCTURAL_TOKENS = 200_000
 
 RestoreMode = Literal["merge", "replace"]
 
@@ -51,6 +56,30 @@ RestoreMode = Literal["merge", "replace"]
 class BackupServiceError(ValueError):
     """Eigene Exception fuer Backup-Service-Validation, damit das
     API-Layer sie 400-mappen kann."""
+
+
+def check_json_bomb(raw_bytes: bytes) -> None:
+    """Security-Fix K2: Pre-Check gegen JSON-Bombs vor `json.loads()`.
+
+    Zaehlt strukturelle Tokens (`[`, `]`, `{`, `}`) — bei normalen
+    Backup-Payloads sind das ~1-1.5M (100k Solves + Sessions etc.).
+    Bei manipulierten deep-nested-JSONs kann diese Zahl in die
+    Millionen gehen und Python-RecursionError oder schlicht riesige
+    CPU-Last bei json.loads() ausloesen.
+
+    Raises BackupServiceError mit 413-mappbarem Message bei Verstoss.
+    """
+    structural_count = (
+        raw_bytes.count(b"[")
+        + raw_bytes.count(b"]")
+        + raw_bytes.count(b"{")
+        + raw_bytes.count(b"}")
+    )
+    if structural_count > MAX_JSON_STRUCTURAL_TOKENS:
+        raise BackupServiceError(
+            f"JSON-Struktur zu komplex ({structural_count} structural tokens; "
+            f"max {MAX_JSON_STRUCTURAL_TOKENS}). Moeglicher JSON-Bomb-Angriff."
+        )
 
 
 # ============================================================
@@ -241,6 +270,9 @@ def restore_user_data(
 
     snapshot_id: int | None = None
     if mode == "replace" and not dry_run and auto_snapshot:
+        # Snapshot vor dem destruktiven Delete — committet eigenstaendig.
+        # Wichtig: bei spaeterem Import-Exception haben wir damit den
+        # Recovery-Pfad (Snapshot-Restore in except-Klausel unten).
         snap = create_snapshot(db, user, reason="before_restore")
         snapshot_id = snap.id
 
@@ -248,12 +280,18 @@ def restore_user_data(
         # Eigene Daten loeschen (Cascade-Behavior beim Solve-Delete:
         # session_id/hardware_id wird NULL bei FK ondelete=SET NULL,
         # aber wir loeschen Sessions/Hardware ja auch, also egal.)
-        db.execute(delete(Achievement).where(Achievement.user_id == user.id))
-        db.execute(delete(Challenge).where(Challenge.user_id == user.id))
-        db.execute(delete(Solve).where(Solve.user_id == user.id))
-        db.execute(delete(DbSession).where(DbSession.user_id == user.id))
-        db.execute(delete(Hardware).where(Hardware.user_id == user.id))
-        db.flush()
+        # Security-Fix K1: alles in try/except + bei Exception
+        # Snapshot wieder einspielen, damit User-Daten nicht verloren gehen.
+        try:
+            db.execute(delete(Achievement).where(Achievement.user_id == user.id))
+            db.execute(delete(Challenge).where(Challenge.user_id == user.id))
+            db.execute(delete(Solve).where(Solve.user_id == user.id))
+            db.execute(delete(DbSession).where(DbSession.user_id == user.id))
+            db.execute(delete(Hardware).where(Hardware.user_id == user.id))
+            db.flush()
+        except Exception:
+            db.rollback()
+            raise
 
     result = RestoreResult(
         mode=mode,
@@ -269,9 +307,19 @@ def restore_user_data(
         achievements_skipped_duplicate=0,
     )
 
-    # ---- Sessions ----
-    # Mapping alte (Backup) session_id -> neue session_id, fuer Solves-FK-Auflug.
+    # ID-Mapping alte (Backup) IDs -> neue IDs, fuer Cross-Refs.
+    # Security-Fix K1: Final-Commit weiter unten in try/except, bei Fail
+    # Snapshot-Recovery (siehe Ende der Funktion).
     session_id_map: dict[int, int] = {}
+    hardware_id_map: dict[int, int] = {}
+
+    # ---- Sessions ----
+    # session_id_map oben schon deklariert. Mapping alte (Backup) session_id
+    # -> neue session_id, fuer Solves-FK-Aufloesung.
+    # Security-Fix S5: cstimer_session_id-Dedup im Replace-Mode, sonst kann
+    # ein manipuliertes Backup mit zwei Sessions gleicher cstimer_session_id
+    # einen Unique-Index-IntegrityError ausloesen + den Loop killen.
+    seen_cstimer_ids: set[int] = set()
     existing_sessions = (
         {}
         if mode == "replace"
@@ -294,10 +342,16 @@ def restore_user_data(
 
         # Security-Fix W.5-finding-6: cstimer_session_id validieren
         # (manipuliertes Backup koennte negative/nicht-int Werte haben)
+        # + Security-Fix S5: doppelte cstimer_session_ids in einem
+        # Backup-Payload dedupen (sonst Unique-Constraint-Crash)
         raw_cs_id = s_data.get("cstimer_session_id")
-        cstimer_session_id = (
+        cstimer_session_id: int | None = (
             raw_cs_id if isinstance(raw_cs_id, int) and raw_cs_id > 0 else None
         )
+        if cstimer_session_id is not None and cstimer_session_id in seen_cstimer_ids:
+            cstimer_session_id = None  # zweite mit gleicher ID -> als neue ohne cstimer-Link
+        if cstimer_session_id is not None:
+            seen_cstimer_ids.add(cstimer_session_id)
 
         new_session = DbSession(
             user_id=user.id,  # IGNORIERE alten user_id, nimm current_user
@@ -313,7 +367,7 @@ def restore_user_data(
         result.sessions_imported += 1
 
     # ---- Hardware ----
-    hardware_id_map: dict[int, int] = {}
+    # hardware_id_map oben schon deklariert.
     existing_hw = (
         {}
         if mode == "replace"
@@ -437,12 +491,53 @@ def restore_user_data(
     # ein "alte Challenge wieder herstellen" ist sinnlos. Beim erneuten
     # /challenges/today werden frische generiert.
 
-    if not dry_run:
+    # Security-Fix K1: Final-Commit in try/except. Bei Exception (z.B.
+    # IntegrityError, ConnectionLost) im Replace-Mode wird der vorher
+    # angelegte Snapshot automatisch wieder eingespielt, damit User-Daten
+    # nicht halb-zerstoert bleiben. Bei Merge-Mode reicht rollback —
+    # keine Daten waren geloescht.
+    if dry_run:
+        db.rollback()  # sicher gegen Halb-State, kein commit
+        return result
+    try:
         db.commit()
-    else:
-        db.rollback()  # sicher gegen Halb-State
+    except Exception:
+        db.rollback()
+        if mode == "replace" and snapshot_id is not None:
+            _recover_from_snapshot(db, user, snapshot_id)
+        raise
 
     return result
+
+
+def _recover_from_snapshot(db: OrmSession, user: User, snapshot_id: int) -> None:
+    """Best-effort Snapshot-Recovery nach Restore-Exception (Security-Fix K1).
+
+    Zieht Snapshot-Payload aus DB, spielt ihn wieder ein (mode=replace,
+    auto_snapshot=False um Endlos-Schleife zu verhindern). Wenn auch das
+    fehlschlaegt: nur loggen, nicht erneut raisen — User kann Snapshot
+    manuell via /backup/snapshots/{id}/restore wieder einspielen.
+    """
+    import logging
+
+    logger = logging.getLogger(__name__)
+    try:
+        snap = db.get(Snapshot, snapshot_id)
+        if snap is None:
+            logger.error("recovery: snapshot %s nicht gefunden", snapshot_id)
+            return
+        payload_orig = json.loads(snap.payload_json)
+        restore_user_data(
+            db, user, payload_orig, mode="replace", dry_run=False, auto_snapshot=False
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.error(
+            "recovery from snapshot %s for user %s failed: %s — "
+            "User muss /backup/snapshots/{id}/restore manuell triggern",
+            snapshot_id,
+            user.id,
+            e,
+        )
 
 
 def _parse_dt(s: str | None) -> datetime | None:

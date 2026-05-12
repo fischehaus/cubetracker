@@ -37,6 +37,7 @@ from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from backup.service import (
     BackupServiceError,
+    check_json_bomb,
     create_snapshot,
     delete_snapshot,
     export_user_data,
@@ -122,6 +123,13 @@ async def restore_backup(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"Upload zu gross (max {MAX_UPLOAD_BYTES} bytes).",
         )
+    # Security-Fix K2: JSON-Bomb-Pre-Check vor json.loads()
+    try:
+        check_json_bomb(raw)
+    except BackupServiceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail=str(e)
+        ) from e
     try:
         payload = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as e:
@@ -227,7 +235,9 @@ def restore_snapshot_endpoint(
 
 
 @router.delete("/snapshots/{snapshot_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(SNAPSHOT_LIMIT)  # 10/h, konsistent mit Snapshot-Erstellung
 def delete_snapshot_endpoint(
+    request: Request,
     snapshot_id: int,
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),

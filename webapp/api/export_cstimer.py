@@ -20,9 +20,16 @@ from exporters.cstimer import export_to_cstimer
 router = APIRouter(prefix="/export", tags=["export"])
 
 
+# Security-Fix S6: Length-Limit auf CSV-Query-Strings.
+# Verhindert Parser-DoS (~1MB von Komma-getrennten Werten).
+_MAX_CSV_LENGTH = 4096
+
+
 def _csv_to_int_list(s: str | None) -> list[int] | None:
     """'1,2,3' -> [1,2,3]. Leere/None -> None (kein Filter)."""
     if not s:
+        return None
+    if len(s) > _MAX_CSV_LENGTH:
         return None
     out: list[int] = []
     for part in s.split(","):
@@ -35,6 +42,8 @@ def _csv_to_int_list(s: str | None) -> list[int] | None:
 
 def _csv_to_str_list(s: str | None) -> list[str] | None:
     if not s:
+        return None
+    if len(s) > _MAX_CSV_LENGTH:
         return None
     out = [p.strip() for p in s.split(",") if p.strip()]
     return out or None
