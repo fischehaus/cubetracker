@@ -18,15 +18,21 @@ import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session as OrmSession
 
 from auth.deps import get_current_user
+from auth.rate_limit import limiter
 from db.database import get_db
 from db.models import Achievement, Hardware, Session as DbSession, Snapshot, Solve, User
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+# Sub-Agent-QA-Finding S3: Rate-Limit auf Admin-Endpoints — verhindert
+# dass ein authentifizierter Angreifer mit gestohlenem Token die teuren
+# COUNT-Queries haemmert.
+ADMIN_LIMIT = "30/minute"
 
 
 def _get_admin_emails() -> set[str]:
@@ -35,30 +41,31 @@ def _get_admin_emails() -> set[str]:
     return {e.strip().lower() for e in raw.split(",") if e.strip()}
 
 
-def _require_admin(current_user: User) -> None:
-    """Hebt 403 wenn der aktuelle User kein Admin ist.
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    """FastAPI-Dependency fuer Admin-only-Endpoints.
+
+    Sub-Agent-QA-Finding S1: als Dependency statt manueller Aufruf
+    im Endpoint-Body — verhindert dass spaetere Admin-Endpoints den
+    Check vergessen koennen (statisch im Code-Review erkennbar).
 
     Sicherheits-Hinweis: liefert generischen 404 (wie bei nicht-existenten
     Endpunkten), kein 403 — verhindert das Probing ob Admin-Endpoint
-    existiert.
+    existiert. Fail-closed: leere ADMIN_EMAILS -> alle bekommen 404.
     """
     admin_emails = _get_admin_emails()
-    if not admin_emails:
-        # Keine Admins konfiguriert -> 404 (Endpoint nicht verfuegbar)
+    if not admin_emails or current_user.email.lower() not in admin_emails:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Not found.",
         )
-    if current_user.email.lower() not in admin_emails:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not found.",
-        )
+    return current_user
 
 
 @router.get("/stats")
+@limiter.limit(ADMIN_LIMIT)
 def get_admin_stats(
-    current_user: User = Depends(get_current_user),
+    request: Request,
+    _admin: User = Depends(require_admin),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Cluster-Statistiken fuer App-Betreiber.
@@ -72,9 +79,12 @@ def get_admin_stats(
 
     KEINE personenbezogenen Daten (keine Emails, Display-Names,
     Einzel-Solves). DSGVO-konform.
-    """
-    _require_admin(current_user)
 
+    Sub-Agent-QA-Finding S4: bei sehr kleinem User-Cluster (<5 User)
+    sind Cube-Type-Listen theoretisch deanonymisierbar — akzeptables
+    Restrisiko fuer Friends-Phase. Bei Wachstum: k-anonymity-Threshold
+    in der Cube-Type-Aggregation.
+    """
     now = datetime.now(UTC)
     seven_days_ago = now - timedelta(days=7)
     thirty_days_ago = now - timedelta(days=30)
