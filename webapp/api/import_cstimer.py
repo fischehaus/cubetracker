@@ -4,17 +4,26 @@ POST /import/cstimer
 - Multipart-File-Upload (.txt oder .json)
 - ?dry_run=true: Stats was importiert wuerde, kein Schreiben
 - File-Size-Limit + Rate-Limit gegen DoS
-- Auto-Snapshot vor grossem Import (>100 neue Solves)
-- Achievement-Recheck nach Bulk
+- Auto-Snapshot + Achievement-Recheck nach grossem Import (>=100 Solves)
+  laufen via BackgroundTask — Endpoint antwortet sofort nach DB-Commit,
+  Snapshot/Recheck koennen 10-30s im Hintergrund laufen.
+
+Performance-Fix 2026-05-12 (csTimer-Import "Network Error" bei 6000+
+Solves): vorher serielle Doppel-Import (Dry-Run + Echt) + sync Snapshot
++ sync Achievement-Recheck = 35-45s Worker-Block, oft groesser als
+Connection-Timeout. Jetzt: einmal echt importieren -> sofort 200 OK ->
+Snapshot + Recheck im BackgroundTask.
 """
 
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 
 from fastapi import (
     APIRouter,
+    BackgroundTasks,
     Depends,
     File,
     HTTPException,
@@ -29,21 +38,54 @@ from achievements.service import run_achievement_check
 from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from backup.service import create_snapshot
-from db.database import get_db
+from db.database import SessionLocal, get_db
 from db.models import User
 from importers.cstimer import import_cstimer_json
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/import", tags=["import"])
 
 MAX_UPLOAD_BYTES = 30 * 1024 * 1024  # 30 MB ~= 100k Solves
-SNAPSHOT_THRESHOLD = 100  # >= so viele neue Solves -> Auto-Snapshot vorher
+SNAPSHOT_THRESHOLD = 100  # >= so viele neue Solves -> Auto-Snapshot nachher
 IMPORT_LIMIT = "5/hour"
+
+
+def _post_import_background(user_id: int, did_import_solves: bool) -> None:
+    """Background-Task nach erfolgreichem Bulk-Import:
+    - Auto-Snapshot (sichert den NEUEN Stand, nicht den alten — funktional
+      ein "after-bulk-import"-Snapshot, der User kann darauf zurueck wenn
+      der Import doch nicht das war was er wollte)
+    - Achievement-Recheck
+
+    Eigene DB-Session, da BackgroundTask die HTTP-Request-Session nicht
+    mehr nutzen kann (die ist beim Response-Send schon geschlossen).
+    """
+    db = SessionLocal()
+    try:
+        user = db.get(User, user_id)
+        if user is None:
+            return
+        if did_import_solves:
+            try:
+                create_snapshot(db, user, reason="after_bulk_import")
+            except Exception as e:  # noqa: BLE001
+                logger.error("background snapshot for user %s failed: %s", user_id, e)
+            try:
+                run_achievement_check(db, user_id)
+            except Exception as e:  # noqa: BLE001
+                logger.error(
+                    "background achievement-recheck for user %s failed: %s", user_id, e
+                )
+    finally:
+        db.close()
 
 
 @router.post("/cstimer", status_code=status.HTTP_200_OK)
 @limiter.limit(IMPORT_LIMIT)
 async def import_cstimer(
     request: Request,
+    background: BackgroundTasks,
     file: UploadFile = File(..., description="csTimer-Export-Datei (.txt/.json)"),
     dry_run: bool = Query(default=False, description="Nur Stats, nichts schreiben"),
     current_user: User = Depends(get_current_user),
@@ -52,11 +94,10 @@ async def import_cstimer(
     """csTimer-Datei fuer aktuellen User importieren — Merge-by-Default,
     Dedup nach (timestamp, time_ms), kein Datenverlust.
 
-    dry_run=true: liefert dieselben Stats wie ein echter Import, aber ohne
-    DB-Aenderung. Empfehlung: erst ?dry_run=true ausfuehren, dann ohne.
+    dry_run=true: liefert Stats was importiert wuerde, ohne DB-Aenderung.
+    Empfehlung: erst Dry-Run, dann real.
     """
-    # Security-Fix: chunked read damit grosse Uploads nicht erst voll
-    # in Memory landen, bevor sie verworfen werden.
+    # Chunked read damit grosse Uploads nicht voll in Memory landen
     raw = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(
@@ -85,30 +126,27 @@ async def import_cstimer(
             detail="JSON-Root muss ein Object sein (csTimer-Format).",
         )
 
-    # 1. Dry-Run zuerst um zu wissen ob Auto-Snapshot lohnt
-    preview = import_cstimer_json(payload, db, current_user.id, dry_run=True)
+    # Dry-Run: rollback am Ende, kein commit (importer.dry_run=True)
+    result = import_cstimer_json(payload, db, current_user.id, dry_run=dry_run)
     response: dict[str, Any] = {
         "filename": file.filename or "unknown",
         "dry_run": dry_run,
-        **preview.to_dict(),
+        **result.to_dict(),
     }
 
     if dry_run:
         return response
 
-    # 2. Bei vielen neuen Solves: Auto-Snapshot vorher
-    snapshot_id: int | None = None
-    if preview.solves_created >= SNAPSHOT_THRESHOLD:
-        snap = create_snapshot(db, current_user, reason="before_bulk_import")
-        snapshot_id = snap.id
-
-    # 3. Echter Import
-    result = import_cstimer_json(payload, db, current_user.id, dry_run=False)
-    response.update(result.to_dict())
-    response["snapshot_created"] = snapshot_id
-
-    # 4. Achievement-Recheck
-    if result.solves_created > 0:
+    # Bei echtem Import + nennenswertem Volumen: Snapshot + Recheck
+    # im Hintergrund laufen lassen, damit der HTTP-Response sofort
+    # zurueck geht (vorher: 35-45s Worker-Block -> Connection-Drops).
+    if result.solves_created >= SNAPSHOT_THRESHOLD:
+        background.add_task(
+            _post_import_background, current_user.id, result.solves_created > 0
+        )
+        response["background_tasks"] = ["snapshot", "achievement_recheck"]
+    elif result.solves_created > 0:
+        # Wenig Solves -> Recheck synchron ist OK, gibt direkt Feedback
         new_unlocks = run_achievement_check(db, current_user.id)
         if new_unlocks:
             response["newly_unlocked_achievements"] = new_unlocks
