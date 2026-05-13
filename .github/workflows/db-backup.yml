@@ -1,0 +1,106 @@
+# Daily Postgres-Dump fuer Cubetracker (Phase W.backup).
+#
+# Hintergrund: Render Free-Tier macht KEINE automatischen Postgres-Backups.
+# Zudem laeuft die DB nach 90 Tagen aus (Render-Limit) -> ohne externen
+# Dump waeren alle User-Daten weg. Diese Action sichert taeglich + on-
+# demand als GitHub-Artifact (90 Tage Retention).
+#
+# Setup-Schritte (siehe BACKUP.md fuer Details):
+#   1. Render-Dashboard -> cubetracker-db -> "External Database URL" kopieren
+#   2. GitHub-Repo -> Settings -> Secrets and variables -> Actions ->
+#      "New repository secret" -> Name DATABASE_URL_PROD, Value = die URL
+#   3. Push dieser Workflow-Datei -> Actions-Tab -> "DB Backup" anklicken ->
+#      "Run workflow" um Setup zu verifizieren
+#
+# Restore (Notfall):
+#   gunzip -k cubetracker-2026-05-13.dump.gz
+#   pg_restore --no-owner --no-acl -d "$NEW_DATABASE_URL" cubetracker-2026-05-13.dump
+#
+# Schedule: 02:00 UTC = 03:00 MEZ / 04:00 MESZ.
+
+name: DB Backup
+
+on:
+  schedule:
+    # Cron-Syntax: minute hour day-of-month month day-of-week
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    # Manual-Trigger ueber Actions-UI fuer ad-hoc-Dumps
+    # (z.B. vor Hetzner-Migration oder grosseren Schema-Aenderungen)
+
+# Verhindert dass parallele Runs (geplant + manuell) sich beissen
+concurrency:
+  group: db-backup
+  cancel-in-progress: false  # warten statt abbrechen — Dumps sind wichtig
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read  # minimum noetig fuer Artifact-Upload
+
+    steps:
+      - name: Install postgresql-client-16 (matcht Render-Postgres-16)
+        # Render-DB ist Postgres 16. pg_dump-Version sollte server-version
+        # matchen, sonst gibt's Warnings oder inkompatible Dumps.
+        # Wir nutzen das offizielle PGDG-Apt-Repo statt der ggf. veralteten
+        # Ubuntu-Default-Version (oft pg-14).
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-16
+          pg_dump --version
+
+      - name: Run pg_dump (custom format + compressed)
+        env:
+          # $DATABASE_URL_PROD aus GitHub-Repo-Secrets. Format: postgres://...
+          # External-URL von Render-Dashboard (NICHT die Internal-URL, die
+          # erreicht nur Render-interne Services).
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${DATABASE_URL:-}" ]]; then
+            echo "::error::DATABASE_URL_PROD secret nicht gesetzt — siehe BACKUP.md"
+            exit 1
+          fi
+
+          DATE=$(date -u +%Y-%m-%d)
+          OUT="cubetracker-${DATE}.dump"
+
+          # --format=custom: binaer + komprimiert (kleiner als plain SQL,
+          # plus pg_restore kann selektiv tabellen-weise zurueckspielen).
+          # --no-owner / --no-acl: Restore auf anderen Server (z.B. Hetzner)
+          # ohne Rollen-Konflikte. Owner wird durch Restore-User uebernommen.
+          pg_dump "$DATABASE_URL" \
+            --format=custom \
+            --no-owner \
+            --no-acl \
+            --verbose \
+            --file="$OUT" 2>&1 | tail -20
+
+          ls -lh "$OUT"
+
+          # Sanity-Check: Dump nicht leer + von pg_restore lesbar
+          if [[ ! -s "$OUT" ]]; then
+            echo "::error::Dump-Datei leer — pg_dump fehlgeschlagen"
+            exit 1
+          fi
+          pg_restore --list "$OUT" | head -20 || {
+            echo "::error::pg_restore kann den Dump nicht lesen"
+            exit 1
+          }
+
+      - name: Upload Dump as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Datum im Namen damit Listen sortierbar ist
+          name: cubetracker-db-${{ github.run_number }}
+          path: cubetracker-*.dump
+          # 90 Tage = max Free-Tier-Retention. Reicht fuer 3 Monate
+          # Forensik. Falls laenger noetig -> S3/Backblaze-Sync.
+          retention-days: 90
+          compression-level: 9  # max gzip — Dumps sind grosse Text-Daten
+          if-no-files-found: error
