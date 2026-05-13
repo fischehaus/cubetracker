@@ -38,6 +38,15 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.logo-bigger",
+        released=date(2026, 5, 14),
+        title="Logo im Header 2.5× groesser",
+        highlights=[
+            "App-Header-Logo von 64-80px auf 160-208px Hoehe "
+            "(Faktor ~2.5×) — viel praesenter als Marke",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.logo-info",
         released=date(2026, 5, 14),
         title="Logo prominenter + Info-Buttons in Karten",

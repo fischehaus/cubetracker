@@ -403,7 +403,7 @@ function MainLayout() {
               src="/cubetracker-logo.png"
               alt=""
               aria-hidden="true"
-              className="h-16 md:h-20 w-auto group-hover:opacity-90 transition-opacity"
+              className="h-40 md:h-52 w-auto group-hover:opacity-90 transition-opacity"
             />
           </button>
           <div className="flex items-center gap-3">
