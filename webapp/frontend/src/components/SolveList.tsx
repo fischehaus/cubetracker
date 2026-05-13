@@ -22,6 +22,13 @@ import {
   parseTimeInput,
 } from "../lib/format";
 import { rollingAverages, type SolvePoint } from "../lib/rolling";
+import {
+  nextSortState,
+  sortIndicator,
+  sortSolveRows,
+  type SortDir,
+  type SortKey,
+} from "../lib/solve-sort";
 import type { Solve } from "../lib/types";
 import { SolveDetailModal } from "./SolveDetailModal";
 
@@ -50,6 +57,16 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
   const [editError, setEditError] = useState<string | null>(null);
   // Solve, der gerade im Detail-Modal angezeigt wird (Phase L-3b)
   const [detailSolve, setDetailSolve] = useState<Solve | null>(null);
+  // Sortierung: Default # desc (API liefert eh DESC, das spiegelt
+  // chronologisch die neuesten oben).
+  const [sortKey, setSortKey] = useState<SortKey>("num");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  function handleSort(clicked: SortKey) {
+    const next = nextSortState({ key: sortKey, dir: sortDir }, clicked);
+    setSortKey(next.key);
+    setSortDir(next.dir);
+  }
 
   const params: SolveListParams = {};
   // -1 (Alle) → wir setzen ein sehr hohes Limit. Backend verkraftet 50k+ ohne Probleme.
@@ -102,6 +119,25 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
     });
     return { ao5Map: ao5M, ao12Map: ao12M };
   }, [solves]);
+
+  // Solvenummer-Berechnung: API liefert die letzten `limit` Solves in DESC.
+  // Wir nehmen `stats.count` als Total + leiten die Nummer ab.
+  // Wichtig: Solvenummer haengt am Solve, NICHT am Sortier-Index.
+  // Sort-Reihenfolge aendert nur die UI-Reihenfolge, die Nummer bleibt.
+  const sortedDisplay = useMemo(() => {
+    if (!solves || solves.length === 0) return [];
+    const totalCount = stats?.count ?? solves.length;
+    const rows = solves.map((s, indexInDesc) => ({
+      solve: s,
+      solveNumber: totalCount - indexInDesc,
+      time_ms: s.time_ms,
+      dnf: s.dnf,
+      plus_two: s.plus_two,
+      ao5: ao5Map.get(s.id) ?? null,
+      ao12: ao12Map.get(s.id) ?? null,
+    }));
+    return sortSolveRows(rows, sortKey, sortDir);
+  }, [solves, stats?.count, ao5Map, ao12Map, sortKey, sortDir]);
 
   // F7: Edit-Mode starten — Initialwert in den Draft setzen.
   function startEdit(solveId: number, field: "time" | "notes", initial: string) {
@@ -210,17 +246,43 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         <table className="w-full text-base">
           <thead>
             <tr className="border-b border-gray-700 text-left text-gray-400 text-sm">
-              <th className="py-2.5 pr-3 font-medium">Zeit</th>
+              <SortableTh
+                label="#"
+                sortKey="num"
+                activeKey={sortKey}
+                dir={sortDir}
+                onClick={handleSort}
+              />
+              <SortableTh
+                label="Zeit"
+                sortKey="time"
+                activeKey={sortKey}
+                dir={sortDir}
+                onClick={handleSort}
+              />
+              <SortableTh
+                label="AO5"
+                sortKey="ao5"
+                activeKey={sortKey}
+                dir={sortDir}
+                onClick={handleSort}
+              />
+              <SortableTh
+                label="AO12"
+                sortKey="ao12"
+                activeKey={sortKey}
+                dir={sortDir}
+                onClick={handleSort}
+              />
               <th className="py-2.5 pr-3 font-medium">Cube</th>
               <th className="py-2.5 pr-3 font-medium">Notiz</th>
               <th className="py-2.5 pr-3 font-medium text-right">Aktionen</th>
             </tr>
           </thead>
           <tbody>
-            {solves.map((s) => {
+            {sortedDisplay.map((row) => {
+              const s = row.solve;
               const isBest = s.id === bestSolveId;
-              const ao5 = ao5Map.get(s.id) ?? null;
-              const ao12 = ao12Map.get(s.id) ?? null;
               const isEditingTime =
                 editing?.solveId === s.id && editing.field === "time";
               const isEditingNotes =
@@ -232,6 +294,9 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                     isBest ? "bg-yellow-500/5" : ""
                   }`}
                 >
+                  <td className="py-2 pr-3 text-sm text-gray-500 font-mono align-top">
+                    {row.solveNumber}
+                  </td>
                   <td className="py-2 pr-3 font-mono align-top">
                     {isEditingTime ? (
                       <input
@@ -275,11 +340,12 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                         </span>
                       </div>
                     )}
-                    {/* ao5/ao12 als kleine Sub-Zeile — wie csTimer-Liste */}
-                    <div className="text-xs text-gray-500 mt-1 font-normal">
-                      ao5 {ao5 !== null ? formatTime(ao5) : "–"} · ao12{" "}
-                      {ao12 !== null ? formatTime(ao12) : "–"}
-                    </div>
+                  </td>
+                  <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top">
+                    {row.ao5 !== null ? formatTime(row.ao5) : "–"}
+                  </td>
+                  <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top">
+                    {row.ao12 !== null ? formatTime(row.ao12) : "–"}
                   </td>
                   <td className="py-3 pr-3 text-gray-300 align-top">
                     <div>{s.cube_type}</div>
@@ -378,8 +444,9 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
       </div>
 
       <p className="mt-3 text-xs text-gray-500">
-        Tipp: Klick auf Zeit oder Notiz zum Bearbeiten · ℹ fuer Detail
-        (Scramble, Notiz, Hardware, Session). Enter speichert, Esc bricht ab.
+        Tipp: Klick auf Spaltenkopf (#, Zeit, AO5, AO12) zum Sortieren ·
+        Klick auf Zeit oder Notiz zum Bearbeiten · ℹ fuer Detail (Scramble,
+        Notiz, Hardware, Session). Enter speichert, Esc bricht ab.
       </p>
 
       {detailSolve && (
@@ -392,5 +459,36 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         />
       )}
     </div>
+  );
+}
+
+// ============================================================
+// Sortable Table Header
+// ============================================================
+
+function SortableTh({
+  label,
+  sortKey,
+  activeKey,
+  dir,
+  onClick,
+}: {
+  label: string;
+  sortKey: SortKey;
+  activeKey: SortKey;
+  dir: SortDir;
+  onClick: (k: SortKey) => void;
+}) {
+  const isActive = sortKey === activeKey;
+  return (
+    <th
+      className={`py-2.5 pr-3 font-medium cursor-pointer select-none ${
+        isActive ? "text-purple-300" : "hover:text-gray-300"
+      }`}
+      onClick={() => onClick(sortKey)}
+    >
+      {label}
+      {sortIndicator(sortKey, activeKey, dir)}
+    </th>
   );
 }

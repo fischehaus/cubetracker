@@ -151,7 +151,14 @@ function TimerTab({
   const scrambleTypeOverride = activeSession?.scramble_type ?? null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+    // Layout-Pflege: Live + Letzte-Solves links, Solving-Eingabe rechts.
+    // Auf Mobile (grid-cols-1) stapelt sich's eh untereinander, dort sorgt
+    // die `lg:`-Bedingung dafuer dass auf grossen Screens die Reihenfolge
+    // greift.
+    <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
+      <aside>
+        <LastSolvesPreview cubeType={timerCubeType} sessionId={timerSessionId} />
+      </aside>
       <main className="space-y-4">
         <SessionPlanCard
           cubeType={timerCubeType}
@@ -172,9 +179,6 @@ function TimerTab({
           onSolveSaved={() => setRegenSeed((s) => s + 1)}
         />
       </main>
-      <aside>
-        <LastSolvesPreview cubeType={timerCubeType} sessionId={timerSessionId} />
-      </aside>
     </div>
   );
 }

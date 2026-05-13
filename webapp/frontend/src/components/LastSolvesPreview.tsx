@@ -2,11 +2,11 @@
 //
 // Dazu eine kleine FormRow-Helper-Komponente fuer die Form-Vergleichszeilen.
 //
-// Zeigt drei Bloecke:
+// Zeigt zwei Bloecke:
 //  1. LIVE-Card: letzter Solve, ao5, ao12, plus Form-Vergleich gegen das
 //     Mittel der letzten N Solves (N waehlbar: 100/500/alle).
-//  2. Letzte 8 Solves zur Kontrolle, mit Quick-Delete pro Solve
-//     (vertippte Eingabe schnell wegmachen).
+//  2. Letzte X Solves als sortierbare Tabelle (Solvenummer, Zeit, AO5,
+//     AO12). X einstellbar 10/20/50/100. Sortierung per Spalten-Klick.
 //
 // Keine Edit-Aktionen ausser Delete und +2/DNF auf den letzten —
 // die volle bearbeitbare Liste lebt im ANALYSE-Tab.
@@ -19,13 +19,23 @@ import {
   useUpdateSolve,
 } from "../lib/api";
 import { formatSolveTime, formatTime } from "../lib/format";
+import { rollingAverages, type SolvePoint } from "../lib/rolling";
+import {
+  nextSortState,
+  sortIndicator,
+  sortSolveRows,
+  type SortDir,
+  type SortKey,
+} from "../lib/solve-sort";
 
 interface Props {
   cubeType: string;
   sessionId: number | null;
 }
 
-const PREVIEW_COUNT = 8;
+// Lookback fuer AO12 — Tabelle zeigt X Zeilen, fetch holt X+11 damit auch
+// der aelteste angezeigte Solve seinen AO12 hat (sonst muesste man "—" zeigen).
+const AO_LOOKBACK = 11;
 
 interface WindowOption {
   value: number;
@@ -37,15 +47,29 @@ const WINDOW_OPTIONS: WindowOption[] = [
   { value: 100_000, label: "alle" },
 ];
 
+// X-Picker fuer die Letzte-Solves-Tabelle
+const TABLE_SIZE_OPTIONS: { value: number; label: string }[] = [
+  { value: 10, label: "10" },
+  { value: 20, label: "20" },
+  { value: 50, label: "50" },
+  { value: 100, label: "100" },
+];
+
 export function LastSolvesPreview({ cubeType, sessionId }: Props) {
   // Window fuer Form-Vergleich (default 100, persistiert lokal pro session)
   const [windowSize, setWindowSize] = useState<number>(100);
 
-  // Eine Query fuer die ausgewaehlte Fenstergroesse — Mini-Liste schneidet
-  // sich daraus die ersten 8 Eintraege.
+  // Tabelle: X-Picker + Sort-State. Default 20, Default-Sort: Solvenummer desc.
+  const [tableSize, setTableSize] = useState<number>(20);
+  const [sortKey, setSortKey] = useState<SortKey>("num");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  // Wir laden max(windowSize, tableSize + AO_LOOKBACK) — eine Query reicht
+  // fuer beide Use-Cases (Form-Vergleich + Tabelle).
+  const fetchLimit = Math.max(windowSize, tableSize + AO_LOOKBACK);
   const params: { cube_type: string; session_id?: number; limit: number } = {
     cube_type: cubeType,
-    limit: windowSize,
+    limit: fetchLimit,
   };
   if (sessionId !== null) params.session_id = sessionId;
   const { data: solves } = useSolves(params);
@@ -61,6 +85,61 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
 
   const lastSolve = solves && solves.length > 0 ? solves[0] : null;
   const isLastPb = lastSolve != null && stats?.best_solve_id === lastSolve.id;
+
+  // Rolling AO5/AO12 pro Solve. API liefert DESC (neueste zuerst), Rolling
+  // braucht chronologisch (alt -> neu). Wir reversen + mappen zurueck per ID.
+  const { ao5Map, ao12Map } = useMemo(() => {
+    if (!solves || solves.length === 0) {
+      return {
+        ao5Map: new Map<number, number | null>(),
+        ao12Map: new Map<number, number | null>(),
+      };
+    }
+    const chronological = [...solves].reverse();
+    const points: SolvePoint[] = chronological.map((s) => ({
+      time_ms: s.time_ms,
+      dnf: s.dnf,
+      plus_two: s.plus_two,
+    }));
+    const ao5s = rollingAverages(points, 5);
+    const ao12s = rollingAverages(points, 12);
+    const ao5M = new Map<number, number | null>();
+    const ao12M = new Map<number, number | null>();
+    chronological.forEach((s, i) => {
+      ao5M.set(s.id, ao5s[i]);
+      ao12M.set(s.id, ao12s[i]);
+    });
+    return { ao5Map: ao5M, ao12Map: ao12M };
+  }, [solves]);
+
+  // Tabellen-Rows: nur die ersten tableSize aus DESC, plus Solvenummer +
+  // AO5/AO12 angeflanscht. Solvenummer = totalCount - indexInDescOfList.
+  // Wir nutzen stats.count als totalCount (= alle Solves matching Filter).
+  const tableRows = useMemo(() => {
+    if (!solves || solves.length === 0) return [];
+    const totalCount = stats?.count ?? solves.length;
+    return solves.slice(0, tableSize).map((s, indexInDesc) => ({
+      solve: s,
+      solveNumber: totalCount - indexInDesc,
+      time_ms: s.time_ms,
+      dnf: s.dnf,
+      plus_two: s.plus_two,
+      ao5: ao5Map.get(s.id) ?? null,
+      ao12: ao12Map.get(s.id) ?? null,
+    }));
+  }, [solves, stats?.count, tableSize, ao5Map, ao12Map]);
+
+  // Sortierte Anzeige — Sort beruehrt nur die UI, Solvenummer bleibt fest.
+  const sortedRows = useMemo(
+    () => sortSolveRows(tableRows, sortKey, sortDir),
+    [tableRows, sortKey, sortDir],
+  );
+
+  function handleSort(clicked: SortKey) {
+    const next = nextSortState({ key: sortKey, dir: sortDir }, clicked);
+    setSortKey(next.key);
+    setSortDir(next.dir);
+  }
 
   // Mittel der geladenen Window-Solves (effective_ms, DNF raus, +2 drin).
   const windowMean = useMemo<number | null>(() => {
@@ -222,46 +301,149 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
         )}
       </div>
 
-      {/* Letzte 8 Solves zur Kontrolle — mit Quick-Delete pro Eintrag */}
+      {/* Letzte X Solves — sortierbare Tabelle mit AO5/AO12 als Spalten */}
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h3 className="text-base uppercase tracking-wide text-gray-500 mb-3">
-          Letzte {PREVIEW_COUNT} ({cubeType})
-        </h3>
-        {solves && solves.length > 0 ? (
-          <ul className="space-y-1.5">
-            {solves.slice(0, PREVIEW_COUNT).map((s, i) => (
-              <li
-                key={s.id}
-                className={`flex items-center justify-between text-base font-mono py-1.5 ${
-                  i === 0 ? "text-gray-100" : "text-gray-400"
-                }`}
-              >
-                <span>{formatSolveTime(s)}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-600">
-                    #{solves.length - i}
-                  </span>
-                  <button
-                    onClick={() => {
-                      if (confirm(`Solve ${formatSolveTime(s)} loeschen?`))
-                        del.mutate(s.id);
-                    }}
-                    className="text-sm rounded bg-gray-800 px-2 py-1 text-gray-500 hover:bg-red-700/40 hover:text-red-200"
-                    title="Solve loeschen (z.B. bei vertippter Eingabe)"
-                  >
-                    🗑
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+        <div className="flex items-baseline justify-between gap-2 mb-3">
+          <h3 className="text-base uppercase tracking-wide text-gray-500">
+            Letzte Solves ({cubeType})
+          </h3>
+          <label className="flex items-center gap-1.5 text-xs text-gray-500">
+            Anzahl
+            <select
+              value={tableSize}
+              onChange={(e) => setTableSize(parseInt(e.target.value, 10))}
+              className="rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
+            >
+              {TABLE_SIZE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {sortedRows.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-700 text-left text-xs text-gray-500">
+                  <SortableHeader
+                    label="#"
+                    sortKey="num"
+                    activeKey={sortKey}
+                    dir={sortDir}
+                    onClick={handleSort}
+                  />
+                  <SortableHeader
+                    label="Zeit"
+                    sortKey="time"
+                    activeKey={sortKey}
+                    dir={sortDir}
+                    onClick={handleSort}
+                  />
+                  <SortableHeader
+                    label="AO5"
+                    sortKey="ao5"
+                    activeKey={sortKey}
+                    dir={sortDir}
+                    onClick={handleSort}
+                  />
+                  <SortableHeader
+                    label="AO12"
+                    sortKey="ao12"
+                    activeKey={sortKey}
+                    dir={sortDir}
+                    onClick={handleSort}
+                  />
+                  <th className="py-1.5 pr-1 text-right font-medium"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedRows.map((row) => {
+                  const isNewest = row.solveNumber === (stats?.count ?? 0);
+                  return (
+                    <tr
+                      key={row.solve.id}
+                      className={`border-b border-gray-800 last:border-0 hover:bg-gray-800/30 ${
+                        isNewest ? "text-gray-100" : "text-gray-400"
+                      }`}
+                    >
+                      <td className="py-1.5 pr-2 text-xs text-gray-500 font-mono">
+                        {row.solveNumber}
+                      </td>
+                      <td className="py-1.5 pr-2 font-mono">
+                        {formatSolveTime(row.solve)}
+                      </td>
+                      <td className="py-1.5 pr-2 font-mono text-gray-500">
+                        {row.ao5 !== null ? formatTime(row.ao5) : "–"}
+                      </td>
+                      <td className="py-1.5 pr-2 font-mono text-gray-500">
+                        {row.ao12 !== null ? formatTime(row.ao12) : "–"}
+                      </td>
+                      <td className="py-1.5 pr-0 text-right">
+                        <button
+                          onClick={() => {
+                            if (
+                              confirm(
+                                `Solve ${formatSolveTime(row.solve)} loeschen?`,
+                              )
+                            )
+                              del.mutate(row.solve.id);
+                          }}
+                          className="text-xs rounded bg-gray-800 px-1.5 py-0.5 text-gray-500 hover:bg-red-700/40 hover:text-red-200"
+                          title="Solve loeschen"
+                        >
+                          🗑
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <p className="text-base text-gray-500">
-            Noch keine Solves fuer {cubeType}. Tipp eine Zeit links ein.
+            Noch keine Solves fuer {cubeType}. Tipp eine Zeit rechts ein.
           </p>
         )}
+        <p className="mt-2 text-[10px] text-gray-600">
+          Klick auf Spaltenkopf zum Sortieren.
+        </p>
       </div>
     </div>
+  );
+}
+
+// ============================================================
+// Sortable Table Header (kleiner Helper — nur fuer diese Komponente)
+// ============================================================
+
+function SortableHeader({
+  label,
+  sortKey,
+  activeKey,
+  dir,
+  onClick,
+}: {
+  label: string;
+  sortKey: SortKey;
+  activeKey: SortKey;
+  dir: SortDir;
+  onClick: (k: SortKey) => void;
+}) {
+  const isActive = sortKey === activeKey;
+  return (
+    <th
+      className={`py-1.5 pr-2 font-medium cursor-pointer select-none ${
+        isActive ? "text-purple-300" : "hover:text-gray-300"
+      }`}
+      onClick={() => onClick(sortKey)}
+    >
+      {label}
+      {sortIndicator(sortKey, activeKey, dir)}
+    </th>
   );
 }
 
