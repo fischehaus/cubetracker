@@ -35,8 +35,7 @@ import { OnboardingBanner } from "./components/OnboardingBanner";
 import { PatchNotesPanel } from "./components/PatchNotesPanel";
 import { ReminderCard } from "./components/ReminderCard";
 import { SolveList } from "./components/SolveList";
-import { FriendsTab } from "./components/FriendsTab";
-import { LeaderboardTab } from "./components/LeaderboardTab";
+import { CommunityTab, type CommunitySection } from "./components/CommunityTab";
 import { StatsCard } from "./components/StatsCard";
 import { TabBar, type AppTab } from "./components/TabBar";
 import { TrainerTab } from "./components/TrainerTab";
@@ -61,14 +60,31 @@ const VALID_TABS: AppTab[] = [
   "analyse",
   "verwaltung",
   "trainer",
-  "friends",
-  "leaderboard",
+  "community",
 ];
 
-function tabFromHash(): AppTab | null {
+// Backward-Compat: alte URL-Hashes (#friends, #leaderboard) mappen auf
+// den neuen Community-Tab + setzen den passenden Sub-Tab. Damit landen
+// User mit Bookmarks/History-Eintraegen weiter sinnvoll.
+const LEGACY_HASH_MAP: Record<string, { tab: AppTab; sub?: CommunitySection }> = {
+  friends: { tab: "community", sub: "friends" },
+  leaderboard: { tab: "community", sub: "leaderboard" },
+};
+
+function tabFromHash(): {
+  tab: AppTab;
+  communityInitial?: CommunitySection;
+} | null {
   if (typeof window === "undefined") return null;
   const raw = window.location.hash.replace(/^#\/?/, "").trim();
-  return (VALID_TABS as string[]).includes(raw) ? (raw as AppTab) : null;
+  const legacy = LEGACY_HASH_MAP[raw];
+  if (legacy) {
+    return { tab: legacy.tab, communityInitial: legacy.sub };
+  }
+  if ((VALID_TABS as string[]).includes(raw)) {
+    return { tab: raw as AppTab };
+  }
+  return null;
 }
 
 interface Health {
@@ -304,17 +320,20 @@ function AnalyseTab({
 // MainLayout
 // ============================================================
 
-function loadInitialTab(): AppTab {
-  if (typeof window === "undefined") return "dashboard";
+function loadInitialTab(): {
+  tab: AppTab;
+  communityInitial?: CommunitySection;
+} {
+  if (typeof window === "undefined") return { tab: "dashboard" };
   // Prio 1: URL-Hash (z.B. #analyse) — Bookmark/Reload-Wahl
   const fromHash = tabFromHash();
   if (fromHash) return fromHash;
   // Prio 2: localStorage (zuletzt genutzt)
   const stored = window.localStorage.getItem(TAB_STORAGE_KEY);
   if ((VALID_TABS as string[]).includes(stored ?? "")) {
-    return stored as AppTab;
+    return { tab: stored as AppTab };
   }
-  return "dashboard";
+  return { tab: "dashboard" };
 }
 
 function MainLayout() {
@@ -327,7 +346,14 @@ function MainLayout() {
   );
   const [analyseSessionId, setAnalyseSessionId] = useState<number | null>(null);
   const [analyseCubeFilter, setAnalyseCubeFilter] = useState<string>("");
-  const [tab, setTab] = useState<AppTab>(loadInitialTab);
+  const initial = loadInitialTab();
+  const [tab, setTab] = useState<AppTab>(initial.tab);
+  // Initial-Sub-Tab im Community-Tab — wird nur beim ersten Mount aus
+  // dem URL-Hash gelesen (z.B. legacy #friends → friends). Spaetere
+  // Wechsel innerhalb des CommunityTabs leben in dessen lokalem state.
+  const [communityInitial] = useState<CommunitySection | undefined>(
+    initial.communityInitial,
+  );
 
   // Tab-Wahl persistieren — localStorage + URL-Hash, damit
   // Reload + Browser-Back beide funktionieren.
@@ -348,8 +374,8 @@ function MainLayout() {
   // Browser-Back/Forward: hash-aenderung von aussen reagieren.
   useEffect(() => {
     function onHashChange() {
-      const t = tabFromHash();
-      if (t && t !== tab) setTab(t);
+      const result = tabFromHash();
+      if (result && result.tab !== tab) setTab(result.tab);
     }
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
@@ -431,8 +457,9 @@ function MainLayout() {
         )}
         {tab === "verwaltung" && <VerwaltungTab />}
         {tab === "trainer" && <TrainerTab />}
-        {tab === "friends" && <FriendsTab />}
-        {tab === "leaderboard" && <LeaderboardTab />}
+        {tab === "community" && (
+          <CommunityTab initialSection={communityInitial} />
+        )}
 
         <footer className="mt-8 text-xs text-gray-600 text-center">
           cubetracker — Speedcubing-Tracker · v-Badge oben rechts zeigt

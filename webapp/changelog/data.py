@@ -38,6 +38,23 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.community-tab",
+        released=date(2026, 5, 14),
+        title="Tab-Konsolidierung: Community ersetzt Freunde + Bestenliste",
+        highlights=[
+            "7 Top-Tabs → 6: Freunde + Bestenliste zusammengelegt in "
+            "neuen Tab „Community\" 🤝",
+            "Innerhalb von Community: Sub-Tab-Bar mit „Freunde\" und "
+            "„Bestenliste\" — gleicher Stil wie Verwaltung-Sub-Tabs",
+            "Backward-Compat: alte URL-Hashes (#friends, #leaderboard) "
+            "landen automatisch auf Community + richtigem Sub-Tab — "
+            "Bookmarks bleiben funktional",
+            "Trainer + Verwaltung bleiben eigenstaendig (konservative "
+            "Konsolidierung — Trainer-Sub-Tabs Heute/Algs/Erfolge sind "
+            "konzeptionell zu eigenstaendig fuer Zerlegung)",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.logo",
         released=date(2026, 5, 14),
         title="Neues Logo eingebunden",
