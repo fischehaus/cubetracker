@@ -38,6 +38,19 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.solvelist-hardware",
+        released=date(2026, 5, 14),
+        title="Analyse → Solves: Hardware statt Notiz in Tabelle",
+        highlights=[
+            "Notiz-Spalte raus aus der Solve-Tabelle (Notiz bleibt im "
+            "Detail-Modal ueber den ℹ-Button verfuegbar)",
+            "Hardware-Spalte stattdessen — zeigt den Hardware-Namen "
+            "fuer jeden Solve, oder „—\" wenn keine zugeordnet",
+            "Cube-Spalte vereinfacht (Hardware-Sub-Zeile entfernt — "
+            "wird ja jetzt eigenstaendig gezeigt)",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.patchnotes",
         released=date(2026, 5, 14),
         title="Patch Notes + automatische Versionierung",

@@ -48,7 +48,9 @@ const LIMIT_OPTIONS: { value: number; label: string }[] = [
   { value: -1, label: "Alle" },
 ];
 
-type EditingState = { solveId: number; field: "time" | "notes" } | null;
+// Notes-Edit raus aus der Tabelle — wird nur noch im Detail-Modal angezeigt.
+// Nur Zeit-Inline-Edit bleibt in der Tabelle.
+type EditingState = { solveId: number; field: "time" } | null;
 
 export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) {
   const [limit, setLimit] = useState<number>(100);
@@ -139,9 +141,9 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
     return sortSolveRows(rows, sortKey, sortDir);
   }, [solves, stats?.count, ao5Map, ao12Map, sortKey, sortDir]);
 
-  // F7: Edit-Mode starten — Initialwert in den Draft setzen.
-  function startEdit(solveId: number, field: "time" | "notes", initial: string) {
-    setEditing({ solveId, field });
+  // Edit-Mode starten — nur noch Zeit, Notiz lebt im Detail-Modal.
+  function startEdit(solveId: number, initial: string) {
+    setEditing({ solveId, field: "time" });
     setDraftValue(initial);
     setEditError(null);
   }
@@ -152,27 +154,18 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
     setEditError(null);
   }
 
-  // F7: Save — bei time wird parseTimeInput angewendet (akzeptiert
-  // alle Formate inkl. csTimer-Stackmat). Notes wird trim'd; leer → null.
+  // Save: parseTimeInput akzeptiert alle Formate inkl. csTimer-Stackmat.
   function saveEdit() {
     if (!editing) return;
-    if (editing.field === "time") {
-      const ms = parseTimeInput(draftValue);
-      if (ms === null) {
-        setEditError("Ungueltiges Zeit-Format");
-        return;
-      }
-      update.mutate(
-        { id: editing.solveId, payload: { time_ms: ms } },
-        { onSuccess: cancelEdit, onError: (e) => setEditError(e.message) }
-      );
-    } else {
-      const trimmed = draftValue.trim();
-      update.mutate(
-        { id: editing.solveId, payload: { notes: trimmed || null } },
-        { onSuccess: cancelEdit, onError: (e) => setEditError(e.message) }
-      );
+    const ms = parseTimeInput(draftValue);
+    if (ms === null) {
+      setEditError("Ungueltiges Zeit-Format");
+      return;
     }
+    update.mutate(
+      { id: editing.solveId, payload: { time_ms: ms } },
+      { onSuccess: cancelEdit, onError: (e) => setEditError(e.message) },
+    );
   }
 
   if (isLoading) {
@@ -275,7 +268,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                 onClick={handleSort}
               />
               <th className="py-2.5 pr-3 font-medium">Cube</th>
-              <th className="py-2.5 pr-3 font-medium">Notiz</th>
+              <th className="py-2.5 pr-3 font-medium">Hardware</th>
               <th className="py-2.5 pr-3 font-medium text-right">Aktionen</th>
             </tr>
           </thead>
@@ -285,8 +278,10 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
               const isBest = s.id === bestSolveId;
               const isEditingTime =
                 editing?.solveId === s.id && editing.field === "time";
-              const isEditingNotes =
-                editing?.solveId === s.id && editing.field === "notes";
+              const hardwareName =
+                s.hardware_id !== null
+                  ? (hardwareById.get(s.hardware_id) ?? null)
+                  : null;
               return (
                 <tr
                   key={s.id}
@@ -318,7 +313,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                         title={`${formatDate(s.timestamp)} — Klick zum Bearbeiten`}
                         className="cursor-pointer"
                         onClick={() =>
-                          startEdit(s.id, "time", formatTime(s.time_ms))
+                          startEdit(s.id, formatTime(s.time_ms))
                         }
                       >
                         {isBest && (
@@ -347,44 +342,15 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                   <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top">
                     {row.ao12 !== null ? formatTime(row.ao12) : "–"}
                   </td>
-                  <td className="py-3 pr-3 text-gray-300 align-top">
-                    <div>{s.cube_type}</div>
-                    {s.hardware_id !== null && hardwareById.has(s.hardware_id) && (
-                      <div
-                        className="text-xs text-gray-500 mt-0.5"
-                        title="Verwendete Hardware"
-                      >
-                        {hardwareById.get(s.hardware_id)}
-                      </div>
-                    )}
+                  <td className="py-2 pr-3 text-gray-300 align-top">
+                    {s.cube_type}
                   </td>
                   <td
-                    className="py-3 pr-3 text-gray-400 text-sm max-w-xs align-top"
-                    title={isEditingNotes ? "" : (s.notes ?? "Klick zum Bearbeiten")}
+                    className="py-2 pr-3 text-sm text-gray-400 align-top"
+                    title={hardwareName ?? "Keine Hardware zugeordnet"}
                   >
-                    {isEditingNotes ? (
-                      <input
-                        type="text"
-                        value={draftValue}
-                        autoFocus
-                        onChange={(e) => setDraftValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") saveEdit();
-                          if (e.key === "Escape") cancelEdit();
-                        }}
-                        onBlur={() => {
-                          if (!editError) saveEdit();
-                        }}
-                        placeholder="Notiz …"
-                        className="w-full rounded border border-purple-500 bg-gray-800 px-1 py-0.5 text-gray-100 text-xs focus:outline-none"
-                      />
-                    ) : (
-                      <div
-                        className="cursor-pointer truncate min-h-[1em]"
-                        onClick={() => startEdit(s.id, "notes", s.notes ?? "")}
-                      >
-                        {s.notes ?? <span className="text-gray-600 italic">+ Notiz</span>}
-                      </div>
+                    {hardwareName ?? (
+                      <span className="text-gray-600 italic">—</span>
                     )}
                   </td>
                   <td className="py-3 pr-3 text-right space-x-2 align-top">
@@ -445,8 +411,8 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
 
       <p className="mt-3 text-xs text-gray-500">
         Tipp: Klick auf Spaltenkopf (#, Zeit, AO5, AO12) zum Sortieren ·
-        Klick auf Zeit oder Notiz zum Bearbeiten · ℹ fuer Detail (Scramble,
-        Notiz, Hardware, Session). Enter speichert, Esc bricht ab.
+        Klick auf Zeit zum Bearbeiten · ℹ fuer Detail (Scramble, Notiz,
+        Hardware, Session). Enter speichert, Esc bricht ab.
       </p>
 
       {detailSolve && (
