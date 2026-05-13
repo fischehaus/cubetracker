@@ -39,6 +39,10 @@ packages = [
     "importers",
     "exporters",
     "emailing",
+    # W.9+ Friend-System / W.10 Leaderboards / Hardware-Seed
+    "friends",
+    "leaderboard",
+    "seeds",
 ]
 
 [tool.pytest.ini_options]

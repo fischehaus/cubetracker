@@ -1,7 +1,9 @@
 """Hardware-CRUD-API (Phase W) — Multi-User-Variante.
 
-Per-User Hardware-Eintraege. Kein Seed-Endpoint (Desktop-spezifisch) —
-in der Web-Variante legt jeder User seine eigene Hardware an.
+Per-User Hardware-Eintraege. Inkl. Seed-Endpoint (W.hardware-fix):
+jeder User kann sich die Standard-Liste vom 2026-05-03 als
+Starthilfe in sein leeres Inventar laden — empty-Check + Insert
+beide auf user_id gefiltert (kein Cross-User-Bleed).
 """
 
 from __future__ import annotations
@@ -12,10 +14,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session as OrmSession
 
+from achievements.service import run_achievement_check
 from auth.deps import get_current_user
 from db.database import get_db
 from db.models import Hardware, Solve, User
 from db.schemas import HardwareCreate, HardwareRead, HardwareUpdate
+from seeds.hardware import HARDWARE_SEED
 
 router = APIRouter(prefix="/hardware", tags=["hardware"])
 
@@ -161,3 +165,53 @@ def delete_hardware(
     hw = _get_or_404(hw_id, current_user, db)
     db.delete(hw)
     db.commit()
+
+
+@router.post("/seed")
+def seed_hardware(
+    force: bool = Query(
+        default=False,
+        description="Wenn False: nur wenn EIGENE Hardware-Liste leer ist. "
+        "Wenn True: Eintraege werden zusaetzlich angelegt (kann Duplikate erzeugen).",
+    ),
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Lade die Standard-Hardware-Liste vom 2026-05-03 ins EIGENE Inventar.
+
+    Multi-User-Sicherheit: empty-Check + alle Inserts sind auf
+    user_id=current_user gefiltert. Andere User sind weder betroffen
+    noch sichtbar.
+    """
+    existing = db.scalar(
+        select(Hardware.id).where(Hardware.user_id == current_user.id).limit(1)
+    )
+    if existing is not None and not force:
+        return {
+            "loaded": 0,
+            "skipped_because_not_empty": True,
+            "use_force_to_load_anyway": True,
+        }
+
+    created = 0
+    for cube_type, items in HARDWARE_SEED:
+        for name, notes in items:
+            db.add(
+                Hardware(
+                    user_id=current_user.id,
+                    name=name,
+                    primary_cube_type=cube_type,
+                    notes=notes,
+                    is_active=True,
+                )
+            )
+            created += 1
+    db.commit()
+    # Achievement-Recheck nach Bulk-Insert — Hardware-related Achievements
+    # (z.B. "5 verschiedene Cubes") koennten getriggert werden.
+    new_unlocks = run_achievement_check(db, current_user.id)
+    return {
+        "loaded": created,
+        "skipped_because_not_empty": False,
+        "newly_unlocked_achievements": new_unlocks,
+    }
