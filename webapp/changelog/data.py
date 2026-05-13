@@ -38,6 +38,24 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-mode-picker",
+        released=date(2026, 5, 14),
+        title="Timer-Modus direkt am Timer auswaehlbar (WCA / Pragmatisch / Text)",
+        highlights=[
+            "Drei-Button-Modus-Picker oben im Timer-Tab — vorher musste man "
+            "sich durch Verwaltung → Einstellungen klicken um Spacebar-Modus "
+            "anzuschalten, war nicht discoverable",
+            "Ein Klick wechselt sowohl spacebar_enabled als auch "
+            "inspection_mode konsistent (WCA vs Pragmatisch)",
+            "Info-Button erklaert die drei Modi: Text-Eingabe / WCA / "
+            "Pragmatisch mit konkretem User-Verhalten",
+            "Wenn Text-Modus aktiv (Desktop): Tipp-Hinweis weist auf den "
+            "Spacebar-Timer hin",
+            "Auf Touch-Geraeten ist Text-Modus disabled (Soft-Keyboard ist "
+            "muehsam) — nur die zwei Spacebar-Varianten klickbar",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.user-menu",
         released=date(2026, 5, 14),
         title="User-Menu oben rechts (klassisches Account-Dropdown)",

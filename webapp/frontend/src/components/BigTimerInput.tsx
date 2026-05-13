@@ -22,6 +22,7 @@ import {
 } from "../lib/api";
 import { COMMON_CUBE_TYPES, parseTimeInput } from "../lib/format";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
+import { InfoButton } from "./InfoButton";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
 import { TouchTimerPad } from "./TouchTimerPad";
 import type { TimerPenalty } from "../hooks/useSpacebarTimer";
@@ -58,8 +59,10 @@ export function BigTimerInput({
   const [plusTwo, setPlusTwo] = useState(false);
   const [dnf, setDnf] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Phase 8.2: Spacebar-Timer-Modus
-  const [settings] = useAppSettings();
+  // Phase 8.2: Spacebar-Timer-Modus. Setter wird gebraucht um Mode-Picker
+  // direkt im Timer-Tab zu unterstuetzen (war frueher nur in Verwaltung →
+  // Einstellungen versteckt — kein neuer User fand das).
+  const [settings, setSettings] = useAppSettings();
   // Reset-Counter fuer SpacebarTimerCard nach erfolgreichem Save
   const [spacebarResetSeed, setSpacebarResetSeed] = useState(0);
   // Touch-Device-Onboarding-Fix (QA-Finding): auf Phone/Tablet immer
@@ -380,6 +383,82 @@ export function BigTimerInput({
         </div>
       )}
 
+      {/* Timer-Modus-Picker — frueher nur in Verwaltung → Einstellungen
+          versteckt, war nicht discoverable. Jetzt direkt im Timer-Tab.
+          3 Modi: Text-Eingabe / Spacebar-WCA / Spacebar-Pragmatisch.
+          Auf Touch-Devices ist Text-Mode nicht sinnvoll (Soft-Keyboard) —
+          wir disablen den Button mit Hint. */}
+      <div className="mb-6 rounded-lg border border-gray-700 bg-gray-800/30 p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-sm font-medium text-gray-300">
+            Timer-Modus
+          </span>
+          <InfoButton align="left">
+            <p className="font-medium mb-1">Drei Timer-Modi</p>
+            <p className="mb-2">
+              <strong>Text-Eingabe:</strong> Du tippst die Zeit nach dem
+              Solve ins Feld + Enter. Klassisch, gut wenn du eine Stoppuhr
+              separat nutzt.
+            </p>
+            <p className="mb-2">
+              <strong>Spacebar — WCA:</strong> Wettkampf-Standard. Space
+              druecken startet Inspection (15s), Space druecken + halten
+              + loslassen startet Solve. Space druecken stoppt. Penalty
+              automatisch (+2 ab 15s, DNF ab 17s).
+            </p>
+            <p>
+              <strong>Spacebar — Pragmatisch:</strong> User-Training. Single
+              Tap waehrend Inspection startet Solve, Double-Tap startet
+              Inspection neu. Auto-DNF bei Countdown 0. Etwas
+              entspannter als WCA.
+            </p>
+          </InfoButton>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <ModeButton
+            active={!spacebarMode}
+            disabled={isTouchDevice}
+            onClick={() =>
+              setSettings({ ...settings, spacebar_enabled: false })
+            }
+            disabledTitle="Auf Touch-Geraet nicht sinnvoll — nutze Spacebar"
+          >
+            ⌨ Text-Eingabe
+          </ModeButton>
+          <ModeButton
+            active={spacebarMode && settings.inspection_mode === "wca"}
+            onClick={() =>
+              setSettings({
+                ...settings,
+                spacebar_enabled: true,
+                inspection_mode: "wca",
+              })
+            }
+          >
+            🏁 Spacebar — WCA
+          </ModeButton>
+          <ModeButton
+            active={spacebarMode && settings.inspection_mode === "pragmatic"}
+            onClick={() =>
+              setSettings({
+                ...settings,
+                spacebar_enabled: true,
+                inspection_mode: "pragmatic",
+              })
+            }
+          >
+            🏃 Spacebar — Pragmatisch
+          </ModeButton>
+        </div>
+        {!spacebarMode && !isTouchDevice && (
+          <p className="mt-2 text-xs text-gray-500">
+            💡 Tipp: Probier den Spacebar-Timer — viel fluessigeres Training,
+            inkl. Inspection-Countdown. Klick einfach auf einen der Spacebar-
+            Modi oben.
+          </p>
+        )}
+      </div>
+
       {/* Phase 8.2: wenn Spacebar-Timer aktiv ODER Touch-Device →
           SpacebarTimerCard, sonst klassisches Text-Eingabefeld.
           Touch-Override: damit Phone-User die App ohne Settings-
@@ -473,5 +552,40 @@ export function BigTimerInput({
         </div>
       )}
     </div>
+  );
+}
+
+// ============================================================
+// Helper: Mode-Picker-Button (kleine Toggle-Buttons mit active-State)
+// ============================================================
+function ModeButton({
+  active,
+  onClick,
+  disabled,
+  disabledTitle,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+  disabledTitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={disabled ? disabledTitle : undefined}
+      className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+        active
+          ? "bg-purple-600 text-white shadow-sm"
+          : disabled
+            ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+            : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-gray-100"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
