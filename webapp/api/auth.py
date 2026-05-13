@@ -183,6 +183,19 @@ def register(
     # Mail fail-soft (Account ist trotzdem angelegt wenn Resend down ist)
     send_verification_email(email_lc, verify_token.token)
 
+    # W.hardware-auto-seed: jeder neue User bekommt die Default-Hardware-
+    # Liste mit is_active=False. Fail-soft — wenn Seed scheitert, ist der
+    # Account trotzdem angelegt, User kann manuell hinzufuegen.
+    try:
+        from seeds.hardware import seed_user_hardware
+
+        seed_user_hardware(db, user.id, default_active=False)
+    except Exception:  # noqa: BLE001
+        # Logger ist auf Endpoint-Level evtl. nicht da, swallow silent —
+        # in den lifespan-Backfill wird der User dann beim naechsten
+        # Cold-Start nachgepflegt.
+        db.rollback()
+
     return user
 
 

@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session as OrmSession
 
@@ -19,7 +20,7 @@ from auth.deps import get_current_user
 from db.database import get_db
 from db.models import Hardware, Solve, User
 from db.schemas import HardwareCreate, HardwareRead, HardwareUpdate
-from seeds.hardware import HARDWARE_SEED
+from seeds.hardware import seed_user_hardware
 
 router = APIRouter(prefix="/hardware", tags=["hardware"])
 
@@ -179,9 +180,10 @@ def seed_hardware(
 ) -> dict[str, Any]:
     """Lade die Standard-Hardware-Liste vom 2026-05-03 ins EIGENE Inventar.
 
-    Multi-User-Sicherheit: empty-Check + alle Inserts sind auf
-    user_id=current_user gefiltert. Andere User sind weder betroffen
-    noch sichtbar.
+    Seit W.hardware-auto-seed: Recovery-Endpoint. Neuer User bekommt eh
+    automatisch beim Register die Liste (is_active=False). Dieser Endpoint
+    bleibt fuer Force-Recovery falls jemand bewusst alles geloescht hat
+    und neu starten will.
     """
     existing = db.scalar(
         select(Hardware.id).where(Hardware.user_id == current_user.id).limit(1)
@@ -193,20 +195,7 @@ def seed_hardware(
             "use_force_to_load_anyway": True,
         }
 
-    created = 0
-    for cube_type, items in HARDWARE_SEED:
-        for name, notes in items:
-            db.add(
-                Hardware(
-                    user_id=current_user.id,
-                    name=name,
-                    primary_cube_type=cube_type,
-                    notes=notes,
-                    is_active=True,
-                )
-            )
-            created += 1
-    db.commit()
+    created = seed_user_hardware(db, current_user.id, default_active=False)
     # Achievement-Recheck nach Bulk-Insert — Hardware-related Achievements
     # (z.B. "5 verschiedene Cubes") koennten getriggert werden.
     new_unlocks = run_achievement_check(db, current_user.id)
@@ -215,3 +204,73 @@ def seed_hardware(
         "skipped_because_not_empty": False,
         "newly_unlocked_achievements": new_unlocks,
     }
+
+
+# ============================================================
+# Bulk-Operationen (W.hardware-auto-seed)
+# ============================================================
+
+
+class HardwareBulkUpdate(BaseModel):
+    """Body fuer Bulk-Patch — gleicher Patch wird auf alle IDs angewendet."""
+
+    model_config = ConfigDict(extra="forbid")
+    ids: list[int] = Field(min_length=1, max_length=200)
+    is_active: bool | None = None
+
+
+class HardwareBulkDelete(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    ids: list[int] = Field(min_length=1, max_length=200)
+
+
+@router.post("/bulk-update")
+def bulk_update_hardware(
+    payload: HardwareBulkUpdate,
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, int]:
+    """Setzt is_active auf eine Menge eigener Hardware-Eintraege.
+
+    Multi-User: WHERE user_id = current_user filtert — fremde IDs werden
+    stillschweigend ignoriert (kein 403, kein 404 — sonst leakt Existenz).
+    """
+    if payload.is_active is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mindestens ein Feld (is_active) muss gesetzt sein.",
+        )
+    # UPDATE statt loop: eine Query reicht, scoped auf user_id.
+    rows = db.execute(
+        select(Hardware).where(
+            Hardware.user_id == current_user.id,
+            Hardware.id.in_(payload.ids),
+        )
+    ).scalars().all()
+    for hw in rows:
+        hw.is_active = payload.is_active
+    db.commit()
+    return {"updated": len(rows)}
+
+
+@router.post("/bulk-delete")
+def bulk_delete_hardware(
+    payload: HardwareBulkDelete,
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, int]:
+    """Loescht eine Menge eigener Hardware-Eintraege.
+
+    Betroffene Solves verlieren ihre hardware_id (FK ondelete=SET NULL).
+    Fremde IDs werden ignoriert.
+    """
+    rows = db.execute(
+        select(Hardware).where(
+            Hardware.user_id == current_user.id,
+            Hardware.id.in_(payload.ids),
+        )
+    ).scalars().all()
+    for hw in rows:
+        db.delete(hw)
+    db.commit()
+    return {"deleted": len(rows)}

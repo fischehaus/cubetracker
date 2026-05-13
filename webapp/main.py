@@ -83,6 +83,24 @@ async def lifespan(app: FastAPI):
                         conn.execute(text(sql))
                     except Exception as me:  # noqa: BLE001
                         print(f"WARN: migration failed ({sql[:60]}...): {me}")
+
+            # W.hardware-auto-seed (2026-05-14): Backfill fuer User die
+            # vor diesem Deploy registriert wurden + noch keine Hardware
+            # angelegt haben. Idempotent — User mit existierender Hardware
+            # (egal ob 1 oder 30 Eintraege) bleiben unangetastet.
+            try:
+                from seeds.hardware import backfill_users_without_hardware
+                from db.database import SessionLocal
+
+                with SessionLocal() as bf_db:
+                    users_seeded, rows_created = backfill_users_without_hardware(bf_db)
+                    if users_seeded > 0:
+                        print(
+                            f"INFO: hardware backfill -> {users_seeded} User, "
+                            f"{rows_created} Rows angelegt"
+                        )
+            except Exception as bf_e:  # noqa: BLE001
+                print(f"WARN: hardware backfill failed: {bf_e}")
         except Exception as e:  # noqa: BLE001
             print(f"WARN: DB schema-init failed: {e}")
     yield

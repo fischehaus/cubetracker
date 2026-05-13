@@ -1,18 +1,23 @@
-// HardwareList: Verwaltung des Cube-Inventars (Phase 5 / F16).
+// HardwareList: Verwaltung des Cube-Inventars.
 //
-// Zeigt alle Hardware-Eintraege als gruppierte Liste pro cube_type,
-// mit Inline-Form fuer „neuer Eintrag" und Quick-Actions (Aktiv-toggle,
-// Notiz editieren, Loeschen).
+// Seit W.hardware-auto-seed (2026-05-14): jeder User bekommt die
+// 30-Cube-Liste automatisch beim Register, mit is_active=false. Daher
+// kein Seed-Button mehr — die Liste ist immer da.
 //
-// Special: „Aus Seed-Datei laden"-Button, falls die Tabelle leer ist —
-// der spielt einmalig die Standard-Liste vom 2026-05-03 ein.
+// Features:
+// - Gruppierung pro primary_cube_type
+// - Selektion per Checkbox + "alle in Gruppe markieren"
+// - Bulk-Aktionen pro Gruppe: aktiv-setzen / inaktiv-setzen / loeschen
+// - Inline-Edit auf Name + Notiz (Click-to-Edit ODER expliziter
+//   "Umbenennen"-Button — beide Wege fuehren ins gleiche Edit-Feld)
 
 import { useMemo, useState } from "react";
 import {
+  useBulkDeleteHardware,
+  useBulkUpdateHardware,
   useCreateHardware,
   useDeleteHardware,
   useHardware,
-  useSeedHardware,
   useUpdateHardware,
 } from "../lib/api";
 import { COMMON_CUBE_TYPES } from "../lib/format";
@@ -23,18 +28,22 @@ export function HardwareList() {
   const create = useCreateHardware();
   const update = useUpdateHardware();
   const del = useDeleteHardware();
-  const seed = useSeedHardware();
+  const bulkUpdate = useBulkUpdateHardware();
+  const bulkDelete = useBulkDeleteHardware();
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [newCube, setNewCube] = useState("3x3");
-  const [seedMessage, setSeedMessage] = useState<string | null>(null);
-  // Edit-State unterscheidet zwischen Name- und Notes-Edit pro Eintrag.
+
+  // Edit-State (Name oder Notiz, jeweils einzeln pro Eintrag)
   const [editing, setEditing] = useState<{
     id: number;
     field: "name" | "notes";
     value: string;
   } | null>(null);
+
+  // Selektions-State fuer Bulk-Aktionen — Set aus Hardware-IDs.
+  const [selected, setSelected] = useState<Set<number>>(new Set());
 
   // Gruppieren nach primary_cube_type
   const grouped = useMemo(() => {
@@ -45,8 +54,6 @@ export function HardwareList() {
       arr.push(h);
       map.set(h.primary_cube_type, arr);
     }
-    // Stable sort: bekannte Cube-Types in der COMMON-Reihenfolge zuerst,
-    // dann die unbekannten alphabetisch.
     const order = new Map<string, number>();
     COMMON_CUBE_TYPES.forEach((c, i) => order.set(c, i));
     return Array.from(map.entries()).sort(([a], [b]) => {
@@ -66,22 +73,71 @@ export function HardwareList() {
           setNewName("");
           setShowAddForm(false);
         },
-      }
+      },
     );
   }
 
-  function handleSeed(force: boolean) {
-    seed.mutate(force, {
-      onSuccess: (r) => {
-        if (r.skipped_because_not_empty) {
-          setSeedMessage(
-            "Inventar ist nicht leer. Force-Knopf darunter laedt zusaetzlich (kann Duplikate erzeugen)."
-          );
-        } else {
-          setSeedMessage(`${r.loaded} Eintraege geladen.`);
-        }
-      },
+  function toggleSelected(id: number) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
     });
+  }
+
+  function selectGroupAll(items: Hardware[], allSelected: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allSelected) {
+        // Alle dieser Gruppe abwaehlen
+        for (const h of items) next.delete(h.id);
+      } else {
+        for (const h of items) next.add(h.id);
+      }
+      return next;
+    });
+  }
+
+  function bulkActivate(items: Hardware[], is_active: boolean) {
+    const ids = items.filter((h) => selected.has(h.id)).map((h) => h.id);
+    if (ids.length === 0) return;
+    bulkUpdate.mutate(
+      { ids, is_active },
+      {
+        onSuccess: () => {
+          setSelected((prev) => {
+            const next = new Set(prev);
+            for (const id of ids) next.delete(id);
+            return next;
+          });
+        },
+      },
+    );
+  }
+
+  function bulkDeleteGroup(items: Hardware[]) {
+    const ids = items.filter((h) => selected.has(h.id)).map((h) => h.id);
+    if (ids.length === 0) return;
+    if (
+      !window.confirm(
+        `${ids.length} markierte Hardware-Eintraege wirklich loeschen?\n` +
+          `Betroffene Solves verlieren ihre Hardware-Zuordnung, bleiben aber erhalten.`,
+      )
+    )
+      return;
+    bulkDelete.mutate(
+      { ids },
+      {
+        onSuccess: () => {
+          setSelected((prev) => {
+            const next = new Set(prev);
+            for (const id of ids) next.delete(id);
+            return next;
+          });
+        },
+      },
+    );
   }
 
   if (isLoading) {
@@ -92,7 +148,8 @@ export function HardwareList() {
     );
   }
 
-  const isEmpty = !hardware || hardware.length === 0;
+  const totalCount = hardware?.length ?? 0;
+  const activeCount = hardware?.filter((h) => h.is_active).length ?? 0;
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
@@ -100,7 +157,7 @@ export function HardwareList() {
         <h2 className="text-2xl font-semibold text-gray-100">
           Hardware-Inventar{" "}
           <span className="text-base text-gray-400">
-            ({hardware?.length ?? 0} {hardware?.length === 1 ? "Cube" : "Cubes"})
+            ({activeCount} aktiv von {totalCount})
           </span>
         </h2>
         <button
@@ -152,173 +209,259 @@ export function HardwareList() {
         </div>
       )}
 
-      {/* Empty-state mit Seed-Knopf */}
-      {isEmpty && (
-        <div className="rounded border border-blue-500/30 bg-blue-500/5 p-4 mb-4">
-          <p className="text-base text-blue-100 mb-2">
-            Inventar ist leer. Lade die Standard-Liste vom 2026-05-03
-            (~37 Cubes ueber 11 Cube-Types)?
-          </p>
-          <button
-            onClick={() => handleSeed(false)}
-            disabled={seed.isPending}
-            className="text-sm rounded bg-blue-600 px-3 py-1.5 text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {seed.isPending ? "Laedt …" : "Aus Seed-Datei laden"}
-          </button>
-          {seedMessage && (
-            <p className="mt-2 text-sm text-blue-200">{seedMessage}</p>
-          )}
+      {/* Empty-State falls noch nichts da (extremer Edge-Case nach
+          Auto-Seed-Backfill — User hat ALLES geloescht). */}
+      {totalCount === 0 && (
+        <div className="rounded border border-gray-700 bg-gray-800/30 p-4 mb-4 text-sm text-gray-400">
+          Inventar ist leer. Lege oben einen neuen Cube an, oder logge dich
+          ab + wieder ein damit die Standard-Liste neu geseedet wird.
         </div>
       )}
 
-      {seedMessage && !isEmpty && (
-        <p className="text-sm text-gray-400 mb-3">{seedMessage}</p>
-      )}
-
-      {/* Gruppierte Liste */}
+      {/* Gruppierte Liste mit Bulk-Aktionen */}
       <div className="space-y-5">
-        {grouped.map(([cube, items]) => (
-          <div key={cube}>
-            <h3 className="text-base font-semibold text-gray-300 mb-2">
-              {cube}{" "}
-              <span className="text-sm text-gray-500 font-normal">
-                ({items.length})
-              </span>
-            </h3>
-            <ul className="space-y-1.5">
-              {items.map((h) => {
-                const isEditingName =
-                  editing?.id === h.id && editing.field === "name";
-                const isEditingNotes =
-                  editing?.id === h.id && editing.field === "notes";
-                return (
-                  <li
+        {grouped.map(([cube, items]) => {
+          const selectedInGroup = items.filter((h) => selected.has(h.id));
+          const allSelected =
+            items.length > 0 && selectedInGroup.length === items.length;
+          const someSelected = selectedInGroup.length > 0;
+
+          return (
+            <div key={cube}>
+              {/* Group-Header mit "Alle markieren"-Checkbox + Bulk-Actions */}
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = !allSelected && someSelected;
+                    }}
+                    onChange={() => selectGroupAll(items, allSelected)}
+                    className="accent-purple-500 w-4 h-4"
+                  />
+                  <h3 className="text-base font-semibold text-gray-300">
+                    {cube}{" "}
+                    <span className="text-sm text-gray-500 font-normal">
+                      ({items.filter((h) => h.is_active).length} aktiv /{" "}
+                      {items.length})
+                    </span>
+                  </h3>
+                </label>
+
+                {someSelected && (
+                  <div className="flex items-center gap-1.5 ml-auto text-xs">
+                    <span className="text-gray-500">
+                      {selectedInGroup.length} ausgewaehlt:
+                    </span>
+                    <button
+                      onClick={() => bulkActivate(items, true)}
+                      disabled={bulkUpdate.isPending}
+                      className="rounded bg-emerald-700/40 px-2 py-1 text-emerald-200 hover:bg-emerald-700/60 disabled:opacity-50"
+                    >
+                      ▶ aktivieren
+                    </button>
+                    <button
+                      onClick={() => bulkActivate(items, false)}
+                      disabled={bulkUpdate.isPending}
+                      className="rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-600 disabled:opacity-50"
+                    >
+                      ⏸ deaktivieren
+                    </button>
+                    <button
+                      onClick={() => bulkDeleteGroup(items)}
+                      disabled={bulkDelete.isPending}
+                      className="rounded bg-red-700/40 px-2 py-1 text-red-200 hover:bg-red-700/60 disabled:opacity-50"
+                    >
+                      🗑 loeschen
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <ul className="space-y-1.5">
+                {items.map((h) => (
+                  <HardwareRow
                     key={h.id}
-                    className={`flex items-center gap-3 rounded border px-3 py-2 ${
-                      h.is_active
-                        ? "border-gray-700 bg-gray-900/40"
-                        : "border-gray-800 bg-gray-900/20 opacity-60"
-                    }`}
-                  >
-                    {/* Name (click-to-edit) */}
-                    {isEditingName ? (
-                      <input
-                        type="text"
-                        value={editing!.value}
-                        onChange={(e) =>
-                          setEditing({ ...editing!, value: e.target.value })
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            const newName = editing!.value.trim();
-                            if (!newName) return;
-                            update.mutate(
-                              { id: h.id, payload: { name: newName } },
-                              { onSuccess: () => setEditing(null) }
-                            );
-                          }
-                          if (e.key === "Escape") setEditing(null);
-                        }}
-                        autoFocus
-                        className="rounded border border-purple-500 bg-gray-800 px-2 py-1 text-base text-gray-100 focus:outline-none min-w-[12rem]"
-                      />
-                    ) : (
-                      <span
-                        className="text-base text-gray-100 font-medium min-w-[12rem] cursor-pointer hover:text-purple-300"
-                        onClick={() =>
-                          setEditing({ id: h.id, field: "name", value: h.name })
-                        }
-                        title="Click zum Umbenennen"
-                      >
-                        {h.name}
-                      </span>
-                    )}
-
-                    {/* Notes (click-to-edit) */}
-                    {isEditingNotes ? (
-                      <input
-                        type="text"
-                        value={editing!.value}
-                        onChange={(e) =>
-                          setEditing({ ...editing!, value: e.target.value })
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            update.mutate(
-                              {
-                                id: h.id,
-                                payload: { notes: editing!.value.trim() || null },
-                              },
-                              { onSuccess: () => setEditing(null) }
-                            );
-                          }
-                          if (e.key === "Escape") setEditing(null);
-                        }}
-                        autoFocus
-                        className="flex-1 rounded border border-purple-500 bg-gray-800 px-2 py-1 text-sm text-gray-100 focus:outline-none"
-                      />
-                    ) : (
-                      <span
-                        className="flex-1 text-sm text-gray-400 cursor-pointer truncate"
-                        onClick={() =>
-                          setEditing({
-                            id: h.id,
-                            field: "notes",
-                            value: h.notes ?? "",
-                          })
-                        }
-                        title="Click zum Bearbeiten"
-                      >
-                        {h.notes ?? (
-                          <span className="text-gray-600 italic">+ Notiz</span>
-                        )}
-                      </span>
-                    )}
-
-                    <button
-                      onClick={() =>
-                        update.mutate({
-                          id: h.id,
-                          payload: { is_active: !h.is_active },
-                        })
-                      }
-                      className={`text-xs rounded px-2 py-1 ${
-                        h.is_active
-                          ? "bg-emerald-700/40 text-emerald-200 hover:bg-emerald-700/60"
-                          : "bg-gray-700 text-gray-400 hover:bg-gray-600"
-                      }`}
-                      title={h.is_active ? "Aktiv" : "Inaktiv (z.B. verkauft)"}
-                    >
-                      {h.is_active ? "aktiv" : "inaktiv"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (
-                          confirm(
-                            `Hardware „${h.name}" wirklich loeschen?\n\nBetroffene Solves bleiben erhalten, verlieren aber ihre Hardware-Zuordnung.`
-                          )
-                        )
-                          del.mutate(h.id);
-                      }}
-                      className="text-sm rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-                      title="Loeschen — Solves bleiben, hardware_id wird NULL"
-                    >
-                      🗑
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+                    h={h}
+                    selected={selected.has(h.id)}
+                    onToggleSelected={() => toggleSelected(h.id)}
+                    editing={editing}
+                    setEditing={setEditing}
+                    update={update}
+                    del={del}
+                  />
+                ))}
+              </ul>
+            </div>
+          );
+        })}
       </div>
 
       <p className="mt-4 text-xs text-gray-500">
-        Click auf Name oder Notiz zum Bearbeiten (Enter speichert,
-        Esc bricht ab). Loeschen entfernt nur den Hardware-Eintrag —
-        alte Solves bleiben erhalten, verlieren aber die Hardware-Zuordnung.
+        Auto-Seed: jeder neue User bekommt 30 Standard-Cubes mit
+        is_active=false. Du markierst selbst was du wirklich besitzt
+        (Checkbox + ▶ aktivieren). „Umbenennen"-Button oder Klick auf
+        den Namen zum Editieren — Enter speichert, Esc bricht ab.
+        Loeschen entfernt nur den Hardware-Eintrag, alte Solves bleiben.
       </p>
     </div>
+  );
+}
+
+// ============================================================
+// Eine Hardware-Zeile (in eigene Komponente fuer Lesbarkeit)
+// ============================================================
+
+function HardwareRow({
+  h,
+  selected,
+  onToggleSelected,
+  editing,
+  setEditing,
+  update,
+  del,
+}: {
+  h: Hardware;
+  selected: boolean;
+  onToggleSelected: () => void;
+  editing: { id: number; field: "name" | "notes"; value: string } | null;
+  setEditing: (
+    e: { id: number; field: "name" | "notes"; value: string } | null,
+  ) => void;
+  // Mutations werden hochgereicht, damit isPending sichtbar bleibt
+  update: ReturnType<typeof useUpdateHardware>;
+  del: ReturnType<typeof useDeleteHardware>;
+}) {
+  const isEditingName = editing?.id === h.id && editing.field === "name";
+  const isEditingNotes = editing?.id === h.id && editing.field === "notes";
+
+  function startRename() {
+    setEditing({ id: h.id, field: "name", value: h.name });
+  }
+
+  return (
+    <li
+      className={`flex items-center gap-3 rounded border px-3 py-2 ${
+        h.is_active
+          ? "border-gray-700 bg-gray-900/40"
+          : "border-gray-800 bg-gray-900/20 opacity-60"
+      } ${selected ? "ring-1 ring-purple-500/60" : ""}`}
+    >
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={onToggleSelected}
+        className="accent-purple-500 w-4 h-4"
+        aria-label={`${h.name} auswaehlen`}
+      />
+
+      {/* Name (click-to-edit) */}
+      {isEditingName ? (
+        <input
+          type="text"
+          value={editing!.value}
+          onChange={(e) => setEditing({ ...editing!, value: e.target.value })}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const newName = editing!.value.trim();
+              if (!newName) return;
+              update.mutate(
+                { id: h.id, payload: { name: newName } },
+                { onSuccess: () => setEditing(null) },
+              );
+            }
+            if (e.key === "Escape") setEditing(null);
+          }}
+          autoFocus
+          className="rounded border border-purple-500 bg-gray-800 px-2 py-1 text-base text-gray-100 focus:outline-none min-w-[12rem]"
+        />
+      ) : (
+        <span
+          className="text-base text-gray-100 font-medium min-w-[12rem] cursor-pointer hover:text-purple-300"
+          onClick={startRename}
+          title="Klick zum Umbenennen"
+        >
+          {h.name}
+        </span>
+      )}
+
+      {/* Notes (click-to-edit) */}
+      {isEditingNotes ? (
+        <input
+          type="text"
+          value={editing!.value}
+          onChange={(e) => setEditing({ ...editing!, value: e.target.value })}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              update.mutate(
+                {
+                  id: h.id,
+                  payload: { notes: editing!.value.trim() || null },
+                },
+                { onSuccess: () => setEditing(null) },
+              );
+            }
+            if (e.key === "Escape") setEditing(null);
+          }}
+          autoFocus
+          className="flex-1 rounded border border-purple-500 bg-gray-800 px-2 py-1 text-sm text-gray-100 focus:outline-none"
+        />
+      ) : (
+        <span
+          className="flex-1 text-sm text-gray-400 cursor-pointer truncate"
+          onClick={() =>
+            setEditing({
+              id: h.id,
+              field: "notes",
+              value: h.notes ?? "",
+            })
+          }
+          title="Klick zum Bearbeiten"
+        >
+          {h.notes ?? <span className="text-gray-600 italic">+ Notiz</span>}
+        </span>
+      )}
+
+      {/* Aktionen */}
+      <button
+        onClick={startRename}
+        disabled={isEditingName}
+        className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-purple-700/40 hover:text-purple-100 disabled:opacity-50"
+        title="Umbenennen — alternativer Weg zum Klick auf den Namen"
+      >
+        ✎ umbenennen
+      </button>
+      <button
+        onClick={() =>
+          update.mutate({
+            id: h.id,
+            payload: { is_active: !h.is_active },
+          })
+        }
+        className={`text-xs rounded px-2 py-1 ${
+          h.is_active
+            ? "bg-emerald-700/40 text-emerald-200 hover:bg-emerald-700/60"
+            : "bg-gray-700 text-gray-400 hover:bg-gray-600"
+        }`}
+        title={h.is_active ? "Aktiv (Klick zum Deaktivieren)" : "Inaktiv (Klick zum Aktivieren)"}
+      >
+        {h.is_active ? "aktiv" : "inaktiv"}
+      </button>
+      <button
+        onClick={() => {
+          if (
+            window.confirm(
+              `Hardware „${h.name}" wirklich loeschen?\n\nBetroffene Solves bleiben erhalten, verlieren aber ihre Hardware-Zuordnung.`,
+            )
+          )
+            del.mutate(h.id);
+        }}
+        className="text-sm rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
+        title="Loeschen — Solves bleiben, hardware_id wird NULL"
+      >
+        🗑
+      </button>
+    </li>
   );
 }

@@ -817,6 +817,52 @@ export function useDeleteHardware(): UseMutationResult<void, Error, number> {
   });
 }
 
+// Bulk-Operations (W.hardware-auto-seed)
+
+export function useBulkUpdateHardware(): UseMutationResult<
+  { updated: number },
+  Error,
+  { ids: number[]; is_active: boolean }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids, is_active }) => {
+      const r = await api.post<{ updated: number }>("/hardware/bulk-update", {
+        ids,
+        is_active,
+      });
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["hardware"] });
+      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
+    },
+  });
+}
+
+export function useBulkDeleteHardware(): UseMutationResult<
+  { deleted: number },
+  Error,
+  { ids: number[] }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids }) => {
+      const r = await api.post<{ deleted: number }>("/hardware/bulk-delete", {
+        ids,
+      });
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["hardware"] });
+      qc.invalidateQueries({ queryKey: ["solves"] });
+      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
+      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
+      qc.invalidateQueries({ queryKey: ["achievements"] });
+    },
+  });
+}
+
 export interface SeedResult {
   loaded: number;
   skipped_because_not_empty: boolean;
