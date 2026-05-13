@@ -5,7 +5,7 @@
 // umgeschaltet (kein routing — die wahl bleibt nicht ueber app-
 // reload erhalten, das ist OK fuer einen verwaltungs-tab).
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { AdminPanel } from "./AdminPanel";
 import { BackupPanel } from "./BackupPanel";
@@ -51,6 +51,32 @@ export function VerwaltungTab() {
   const tabs = isAdmin ? [...SUB_TABS, ADMIN_TAB] : SUB_TABS;
 
   const [section, setSection] = useState<VerwaltungSection>("sessions");
+
+  // UserMenu (App.tsx) feuert "cubetracker:goto-verwaltung-section" wenn
+  // der User "Mein Account & Einstellungen" klickt — wir springen dann
+  // direkt zum Settings-Sub-Tab. Generisch fuer kuenftige Direkt-Links.
+  useEffect(() => {
+    function onGoto(e: Event) {
+      const detail = (e as CustomEvent<{ section?: string }>).detail;
+      const target = detail?.section;
+      if (!target) return;
+      // Type-Guard: nur valide Sections setzen
+      const valid: VerwaltungSection[] = [
+        "sessions",
+        "hardware",
+        "daten",
+        "outliers",
+        "settings",
+        "admin",
+      ];
+      if ((valid as string[]).includes(target)) {
+        setSection(target as VerwaltungSection);
+      }
+    }
+    window.addEventListener("cubetracker:goto-verwaltung-section", onGoto);
+    return () =>
+      window.removeEventListener("cubetracker:goto-verwaltung-section", onGoto);
+  }, []);
 
   return (
     <div className="space-y-4">

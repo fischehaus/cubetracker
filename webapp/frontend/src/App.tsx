@@ -34,6 +34,7 @@ import { MultiCompareCard } from "./components/MultiCompareCard";
 import { FeatureListPanel } from "./components/FeatureListPanel";
 import { OnboardingBanner } from "./components/OnboardingBanner";
 import { PatchNotesPanel } from "./components/PatchNotesPanel";
+import { UserMenu } from "./components/UserMenu";
 import { ReminderCard } from "./components/ReminderCard";
 import { SolveList } from "./components/SolveList";
 import { CommunityTab, type CommunitySection } from "./components/CommunityTab";
@@ -95,11 +96,9 @@ interface Health {
   mode?: "dev" | "prod"; // Phase 9 — neu, kann fehlen bei alten Backends
 }
 
-function HealthBadge() {
-  // UX-Refactor 2026-05-14: Version-Badge ist jetzt klickbar — oeffnet
-  // Patch-Notes-Modal. So lebt das Changelog am natuerlichen Ort
-  // (Versions-Hinweis) statt versteckt im Verwaltungs-Sub-Tab.
-  const [showPatches, setShowPatches] = useState(false);
+function HealthBadge({ onClick }: { onClick: () => void }) {
+  // Version-Badge — Klick oeffnet Patch-Notes-Modal (State lebt im
+  // MainLayout, damit auch das UserMenu denselben Modal nutzen kann).
   const { data, error } = useQuery<Health>({
     queryKey: ["health"],
     queryFn: async () => {
@@ -124,24 +123,21 @@ function HealthBadge() {
   }
   const isProd = data.mode === "prod";
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setShowPatches(true)}
-        className={
-          isProd
-            ? "text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-3 py-1.5 hover:bg-emerald-500/20 cursor-pointer transition-colors"
-            : "text-sm text-purple-300 bg-purple-500/10 border border-purple-500/30 rounded px-3 py-1.5 hover:bg-purple-500/20 cursor-pointer transition-colors"
-        }
-        title="Patch Notes anzeigen"
-      >
-        v{data.version}
-        {data.mode && (
-          <span className="ml-1 text-xs opacity-70">[{data.mode}]</span>
-        )}
-      </button>
-      {showPatches && <PatchNotesModal onClose={() => setShowPatches(false)} />}
-    </>
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        isProd
+          ? "text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-3 py-1.5 hover:bg-emerald-500/20 cursor-pointer transition-colors"
+          : "text-sm text-purple-300 bg-purple-500/10 border border-purple-500/30 rounded px-3 py-1.5 hover:bg-purple-500/20 cursor-pointer transition-colors"
+      }
+      title="Patch Notes anzeigen"
+    >
+      v{data.version}
+      {data.mode && (
+        <span className="ml-1 text-xs opacity-70">[{data.mode}]</span>
+      )}
+    </button>
   );
 }
 
@@ -349,6 +345,10 @@ function MainLayout() {
   const [analyseCubeFilter, setAnalyseCubeFilter] = useState<string>("");
   const initial = loadInitialTab();
   const [tab, setTab] = useState<AppTab>(initial.tab);
+  // Modals fuer Patch-Notes + Features-Liste — State lebt hier zentral,
+  // weil mehrere Trigger drauf zugreifen (Version-Badge, UserMenu, Footer).
+  const [showPatches, setShowPatches] = useState(false);
+  const [showFeatures, setShowFeatures] = useState(false);
   // Initial-Sub-Tab im Community-Tab — wird nur beim ersten Mount aus
   // dem URL-Hash gelesen (z.B. legacy #friends → friends). Spaetere
   // Wechsel innerhalb des CommunityTabs leben in dessen lokalem state.
@@ -407,17 +407,29 @@ function MainLayout() {
             />
           </button>
           <div className="flex items-center gap-3">
-            <HealthBadge />
+            <HealthBadge onClick={() => setShowPatches(true)} />
             {user && (
-              <>
-                <span className="text-sm text-gray-400 hidden md:inline">{user.email}</span>
-                <button
-                  onClick={() => void logout()}
-                  className="text-sm text-gray-300 hover:text-gray-100 underline"
-                >
-                  Logout
-                </button>
-              </>
+              <UserMenu
+                email={user.email}
+                displayName={user.display_name}
+                isAdmin={user.is_admin}
+                onOpenSettings={() => {
+                  setTab("verwaltung");
+                  // Event laesst VerwaltungTab zum Sub-Tab "settings" springen.
+                  // Sub-Tab-State lebt lokal, daher kein direkter Set-Pfad —
+                  // Event-Hook ist die kleinste invasive Lösung.
+                  setTimeout(() => {
+                    window.dispatchEvent(
+                      new CustomEvent("cubetracker:goto-verwaltung-section", {
+                        detail: { section: "settings" },
+                      }),
+                    );
+                  }, 0);
+                }}
+                onOpenPatchNotes={() => setShowPatches(true)}
+                onOpenFeatures={() => setShowFeatures(true)}
+                onLogout={() => void logout()}
+              />
             )}
           </div>
         </header>
@@ -462,38 +474,30 @@ function MainLayout() {
           <CommunityTab initialSection={communityInitial} />
         )}
 
-        <Footer />
+        <footer className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
+          <span>cubetracker — Speedcubing-Tracker</span>
+          <span aria-hidden="true">·</span>
+          <button
+            type="button"
+            onClick={() => setShowFeatures(true)}
+            className="text-gray-500 hover:text-gray-200 underline"
+          >
+            Was kann diese App?
+          </button>
+          <span aria-hidden="true">·</span>
+          <span>Mehr Optionen oben rechts im User-Menu</span>
+        </footer>
       </div>
 
-      {/* Globale Toaster — bleiben auf jedem Tab sichtbar */}
+      {/* Globale Toaster + Modals — bleiben auf jedem Tab sichtbar */}
       <AchievementToaster />
       <ChallengeCompletionToaster />
       <PbConfettiOverlay />
-    </div>
-  );
-}
-
-function Footer() {
-  const [showFeatures, setShowFeatures] = useState(false);
-  return (
-    <>
-      <footer className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
-        <span>cubetracker — Speedcubing-Tracker</span>
-        <span aria-hidden="true">·</span>
-        <button
-          type="button"
-          onClick={() => setShowFeatures(true)}
-          className="text-gray-500 hover:text-gray-200 underline"
-        >
-          Was kann diese App?
-        </button>
-        <span aria-hidden="true">·</span>
-        <span>v-Badge oben rechts = Patch Notes</span>
-      </footer>
+      {showPatches && <PatchNotesModal onClose={() => setShowPatches(false)} />}
       {showFeatures && (
         <FeaturesModal onClose={() => setShowFeatures(false)} />
       )}
-    </>
+    </div>
   );
 }
 

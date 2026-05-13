@@ -38,6 +38,24 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.user-menu",
+        released=date(2026, 5, 14),
+        title="User-Menu oben rechts (klassisches Account-Dropdown)",
+        highlights=[
+            "Klick auf Email/Avatar oben rechts oeffnet jetzt ein Dropdown-"
+            "Menu mit den Standard-Aktionen: Mein Account, Patch Notes, "
+            "Was kann diese App, Logout",
+            "Avatar mit Initialen (Display-Name oder Email-Anfangsbuchstaben), "
+            "ADMIN-Badge wenn du Admin bist",
+            "„Mein Account & Einstellungen\" springt direkt zum richtigen "
+            "Sub-Tab in der Verwaltung (Settings inkl. AccountSettingsPanel)",
+            "Patch Notes + Features-Modal sind dadurch ueber 3 Wege "
+            "erreichbar: Version-Badge oben rechts, User-Menu, Footer-Link",
+            "Alter Email-Text + nackter Logout-Link entfernt — UserMenu "
+            "ersetzt beides",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.logo-kor",
         released=date(2026, 5, 14),
         title="Korrigiertes Logo eingespielt",
