@@ -38,6 +38,25 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.logo-info",
+        released=date(2026, 5, 14),
+        title="Logo prominenter + Info-Buttons in Karten",
+        highlights=[
+            "App-Header: Logo ersetzt den separaten „cubetracker\"-"
+            "Schriftzug + Tagline (war doppelt — das Logo enthaelt beides). "
+            "Logo-Hoehe 64-80px, klickbar zum Dashboard-Tab, mit Hover-"
+            "Effekt. H1-Tag bleibt screenreader-only fuer SEO.",
+            "Anmeldeseite: Logo nimmt jetzt die volle Card-Innenbreite ein "
+            "(war zu klein im Verhaeltnis zum Whitespace) — Card-Breite "
+            "etwas erhoeht.",
+            "Neue InfoButton-Komponente (ⓘ-Icon) mit Klick-/Hover-Popover. "
+            "Schliesst bei Klick ausserhalb oder Esc.",
+            "Info-Buttons platziert in: LIVE-Karte, Letzte-Solves-Tabelle, "
+            "Trainings-Set, Scramble — erklaert die wichtigsten Begriffe "
+            "(AO5/AO12/Form-Vergleich/WCA-Scramble-Notation).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.features-page",
         released=date(2026, 5, 14),
         title="App-Beschreibung + Feature-Liste",

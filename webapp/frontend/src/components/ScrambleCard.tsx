@@ -16,6 +16,7 @@ import {
   resolveScrambleTypeOverride,
 } from "../lib/scramble";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
+import { InfoButton } from "./InfoButton";
 
 interface Props {
   /** App-cube_type ("3x3", "Pyraminx", …) oder Subset-Override ("pll"/"oll" → Phase 8b) */
@@ -67,11 +68,23 @@ export function ScrambleCard({
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
       <div className="flex items-center justify-between mb-2 gap-3">
-        <div className="text-sm text-gray-500 uppercase tracking-wide">
-          Scramble{" "}
-          <span className="text-gray-600 normal-case tracking-normal">
-            ({effectiveType})
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500 uppercase tracking-wide">
+            Scramble{" "}
+            <span className="text-gray-600 normal-case tracking-normal">
+              ({effectiveType})
+            </span>
           </span>
+          <InfoButton>
+            <p className="font-medium mb-1">Scramble</p>
+            <p>
+              Zufaellige Verdrehungs-Sequenz nach WCA-Notation. Buchstaben =
+              Seite (R, L, U, D, F, B), Strich („L'") = gegen den Uhrzeiger,
+              Zahl 2 = doppelte Drehung. Wende den Scramble auf einen
+              geloesten Cube an — dann sind alle Loesungen unter denselben
+              Bedingungen vergleichbar. „Skip" wirft einen neuen.
+            </p>
+          </InfoButton>
         </div>
         <button
           onClick={() => setSkipCounter((c) => c + 1)}

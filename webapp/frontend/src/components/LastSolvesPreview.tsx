@@ -27,6 +27,7 @@ import {
   type SortDir,
   type SortKey,
 } from "../lib/solve-sort";
+import { InfoButton } from "./InfoButton";
 
 interface Props {
   cubeType: string;
@@ -167,9 +168,21 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
     <div className="space-y-4">
       {/* Live-Stats prominent: letzter Solve + ao5/ao12 + Form-Vergleich */}
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h3 className="text-base uppercase tracking-wide text-gray-500 mb-4">
-          Live ({cubeType})
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base uppercase tracking-wide text-gray-500">
+            Live ({cubeType})
+          </h3>
+          <InfoButton align="right">
+            <p className="font-medium mb-1">Live-Karte</p>
+            <p>
+              Zeigt deinen <strong>letzten Solve</strong> + die aktuellen
+              Averages (AO5/AO12 = trimmed mean der letzten 5/12 Solves,
+              WCA-konform). „Form vs" vergleicht dein aktuelles Niveau mit
+              dem Mittel eines waehlbaren Fensters (letzte 100/500/alle).
+              Gruen = besser als Schnitt, rot = schlechter.
+            </p>
+          </InfoButton>
+        </div>
 
         <div className="space-y-4">
           <div>
@@ -303,10 +316,21 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
 
       {/* Letzte X Solves — sortierbare Tabelle mit AO5/AO12 als Spalten */}
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <div className="flex items-baseline justify-between gap-2 mb-3">
-          <h3 className="text-base uppercase tracking-wide text-gray-500">
-            Letzte Solves ({cubeType})
-          </h3>
+        <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base uppercase tracking-wide text-gray-500">
+              Letzte Solves ({cubeType})
+            </h3>
+            <InfoButton>
+              <p className="font-medium mb-1">Letzte Solves</p>
+              <p>
+                Die zuletzt eingetragenen Solves dieses Cube-Typs. Anzahl
+                ueber den Selector waehlbar (10/20/50/100). Klick auf
+                Spaltenkopf sortiert (Solvenummer, Zeit, AO5, AO12). DNF
+                und leere Averages landen beim Sortieren am Ende.
+              </p>
+            </InfoButton>
+          </div>
           <label className="flex items-center gap-1.5 text-xs text-gray-500">
             Anzahl
             <select

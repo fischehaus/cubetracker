@@ -388,24 +388,24 @@ function MainLayout() {
     <div className="min-h-screen p-6">
       <div className="mx-auto max-w-7xl">
         <header className="flex items-center justify-between mb-6 gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            {/* Cube-Icon links neben dem Schriftzug. Quadratisch, klein —
-                der Schriftzug bleibt H1 fuer SEO + Screenreader. */}
+          {/* Volles Logo (mit Schriftzug + Tagline) ersetzt den separaten
+              H1+Untertitel. Klick fuehrt zurueck zum Default-Tab. Logo
+              enthaelt den App-Namen, daher visuell-doppelt wenn man's
+              danebenstellen wuerde. H1 mit sr-only fuer Screenreader + SEO. */}
+          <button
+            type="button"
+            onClick={() => setTab("dashboard")}
+            className="flex items-center group focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded-lg"
+            aria-label="cubetracker — Speedcubing-Solve-Tracking — zum Dashboard"
+          >
+            <h1 className="sr-only">cubetracker — Speedcubing-Solve-Tracking</h1>
             <img
-              src="/cubetracker-192.png"
+              src="/cubetracker-logo.png"
               alt=""
               aria-hidden="true"
-              className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0"
+              className="h-16 md:h-20 w-auto group-hover:opacity-90 transition-opacity"
             />
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-100">
-                cubetracker
-              </h1>
-              <p className="text-sm md:text-base text-gray-400">
-                Speedcubing-Solve-Tracking — Multi-User-Web.
-              </p>
-            </div>
-          </div>
+          </button>
           <div className="flex items-center gap-3">
             <HealthBadge />
             {user && (

@@ -18,6 +18,7 @@ import { useMemo, useState } from "react";
 import { useSolves } from "../lib/api";
 import { formatTime } from "../lib/format";
 import type { Solve } from "../lib/types";
+import { InfoButton } from "./InfoButton";
 
 interface Props {
   cubeType: string;
@@ -87,8 +88,20 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <div className="text-sm uppercase tracking-wide text-gray-500">
-              Trainings-Set
+            <div className="flex items-center gap-2">
+              <span className="text-sm uppercase tracking-wide text-gray-500">
+                Trainings-Set
+              </span>
+              <InfoButton>
+                <p className="font-medium mb-1">Trainings-Set</p>
+                <p>
+                  Setze dir eine feste Anzahl Solves als Ziel (z.B. 12 oder
+                  50). Waehrend du solvest, zaehlt das Set runter und zeigt
+                  Live-Stats. Am Ende kriegst du eine Zusammenfassung: Best,
+                  Worst, AO5, AO12, AO100, plus DNF/+2-Statistik. Praktisch
+                  fuer fokussiertes Training mit klarem Stoppzeitpunkt.
+                </p>
+              </InfoButton>
             </div>
             <div className="text-base text-gray-300 mt-0.5">
               Plane eine feste Anzahl Solves und bekomme am Ende eine

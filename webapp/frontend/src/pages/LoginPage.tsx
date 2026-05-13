@@ -45,15 +45,18 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
-      <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6 lg:gap-10 items-start">
+      <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-[480px_1fr] gap-6 lg:gap-10 items-start">
         {/* Linke Spalte: Logo + Login-Form */}
-        <div className="w-full max-w-sm mx-auto lg:max-w-none bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
+        <div className="w-full max-w-md mx-auto lg:max-w-none bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
+          {/* Logo prominent — wie eine Marken-Visitenkarte. Volle Card-
+              Innenbreite (Card ist max-w-md = 448px, Padding p-6 = 24px,
+              also ~400px Innenraum). */}
           <img
             src="/cubetracker-logo.png"
             alt="cubetracker — Speedcubing Solve-Tracking"
-            className="w-full max-w-[260px] mx-auto mb-3"
+            className="w-full mx-auto mb-4"
           />
-          <p className="text-sm text-gray-400 mb-6 text-center">
+          <p className="text-base text-gray-400 mb-6 text-center">
             {mode === "login"
               ? "Willkommen zurueck."
               : mode === "register"
