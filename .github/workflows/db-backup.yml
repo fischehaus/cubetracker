@@ -101,10 +101,15 @@ jobs:
             echo "::error::Dump-Datei leer — pg_dump fehlgeschlagen"
             exit 1
           fi
-          pg_restore --list "$OUT" | head -20 || {
+          # pg_restore --list in Datei schreiben, dann head — Pipe + pipefail
+          # gibt SIGPIPE wenn head nach 20 Zeilen schliesst und pg_restore
+          # noch schreibt, was den ganzen Step failt obwohl Dump OK ist.
+          pg_restore --list "$OUT" > /tmp/dump-list.txt || {
             echo "::error::pg_restore kann den Dump nicht lesen"
             exit 1
           }
+          head -20 /tmp/dump-list.txt
+          echo "(... $(wc -l < /tmp/dump-list.txt) total entries)"
 
       - name: Upload Dump as Artifact
         uses: actions/upload-artifact@v4
