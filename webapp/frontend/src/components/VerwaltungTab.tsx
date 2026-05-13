@@ -13,6 +13,7 @@ import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
 import { ImportPanel } from "./ImportPanel";
 import { OutlierCard } from "./OutlierCard";
+import { PatchNotesPanel } from "./PatchNotesPanel";
 import { SessionList } from "./SessionList";
 import { SettingsPanel } from "./SettingsPanel";
 
@@ -22,6 +23,7 @@ type VerwaltungSection =
   | "daten"
   | "outliers"
   | "settings"
+  | "patches"
   | "admin";
 
 interface SubTab {
@@ -36,6 +38,7 @@ const SUB_TABS: SubTab[] = [
   { id: "daten", label: "Daten", icon: "📥" },
   { id: "outliers", label: "Outliers", icon: "⚠" },
   { id: "settings", label: "Einstellungen", icon: "⚙" },
+  { id: "patches", label: "Patch Notes", icon: "📋" },
 ];
 
 // Admin-Tab nur fuer User mit is_admin === true (env-driven, siehe
@@ -113,6 +116,7 @@ export function VerwaltungTab() {
       )}
       {section === "outliers" && <OutlierCard />}
       {section === "settings" && <SettingsPanel />}
+      {section === "patches" && <PatchNotesPanel />}
       {section === "admin" && isAdmin && <AdminPanel />}
     </div>
   );

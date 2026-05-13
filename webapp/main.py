@@ -21,6 +21,7 @@ from api import admin as admin_api
 from api import auth as auth_api
 from api import backup as backup_api
 from api import challenges as challenges_api
+from api import changelog as changelog_api
 from api import export_cstimer as export_api
 from api import friends as friends_api
 from api import hardware as hardware_api
@@ -32,7 +33,12 @@ from api import stats as stats_api
 from auth.config import IS_PROD, require_strong_secret
 from auth.rate_limit import limiter
 
-__version__ = "2.0.0a0"
+# Version-String wird automatisch aus PATCH_NOTES[0].version abgeleitet —
+# Single-Source-of-Truth ist `changelog/data.py`. Bei jeder Aenderung
+# einen neuen Eintrag dort einfuegen, hier passiert nichts manuell.
+from changelog.data import current_version
+
+__version__ = current_version()
 
 
 @asynccontextmanager
@@ -163,6 +169,7 @@ app.include_router(export_api.router)
 app.include_router(admin_api.router)
 app.include_router(friends_api.router)
 app.include_router(leaderboard_api.router)
+app.include_router(changelog_api.router)
 
 
 @app.get("/api/health")

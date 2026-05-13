@@ -1481,3 +1481,31 @@ export function useLeaderboard(
     staleTime: 30_000,
   });
 }
+
+// ============================================================
+// Patch Notes (Changelog)
+// ============================================================
+
+export interface PatchNote {
+  version: string;
+  released: string; // ISO-date "2026-05-14"
+  title: string;
+  highlights: string[];
+  commit: string | null;
+}
+
+interface ChangelogResponse {
+  patches: PatchNote[];
+}
+
+export function usePatchNotes(): UseQueryResult<ChangelogResponse> {
+  return useQuery({
+    queryKey: ["patch-notes"],
+    queryFn: async () => {
+      const r = await api.get<ChangelogResponse>("/api/changelog");
+      return r.data;
+    },
+    // Patch-Notes aendern sich nur bei Deploy — 5min Cache reicht.
+    staleTime: 5 * 60_000,
+  });
+}
