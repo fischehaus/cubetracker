@@ -15,6 +15,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { api, clearAccessToken, getAccessToken, setAccessToken } from "../lib/api";
 
 export interface UserRead {
@@ -24,6 +25,9 @@ export interface UserRead {
   email_verified: boolean;
   display_name: string | null;
   created_at: string;
+  /** Computed from ADMIN_EMAILS-Env-Var im Backend. Steuert ob die
+   *  Admin-Card im VerwaltungTab sichtbar ist. */
+  is_admin: boolean;
 }
 
 export interface AuthState {
@@ -72,6 +76,12 @@ async function apiMe(): Promise<UserRead> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserRead | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // QA-Finding (high): React-Query-Cache haelt die Antworten aller
+  // /api-Calls bis zur Garbage-Collection. Bei Logout->Login von User A
+  // zu User B im selben Browser sieht User B kurz Daten von User A bis
+  // die Queries refetcht haben. qc.clear() bei Login/Logout schliesst
+  // das. Quelle: Sub-Agent-QA-Review Admin-Card.
+  const qc = useQueryClient();
 
   // Beim App-Start: wenn ein Access-Token im Storage liegt, /auth/me probieren.
   useEffect(() => {
@@ -98,27 +108,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // apiClient feuert "cubetracker:logged-out" wenn Refresh fehlschlaegt.
+  // Auch hier Cache leeren (s.o.) — Stale-Daten gehoeren keinem mehr.
   useEffect(() => {
-    const handler = () => setUser(null);
+    const handler = () => {
+      setUser(null);
+      qc.clear();
+    };
     window.addEventListener("cubetracker:logged-out", handler);
     return () => window.removeEventListener("cubetracker:logged-out", handler);
-  }, []);
+  }, [qc]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const me = await apiLogin(email, password);
-    setUser(me);
-  }, []);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      qc.clear();
+      const me = await apiLogin(email, password);
+      setUser(me);
+    },
+    [qc],
+  );
 
-  const register = useCallback(async (email: string, password: string) => {
-    await apiRegister(email, password);
-    const me = await apiLogin(email, password);
-    setUser(me);
-  }, []);
+  const register = useCallback(
+    async (email: string, password: string) => {
+      qc.clear();
+      await apiRegister(email, password);
+      const me = await apiLogin(email, password);
+      setUser(me);
+    },
+    [qc],
+  );
 
   const logout = useCallback(async () => {
     await apiLogout();
     setUser(null);
-  }, []);
+    qc.clear();
+  }, [qc]);
 
   // Nach Profil-Aenderungen via PATCH /me / verify-email etc: User reloaden.
   const refreshMe = useCallback(async () => {

@@ -13,6 +13,7 @@ DB direkt.
 
 from __future__ import annotations
 
+import os
 from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
@@ -76,6 +77,20 @@ class User(Base):
     email_verification_tokens: Mapped[list[EmailVerificationToken]] = relationship(
         "EmailVerificationToken", back_populates="user", cascade="all, delete-orphan"
     )
+
+    @property
+    def is_admin(self) -> bool:
+        """Computed: True wenn email in ADMIN_EMAILS-Env-Var (comma-separated).
+
+        Persistiert NICHT in der DB — Quelle-of-Truth ist die Env-Var (auch
+        genutzt in api/admin.py:require_admin). Pydantic UserRead picked das
+        ueber from_attributes automatisch auf, ohne dass jeder Endpoint
+        manuell setzen muss.
+        Fail-closed: leere/fehlende ADMIN_EMAILS -> alle False.
+        """
+        raw = os.getenv("ADMIN_EMAILS", "")
+        admin_set = {e.strip().lower() for e in raw.split(",") if e.strip()}
+        return bool(admin_set) and self.email.lower() in admin_set
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<User id={self.id} email={self.email!r}>"

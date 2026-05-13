@@ -6,6 +6,8 @@
 // reload erhalten, das ist OK fuer einen verwaltungs-tab).
 
 import { useState } from "react";
+import { useAuth } from "../auth/AuthContext";
+import { AdminStatsPanel } from "./AdminStatsPanel";
 import { BackupPanel } from "./BackupPanel";
 import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
@@ -19,7 +21,8 @@ type VerwaltungSection =
   | "hardware"
   | "daten"
   | "outliers"
-  | "settings";
+  | "settings"
+  | "admin";
 
 interface SubTab {
   id: VerwaltungSection;
@@ -35,7 +38,16 @@ const SUB_TABS: SubTab[] = [
   { id: "settings", label: "Einstellungen", icon: "⚙" },
 ];
 
+// Admin-Tab nur fuer User mit is_admin === true (env-driven, siehe
+// backend api/admin.py). Liegt am Ende um die Tab-Reihenfolge fuer
+// Non-Admins stabil zu halten.
+const ADMIN_TAB: SubTab = { id: "admin", label: "Admin", icon: "🛡" };
+
 export function VerwaltungTab() {
+  const { user } = useAuth();
+  const isAdmin = user?.is_admin ?? false;
+  const tabs = isAdmin ? [...SUB_TABS, ADMIN_TAB] : SUB_TABS;
+
   const [section, setSection] = useState<VerwaltungSection>("sessions");
 
   return (
@@ -45,7 +57,7 @@ export function VerwaltungTab() {
         className="flex gap-1 rounded-lg border border-gray-700 bg-gray-900/50 p-1"
         aria-label="Verwaltungs-Bereiche"
       >
-        {SUB_TABS.map((t) => {
+        {tabs.map((t) => {
           const active = section === t.id;
           return (
             <button
@@ -101,6 +113,7 @@ export function VerwaltungTab() {
       )}
       {section === "outliers" && <OutlierCard />}
       {section === "settings" && <SettingsPanel />}
+      {section === "admin" && isAdmin && <AdminStatsPanel />}
     </div>
   );
 }

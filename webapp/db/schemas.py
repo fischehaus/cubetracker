@@ -39,6 +39,10 @@ class UserRead(BaseModel):
     email_verified: bool
     display_name: str | None
     created_at: datetime
+    # Computed-Property aus dem User-Model — abgeleitet von ADMIN_EMAILS-Env-Var.
+    # Frontend nutzt das um den Admin-Sub-Tab im VerwaltungTab nur fuer
+    # Admins zu rendern. Default False fuer Tests die UserRead manuell bauen.
+    is_admin: bool = False
 
 
 class UserUpdate(BaseModel):

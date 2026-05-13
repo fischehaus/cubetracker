@@ -1022,3 +1022,56 @@ export function useDismissChallenge(): UseMutationResult<
     },
   });
 }
+
+// ============================================================
+// Admin (Phase W.admin) — Cluster-Statistiken fuer App-Betreiber
+// ============================================================
+
+export interface AdminTopCube {
+  cube_type: string;
+  solves: number;
+}
+
+export interface AdminStats {
+  users: {
+    total: number;
+    active: number;
+    email_verified: number;
+    recently_active_7d: number;
+    recently_active_30d: number;
+  };
+  volume: {
+    solves: number;
+    sessions: number;
+    hardware: number;
+    achievements_unlocked: number;
+  };
+  top_cubes: AdminTopCube[];
+  storage: {
+    snapshots_count: number;
+    snapshots_total_bytes: number;
+    snapshots_total_mb: number;
+  };
+  as_of: string;
+}
+
+/**
+ * Cluster-Statistiken — nur fuer Admins (ADMIN_EMAILS-Env-Var).
+ * Backend liefert 404 fuer Non-Admins (kein Probing). Frontend
+ * sollte den Hook nur enable'n wenn user.is_admin.
+ */
+export function useAdminStats(
+  enabled: boolean,
+): UseQueryResult<AdminStats> {
+  return useQuery({
+    queryKey: ["admin-stats"],
+    queryFn: async (): Promise<AdminStats> => {
+      const r = await api.get<AdminStats>("/admin/stats");
+      return r.data;
+    },
+    enabled,
+    // Stats sind teuer (COUNT auf grossen Tabellen), Rate-Limit 30/min.
+    // 60s staleTime ist mehr als genug fuer ein Admin-Dashboard.
+    staleTime: 60_000,
+  });
+}
