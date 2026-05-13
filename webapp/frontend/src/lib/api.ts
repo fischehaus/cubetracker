@@ -1201,3 +1201,178 @@ export function useAdminAnnouncement(): UseMutationResult<
     },
   });
 }
+
+// ============================================================
+// Friends (Phase W.9)
+// ============================================================
+
+export interface FriendUserBrief {
+  id: number;
+  display_name: string | null;
+  /** Nur fuer accepted-Friends gesetzt. pending-Anfragen leaken keine Email. */
+  email: string | null;
+}
+
+export type FriendshipStatus = "pending" | "accepted";
+export type FriendshipDirection = "outgoing" | "incoming";
+
+export interface Friendship {
+  id: number;
+  status: FriendshipStatus;
+  direction: FriendshipDirection;
+  other: FriendUserBrief;
+  created_at: string;
+  accepted_at: string | null;
+}
+
+export interface FriendsListResponse {
+  friends: Friendship[];
+  incoming_pending: Friendship[];
+  outgoing_pending: Friendship[];
+}
+
+export type FriendRelationship =
+  | "none"
+  | "outgoing_pending"
+  | "incoming_pending"
+  | "accepted";
+
+export interface FriendSearchResult {
+  id: number;
+  display_name: string | null;
+  relationship: FriendRelationship;
+  friendship_id: number | null;
+}
+
+interface FriendSearchResponse {
+  results: FriendSearchResult[];
+}
+
+interface EmailLookupResponse {
+  found: boolean;
+  user: FriendSearchResult | null;
+}
+
+export function useFriendsList(
+  enabled: boolean,
+): UseQueryResult<FriendsListResponse> {
+  return useQuery({
+    queryKey: ["friends-list"],
+    queryFn: async (): Promise<FriendsListResponse> => {
+      const r = await api.get<FriendsListResponse>("/friends/list");
+      return r.data;
+    },
+    enabled,
+    staleTime: 15_000,
+  });
+}
+
+export function useFriendSearch(
+  q: string,
+): UseQueryResult<FriendSearchResponse> {
+  return useQuery({
+    queryKey: ["friend-search", q],
+    queryFn: async (): Promise<FriendSearchResponse> => {
+      const r = await api.get<FriendSearchResponse>("/friends/search", {
+        params: { q },
+      });
+      return r.data;
+    },
+    // Erst ab 2 Zeichen feuern — sonst 422 vom Backend
+    enabled: q.trim().length >= 2,
+    staleTime: 10_000,
+  });
+}
+
+export function useEmailLookup(): UseMutationResult<
+  EmailLookupResponse,
+  Error,
+  { email: string }
+> {
+  return useMutation({
+    mutationFn: async ({ email }) => {
+      const r = await api.post<EmailLookupResponse>("/friends/lookup-email", {
+        email,
+      });
+      return r.data;
+    },
+  });
+}
+
+export function useSendFriendRequest(): UseMutationResult<
+  Friendship,
+  Error,
+  { target_user_id: number }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ target_user_id }) => {
+      const r = await api.post<Friendship>("/friends/request", {
+        target_user_id,
+      });
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["friends-list"] });
+      qc.invalidateQueries({ queryKey: ["friend-search"] });
+    },
+  });
+}
+
+export function useAcceptFriend(): UseMutationResult<
+  Friendship,
+  Error,
+  { friendship_id: number }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ friendship_id }) => {
+      const r = await api.post<Friendship>(`/friends/${friendship_id}/accept`);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["friends-list"] });
+      qc.invalidateQueries({ queryKey: ["friend-search"] });
+    },
+  });
+}
+
+export function useRemoveFriendship(): UseMutationResult<
+  void,
+  Error,
+  { friendship_id: number }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ friendship_id }) => {
+      await api.delete(`/friends/${friendship_id}`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["friends-list"] });
+      qc.invalidateQueries({ queryKey: ["friend-search"] });
+    },
+  });
+}
+
+/** Toggle is_discoverable + display_name via PATCH /auth/me. Auch fuer
+ *  Display-Name-Updates wiederverwendbar (existierender Endpoint). */
+export function useUpdateProfile(): UseMutationResult<
+  unknown,
+  Error,
+  { display_name?: string | null; is_discoverable?: boolean }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (patch) => {
+      const r = await api.patch("/auth/me", patch);
+      return r.data;
+    },
+    onSuccess: () => {
+      // /auth/me liefert neuen User — AuthContext muss refreshen.
+      // Wir feuern unser eigenes Event statt direkt im Hook auf
+      // AuthContext zuzugreifen (zirkulaer waere doof).
+      window.dispatchEvent(new Event("cubetracker:profile-updated"));
+      qc.invalidateQueries({ queryKey: ["friends-list"] });
+    },
+  });
+}

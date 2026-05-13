@@ -28,6 +28,8 @@ export interface UserRead {
   /** Computed from ADMIN_EMAILS-Env-Var im Backend. Steuert ob die
    *  Admin-Card im VerwaltungTab sichtbar ist. */
   is_admin: boolean;
+  /** Phase W.9: Opt-In fuer User-Suche per display_name. */
+  is_discoverable: boolean;
 }
 
 export interface AuthState {
@@ -117,6 +119,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener("cubetracker:logged-out", handler);
     return () => window.removeEventListener("cubetracker:logged-out", handler);
   }, [qc]);
+
+  // Phase W.9: useUpdateProfile feuert "cubetracker:profile-updated" nach
+  // erfolgreichem PATCH /auth/me — wir refetchen den User damit
+  // display_name/is_discoverable im AuthState aktuell sind.
+  useEffect(() => {
+    const handler = () => {
+      void apiMe()
+        .then((u) => setUser(u))
+        .catch(() => {
+          // Ignorieren — wenn /auth/me 401 wirft, kuemmert sich der
+          // logged-out-Handler. Hier nicht zusaetzlich loggen.
+        });
+    };
+    window.addEventListener("cubetracker:profile-updated", handler);
+    return () =>
+      window.removeEventListener("cubetracker:profile-updated", handler);
+  }, []);
 
   const login = useCallback(
     async (email: string, password: string) => {

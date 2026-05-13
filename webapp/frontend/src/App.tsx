@@ -34,6 +34,7 @@ import { MultiCompareCard } from "./components/MultiCompareCard";
 import { OnboardingBanner } from "./components/OnboardingBanner";
 import { ReminderCard } from "./components/ReminderCard";
 import { SolveList } from "./components/SolveList";
+import { FriendsTab } from "./components/FriendsTab";
 import { StatsCard } from "./components/StatsCard";
 import { TabBar, type AppTab } from "./components/TabBar";
 import { TrainerTab } from "./components/TrainerTab";
@@ -58,6 +59,7 @@ const VALID_TABS: AppTab[] = [
   "analyse",
   "verwaltung",
   "trainer",
+  "friends",
 ];
 
 function tabFromHash(): AppTab | null {
@@ -379,6 +381,7 @@ function MainLayout() {
         )}
         {tab === "verwaltung" && <VerwaltungTab />}
         {tab === "trainer" && <TrainerTab />}
+        {tab === "friends" && <FriendsTab />}
 
         <footer className="mt-8 text-sm text-gray-500 text-center">
           v1.0 · Distribution-faehig · OLL-Visualisierung · 31 Achievements

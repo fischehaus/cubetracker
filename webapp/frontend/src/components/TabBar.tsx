@@ -12,7 +12,8 @@ export type AppTab =
   | "dashboard"
   | "analyse"
   | "verwaltung"
-  | "trainer";
+  | "trainer"
+  | "friends";
 
 interface TabDef {
   id: AppTab;
@@ -51,6 +52,12 @@ export const TABS: TabDef[] = [
     label: "Trainer",
     icon: "🏆",
     description: "Erfolge + Daily Challenges (Phase 7)",
+  },
+  {
+    id: "friends",
+    label: "Freunde",
+    icon: "🤝",
+    description: "Freundeliste + Anfragen (Phase W.9)",
   },
 ];
 

@@ -136,7 +136,66 @@ function ProfileSection() {
         {info && <FeedbackOk text={info} />}
         {error && <FeedbackErr text={error} />}
       </form>
+
+      {/* Phase W.9: Discoverability-Toggle */}
+      <DiscoverabilitySection />
     </Card>
+  );
+}
+
+function DiscoverabilitySection() {
+  const { user, refreshMe } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!user) return null;
+
+  const hasName = !!user.display_name?.trim();
+
+  async function toggle(next: boolean) {
+    setBusy(true);
+    setInfo(null);
+    setError(null);
+    try {
+      await api.patch("/auth/me", { is_discoverable: next });
+      await refreshMe();
+      setInfo(next ? "Du bist jetzt fuer andere User auffindbar." : "Auffindbarkeit deaktiviert.");
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 border-t border-gray-700 pt-3 space-y-2">
+      <div className="text-sm font-medium text-gray-300">
+        Auffindbar fuer andere (Freunde-Suche)
+      </div>
+      <p className="text-xs text-gray-400">
+        Wenn aktiv, koennen andere User dich per <em>Display-Name</em> in
+        der Freunde-Suche finden. Per <em>Email</em> bist du immer findbar
+        (wer die Adresse kennt). Default: aus.
+      </p>
+      <label className="flex items-center gap-2 text-sm text-gray-200">
+        <input
+          type="checkbox"
+          checked={user.is_discoverable}
+          onChange={(e) => void toggle(e.target.checked)}
+          disabled={busy || !hasName}
+          className="accent-purple-500 w-4 h-4"
+        />
+        Andere User koennen mich per Display-Name finden
+      </label>
+      {!hasName && (
+        <p className="text-xs text-amber-300">
+          ⚠ Erst einen Anzeige-Namen setzen — sonst gibt es nichts zu finden.
+        </p>
+      )}
+      {info && <FeedbackOk text={info} />}
+      {error && <FeedbackErr text={error} />}
+    </div>
   );
 }
 

@@ -16,7 +16,17 @@ from __future__ import annotations
 import os
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -44,6 +54,12 @@ class User(Base):
     # wenn Mail nicht ankommt), aber UI zeigt einen Hinweis-Banner.
     email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     display_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Phase W.9: Friend-System.
+    # Opt-In: User muss aktiv is_discoverable=true setzen damit er per
+    # display_name in der User-Suche auftaucht. Default False = maximaler
+    # Privacy-Schutz. Friend-Request per exakter Email umgeht diese Sperre
+    # bewusst NICHT — nur per ID/User-Suche-Result-Klick anfragbar.
+    is_discoverable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     # Token-Revocation: jeder ausgegebene JWT enthaelt das aktuelle token_version
     # in seinen Claims. Wird die Spalte hochgezaehlt (Logout, Password-Change),
     # invalidiert das alle bestehenden Tokens dieses Users sofort.
@@ -76,6 +92,21 @@ class User(Base):
     )
     email_verification_tokens: Mapped[list[EmailVerificationToken]] = relationship(
         "EmailVerificationToken", back_populates="user", cascade="all, delete-orphan"
+    )
+    # Phase W.9 Friend-System. Zwei separate Relations weil eine Friendship
+    # einen Requester + ein Target hat. Cascade beim User-Delete: alle eigenen
+    # Friendships (egal welche Rolle) werden mit-geloescht.
+    sent_friend_requests: Mapped[list[Friendship]] = relationship(
+        "Friendship",
+        foreign_keys="Friendship.requester_id",
+        back_populates="requester",
+        cascade="all, delete-orphan",
+    )
+    received_friend_requests: Mapped[list[Friendship]] = relationship(
+        "Friendship",
+        foreign_keys="Friendship.target_id",
+        back_populates="target",
+        cascade="all, delete-orphan",
     )
 
     @property
@@ -332,3 +363,61 @@ class EmailVerificationToken(Base):
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     user: Mapped[User] = relationship("User", back_populates="email_verification_tokens")
+
+
+class Friendship(Base):
+    """Friend-Beziehung zwischen zwei Usern (Phase W.9).
+
+    Workflow:
+      A klickt "Anfrage senden" zu B -> Row {requester=A, target=B, status='pending'}
+      B klickt "Annehmen"           -> status='accepted', accepted_at=now
+      A oder B klickt "Entfernen"   -> Row wird geloescht (kein status='removed')
+
+    Design-Entscheidungen:
+    - Eine Friendship-Zeile pro Beziehung (nicht zwei symmetrische). Spart
+      Schreib-Aufwand bei Accept (statt 2 Rows updaten nur 1). Friend-Listen-
+      Abfragen muessen dafuer beide Richtungen (requester OR target) checken.
+    - UniqueConstraint normalisiert (kleinste, groesste ID) verhindert dass
+      A->B pending UND B->A pending gleichzeitig existieren (kreuz-Anfragen).
+      CHECK-Constraint LEAST/GREATEST haengt von Postgres ab -> wir loesen
+      es im Service-Layer via Suche nach (LEAST, GREATEST) Match.
+    - CASCADE auf User-Delete: wenn ein User geloescht wird, sind seine
+      Friendships obsolet — beide Richtungen weg.
+    """
+
+    __tablename__ = "friendships"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    requester_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    target_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    # Aktuell nur "pending" + "accepted". "blocked" bewusst draussen — wer
+    # blockieren will, kann Friendship loeschen + die Person nicht mehr
+    # findbar machen (is_discoverable=false). Block-Liste waere Phase W.10+.
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending", index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    accepted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    requester: Mapped[User] = relationship(
+        "User", foreign_keys=[requester_id], back_populates="sent_friend_requests"
+    )
+    target: Mapped[User] = relationship(
+        "User", foreign_keys=[target_id], back_populates="received_friend_requests"
+    )
+
+    __table_args__ = (
+        # Self-Friendship verhindern (zus. zur Service-Check)
+        CheckConstraint("requester_id <> target_id", name="ck_friendship_no_self"),
+        # Eine Friendship pro Paar — egal welche Richtung. Pruefung passiert
+        # im Service via Symmetrie-Suche, hier ist nur (requester, target)
+        # unique (verhindert Doppel-Request derselben Richtung).
+        UniqueConstraint("requester_id", "target_id", name="uq_friendship_directed"),
+        Index("ix_friendship_status_pair", "status", "requester_id", "target_id"),
+    )

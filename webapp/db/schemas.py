@@ -43,6 +43,9 @@ class UserRead(BaseModel):
     # Frontend nutzt das um den Admin-Sub-Tab im VerwaltungTab nur fuer
     # Admins zu rendern. Default False fuer Tests die UserRead manuell bauen.
     is_admin: bool = False
+    # Phase W.9: Opt-In fuer User-Suche per display_name. Frontend zeigt
+    # einen Toggle in den Einstellungen.
+    is_discoverable: bool = False
 
 
 class UserUpdate(BaseModel):
@@ -55,6 +58,7 @@ class UserUpdate(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
     display_name: str | None = Field(default=None, max_length=64)
+    is_discoverable: bool | None = Field(default=None)
 
 
 class PasswordChange(BaseModel):

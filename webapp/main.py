@@ -22,6 +22,7 @@ from api import auth as auth_api
 from api import backup as backup_api
 from api import challenges as challenges_api
 from api import export_cstimer as export_api
+from api import friends as friends_api
 from api import hardware as hardware_api
 from api import import_cstimer as import_api
 from api import sessions as sessions_api
@@ -63,6 +64,17 @@ async def lifespan(app: FastAPI):
             migrations = [
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE",
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name VARCHAR(64)",
+                # Phase W.9: is_discoverable Opt-In + friendships-Tabelle.
+                # create_all() oben legt friendships-Tabelle an, hier nur die
+                # neue Spalte auf existierende users-Tabelle.
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_discoverable BOOLEAN NOT NULL DEFAULT FALSE",
+                # QA-Fix H1: cross-direction Race-Schutz auf friendships.
+                # Functional unique index garantiert dass es NUR EINE Row pro
+                # User-Paar gibt, egal welche Richtung (A->B oder B->A).
+                # Postgres-spezifisch (LEAST/GREATEST). Auf SQLite (Dev) faellt
+                # das durch try/except — Dev-Tests laufen eh nicht concurrent.
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_friendship_pair_normalized "
+                "ON friendships (LEAST(requester_id, target_id), GREATEST(requester_id, target_id))",
             ]
             with engine.begin() as conn:
                 for sql in migrations:
@@ -130,6 +142,7 @@ app.include_router(backup_api.router)
 app.include_router(import_api.router)
 app.include_router(export_api.router)
 app.include_router(admin_api.router)
+app.include_router(friends_api.router)
 
 
 @app.get("/api/health")
