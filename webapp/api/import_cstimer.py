@@ -146,6 +146,33 @@ async def import_cstimer(
             detail="JSON-Root muss ein Object sein (csTimer-Format).",
         )
 
+    # Auto-Detect: ist das vielleicht ein Cubetracker-Backup-JSON statt
+    # csTimer-Format? Backup-JSONs haben Top-Level-Keys wie 'solves',
+    # 'sessions', 'schema_version' — KEINE 'session<N>'-Keys.
+    has_cstimer_sessions = any(k.startswith("session") for k in payload)
+    looks_like_backup = (
+        "schema_version" in payload or "solves" in payload or "exported_at" in payload
+    )
+    if looks_like_backup and not has_cstimer_sessions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Diese Datei sieht aus wie ein Cubetracker-Backup, "
+                "nicht wie ein csTimer-Export. Bitte unter "
+                "'Backup & Wiederherstellung' hochladen "
+                "(Verwaltung -> Daten -> Backup-Card)."
+            ),
+        )
+    if not has_cstimer_sessions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Datei enthaelt keine csTimer-Sessions (Top-Level-Keys "
+                "wie 'session1', 'session2'...). Bitte pruefe ob du "
+                "die richtige Datei hochgeladen hast."
+            ),
+        )
+
     # Dry-Run: rollback am Ende, kein commit (importer.dry_run=True)
     result = import_cstimer_json(payload, db, current_user.id, dry_run=dry_run)
     response: dict[str, Any] = {

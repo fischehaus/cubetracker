@@ -51,11 +51,19 @@ export function ImportPanel() {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 space-y-4">
-      <h2 className="text-2xl font-semibold text-gray-100">csTimer-Import</h2>
+      <h2 className="text-2xl font-semibold text-gray-100">
+        csTimer-Import <span className="text-sm text-gray-500">(Migration aus csTimer)</span>
+      </h2>
 
       <p className="text-base text-gray-400">
-        Lade die csTimer-Export-Datei (.txt oder .json) hoch. Re-Import
-        erkennt Duplikate automatisch — nichts wird doppelt angelegt.
+        Lade eine <strong>csTimer-Export-Datei</strong> hoch (.txt oder .json).
+        Re-Import erkennt Duplikate automatisch — nichts wird doppelt angelegt.
+      </p>
+
+      <p className="text-xs text-gray-500">
+        ⚠ Nicht das Cubetracker-Backup-JSON hier hochladen — das gehoert
+        zu „Backup &amp; Wiederherstellung" oben. csTimer-Export-Dateien
+        heissen typischerweise <code>cstimer_YYYYMMDD_HHMMSS.txt</code>.
       </p>
 
       <div>

@@ -71,9 +71,32 @@ export function VerwaltungTab() {
       {section === "hardware" && <HardwareList />}
       {section === "daten" && (
         <div className="space-y-4">
+          {/* Orientierungs-Hilfe: zwei verschiedene JSON-Formate
+              im Spiel (Cubetracker-Backup vs csTimer-Export).
+              User-Verwirrung-Potenzial hoch -> klarer Aufmacher. */}
+          <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-4 text-sm text-blue-200">
+            <p className="font-medium mb-1">Welches Format hast du?</p>
+            <ul className="list-disc list-inside space-y-1 text-xs text-blue-100/80">
+              <li>
+                <strong>Cubetracker-Backup</strong> (Filename z.B.{" "}
+                <code>cubetracker_…_….json</code>): unter
+                <strong> „Backup &amp; Wiederherstellung"</strong> hochladen.
+              </li>
+              <li>
+                <strong>csTimer-Export</strong> (Filename z.B.{" "}
+                <code>cstimer_20260513_….txt</code> oder <code>.json</code>):
+                unter <strong> „csTimer-Import"</strong> hochladen.
+              </li>
+            </ul>
+          </div>
+
+          {/* Reihenfolge nach Haeufigkeit/Use-Case:
+              1. Voll-Backup (haeufigste Aktion: Sicherung)
+              2. csTimer-Import (Migration-Brücke)
+              3. csTimer-Export (Export an csTimer-Mobile-App) */}
+          <BackupPanel />
           <ImportPanel />
           <CsTimerExportPanel />
-          <BackupPanel />
         </div>
       )}
       {section === "outliers" && <OutlierCard />}

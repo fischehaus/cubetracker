@@ -143,6 +143,24 @@ async def restore_backup(
             detail="Backup-JSON-Root muss ein Object sein.",
         )
 
+    # Auto-Detect: ist das vielleicht ein csTimer-Export-File statt
+    # Cubetracker-Backup? csTimer hat Top-Level-Keys 'session1', 'session2',
+    # 'properties' — KEIN 'solves' / 'sessions' / 'schema_version'.
+    has_cstimer_sessions = any(k.startswith("session") for k in payload)
+    has_cubetracker_keys = (
+        "schema_version" in payload or "solves" in payload or "exported_at" in payload
+    )
+    if has_cstimer_sessions and not has_cubetracker_keys:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Diese Datei sieht aus wie ein csTimer-Export, "
+                "nicht wie ein Cubetracker-Backup. Bitte unter "
+                "'csTimer-Import' hochladen (Verwaltung -> Daten -> "
+                "csTimer-Import-Card)."
+            ),
+        )
+
     try:
         result = restore_user_data(db, current_user, payload, mode=mode, dry_run=dry_run)
     except BackupServiceError as e:
