@@ -108,12 +108,30 @@ const CHANGE_EVENT = "cubetracker:settings-changed";
 /**
  * Liest aus localStorage + merged partial mit defaults.
  * Defensive: bei JSON-parse-error oder fehlender feldern → defaults.
+ *
+ * Touch-Device-Default-Override (2026-05-14): bei FRISCHEM localStorage
+ * (= erstes App-Laden) wird auf Touch-Geraeten der WCA-Spacebar-Modus
+ * als Default gesetzt. Soft-Keyboard fuer Text-Eingabe waere muehsam.
+ * Sobald der User eigene Settings hat (parsed != null), bleiben die
+ * unangetastet — keine Migration, kein Reset.
  */
 export function loadSettings(): AppSettings {
   if (typeof window === "undefined") return SETTINGS_DEFAULTS;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return SETTINGS_DEFAULTS;
+    if (!raw) {
+      const isTouch =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(pointer: coarse)").matches;
+      if (isTouch) {
+        return {
+          ...SETTINGS_DEFAULTS,
+          spacebar_enabled: true,
+          inspection_mode: "wca",
+        };
+      }
+      return SETTINGS_DEFAULTS;
+    }
     const parsed = JSON.parse(raw) as Partial<AppSettings>;
     return { ...SETTINGS_DEFAULTS, ...parsed };
   } catch {

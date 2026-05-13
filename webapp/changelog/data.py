@@ -38,6 +38,23 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.touch-text-mode",
+        released=date(2026, 5, 14),
+        title="Touch-Devices: Text-Eingabe erlaubt + WCA als Default",
+        highlights=[
+            "Auf Phone/Tablet ist Text-Eingabe-Modus jetzt waehlbar (war "
+            "vorher zwangsgespertt). Sinnvoll wenn man z.B. Bluetooth-"
+            "Keyboard hat oder ohne Inspection-Countdown solven will.",
+            "Frische Touch-User starten direkt mit WCA-Spacebar als "
+            "Default — kein „erst Settings finden\"-Detour mehr.",
+            "Bestehende User behalten ihre gespeicherten Settings unangetastet.",
+            "Tipp-Hinweis-Text passt sich an: auf Touch + Text-Modus "
+            "wird darauf hingewiesen dass Soft-Tastatur muehsam sein "
+            "kann; auf Desktop + Text-Modus wird zum Spacebar-Timer "
+            "eingeladen.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.info-buttons-everywhere",
         released=date(2026, 5, 14),
         title="Info-Buttons in allen Karten",

@@ -65,13 +65,13 @@ export function BigTimerInput({
   const [settings, setSettings] = useAppSettings();
   // Reset-Counter fuer SpacebarTimerCard nach erfolgreichem Save
   const [spacebarResetSeed, setSpacebarResetSeed] = useState(0);
-  // Touch-Device-Onboarding-Fix (QA-Finding): auf Phone/Tablet immer
-  // Spacebar-/Touch-Modus rendern, weil Text-Eingabe per Soft-Keyboard
-  // dort eh muehsam ist. Setting bleibt unangetastet — Tablet+BT-Keyboard-
-  // User kann die Touch-Detection nicht aushebeln, das ist akzeptiert
-  // (sie koennen ueber Settings den Modus weiter steuern).
+  // Touch-Device-Default (2026-05-14): fuer FRISCHE Touch-User wird
+  // beim ersten Laden automatisch WCA-Spacebar gesetzt (siehe
+  // settings.ts:loadSettings). User darf trotzdem auf Text-Eingabe
+  // wechseln — wir respektieren ausschliesslich das User-Setting,
+  // kein automatischer Touch-Override mehr.
   const isTouchDevice = useIsTouchDevice();
-  const spacebarMode = settings.spacebar_enabled || isTouchDevice;
+  const spacebarMode = settings.spacebar_enabled;
 
   // „User hat in diesem Cube manuell gewaehlt" → wenn ja, kein Auto-Suggest-
   // Override mehr. Reset bei Cube-Wechsel, sodass der naechste Cube wieder
@@ -417,11 +417,9 @@ export function BigTimerInput({
         <div className="flex flex-wrap gap-1.5">
           <ModeButton
             active={!spacebarMode}
-            disabled={isTouchDevice}
             onClick={() =>
               setSettings({ ...settings, spacebar_enabled: false })
             }
-            disabledTitle="Auf Touch-Geraet nicht sinnvoll — nutze Spacebar"
           >
             ⌨ Text-Eingabe
           </ModeButton>
@@ -450,11 +448,12 @@ export function BigTimerInput({
             🏃 Spacebar — Pragmatisch
           </ModeButton>
         </div>
-        {!spacebarMode && !isTouchDevice && (
+        {!spacebarMode && (
           <p className="mt-2 text-xs text-gray-500">
-            💡 Tipp: Probier den Spacebar-Timer — viel fluessigeres Training,
-            inkl. Inspection-Countdown. Klick einfach auf einen der Spacebar-
-            Modi oben.
+            💡 Tipp:{" "}
+            {isTouchDevice
+              ? "auf dem Phone ist Text-Eingabe ueber die Soft-Tastatur etwas muehsam — Spacebar-Tap ist meist schneller."
+              : "Probier den Spacebar-Timer — viel fluessigeres Training, inkl. Inspection-Countdown. Klick einfach auf einen der Spacebar-Modi oben."}
           </p>
         )}
       </div>
