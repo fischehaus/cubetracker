@@ -334,9 +334,10 @@ def update_me(
     Sub-Agent-Finding K4: explizite Whitelist als zweite Defense-Schicht
     zusaetzlich zum UserUpdate-Schema (das `extra=forbid` hat).
     """
-    # Whitelist erweitert um is_discoverable (Phase W.9). Email/Password
-    # bleiben aussen vor — die haben ihre eigenen sicherheits-relevanten Flows.
-    _ALLOWED_FIELDS = {"display_name", "is_discoverable"}
+    # Whitelist erweitert um is_discoverable (Phase W.9) + postal_code
+    # (Phase W.future-tournaments). Email/Password bleiben aussen vor —
+    # die haben ihre eigenen sicherheits-relevanten Flows.
+    _ALLOWED_FIELDS = {"display_name", "is_discoverable", "postal_code"}
     data = payload.model_dump(exclude_unset=True)
     for key, value in data.items():
         if key in _ALLOWED_FIELDS:

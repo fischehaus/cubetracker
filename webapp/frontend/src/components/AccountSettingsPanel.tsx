@@ -61,6 +61,7 @@ export function AccountSettingsPanel() {
 function ProfileSection() {
   const { user, refreshMe } = useAuth();
   const [displayName, setDisplayName] = useState(user?.display_name ?? "");
+  const [postalCode, setPostalCode] = useState(user?.postal_code ?? "");
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +74,10 @@ function ProfileSection() {
     setInfo(null);
     setError(null);
     try {
-      await api.patch("/auth/me", { display_name: displayName || null });
+      await api.patch("/auth/me", {
+        display_name: displayName || null,
+        postal_code: postalCode.trim() || null,
+      });
       await refreshMe();
       setInfo("Profil aktualisiert.");
     } catch (err) {
@@ -134,6 +138,24 @@ function ProfileSection() {
           placeholder="z.B. dein Vorname"
           className="w-full max-w-xs rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
+
+        <label className="block text-sm font-medium text-gray-300 pt-2">
+          Postleitzahl (optional)
+        </label>
+        <input
+          type="text"
+          maxLength={16}
+          value={postalCode}
+          onChange={(e) => setPostalCode(e.target.value)}
+          placeholder="z.B. 12345"
+          autoComplete="postal-code"
+          className="w-full max-w-xs rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        />
+        <p className="text-xs text-gray-500 max-w-xs">
+          Wird spaeter genutzt um Turniere in deiner Naehe anzuzeigen.
+          Wird sonst nicht weitergegeben.
+        </p>
+
         <button
           type="submit"
           disabled={busy}

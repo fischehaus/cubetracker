@@ -46,6 +46,9 @@ class UserRead(BaseModel):
     # Phase W.9: Opt-In fuer User-Suche per display_name. Frontend zeigt
     # einen Toggle in den Einstellungen.
     is_discoverable: bool = False
+    # Phase W.future-tournaments: Postleitzahl fuer „Turniere in der
+    # Naehe"-Feature. Optional, multi-country (kein Format-Check).
+    postal_code: str | None = None
 
 
 class UserUpdate(BaseModel):
@@ -59,6 +62,7 @@ class UserUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     display_name: str | None = Field(default=None, max_length=64)
     is_discoverable: bool | None = Field(default=None)
+    postal_code: str | None = Field(default=None, max_length=16)
 
 
 class PasswordChange(BaseModel):

@@ -75,6 +75,9 @@ async def lifespan(app: FastAPI):
                 # create_all() oben legt friendships-Tabelle an, hier nur die
                 # neue Spalte auf existierende users-Tabelle.
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_discoverable BOOLEAN NOT NULL DEFAULT FALSE",
+                # Phase W.future-tournaments: Postleitzahl-Feld fuer
+                # spaeteres "Turniere in der Naehe"-Feature.
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS postal_code VARCHAR(16)",
                 # QA-Fix H1: cross-direction Race-Schutz auf friendships.
                 # Functional unique index garantiert dass es NUR EINE Row pro
                 # User-Paar gibt, egal welche Richtung (A->B oder B->A).

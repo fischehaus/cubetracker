@@ -54,6 +54,10 @@ class User(Base):
     # wenn Mail nicht ankommt), aber UI zeigt einen Hinweis-Banner.
     email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     display_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Phase W.future-tournaments: Postleitzahl fuer "Turniere in der Naehe"-
+    # Feature. Optional, kein Format-Constraint (multi-country: DE 5-stellig,
+    # AT 4-stellig, UK alphanumerisch, etc.). Frontend validiert lasch.
+    postal_code: Mapped[str | None] = mapped_column(String(16), nullable=True)
     # Phase W.9: Friend-System.
     # Opt-In: User muss aktiv is_discoverable=true setzen damit er per
     # display_name in der User-Suche auftaucht. Default False = maximaler

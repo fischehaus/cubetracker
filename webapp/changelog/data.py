@@ -38,6 +38,21 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.postal-code",
+        released=date(2026, 5, 14),
+        title="Postleitzahl im Profil — Vorbereitung fuer Turnier-Naehe",
+        highlights=[
+            "Neues Profil-Feld 'Postleitzahl' in Verwaltung → Einstellungen "
+            "→ Account → Profil (optional, multi-country-Format)",
+            "Backend: User.postal_code (max 16 Zeichen) + Migration "
+            "(idempotent via ALTER TABLE ADD COLUMN IF NOT EXISTS)",
+            "PATCH /auth/me Whitelist erweitert — postal_code aenderbar",
+            "Vorbereitung fuer kommendes Feature: „Naechste WCA-Turniere "
+            "in deiner Naehe\" — Daten werden bewusst jetzt schon gesammelt "
+            "damit das Feature spaeter direkt nutzbar ist",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.touch-text-mode",
         released=date(2026, 5, 14),
         title="Touch-Devices: Text-Eingabe erlaubt + WCA als Default",

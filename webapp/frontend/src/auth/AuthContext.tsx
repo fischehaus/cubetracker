@@ -30,6 +30,9 @@ export interface UserRead {
   is_admin: boolean;
   /** Phase W.9: Opt-In fuer User-Suche per display_name. */
   is_discoverable: boolean;
+  /** Phase W.future-tournaments: Postleitzahl fuer "Turniere in der
+   *  Naehe"-Feature. Optional, multi-country-Format. */
+  postal_code: string | null;
 }
 
 export interface AuthState {
