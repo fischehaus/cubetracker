@@ -40,10 +40,12 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.logo-bigger",
         released=date(2026, 5, 14),
-        title="Logo im Header 2.5× groesser",
+        title="Logo groesser (Header 2.5× / Login 1.5×)",
         highlights=[
             "App-Header-Logo von 64-80px auf 160-208px Hoehe "
             "(Faktor ~2.5×) — viel praesenter als Marke",
+            "Login-Seite: Card-Breite max-w-md (448px) → max-w-[600px], "
+            "Logo waechst proportional mit (~1.5×)",
         ],
     ),
     PatchNote(

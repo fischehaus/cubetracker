@@ -45,9 +45,10 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
-      <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-[480px_1fr] gap-6 lg:gap-10 items-start">
-        {/* Linke Spalte: Logo + Login-Form */}
-        <div className="w-full max-w-md mx-auto lg:max-w-none bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
+      <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-[620px_1fr] gap-6 lg:gap-10 items-start">
+        {/* Linke Spalte: Logo + Login-Form. Card-Breite 1.5× erhoeht
+            damit das Logo entsprechend groesser wirkt (User-Wunsch). */}
+        <div className="w-full max-w-[600px] mx-auto lg:max-w-none bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
           {/* Logo prominent — wie eine Marken-Visitenkarte. Volle Card-
               Innenbreite (Card ist max-w-md = 448px, Padding p-6 = 24px,
               also ~400px Innenraum). */}
