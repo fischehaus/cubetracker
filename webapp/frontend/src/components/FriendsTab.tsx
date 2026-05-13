@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
+import { InfoButton } from "./InfoButton";
 import {
   useAcceptFriend,
   useEmailLookup,
@@ -274,7 +275,19 @@ function SearchCard() {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4 space-y-3">
-      <h3 className="text-lg font-medium text-purple-300">User finden</h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-lg font-medium text-purple-300">User finden</h3>
+        <InfoButton>
+          <p className="font-medium mb-1">User finden</p>
+          <p>
+            Zwei Suchwege: <strong>Display-Name</strong> (Prefix-Match,
+            ab 2 Zeichen, nur User die „Auffindbar\" aktiviert haben);
+            <strong> exakte Email</strong> (umgeht die Auffindbar-Sperre —
+            wer die Email kennt, kennt den User). Suchergebnisse zeigen
+            sofort den Beziehungs-Status (z.B. „bereits Freund\", „Anfrage offen\").
+          </p>
+        </InfoButton>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Display-Name-Suche */}

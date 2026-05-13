@@ -11,6 +11,7 @@ import {
   useRegenerateChallenges,
 } from "../lib/api";
 import { ChallengeCard } from "./ChallengeCard";
+import { InfoButton } from "./InfoButton";
 
 export function DailyChallengesPanel() {
   const { data, isLoading, error } = useChallengesToday();
@@ -46,12 +47,25 @@ export function DailyChallengesPanel() {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Tages-Challenges{" "}
-          <span className="text-base text-gray-400">
-            ({completedCount} / {visible.length} erfuellt)
-          </span>
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Tages-Challenges{" "}
+            <span className="text-base text-gray-400">
+              ({completedCount} / {visible.length} erfuellt)
+            </span>
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Tages-Challenges</p>
+            <p>
+              Drei kleine taegliche Aufgaben. Werden um Mitternacht UTC
+              neu generiert. Schwierigkeitsgrade variieren (z.B. „mache
+              X Solves heute", „erreiche AO5 unter Y", „kein DNF in 10
+              Solves"). Dismiss-Funktion fuer Challenges die du heute
+              nicht angehen willst. Refresh-Button generiert neu (z.B.
+              wenn du was unmoegliches bekommen hast).
+            </p>
+          </InfoButton>
+        </div>
         <button
           onClick={() => regenerate.mutate()}
           disabled={regenerate.isPending}

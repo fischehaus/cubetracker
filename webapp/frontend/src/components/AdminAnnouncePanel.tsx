@@ -8,6 +8,7 @@
 // Rate-Limit 3/h serverseitig — falls jemand zu oft probiert, kommt 429.
 
 import { useState } from "react";
+import { InfoButton } from "./InfoButton";
 import {
   useAdminAnnouncement,
   type AdminAnnouncementResult,
@@ -42,9 +43,21 @@ export function AdminAnnouncePanel() {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 space-y-3">
-      <h3 className="text-lg font-medium text-purple-300">
-        Bulk-Mail an alle User
-      </h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-lg font-medium text-purple-300">
+          Bulk-Mail an alle User
+        </h3>
+        <InfoButton>
+          <p className="font-medium mb-1">Bulk-Mail</p>
+          <p>
+            Schickt eine Mail an alle aktiv+verifiziert User. Dry-Run zeigt
+            erst die Empfaenger-Zahl. Rate-Limit 3/h server-seitig.
+            Hard-Cap bei 80 Empfaengern (Worker-Timeout-Schutz). Body wird
+            HTML-escaped (XSS-Defense). Use-Cases: Wartungs-Ankuendigungen,
+            Migration-Hinweise.
+          </p>
+        </InfoButton>
+      </div>
       <p className="text-sm text-gray-400">
         Geht an aktive User mit verifizierter Email. Wartung-/Ankuendigungs-
         Mails. Rate-Limit 3/h. <strong>Erst Dry-Run klicken</strong> um die

@@ -13,6 +13,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { COMMON_CUBE_TYPES, formatTime } from "../lib/format";
+import { InfoButton } from "./InfoButton";
 import {
   useFriendsList,
   useLeaderboard,
@@ -81,12 +82,24 @@ export function LeaderboardTab() {
   return (
     <div className="space-y-4 max-w-5xl">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Bestenliste{" "}
-          <span className="text-sm text-gray-500">
-            (du + deine {friendsCount} Freunde)
-          </span>
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Bestenliste{" "}
+            <span className="text-sm text-gray-500">
+              (du + deine {friendsCount} Freunde)
+            </span>
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Bestenliste</p>
+            <p>
+              Vergleicht dich + accepted-Freunde fuer den ausgewaehlten
+              Cube-Type. Spalten: Best Single, Best AO5, Best AO12,
+              Aktuelle AO5, Solves (30d), Last Active. Du bist immer oben
+              hervorgehoben, Freunde sortiert nach Best Single (Top-3 mit
+              Medaillen). Nur accepted-Friends, keine Emails im Output.
+            </p>
+          </InfoButton>
+        </div>
         <label className="flex items-baseline gap-2 text-sm text-gray-400">
           Cube-Type
           <select

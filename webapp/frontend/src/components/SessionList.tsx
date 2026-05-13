@@ -18,6 +18,7 @@ import {
   useUpdateSession,
 } from "../lib/api";
 import type { Session } from "../lib/types";
+import { InfoButton } from "./InfoButton";
 
 type EditState = { id: number; field: "name" | "notes"; value: string } | null;
 type ModalState =
@@ -98,12 +99,23 @@ export function SessionList() {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Sessions{" "}
-          <span className="text-base text-gray-400">
-            ({sessions?.length ?? 0})
-          </span>
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Sessions{" "}
+            <span className="text-base text-gray-400">
+              ({sessions?.length ?? 0})
+            </span>
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Sessions</p>
+            <p>
+              Sessions strukturieren dein Training (z.B. „OH", „PLL-Drill",
+              „Cold-Solves"). Solves werden einer Session zugeordnet, Stats
+              koennen pro Session gefiltert werden. „Merge"-Funktion kombiniert
+              Sessions, „Migrate" verschiebt Solves vor dem Loeschen.
+            </p>
+          </InfoButton>
+        </div>
         <button
           onClick={() => setShowAddForm((v) => !v)}
           className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"

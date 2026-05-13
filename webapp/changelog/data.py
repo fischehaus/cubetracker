@@ -38,6 +38,26 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.info-buttons-everywhere",
+        released=date(2026, 5, 14),
+        title="Info-Buttons in allen Karten",
+        highlights=[
+            "ⓘ-Buttons in 20+ Komponenten ergaenzt — jede groessere Card "
+            "hat jetzt einen Hover-/Klick-Tooltip mit Erklaerungstext",
+            "Dashboard: Statistiken, Activity, Reminders, Challenges-Mini, "
+            "Erfolge-Mini, Vergleich",
+            "Analyse: Solve-Liste, Trends, Verteilung, Aktivitaets-Chart, "
+            "Hardware-Vergleich",
+            "Verwaltung: Sessions, Hardware-Inventar, Backup, csTimer-"
+            "Import, csTimer-Export, Outliers, Account, Spacebar-Settings",
+            "Trainer: Algorithm-Trainer, Erfolge, Tages-Challenges",
+            "Community: Bestenliste, Freunde-Suche",
+            "Admin: Statistiken, User-Liste, Bulk-Mail",
+            "SettingsPanel Section-Helper erweitert — kann optional einen "
+            "InfoButton-Slot rendern (Pattern fuer weitere Sub-Sektionen)",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-mode-picker",
         released=date(2026, 5, 14),
         title="Timer-Modus direkt am Timer auswaehlbar (WCA / Pragmatisch / Text)",

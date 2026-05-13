@@ -20,6 +20,7 @@ import {
   YAxis,
 } from "recharts";
 import { useSolves, type SolveListParams } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 import { computeYDomain, parseSecondsToMs } from "../lib/chart-utils";
 import { formatTime } from "../lib/format";
 import { rollingAverages, type SolvePoint } from "../lib/rolling";
@@ -130,9 +131,21 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h3 className="text-2xl font-semibold text-gray-100">
-          Trends <span className="text-base text-gray-400">({chartData.length} Solves)</span>
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-2xl font-semibold text-gray-100">
+            Trends <span className="text-base text-gray-400">({chartData.length} Solves)</span>
+          </h3>
+          <InfoButton>
+            <p className="font-medium mb-1">Trends-Chart</p>
+            <p>
+              Verlauf deiner Solve-Zeiten ueber Zeit. Punkte = einzelne
+              Solves (Singles), Linien = gleitende Mittel (AO5/AO12).
+              Y-Achse: Zeit (kleiner = besser). Hilft Plateaus + Sprung-
+              Verbesserungen zu erkennen. Y-Bereich manuell setzbar fuer
+              Detail-Fokus.
+            </p>
+          </InfoButton>
+        </div>
         <div className="flex gap-3 items-center text-sm">
           <label className="flex items-center gap-1.5 text-gray-400">
             <input

@@ -10,6 +10,7 @@
 
 import { useState } from "react";
 import { api } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 
 export function CsTimerExportPanel() {
   const [busy, setBusy] = useState(false);
@@ -45,7 +46,19 @@ export function CsTimerExportPanel() {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 space-y-3">
-      <h2 className="text-2xl font-semibold text-gray-100">csTimer-Export</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-2xl font-semibold text-gray-100">csTimer-Export</h2>
+        <InfoButton>
+          <p className="font-medium mb-1">csTimer-Export</p>
+          <p>
+            Exportiert deine Solves + Sessions im csTimer-JSON-Format. Du
+            kannst die Datei in csTimer importieren (dort: Settings →
+            Backup → Import) — z.B. um Cubetracker-Daten auf einer
+            csTimer-Mobile-App weiterzunutzen, oder als zusaetzliche
+            Backup-Variante. Datenhoheit bleibt bei dir.
+          </p>
+        </InfoButton>
+      </div>
 
       <p className="text-base text-gray-400">
         Exportiert deine Solves + Sessions im csTimer-JSON-Format. Du

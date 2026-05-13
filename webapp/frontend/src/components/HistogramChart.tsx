@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { useSolves, type SolveListParams } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 import { buildHistogram } from "../lib/histogram";
 import type { SolvePoint } from "../lib/rolling";
 
@@ -68,13 +69,24 @@ export function HistogramChart({ cubeType, sessionId }: Props) {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-semibold text-gray-100">
-          Verteilung{" "}
-          <span className="text-base text-gray-400">
-            ({totalValid} valide Solves)
-          </span>
-        </h3>
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="flex items-center gap-2">
+          <h3 className="text-2xl font-semibold text-gray-100">
+            Verteilung{" "}
+            <span className="text-base text-gray-400">
+              ({totalValid} valide Solves)
+            </span>
+          </h3>
+          <InfoButton>
+            <p className="font-medium mb-1">Verteilungs-Histogramm</p>
+            <p>
+              Wie oft welche Zeit vorkam — gruppiert in Zeit-Bins.
+              Schoene Glocken-Form = konsistente Performance. Lange
+              Schwaenze rechts = Outlier (z.B. Mistake-Solves). DNFs
+              fliegen raus (Achse waere sonst unendlich).
+            </p>
+          </InfoButton>
+        </div>
       </div>
 
       <ResponsiveContainer width="100%" height={300}>

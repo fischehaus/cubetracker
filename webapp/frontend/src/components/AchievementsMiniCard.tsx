@@ -9,6 +9,7 @@
 
 import { useMemo } from "react";
 import { useAchievements } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 import type { AppTab } from "./TabBar";
 
 interface Props {
@@ -44,8 +45,19 @@ export function AchievementsMiniCard({ onSwitchTab }: Props) {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-base font-semibold text-gray-200">Erfolge</h3>
+      <div className="flex items-center justify-between mb-3 gap-2">
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-semibold text-gray-200">Erfolge</h3>
+          <InfoButton>
+            <p className="font-medium mb-1">Erfolge (Achievements)</p>
+            <p>
+              30+ Personal-Trainer-Ziele die du nebenbei freischaltest
+              (z.B. „erstes Sub-20-Solve", „100 Solves an einem Tag",
+              „PB-Streak"). Klick auf die Card oeffnet den Trainer-Tab
+              mit allen Erfolgen + Fortschritts-Anzeige.
+            </p>
+          </InfoButton>
+        </div>
         <span className="text-sm text-gray-500">
           {summary.unlocked} / {summary.total}
         </span>

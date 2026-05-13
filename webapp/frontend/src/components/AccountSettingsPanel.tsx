@@ -12,6 +12,7 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 
 export function AccountSettingsPanel() {
   const { user, logout } = useAuth();
@@ -20,7 +21,18 @@ export function AccountSettingsPanel() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-semibold text-gray-100">Account</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-2xl font-semibold text-gray-100">Account</h2>
+        <InfoButton>
+          <p className="font-medium mb-1">Account</p>
+          <p>
+            Profil-Daten + Sicherheit. Display-Name aendern, Passwort
+            aendern (logged dich automatisch aus), Email-Adresse aendern
+            (mit Re-Verifikation der neuen Adresse), Auffindbar-Toggle
+            fuer die Freunde-Suche, Account komplett loeschen (DSGVO).
+          </p>
+        </InfoButton>
+      </div>
 
       <ProfileSection />
       <PasswordSection />

@@ -7,6 +7,7 @@
 import { useMemo } from "react";
 import { useAchievements, useRecheckAchievements } from "../lib/api";
 import { formatDate } from "../lib/format";
+import { InfoButton } from "./InfoButton";
 import type { AchievementItem } from "../lib/types";
 
 const CATEGORY_LABELS: Record<AchievementItem["category"], string> = {
@@ -62,12 +63,24 @@ export function AchievementsCard() {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Erfolge{" "}
-          <span className="text-base text-gray-400">
-            ({unlockedCount} von {totalCount} freigeschaltet)
-          </span>
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Erfolge{" "}
+            <span className="text-base text-gray-400">
+              ({unlockedCount} von {totalCount} freigeschaltet)
+            </span>
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Erfolge / Achievements</p>
+            <p>
+              30+ Personal-Trainer-Ziele in Kategorien (Volume, Speed,
+              Konsistenz, Streaks etc.). Werden automatisch geprueft nach
+              jedem Solve. Verschlossene Erfolge zeigen Hint-Text — gibt
+              dir naechstes Trainings-Ziel ohne zu spoilern. „Recheck"
+              prueft nochmal alles durch (Backup nach grossen Imports).
+            </p>
+          </InfoButton>
+        </div>
         <button
           onClick={() => recheck.mutate()}
           disabled={recheck.isPending}

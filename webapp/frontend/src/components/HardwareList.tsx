@@ -22,6 +22,7 @@ import {
 } from "../lib/api";
 import { COMMON_CUBE_TYPES } from "../lib/format";
 import type { Hardware } from "../lib/types";
+import { InfoButton } from "./InfoButton";
 
 export function HardwareList() {
   const { data: hardware, isLoading } = useHardware();
@@ -154,12 +155,24 @@ export function HardwareList() {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Hardware-Inventar{" "}
-          <span className="text-base text-gray-400">
-            ({activeCount} aktiv von {totalCount})
-          </span>
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Hardware-Inventar{" "}
+            <span className="text-base text-gray-400">
+              ({activeCount} aktiv von {totalCount})
+            </span>
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Hardware-Inventar</p>
+            <p>
+              Deine Cube-Sammlung. Jeder neue User bekommt automatisch 30
+              Standard-Cubes (alle inaktiv) — markier die ab die du wirklich
+              besitzt + Bulk-Aktiviere sie. Aktive Cubes erscheinen im
+              Timer-Hardware-Selector + im Hardware-Vergleich. Solves
+              behalten ihre Hardware-Zuordnung auch nach Loeschen.
+            </p>
+          </InfoButton>
+        </div>
         <button
           onClick={() => setShowAddForm((v) => !v)}
           className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"

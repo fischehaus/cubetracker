@@ -3,6 +3,7 @@
 
 import { useStats } from "../lib/api";
 import { formatDate, formatTime } from "../lib/format";
+import { InfoButton } from "./InfoButton";
 
 interface Props {
   cubeType?: string;
@@ -86,8 +87,19 @@ export function StatsCard({ cubeType, sessionId }: Props) {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-100">Statistiken</h2>
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">Statistiken</h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Statistiken</p>
+            <p>
+              Best Single + Best/Aktuelle AO5/AO12/AO100 fuer die aktuelle
+              Auswahl (Cube + Session). WCA-konform: +2 zaehlt als Zeit+2s,
+              DNF wird beim Average getrimmt. „Best AO5" = beste je
+              erreichte AO5 ueber alle Solves; „aktuelle AO5" = die letzten 5.
+            </p>
+          </InfoButton>
+        </div>
         <span className="text-sm text-gray-500">{filterLabel}</span>
       </div>
 

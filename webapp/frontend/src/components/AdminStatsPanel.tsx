@@ -10,6 +10,7 @@
 
 import { useAuth } from "../auth/AuthContext";
 import { useAdminStats } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 
 function formatNumber(n: number): string {
   return n.toLocaleString("de-DE");
@@ -67,10 +68,21 @@ export function AdminStatsPanel() {
     <div className="space-y-4">
       {/* Header: as_of + Refresh */}
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Admin-Statistiken{" "}
-          <span className="text-sm text-gray-500">(nur fuer App-Betreiber)</span>
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Admin-Statistiken{" "}
+            <span className="text-sm text-gray-500">(nur fuer App-Betreiber)</span>
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Admin-Statistiken</p>
+            <p>
+              Anonyme Aggregat-Daten zum Cluster: User-Counts (total/aktiv/
+              verifiziert/30d-aktiv), Daten-Volumen (Solves/Sessions/
+              Hardware/Achievements), Top-10 Cube-Types, Snapshot-Storage.
+              Keine personenbezogenen Daten — DSGVO-konform. Caching 60s.
+            </p>
+          </InfoButton>
+        </div>
         <div className="flex items-center gap-3 text-xs text-gray-500">
           <span>Stand: {formatRelative(data.as_of)}</span>
           <button

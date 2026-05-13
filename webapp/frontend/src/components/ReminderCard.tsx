@@ -7,6 +7,7 @@
 //                          (Dashboard-Top-Row, damit Layout stabil bleibt)
 
 import { useStatsByCube, type CubeStats } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 
 const REMINDER_DAYS = 7;
 const MAX_VISIBLE = 6; // bei vielen Reminder-Cubes nicht ueberlaufen lassen
@@ -39,9 +40,19 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
     if (emptyMode === "hide") return null;
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-2">
-          Reminders
-        </h3>
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="text-sm uppercase tracking-wide text-gray-500">
+            Reminders
+          </h3>
+          <InfoButton>
+            <p className="font-medium mb-1">Reminders</p>
+            <p>
+              Listet Cubes die du laenger als {REMINDER_DAYS} Tage nicht
+              mehr angefasst hast. Sortiert: vergessenste oben. Bezieht
+              sich auf alle aktiven Hardware-Cubes (Verwaltung → Hardware).
+            </p>
+          </InfoButton>
+        </div>
         <div className="text-base text-gray-400">
           Alle Cubes innerhalb der letzten {REMINDER_DAYS} Tage trainiert. ✅
         </div>
@@ -54,10 +65,20 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
 
   return (
     <div className="rounded-lg border border-blue-500/40 bg-blue-500/5 p-6">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm uppercase tracking-wide text-blue-200">
-          Reminders
-        </h3>
+      <div className="flex items-center justify-between mb-3 gap-2">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm uppercase tracking-wide text-blue-200">
+            Reminders
+          </h3>
+          <InfoButton>
+            <p className="font-medium mb-1">Reminders</p>
+            <p>
+              Cubes die du laenger als {REMINDER_DAYS} Tage nicht mehr
+              angefasst hast. Klick auf einen Eintrag setzt deinen
+              Timer-Cube-Filter auf den Cube — direkter Sprung ins Training.
+            </p>
+          </InfoButton>
+        </div>
         <span className="text-xs text-blue-300/70">
           {neglected.length} {neglected.length === 1 ? "Cube" : "Cubes"}
         </span>

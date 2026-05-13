@@ -3,6 +3,7 @@
 // Email + Account-Loeschen). Drunter dann die App-/Timer-/Drill-Settings.
 
 import { AccountSettingsPanel } from "./AccountSettingsPanel";
+import { InfoButton } from "./InfoButton";
 import {
   FONT_SIZE_LABELS,
   SETTINGS_DEFAULTS,
@@ -50,7 +51,20 @@ export function SettingsPanel() {
       <AccountSettingsPanel />
 
       {/* App-Settings (Spacebar, Drills, Font-Size) — Geraete-spezifisch */}
-      <Section title="Spacebar-Timer">
+      <Section
+        title="Spacebar-Timer"
+        info={
+          <>
+            <p className="font-medium mb-1">Spacebar-Timer-Settings</p>
+            <p>
+              Tiefere Einstellungen fuer den Spacebar-Timer. Mode (WCA vs
+              Pragmatisch) kann auch direkt im Timer-Tab gewaehlt werden.
+              Inspection-Dauer, Hold-Time, Sound-Signale, Phase-Splits sind
+              hier konfigurierbar.
+            </p>
+          </>
+        }
+      >
         <Toggle
           label="Spacebar-Modus aktivieren"
           hint="WCA-Standard-Flow: Space halten → loslassen startet, Space drücken stoppt. Klassischer Text-Input bleibt parallel verfügbar."
@@ -246,10 +260,21 @@ function FontSizeToggle({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  info,
+  children,
+}: {
+  title: string;
+  info?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
-      <h3 className="text-lg font-semibold text-gray-100 mb-3">{title}</h3>
+      <div className="flex items-center gap-2 mb-3">
+        <h3 className="text-lg font-semibold text-gray-100">{title}</h3>
+        {info && <InfoButton>{info}</InfoButton>}
+      </div>
       <div className="space-y-3">{children}</div>
     </div>
   );

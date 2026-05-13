@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 
 type RestoreMode = "merge" | "replace";
 
@@ -145,9 +146,22 @@ export function BackupPanel() {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-gray-100 mb-1">
-          Backup &amp; Wiederherstellung
-        </h2>
+        <div className="flex items-center gap-2 mb-1">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Backup &amp; Wiederherstellung
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Backup &amp; Wiederherstellung</p>
+            <p>
+              Voll-Export deiner Daten (Solves, Sessions, Hardware,
+              Achievements) als JSON-Datei. Wiederherstellen aus eigenem
+              Backup mit Merge-Modus (nichts wird ueberschrieben) oder
+              Replace-Modus (alles wird neu geschrieben, mit Confirm-String).
+              Snapshots = Wiederherstellungspunkte, max 2 pro User —
+              automatisch vor groesseren Operationen (Restore, Bulk-Import).
+            </p>
+          </InfoButton>
+        </div>
         <p className="text-sm text-gray-400">
           Voll-Export deiner Daten (JSON), Wiederherstellen aus Datei,
           Snapshots als Wiederherstellungspunkte (max 2 pro User).

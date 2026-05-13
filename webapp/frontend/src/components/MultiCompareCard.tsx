@@ -17,6 +17,7 @@ import {
   useStatsBySession,
 } from "../lib/api";
 import { formatTime } from "../lib/format";
+import { InfoButton } from "./InfoButton";
 
 type CompareMode = "cube" | "session";
 
@@ -40,7 +41,18 @@ export function MultiCompareCard({ sessionId }: Props) {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-gray-100">Vergleich</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">Vergleich</h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Vergleich</p>
+            <p>
+              Side-by-Side-Tabelle deiner Stats — entweder nach{" "}
+              <strong>Cube-Type</strong> (3x3 vs 4x4 vs 5x5 …) oder nach{" "}
+              <strong>Session</strong> (z.B. „OH" vs „Cold Solves"). Hilft
+              zu sehen wo du Fortschritte machst und wo du weniger trainierst.
+            </p>
+          </InfoButton>
+        </div>
         <div className="flex rounded border border-gray-700 overflow-hidden">
           <button
             onClick={() => changeMode("cube")}

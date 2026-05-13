@@ -13,6 +13,7 @@
 import { useMemo, useState } from "react";
 import { useStatsByHardware, type HardwareCubeStats } from "../lib/api";
 import { formatTime } from "../lib/format";
+import { InfoButton } from "./InfoButton";
 
 interface Props {
   cubeType: string;
@@ -150,11 +151,22 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Hardware-Vergleich{" "}
-          <span className="text-base text-gray-400">({cubeType})</span>
-        </h2>
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Hardware-Vergleich{" "}
+            <span className="text-base text-gray-400">({cubeType})</span>
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Hardware-Vergleich</p>
+            <p>
+              Vergleicht deine Stats pro Cube (Hardware-Eintrag) fuer den
+              ausgewaehlten Cube-Type. Hilft zu sehen ob ein bestimmter
+              Speedcube wirklich schneller ist oder nur gefuehlt. Klick
+              auf Spaltenkopf zum Sortieren.
+            </p>
+          </InfoButton>
+        </div>
         <span className="text-sm text-gray-500">
           sortiert nach {sortLabel} {sortDir === "asc" ? "↑" : "↓"}
         </span>

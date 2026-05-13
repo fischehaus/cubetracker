@@ -13,6 +13,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
+import { InfoButton } from "./InfoButton";
 import {
   useAdminDeleteUser,
   useAdminPatchUser,
@@ -83,10 +84,22 @@ export function AdminUsersPanel() {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 space-y-3">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="text-lg font-medium text-purple-300">
-          User-Liste{" "}
-          <span className="text-sm text-gray-500">({data.count})</span>
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-medium text-purple-300">
+            User-Liste{" "}
+            <span className="text-sm text-gray-500">({data.count})</span>
+          </h3>
+          <InfoButton>
+            <p className="font-medium mb-1">User-Liste</p>
+            <p>
+              Alle registrierten User mit Solve-Count, Last-Active, Status-
+              Badges. Aktionen pro User: Mail senden, Email manuell als
+              verifiziert markieren (Support-Hilfe), Deaktivieren/Aktivieren,
+              DSGVO-Hard-Delete (mit Pflicht-Confirm-String). Du kannst
+              dich selbst nicht deaktivieren/loeschen.
+            </p>
+          </InfoButton>
+        </div>
         <button
           onClick={() => refetch()}
           disabled={isFetching}

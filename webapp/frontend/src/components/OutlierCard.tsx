@@ -14,6 +14,7 @@ import {
   type SolveListParams,
 } from "../lib/api";
 import { formatTime } from "../lib/format";
+import { InfoButton } from "./InfoButton";
 import {
   findOutliers,
   findOutliersBySession,
@@ -75,18 +76,30 @@ export function OutlierCard() {
         : "rounded-lg border border-amber-500/40 bg-amber-500/5 p-6"
     }>
       <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
-        <h2 className={
-          groups.length === 0
-            ? "text-2xl font-semibold text-gray-100"
-            : "text-2xl font-semibold text-amber-200"
-        }>
-          Verdaechtige Zeiten
-          {groups.length > 0 && (
-            <span className="ml-2 text-sm text-amber-300/70 font-normal">
-              ({totalOutliers} {totalOutliers === 1 ? "Solve" : "Solves"})
-            </span>
-          )}
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className={
+            groups.length === 0
+              ? "text-2xl font-semibold text-gray-100"
+              : "text-2xl font-semibold text-amber-200"
+          }>
+            Verdaechtige Zeiten
+            {groups.length > 0 && (
+              <span className="ml-2 text-sm text-amber-300/70 font-normal">
+                ({totalOutliers} {totalOutliers === 1 ? "Solve" : "Solves"})
+              </span>
+            )}
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Outlier-Detection</p>
+            <p>
+              Listet Solves die deutlich vom Median deines Cube-Typs
+              abweichen (z.B. 3x mehr als der Median). Typische Ursachen:
+              vertippte Zeit, csTimer-Import mit falscher Skalierung,
+              Misclicks. Du kannst sie direkt loeschen oder DNF/+2 nachpflegen.
+              Per-Session oder per-Cube-Median waehlbar.
+            </p>
+          </InfoButton>
+        </div>
         <div className="flex items-center gap-3 flex-wrap">
           {/* Phase 8.1: Toggle Median-pro-Cube vs Median-pro-Session.
               Sinnvoll wenn man mehrere Sessions desselben Cubes hat

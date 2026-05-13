@@ -30,6 +30,7 @@ import {
   type SortKey,
 } from "../lib/solve-sort";
 import type { Solve } from "../lib/types";
+import { InfoButton } from "./InfoButton";
 import { SolveDetailModal } from "./SolveDetailModal";
 
 interface Props {
@@ -206,13 +207,24 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Solves{" "}
-          <span className="text-base text-gray-400">
-            ({solves.length}
-            {cubeFilter && ` · ${cubeFilter}`})
-          </span>
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Solves{" "}
+            <span className="text-base text-gray-400">
+              ({solves.length}
+              {cubeFilter && ` · ${cubeFilter}`})
+            </span>
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Solve-Liste</p>
+            <p>
+              Alle deine Solves chronologisch (neueste oben). Klick auf
+              Spaltenkopf #/Zeit/AO5/AO12 zum Sortieren. Klick auf Zeit
+              oder Notiz bearbeitet inline. ℹ-Button pro Zeile zeigt
+              Scramble + Hardware + Session-Details.
+            </p>
+          </InfoButton>
+        </div>
         {/* Limit-Selektor bleibt list-spezifisch. Cube-Filter sitzt in
             der AnalyseFilterBar oben. */}
         <select

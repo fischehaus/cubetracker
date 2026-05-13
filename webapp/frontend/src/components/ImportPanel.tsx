@@ -4,6 +4,7 @@
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 
 interface ImportResult {
   sessions_created: number;
@@ -51,9 +52,22 @@ export function ImportPanel() {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 space-y-4">
-      <h2 className="text-2xl font-semibold text-gray-100">
-        csTimer-Import <span className="text-sm text-gray-500">(Migration aus csTimer)</span>
-      </h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-2xl font-semibold text-gray-100">
+          csTimer-Import <span className="text-sm text-gray-500">(Migration aus csTimer)</span>
+        </h2>
+        <InfoButton>
+          <p className="font-medium mb-1">csTimer-Import</p>
+          <p>
+            Lade deine csTimer-Export-Datei (.txt oder .json) hoch und
+            cubetracker uebernimmt deinen kompletten Bestand: Sessions,
+            Solves, Scrambles, Notizen, +2/DNF-Penalties, Timestamps.
+            Re-Import erkennt Duplikate (timestamp + time_ms) automatisch —
+            nichts wird doppelt angelegt. Dry-Run-Option zeigt vorher was
+            passieren wuerde.
+          </p>
+        </InfoButton>
+      </div>
 
       <p className="text-base text-gray-400">
         Lade eine <strong>csTimer-Export-Datei</strong> hoch (.txt oder .json).

@@ -20,6 +20,7 @@ import {
   YAxis,
 } from "recharts";
 import { useActivity, type ActivityGranularity } from "../lib/api";
+import { InfoButton } from "./InfoButton";
 
 interface Props {
   cubeType?: string;
@@ -126,12 +127,22 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h3 className="text-2xl font-semibold text-gray-100">
-          Aktivität{" "}
-          <span className="text-base text-gray-400">
-            ({data.total_count} Solves)
-          </span>
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-2xl font-semibold text-gray-100">
+            Aktivität{" "}
+            <span className="text-base text-gray-400">
+              ({data.total_count} Solves)
+            </span>
+          </h3>
+          <InfoButton>
+            <p className="font-medium mb-1">Aktivitaets-Chart</p>
+            <p>
+              Wie viele Solves du pro Tag / Woche / Monat gemacht hast.
+              Granularitaet ueber den Selector rechts. Hilft Trainings-
+              Konsistenz zu sehen — lange Pausen vs Streaks.
+            </p>
+          </InfoButton>
+        </div>
         <div className="flex gap-2 items-center text-sm">
           <select
             value={granularity}

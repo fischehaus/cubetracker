@@ -4,6 +4,7 @@
 
 import { useTemporalStats } from "../lib/api";
 import { formatTime } from "../lib/format";
+import { InfoButton } from "./InfoButton";
 
 interface Props {
   sessionId: number | null;
@@ -45,9 +46,20 @@ export function ActivityCard({ sessionId, slice }: Props) {
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-      <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-2">
-        {SLICE_LABELS[slice]}
-      </h3>
+      <div className="flex items-center gap-2 mb-2">
+        <h3 className="text-sm uppercase tracking-wide text-gray-500">
+          {SLICE_LABELS[slice]}
+        </h3>
+        <InfoButton>
+          <p className="font-medium mb-1">{SLICE_LABELS[slice]}</p>
+          <p>
+            Zeigt Anzahl Solves + Cube-Verteilung fuer{" "}
+            {slice === "today" ? "heute (seit 0:00 deiner Zeit)" : "die letzten 7 Tage"}.
+            Aktive Cubes als Top-3, Rest aggregiert. Aktualisiert sich
+            live nach jedem neuen Solve.
+          </p>
+        </InfoButton>
+      </div>
       <div className="text-5xl font-bold text-gray-100 leading-none mb-1">
         {s.count}
         <span className="text-lg font-normal text-gray-500 ml-2">

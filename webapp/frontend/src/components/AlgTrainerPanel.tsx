@@ -26,6 +26,7 @@ import {
 } from "../lib/algs";
 import { formatSolveTime, formatTime, parseTimeInput } from "../lib/format";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
+import { InfoButton } from "./InfoButton";
 import type { Solve } from "../lib/types";
 import { CubeStateView } from "./CubeStateView";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
@@ -62,9 +63,21 @@ export function AlgTrainerPanel() {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Algorithm-Trainer
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-gray-100">
+            Algorithm-Trainer
+          </h2>
+          <InfoButton>
+            <p className="font-medium mb-1">Algorithm-Trainer</p>
+            <p>
+              Drill-Modus fuer PLL- + OLL-Algorithmen. Sub-Sets waehlbar
+              (z.B. „nur Edge-Permutationen"), Scrambles werden zufaellig
+              generiert mit der Inversion des gewuenschten Algorithmus.
+              Loese den Scramble + speichere die Zeit pro Algorithm —
+              hilft Schwachstellen zu identifizieren.
+            </p>
+          </InfoButton>
+        </div>
         <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1">
           {SUBSETS.map((s) => {
             const active = subset === s.id;
