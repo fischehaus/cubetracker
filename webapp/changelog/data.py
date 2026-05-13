@@ -38,6 +38,19 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.logo-kor",
+        released=date(2026, 5, 14),
+        title="Korrigiertes Logo eingespielt",
+        highlights=[
+            "Neues Logo cubetracker_kor.png — auf das tatsaechliche Motiv "
+            "zugeschnitten, kein toter Whitespace mehr im Bild",
+            "Wirkt im Header + auf Login deutlich praesenter, weil bei "
+            "gleicher Anzeigegroesse mehr Pixel auf das Logo entfallen",
+            "Favicons + Apple-Touch-Icon neu generiert (Cube-Crop aus dem "
+            "korrigierten Bild) — Browser-Tab-Icon ist jetzt klarer",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.logo-bigger",
         released=date(2026, 5, 14),
         title="Logo groesser (Header 2.5× / Login 1.5×)",
