@@ -13,7 +13,8 @@ export type AppTab =
   | "analyse"
   | "verwaltung"
   | "trainer"
-  | "friends";
+  | "friends"
+  | "leaderboard";
 
 interface TabDef {
   id: AppTab;
@@ -58,6 +59,12 @@ export const TABS: TabDef[] = [
     label: "Freunde",
     icon: "🤝",
     description: "Freundeliste + Anfragen (Phase W.9)",
+  },
+  {
+    id: "leaderboard",
+    label: "Bestenliste",
+    icon: "🏁",
+    description: "PB-/AO5-/AO12-Vergleich mit Freunden (Phase W.10)",
   },
 ];
 

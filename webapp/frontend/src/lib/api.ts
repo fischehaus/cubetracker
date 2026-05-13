@@ -1376,3 +1376,62 @@ export function useUpdateProfile(): UseMutationResult<
     },
   });
 }
+
+// ============================================================
+// Leaderboard (Phase W.10)
+// ============================================================
+
+export interface LeaderboardEntry {
+  user_id: number;
+  display_name: string;
+  is_me: boolean;
+  cube_type: string;
+  solve_count_total: number;
+  solve_count_30d: number;
+  best_ms: number | null;
+  best_ao5: number | null;
+  best_ao12: number | null;
+  current_ao5: number | null;
+  current_ao12: number | null;
+  last_solve_at: string | null;
+}
+
+export interface LeaderboardResponse {
+  cube_type: string;
+  rows: LeaderboardEntry[];
+  count: number;
+}
+
+interface CubeTypesResponse {
+  cube_types: string[];
+}
+
+export function useLeaderboardCubeTypes(
+  enabled: boolean,
+): UseQueryResult<CubeTypesResponse> {
+  return useQuery({
+    queryKey: ["leaderboard-cube-types"],
+    queryFn: async () => {
+      const r = await api.get<CubeTypesResponse>("/leaderboard/cube-types");
+      return r.data;
+    },
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useLeaderboard(
+  cubeType: string | null,
+): UseQueryResult<LeaderboardResponse> {
+  return useQuery({
+    queryKey: ["leaderboard", cubeType],
+    queryFn: async () => {
+      const r = await api.get<LeaderboardResponse>("/leaderboard", {
+        params: { cube_type: cubeType },
+      });
+      return r.data;
+    },
+    enabled: !!cubeType && cubeType.length >= 1,
+    staleTime: 30_000,
+  });
+}
