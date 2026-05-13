@@ -38,6 +38,22 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.features-page",
+        released=date(2026, 5, 14),
+        title="App-Beschreibung + Feature-Liste",
+        highlights=[
+            "Anmeldeseite zeigt jetzt prominent „Was ist cubetracker?\" + "
+            "Highlights neben dem Login-Formular — Besucher ohne Account "
+            "verstehen sofort worum's geht",
+            "Feature-Liste in 7 Kategorien (Solving, Analyse, Trainer, "
+            "Community, Hardware, Daten, Account+Sicherheit)",
+            "Innerhalb der App: Footer-Link „Was kann diese App?\" oeffnet "
+            "die selbe Feature-Liste als Modal",
+            "Layout: Desktop 2-spaltig (Form links + Features rechts), "
+            "Mobile gestapelt — Form bleibt prominent oben",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.community-tab",
         released=date(2026, 5, 14),
         title="Tab-Konsolidierung: Community ersetzt Freunde + Bestenliste",

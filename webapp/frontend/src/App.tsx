@@ -31,6 +31,7 @@ import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HistogramChart } from "./components/HistogramChart";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
 import { MultiCompareCard } from "./components/MultiCompareCard";
+import { FeatureListPanel } from "./components/FeatureListPanel";
 import { OnboardingBanner } from "./components/OnboardingBanner";
 import { PatchNotesPanel } from "./components/PatchNotesPanel";
 import { ReminderCard } from "./components/ReminderCard";
@@ -461,16 +462,62 @@ function MainLayout() {
           <CommunityTab initialSection={communityInitial} />
         )}
 
-        <footer className="mt-8 text-xs text-gray-600 text-center">
-          cubetracker — Speedcubing-Tracker · v-Badge oben rechts zeigt
-          aktuelle Version + Patch Notes
-        </footer>
+        <Footer />
       </div>
 
       {/* Globale Toaster — bleiben auf jedem Tab sichtbar */}
       <AchievementToaster />
       <ChallengeCompletionToaster />
       <PbConfettiOverlay />
+    </div>
+  );
+}
+
+function Footer() {
+  const [showFeatures, setShowFeatures] = useState(false);
+  return (
+    <>
+      <footer className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
+        <span>cubetracker — Speedcubing-Tracker</span>
+        <span aria-hidden="true">·</span>
+        <button
+          type="button"
+          onClick={() => setShowFeatures(true)}
+          className="text-gray-500 hover:text-gray-200 underline"
+        >
+          Was kann diese App?
+        </button>
+        <span aria-hidden="true">·</span>
+        <span>v-Badge oben rechts = Patch Notes</span>
+      </footer>
+      {showFeatures && (
+        <FeaturesModal onClose={() => setShowFeatures(false)} />
+      )}
+    </>
+  );
+}
+
+function FeaturesModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-6 mt-8 mb-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-100 text-2xl leading-none"
+            aria-label="Schliessen"
+          >
+            ×
+          </button>
+        </div>
+        <FeatureListPanel />
+      </div>
     </div>
   );
 }

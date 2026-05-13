@@ -5,6 +5,8 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
+import { FeatureListPanel } from "../components/FeatureListPanel";
+import { APP_TAGLINE, HERO_HIGHLIGHTS } from "../lib/features-data";
 
 type Mode = "login" | "register" | "forgot";
 
@@ -42,23 +44,22 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
-        {/* Logo prominent oben — Schriftzug ist Teil der Grafik, also
-            kein separater H1 noetig. alt-Text gibt Screenreadern den App-
-            Namen + Tagline. */}
-        <img
-          src="/cubetracker-logo.png"
-          alt="cubetracker — Speedcubing Solve-Tracking"
-          className="w-full max-w-[260px] mx-auto mb-3"
-        />
-        <p className="text-sm text-gray-400 mb-6 text-center">
-          {mode === "login"
-            ? "Willkommen zurueck."
-            : mode === "register"
-              ? "Account erstellen."
-              : "Passwort vergessen."}
-        </p>
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6 lg:gap-10 items-start">
+        {/* Linke Spalte: Logo + Login-Form */}
+        <div className="w-full max-w-sm mx-auto lg:max-w-none bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
+          <img
+            src="/cubetracker-logo.png"
+            alt="cubetracker — Speedcubing Solve-Tracking"
+            className="w-full max-w-[260px] mx-auto mb-3"
+          />
+          <p className="text-sm text-gray-400 mb-6 text-center">
+            {mode === "login"
+              ? "Willkommen zurueck."
+              : mode === "register"
+                ? "Account erstellen."
+                : "Passwort vergessen."}
+          </p>
 
         {mode !== "forgot" && (
           <div className="flex gap-2 mb-4">
@@ -168,10 +169,33 @@ export function LoginPage() {
           )}
         </div>
 
-        <p className="text-xs text-gray-500 mt-6 text-center">
-          Tipp: Render-Free schlaeft nach 15 Min Idle. Erste Anmeldung kann
-          ~50s dauern.
-        </p>
+          <p className="text-xs text-gray-500 mt-6 text-center">
+            Tipp: Render-Free schlaeft nach 15 Min Idle. Erste Anmeldung kann
+            ~50s dauern.
+          </p>
+        </div>
+
+        {/* Rechte Spalte: Was-ist-das + Feature-Liste fuer Besucher
+            ohne Account. Auf Desktop nebeneinander, auf Mobile gestapelt. */}
+        <aside className="space-y-4 max-w-2xl mx-auto lg:mx-0">
+          <div className="rounded-2xl border border-purple-500/30 bg-purple-500/5 p-5">
+            <p className="text-base text-gray-200 leading-relaxed">
+              {APP_TAGLINE}
+            </p>
+            <ul className="mt-3 space-y-1 text-sm text-purple-200">
+              {HERO_HIGHLIGHTS.map((h, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span aria-hidden="true" className="text-purple-400">
+                    ✓
+                  </span>
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <FeatureListPanel compact />
+        </aside>
       </div>
     </div>
   );
