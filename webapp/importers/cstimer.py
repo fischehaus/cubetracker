@@ -96,9 +96,13 @@ def _to_aware_utc(ts: datetime) -> datetime:
     return ts.astimezone(UTC)
 
 
-def derive_cube_type(session_name: str, scramble_type: str | None) -> str:
-    """Cube-Type aus Session-Name + scrType ableiten."""
-    name = session_name.strip()
+def derive_cube_type(session_name: str | int | None, scramble_type: str | None) -> str:
+    """Cube-Type aus Session-Name + scrType ableiten.
+
+    Defensiv gegen csTimer-Default-Namen die Integers sein koennen
+    (Session ohne eigenen Namen heisst dann z.B. `1`, nicht `"1"`).
+    """
+    name = str(session_name).strip() if session_name is not None else ""
     # 1) Name match
     if name in COMMON_CUBE_NAMES:
         return name
@@ -234,7 +238,10 @@ def import_cstimer_json(
             continue
 
         meta = session_meta.get(cstimer_sid, {})
-        session_name = meta.get("name", f"Session {cstimer_sid}")
+        # csTimer-Default: Session ohne User-Namen heisst Integer (1, 2, ...).
+        # DB-Column `name` ist String(128) -> zwingend zu str konvertieren.
+        raw_name = meta.get("name", f"Session {cstimer_sid}")
+        session_name = str(raw_name) if raw_name is not None else f"Session {cstimer_sid}"
         scramble_type = meta.get("scramble_type", "")
 
         # Session per (user_id, cstimer_session_id) finden oder anlegen
