@@ -14,11 +14,13 @@ aggregiert).
 
 from __future__ import annotations
 
+import logging
 import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session as OrmSession
 
@@ -26,6 +28,9 @@ from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from db.database import get_db
 from db.models import Achievement, Hardware, Session as DbSession, Snapshot, Solve, User
+from emailing.service import send_admin_message
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -33,6 +38,17 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 # dass ein authentifizierter Angreifer mit gestohlenem Token die teuren
 # COUNT-Queries haemmert.
 ADMIN_LIMIT = "30/minute"
+# Single-User-Mail darf haeufiger gehen (Support-Use-Case), aber nicht
+# beliebig (Spam-Schutz falls Admin-Token kompromittiert).
+ADMIN_MAIL_LIMIT = "30/hour"
+# Bulk-Announcement: sehr streng, weil es alle User trifft. 3/h reicht
+# fuer betriebliche Ankuendigungen, killt Account-Takeover-Mailbomb.
+ADMIN_ANNOUNCE_LIMIT = "3/hour"
+# QA-Finding M2: synchroner Resend-Loop -> bei vielen Empfaengern
+# Render-Worker-Timeout (>30s). Harter Cap bis Background-Job-Setup.
+# 80 * ~200ms = ~16s. Wenn das ueberschritten wird, sollte ein BG-Job
+# oder Resend-Batch-Endpoint hin.
+ANNOUNCEMENT_MAX_RECIPIENTS = 80
 
 
 def _get_admin_emails() -> set[str]:
@@ -157,4 +173,306 @@ def get_admin_stats(
             "snapshots_total_mb": round(int(total_snapshot_bytes) / 1024 / 1024, 2),
         },
         "as_of": now.isoformat(),
+    }
+
+
+# ============================================================
+# User-Management (Phase W.admin Phase 2)
+# ============================================================
+
+
+class AdminUserPatch(BaseModel):
+    """Felder die ein Admin an einem fremden User aendern darf.
+
+    extra="forbid": Mass-Assignment-Schutz wie bei UserUpdate. Bewusst KEIN
+    email/display_name/password — fuer Email-Change gibt's den User-Flow,
+    Display-Name ist sein Recht, Passwort hat der Admin gar nicht (bcrypt).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    is_active: bool | None = None
+    email_verified: bool | None = None
+
+
+class AdminEmailPayload(BaseModel):
+    """Ad-hoc-Mail-Body. Plain-Text, Service escaped vor HTML-Render."""
+
+    model_config = ConfigDict(extra="forbid")
+    subject: str = Field(min_length=1, max_length=120)
+    body: str = Field(min_length=1, max_length=4000)
+
+
+class AdminAnnouncementPayload(BaseModel):
+    """Bulk-Mail an alle aktiven User. dry_run liefert nur Empfaenger-Count."""
+
+    model_config = ConfigDict(extra="forbid")
+    subject: str = Field(min_length=1, max_length=120)
+    body: str = Field(min_length=1, max_length=4000)
+    dry_run: bool = Field(default=False)
+
+
+def _user_summary_row(
+    user: User, solve_count: int, last_solve_at: datetime | None
+) -> dict[str, Any]:
+    return {
+        "id": user.id,
+        "email": user.email,
+        "display_name": user.display_name,
+        "is_active": user.is_active,
+        "email_verified": user.email_verified,
+        "is_admin": user.is_admin,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "solve_count": solve_count,
+        "last_solve_at": last_solve_at.isoformat() if last_solve_at else None,
+    }
+
+
+@router.get("/users")
+@limiter.limit(ADMIN_LIMIT)
+def list_users(
+    request: Request,
+    _admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Alle User mit Aggregaten (Solve-Count, letzter Solve).
+
+    Bewusst kein Pagination — bei <500 User reicht's. Wenn das ueberlaeuft,
+    waere k-anonym-Filter sowieso noetig (siehe S4-Doku).
+    """
+    # Aggregat: solve_count + max(timestamp) je User in einer Query.
+    # LEFT JOIN damit User ohne Solves trotzdem mit count=0 auftauchen.
+    stats_subq = (
+        select(
+            Solve.user_id.label("uid"),
+            func.count(Solve.id).label("cnt"),
+            func.max(Solve.timestamp).label("last_at"),
+        )
+        .group_by(Solve.user_id)
+        .subquery()
+    )
+    rows = db.execute(
+        select(User, stats_subq.c.cnt, stats_subq.c.last_at)
+        .outerjoin(stats_subq, User.id == stats_subq.c.uid)
+        .order_by(User.created_at.desc())
+    ).all()
+    users = [
+        _user_summary_row(u, int(cnt or 0), last_at) for (u, cnt, last_at) in rows
+    ]
+    return {"users": users, "count": len(users)}
+
+
+@router.patch("/users/{user_id}")
+@limiter.limit(ADMIN_LIMIT)
+def update_user(
+    request: Request,
+    user_id: int,
+    payload: AdminUserPatch,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Setzt is_active und/oder email_verified an einem fremden User.
+
+    Self-Protection: Admin kann sich nicht selbst deaktivieren (sonst
+    aussperren-Gefahr).
+    """
+    if user_id == admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Du kannst dich nicht selbst per Admin-API aendern. "
+                "Nutze /auth/me oder einen anderen Admin-Account."
+            ),
+        )
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User nicht gefunden."
+        )
+
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mindestens ein Feld (is_active oder email_verified) muss gesetzt sein.",
+        )
+
+    # Token-Revocation: Deaktivieren MUSS token_version hochzaehlen, sonst
+    # koennte der gerade gesperrte User mit seinem bestehenden Access-Token
+    # bis zur naechsten /auth/refresh weiter requests machen.
+    if "is_active" in updates and updates["is_active"] is False and user.is_active:
+        user.token_version = (user.token_version or 0) + 1
+    if "is_active" in updates:
+        user.is_active = bool(updates["is_active"])
+    if "email_verified" in updates:
+        user.email_verified = bool(updates["email_verified"])
+
+    db.commit()
+    db.refresh(user)
+    logger.warning(
+        "[ADMIN] %s patched user %s (%s) -> %s",
+        admin.email,
+        user.id,
+        user.email,
+        updates,
+    )
+    return _user_summary_row(user, solve_count=0, last_solve_at=None)
+
+
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(ADMIN_LIMIT)
+def delete_user(
+    request: Request,
+    user_id: int,
+    confirm: str = Query(
+        ..., description="Muss exakt 'DELETE_USER_{id}' sein, sonst 400."
+    ),
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> None:
+    """Hard-Delete eines fremden Users incl. Cascade (Solves, Sessions,
+    Hardware, Achievements, Snapshots, alles).
+
+    Confirm-Mechanik wie bei /backup/restore?mode=replace — muesste man
+    aus Versehen mehrfach in der UI tippen damit's ausgeloest wird.
+    DSGVO-Pflicht: User-Recht auf Vergessen, dokumentierte Dauer 30 Tage,
+    wir loeschen sofort. Audit ueber WARNING-Log + Render-Log-Retention.
+    """
+    if user_id == admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Du kannst dich nicht selbst loeschen.",
+        )
+    expected_confirm = f"DELETE_USER_{user_id}"
+    if confirm != expected_confirm:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"confirm muss exakt '{expected_confirm}' sein.",
+        )
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User nicht gefunden."
+        )
+    email_for_log = user.email  # nach delete() ist user detached
+    db.delete(user)
+    db.commit()
+    logger.warning(
+        "[ADMIN] %s HARD-DELETED user %s (%s) — DSGVO-Cascade",
+        admin.email,
+        user_id,
+        email_for_log,
+    )
+
+
+@router.post("/users/{user_id}/email")
+@limiter.limit(ADMIN_MAIL_LIMIT)
+def send_email_to_user(
+    request: Request,
+    user_id: int,
+    payload: AdminEmailPayload,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Ad-hoc-Mail an einen einzelnen User (Support, Antwort auf Nachfrage).
+
+    Body ist Plain-Text, der Email-Service escaped vor HTML-Render. Keine
+    Markdown-/HTML-Pass-Through (Stored-XSS-Schutz falls Admin-Account
+    kompromittiert).
+    """
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User nicht gefunden."
+        )
+    result = send_admin_message(user.email, payload.subject, payload.body)
+    logger.info(
+        "[ADMIN] %s -> mail-to-user %s (%s) success=%s id=%s err=%s",
+        admin.email,
+        user.id,
+        user.email,
+        result.success,
+        result.message_id,
+        result.error,
+    )
+    return {
+        "success": result.success,
+        "message_id": result.message_id,
+        "error": result.error,
+        "recipient": user.email,
+    }
+
+
+@router.post("/announcement")
+@limiter.limit(ADMIN_ANNOUNCE_LIMIT)
+def send_announcement(
+    request: Request,
+    payload: AdminAnnouncementPayload,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Bulk-Mail an alle AKTIVEN User mit verifizierter Email.
+
+    dry_run liefert nur die Empfaenger-Zahl, kein Versand. Praktisch fuer
+    Pre-Check ("an wieviele schicke ich?") bevor man den echten Knopf
+    drueckt.
+
+    Filter:
+    - is_active=True (nicht-deaktivierte)
+    - email_verified=True (nur Mails wo wir sicher sind dass sie ankommen
+      und Consent ist abgesichert — sonst Spam-Reports)
+    """
+    recipients = db.execute(
+        select(User.email).where(
+            User.is_active.is_(True), User.email_verified.is_(True)
+        )
+    ).scalars().all()
+    if payload.dry_run:
+        return {
+            "dry_run": True,
+            "recipient_count": len(recipients),
+            "sent": 0,
+            "failed": 0,
+            "max_recipients": ANNOUNCEMENT_MAX_RECIPIENTS,
+            "over_cap": len(recipients) > ANNOUNCEMENT_MAX_RECIPIENTS,
+        }
+
+    # QA-Finding M2: harter Cap gegen Worker-Timeout. Wenn das ueberschritten
+    # wird, ist ein Background-Job-Setup faellig (siehe Code-Kommentar oben).
+    if len(recipients) > ANNOUNCEMENT_MAX_RECIPIENTS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Zu viele Empfaenger ({len(recipients)}). Maximal "
+                f"{ANNOUNCEMENT_MAX_RECIPIENTS} synchron unterstuetzt. "
+                "Bitte Background-Job-Setup implementieren bevor du an "
+                "mehr User schicken willst."
+            ),
+        )
+
+    sent = 0
+    failed = 0
+    failures: list[str] = []
+    for to in recipients:
+        result = send_admin_message(to, payload.subject, payload.body)
+        if result.success:
+            sent += 1
+        else:
+            failed += 1
+            failures.append(f"{to}: {result.error}")
+    logger.warning(
+        "[ADMIN] %s sent announcement '%s' to %d recipients (sent=%d failed=%d)",
+        admin.email,
+        payload.subject[:60],
+        len(recipients),
+        sent,
+        failed,
+    )
+    return {
+        "dry_run": False,
+        "recipient_count": len(recipients),
+        "sent": sent,
+        "failed": failed,
+        # nur die ersten 20 Fehler-Details zurueck, sonst kann der Response
+        # bei vielen Empfaengern riesig werden
+        "failures": failures[:20],
     }

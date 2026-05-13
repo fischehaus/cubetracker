@@ -1075,3 +1075,129 @@ export function useAdminStats(
     staleTime: 60_000,
   });
 }
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  display_name: string | null;
+  is_active: boolean;
+  email_verified: boolean;
+  is_admin: boolean;
+  created_at: string | null;
+  solve_count: number;
+  last_solve_at: string | null;
+}
+
+interface AdminUsersResponse {
+  users: AdminUser[];
+  count: number;
+}
+
+export function useAdminUsers(enabled: boolean): UseQueryResult<AdminUsersResponse> {
+  return useQuery({
+    queryKey: ["admin-users"],
+    queryFn: async (): Promise<AdminUsersResponse> => {
+      const r = await api.get<AdminUsersResponse>("/admin/users");
+      return r.data;
+    },
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+export interface AdminUserPatch {
+  is_active?: boolean;
+  email_verified?: boolean;
+}
+
+export function useAdminPatchUser(): UseMutationResult<
+  AdminUser,
+  Error,
+  { userId: number; patch: AdminUserPatch }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userId, patch }) => {
+      const r = await api.patch<AdminUser>(`/admin/users/${userId}`, patch);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+    },
+  });
+}
+
+export function useAdminDeleteUser(): UseMutationResult<
+  void,
+  Error,
+  { userId: number }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userId }) => {
+      // Confirm-Param wird vom Backend exakt verglichen — Frontend baut ihn
+      // genauso. Doppelter Schutz: der User muss den Text auch in der UI
+      // tippen, dann waere er hier in einem zusaetzlichen state-Feld.
+      await api.delete(`/admin/users/${userId}`, {
+        params: { confirm: `DELETE_USER_${userId}` },
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+    },
+  });
+}
+
+export interface AdminMailResult {
+  success: boolean;
+  message_id: string | null;
+  error: string | null;
+  recipient: string;
+}
+
+export function useAdminSendEmail(): UseMutationResult<
+  AdminMailResult,
+  Error,
+  { userId: number; subject: string; body: string }
+> {
+  return useMutation({
+    mutationFn: async ({ userId, subject, body }) => {
+      const r = await api.post<AdminMailResult>(`/admin/users/${userId}/email`, {
+        subject,
+        body,
+      });
+      return r.data;
+    },
+  });
+}
+
+export interface AdminAnnouncementResult {
+  dry_run: boolean;
+  recipient_count: number;
+  sent: number;
+  failed: number;
+  failures?: string[];
+  /** Server-Cap fuer synchron-versendbare Empfaenger (M2-Fix). */
+  max_recipients?: number;
+  /** true wenn recipient_count > max_recipients — echter Send wuerde 400. */
+  over_cap?: boolean;
+}
+
+export function useAdminAnnouncement(): UseMutationResult<
+  AdminAnnouncementResult,
+  Error,
+  { subject: string; body: string; dry_run: boolean }
+> {
+  return useMutation({
+    mutationFn: async ({ subject, body, dry_run }) => {
+      const r = await api.post<AdminAnnouncementResult>("/admin/announcement", {
+        subject,
+        body,
+        dry_run,
+      });
+      return r.data;
+    },
+  });
+}

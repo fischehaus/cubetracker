@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
-import { AdminStatsPanel } from "./AdminStatsPanel";
+import { AdminPanel } from "./AdminPanel";
 import { BackupPanel } from "./BackupPanel";
 import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
@@ -113,7 +113,7 @@ export function VerwaltungTab() {
       )}
       {section === "outliers" && <OutlierCard />}
       {section === "settings" && <SettingsPanel />}
-      {section === "admin" && isAdmin && <AdminStatsPanel />}
+      {section === "admin" && isAdmin && <AdminPanel />}
     </div>
   );
 }

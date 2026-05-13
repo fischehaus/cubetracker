@@ -135,6 +135,46 @@ def send_password_reset_email(to: str, reset_token: str) -> EmailResult:
     return _send(to, "cubetracker — Passwort zuruecksetzen", html)
 
 
+def send_admin_message(to: str, subject: str, body: str) -> EmailResult:
+    """Ad-hoc-Mail vom Admin an einen User (Support, Ankuendigung).
+
+    `body` ist Plain-Text. Newlines werden zu <br>. Kein Markdown, kein
+    HTML-Pass-Through (XSS-Risiko falls Admin-Account kompromittiert
+    wird — wir escapen vor dem Rendern in HTML).
+
+    Subject-Prefix "[cubetracker]" wird automatisch ergaenzt damit User
+    die Mail als App-Mail erkennen.
+    """
+    # HTML-Escape gegen XSS-Risiko, Newlines zu <br> fuer Plain-Body-Optik
+    import html as _html
+
+    safe_body = _html.escape(body).replace("\n", "<br>\n")
+    # QA-Finding M1: Subject defensiv CRLF-strippen — Resend baut den
+    # SMTP-Header selbst und sollte das eigentlich tun, aber wir trauen
+    # nicht ueber die Lib-Boundary. Ein eingeschleuster Newline koennte
+    # zusaetzliche Header (Bcc:, Reply-To:) injizieren.
+    safe_subject = subject.replace("\r", " ").replace("\n", " ").strip()
+    full_subject = (
+        safe_subject if safe_subject.startswith("[cubetracker]") else f"[cubetracker] {safe_subject}"
+    )
+    html_body = f"""\
+<!doctype html>
+<html lang="de">
+<body style="font-family: system-ui, sans-serif; max-width: 480px; margin: 32px auto; color: #111;">
+  <h1 style="font-size: 20px; color: #7c3aed;">cubetracker</h1>
+  <div style="margin: 16px 0; line-height: 1.5;">
+    {safe_body}
+  </div>
+  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
+  <p style="font-size: 12px; color: #888;">
+    Diese Mail wurde vom Betreiber von cubetracker an dich gesendet.
+    Antworten gehen direkt an den Betreiber, kein Auto-Reply.
+  </p>
+</body>
+</html>"""
+    return _send(to, full_subject, html_body)
+
+
 def send_email_change_verification(to: str, verification_token: str) -> EmailResult:
     """Verifizierung der NEUEN Email-Adresse bei Email-Change-Flow."""
     link = f"{FRONTEND_URL}/verify-email?token={verification_token}"
