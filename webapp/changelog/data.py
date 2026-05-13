@@ -38,6 +38,18 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.logo",
+        released=date(2026, 5, 14),
+        title="Neues Logo eingebunden",
+        highlights=[
+            "Logo (Cube mit lila/cyan-Gradient + Time-Bar-Linie) prominent "
+            "auf der Anmeldeseite",
+            "Cube-Icon klein neben dem 'cubetracker'-Schriftzug im Header",
+            "Browser-Tab-Favicon zeigt den Cube — endlich kein Default-Icon mehr",
+            "Apple-Touch-Icon fuer Homescreen-Install (vorab fuer PWA-Setup)",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ux-quickwins",
         released=date(2026, 5, 14),
         title="UX-Quick-Wins nach Audit",

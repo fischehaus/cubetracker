@@ -361,11 +361,23 @@ function MainLayout() {
     <div className="min-h-screen p-6">
       <div className="mx-auto max-w-7xl">
         <header className="flex items-center justify-between mb-6 gap-4 flex-wrap">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-100">cubetracker</h1>
-            <p className="text-base text-gray-400">
-              Speedcubing-Solve-Tracking — Multi-User-Web.
-            </p>
+          <div className="flex items-center gap-3">
+            {/* Cube-Icon links neben dem Schriftzug. Quadratisch, klein —
+                der Schriftzug bleibt H1 fuer SEO + Screenreader. */}
+            <img
+              src="/cubetracker-192.png"
+              alt=""
+              aria-hidden="true"
+              className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0"
+            />
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-100">
+                cubetracker
+              </h1>
+              <p className="text-sm md:text-base text-gray-400">
+                Speedcubing-Solve-Tracking — Multi-User-Web.
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <HealthBadge />

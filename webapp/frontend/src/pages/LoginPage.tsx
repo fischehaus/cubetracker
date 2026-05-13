@@ -44,8 +44,15 @@ export function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
-        <h1 className="text-3xl font-bold text-gray-100 mb-1">cubetracker</h1>
-        <p className="text-sm text-gray-400 mb-6">
+        {/* Logo prominent oben — Schriftzug ist Teil der Grafik, also
+            kein separater H1 noetig. alt-Text gibt Screenreadern den App-
+            Namen + Tagline. */}
+        <img
+          src="/cubetracker-logo.png"
+          alt="cubetracker — Speedcubing Solve-Tracking"
+          className="w-full max-w-[260px] mx-auto mb-3"
+        />
+        <p className="text-sm text-gray-400 mb-6 text-center">
           {mode === "login"
             ? "Willkommen zurueck."
             : mode === "register"
