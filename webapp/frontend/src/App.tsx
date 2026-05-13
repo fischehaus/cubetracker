@@ -32,6 +32,7 @@ import { HistogramChart } from "./components/HistogramChart";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
 import { MultiCompareCard } from "./components/MultiCompareCard";
 import { OnboardingBanner } from "./components/OnboardingBanner";
+import { PatchNotesPanel } from "./components/PatchNotesPanel";
 import { ReminderCard } from "./components/ReminderCard";
 import { SolveList } from "./components/SolveList";
 import { FriendsTab } from "./components/FriendsTab";
@@ -78,9 +79,12 @@ interface Health {
 }
 
 function HealthBadge() {
+  // UX-Refactor 2026-05-14: Version-Badge ist jetzt klickbar — oeffnet
+  // Patch-Notes-Modal. So lebt das Changelog am natuerlichen Ort
+  // (Versions-Hinweis) statt versteckt im Verwaltungs-Sub-Tab.
+  const [showPatches, setShowPatches] = useState(false);
   const { data, error } = useQuery<Health>({
     queryKey: ["health"],
-    // Phase 9: bevorzugt /api/health (neue Route), fallback / (alt).
     queryFn: async () => {
       try {
         return (await api.get<Health>("/api/health")).data;
@@ -102,22 +106,50 @@ function HealthBadge() {
     return <span className="text-sm text-gray-500">…</span>;
   }
   const isProd = data.mode === "prod";
-  // Visuell unterschiedlich: Dev = Lila-Border (Entwickler-Hinweis),
-  // Prod = klassisches gruen. So sieht User sofort welche Variante.
   return (
-    <span
-      className={
-        isProd
-          ? "text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-3 py-1.5"
-          : "text-sm text-purple-300 bg-purple-500/10 border border-purple-500/30 rounded px-3 py-1.5"
-      }
-      title={isProd ? "Installierte App" : "Entwicklungs-Modus"}
+    <>
+      <button
+        type="button"
+        onClick={() => setShowPatches(true)}
+        className={
+          isProd
+            ? "text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-3 py-1.5 hover:bg-emerald-500/20 cursor-pointer transition-colors"
+            : "text-sm text-purple-300 bg-purple-500/10 border border-purple-500/30 rounded px-3 py-1.5 hover:bg-purple-500/20 cursor-pointer transition-colors"
+        }
+        title="Patch Notes anzeigen"
+      >
+        v{data.version}
+        {data.mode && (
+          <span className="ml-1 text-xs opacity-70">[{data.mode}]</span>
+        )}
+      </button>
+      {showPatches && <PatchNotesModal onClose={() => setShowPatches(false)} />}
+    </>
+  );
+}
+
+function PatchNotesModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
+      onClick={onClose}
     >
-      v{data.version}
-      {data.mode && (
-        <span className="ml-1 text-xs opacity-70">[{data.mode}]</span>
-      )}
-    </span>
+      <div
+        className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-6 mt-8 mb-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-100 text-2xl leading-none"
+            aria-label="Schliessen"
+          >
+            ×
+          </button>
+        </div>
+        <PatchNotesPanel />
+      </div>
+    </div>
   );
 }
 
@@ -390,8 +422,9 @@ function MainLayout() {
         {tab === "friends" && <FriendsTab />}
         {tab === "leaderboard" && <LeaderboardTab />}
 
-        <footer className="mt-8 text-sm text-gray-500 text-center">
-          v1.0 · Distribution-faehig · OLL-Visualisierung · 31 Achievements
+        <footer className="mt-8 text-xs text-gray-600 text-center">
+          cubetracker — Speedcubing-Tracker · v-Badge oben rechts zeigt
+          aktuelle Version + Patch Notes
         </footer>
       </div>
 

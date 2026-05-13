@@ -68,59 +68,176 @@ function DiscoverabilityCard({
   const update = useUpdateProfile();
   const hasName = !!displayName?.trim();
 
+  // Inline-Edit-State fuer Display-Name (UX-Refactor 2026-05-14: war
+  // vorher nur in Verwaltung→Einstellungen, das forcierte einen Tab-
+  // Wechsel — jetzt direkt hier, wo man's braucht).
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState(displayName ?? "");
+
+  function saveName() {
+    const trimmed = nameDraft.trim();
+    if (!trimmed) return;
+    update.mutate(
+      { display_name: trimmed },
+      { onSuccess: () => setEditingName(false) },
+    );
+  }
+
+  // Aktivierter Auffindbar-State: kompakt-gruene Bestaetigungs-Card.
   if (isDiscoverable && hasName) {
     return (
-      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-200">
-        <strong>Auffindbar</strong> als „{displayName}". Andere User koennen
-        dich per Display-Name-Suche finden.
-        {" "}
-        <button
-          onClick={() => update.mutate({ is_discoverable: false })}
-          disabled={update.isPending}
-          className="ml-2 underline hover:text-emerald-100 disabled:opacity-50"
-        >
-          deaktivieren
-        </button>
+      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-200 space-y-1">
+        <div>
+          <strong>Auffindbar</strong> als „{displayName}". Andere User
+          koennen dich per Display-Name-Suche finden.
+        </div>
+        <div className="flex flex-wrap gap-3 text-xs">
+          <button
+            onClick={() => {
+              setNameDraft(displayName ?? "");
+              setEditingName(true);
+            }}
+            className="underline hover:text-emerald-100"
+          >
+            Display-Name aendern
+          </button>
+          <button
+            onClick={() => update.mutate({ is_discoverable: false })}
+            disabled={update.isPending}
+            className="underline hover:text-emerald-100 disabled:opacity-50"
+          >
+            Auffindbar deaktivieren
+          </button>
+        </div>
+        {editingName && (
+          <InlineNameEditor
+            value={nameDraft}
+            onChange={setNameDraft}
+            onSave={saveName}
+            onCancel={() => setEditingName(false)}
+            pending={update.isPending}
+          />
+        )}
       </div>
     );
   }
 
+  // Nicht-auffindbar-State: Onboarding-Card mit allen Aktionen inline.
   return (
-    <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-4 text-sm text-blue-100 space-y-2">
-      <p className="font-medium text-blue-200">Wie wirst du gefunden?</p>
-      <p>
-        Aktuell <strong>nicht auffindbar</strong>. Du kannst trotzdem
-        andere per Email-Lookup finden + ihnen Freundes-Anfragen schicken.
-        Damit DICH andere per Display-Name-Suche finden koennen, brauchst
-        du:
-      </p>
-      <ul className="list-disc list-inside text-xs space-y-0.5 text-blue-200/80">
-        <li>
-          Einen <strong>Display-Name</strong> (Verwaltung →
-          Einstellungen)
-          {!hasName && " — bei dir aktuell leer"}
-        </li>
-        <li>
-          <strong>„Auffindbar"</strong> aktivieren — dieser Toggle hier:
-        </li>
-      </ul>
-      <button
-        onClick={() => update.mutate({ is_discoverable: true })}
-        disabled={!hasName || update.isPending}
-        className="rounded bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed"
-        title={
-          !hasName
-            ? "Erst Display-Name in Verwaltung → Einstellungen setzen"
-            : "Anderen erlauben, dich per Display-Name zu finden"
-        }
-      >
-        {update.isPending ? "…" : "Auffindbar aktivieren"}
-      </button>
+    <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-4 text-sm text-blue-100 space-y-3">
+      <div>
+        <p className="font-medium text-blue-200">Wie wirst du gefunden?</p>
+        <p className="mt-1">
+          Aktuell <strong>nicht auffindbar</strong>. Du kannst trotzdem
+          andere per Email-Lookup finden + ihnen Freundes-Anfragen schicken.
+          Damit DICH andere per Display-Name finden koennen, brauchst du
+          beides:
+        </p>
+      </div>
+
+      {/* Schritt 1: Display-Name inline setzen */}
+      <div className="rounded border border-blue-500/20 bg-blue-500/5 p-3 space-y-2">
+        <div className="text-xs font-medium text-blue-200">
+          1. Display-Name
+          {hasName ? (
+            <span className="ml-2 text-emerald-300">✓ gesetzt: „{displayName}"</span>
+          ) : (
+            <span className="ml-2 text-amber-300">⚠ noch leer</span>
+          )}
+        </div>
+        {editingName || !hasName ? (
+          <InlineNameEditor
+            value={nameDraft}
+            onChange={setNameDraft}
+            onSave={saveName}
+            onCancel={() => {
+              setEditingName(false);
+              setNameDraft(displayName ?? "");
+            }}
+            pending={update.isPending}
+          />
+        ) : (
+          <button
+            onClick={() => {
+              setNameDraft(displayName ?? "");
+              setEditingName(true);
+            }}
+            className="text-xs underline text-blue-200 hover:text-blue-100"
+          >
+            Aendern
+          </button>
+        )}
+      </div>
+
+      {/* Schritt 2: Auffindbar aktivieren */}
+      <div className="rounded border border-blue-500/20 bg-blue-500/5 p-3">
+        <div className="text-xs font-medium text-blue-200 mb-2">
+          2. Auffindbar aktivieren
+        </div>
+        <button
+          onClick={() => update.mutate({ is_discoverable: true })}
+          disabled={!hasName || update.isPending}
+          className="rounded bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          title={
+            !hasName
+              ? "Erst Display-Name setzen (Schritt 1)"
+              : "Anderen erlauben, dich per Display-Name zu finden"
+          }
+        >
+          {update.isPending ? "…" : "Auffindbar aktivieren"}
+        </button>
+      </div>
+
       {update.isError && (
         <div className="text-xs text-red-300">
           Fehler: {update.error?.message}
         </div>
       )}
+    </div>
+  );
+}
+
+function InlineNameEditor({
+  value,
+  onChange,
+  onSave,
+  onCancel,
+  pending,
+}: {
+  value: string;
+  onChange: (s: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  pending: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") onSave();
+          if (e.key === "Escape") onCancel();
+        }}
+        maxLength={64}
+        autoFocus
+        placeholder="z.B. dein Vorname"
+        className="rounded border border-gray-600 bg-gray-800 px-2 py-1 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
+      />
+      <button
+        onClick={onSave}
+        disabled={pending || !value.trim()}
+        className="rounded bg-purple-600 px-3 py-1 text-xs text-white hover:bg-purple-700 disabled:opacity-40"
+      >
+        {pending ? "…" : "Speichern"}
+      </button>
+      <button
+        onClick={onCancel}
+        className="rounded bg-gray-700 px-3 py-1 text-xs text-gray-300 hover:bg-gray-600"
+      >
+        Abbrechen
+      </button>
     </div>
   );
 }

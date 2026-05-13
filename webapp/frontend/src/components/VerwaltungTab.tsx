@@ -13,17 +13,17 @@ import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
 import { ImportPanel } from "./ImportPanel";
 import { OutlierCard } from "./OutlierCard";
-import { PatchNotesPanel } from "./PatchNotesPanel";
 import { SessionList } from "./SessionList";
 import { SettingsPanel } from "./SettingsPanel";
 
+// UX-Refactor 2026-05-14: Patches-Sub-Tab raus — Patch Notes leben jetzt
+// am Versions-Badge (Header rechts oben) als Modal. Natuerlicherer Ort.
 type VerwaltungSection =
   | "sessions"
   | "hardware"
   | "daten"
   | "outliers"
   | "settings"
-  | "patches"
   | "admin";
 
 interface SubTab {
@@ -38,7 +38,6 @@ const SUB_TABS: SubTab[] = [
   { id: "daten", label: "Daten", icon: "📥" },
   { id: "outliers", label: "Outliers", icon: "⚠" },
   { id: "settings", label: "Einstellungen", icon: "⚙" },
-  { id: "patches", label: "Patch Notes", icon: "📋" },
 ];
 
 // Admin-Tab nur fuer User mit is_admin === true (env-driven, siehe
@@ -116,7 +115,6 @@ export function VerwaltungTab() {
       )}
       {section === "outliers" && <OutlierCard />}
       {section === "settings" && <SettingsPanel />}
-      {section === "patches" && <PatchNotesPanel />}
       {section === "admin" && isAdmin && <AdminPanel />}
     </div>
   );

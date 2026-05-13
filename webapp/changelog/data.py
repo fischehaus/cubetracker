@@ -38,6 +38,21 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ux-quickwins",
+        released=date(2026, 5, 14),
+        title="UX-Quick-Wins nach Audit",
+        highlights=[
+            "Patch Notes raus aus Verwaltung — sind jetzt ein Modal das "
+            "via Klick auf den Versions-Badge oben rechts aufgeht "
+            "(natuerlicherer Ort fuer Versions-Info)",
+            "Discoverability-Card in Freunde-Tab konsolidiert — "
+            "Display-Name jetzt inline editierbar, kein Verweis mehr "
+            "nach Verwaltung → Einstellungen noetig",
+            "Cleanup: hidden refreshMe-Button + stale Footer-String entfernt",
+            "Verwaltung-Sub-Tabs reduziert: 7 → 6 (Patch Notes raus)",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.solvelist-hardware",
         released=date(2026, 5, 14),
         title="Analyse → Solves: Hardware statt Notiz in Tabelle",

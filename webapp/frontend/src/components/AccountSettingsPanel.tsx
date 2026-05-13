@@ -14,7 +14,7 @@ import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
 
 export function AccountSettingsPanel() {
-  const { user, refreshMe, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   if (!user) return null;
 
@@ -38,10 +38,6 @@ export function AccountSettingsPanel() {
           Logout
         </button>
       </p>
-
-      <button onClick={() => void refreshMe()} className="hidden">
-        refreshMe (programmatic only)
-      </button>
     </div>
   );
 }
