@@ -41,17 +41,20 @@ jobs:
       contents: read  # minimum noetig fuer Artifact-Upload
 
     steps:
-      - name: Install postgresql-client-16 (matcht Render-Postgres-16)
-        # Render-DB ist Postgres 16. pg_dump-Version sollte server-version
-        # matchen, sonst gibt's Warnings oder inkompatible Dumps.
-        # Wir nutzen das offizielle PGDG-Apt-Repo statt der ggf. veralteten
-        # Ubuntu-Default-Version (oft pg-14).
+      - name: Install postgresql-client-18 (matcht Render-Postgres-18.3)
+        # pg_dump-Major-Version muss >= Server-Major-Version sein, sonst
+        # verweigert pg_dump mit "aborting because of server version
+        # mismatch". Render hat seit ~Mai 2026 Postgres 18.3 als Default.
+        # Wenn Render irgendwann auf 19+ upgradet, hier hochziehen — der
+        # Job faellt dann mit derselben Fehlermeldung sichtbar.
+        # Wir nutzen das offizielle PGDG-Apt-Repo, weil Ubuntu-Default oft
+        # nur pg-14/-16 ausliefert.
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-          sudo apt-get install -y postgresql-client-16
+          sudo apt-get install -y postgresql-client-18
           pg_dump --version
 
       - name: Run pg_dump (custom format + compressed)
