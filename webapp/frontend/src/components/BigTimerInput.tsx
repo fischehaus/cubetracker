@@ -23,7 +23,9 @@ import {
 import { COMMON_CUBE_TYPES, parseTimeInput } from "../lib/format";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
+import { TouchTimerPad } from "./TouchTimerPad";
 import type { TimerPenalty } from "../hooks/useSpacebarTimer";
+import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
 
 interface Props {
   cubeType: string;
@@ -60,6 +62,13 @@ export function BigTimerInput({
   const [settings] = useAppSettings();
   // Reset-Counter fuer SpacebarTimerCard nach erfolgreichem Save
   const [spacebarResetSeed, setSpacebarResetSeed] = useState(0);
+  // Touch-Device-Onboarding-Fix (QA-Finding): auf Phone/Tablet immer
+  // Spacebar-/Touch-Modus rendern, weil Text-Eingabe per Soft-Keyboard
+  // dort eh muehsam ist. Setting bleibt unangetastet — Tablet+BT-Keyboard-
+  // User kann die Touch-Detection nicht aushebeln, das ist akzeptiert
+  // (sie koennen ueber Settings den Modus weiter steuern).
+  const isTouchDevice = useIsTouchDevice();
+  const spacebarMode = settings.spacebar_enabled || isTouchDevice;
 
   // „User hat in diesem Cube manuell gewaehlt" → wenn ja, kein Auto-Suggest-
   // Override mehr. Reset bei Cube-Wechsel, sodass der naechste Cube wieder
@@ -94,19 +103,32 @@ export function BigTimerInput({
     setUserPickedHardware(false);
   }, [cubeType]);
 
-  // Session-Suggest anwenden, wenn User nicht manuell gewaehlt hat
+  // Session-Suggest anwenden, wenn User nicht manuell gewaehlt hat.
+  // QA-Fix: Race-Condition-Gate — bei schnellem Cube-Wechsel kann die
+  // alte Suggestion-Response noch ankommen waehrend cubeType schon ein
+  // anderer ist. cube_type-Match verhindert dass die stale Antwort den
+  // neuen Cube ueberschreibt.
   useEffect(() => {
-    if (sessionSuggestion && !userPickedSession) {
+    if (
+      sessionSuggestion &&
+      sessionSuggestion.cube_type === cubeType &&
+      !userPickedSession
+    ) {
       onSessionIdChange(sessionSuggestion.session_id);
     }
-  }, [sessionSuggestion, userPickedSession, onSessionIdChange]);
+  }, [sessionSuggestion, userPickedSession, onSessionIdChange, cubeType]);
 
-  // Hardware-Suggest anwenden, wenn User nicht manuell gewaehlt hat
+  // Hardware-Suggest anwenden, wenn User nicht manuell gewaehlt hat.
+  // QA-Fix: dieselbe Race-Condition wie bei Session-Suggest (s.o.)
   useEffect(() => {
-    if (hardwareSuggestion && !userPickedHardware) {
+    if (
+      hardwareSuggestion &&
+      hardwareSuggestion.cube_type === cubeType &&
+      !userPickedHardware
+    ) {
       setHardwareId(hardwareSuggestion.hardware_id);
     }
-  }, [hardwareSuggestion, userPickedHardware]);
+  }, [hardwareSuggestion, userPickedHardware, cubeType]);
 
   function save() {
     setError(null);
@@ -358,9 +380,11 @@ export function BigTimerInput({
         </div>
       )}
 
-      {/* Phase 8.2: wenn Spacebar-Timer aktiv → SpacebarTimerCard,
-          sonst klassisches Text-Eingabefeld. */}
-      {settings.spacebar_enabled ? (
+      {/* Phase 8.2: wenn Spacebar-Timer aktiv ODER Touch-Device →
+          SpacebarTimerCard, sonst klassisches Text-Eingabefeld.
+          Touch-Override: damit Phone-User die App ohne Settings-
+          Detour benutzen koennen (QA-Fix Onboarding-Gap). */}
+      {spacebarMode ? (
         <div className="my-6">
           <SpacebarTimerCard
             enabled={true}
@@ -369,6 +393,9 @@ export function BigTimerInput({
             onSave={saveFromSpacebar}
             resetSeed={spacebarResetSeed}
           />
+          {/* Touch-Devices: Tap-Pad das synthetische Space-Events
+              dispatched. Auf Desktop rendert nichts. */}
+          <TouchTimerPad />
           <p className="mt-3 text-center text-sm text-gray-500">
             Spacebar-Modus: aenderbar in Verwaltung → Einstellungen
           </p>
@@ -406,7 +433,7 @@ export function BigTimerInput({
 
       {/* Toggles + Save — nur im Text-Mode (Spacebar regelt +2/DNF
           automatisch ueber Inspection-Penalty + auto-save). */}
-      {!settings.spacebar_enabled && (
+      {!spacebarMode && (
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <label className="flex items-center gap-2 rounded border border-gray-700 bg-gray-800/50 px-4 py-2 text-base text-gray-200 cursor-pointer hover:bg-gray-800">
             <input
