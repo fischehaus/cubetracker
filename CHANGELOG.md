@@ -5,6 +5,32 @@ Notable changes only. Single-Dev-Projekt, kein striktes SemVer — wir nutzen
 release sobald Hetzner-Migration durch + Feature-Set fuer Friends/Public
 Profile komplett.
 
+## v2.0.0-alpha.W.10 — Leaderboards (2026-05-13)
+
+**Commit**: `8966715`
+
+Neu — Cross-User-Vergleich mit accepted-Friends:
+- Top-Tab **🏁 Bestenliste** mit Cube-Type-Picker
+- Tabelle: Best Single, Best AO5, Best AO12, Aktuelles AO5, Solves (30d),
+  Last Active
+- Self optisch hervorgehoben + immer oben, Friends nach Best Single sortiert,
+  Top-3 mit 🥇🥈🥉
+- Nutzt `stats/calc.py:compute_stats()` (WCA: +2-Handling, AO5/AO12
+  sliding-window-best mit DNF-Trim)
+
+Backend:
+- `leaderboard/service.py` + `api/leaderboard.py`
+- 2 Endpoints: `GET /leaderboard?cube_type` + `GET /leaderboard/cube-types`
+- Rate-Limit 60/min, KEINE Emails im Output, Display-Name-Fallback "User #ID"
+- `_accepted_friend_ids` filtert hart auf `status='accepted'` (kein
+  Stranger-Leak)
+- Bonus: Backup-Pipeline `.github/workflows/db-backup.yml` daily 02:00 UTC
+
+QA-Sub-Agent-Findings — 0 high, 3 medium gefixt:
+- M3 Picker-Fallback bei leerer cube_types-Liste → COMMON_CUBE_TYPES
+- M4 TZ-defensive `_aware()` gegen naive timestamps aus altem Import-Pfad
+- L6 Empty-State-Race: friendsLoaded-Guard
+
 ## v2.0.0-alpha.W.9 — Friend-System (2026-05-13)
 
 **Commit**: `d573b11`
