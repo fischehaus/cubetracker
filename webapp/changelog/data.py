@@ -46,9 +46,12 @@ PATCH_NOTES: list[PatchNote] = [
             "Bildschirmrand. Jetzt: auf Phone als Bottom-Sheet (klebt unten, "
             "full-width minus Rand) — ragt nie mehr ueber. Ab Tablet wie "
             "bisher als Popover neben dem Button.",
-            "Bestenliste + Solve-Liste: `w-full` quetschte die Spalten "
-            "statt horizontal zu scrollen. Mit min-w auf der Tabelle "
-            "ueberlaeuft sie jetzt sauber → horizontaler Scroll greift.",
+            "Bestenliste + Solve-Liste: das min-w aus dem ersten Versuch "
+            "blaehte die Tabelle kuenstlich auf (Leerraum rechts wirkte "
+            "abgeschnitten). Jetzt: kein min-w — auf Phone sind durch die "
+            "Spalten-Priorisierung eh nur 4 Spalten sichtbar, die passen "
+            "via w-full in jeden Screen. Lange Display-Names werden "
+            "abgeschnitten (truncate) statt die Tabelle zu sprengen.",
         ],
     ),
     PatchNote(

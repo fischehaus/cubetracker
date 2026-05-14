@@ -173,11 +173,12 @@ function LeaderboardTable({
   }
 
   return (
-    // Mobile-First: p-2 statt p-4 (mehr Platz), min-w auf der Tabelle —
-    // sonst quetscht `w-full` die Spalten statt zu scrollen. Mit min-w
-    // ueberlaeuft die Tabelle den Container → overflow-x-auto greift.
+    // Mobile-First: p-2 statt p-4 (mehr Platz). KEIN min-w — auf Phone
+    // sind durch `hidden md:table-cell` nur 4 Spalten sichtbar, die
+    // passen via w-full in jeden Screen. overflow-x-auto bleibt als
+    // Fallback (z.B. extrem langer Display-Name).
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-2 sm:p-4 overflow-x-auto">
-      <table className="w-full min-w-[440px] text-sm">
+      <table className="w-full text-sm">
         <thead>
           {/* Mobile-First: auf <md nur Rang/User/Best Single/Best AO5 —
               die weniger wichtigen Spalten ab md sichtbar. */}
@@ -238,12 +239,14 @@ function LeaderboardRow({
     <tr className={rowClass}>
       <td className="py-2 pr-3 text-center">{rankBadge}</td>
       <td className={`py-2 pr-3 ${nameClass}`}>
-        {row.display_name}
-        {row.is_me && (
-          <span className="ml-2 text-[10px] uppercase text-purple-400">
-            du
-          </span>
-        )}
+        <span className="block max-w-[160px] truncate" title={row.display_name}>
+          {row.display_name}
+          {row.is_me && (
+            <span className="ml-2 text-[10px] uppercase text-purple-400">
+              du
+            </span>
+          )}
+        </span>
       </td>
       <td className="py-2 pr-3 font-mono">{fmt(row.best_ms)}</td>
       <td className="py-2 pr-3 font-mono text-gray-300">{fmt(row.best_ao5)}</td>
