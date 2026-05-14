@@ -387,17 +387,22 @@ function MainLayout() {
   const { user, logout } = useAuth();
 
   return (
-    <div className="min-h-screen p-6">
+    // Container-Padding mobile-first: p-3 auf Phone (24px waren zu viel
+    // auf 360px-Screens), p-6 ab md.
+    <div className="min-h-screen p-3 md:p-6">
       <div className="mx-auto max-w-7xl">
         <header className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           {/* Volles Logo (mit Schriftzug + Tagline) ersetzt den separaten
               H1+Untertitel. Klick fuehrt zurueck zum Default-Tab. Logo
               enthaelt den App-Namen, daher visuell-doppelt wenn man's
-              danebenstellen wuerde. H1 mit sr-only fuer Screenreader + SEO. */}
+              danebenstellen wuerde. H1 mit sr-only fuer Screenreader + SEO.
+              Hoehe responsiv gestaffelt: das Logo ist ~2.56:1 breit, bei
+              h-40 waeren das 410px — sprengt jeden Phone-Screen. Daher
+              h-16 (Phone) → h-28 (sm) → h-52 (md+, User-Wunsch 2.5x). */}
           <button
             type="button"
             onClick={() => setTab("dashboard")}
-            className="flex items-center group focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded-lg"
+            className="flex items-center group focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded-lg min-w-0"
             aria-label="cubetracker — Speedcubing-Solve-Tracking — zum Dashboard"
           >
             <h1 className="sr-only">cubetracker — Speedcubing-Solve-Tracking</h1>
@@ -405,7 +410,7 @@ function MainLayout() {
               src="/cubetracker-logo.png"
               alt=""
               aria-hidden="true"
-              className="h-40 md:h-52 w-auto group-hover:opacity-90 transition-opacity"
+              className="h-16 sm:h-28 md:h-52 w-auto group-hover:opacity-90 transition-opacity"
             />
           </button>
           <div className="flex items-center gap-3">

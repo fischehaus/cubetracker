@@ -38,6 +38,22 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.mobile-polish",
+        released=date(2026, 5, 14),
+        title="Mobile-First Welle 4: Header + Padding + Abschluss",
+        highlights=[
+            "Header-Logo auf Phone gefixt — war h-40 (160px Hoehe = "
+            "~410px Breite) und sprengte jeden Phone-Screen. Jetzt "
+            "responsiv gestaffelt: h-16 Phone → h-28 sm → h-52 Desktop "
+            "(2.5x-Wunsch bleibt fuer grosse Screens)",
+            "Container-Padding p-3 auf Phone (war p-6 = 24px, zu viel auf "
+            "360px-Screens), p-6 ab Tablet",
+            "Charts (Trends/Verteilung/Aktivitaet) waren bereits responsive "
+            "(ResponsiveContainer), Filter-Bars haben flex-wrap — kein Fix "
+            "noetig. Mobile-First-Refactor damit abgeschlossen.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.mobile-tables",
         released=date(2026, 5, 14),
         title="Mobile-First Welle 3: Tabellen phone-tauglich",
