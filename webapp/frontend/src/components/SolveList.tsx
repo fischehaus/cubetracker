@@ -278,9 +278,14 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                 activeKey={sortKey}
                 dir={sortDir}
                 onClick={handleSort}
+                hideOnMobile
               />
-              <th className="py-2.5 pr-3 font-medium">Cube</th>
-              <th className="py-2.5 pr-3 font-medium">Hardware</th>
+              <th className="py-2.5 pr-3 font-medium hidden md:table-cell">
+                Cube
+              </th>
+              <th className="py-2.5 pr-3 font-medium hidden md:table-cell">
+                Hardware
+              </th>
               <th className="py-2.5 pr-3 font-medium text-right">Aktionen</th>
             </tr>
           </thead>
@@ -351,14 +356,14 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                   <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top">
                     {row.ao5 !== null ? formatTime(row.ao5) : "–"}
                   </td>
-                  <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top">
+                  <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top hidden md:table-cell">
                     {row.ao12 !== null ? formatTime(row.ao12) : "–"}
                   </td>
-                  <td className="py-2 pr-3 text-gray-300 align-top">
+                  <td className="py-2 pr-3 text-gray-300 align-top hidden md:table-cell">
                     {s.cube_type}
                   </td>
                   <td
-                    className="py-2 pr-3 text-sm text-gray-400 align-top"
+                    className="py-2 pr-3 text-sm text-gray-400 align-top hidden md:table-cell"
                     title={hardwareName ?? "Keine Hardware zugeordnet"}
                   >
                     {hardwareName ?? (
@@ -450,19 +455,22 @@ function SortableTh({
   activeKey,
   dir,
   onClick,
+  hideOnMobile,
 }: {
   label: string;
   sortKey: SortKey;
   activeKey: SortKey;
   dir: SortDir;
   onClick: (k: SortKey) => void;
+  /** Mobile-First: Spalte auf <md ausblenden (Details ueber ℹ-Button). */
+  hideOnMobile?: boolean;
 }) {
   const isActive = sortKey === activeKey;
   return (
     <th
       className={`py-2.5 pr-3 font-medium cursor-pointer select-none ${
-        isActive ? "text-purple-300" : "hover:text-gray-300"
-      }`}
+        hideOnMobile ? "hidden md:table-cell" : ""
+      } ${isActive ? "text-purple-300" : "hover:text-gray-300"}`}
       onClick={() => onClick(sortKey)}
     >
       {label}

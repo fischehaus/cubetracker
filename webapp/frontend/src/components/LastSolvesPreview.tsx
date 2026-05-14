@@ -379,6 +379,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                     activeKey={sortKey}
                     dir={sortDir}
                     onClick={handleSort}
+                    hideOnMobile
                   />
                   <th className="py-1.5 pr-1 text-right font-medium"></th>
                 </tr>
@@ -402,7 +403,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                       <td className="py-1.5 pr-2 font-mono text-gray-500">
                         {row.ao5 !== null ? formatTime(row.ao5) : "–"}
                       </td>
-                      <td className="py-1.5 pr-2 font-mono text-gray-500">
+                      <td className="py-1.5 pr-2 font-mono text-gray-500 hidden md:table-cell">
                         {row.ao12 !== null ? formatTime(row.ao12) : "–"}
                       </td>
                       <td className="py-1.5 pr-0 text-right">
@@ -450,19 +451,22 @@ function SortableHeader({
   activeKey,
   dir,
   onClick,
+  hideOnMobile,
 }: {
   label: string;
   sortKey: SortKey;
   activeKey: SortKey;
   dir: SortDir;
   onClick: (k: SortKey) => void;
+  /** Mobile-First: Spalte auf <md ausblenden (Sidebar ist eng auf Phone). */
+  hideOnMobile?: boolean;
 }) {
   const isActive = sortKey === activeKey;
   return (
     <th
       className={`py-1.5 pr-2 font-medium cursor-pointer select-none ${
-        isActive ? "text-purple-300" : "hover:text-gray-300"
-      }`}
+        hideOnMobile ? "hidden md:table-cell" : ""
+      } ${isActive ? "text-purple-300" : "hover:text-gray-300"}`}
       onClick={() => onClick(sortKey)}
     >
       {label}

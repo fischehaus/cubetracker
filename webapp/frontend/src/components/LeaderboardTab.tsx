@@ -176,15 +176,17 @@ function LeaderboardTable({
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4 overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
+          {/* Mobile-First: auf <md nur Rang/User/Best Single/Best AO5 —
+              die weniger wichtigen Spalten ab md sichtbar. */}
           <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-700">
             <th className="py-2 pr-3">Rang</th>
             <th className="py-2 pr-3">User</th>
             <th className="py-2 pr-3">Best Single</th>
             <th className="py-2 pr-3">Best AO5</th>
-            <th className="py-2 pr-3">Best AO12</th>
-            <th className="py-2 pr-3">Akt. AO5</th>
-            <th className="py-2 pr-3">Solves (30d)</th>
-            <th className="py-2 pr-3">Zuletzt</th>
+            <th className="py-2 pr-3 hidden md:table-cell">Best AO12</th>
+            <th className="py-2 pr-3 hidden md:table-cell">Akt. AO5</th>
+            <th className="py-2 pr-3 hidden md:table-cell">Solves (30d)</th>
+            <th className="py-2 pr-3 hidden md:table-cell">Zuletzt</th>
           </tr>
         </thead>
         <tbody>
@@ -242,18 +244,23 @@ function LeaderboardRow({
       </td>
       <td className="py-2 pr-3 font-mono">{fmt(row.best_ms)}</td>
       <td className="py-2 pr-3 font-mono text-gray-300">{fmt(row.best_ao5)}</td>
-      <td className="py-2 pr-3 font-mono text-gray-300">{fmt(row.best_ao12)}</td>
-      <td className="py-2 pr-3 font-mono text-gray-400">
+      <td className="py-2 pr-3 font-mono text-gray-300 hidden md:table-cell">
+        {fmt(row.best_ao12)}
+      </td>
+      <td className="py-2 pr-3 font-mono text-gray-400 hidden md:table-cell">
         {fmt(row.current_ao5)}
       </td>
-      <td className="py-2 pr-3 text-gray-400">
+      <td className="py-2 pr-3 text-gray-400 hidden md:table-cell">
         {row.solve_count_30d.toLocaleString("de-DE")}
         <span className="text-xs text-gray-600">
           {" / "}
           {row.solve_count_total.toLocaleString("de-DE")}
         </span>
       </td>
-      <td className="py-2 pr-3 text-gray-500" title={row.last_solve_at ?? ""}>
+      <td
+        className="py-2 pr-3 text-gray-500 hidden md:table-cell"
+        title={row.last_solve_at ?? ""}
+      >
         {fmtRelative(row.last_solve_at)}
       </td>
     </tr>

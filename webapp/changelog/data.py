@@ -38,6 +38,22 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.mobile-tables",
+        released=date(2026, 5, 14),
+        title="Mobile-First Welle 3: Tabellen phone-tauglich",
+        highlights=[
+            "Analyse → Solves: auf Phone zeigt die Tabelle nur noch #, "
+            "Zeit, AO5, Aktionen — AO12/Cube/Hardware ab Tablet-Breite "
+            "(Details immer ueber den ℹ-Button erreichbar)",
+            "Bestenliste: auf Phone nur Rang, User, Best Single, Best AO5 "
+            "— Best AO12/Aktuelle AO5/Solves/Zuletzt ab Tablet-Breite",
+            "Timer → Letzte Solves: AO12-Spalte auf Phone ausgeblendet "
+            "(Sidebar ist eng), Solvenummer/Zeit/AO5 bleiben",
+            "Keine Funktion geht verloren — nur visuelle Priorisierung "
+            "der wichtigsten Spalten auf kleinen Screens",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.mobile-nav",
         released=date(2026, 5, 14),
         title="Mobile-First Welle 1+2: Navigation + Timer-Layout",
