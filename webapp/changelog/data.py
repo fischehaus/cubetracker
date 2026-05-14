@@ -38,6 +38,20 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.mobile-fixes",
+        released=date(2026, 5, 14),
+        title="Mobile-Fixes nach Phone-Test",
+        highlights=[
+            "Info-Button-Popover (ⓘ) ragte auf Phone teilweise ueber den "
+            "Bildschirmrand. Jetzt: auf Phone als Bottom-Sheet (klebt unten, "
+            "full-width minus Rand) — ragt nie mehr ueber. Ab Tablet wie "
+            "bisher als Popover neben dem Button.",
+            "Bestenliste + Solve-Liste: `w-full` quetschte die Spalten "
+            "statt horizontal zu scrollen. Mit min-w auf der Tabelle "
+            "ueberlaeuft sie jetzt sauber → horizontaler Scroll greift.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.mobile-polish",
         released=date(2026, 5, 14),
         title="Mobile-First Welle 4: Header + Padding + Abschluss",

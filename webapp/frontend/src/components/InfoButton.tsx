@@ -69,8 +69,13 @@ export function InfoButton({
       {open && (
         <div
           role="tooltip"
-          className={`absolute z-20 top-full mt-2 w-64 max-w-[80vw] rounded-lg border border-purple-500/40 bg-gray-900 px-3 py-2 text-xs leading-relaxed text-gray-200 shadow-xl ${
-            align === "right" ? "right-0" : "left-0"
+          // Mobile-First (2026-05-14): auf Phone (< sm) als fixed Bottom-
+          // Sheet — full-width minus Rand, klebt unten. So ragt das
+          // Popover nie ueber einen Bildschirmrand, egal wo der Button
+          // sitzt. Ab sm: klassisches absolute-Popover relativ zum Button
+          // (align steuert links/rechts).
+          className={`fixed left-3 right-3 bottom-3 z-30 sm:absolute sm:left-auto sm:right-auto sm:bottom-auto sm:top-full sm:mt-2 sm:w-64 rounded-lg border border-purple-500/40 bg-gray-900 px-3 py-2 text-xs leading-relaxed text-gray-200 shadow-xl ${
+            align === "right" ? "sm:right-0" : "sm:left-0"
           }`}
         >
           {children}

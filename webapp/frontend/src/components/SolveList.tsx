@@ -247,8 +247,10 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         </div>
       )}
 
+      {/* Mobile-First: min-w auf der Tabelle damit overflow-x-auto wirklich
+          scrollt statt die 4 Phone-Spalten zu quetschen. */}
       <div className="overflow-x-auto">
-        <table className="w-full text-base">
+        <table className="w-full min-w-[360px] text-base">
           <thead>
             <tr className="border-b border-gray-700 text-left text-gray-400 text-sm">
               <SortableTh

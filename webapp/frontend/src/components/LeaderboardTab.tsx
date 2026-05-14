@@ -173,8 +173,11 @@ function LeaderboardTable({
   }
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4 overflow-x-auto">
-      <table className="w-full text-sm">
+    // Mobile-First: p-2 statt p-4 (mehr Platz), min-w auf der Tabelle —
+    // sonst quetscht `w-full` die Spalten statt zu scrollen. Mit min-w
+    // ueberlaeuft die Tabelle den Container → overflow-x-auto greift.
+    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-2 sm:p-4 overflow-x-auto">
+      <table className="w-full min-w-[440px] text-sm">
         <thead>
           {/* Mobile-First: auf <md nur Rang/User/Best Single/Best AO5 —
               die weniger wichtigen Spalten ab md sichtbar. */}
