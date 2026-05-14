@@ -10,6 +10,7 @@
 import { useState } from "react";
 import { FriendsTab } from "./FriendsTab";
 import { LeaderboardTab } from "./LeaderboardTab";
+import { ScrollableTabBar } from "./ScrollableTabBar";
 
 export type CommunitySection = "friends" | "leaderboard";
 
@@ -34,29 +35,13 @@ export function CommunityTab({ initialSection = "friends" }: Props) {
 
   return (
     <div className="space-y-4">
-      <nav
-        className="flex gap-1 rounded-lg border border-gray-700 bg-gray-900/50 p-1"
-        aria-label="Community-Bereiche"
-      >
-        {SUB_TABS.map((t) => {
-          const active = section === t.id;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setSection(t.id)}
-              aria-current={active ? "page" : undefined}
-              className={`flex-1 flex items-center justify-center gap-2 rounded-md px-4 h-11 text-base font-medium transition ${
-                active
-                  ? "bg-purple-600 text-white shadow-sm"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-gray-100"
-              }`}
-            >
-              <span aria-hidden="true">{t.icon}</span>
-              <span>{t.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      <ScrollableTabBar
+        tabs={SUB_TABS}
+        current={section}
+        onChange={(id) => setSection(id as CommunitySection)}
+        ariaLabel="Community-Bereiche"
+        size="md"
+      />
 
       {section === "friends" && <FriendsTab />}
       {section === "leaderboard" && <LeaderboardTab />}

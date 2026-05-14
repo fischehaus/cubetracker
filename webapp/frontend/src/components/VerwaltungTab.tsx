@@ -13,6 +13,7 @@ import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
 import { ImportPanel } from "./ImportPanel";
 import { OutlierCard } from "./OutlierCard";
+import { ScrollableTabBar } from "./ScrollableTabBar";
 import { SessionList } from "./SessionList";
 import { SettingsPanel } from "./SettingsPanel";
 
@@ -80,30 +81,14 @@ export function VerwaltungTab() {
 
   return (
     <div className="space-y-4">
-      {/* Sub-Tab-Bar */}
-      <nav
-        className="flex gap-1 rounded-lg border border-gray-700 bg-gray-900/50 p-1"
-        aria-label="Verwaltungs-Bereiche"
-      >
-        {tabs.map((t) => {
-          const active = section === t.id;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setSection(t.id)}
-              aria-current={active ? "page" : undefined}
-              className={`flex-1 flex items-center justify-center gap-2 rounded-md px-4 h-11 text-base font-medium transition ${
-                active
-                  ? "bg-purple-600 text-white shadow-sm"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-gray-100"
-              }`}
-            >
-              <span aria-hidden="true">{t.icon}</span>
-              <span>{t.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {/* Sub-Tab-Bar — mobile-first scrollbar (UX-Refactor 2026-05-14) */}
+      <ScrollableTabBar
+        tabs={tabs}
+        current={section}
+        onChange={(id) => setSection(id as VerwaltungSection)}
+        ariaLabel="Verwaltungs-Bereiche"
+        size="md"
+      />
 
       {/* Aktive Sektion — Outliers managed Session-Filter intern.
           „Daten" enthaelt Import + Backup/Export untereinander. */}

@@ -196,15 +196,17 @@ function TimerTab({
   const scrambleTypeOverride = activeSession?.scramble_type ?? null;
 
   return (
-    // Layout-Pflege: Live + Letzte-Solves links, Solving-Eingabe rechts.
-    // Auf Mobile (grid-cols-1) stapelt sich's eh untereinander, dort sorgt
-    // die `lg:`-Bedingung dafuer dass auf grossen Screens die Reihenfolge
-    // greift.
+    // Layout: Desktop = Live/Letzte-Solves links (420px), Solving rechts.
+    // Mobile (UX-Refactor 2026-05-14): order-Klassen sorgen dafuer dass
+    // der Solving-Bereich (Scramble + Timer) ZUERST kommt — auf Phone
+    // will man die Eingabe sofort sehen, nicht erst durch die Historie
+    // scrollen. Auf lg: kehrt die natuerliche DOM-Reihenfolge zurueck
+    // (aside links, main rechts).
     <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
-      <aside>
+      <aside className="order-2 lg:order-1">
         <LastSolvesPreview cubeType={timerCubeType} sessionId={timerSessionId} />
       </aside>
-      <main className="space-y-4">
+      <main className="order-1 lg:order-2 space-y-4">
         <SessionPlanCard
           cubeType={timerCubeType}
           sessionId={timerSessionId}

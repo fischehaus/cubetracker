@@ -38,6 +38,22 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.mobile-nav",
+        released=date(2026, 5, 14),
+        title="Mobile-First Welle 1+2: Navigation + Timer-Layout",
+        highlights=[
+            "Neue ScrollableTabBar-Komponente: auf Phone horizontal "
+            "scrollbar (snap-scroll), auf Desktop wie bisher gleichmaessig "
+            "verteilt — kein Umbrechen/Quetschen mehr bei 6 Top-Tabs",
+            "Top-TabBar + Verwaltung-Sub-Tabs + Community-Sub-Tabs nutzen "
+            "alle das gleiche Pattern",
+            "Timer-Tab auf Mobile: Solving-Bereich (Scramble + Timer) "
+            "kommt jetzt ZUERST, die Letzte-Solves-Historie darunter — "
+            "vorher musste man auf dem Phone erst durch die Historie "
+            "scrollen. Auf Desktop unveraendert (Historie links).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.postal-code",
         released=date(2026, 5, 14),
         title="Postleitzahl im Profil — Vorbereitung fuer Turnier-Naehe",
