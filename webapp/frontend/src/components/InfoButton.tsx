@@ -74,11 +74,23 @@ export function InfoButton({
           // Popover nie ueber einen Bildschirmrand, egal wo der Button
           // sitzt. Ab sm: klassisches absolute-Popover relativ zum Button
           // (align steuert links/rechts).
-          className={`fixed left-3 right-3 bottom-3 z-30 sm:absolute sm:left-auto sm:right-auto sm:bottom-auto sm:top-full sm:mt-2 sm:w-64 rounded-lg border border-purple-500/40 bg-gray-900 px-3 py-2 text-xs leading-relaxed text-gray-200 shadow-xl ${
+          // z-40: ueber UserMenu-Dropdown (z-30), unter Modals (z-50).
+          className={`fixed left-3 right-3 bottom-3 z-40 sm:absolute sm:left-auto sm:right-auto sm:bottom-auto sm:top-full sm:mt-2 sm:w-64 rounded-lg border border-purple-500/40 bg-gray-900 px-3 py-2 text-xs leading-relaxed text-gray-200 shadow-xl ${
             align === "right" ? "sm:right-0" : "sm:left-0"
           }`}
         >
-          {children}
+          {/* Close-Button nur auf Phone (< sm) — dort ist das Sheet ein
+              breites Bottom-Element, Outside-Tap allein ist als Schliess-
+              Mechanik duenn. Ab sm schliesst Hover-Leave / Outside-Click. */}
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Info schliessen"
+            className="sm:hidden absolute top-1 right-2 text-gray-400 hover:text-gray-100 text-lg leading-none"
+          >
+            ×
+          </button>
+          <div className="sm:pr-0 pr-4">{children}</div>
         </div>
       )}
     </span>

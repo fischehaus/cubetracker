@@ -44,7 +44,10 @@ export function ScrollableTabBar({
 
   return (
     <nav
-      className="flex gap-1 rounded-lg border border-gray-700 bg-gray-900/50 p-1 overflow-x-auto md:overflow-visible snap-x snap-mandatory"
+      // snap-proximity statt snap-mandatory: mandatory zwingt den
+      // Container immer an einen Snap-Punkt — beim Antippen halb
+      // sichtbarer Tabs ruckelt das. proximity snappt nur "wenn nah dran".
+      className="flex gap-1 rounded-lg border border-gray-700 bg-gray-900/50 p-1 overflow-x-auto md:overflow-visible snap-x snap-proximity"
       aria-label={ariaLabel}
     >
       {tabs.map((t) => {

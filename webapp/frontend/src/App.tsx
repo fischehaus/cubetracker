@@ -197,16 +197,13 @@ function TimerTab({
 
   return (
     // Layout: Desktop = Live/Letzte-Solves links (420px), Solving rechts.
-    // Mobile (UX-Refactor 2026-05-14): order-Klassen sorgen dafuer dass
-    // der Solving-Bereich (Scramble + Timer) ZUERST kommt — auf Phone
-    // will man die Eingabe sofort sehen, nicht erst durch die Historie
-    // scrollen. Auf lg: kehrt die natuerliche DOM-Reihenfolge zurueck
-    // (aside links, main rechts).
+    // QA-Fix 2026-05-14: DOM-Reihenfolge = main (Solving) zuerst, dann
+    // aside (Historie). Damit folgt Tab-Key + Screenreader auf Mobile der
+    // visuellen Reihenfolge (Timer oben). Auf lg: dreht `lg:order-*` die
+    // Spalten visuell um (aside links, main rechts) — die DOM-Reihenfolge
+    // bleibt aber a11y-korrekt.
     <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
-      <aside className="order-2 lg:order-1">
-        <LastSolvesPreview cubeType={timerCubeType} sessionId={timerSessionId} />
-      </aside>
-      <main className="order-1 lg:order-2 space-y-4">
+      <main className="lg:order-2 space-y-4">
         <SessionPlanCard
           cubeType={timerCubeType}
           sessionId={timerSessionId}
@@ -226,6 +223,9 @@ function TimerTab({
           onSolveSaved={() => setRegenSeed((s) => s + 1)}
         />
       </main>
+      <aside className="lg:order-1">
+        <LastSolvesPreview cubeType={timerCubeType} sessionId={timerSessionId} />
+      </aside>
     </div>
   );
 }

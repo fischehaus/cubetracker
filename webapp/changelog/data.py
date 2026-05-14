@@ -38,6 +38,24 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.mobile-qa",
+        released=date(2026, 5, 14),
+        title="Mobile-Refactor QA-Fixes",
+        highlights=[
+            "Timer-Tab: DOM-Reihenfolge korrigiert — Tab-Taste + Screenreader "
+            "folgen jetzt der visuellen Reihenfolge (Timer zuerst, dann "
+            "Historie). Vorher tabbte man auf Phone erst durch die "
+            "Solve-Historie.",
+            "Tab-Leisten: snap-proximity statt snap-mandatory — kein "
+            "Ruckeln mehr beim Antippen halb sichtbarer Tabs auf Touch.",
+            "Info-Popover: z-Index auf 40 angehoben (sauber zwischen "
+            "UserMenu und Modals) + Close-Button (×) im Phone-Bottom-Sheet, "
+            "weil Outside-Tap als alleinige Schliess-Mechanik duenn war.",
+            "QA-Sub-Agent-Review: Tabellen-Spalten-Konsistenz + alle "
+            "Regressionen (Abstaende, Sub-Tab-State, Event-Listener) sauber.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.mobile-fixes",
         released=date(2026, 5, 14),
         title="Mobile-Fixes nach Phone-Test",
