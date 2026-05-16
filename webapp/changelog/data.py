@@ -38,31 +38,6 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
-        version="2.0.0-alpha.W.scramble-cstimer",
-        released=date(2026, 5, 17),
-        title="Inoffizielle Scrambles: 4/5 jetzt WCA-Quality (cstimer_module)",
-        highlights=[
-            "Recherche-Sub-Agent fand cstimer_module@0.1.5 auf npm — vom "
-            "Original-csTimer-Autor (cs0x7f) veroeffentlicht. Bietet echte "
-            "Random-State-Solver fuer Ivy/Gear/Redi/Master Pyraminx.",
-            "Drop-in-Einbau: webapp/frontend/src/lib/scramble.ts routet "
-            "diese 4 Custom-Puzzles jetzt zu cstimer_module statt zum "
-            "primitiven Random-Move-Generator. Notation + Quality "
-            "identisch zu csTimer.app.",
-            "Konkret bedeutet das: Ivy-Scrambles sind 6-8 Moves statt 8 "
-            "Random-Moves. Gear-Scrambles haben die korrekte Tooth-Counting-"
-            "Notation (U5, F3 = Anzahl Zaehne). Redi-Scrambles in MoYu-"
-            "Standard-Format. Master Pyraminx mit Wide-Moves.",
-            "Master Skewb bleibt als einziger bei Random-Move — kein "
-            "Random-State-Solver existiert im JavaScript-Oekosystem (auch "
-            "csTimer selbst hat keinen). Disclaimer in der ScrambleCard "
-            "entsprechend angepasst (zeigt sich nur noch fuer Master Skewb).",
-            "Bundle-Auswirkung: +250 KB minified / +80 KB gzipped. "
-            "Lizenz GPL-3.0 (csTimer-Standard-Modell, passt zu cubetracker "
-            "als Open-Source-Speedcubing-App).",
-        ],
-    ),
-    PatchNote(
         version="2.0.0-alpha.W.scramble-quality",
         released=date(2026, 5, 17),
         title="Inoffizielle Scrambles: Notations-Bugs gefixt + ehrlicher Disclaimer",
