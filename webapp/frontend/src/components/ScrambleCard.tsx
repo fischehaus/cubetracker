@@ -86,12 +86,25 @@ export function ScrambleCard({
   const [settings] = useAppSettings();
   const fontPx = TIMER_FONT_SCALE[settings.timer_font_size].scramble;
 
+  // Phase W.custom-scramble (2026-05-17): Edit-Modus laesst User einen
+  // eigenen Scramble eintippen. Aktivieren via Edit-Button, speichern
+  // mit Enter / Save-Button. Generator-Effekt wird mit isCustom-Flag
+  // pausiert (sonst wuerde der naechste Render-Trigger den Custom-
+  // Scramble ueberschreiben).
+  const [editMode, setEditMode] = useState(false);
+  const [editValue, setEditValue] = useState("");
+  const [isCustom, setIsCustom] = useState(false);
+
   // User-Override aus dem Picker. null = „folgt automatisch dem Cube".
   // Wir resetten ihn bei cubeType-Wechsel, sodass der naechste Cube
   // wieder seinen passenden Default zeigt.
   const [userPickedType, setUserPickedType] = useState<string | null>(null);
   useEffect(() => {
     setUserPickedType(null);
+    // Cube-Wechsel verwirft auch den Custom-Scramble — er passt nicht
+    // mehr.
+    setIsCustom(false);
+    setEditMode(false);
   }, [cubeType]);
 
   // Override-Resolution: Session-scramble_type → scrambow-Code, falls
@@ -118,11 +131,40 @@ export function ScrambleCard({
   // entweder useEvent (React 19+ stable?) oder den Parent zwingen,
   // useCallback zu nutzen.
   useEffect(() => {
+    // Wenn der User gerade einen Custom-Scramble eingegeben hat,
+    // nicht ueberschreiben. Nach Skip / Save / Cube-Wechsel wird
+    // isCustom resetet.
+    if (isCustom) return;
     const next = generateScramble(effectiveType);
     setScramble(next);
     onScrambleGenerated(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveType, regenerationSeed, skipCounter]);
+  }, [effectiveType, regenerationSeed, skipCounter, isCustom]);
+
+  /** Custom-Scramble uebernehmen: validiert nicht streng (nur Trim),
+   *  verlaesst sich darauf dass User die Notation kennt. */
+  function applyCustomScramble() {
+    const trimmed = editValue.trim();
+    if (!trimmed) {
+      // Leerer Input → Edit-Modus verlassen ohne aenderung
+      setEditMode(false);
+      return;
+    }
+    setScramble(trimmed);
+    onScrambleGenerated(trimmed);
+    setIsCustom(true);
+    setEditMode(false);
+  }
+
+  function cancelEdit() {
+    setEditMode(false);
+    setEditValue("");
+  }
+
+  function startEdit() {
+    setEditValue(scramble);
+    setEditMode(true);
+  }
 
   /** Toggle WCA ↔ Inoffiziell. Switcht auf den ersten Eintrag der Ziel-
    *  Kategorie ODER auf den Cube-Default, falls dieser zur Ziel-Kategorie
@@ -174,13 +216,27 @@ export function ScrambleCard({
             </p>
           </InfoButton>
         </div>
-        <button
-          onClick={() => setSkipCounter((c) => c + 1)}
-          className="text-sm rounded border border-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-800 hover:text-gray-100"
-          title="Diesen Scramble ueberspringen, neuen generieren"
-        >
-          ⏭ Skip
-        </button>
+        <div className="flex items-center gap-1.5">
+          {!editMode && (
+            <button
+              onClick={startEdit}
+              className="text-sm rounded border border-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-800 hover:text-gray-100"
+              title="Eigenen Scramble eintippen (z.B. aus einer anderen App / Wettkampf)"
+            >
+              ✏ Eigene
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setIsCustom(false);
+              setSkipCounter((c) => c + 1);
+            }}
+            className="text-sm rounded border border-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-800 hover:text-gray-100"
+            title="Diesen Scramble ueberspringen, neuen generieren"
+          >
+            ⏭ Skip
+          </button>
+        </div>
       </div>
 
       {/* Picker-Zeile: Toggle + Dropdown + Auto-Reset-Button.
@@ -248,17 +304,68 @@ export function ScrambleCard({
         )}
       </div>
 
-      <div
-        className="font-mono text-gray-100 leading-relaxed break-words select-all"
-        style={{ fontSize: fontPx }}
-        aria-live="polite"
-      >
-        {scramble || (
-          <span className="text-gray-500 text-base">
-            Scramble nicht verfuegbar fuer diesen Typ.
-          </span>
-        )}
-      </div>
+      {editMode ? (
+        // Edit-Modus (Phase W.custom-scramble): Textarea + Save/Abbrechen.
+        // Enter speichert (ohne Shift), Esc bricht ab. Auto-Focus + select
+        // damit User direkt ueberschreiben kann.
+        <div className="space-y-2">
+          <textarea
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                applyCustomScramble();
+              } else if (e.key === "Escape") {
+                e.preventDefault();
+                cancelEdit();
+              }
+            }}
+            autoFocus
+            rows={3}
+            placeholder="z.B. R U R' U' R' F R2 U' R' U' R U R' F'"
+            className="w-full font-mono rounded border border-purple-500/40 bg-gray-800 text-gray-100 px-3 py-2 focus:border-purple-500 focus:outline-none resize-y"
+            style={{ fontSize: fontPx }}
+          />
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <button
+              type="button"
+              onClick={applyCustomScramble}
+              className="rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"
+            >
+              ✓ Uebernehmen (Enter)
+            </button>
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="rounded border border-gray-700 px-3 py-1.5 text-gray-300 hover:bg-gray-800"
+            >
+              Abbrechen (Esc)
+            </button>
+            <span className="text-xs text-gray-500">
+              Eingabe wird nicht validiert — pruefe selbst dass die
+              Notation zum Cube-Type passt.
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="font-mono text-gray-100 leading-relaxed break-words select-all"
+          style={{ fontSize: fontPx }}
+          aria-live="polite"
+        >
+          {scramble || (
+            <span className="text-gray-500 text-base">
+              Scramble nicht verfuegbar fuer diesen Typ.
+            </span>
+          )}
+          {isCustom && (
+            <span className="ml-3 align-middle text-[11px] uppercase tracking-wide text-purple-300/80 border border-purple-500/40 rounded px-1.5 py-0.5">
+              ✏ eigene Eingabe
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Disclaimer NUR fuer Custom-Puzzles ohne Random-State-Solver
           (Phase W.ivy-rs, 2026-05-17): Ivy hat seit jetzt einen

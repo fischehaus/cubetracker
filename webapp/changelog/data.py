@@ -38,6 +38,26 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.custom-scramble",
+        released=date(2026, 5, 17),
+        title="Custom-Scramble eintippen statt random generieren",
+        highlights=[
+            "P1.3 aus dem Quick-Wins-Sprint. Neuer Edit-Button in der "
+            "ScrambleCard. Klick darauf oeffnet eine Textarea wo der "
+            "User einen eigenen Scramble eintippen kann.",
+            "Use-Cases: Wettkampf-Scramble aus der WCA-Live-Anzeige "
+            "uebernehmen, Algorithmus-Drill mit fixer Sequenz, Scramble "
+            "aus einer anderen App fortsetzen.",
+            "Bedienung: Enter speichert, Esc bricht ab. Custom-Scramble "
+            "ueberlebt Cube-Type-Wechsel nicht (Auto-Reset). Skip-Button "
+            "verwirft Custom + generiert neuen Random.",
+            "Visueller Hinweis bei aktivem Custom-Scramble: kleiner "
+            "lila Badge ev eigene Eingabe neben dem Scramble.",
+            "Keine Validierung der Notation — der User weiss was er "
+            "eintippt. Defensive Trim auf Whitespace.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.penalty-quick",
         released=date(2026, 5, 17),
         title="Penalty-Quick-Buttons direkt unter dem Timer",
