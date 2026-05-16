@@ -38,6 +38,29 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.country-qa",
+        released=date(2026, 5, 16),
+        title="QA-Fixes nach Country-Feld-Welle",
+        highlights=[
+            "HIGH-Bug-Fix: WcaUpcomingCard hat die 422-Detail-Message vom "
+            "Backend nicht extrahiert (Axios setzt error.message auf "
+            "generisches Request-failed-Status — die echte Message liegt "
+            "in error.response.data.detail). Folge: der Onboarding-Empty-"
+            "State triggerte NIE, User sahen statt freundlichem Hint die "
+            "nutzlose rote Error-Box. Jetzt: explizites Parsing via "
+            "AxiosError-Type + Status-422-Match.",
+            "MEDIUM-Fix: Login-Endpoint hatte lazy-import von news.refresh "
+            "ohne try/except. Wenn feedparser/httpx fehlen (z.B. nach "
+            "fehlgeschlagenem Render-pip-install), wuerde Login 500 werfen "
+            "obwohl Auth funktioniert. Jetzt: try/except um den Import — "
+            "Auto-Refresh ist nice-to-have, Login hat Prio.",
+            "Country-Liste erweitert um 8 fehlende Cube-Communities: "
+            "Hongkong (HK, >500 WCA-Cuber), VAE (AE), Neuseeland (NZ), "
+            "Aegypten (EG), Marokko (MA), Dominikanische Republik (DO), "
+            "Costa Rica (CR), Venezuela (VE). Insgesamt 63 Laender.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.country-feld",
         released=date(2026, 5, 16),
         title="Land-Feld im Profil + WCA-Hinweise sauber",

@@ -9,6 +9,7 @@
 // offizielle API v0 (1h-Cache).
 
 import { useState } from "react";
+import { AxiosError } from "axios";
 import { useUpcomingCompetitions, type WcaCompetition } from "../lib/api";
 import { InfoButton } from "./InfoButton";
 
@@ -25,12 +26,20 @@ export function WcaUpcomingCard() {
   });
 
   // 422-Fall: keine Postleitzahl im Profil
-  const errMsg = error instanceof Error ? error.message : String(error || "");
-  // Backend liefert 422 mit verschiedenen Detail-Texten je nach fehlendem
-  // Feld — wir matchen lasch (PLZ, Land, Postleitzahl) damit beide Falle
-  // den Onboarding-Empty-State triggern.
+  // QA-Fix H1 (2026-05-16): Axios setzt error.message bei HTTP-Errors auf
+  // den generischen String „Request failed with status code 422" — die
+  // ECHTE Detail-Message vom Backend liegt in error.response.data.detail.
+  // Wir extrahieren beides + matchen die Detail-Message gegen die
+  // Profil-Hint-Patterns. Ohne diesen Fix triggert der Empty-State NIE +
+  // der User sieht den nutzlosen „Request failed"-Banner statt der
+  // freundlichen Anleitung zum Profil-Setup.
+  const axiosErr = error as AxiosError<{ detail?: string }> | null;
+  const httpStatus = axiosErr?.response?.status;
+  const backendDetail = axiosErr?.response?.data?.detail ?? "";
+  const errMsg =
+    backendDetail || (error instanceof Error ? error.message : String(error || ""));
   const isProfileIncomplete =
-    /Postleitzahl|Land|country|PLZ/i.test(errMsg);
+    httpStatus === 422 && /Postleitzahl|Land|country|PLZ/i.test(backendDetail);
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">

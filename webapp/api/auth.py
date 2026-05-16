@@ -241,11 +241,18 @@ def login(
     # ist das ein no-op (keine HTTP-Calls). Laeuft NACH der Response, also
     # blockt der User nicht. User-Wunsch: „bei jeder Neuanmeldung sollen die
     # Infos aktualisiert werden".
-    # Lazy-import um Circular-Imports zu vermeiden + Auth-Module schlank zu
-    # halten.
-    from news.refresh import trigger_background_refresh
+    # Lazy-import + try/except: QA-Fix M2 (2026-05-16). Lazy-Import allein
+    # verhindert nur Circular-Imports — wenn `feedparser` o.ae. fehlt, wuerde
+    # der ImportError synchron im Login-Endpoint vor add_task knallen und
+    # Login waere 500 obwohl Auth funktioniert. Defensive: failure des
+    # Background-Hooks darf den Login NIE blockieren.
+    try:
+        from news.refresh import trigger_background_refresh
 
-    background.add_task(trigger_background_refresh)
+        background.add_task(trigger_background_refresh)
+    except Exception:  # noqa: BLE001
+        # Auto-Refresh ist nice-to-have, Login hat absolute Prio.
+        pass
 
     return AccessTokenOnly(access_token=access)
 

@@ -20,6 +20,7 @@ export interface Country {
  * Liste ist keine offizielle Quelle, kann jederzeit erweitert werden.
  */
 export const COUNTRIES: Country[] = [
+  { iso2: "EG", label: "Aegypten" },
   { iso2: "AR", label: "Argentinien" },
   { iso2: "AU", label: "Australien" },
   { iso2: "BE", label: "Belgien" },
@@ -27,13 +28,16 @@ export const COUNTRIES: Country[] = [
   { iso2: "BG", label: "Bulgarien" },
   { iso2: "CL", label: "Chile" },
   { iso2: "CN", label: "China" },
+  { iso2: "CR", label: "Costa Rica" },
   { iso2: "DK", label: "Daenemark" },
   { iso2: "DE", label: "Deutschland" },
+  { iso2: "DO", label: "Dominikanische Republik" },
   { iso2: "EE", label: "Estland" },
   { iso2: "FI", label: "Finnland" },
   { iso2: "FR", label: "Frankreich" },
   { iso2: "GR", label: "Griechenland" },
   { iso2: "GB", label: "Grossbritannien" },
+  { iso2: "HK", label: "Hongkong" },
   { iso2: "IN", label: "Indien" },
   { iso2: "ID", label: "Indonesien" },
   { iso2: "IE", label: "Irland" },
@@ -51,7 +55,9 @@ export const COUNTRIES: Country[] = [
   { iso2: "LU", label: "Luxemburg" },
   { iso2: "MY", label: "Malaysia" },
   { iso2: "MT", label: "Malta" },
+  { iso2: "MA", label: "Marokko" },
   { iso2: "MX", label: "Mexiko" },
+  { iso2: "NZ", label: "Neuseeland" },
   { iso2: "NL", label: "Niederlande" },
   { iso2: "NO", label: "Norwegen" },
   { iso2: "AT", label: "Oesterreich" },
@@ -75,8 +81,10 @@ export const COUNTRIES: Country[] = [
   { iso2: "TR", label: "Tuerkei" },
   { iso2: "UA", label: "Ukraine" },
   { iso2: "HU", label: "Ungarn" },
-  { iso2: "VN", label: "Vietnam" },
+  { iso2: "AE", label: "Vereinigte Arabische Emirate" },
   { iso2: "US", label: "Vereinigte Staaten" },
+  { iso2: "VE", label: "Venezuela" },
+  { iso2: "VN", label: "Vietnam" },
 ];
 
 /** Returns label for an ISO code, or the code itself as fallback. */
