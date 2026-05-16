@@ -67,6 +67,12 @@ export function BigTimerInput({
   // Wird beim naechsten Solve-Start (Spacebar-Press oder Text-Input
   // gefokussiert) wieder geleert.
   const [lastSavedSolve, setLastSavedSolve] = useState<Solve | null>(null);
+  // QA-Fix M#8 (2026-05-17): zwei-Klick-Confirm fuer Loeschen statt
+  // window.confirm() — Browser-Native-Dialog ist auf Mobile unzuverlaessig
+  // (Back-Button schliesst Dialog, kann durch PWA-Wrapper geschluckt werden).
+  // Pattern: erster Klick → Button-Label wechselt zu „Wirklich loeschen?",
+  // zweiter Klick innerhalb 5s loescht. Auto-Reset nach 5s ohne Aktion.
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   // Auto-Focus beim Mounten (nur Text-Mode)
   useEffect(() => {
@@ -80,7 +86,22 @@ export function BigTimerInput({
   // auf 4x4 umgestellt hat (verwirrend + falscher Context).
   useEffect(() => {
     setLastSavedSolve(null);
+    setDeleteConfirm(false);
   }, [cubeType, sessionId]);
+
+  // QA-Fix M#8: Delete-Confirm nach 5s ohne 2. Klick wieder zuruecksetzen,
+  // sonst bleibt der Button gefuehlt „bewaffnet" liegen.
+  useEffect(() => {
+    if (!deleteConfirm) return;
+    const t = setTimeout(() => setDeleteConfirm(false), 5000);
+    return () => clearTimeout(t);
+  }, [deleteConfirm]);
+
+  // Confirm beim Wechsel auf einen neuen Solve oder beim Ausblenden
+  // wieder zuruecknehmen.
+  useEffect(() => {
+    setDeleteConfirm(false);
+  }, [lastSavedSolve?.id]);
 
   function save() {
     setError(null);
@@ -191,9 +212,18 @@ export function BigTimerInput({
   }
   function deleteLast() {
     if (!lastSavedSolve) return;
-    if (!confirm("Letzten Solve loeschen?")) return;
+    // Zwei-Klick-Pattern statt window.confirm(): erster Klick „bewaffnet",
+    // zweiter Klick loescht. Verhindert Fehlbedienung auf Mobile ohne
+    // Browser-Dialog-Abhaengigkeit (siehe QA M#8).
+    if (!deleteConfirm) {
+      setDeleteConfirm(true);
+      return;
+    }
     del.mutate(lastSavedSolve.id, {
-      onSuccess: () => setLastSavedSolve(null),
+      onSuccess: () => {
+        setLastSavedSolve(null);
+        setDeleteConfirm(false);
+      },
     });
   }
 
@@ -282,7 +312,11 @@ export function BigTimerInput({
           ↺-Klick). */}
       {lastSavedSolve && (
         <div className="mt-4 flex items-center justify-center gap-2 flex-wrap text-sm">
-          <span className="text-gray-500">Letzter Solve:</span>
+          {/* QA-Fix H#2: cube_type ins Label, damit User auch ueber
+              Cube-Wechsel hinweg weiss, welcher Solve gerade bearbeitet wird. */}
+          <span className="text-gray-500">
+            Letzter Solve ({lastSavedSolve.cube_type}):
+          </span>
           <button
             type="button"
             onClick={toggleLastPlusTwo}
@@ -292,7 +326,13 @@ export function BigTimerInput({
                 ? "bg-amber-600/40 text-amber-100 hover:bg-amber-600/60"
                 : "bg-gray-800 text-gray-300 hover:bg-gray-700"
             } disabled:opacity-40 disabled:cursor-not-allowed`}
-            title={lastSavedSolve.plus_two ? "+2 entfernen" : "+2 Strafe markieren"}
+            title={
+              lastSavedSolve.plus_two
+                ? "+2 entfernen"
+                : lastSavedSolve.dnf
+                ? "Nicht moeglich auf DNF-Solve (zuerst DNF entfernen)"
+                : "+2 Strafe markieren"
+            }
           >
             {lastSavedSolve.plus_two ? "✓ +2" : "+2"}
           </button>
@@ -305,7 +345,13 @@ export function BigTimerInput({
                 ? "bg-red-600/40 text-red-100 hover:bg-red-600/60"
                 : "bg-gray-800 text-gray-300 hover:bg-gray-700"
             } disabled:opacity-40 disabled:cursor-not-allowed`}
-            title={lastSavedSolve.dnf ? "DNF entfernen" : "Als DNF markieren"}
+            title={
+              lastSavedSolve.dnf
+                ? "DNF entfernen"
+                : lastSavedSolve.plus_two
+                ? "Als DNF markieren — vorhandenes +2 wird automatisch entfernt (WCA: nicht kombinierbar)"
+                : "Als DNF markieren"
+            }
           >
             {lastSavedSolve.dnf ? "✓ DNF" : "DNF"}
           </button>
@@ -313,10 +359,18 @@ export function BigTimerInput({
             type="button"
             onClick={deleteLast}
             disabled={del.isPending}
-            className="rounded px-3 py-1.5 bg-gray-800 text-gray-400 hover:bg-red-900/40 hover:text-red-200 disabled:opacity-40"
-            title="Letzten Solve loeschen"
+            className={`rounded px-3 py-1.5 transition-colors ${
+              deleteConfirm
+                ? "bg-red-700 text-red-100 hover:bg-red-600 animate-pulse"
+                : "bg-gray-800 text-gray-400 hover:bg-red-900/40 hover:text-red-200"
+            } disabled:opacity-40`}
+            title={
+              deleteConfirm
+                ? "Erneut klicken zum endgueltigen Loeschen"
+                : "Letzten Solve loeschen"
+            }
           >
-            🗑 Loeschen
+            {deleteConfirm ? "Wirklich loeschen?" : "🗑 Loeschen"}
           </button>
           <button
             type="button"

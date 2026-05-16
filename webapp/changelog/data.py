@@ -38,6 +38,31 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.qa-fixes-p1",
+        released=date(2026, 5, 17),
+        title="QA-Fixes zu Voice-Alert / Penalty-Buttons / Quick-Aktionen",
+        highlights=[
+            "Voice-Alert: globaler speechSynthesis.cancel()-Call entfernt. "
+            "Vorher konnte unsere TTS-Ansage Screen-Reader-Ausgaben (NVDA / "
+            "VoiceOver) abbrechen. Das Risiko ist real, der Overlap-Schutz "
+            "war eh ueberkonstruiert (4s Abstand zwischen 'acht' und 'zwoelf').",
+            "Voice-Alert: Safari iOS bekommt jetzt eine 0-Volume-Dummy-"
+            "Utterance beim ersten Spacebar-Press, damit die Voice-Engine "
+            "warm laeuft. Vorher konnte die erste TTS-Ansage stumm bleiben.",
+            "Penalty-Quick-Buttons: Klick auf DNF entfernt automatisch ein "
+            "vorhandenes +2 (WCA-konform, beides ist nicht kombinierbar). "
+            "Dieses Verhalten ist jetzt im Button-Tooltip explizit erklaert, "
+            "vorher hat es das Flag still geloescht.",
+            "Penalty-Quick-Buttons: 'Letzter Solve:' zeigt jetzt zusaetzlich "
+            "den Cube-Type (z.B. 'Letzter Solve (3x3):'), damit klar bleibt "
+            "welcher Solve gerade editiert wird.",
+            "Loeschen-Quick-Aktion: window.confirm() raus, Zwei-Klick-Pattern "
+            "rein. Erster Klick aktiviert den Button (rot pulsierend), "
+            "zweiter Klick innerhalb 5s loescht. Sicherer auf Mobile + ohne "
+            "Browser-Native-Dialog-Abhaengigkeit.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-frontend",
         released=date(2026, 5, 17),
         title="Roadmap-Anzeige im Frontend (Modal mit Phasen P1-P6)",

@@ -90,9 +90,12 @@ function speak(text: string, lang: "de" | "en"): void {
     .speechSynthesis;
   if (!synth) return;
   try {
-    // Cancel ggf. laufende Utterance — bei dichter Folge (8s → 12s = 4s
-    // Abstand) ist 12s wichtiger als ein noch nicht beendetes "acht".
-    synth.cancel();
+    // KEIN synth.cancel() — die SpeechSynthesis-Queue ist global pro Tab.
+    // Cancel wuerde auch Screen-Reader-Ansagen (NVDA / VoiceOver / TalkBack)
+    // killen, die parallel laufen koennten. "acht" ist <500ms; bei 4s
+    // Abstand bis "zwoelf" ist die Wahrscheinlichkeit fuer Overlap minimal,
+    // und selbst dann werden beide Worte sequentiell ausgegeben — der User
+    // verpasst nichts.
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = lang === "de" ? "de-DE" : "en-US";
     utter.volume = 1.0;
@@ -115,10 +118,28 @@ export function speakInspectionWarn12s(lang: "de" | "en"): void {
 }
 
 /**
- * Initialisiert AudioContext bei einem User-Gesture.
+ * Initialisiert AudioContext + speechSynthesis bei einem User-Gesture.
  * Wird aufgerufen bei erstem Spacebar-Press, damit spaetere Beeps
  * nicht von Browser-Autoplay-Policy blockiert werden.
+ *
+ * Safari iOS-Detail (QA-Befund M#4, 2026-05-17): die SpeechSynthesis-API
+ * laedt Stimmen lazy. Wenn man die erste Utterance erst 8s spaeter
+ * abfeuert, wird sie auf iOS gelegentlich stumm verschluckt. Wir feuern
+ * deshalb hier eine 0-Volume-Dummy-Utterance ab, damit die Voice-Engine
+ * im aktuellen User-Gesture-Kontext bereits warm laeuft.
  */
 export function primeAudio(): void {
   getContext();
+  if (typeof window === "undefined") return;
+  const synth = (window as unknown as { speechSynthesis?: SpeechSynthesis })
+    .speechSynthesis;
+  if (!synth) return;
+  try {
+    const utter = new SpeechSynthesisUtterance(" ");
+    utter.volume = 0;
+    utter.rate = 1.0;
+    synth.speak(utter);
+  } catch {
+    // ignore
+  }
 }
