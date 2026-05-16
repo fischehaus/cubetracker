@@ -1,0 +1,63 @@
+name: 🐛 Bug Report
+description: Etwas funktioniert nicht wie erwartet
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke, dass du dir Zeit nimmst einen Bug zu melden! Bitte fuelle die Felder unten so genau wie moeglich aus.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Was ist passiert?
+      description: Beschreibe das Problem in 1-2 Saetzen. Was wolltest du tun, was hat stattdessen passiert?
+      placeholder: Ich habe auf "Solve speichern" geklickt, aber statt einer neuen Zeile in der Tabelle kam ein roter Fehler-Banner.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Schritte zum Reproduzieren
+      description: Was muesste ich machen um denselben Fehler zu sehen?
+      placeholder: |
+        1. Login auf cubetracker.de
+        2. Tab "Timer" oeffnen
+        3. Cube-Type "3x3" waehlen
+        4. Eine Zeit eingeben (z.B. 12.34)
+        5. "Speichern" klicken
+        → Fehler erscheint statt Solve gespeichert
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+      description: Was haettest du stattdessen erwartet?
+      placeholder: Der Solve sollte gespeichert werden + in der Letzte-Solves-Tabelle erscheinen.
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Auf welchem Geraet?
+      options:
+        - Desktop / Laptop
+        - Tablet
+        - Phone
+        - Mehrere / unsicher
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser + Version (falls bekannt)
+      placeholder: Chrome 130, Firefox 132, Safari iOS 17, etc.
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot oder Console-Log (optional)
+      description: Falls du einen Screenshot hast — einfach ins Feld ziehen. Browser-Console-Errors (F12 → Console) helfen besonders.

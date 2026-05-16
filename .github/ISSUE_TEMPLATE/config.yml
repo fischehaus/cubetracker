@@ -1,0 +1,12 @@
+# GitHub-Issue-Template-Konfiguration fuer cubetracker
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: Frage zur Nutzung (cubetracker.de)
+    url: https://cubetracker.de
+    about: Erst die App ausprobieren. Bei Fragen zur Bedienung — die meisten Funktionen haben einen ⓘ-Info-Button mit Erklaerung.
+  - name: Feedback ohne GitHub-Account
+    url: https://cubetracker.de
+    about: In der App unter Verwaltung → Feedback gibt es ein Formular, das direkt eine Mail an den Entwickler schickt (kein GitHub-Account noetig).

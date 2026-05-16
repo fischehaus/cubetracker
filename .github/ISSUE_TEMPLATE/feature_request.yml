@@ -1,0 +1,41 @@
+name: ✨ Feature-Wunsch / Verbesserung
+description: Idee fuer ein neues Feature oder Verbesserung an bestehendem
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke fuer die Idee! Bitte beschreibe so konkret wie moeglich was du dir wuenschst — je klarer das Bild, desto besser laesst es sich umsetzen.
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Was wuenschst du dir?
+      description: Beschreibe das Feature in 1-3 Saetzen.
+      placeholder: Im Timer-Tab waere ein Counter "Solves heute" praktisch — direkt neben dem grossen Timer-Display.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Warum waere das hilfreich?
+      description: Was wuerde sich fuer dich aendern wenn das umgesetzt waere?
+      placeholder: Ich verliere mich beim Training oft in der Zeit. Eine kleine Anzeige wuerde mir helfen mein Tagesziel im Blick zu behalten.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Wie wichtig waere dir das?
+      options:
+        - "Nice-to-have — kann warten"
+        - "Wuerde mein Erlebnis spuerbar verbessern"
+        - "Kritisch — ohne das nutze ich die App weniger gerne"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workaround oder Alternativen (optional)
+      description: Behilfst du dir aktuell anders? Gibt's vergleichbare Loesungen in anderen Apps?

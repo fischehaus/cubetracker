@@ -38,6 +38,30 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feedback",
+        released=date(2026, 5, 17),
+        title="Feedback-Kanal: GitHub-Issues + Email-Form ohne GitHub-Account",
+        highlights=[
+            "Neuer Footer-Link 💬 Feedback in der App. Oeffnet ein Modal "
+            "mit zwei Wegen: GitHub-Issue (fuer Profi-User mit Account) "
+            "oder Email-Form (fuer alle anderen).",
+            "GitHub-Issue-Templates angelegt unter .github/ISSUE_TEMPLATE/ "
+            "fuer Bug-Reports + Feature-Wuensche. Strukturierte Form-Felder "
+            "fuhren Schritt-fuer-Schritt durch die wichtigen Fragen.",
+            "Email-Form-Mode: User schreibt Nachricht (10-4000 Zeichen), "
+            "Backend schickt via vorhandene Resend-Infrastruktur an die "
+            "erste ADMIN_EMAILS-Adresse. User-Email + Display-Name werden "
+            "im Body mitgeschickt, damit Antwort moeglich ist.",
+            "Hartes Rate-Limit 3/Stunde pro IP gegen Spam. Auth pflicht "
+            "(nur eingeloggte User koennen Feedback schicken).",
+            "Vorbereitung: Repo soll public werden, damit die GitHub-"
+            "Issue-Links funktionieren. Secret-Audit ist clean (keine "
+            ".env-Files, keine hardcoded Tokens, keine echten User-Daten "
+            "im Code) — Repo-Switch via GitHub-Settings ohne weitere "
+            "Vorarbeit moeglich.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ivy-rs",
         released=date(2026, 5, 17),
         title="Ivy Cube: echte WCA-Quality-Scrambles (Eigenbau-Solver)",

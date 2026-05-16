@@ -1498,6 +1498,40 @@ interface ChangelogResponse {
   patches: PatchNote[];
 }
 
+// ============================================================
+// Feedback (Phase W.feedback, 2026-05-17)
+// ============================================================
+
+export type FeedbackType = "bug" | "feature" | "other";
+
+export interface FeedbackPayload {
+  feedback_type: FeedbackType;
+  message: string;
+}
+
+export interface FeedbackResponse {
+  success: boolean;
+  message_id: string | null;
+}
+
+/**
+ * Schickt User-Feedback an den Admin via Backend-Resend-Email.
+ * Hartes Rate-Limit (3/h pro IP) — kein Spam-Schutz im Frontend noetig.
+ * 503 wenn Resend nicht erreichbar (z.B. ADMIN_EMAILS nicht gesetzt).
+ */
+export function useSubmitFeedback(): UseMutationResult<
+  FeedbackResponse,
+  Error,
+  FeedbackPayload
+> {
+  return useMutation({
+    mutationFn: async (payload: FeedbackPayload) => {
+      const r = await api.post<FeedbackResponse>("/feedback", payload);
+      return r.data;
+    },
+  });
+}
+
 export function usePatchNotes(): UseQueryResult<ChangelogResponse> {
   return useQuery({
     queryKey: ["patch-notes"],

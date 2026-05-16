@@ -23,6 +23,7 @@ from api import backup as backup_api
 from api import challenges as challenges_api
 from api import changelog as changelog_api
 from api import export_cstimer as export_api
+from api import feedback as feedback_api
 from api import friends as friends_api
 from api import hardware as hardware_api
 from api import import_cstimer as import_api
@@ -181,6 +182,7 @@ app.include_router(leaderboard_api.router)
 app.include_router(changelog_api.router)
 app.include_router(wca_api.router)
 app.include_router(news_api.router)
+app.include_router(feedback_api.router)
 
 
 @app.get("/api/health")

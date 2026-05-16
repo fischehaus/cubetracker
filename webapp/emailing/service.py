@@ -175,6 +175,62 @@ def send_admin_message(to: str, subject: str, body: str) -> EmailResult:
     return _send(to, full_subject, html_body)
 
 
+def send_feedback_email(
+    feedback_type: str,
+    message: str,
+    user_email: str,
+    user_display_name: str | None,
+) -> EmailResult:
+    """User-Feedback-Mail an die Admin-Adresse (ADMIN_EMAILS[0]).
+
+    Phase W.feedback (2026-05-17): User koennen ohne GitHub-Account
+    Feedback geben via App-Form. Der Inhalt landet als Email beim
+    Admin, der dann entscheidet ob daraus ein GitHub-Issue wird.
+    """
+    admin_emails_raw = os.getenv("ADMIN_EMAILS", "").strip()
+    if not admin_emails_raw:
+        logger.warning("ADMIN_EMAILS nicht gesetzt — Feedback nicht versandbar")
+        return EmailResult(success=False, message_id=None, error="no_admin")
+    # Nimm die erste Admin-Email (ADMIN_EMAILS ist comma-separated)
+    admin_to = [e.strip() for e in admin_emails_raw.split(",") if e.strip()][0]
+
+    type_label = {
+        "bug": "🐛 Bug-Report",
+        "feature": "✨ Feature-Wunsch",
+        "other": "💬 Allgemeines Feedback",
+    }.get(feedback_type, feedback_type)
+
+    # Plain-Text-Escape der Message (kein User-HTML in Email-Body)
+    import html as html_lib
+
+    safe_message = html_lib.escape(message).replace("\n", "<br>")
+    safe_display = html_lib.escape(user_display_name or "(kein Anzeige-Name)")
+    safe_email = html_lib.escape(user_email)
+
+    body_html = f"""\
+<!doctype html>
+<html lang="de">
+<body style="font-family: system-ui, sans-serif; max-width: 600px; margin: 32px auto; color: #111;">
+  <h1 style="font-size: 20px;">{type_label} via cubetracker.de</h1>
+  <table style="font-size: 14px; color: #555; border-collapse: collapse; margin-bottom: 16px;">
+    <tr><td style="padding-right: 12px;"><b>Von:</b></td><td>{safe_display}</td></tr>
+    <tr><td style="padding-right: 12px;"><b>Email:</b></td><td><a href="mailto:{safe_email}">{safe_email}</a></td></tr>
+    <tr><td style="padding-right: 12px;"><b>Typ:</b></td><td>{html_lib.escape(feedback_type)}</td></tr>
+  </table>
+  <div style="background: #f3f4f6; border-left: 4px solid #7c3aed; padding: 12px 16px; font-size: 14px; line-height: 1.5; white-space: pre-wrap;">
+    {safe_message}
+  </div>
+  <p style="font-size: 12px; color: #888; margin-top: 24px;">
+    Wenn der Report relevant ist, kannst du daraus ein GitHub-Issue
+    machen unter
+    <a href="https://github.com/fischehaus/cubetracker/issues/new/choose">github.com/fischehaus/cubetracker/issues</a>.
+  </p>
+</body>
+</html>"""
+    subject = f"[cubetracker.de] {type_label} von {safe_display}"
+    return _send(admin_to, subject, body_html)
+
+
 def send_email_change_verification(to: str, verification_token: str) -> EmailResult:
     """Verifizierung der NEUEN Email-Adresse bei Email-Change-Flow."""
     link = f"{FRONTEND_URL}/verify-email?token={verification_token}"
