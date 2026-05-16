@@ -38,6 +38,28 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.dashboard-story",
+        released=date(2026, 5, 16),
+        title="Dashboard-Refactor: 4-Sektionen-Story",
+        highlights=[
+            "Dashboard hat jetzt eine klare Story-Reihenfolge in 4 "
+            "Sektionen statt loser Karten-Reihen: HEUTE (Activity/"
+            "Reminder) → DEINE PERFORMANCE (Multi-Cube-Vergleich + "
+            "Stats) → TRAININGS-ANTRIEB (Challenges + Achievements) → "
+            "SPEEDCUBING-WELT (WCA-Turniere + News).",
+            "Jede Sektion hat einen dezenten Mini-Header (lila, klein, "
+            "Spacing wide), Karten selbst sind unveraendert. Semantisches "
+            "<section>-Markup + aria-labelledby fuer Screenreader.",
+            "Speedcubing-Welt-Sektion ist jetzt der „natuerliche\" Ort "
+            "fuer die heute neu hinzugefuegten Karten (WCA-Turniere + "
+            "News) statt einer temporaeren Anhang-Reihe.",
+            "Spacing zwischen Sektionen leicht groesser (space-y-8 statt "
+            "space-y-6) — Sektionen sollen sich visuell abgrenzen.",
+            "Tab-Reihenfolge bleibt (User-Entscheidung): Timer / "
+            "Dashboard / Analyse / Trainer / Community / Verwaltung.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.news-frontend",
         released=date(2026, 5, 16),
         title="Speedcubing-News-Card im Dashboard live",

@@ -287,34 +287,80 @@ function DashboardTab({
 }) {
   // DASHBOARD = Live-Sicht. Optionaler Session-Filter (default 'alle').
   // Cube-Filter bewusst NICHT — Dashboard vergleicht cube-uebergreifend.
-  // Phase 7a: AchievementsMiniCard kompakt — Klick fuehrt zum Trainer-Tab.
-  // Phase 7b: ChallengesMiniCard daneben, ebenfalls Klick → Trainer-Tab.
+  //
+  // Welle „W.dashboard-story" (2026-05-16): Big-Bang-Refactor mit Story-
+  // Reihenfolge. Vier Sektionen mit semantischen <section>-Tags + sichtbaren
+  // Mini-Headlines fuer Scan-Hilfe. Karten selbst unveraendert, nur
+  // Gruppierung + Reihenfolge neu.
+  //
+  // Story:
+  //   1. HEUTE          — was hat heute/diese Woche stattgefunden, was muss erinnert werden
+  //   2. DEINE PERFORMANCE — Vergleich + Gesamt-Stats
+  //   3. TRAININGS-ANTRIEB — was treibt mich weiter (Challenges + Achievements)
+  //   4. SPEEDCUBING-WELT — was passiert ausserhalb meiner App (Turniere + News)
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <DashboardFilterBar
         sessionId={sessionId}
         onSessionIdChange={setSessionId}
       />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <ActivityCard sessionId={sessionId} slice="today" />
-        <ActivityCard sessionId={sessionId} slice="week" />
-        <ReminderCard sessionId={sessionId} emptyMode="visible" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ChallengesMiniCard onSwitchTab={onSwitchTab} />
-        <AchievementsMiniCard onSwitchTab={onSwitchTab} />
-      </div>
-      <MultiCompareCard sessionId={sessionId} />
-      <StatsCard cubeType={undefined} sessionId={sessionId} />
-      {/* W.wca-comps + W.news: temporaerer „Speedcubing-Welt"-Block.
-          In Phase C kommt der ordentlich in eine eigene Sektion + Story-
-          Reihenfolge im Dashboard. Auf Desktop zwei-spaltig, auf Mobile
-          gestapelt. */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <WcaUpcomingCard />
-        <NewsCard />
-      </div>
+
+      <DashboardSection title="Heute" id="dash-heute">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ActivityCard sessionId={sessionId} slice="today" />
+          <ActivityCard sessionId={sessionId} slice="week" />
+          <ReminderCard sessionId={sessionId} emptyMode="visible" />
+        </div>
+      </DashboardSection>
+
+      <DashboardSection title="Deine Performance" id="dash-performance">
+        <div className="space-y-4">
+          <MultiCompareCard sessionId={sessionId} />
+          <StatsCard cubeType={undefined} sessionId={sessionId} />
+        </div>
+      </DashboardSection>
+
+      <DashboardSection title="Trainings-Antrieb" id="dash-antrieb">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ChallengesMiniCard onSwitchTab={onSwitchTab} />
+          <AchievementsMiniCard onSwitchTab={onSwitchTab} />
+        </div>
+      </DashboardSection>
+
+      <DashboardSection title="Speedcubing-Welt" id="dash-welt">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <WcaUpcomingCard />
+          <NewsCard />
+        </div>
+      </DashboardSection>
     </div>
+  );
+}
+
+/**
+ * Dashboard-Sektion: schmaler Header + Inhalts-Block. Semantisches
+ * <section> mit aria-labelledby fuer Screenreader. Header ist visuell
+ * dezent (kleine Schrift, hellerer Akzent), damit die Karten dominieren.
+ */
+function DashboardSection({
+  title,
+  id,
+  children,
+}: {
+  title: string;
+  id: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section aria-labelledby={id} className="space-y-3">
+      <h2
+        id={id}
+        className="text-xs font-semibold uppercase tracking-[0.15em] text-purple-300/80"
+      >
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }
 
