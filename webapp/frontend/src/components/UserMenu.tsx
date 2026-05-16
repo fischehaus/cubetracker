@@ -13,6 +13,7 @@ interface Props {
   isAdmin: boolean;
   onOpenSettings: () => void;
   onOpenPatchNotes: () => void;
+  onOpenRoadmap: () => void;
   onOpenFeatures: () => void;
   onOpenFeedback: () => void;
   onLogout: () => void;
@@ -24,6 +25,7 @@ export function UserMenu({
   isAdmin,
   onOpenSettings,
   onOpenPatchNotes,
+  onOpenRoadmap,
   onOpenFeatures,
   onOpenFeedback,
   onLogout,
@@ -112,6 +114,9 @@ export function UserMenu({
           </MenuItem>
           <MenuItem onClick={() => run(onOpenPatchNotes)} icon="📋">
             Patch Notes
+          </MenuItem>
+          <MenuItem onClick={() => run(onOpenRoadmap)} icon="🗺">
+            Roadmap (was kommt als naechstes?)
           </MenuItem>
           <MenuItem onClick={() => run(onOpenFeatures)} icon="ℹ">
             Was kann diese App?

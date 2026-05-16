@@ -38,6 +38,26 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-frontend",
+        released=date(2026, 5, 17),
+        title="Roadmap-Anzeige im Frontend (Modal mit Phasen P1-P6)",
+        highlights=[
+            "P1.4 aus dem Quick-Wins-Sprint. Neues RoadmapModal zeigt "
+            "die 6 Phasen mit Items, Aufwand-Schaetzung und Status. "
+            "Transparent fuer User was geplant ist + warum.",
+            "Triggerbar via Footer-Link 'Roadmap' UND User-Menu oben "
+            "rechts. Beide Wege parallel = mehr Sichtbarkeit.",
+            "Single-Source webapp/frontend/src/lib/roadmap-data.ts — "
+            "Roadmap-Updates brauchen kein Backend-Deploy, nur "
+            "Frontend-Build.",
+            "Status-Kodierung: aktiv (lila) / geplant (amber) / future "
+            "(grau) / ongoing (blau). Bereits abgeschlossene Items pro "
+            "Phase mit ✓ + Strikethrough.",
+            "Hinweis im Modal: 'fehlt was? Sag's uns via Feedback-Link "
+            "oder GitHub' — closed-the-loop zum Feedback-Kanal.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.custom-scramble",
         released=date(2026, 5, 17),
         title="Custom-Scramble eintippen statt random generieren",

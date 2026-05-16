@@ -37,6 +37,7 @@ import { MultiCompareCard } from "./components/MultiCompareCard";
 import { NewsCard } from "./components/NewsCard";
 import { FeatureListPanel } from "./components/FeatureListPanel";
 import { FeedbackModal } from "./components/FeedbackModal";
+import { RoadmapModal } from "./components/RoadmapModal";
 import { OnboardingBanner } from "./components/OnboardingBanner";
 import { PatchNotesPanel } from "./components/PatchNotesPanel";
 import { UserMenu } from "./components/UserMenu";
@@ -453,6 +454,7 @@ function MainLayout() {
   const [showPatches, setShowPatches] = useState(false);
   const [showFeatures, setShowFeatures] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showRoadmap, setShowRoadmap] = useState(false);
   // Initial-Sub-Tab im Community-Tab — wird nur beim ersten Mount aus
   // dem URL-Hash gelesen (z.B. legacy #friends → friends). Spaetere
   // Wechsel innerhalb des CommunityTabs leben in dessen lokalem state.
@@ -536,6 +538,7 @@ function MainLayout() {
                   }, 0);
                 }}
                 onOpenPatchNotes={() => setShowPatches(true)}
+                onOpenRoadmap={() => setShowRoadmap(true)}
                 onOpenFeatures={() => setShowFeatures(true)}
                 onOpenFeedback={() => setShowFeedback(true)}
                 onLogout={() => void logout()}
@@ -597,6 +600,14 @@ function MainLayout() {
           <span aria-hidden="true">·</span>
           <button
             type="button"
+            onClick={() => setShowRoadmap(true)}
+            className="text-gray-500 hover:text-gray-200 underline"
+          >
+            🗺 Roadmap
+          </button>
+          <span aria-hidden="true">·</span>
+          <button
+            type="button"
             onClick={() => setShowFeedback(true)}
             className="text-gray-500 hover:text-gray-200 underline"
           >
@@ -618,6 +629,7 @@ function MainLayout() {
       {showFeedback && (
         <FeedbackModal onClose={() => setShowFeedback(false)} />
       )}
+      {showRoadmap && <RoadmapModal onClose={() => setShowRoadmap(false)} />}
     </div>
   );
 }
