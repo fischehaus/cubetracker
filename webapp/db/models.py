@@ -427,6 +427,38 @@ class Friendship(Base):
     )
 
 
+class NewsItem(Base):
+    """News-Item aus dem RSS-Aggregator (Phase W.news).
+
+    Globale Tabelle (kein user_id), wird vom News-Fetcher periodisch
+    befuellt. Dedup ueber `link` (RSS-Item-URL). Cleanup von Items
+    aelter als 60 Tage erledigt der Fetcher selbst.
+    """
+
+    __tablename__ = "news_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # Source = interne ID des Feeds (z.B. "wca" oder "reddit_cubers").
+    source: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    # User-sichtbarer Label fuer die Source ("WCA", "r/Cubers").
+    source_label: Mapped[str] = mapped_column(String(64), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    # URL zum Original-Item — UNIQUE-Constraint dient als Dedup-Key.
+    link: Mapped[str] = mapped_column(String(1000), nullable=False, unique=True)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    fetched_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+    __table_args__ = (
+        # Sort-Index fuer "neueste zuerst"-Query (published_at DESC).
+        Index("ix_news_published", "published_at"),
+    )
+
+
 class PostalCodeGeo(Base):
     """Geocoding-Cache fuer Postleitzahlen (Phase W.wca-comps).
 

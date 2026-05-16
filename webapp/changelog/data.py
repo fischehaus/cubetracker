@@ -38,6 +38,25 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.news-backend",
+        released=date(2026, 5, 16),
+        title="Backend fuer „Speedcubing-News\" gebaut",
+        highlights=[
+            "Neues Backend-Modul `webapp/news/`: RSS-Aggregator mit "
+            "feedparser, persistente DB-Tabelle `news_items` (Dedup ueber "
+            "RSS-Link-URL), on-demand-Refresh-Strategie (wenn letzter "
+            "Fetch > 60min alt, sync re-fetch beim naechsten Endpoint-Call).",
+            "Konfigurierte Sources (vorerst): WCA Posts (offizielle "
+            "Announcements) + r/Cubers (Community-Reddit). Erweiterung "
+            "spaeter via `news/sources.py`.",
+            "Endpoint `GET /news/latest?limit=10` mit Auth + 60/min-Rate-"
+            "Limit. Liefert sortiert nach published_at DESC.",
+            "Cleanup: Items > 60 Tage werden im selben Pass geloescht — "
+            "Tabelle bleibt schlank, kein Cron noetig.",
+            "Frontend-Card folgt im naechsten Commit.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-comps-frontend",
         released=date(2026, 5, 16),
         title="WCA-Turniere-Card im Dashboard live",

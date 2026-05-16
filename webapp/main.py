@@ -27,6 +27,7 @@ from api import friends as friends_api
 from api import hardware as hardware_api
 from api import import_cstimer as import_api
 from api import leaderboard as leaderboard_api
+from api import news as news_api
 from api import sessions as sessions_api
 from api import solves as solves_api
 from api import stats as stats_api
@@ -175,6 +176,7 @@ app.include_router(friends_api.router)
 app.include_router(leaderboard_api.router)
 app.include_router(changelog_api.router)
 app.include_router(wca_api.router)
+app.include_router(news_api.router)
 
 
 @app.get("/api/health")
