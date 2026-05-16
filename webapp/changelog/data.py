@@ -38,6 +38,27 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-layout",
+        released=date(2026, 5, 16),
+        title="Mobile-Timer-Layout: Scramble direkt ueber Timer + Selektoren unten",
+        highlights=[
+            "Phone-Reihenfolge im Timer-Tab umgebaut: Scramble → Timer-"
+            "Display → „Tippen & halten"-Pad → erst danach Cube-/Session-/"
+            "Hardware-Selektoren + Timer-Modus. Damit ist beim Solven kein "
+            "Scrollen mehr noetig — alles Wichtige sichtbar.",
+            "BigTimerInput aufgeteilt: Selektoren leben jetzt in einer "
+            "eigenen TimerControlsCard, das Timer-Display ist nur noch das "
+            "Solving-Eingabefeld + Save. Klare Verantwortlichkeiten, "
+            "leichter zu warten.",
+            "hardwareId nach TimerTab hochgezogen — der Save-Pfad in "
+            "BigTimerInput nutzt jetzt dieselbe Quelle wie der Selektor-"
+            "Block, kein State-Auseinanderdriften mehr moeglich.",
+            "Desktop unveraendert: Live-Solves links (420px), Solving "
+            "rechts. Nur die Reihenfolge innerhalb des Solving-Spalts "
+            "folgt jetzt der mobile-Logik (Selektoren unten).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.mo3-ao100",
         released=date(2026, 5, 14),
         title="Mo3 + AO100 in Solve-Tabellen + Mobile-Scroll",

@@ -26,6 +26,9 @@ import { DashboardFilterBar } from "./components/DashboardFilterBar";
 import { PbConfettiOverlay } from "./components/PbConfettiOverlay";
 import { ScrambleCard } from "./components/ScrambleCard";
 import { SessionPlanCard } from "./components/SessionPlanCard";
+import { TimerControlsCard } from "./components/TimerControlsCard";
+import { TouchTimerPad } from "./components/TouchTimerPad";
+import { useAppSettings } from "./lib/settings";
 import { useSessions } from "./lib/api";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HistogramChart } from "./components/HistogramChart";
@@ -178,10 +181,15 @@ function TimerTab({
   setTimerCubeType: (s: string) => void;
 }) {
   // TIMER hat keine externe Filter-Leiste — Cube/Session/Hardware
-  // werden im BigTimerInput gewaehlt.
+  // werden in der TimerControlsCard gewaehlt.
+  // Welle 2 (2026-05-16): hardwareId aus BigTimerInput hochgezogen, damit
+  // die Controls UNTER dem TouchPad als eigene Karte leben koennen ohne
+  // dass die Hardware-Auswahl mit dem Save-Pfad in BigTimerInput auseinander
+  // fallt.
   const [timerSessionId, setTimerSessionId] = useState<number | null>(null);
+  const [timerHardwareId, setTimerHardwareId] = useState<number | null>(null);
 
-  // Phase 8a: Scramble-State im TimerTab orchestriert.
+  // Scramble-State im TimerTab orchestriert.
   // - currentScramble: aktueller String, an BigTimerInput fuer Save
   // - regenSeed: counter den BigTimerInput nach jedem Save bumpt,
   //              damit ScrambleCard re-generiert
@@ -195,19 +203,23 @@ function TimerTab({
   const activeSession = sessions?.find((s) => s.id === timerSessionId);
   const scrambleTypeOverride = activeSession?.scramble_type ?? null;
 
+  // Settings nur fuer TouchPad-Sichtbarkeit — Tap-Pad nur im Spacebar-Modus,
+  // sonst gibt es nichts zu „triggern" (Text-Mode = Soft-Tastatur).
+  const [settings] = useAppSettings();
+  const showTouchPad = settings.spacebar_enabled;
+
   return (
     // Layout: Desktop = Live/Letzte-Solves links (420px), Solving rechts.
-    // QA-Fix 2026-05-14: DOM-Reihenfolge = main (Solving) zuerst, dann
-    // aside (Historie). Damit folgt Tab-Key + Screenreader auf Mobile der
-    // visuellen Reihenfolge (Timer oben). Auf lg: dreht `lg:order-*` die
-    // Spalten visuell um (aside links, main rechts) — die DOM-Reihenfolge
-    // bleibt aber a11y-korrekt.
+    // DOM-Reihenfolge im main = mobile-visuelle Reihenfolge (Welle 2,
+    // 2026-05-16, User-Wunsch): Scramble direkt ueber Timer-Display,
+    // dann TouchPad ("Tippen & halten"), erst danach die Selektoren —
+    // weil man die nur selten waehrend des Solvens braucht. SessionPlan
+    // ganz oben weil's eine optionale Trainings-Karte ist.
+    // Auf lg dreht `lg:order-1/2` nur die zwei Hauptspalten um (aside
+    // links, main rechts) — die DOM-Reihenfolge bleibt a11y-korrekt.
     <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
       <main className="lg:order-2 space-y-4">
-        <SessionPlanCard
-          cubeType={timerCubeType}
-          sessionId={timerSessionId}
-        />
+        <SessionPlanCard cubeType={timerCubeType} sessionId={timerSessionId} />
         <ScrambleCard
           cubeType={timerCubeType}
           scrambleTypeOverride={scrambleTypeOverride}
@@ -216,11 +228,24 @@ function TimerTab({
         />
         <BigTimerInput
           cubeType={timerCubeType}
+          sessionId={timerSessionId}
+          hardwareId={timerHardwareId}
+          scramble={currentScramble}
+          onSolveSaved={() => setRegenSeed((s) => s + 1)}
+        />
+        {/* TouchTimerPad rendert auf Desktop immer null — auf Phone nur
+            sichtbar wenn Spacebar-Modus aktiv ist (Text-Mode = Soft-Tastatur,
+            da gibt es nichts zu triggern). Lebt seit Welle 2 ausserhalb von
+            BigTimerInput, damit der Selektor-Block in TimerControlsCard
+            UNTER dem Pad scrollen kann. */}
+        {showTouchPad && <TouchTimerPad />}
+        <TimerControlsCard
+          cubeType={timerCubeType}
           onCubeTypeChange={setTimerCubeType}
           sessionId={timerSessionId}
           onSessionIdChange={setTimerSessionId}
-          scramble={currentScramble}
-          onSolveSaved={() => setRegenSeed((s) => s + 1)}
+          hardwareId={timerHardwareId}
+          onHardwareIdChange={setTimerHardwareId}
         />
       </main>
       <aside className="lg:order-1">
