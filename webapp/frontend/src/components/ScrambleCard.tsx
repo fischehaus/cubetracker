@@ -50,9 +50,19 @@ interface Props {
 
 type Category = "wca" | "unofficial";
 
-/** Hilfs-Funktion: ist ein Code in der WCA- oder Inoffiziell-Liste? */
-function categoryFor(code: string): Category {
-  return WCA_SCRAMBLE_TYPES.some((t) => t.code === code) ? "wca" : "unofficial";
+/**
+ * Hilfs-Funktion: in welcher Picker-Kategorie ist der Code?
+ *
+ * Returnt `null` fuer Codes, die in keiner unserer beiden Listen sind —
+ * z.B. Trainer-Subsets wie „pll", „oll" oder ein csTimer-Override wie
+ * „333oh". Der Caller (ScrambleCard) deaktiviert den Dropdown in diesem
+ * Fall und zeigt einen Hinweis, statt einen `<select>` mit value zu
+ * rendern, der gar keine Option matcht (QA-Fix Welle 3, 2026-05-16).
+ */
+function categoryFor(code: string): Category | null {
+  if (WCA_SCRAMBLE_TYPES.some((t) => t.code === code)) return "wca";
+  if (UNOFFICIAL_SCRAMBLE_TYPES.some((t) => t.code === code)) return "unofficial";
+  return null;
 }
 
 /** UI-Label fuer einen Code aus den beiden Listen (Fallback = Code). */
@@ -99,6 +109,13 @@ export function ScrambleCard({
   // Kategorie fuer den Toggle — derived aus dem effektivenType.
   const effectiveCategory = categoryFor(effectiveType);
 
+  // QA-Hinweis: onScrambleGenerated bewusst NICHT in den deps. Der Parent
+  // (TimerTab) gibt `setCurrentScramble` direkt aus `useState` rein — die
+  // Identitaet bleibt stabil. Wuerde der Parent das mal in einen inline-
+  // Callback umbauen, koennte dieser Effect ungewollt bei jedem Render
+  // feuern und einen neuen Scramble erzeugen. Wenn das jemals nervt,
+  // entweder useEvent (React 19+ stable?) oder den Parent zwingen,
+  // useCallback zu nutzen.
   useEffect(() => {
     const next = generateScramble(effectiveType);
     setScramble(next);
@@ -120,8 +137,14 @@ export function ScrambleCard({
   }
 
   const isOverridden = userPickedType !== null;
-  const typesInCategory =
-    effectiveCategory === "wca" ? WCA_SCRAMBLE_TYPES : UNOFFICIAL_SCRAMBLE_TYPES;
+  // Bei Sonderfall (effectiveCategory === null, z.B. Session-Vorgabe „pll")
+  // ist die Liste leer — Dropdown wird dann nicht gerendert (siehe unten).
+  const typesInCategory: ScrambleTypeInfo[] =
+    effectiveCategory === "wca"
+      ? WCA_SCRAMBLE_TYPES
+      : effectiveCategory === "unofficial"
+        ? UNOFFICIAL_SCRAMBLE_TYPES
+        : [];
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
@@ -180,21 +203,38 @@ export function ScrambleCard({
             Inoffiziell
           </CategoryButton>
         </div>
-        <label className="text-xs text-gray-500 sr-only" htmlFor="scramble-type-picker">
-          Scramble-Typ
-        </label>
-        <select
-          id="scramble-type-picker"
-          value={effectiveType}
-          onChange={(e) => setUserPickedType(e.target.value)}
-          className="rounded border border-gray-700 bg-gray-800 px-2 py-1 text-xs text-gray-200 focus:border-purple-500 focus:outline-none"
-        >
-          {typesInCategory.map((t) => (
-            <option key={t.code} value={t.code}>
-              {t.label}
-            </option>
-          ))}
-        </select>
+        {effectiveCategory !== null ? (
+          <>
+            <label
+              className="text-xs text-gray-500 sr-only"
+              htmlFor="scramble-type-picker"
+            >
+              Scramble-Typ
+            </label>
+            <select
+              id="scramble-type-picker"
+              value={effectiveType}
+              onChange={(e) => setUserPickedType(e.target.value)}
+              className="rounded border border-gray-700 bg-gray-800 px-2 py-1 text-xs text-gray-200 focus:border-purple-500 focus:outline-none"
+            >
+              {typesInCategory.map((t) => (
+                <option key={t.code} value={t.code}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </>
+        ) : (
+          // Sonderfall (QA-Fix Welle 3): effectiveType ist weder in WCA noch
+          // in UNOFFICIAL — z.B. Session.scramble_type = "pll"/"oll". Wir
+          // zeigen den Picker-Wert read-only an, beide Toggle-Buttons sind
+          // un-highlighted, ein Klick auf einen Toggle wechselt in die
+          // jeweilige Kategorie. „↺ auto" stellt den Cube-Default wieder her.
+          <span className="text-xs text-gray-500 italic">
+            Aus Session-Vorgabe: „{labelFor(effectiveType)}" — Toggle
+            waehlen um zu aendern
+          </span>
+        )}
         {isOverridden && (
           <button
             type="button"

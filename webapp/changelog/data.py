@@ -38,6 +38,38 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.welle2-3-qa",
+        released=date(2026, 5, 16),
+        title="QA-Fixes nach Welle 2 + 3",
+        highlights=[
+            "Race-Condition beim Speichern nach Cube-Wechsel behoben: "
+            "wenn man unmittelbar nach Cube-Wechsel speicherte, konnte "
+            "die alte (cube-fremde) Hardware persistiert werden, weil "
+            "der Auto-Suggest noch nicht durch war. Jetzt: hardwareId "
+            "wird beim Cube-Wechsel auf null gesetzt — worst case ist "
+            "„ohne Hardware" statt „falsche Hardware".",
+            "Custom-Scramble-Generator (Ivy, Gear, …) hatte einen "
+            "theoretischen Endlos-Loop wenn eine Spec nur 1 Base-Move "
+            "gehabt haette. Defensive Guard rein — bei <2 Bases "
+            "deaktivieren wir den „kein-Wiederholen"-Filter automatisch, "
+            "damit der Tab nicht haengt.",
+            "Scramble-Picker bei Session-Vorgaben (z.B. „pll" aus einer "
+            "PLL-Trainings-Session): Toggle/Dropdown wuerde inkonsistent "
+            "wirken, weil pll weder in WCA noch in Inoffiziell ist. "
+            "Jetzt: beide Toggle-Buttons un-highlighted, statt Dropdown "
+            "ein Hinweis „Aus Session-Vorgabe: pll — Toggle waehlen "
+            "um zu aendern". Klick auf einen Toggle wechselt sauber in "
+            "die jeweilige Kategorie.",
+            "Code-Hygiene: tote Props in ModeButton (disabled/disabled"
+            "Title) raus, redundante mt-4 auf TouchTimerPad entfernt "
+            "(space-y-4 des Parents reichte), eslint-disable-Kommentar "
+            "in ScrambleCard erklaert (Identitaets-stabile Callback-Prop).",
+            "Tests: „kein direktes Wiederholen"-Iterationen von 10 auf "
+            "100 erhoeht — kostet <50ms, schliesst Glueckstreffer bei "
+            "kleinen Move-Sets (gear hat nur 3 Bases) aus.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.scramble-picker",
         released=date(2026, 5, 16),
         title="Scramble-Picker: WCA + Inoffiziell (Ivy, Gear, Redi, …)",

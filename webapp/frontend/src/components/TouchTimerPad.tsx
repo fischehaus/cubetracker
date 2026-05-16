@@ -59,7 +59,7 @@ export function TouchTimerPad() {
         dispatchSpace("keyup");
       }}
       onContextMenu={(e) => e.preventDefault()}
-      className="mt-4 w-full rounded-lg border-2 border-purple-500/60 bg-purple-600/20 py-8 text-lg font-semibold text-purple-100 select-none touch-none transition-colors active:bg-purple-600/50"
+      className="w-full rounded-lg border-2 border-purple-500/60 bg-purple-600/20 py-8 text-lg font-semibold text-purple-100 select-none touch-none transition-colors active:bg-purple-600/50"
       aria-label="Touch-Timer-Pad: tippen und halten ersetzt die Space-Taste"
     >
       👆 Tippen &amp; halten — wie Space

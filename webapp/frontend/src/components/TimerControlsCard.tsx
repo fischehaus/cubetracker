@@ -354,28 +354,20 @@ export function TimerControlsCard({
 function ModeButton({
   active,
   onClick,
-  disabled,
-  disabledTitle,
   children,
 }: {
   active: boolean;
   onClick: () => void;
-  disabled?: boolean;
-  disabledTitle?: string;
   children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
-      title={disabled ? disabledTitle : undefined}
       className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
         active
           ? "bg-purple-600 text-white shadow-sm"
-          : disabled
-            ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-            : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-gray-100"
+          : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-gray-100"
       }`}
     >
       {children}

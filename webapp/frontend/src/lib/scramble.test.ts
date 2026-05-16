@@ -130,8 +130,12 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
       expect(moves.length).toBe(minMoves);
     });
     it(`"${type}" never repeats the same base move directly`, () => {
-      // 10 Iterationen reichen um zufaellige Glueckstreffer auszuschliessen.
-      for (let i = 0; i < 10; i++) {
+      // 100 Iterationen — QA-Fix Welle 3 (2026-05-16). Bei specs mit nur
+      // 3 Bases (gear: U/R/F) ist die Trefferwahrscheinlichkeit fuer
+      // zufaellige Glueckstreffer bei 10 Iterationen noch hoch genug,
+      // dass ein kaputter Filter durchrutschen koennte. 100 Iterationen
+      // bei <50ms Total-Laufzeit kostet nichts.
+      for (let i = 0; i < 100; i++) {
         const s = generateScramble(type);
         const moves = s.split(/\s+/).filter((x) => x.length > 0);
         for (let j = 1; j < moves.length; j++) {

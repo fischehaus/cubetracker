@@ -252,13 +252,21 @@ function pick<T>(arr: T[]): T {
  * Erzeugt einen Random-Move-Scramble nach der Spec. „Kein direktes
  * Wiederholen derselben Base"-Filter (sonst kommen Moves wie "L L'"
  * raus, die effektiv nichts tun).
+ *
+ * QA-Fix Welle 3 (2026-05-16): Defensive Guard fuer `spec.moves.length < 2`.
+ * Ohne Guard waere die while-Schleife ein Endlos-Loop (jeder neue Pick
+ * waere immer derselbe wie lastBase, continue, repeat). Aktuell hat keine
+ * Spec nur 1 Move — aber bei einem zukuenftigen Konfig-Tippfehler wuerde
+ * der Tab haengen. Bei <2 Moves geben wir den Filter auf — Qualitaet
+ * wird dann schlechter, aber Tab bleibt responsive.
  */
 function generateCustomScramble(spec: CustomScrambleSpec): string {
   const moves: string[] = [];
+  const filterEnabled = spec.moves.length >= 2;
   let lastBase: string | null = null;
   while (moves.length < spec.length) {
     const base = pick(spec.moves);
-    if (base === lastBase) continue;
+    if (filterEnabled && base === lastBase) continue;
     lastBase = base;
     const mod = pick(spec.modifiers);
     moves.push(base + mod);

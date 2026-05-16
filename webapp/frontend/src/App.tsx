@@ -7,7 +7,7 @@
 //
 // Header zeigt nur noch Title + Backend-Badge.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
@@ -207,6 +207,25 @@ function TimerTab({
   // sonst gibt es nichts zu „triggern" (Text-Mode = Soft-Tastatur).
   const [settings] = useAppSettings();
   const showTouchPad = settings.spacebar_enabled;
+
+  // QA-Fix Welle 2 (2026-05-16): hardwareId bei Cube-Wechsel auf null
+  // resetten. Sonst Race-Condition: useSuggestHardware in TimerControlsCard
+  // braucht einen HTTP-Roundtrip um die passende Hardware fuer den neuen
+  // Cube zu finden — wenn der User in der Latenz-Luecke Enter drueckt,
+  // wird die alte (cube-fremde) Hardware persistiert. Reset → worst case
+  // = ohne Hardware (besser als = falsche Hardware). userPickedHardware-
+  // Flag in TimerControlsCard greift weiterhin: wenn User selbst geklickt
+  // hat, ueberschreibt der Auto-Suggest danach nicht mehr.
+  // initialMountRef verhindert dass beim ersten Mount der Suggest geblockt
+  // wird (initial gilt hardwareId === null sowieso → no-op).
+  const initialMountRef = useRef(true);
+  useEffect(() => {
+    if (initialMountRef.current) {
+      initialMountRef.current = false;
+      return;
+    }
+    setTimerHardwareId(null);
+  }, [timerCubeType]);
 
   return (
     // Layout: Desktop = Live/Letzte-Solves links (420px), Solving rechts.
