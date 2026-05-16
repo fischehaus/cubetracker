@@ -34,8 +34,59 @@
 > - **Datenuebertragung Dev↔Prod via Backup/Restore-Endpoint** (Pflicht
 >   in Phase 9)
 >
-> **Letzter Stand:** 2026-05-04. **Phase 9 fertig, Tag `v1.0.1`
-> (Hotfix) gesetzt.** Distribution-faehig + ausgerollt + live verifiziert.
+> **LETZTER STAND (2026-05-16 abend, Session-Ende via /abschluss):**
+> Multi-User-Web-Variante (webapp/) ist live auf cubetracker.de.
+> Heute deployed: 19 Wellen in einem Tag — Mobile-Timer-Refactor
+> abgeschlossen, Scramble-Picker (WCA+Inoffiziell), Mo3+AO100,
+> WCA-Turniere-in-der-Naehe (mit DACH-Nachbarn + Land-Feld im Profil),
+> Speedcubing-News (3 Quellen + Auto-Refresh bei Login),
+> Dashboard-Story-Refactor (4 Sektionen), csTimer-Bigfile-Fix,
+> /abschluss-Slash-Command + Stop-Hook + 5 weitere Claude-Code-Hooks.
+> Letzter Tag: `v2.0.0-alpha.W.abschluss-skill`, Commit `5b2cc8c`.
+>
+> **EINMALIGER ROOT-CAUSE-HOTFIX heute:** Bash-Heredoc hatte deutsche
+> Schliess-Anfuehrungszeichen mit ASCII gemischt → Python-SyntaxError
+> in changelog/data.py → 5 Render-Deploys gescheitert. Fix `0a85fe0`.
+> Lesson: in CLAUDE.md verankert "kein gemischtes Quoting in
+> Bash-Heredocs mehr".
+>
+> **OFFENE USER-AUFGABEN:**
+> - Phone-Re-Test der heute deployten Sachen (Mobile-Refactor +
+>   Scramble-Picker + WCA-Card + News-Card + Dashboard)
+> - Profil-Test: PLZ + Land setzen, WCA-Turniere-Card pruefen,
+>   Distanz-Selector klicken
+> - RESEND_API_KEY rotieren (alter Chat-Key revoken)
+>
+> **NAECHSTE Quick-Wins (User-Wahl beim naechsten Mal):**
+> - PWA-Setup (~1 Tag): Manifest + Service-Worker fuer
+>   Phone-Homescreen-Install. Nach Mobile-First-Refactor konsequent.
+> - Feedback-Kanal (~1-2h): Form in Verwaltung "Rueckmeldung an
+>   Entwickler", Email via vorhandene Resend-Infrastruktur.
+> - Roadmap-Anzeige im Frontend: analog Patch-Notes-Modal, aber
+>   Vorwaerts-Sicht.
+> - PLL-Bilder einbinden (wartet auf User-Lieferung der 21 PNGs).
+> - i18n (Englisch fuer Reichweite).
+> - News-Quellen erweitern (HTML-Scraping fuer SpeedCubeShop/
+>   TheCubicle, oder YouTube-Channel-RSS mit kurierter Liste).
+> - Friend-System-Ausbau W.11+ (Activity-Feed, Public-Profile).
+>
+> **INFRASTRUKTUR:**
+> - Mitte Juli: Hetzner-Migration (vor Render-Postgres-90d-Limit
+>   ~2026-08-08). Coolify-basiertes Setup.
+>
+> **WORKFLOW-NEU:**
+> - Beim Start: SessionStart-Hook gibt Repo-Stand-Snapshot aus.
+> - Bei jedem Bash-Aufruf: pre-bash-dev-server.sh blockt uvicorn/npm
+>   run dev/vite (User-Override CUBETRACKER_ALLOW_LOCAL_DEV=1).
+> - Nach git commit: Push-Reminder + Tag-Reminder.
+> - Nach Edit von .ts/.tsx: localhost-Hardcode-Warner.
+> - Bei "Session beenden": /abschluss-Skill ruft 8-Punkte-Check auf.
+> - Stop-Hook (1x/Session): Mini-Backstop.
+>
+> ---
+>
+> **ARCHIV-ABSCHNITT (Stand 2026-05-04, Desktop-Phase 9):**
+> Distribution-faehig + ausgerollt + live verifiziert.
 > v1.0 hatte einen API-baseURL-Bug (hardcoded localhost:8000) — in v1.0.1
 > behoben (relative URL via `import.meta.env.DEV`-check).
 >
