@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "Cubetracker-projekt-spezifische Claude-Code-Settings. Insbesondere Hooks gegen die heutigen Mental-Model-Fehler: (1) lokale Dev-Server starten obwohl Render schon deployed, (2) Commits vergessen zu pushen, (3) Patch-Notes-Versionen ohne Git-Tag rumlassen.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-bash-dev-server.sh\"",
+            "timeout": 5,
+            "shell": "bash"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit *)",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/post-git-commit.sh\"",
+            "timeout": 10,
+            "shell": "bash"
+          }
+        ]
+      }
+    ]
+  }
+}
