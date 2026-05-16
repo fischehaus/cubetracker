@@ -38,6 +38,28 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.deploy-fix",
+        released=date(2026, 5, 16),
+        title="Hotfix: SyntaxError-Quotes in Patch-Notes — alle Render-Deploys grün",
+        highlights=[
+            "Render-Deploys aller heutigen Welle-Commits sind gescheitert "
+            "(5 Fail-Mails: news-backend, news-frontend, dashboard-story, "
+            "wca-comps-hardening, wca-news-qa).",
+            "Root-Cause: in mehreren Patch-Notes-Strings hatte mein "
+            "Bash-Heredoc das deutsche Schliess-Anfuehrungszeichen (U+201D) "
+            "faelschlich durch ein ASCII-Quote (U+0022) ersetzt. Das mittlere "
+            "ASCII-Quote terminierte den Python-String an einer ungewollten "
+            "Stelle, der Rest war Syntaxmuell. 22 solcher Stellen ueber 13 "
+            "Zeilen gefunden.",
+            "Fix: alle ASCII-Quotes mitten in Patch-Notes-Strings systematisch "
+            "durch das korrekte deutsche Schliess-Anfuehrungszeichen ersetzt. "
+            "Backend startet jetzt sauber (lokal mit echten Deps verifiziert).",
+            "Konsequenz: zukuenftige Patch-Notes nutzen nur ASCII-Quoting "
+            "oder explizit-escaped Quotes — kein Mix mehr von deutschen "
+            "Anfuehrungszeichen mit Heredoc-faulen Bash-Pipes.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-news-qa",
         released=date(2026, 5, 16),
         title="QA-Fixes nach WCA/News-Sprint",
@@ -76,7 +98,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Jede Sektion hat einen dezenten Mini-Header (lila, klein, "
             "Spacing wide), Karten selbst sind unveraendert. Semantisches "
             "<section>-Markup + aria-labelledby fuer Screenreader.",
-            "Speedcubing-Welt-Sektion ist jetzt der „natuerliche\" Ort "
+            "Speedcubing-Welt-Sektion ist jetzt der „natuerliche\” Ort "
             "fuer die heute neu hinzugefuegten Karten (WCA-Turniere + "
             "News) statt einer temporaeren Anhang-Reihe.",
             "Spacing zwischen Sektionen leicht groesser (space-y-8 statt "
@@ -90,24 +112,24 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 16),
         title="Speedcubing-News-Card im Dashboard live",
         highlights=[
-            "Neue Karte „📰 Speedcubing-News\" im Dashboard, direkt neben "
+            "Neue Karte „📰 Speedcubing-News\” im Dashboard, direkt neben "
             "der WCA-Turniere-Card (zweispaltig ab Tablet-Breite, "
             "Mobile gestapelt).",
             "Pro News-Item: Titel als Link zur Quelle, Source-Badge "
             "(farb-kodiert: WCA = lila, r/Cubers = orange), Summary "
-            "(2 Zeilen abgekuerzt), Relativ-Datum („vor 3h\", „vor 2d\").",
+            "(2 Zeilen abgekuerzt), Relativ-Datum („vor 3h\”, „vor 2d\”).",
             "Beim Erst-Aufruf nach Deploy ist die DB noch leer — die "
             "Card zeigt einen Hinweis, dass der Hintergrund-Fetch "
             "dabei ist + bittet um Reload in einer Minute.",
             "Naechster Schritt: Phase C — Dashboard-Refactor mit "
-            "eigener „Speedcubing-Welt\"-Sektion und neuer Story-"
+            "eigener „Speedcubing-Welt\”-Sektion und neuer Story-"
             "Reihenfolge.",
         ],
     ),
     PatchNote(
         version="2.0.0-alpha.W.news-backend",
         released=date(2026, 5, 16),
-        title="Backend fuer „Speedcubing-News\" gebaut",
+        title="Backend fuer „Speedcubing-News\” gebaut",
         highlights=[
             "Neues Backend-Modul `webapp/news/`: RSS-Aggregator mit "
             "feedparser, persistente DB-Tabelle `news_items` (Dedup ueber "
@@ -128,15 +150,15 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 16),
         title="WCA-Turniere-Card im Dashboard live",
         highlights=[
-            "Neue Karte „🏆 WCA-Turniere\" im Dashboard (temporaer am "
+            "Neue Karte „🏆 WCA-Turniere\” im Dashboard (temporaer am "
             "Ende — Phase C wandert sie in eine eigene „Speedcubing-"
-            "Welt\"-Sektion gemeinsam mit den geplanten News).",
+            "Welt\”-Sektion gemeinsam mit den geplanten News).",
             "Pro Turnier sichtbar: Name (Link zur WCA-Detailseite), "
             "Datum (Range-formatiert dt.), Stadt, Anzahl Events, "
             "Distanz in km von deiner Profil-PLZ (Luftlinie).",
             "Distanz-Selector: 100 / 300 / 500 / 1000 / 5000 km. Bei "
             "leerer Liste auf Default-300km: ein-Klick auf „Weltweit "
-            "suchen\".",
+            "suchen\”.",
             "Empty-State wenn keine PLZ im Profil: Hint mit Pfad "
             "Verwaltung → Account zum Setzen.",
             "Daten direkt von der offiziellen WCA-API (1h Cache); "
@@ -146,7 +168,7 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.wca-comps-backend",
         released=date(2026, 5, 16),
-        title="Backend fuer „WCA-Turniere in der Naehe\" gebaut",
+        title="Backend fuer „WCA-Turniere in der Naehe\” gebaut",
         highlights=[
             "Neues Backend-Modul `webapp/wca/`: WCA-API-Client (mit 1h-In-"
             "Memory-Cache), Nominatim-Geocoding-Wrapper (mit persistentem "
@@ -161,7 +183,7 @@ PATCH_NOTES: list[PatchNote] = [
             "dieselbe PLZ haben = nur 1 Nominatim-Call. PLZ-Geo aendert "
             "sich nie, TTL 30 Tage ist konservativ.",
             "Frontend-Card folgt im naechsten Commit.",
-            "Hintergrund: User-Wunsch nach „Turniere in deiner Naehe\". "
+            "Hintergrund: User-Wunsch nach „Turniere in deiner Naehe\”. "
             "PLZ-Feld wurde dafuer Mai 14 schon im Profil ergaenzt — "
             "jetzt ist die andere Haelfte fertig.",
         ],
@@ -179,9 +201,9 @@ PATCH_NOTES: list[PatchNote] = [
             "(~30M Tokens) weiterhin unmoeglich. Pre-Check greift bei 1/15 "
             "der theoretisch moeglichen Token-Last.",
             "Error-Message verstaendlicher: vorher „Moeglicher JSON-Bomb-"
-            "Angriff\" (verwirrend fuer normale User), jetzt „Datei zu "
+            "Angriff\” (verwirrend fuer normale User), jetzt „Datei zu "
             "komplex — bei normalen csTimer-Exporten reicht das fuer ca. "
-            "300.000 Solves\" plus Diagnose-Hinweis.",
+            "300.000 Solves\” plus Diagnose-Hinweis.",
             "Hintergrund: User-Report 2026-05-13 (csTimer-.txt-Datei "
             "scheiterte). Hypothese im STATUS-Memo war korrekt.",
         ],
@@ -189,7 +211,7 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.features-refresh",
         released=date(2026, 5, 16),
-        title="Feature-Liste „Was kann cubetracker?" auf Stand gebracht",
+        title="Feature-Liste „Was kann cubetracker?” auf Stand gebracht",
         highlights=[
             "Solving: Scramble-Picker (WCA + Inoffiziell: Ivy, Gear, "
             "Redi, Master Pyraminx, Master Skewb, FTO) ergaenzt — war "
@@ -201,11 +223,11 @@ PATCH_NOTES: list[PatchNote] = [
             "Analyse: Mo3 in Best-Times-Aufzaehlung dazu (heute neu in "
             "den Tabellen). Best-Avg-Timestamps + Detail-Modal pro "
             "Solve waren portiert aber stumm — jetzt erwaehnt.",
-            "Trainer: „Algs-Trainer mit Visualisierung\" war "
+            "Trainer: „Algs-Trainer mit Visualisierung\” war "
             "ueberoptimistisch — gilt nur fuer OLL (57 Bilder). PLL-"
             "Bilder folgen noch, jetzt ehrlich kommuniziert.",
             "Account: Postleitzahl im Profil dazu (Vorbereitung fuer "
-            "„WCA-Turniere in deiner Naehe\").",
+            "„WCA-Turniere in deiner Naehe\”).",
         ],
     ),
     PatchNote(
@@ -218,24 +240,24 @@ PATCH_NOTES: list[PatchNote] = [
             "die alte (cube-fremde) Hardware persistiert werden, weil "
             "der Auto-Suggest noch nicht durch war. Jetzt: hardwareId "
             "wird beim Cube-Wechsel auf null gesetzt — worst case ist "
-            "„ohne Hardware" statt „falsche Hardware".",
+            "„ohne Hardware” statt „falsche Hardware”.",
             "Custom-Scramble-Generator (Ivy, Gear, …) hatte einen "
             "theoretischen Endlos-Loop wenn eine Spec nur 1 Base-Move "
             "gehabt haette. Defensive Guard rein — bei <2 Bases "
-            "deaktivieren wir den „kein-Wiederholen"-Filter automatisch, "
+            "deaktivieren wir den „kein-Wiederholen”-Filter automatisch, "
             "damit der Tab nicht haengt.",
-            "Scramble-Picker bei Session-Vorgaben (z.B. „pll" aus einer "
+            "Scramble-Picker bei Session-Vorgaben (z.B. „pll” aus einer "
             "PLL-Trainings-Session): Toggle/Dropdown wuerde inkonsistent "
             "wirken, weil pll weder in WCA noch in Inoffiziell ist. "
             "Jetzt: beide Toggle-Buttons un-highlighted, statt Dropdown "
             "ein Hinweis „Aus Session-Vorgabe: pll — Toggle waehlen "
-            "um zu aendern". Klick auf einen Toggle wechselt sauber in "
+            "um zu aendern”. Klick auf einen Toggle wechselt sauber in "
             "die jeweilige Kategorie.",
             "Code-Hygiene: tote Props in ModeButton (disabled/disabled"
             "Title) raus, redundante mt-4 auf TouchTimerPad entfernt "
             "(space-y-4 des Parents reichte), eslint-disable-Kommentar "
             "in ScrambleCard erklaert (Identitaets-stabile Callback-Prop).",
-            "Tests: „kein direktes Wiederholen"-Iterationen von 10 auf "
+            "Tests: „kein direktes Wiederholen”-Iterationen von 10 auf "
             "100 erhoeht — kostet <50ms, schliesst Glueckstreffer bei "
             "kleinen Move-Sets (gear hat nur 3 Bases) aus.",
         ],
@@ -248,7 +270,7 @@ PATCH_NOTES: list[PatchNote] = [
             "ScrambleCard hat jetzt einen Picker: Toggle WCA ↔ "
             "Inoffiziell + Dropdown mit den verfuegbaren Typen. Default "
             "folgt weiterhin dem gewaehlten Cube-Type — bei Override "
-            "erscheint ein „↺ auto"-Button um wieder zum Default zu "
+            "erscheint ein „↺ auto”-Button um wieder zum Default zu "
             "springen.",
             "WCA-Liste: alle WCA-Cubes (3x3, 4x4, …, Pyraminx, Skewb, "
             "Square-1, Megaminx, Clock) — werden weiterhin von scrambow "
@@ -256,11 +278,11 @@ PATCH_NOTES: list[PatchNote] = [
             "Inoffizielle Cubes (User-Wunsch): Ivy Cube, Gear Cube, "
             "Redi Cube, Master Pyraminx, Master Skewb, FTO. FTO via "
             "scrambow, die anderen via eigenem Random-Move-Generator mit "
-            "„kein direktes Wiederholen derselben Achse"-Filter — nicht "
+            "„kein direktes Wiederholen derselben Achse”-Filter — nicht "
             "WCA-quality, aber sauber fuers Casual-Training.",
             "Cube-Type-Wechsel resettet den Picker automatisch, sodass "
             "der neue Cube wieder seinen passenden Scramble bekommt — "
-            "verhindert „Ivy-Scramble fuer 3x3"-Stolperfallen.",
+            "verhindert „Ivy-Scramble fuer 3x3”-Stolperfallen.",
             "Session.scramble_type (csTimer-Import + PLL/OLL-Trainings-"
             "Sessions) wird weiterhin respektiert — User-Picker schlaegt "
             "es aber, falls man manuell aenderen will.",
@@ -272,7 +294,7 @@ PATCH_NOTES: list[PatchNote] = [
         title="Mobile-Timer-Layout: Scramble direkt ueber Timer + Selektoren unten",
         highlights=[
             "Phone-Reihenfolge im Timer-Tab umgebaut: Scramble → Timer-"
-            "Display → „Tippen & halten"-Pad → erst danach Cube-/Session-/"
+            "Display → „Tippen & halten”-Pad → erst danach Cube-/Session-/"
             "Hardware-Selektoren + Timer-Modus. Damit ist beim Solven kein "
             "Scrollen mehr noetig — alles Wichtige sichtbar.",
             "BigTimerInput aufgeteilt: Selektoren leben jetzt in einer "
@@ -402,7 +424,7 @@ PATCH_NOTES: list[PatchNote] = [
             "(idempotent via ALTER TABLE ADD COLUMN IF NOT EXISTS)",
             "PATCH /auth/me Whitelist erweitert — postal_code aenderbar",
             "Vorbereitung fuer kommendes Feature: „Naechste WCA-Turniere "
-            "in deiner Naehe\" — Daten werden bewusst jetzt schon gesammelt "
+            "in deiner Naehe\” — Daten werden bewusst jetzt schon gesammelt "
             "damit das Feature spaeter direkt nutzbar ist",
         ],
     ),
@@ -415,7 +437,7 @@ PATCH_NOTES: list[PatchNote] = [
             "vorher zwangsgespertt). Sinnvoll wenn man z.B. Bluetooth-"
             "Keyboard hat oder ohne Inspection-Countdown solven will.",
             "Frische Touch-User starten direkt mit WCA-Spacebar als "
-            "Default — kein „erst Settings finden\"-Detour mehr.",
+            "Default — kein „erst Settings finden\”-Detour mehr.",
             "Bestehende User behalten ihre gespeicherten Settings unangetastet.",
             "Tipp-Hinweis-Text passt sich an: auf Touch + Text-Modus "
             "wird darauf hingewiesen dass Soft-Tastatur muehsam sein "
@@ -471,7 +493,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Was kann diese App, Logout",
             "Avatar mit Initialen (Display-Name oder Email-Anfangsbuchstaben), "
             "ADMIN-Badge wenn du Admin bist",
-            "„Mein Account & Einstellungen\" springt direkt zum richtigen "
+            "„Mein Account & Einstellungen\” springt direkt zum richtigen "
             "Sub-Tab in der Verwaltung (Settings inkl. AccountSettingsPanel)",
             "Patch Notes + Features-Modal sind dadurch ueber 3 Wege "
             "erreichbar: Version-Badge oben rechts, User-Menu, Footer-Link",
@@ -508,7 +530,7 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 14),
         title="Logo prominenter + Info-Buttons in Karten",
         highlights=[
-            "App-Header: Logo ersetzt den separaten „cubetracker\"-"
+            "App-Header: Logo ersetzt den separaten „cubetracker\”-"
             "Schriftzug + Tagline (war doppelt — das Logo enthaelt beides). "
             "Logo-Hoehe 64-80px, klickbar zum Dashboard-Tab, mit Hover-"
             "Effekt. H1-Tag bleibt screenreader-only fuer SEO.",
@@ -527,12 +549,12 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 14),
         title="App-Beschreibung + Feature-Liste",
         highlights=[
-            "Anmeldeseite zeigt jetzt prominent „Was ist cubetracker?\" + "
+            "Anmeldeseite zeigt jetzt prominent „Was ist cubetracker?\” + "
             "Highlights neben dem Login-Formular — Besucher ohne Account "
             "verstehen sofort worum's geht",
             "Feature-Liste in 7 Kategorien (Solving, Analyse, Trainer, "
             "Community, Hardware, Daten, Account+Sicherheit)",
-            "Innerhalb der App: Footer-Link „Was kann diese App?\" oeffnet "
+            "Innerhalb der App: Footer-Link „Was kann diese App?\” oeffnet "
             "die selbe Feature-Liste als Modal",
             "Layout: Desktop 2-spaltig (Form links + Features rechts), "
             "Mobile gestapelt — Form bleibt prominent oben",
@@ -544,9 +566,9 @@ PATCH_NOTES: list[PatchNote] = [
         title="Tab-Konsolidierung: Community ersetzt Freunde + Bestenliste",
         highlights=[
             "7 Top-Tabs → 6: Freunde + Bestenliste zusammengelegt in "
-            "neuen Tab „Community\" 🤝",
-            "Innerhalb von Community: Sub-Tab-Bar mit „Freunde\" und "
-            "„Bestenliste\" — gleicher Stil wie Verwaltung-Sub-Tabs",
+            "neuen Tab „Community\” 🤝",
+            "Innerhalb von Community: Sub-Tab-Bar mit „Freunde\” und "
+            "„Bestenliste\” — gleicher Stil wie Verwaltung-Sub-Tabs",
             "Backward-Compat: alte URL-Hashes (#friends, #leaderboard) "
             "landen automatisch auf Community + richtigem Sub-Tab — "
             "Bookmarks bleiben funktional",
@@ -590,7 +612,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Notiz-Spalte raus aus der Solve-Tabelle (Notiz bleibt im "
             "Detail-Modal ueber den ℹ-Button verfuegbar)",
             "Hardware-Spalte stattdessen — zeigt den Hardware-Namen "
-            "fuer jeden Solve, oder „—\" wenn keine zugeordnet",
+            "fuer jeden Solve, oder „—\” wenn keine zugeordnet",
             "Cube-Spalte vereinfacht (Hardware-Sub-Zeile entfernt — "
             "wird ja jetzt eigenstaendig gezeigt)",
         ],
