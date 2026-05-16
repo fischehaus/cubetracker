@@ -20,6 +20,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -476,8 +477,8 @@ class PostalCodeGeo(Base):
     # in verschiedenen Laendern existieren (z.B. 1010 = AT-Wien + CH-Zuerich).
     postal_code: Mapped[str] = mapped_column(String(16), primary_key=True)
     country_iso2: Mapped[str] = mapped_column(String(2), primary_key=True)
-    lat: Mapped[float] = mapped_column(nullable=False)
-    lng: Mapped[float] = mapped_column(nullable=False)
+    lat: Mapped[float] = mapped_column(Float, nullable=False)
+    lng: Mapped[float] = mapped_column(Float, nullable=False)
     fetched_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
