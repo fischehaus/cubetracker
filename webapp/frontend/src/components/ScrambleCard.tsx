@@ -258,6 +258,20 @@ export function ScrambleCard({
           </span>
         )}
       </div>
+
+      {/* Ehrlicher Disclaimer fuer Inoffizielle (Phase W.scramble-quality,
+          2026-05-17): unsere Custom-Scrambles fuer Ivy/Gear/Redi/Master
+          Pyra/Skewb sind Random-Move-Sequenzen mit korrektem Move-Set,
+          aber KEIN WCA-Random-State-Solver. Quality ist gut genug fuers
+          Casual-Training, aber nicht Wettkampf-aequivalent. FTO laeuft
+          via scrambow → WCA-quality. */}
+      {effectiveCategory === "unofficial" && effectiveType !== "fto" && (
+        <p className="mt-3 text-[11px] text-amber-300/70">
+          Hinweis: Inoffizielle Scrambles sind Random-Move-Sequenzen mit
+          korrekter Notation, aber kein Random-State-Solver. Gut fuers
+          Training, nicht 100% Wettkampf-vergleichbar.
+        </p>
+      )}
     </div>
   );
 }

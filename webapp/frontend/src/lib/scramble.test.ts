@@ -116,8 +116,10 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
   //   1. non-empty output
   //   2. erwartete Anzahl Moves (split-by-space)
   //   3. keine direkt wiederholten Bases (Ivy "L L'" waere sinnlos)
+  // Move-Counts gemaess CUSTOM_PUZZLE_SPECS in scramble.ts.
+  // Ivy auf 8 reduziert (Fix 2026-05-17 — csTimer-Default).
   const cases: { type: string; minMoves: number }[] = [
-    { type: "ivy", minMoves: 10 },
+    { type: "ivy", minMoves: 8 },
     { type: "gear", minMoves: 12 },
     { type: "redi", minMoves: 15 },
     { type: "master_pyraminx", minMoves: 25 },

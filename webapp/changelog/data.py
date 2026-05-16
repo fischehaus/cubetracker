@@ -38,6 +38,31 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.scramble-quality",
+        released=date(2026, 5, 17),
+        title="Inoffizielle Scrambles: Notations-Bugs gefixt + ehrlicher Disclaimer",
+        highlights=[
+            "User-Befund: einige Custom-Scrambles waren falsch. Recherche "
+            "bestaetigt zwei echte Bugs in scramble.ts:",
+            "GEAR CUBE (kritischer Bug): wegen der Zahnrad-Mechanik sind "
+            "physikalisch nur 180-Grad-Drehungen moeglich (Quelle: Wikipedia/"
+            "Gear-Cube). Meine alte Spec hatte nur 3 Faces (U/R/F) statt 6 "
+            "und mischte 90 + 180 Grad. Jetzt: alle 6 Faces (U/D/L/R/F/B), "
+            "ausschliesslich 2-Suffix.",
+            "IVY CUBE: falsche Achse F statt U. Standard-Notation per "
+            "Speedsolving-Wiki ist U/L/R/B fuer die 4 Eck-Achsen. "
+            "Scramble-Laenge auf csTimer-Default 8 reduziert.",
+            "Ehrlicher UI-Disclaimer in der ScrambleCard fuer inoffizielle "
+            "Cubes: 'Random-Move-Sequenzen mit korrekter Notation, kein "
+            "Random-State-Solver — gut fuers Training, nicht 100% Wettkampf-"
+            "vergleichbar'. FTO bleibt ausgenommen (scrambow-generiert, "
+            "WCA-quality).",
+            "Redi + Master Pyra/Skewb: Notation belassen (csTimer-MoYu-"
+            "Variante ist nicht eindeutig dokumentiert, unsere Approximation "
+            "ist plausibel).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.live-card-mo3-ao100",
         released=date(2026, 5, 17),
         title="LIVE-Karte: 4 Averages — Tabelle wieder ohne Scroll",

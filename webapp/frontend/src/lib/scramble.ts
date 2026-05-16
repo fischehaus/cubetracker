@@ -209,33 +209,44 @@ interface CustomScrambleSpec {
 }
 
 const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
-  // Ivy Cube: 4 Eck-Achsen. Notation kompatibel mit gaengiger
-  // Speedcubing-Community (L, R, B, F + optionaler ').
+  // Ivy Cube — Fix 2026-05-17 nach User-Hinweis dass Scrambles nicht
+  // korrekt waren. Korrekte Standard-Notation (Speedsolving-Wiki):
+  // 4 Eck-Achsen U/L/R/B (NICHT F — meine vorherige Liste war falsch).
+  // Modifier "'" fuer CCW. 8-Move-Scrambles sind csTimer-Default.
+  // Quelle: https://www.speedsolving.com/wiki/index.php/Ivy_Cube
   ivy: {
-    moves: ["L", "R", "B", "F"],
+    moves: ["U", "L", "R", "B"],
     modifiers: ["", "'"],
-    length: 10,
+    length: 8,
   },
-  // Gear Cube: 3 Achsen, 180°-Drehungen sind dominant.
-  // Notation: U/R/F mit optionalem "2".
+  // Gear Cube — Fix 2026-05-17 (kritischster Bug der alten Version).
+  // Wegen der Zahnrad-Mechanik sind NUR 180°-Drehungen physikalisch
+  // moeglich — 90°-Turns gibt's nicht. Alle 6 Faces mit ausschliesslich
+  // "2"-Suffix. Quelle: https://en.wikipedia.org/wiki/Gear_Cube
+  // Vorher hatte ich faelschlich nur 3 Faces + Mischung 90°/180° —
+  // beide grob falsch.
   gear: {
-    moves: ["U", "R", "F"],
-    modifiers: ["", "2"],
+    moves: ["U", "D", "L", "R", "F", "B"],
+    modifiers: ["2"],
     length: 12,
   },
-  // Redi Cube: 8 Corners (gross/klein-Buchstaben fuer obere/untere Reihe).
+  // Redi Cube — csTimer nutzt eine MoYu-Notation, die uneinheitlich
+  // dokumentiert ist (mehrere Varianten in der Community). Wir bleiben
+  // bei der Gross-/Kleinbuchstaben-Variante mit CCW-Suffix. Nicht
+  // perfekt csTimer-kompatibel, aber inhaltlich plausibel.
   redi: {
     moves: ["L", "R", "B", "F", "l", "r", "b", "f"],
     modifiers: ["", "'"],
     length: 15,
   },
-  // Master Pyraminx: 4 Tip-Achsen + 4 Wide-Layer.
+  // Master Pyraminx: 4 Tip-Achsen (gross) + 4 Wide-Layer (klein),
+  // jeweils mit CCW-Option.
   master_pyraminx: {
     moves: ["U", "L", "R", "B", "u", "l", "r", "b"],
     modifiers: ["", "'"],
     length: 25,
   },
-  // Master Skewb: dieselben Achsen wie Master Pyraminx (4 Corners + Wides).
+  // Master Skewb: analog Master Pyraminx (4 Corner + Wides).
   master_skewb: {
     moves: ["U", "L", "R", "B", "u", "l", "r", "b"],
     modifiers: ["", "'"],
