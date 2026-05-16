@@ -38,6 +38,24 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.features-update-wca-news",
+        released=date(2026, 5, 16),
+        title="Was kann die App: Speedcubing-Welt + Country-Update",
+        highlights=[
+            "Feature-Liste auf der Anmeldeseite + im In-App-Modal um die "
+            "heute neuen Features erweitert.",
+            "Neue Kategorie Speedcubing-Welt: WCA-Turniere in der Naehe "
+            "(mit DACH-Nachbarn-Logik), Speedcubing-News aus drei kuratierten "
+            "Quellen, Auto-Refresh-Hinweis, Datenquellen-Transparenz.",
+            "Account-Bullet aktualisiert: Postleitzahl ist nicht mehr "
+            "Vorbereitung sondern produktiv genutzt — jetzt mit Land "
+            "zusammen klar als Speed-Turnier-Filter beschrieben.",
+            "HERO-HIGHLIGHTS auf der Login-Seite: einen Snapshot+Backup-"
+            "Bullet ersetzt durch WCA-Turniere/News — das ist heute der "
+            "wahre Marketing-Wert.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.country-qa",
         released=date(2026, 5, 16),
         title="QA-Fixes nach Country-Feld-Welle",

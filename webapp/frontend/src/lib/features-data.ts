@@ -67,6 +67,17 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     ],
   },
   {
+    title: "Speedcubing-Welt",
+    icon: "🌍",
+    bullets: [
+      "WCA-Turniere in deiner Naehe: Liste der naechsten offiziellen Wettkaempfe mit Distanz-Berechnung (Luftlinie) basierend auf deiner Postleitzahl + Land aus dem Profil",
+      "DACH-Bonus: User in DE/AT/CH sehen automatisch auch Turniere aus den direkten Nachbarlaendern (DE-User z.B. AT, CH, NL, BE, LU, FR, DK, PL, CZ)",
+      "Speedcubing-News aus drei kuratierten Quellen: WCA-Announcements (offizielle Mitteilungen), SpeedCubing.org (World Records + Coverage), r/Cubers (Community)",
+      "Auto-Refresh: bei jeder Anmeldung pruefen wir im Hintergrund ob neue News verfuegbar sind — beim ersten Dashboard-Aufruf sind sie da, ohne Wartezeit",
+      "Datenquellen sind die offizielle WCA-API + OpenStreetMap-Geocoding (keine Tracker, keine Drittanbieter-Cookies)",
+    ],
+  },
+  {
     title: "Daten",
     icon: "📥",
     bullets: [
@@ -82,7 +93,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     bullets: [
       "Email-Verifikation + Password-Reset per Mail",
       "Display-Name + Email-Change-Flow mit Re-Verifikation",
-      "Optionale Postleitzahl im Profil (Vorbereitung fuer „WCA-Turniere in deiner Naehe\")",
+      "Postleitzahl + Land im Profil (optional) — speist die WCA-Turniere-Suche im Dashboard. Wird ausschliesslich fuer Distanz-Berechnung genutzt, nie weitergegeben",
       "Account-Loeschung (DSGVO-konform, alle Daten weg)",
       "Multi-User-Isolation: deine Daten sind technisch von anderen getrennt",
     ],
@@ -97,6 +108,6 @@ export const APP_TAGLINE =
 export const HERO_HIGHLIGHTS: string[] = [
   "WCA-konformer Timer mit Spacebar + Touch-Modus",
   "csTimer-Import — kompletter Bestand uebernommen",
+  "WCA-Turniere in deiner Naehe + Speedcubing-News auf dem Dashboard",
   "Bestenliste-Vergleich mit Freunden",
-  "Automatische Backups + Snapshots",
 ];
