@@ -215,3 +215,12 @@ Wird im `/abschluss`-Check explizit kontrolliert.
 `„...""` (U+201E + U+0022) zerschießt Python-Strings → Render-Deploy-
 Crash. Stattdessen: nur ASCII-Quotes oder Heredoc-Output via Python-
 Script regenerieren.
+
+**Neue NPM-Packages mit Native-Node-Globals immer Browser-getestet:**
+bei Paketen die `Buffer`, `process`, `crypto.randomBytes`, `fs`, etc.
+nutzen — lokaler `npm run build` UND `node -e "..."`-Smoke sind NICHT
+ausreichend. Diese Globals existieren in Node, aber nicht im Browser
+ohne Polyfill (`vite-plugin-node-polyfills` o.ae.). Vor Production-
+Push: separates Test-Branch + Headless-Browser-Smoke (Playwright /
+Puppeteer). Klassiker-Bug: cstimer_module-Einbau am 2026-05-16 hat
+cubetracker.de gekillt obwohl alle lokalen Tests gruen waren.

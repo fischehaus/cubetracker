@@ -34,15 +34,24 @@
 > - **Datenuebertragung Dev↔Prod via Backup/Restore-Endpoint** (Pflicht
 >   in Phase 9)
 >
-> **LETZTER STAND (2026-05-16 abend, Session-Ende via /abschluss):**
+> **LETZTER STAND (2026-05-16 spaeter abend, Session-Ende via /abschluss):**
 > Multi-User-Web-Variante (webapp/) ist live auf cubetracker.de.
-> Heute deployed: 19 Wellen in einem Tag — Mobile-Timer-Refactor
+> Heute deployed: 27 Wellen + 1 Revert. Mobile-Timer-Refactor
 > abgeschlossen, Scramble-Picker (WCA+Inoffiziell), Mo3+AO100,
 > WCA-Turniere-in-der-Naehe (mit DACH-Nachbarn + Land-Feld im Profil),
 > Speedcubing-News (3 Quellen + Auto-Refresh bei Login),
 > Dashboard-Story-Refactor (4 Sektionen), csTimer-Bigfile-Fix,
 > /abschluss-Slash-Command + Stop-Hook + 5 weitere Claude-Code-Hooks.
-> Letzter Tag: `v2.0.0-alpha.W.abschluss-skill`, Commit `5b2cc8c`.
+> Letzte Wellen-Items: Live-Karte 4 Averages + Tabelle ohne AO100
+> (d80c036), Scramble-Notations-Bugs gefixt + Disclaimer (60148cd),
+> Roadmap rendered. Letzter Commit `e646933`.
+>
+> **HOTFIX-EREIGNIS heute spaet:** cstimer_module-Einbau (6d7a0eb)
+> hat cubetracker.de gekillt — 12x Buffer-Globals ohne Browser-Polyfill.
+> Sofort-Revert (7596eb7), Seite wieder oben. Lesson in CLAUDE.md zu
+> ergaenzen: BEI NEUEN NPM-PACKAGES MIT NATIVE-NODE-GLOBALS (Buffer,
+> process, crypto, fs) IMMER Headless-Browser-Smoke VOR Production-
+> Push. Lokaler Vite-Build + Node-Smoke-Test sind NICHT ausreichend.
 >
 > **EINMALIGER ROOT-CAUSE-HOTFIX heute:** Bash-Heredoc hatte deutsche
 > Schliess-Anfuehrungszeichen mit ASCII gemischt → Python-SyntaxError
