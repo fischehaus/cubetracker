@@ -21,6 +21,13 @@
 // identisch, im skewb-Scrambler-Loop). Types kommen aus dem npm-Paket
 // via *.d.ts-Stub im selben vendor-Ordner.
 import { Scrambow } from "../vendor/scrambow-patched";
+// cstimer_module liefert WCA-Quality Random-State-Scrambles fuer Cubes,
+// die scrambow nicht abdeckt (Ivy, Gear, Redi, Master Pyraminx). Same-
+// Author wie csTimer (cs0x7f) — also identisch zur csTimer-Implementation.
+// Phase W.scramble-cstimer (2026-05-17): ersetzt unseren primitiven
+// Random-Move-Generator fuer 4 von 5 Custom-Puzzles. Master Skewb
+// bleibt Random-Move (existiert nirgends als Random-State-Solver).
+import cstimer from "cstimer_module";
 
 /**
  * Mappt einen App-cube_type ("3x3", "OH", "Pyraminx", …) auf den
@@ -286,23 +293,59 @@ function generateCustomScramble(spec: CustomScrambleSpec): string {
 }
 
 /**
+ * Mapping unsere internen Custom-Codes → cstimer_module-Codes.
+ * Phase W.scramble-cstimer (2026-05-17): 4 von 5 Custom-Puzzles
+ * bekommen jetzt WCA-Quality-Random-State-Scrambles via cstimer_module
+ * (gleicher Autor wie csTimer selbst). Master Skewb fehlt — kein
+ * Solver existiert im JS-Oekosystem (auch csTimer hat keinen).
+ */
+const CSTIMER_CODE_MAP: Record<string, string> = {
+  ivy: "ivyso", // Random-State (echter solvivy-Solver)
+  gear: "gearso", // Random-State (Pruning-Tables)
+  redi: "rediso", // Random-State (solveRedi)
+  master_pyraminx: "mpyrso", // Random-State (in pyraminx.js registriert)
+  // master_skewb: nicht in cstimer_module → faellt durch auf Random-Move
+};
+
+/**
+ * Welche Custom-Puzzles haben jetzt WCA-Quality? Wird vom Frontend
+ * genutzt um den „kein Random-State-Solver"-Disclaimer NUR fuer die
+ * Random-Move-Fallback-Puzzles anzuzeigen (Master Skewb).
+ */
+export function isWcaQualityCustomPuzzle(code: string): boolean {
+  return code in CSTIMER_CODE_MAP;
+}
+
+/**
  * Generiert einen Scramble-String fuer den gegebenen Typ (cube_type
  * oder scramble_type-override aus Session).
  *
  * Reihenfolge:
- *   1. Custom-Puzzle? → eigener Random-Move-Generator
- *   2. Sonst scrambow probieren
- *   3. Bei Fehler → leerer String (UI zeigt Fallback-Meldung)
+ *   1. cstimer_module hat einen Random-State-Solver? → WCA-Quality
+ *   2. Sonst: eigener Random-Move-Generator (master_skewb)
+ *   3. Sonst: scrambow probieren (WCA-Cubes + FTO)
+ *   4. Bei Fehler → leerer String (UI zeigt Fallback-Meldung)
  *
  * Wir crashen nicht, weil ein fehlender Scramble den Timer nicht
  * blockieren soll.
  */
 export function generateScramble(typeOverride: string): string {
-  // 1) Custom Puzzles, die scrambow nicht kann
+  // 1) cstimer_module — WCA-Quality fuer 4 von 5 Custom-Puzzles
+  if (typeOverride in CSTIMER_CODE_MAP) {
+    try {
+      const result = cstimer.getScramble(CSTIMER_CODE_MAP[typeOverride]);
+      if (result && typeof result === "string" && result.trim().length > 0) {
+        return result;
+      }
+    } catch {
+      // Fallback auf Random-Move wenn cstimer_module crashed
+    }
+  }
+  // 2) Custom Puzzles ohne cstimer-Support (master_skewb) → Random-Move
   if (typeOverride in CUSTOM_PUZZLE_SPECS) {
     return generateCustomScramble(CUSTOM_PUZZLE_SPECS[typeOverride]);
   }
-  // 2) scrambow-Pfad
+  // 3) scrambow-Pfad (alle WCA-Cubes + FTO + Trainer-Subsets)
   try {
     const scrambow = new Scrambow().setType(typeOverride);
     const result = scrambow.get(1);

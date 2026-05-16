@@ -22,6 +22,7 @@ import {
   cubeTypeToScrambowType,
   defaultScrambleTypeForCube,
   generateScramble,
+  isWcaQualityCustomPuzzle,
   resolveScrambleTypeOverride,
   UNOFFICIAL_SCRAMBLE_TYPES,
   WCA_SCRAMBLE_TYPES,
@@ -259,19 +260,23 @@ export function ScrambleCard({
         )}
       </div>
 
-      {/* Ehrlicher Disclaimer fuer Inoffizielle (Phase W.scramble-quality,
-          2026-05-17): unsere Custom-Scrambles fuer Ivy/Gear/Redi/Master
-          Pyra/Skewb sind Random-Move-Sequenzen mit korrektem Move-Set,
-          aber KEIN WCA-Random-State-Solver. Quality ist gut genug fuers
-          Casual-Training, aber nicht Wettkampf-aequivalent. FTO laeuft
-          via scrambow → WCA-quality. */}
-      {effectiveCategory === "unofficial" && effectiveType !== "fto" && (
-        <p className="mt-3 text-[11px] text-amber-300/70">
-          Hinweis: Inoffizielle Scrambles sind Random-Move-Sequenzen mit
-          korrekter Notation, aber kein Random-State-Solver. Gut fuers
-          Training, nicht 100% Wettkampf-vergleichbar.
-        </p>
-      )}
+      {/* Disclaimer NUR noch fuer Master Skewb (Phase W.scramble-cstimer,
+          2026-05-17): Ivy/Gear/Redi/Master Pyraminx bekommen seit jetzt
+          echte WCA-Quality-Random-State-Scrambles via cstimer_module
+          (gleicher Autor wie csTimer). FTO ueber scrambow. Nur Master
+          Skewb laeuft noch ueber unseren Random-Move-Generator weil
+          kein Random-State-Solver existiert (auch nicht in csTimer
+          selbst). */}
+      {effectiveCategory === "unofficial" &&
+        !isWcaQualityCustomPuzzle(effectiveType) &&
+        effectiveType !== "fto" && (
+          <p className="mt-3 text-[11px] text-amber-300/70">
+            Hinweis: Master Skewb hat keinen Random-State-Solver (existiert
+            in keiner JS-Library). Scramble ist eine Random-Move-Sequenz
+            mit korrekter Notation — gut fuers Training, nicht 100%
+            Wettkampf-vergleichbar.
+          </p>
+        )}
     </div>
   );
 }

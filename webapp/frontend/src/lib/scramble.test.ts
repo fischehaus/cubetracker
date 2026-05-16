@@ -111,43 +111,48 @@ describe("generateScramble (smoke)", () => {
   }
 });
 
-describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
-  // Inoffizielle Cubes: eigener Random-Move-Generator. Tests checken:
-  //   1. non-empty output
-  //   2. erwartete Anzahl Moves (split-by-space)
-  //   3. keine direkt wiederholten Bases (Ivy "L L'" waere sinnlos)
-  // Move-Counts gemaess CUSTOM_PUZZLE_SPECS in scramble.ts.
-  // Ivy auf 8 reduziert (Fix 2026-05-17 — csTimer-Default).
-  const cases: { type: string; minMoves: number }[] = [
-    { type: "ivy", minMoves: 8 },
-    { type: "gear", minMoves: 12 },
-    { type: "redi", minMoves: 15 },
-    { type: "master_pyraminx", minMoves: 25 },
-    { type: "master_skewb", minMoves: 25 },
-  ];
-  for (const { type, minMoves } of cases) {
-    it(`"${type}" produces a scramble with ${minMoves} moves`, () => {
-      const s = generateScramble(type);
-      const moves = s.split(/\s+/).filter((x) => x.length > 0);
-      expect(moves.length).toBe(minMoves);
-    });
-    it(`"${type}" never repeats the same base move directly`, () => {
-      // 100 Iterationen — QA-Fix Welle 3 (2026-05-16). Bei specs mit nur
-      // 3 Bases (gear: U/R/F) ist die Trefferwahrscheinlichkeit fuer
-      // zufaellige Glueckstreffer bei 10 Iterationen noch hoch genug,
-      // dass ein kaputter Filter durchrutschen koennte. 100 Iterationen
-      // bei <50ms Total-Laufzeit kostet nichts.
-      for (let i = 0; i < 100; i++) {
+describe("generateScramble — Custom Puzzles", () => {
+  // Phase W.scramble-cstimer (2026-05-17): Ivy/Gear/Redi/Master Pyraminx
+  // laufen jetzt ueber cstimer_module (Random-State-Solver, WCA-Quality).
+  // Wir checken nur dass der Output non-empty + plausibel ist — die
+  // Move-Anzahl variiert je nach Solver-Output. Master Skewb laeuft
+  // weiter ueber unseren Random-Move-Generator (fester Move-Count).
+
+  describe("WCA-Quality (cstimer_module)", () => {
+    const types = ["ivy", "gear", "redi", "master_pyraminx"];
+    for (const type of types) {
+      it(`"${type}" generiert non-empty Scramble via cstimer_module`, () => {
         const s = generateScramble(type);
+        expect(s.length).toBeGreaterThan(0);
+        // Mindestens 3 Moves — kein Solver liefert weniger fuer reasonable States
+        const moves = s.split(/\s+/).filter((x) => x.length > 0);
+        expect(moves.length).toBeGreaterThanOrEqual(3);
+      });
+    }
+  });
+
+  describe("Random-Move (Master Skewb)", () => {
+    it("master_skewb generiert genau 25 Moves", () => {
+      const s = generateScramble("master_skewb");
+      const moves = s.split(/\s+/).filter((x) => x.length > 0);
+      expect(moves.length).toBe(25);
+    });
+    it("master_skewb wiederholt nicht direkt dieselbe Base", () => {
+      // 100 Iterationen — Random-Move-Filter-Verifikation
+      for (let i = 0; i < 100; i++) {
+        const s = generateScramble("master_skewb");
         const moves = s.split(/\s+/).filter((x) => x.length > 0);
         for (let j = 1; j < moves.length; j++) {
-          // Base = Move ohne den Modifier-Suffix (' oder 2)
           const base = (m: string) => m.replace(/['2]$/, "");
-          expect(base(moves[j]), `Move ${j} (${moves[j]}) sollte nicht dieselbe Base haben wie ${moves[j - 1]}`).not.toBe(base(moves[j - 1]));
+          expect(
+            base(moves[j]),
+            `Move ${j} (${moves[j]}) sollte nicht dieselbe Base haben wie ${moves[j - 1]}`,
+          ).not.toBe(base(moves[j - 1]));
         }
       }
     });
-  }
+  });
+
   it("fto (scrambow-unterstuetzt) produces non-empty scramble", () => {
     // FTO ist von scrambow supportiert — wir routen es zu scrambow,
     // nicht zu unserem Custom-Generator.
