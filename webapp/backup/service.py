@@ -44,11 +44,18 @@ MAX_SNAPSHOTS_PER_USER = 2
 # Render-Free). 30 MB entspricht ~100k Solves; 2 Snapshots * Postgres-Free
 # 1GB = max ~16 User die einen vollen Datensatz haben koennen.
 MAX_SNAPSHOT_PAYLOAD_BYTES = 30 * 1024 * 1024
-# Security-Fix K2: JSON-Bomb-Schutz. Pre-Check vor json.loads(). 100k
-# Solves haben ~12 Tokens pro Solve = 1.2M Tokens fuers Solve-Array,
-# plus Sessions/Hardware/Achievements/Challenges = ~1.5M Tokens worst
-# case. 200k erlaubt das gleiche + Reserve, aber blockt Mio-Nest-Bomben.
-MAX_JSON_STRUCTURAL_TOKENS = 200_000
+# Security-Fix K2: JSON-Bomb-Schutz. Pre-Check vor json.loads().
+#
+# Bug-Fix Quick-Win 2026-05-16: Limit von 200_000 auf 2_000_000 hoch.
+# Vorher: csTimer-Files mit > ~30k Solves wurden faelschlich abgelehnt
+# (User-Report 2026-05-13). Realistische csTimer-Density: ~6-12
+# Structural Tokens pro Solve (`[[date, time, ...], scramble, ...]`).
+# 100k Solves = ~800k-1.2M Tokens; 300k Solves = ~2-3M Tokens.
+#
+# 2M ist eine sichere Obergrenze: bei 30MB-Upload-Limit waeren echte
+# JSON-Bombs (dense nested brackets, ~1 Token/Byte) bei 30M Tokens —
+# also Faktor 15 ueber dem Limit. Schutz greift weiterhin.
+MAX_JSON_STRUCTURAL_TOKENS = 2_000_000
 
 RestoreMode = Literal["merge", "replace"]
 
@@ -77,8 +84,11 @@ def check_json_bomb(raw_bytes: bytes) -> None:
     )
     if structural_count > MAX_JSON_STRUCTURAL_TOKENS:
         raise BackupServiceError(
-            f"JSON-Struktur zu komplex ({structural_count} structural tokens; "
-            f"max {MAX_JSON_STRUCTURAL_TOKENS}). Moeglicher JSON-Bomb-Angriff."
+            f"Datei zu komplex ({structural_count:,} JSON-Strukturzeichen; "
+            f"erlaubt max {MAX_JSON_STRUCTURAL_TOKENS:,}). Bei normalen "
+            f"csTimer-Exporten reicht das fuer ca. 300.000 Solves — wenn "
+            f"deine Datei wirklich darueber liegt, melde dich beim Entwickler. "
+            f"Sonst pruefe ob du die richtige Datei hochlaedst."
         )
 
 

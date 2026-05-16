@@ -38,6 +38,26 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.cstimer-bigfile",
+        released=date(2026, 5, 16),
+        title="csTimer-Import: grosse Files (30k+ Solves) jetzt importierbar",
+        highlights=[
+            "Bug-Fix: JSON-Bomb-Pre-Check (Security-Layer K2) hatte das "
+            "Limit auf 200.000 strukturelle JSON-Tokens — fuer csTimer-"
+            "Exporte mit > ca. 30.000 Solves zu eng. Limit jetzt auf "
+            "2.000.000 hoch, was ca. 300.000 Solves abdeckt.",
+            "Sicherheit bleibt: 30MB-Upload-Hardcap macht echte JSON-Bombs "
+            "(~30M Tokens) weiterhin unmoeglich. Pre-Check greift bei 1/15 "
+            "der theoretisch moeglichen Token-Last.",
+            "Error-Message verstaendlicher: vorher „Moeglicher JSON-Bomb-"
+            "Angriff\" (verwirrend fuer normale User), jetzt „Datei zu "
+            "komplex — bei normalen csTimer-Exporten reicht das fuer ca. "
+            "300.000 Solves\" plus Diagnose-Hinweis.",
+            "Hintergrund: User-Report 2026-05-13 (csTimer-.txt-Datei "
+            "scheiterte). Hypothese im STATUS-Memo war korrekt.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.features-refresh",
         released=date(2026, 5, 16),
         title="Feature-Liste „Was kann cubetracker?" auf Stand gebracht",
