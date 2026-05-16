@@ -1558,6 +1558,48 @@ export interface UpcomingCompetitionsResponse {
  * Cache 30min (Liste aendert sich selten — WCA published Turniere
  * Wochen vorher).
  */
+// ============================================================
+// Speedcubing-News (Phase W.news)
+// ============================================================
+
+export interface NewsItem {
+  id: number;
+  source: string;
+  source_label: string;
+  title: string;
+  link: string;
+  summary: string | null;
+  published_at: string | null;
+  fetched_at: string | null;
+}
+
+export interface NewsLatestResponse {
+  items: NewsItem[];
+  count: number;
+  refreshed: boolean;
+}
+
+/**
+ * Letzte Speedcubing-News (WCA-Announcements + r/Cubers).
+ * Backend macht on-demand-Refresh wenn Items > 60min alt — daher
+ * client-staleTime 30min reicht aus.
+ */
+export function useLatestNews(
+  limit: number = 10,
+): UseQueryResult<NewsLatestResponse> {
+  return useQuery({
+    queryKey: ["news-latest", limit],
+    queryFn: async () => {
+      const r = await api.get<NewsLatestResponse>("/news/latest", {
+        params: { limit },
+      });
+      return r.data;
+    },
+    staleTime: 30 * 60_000,
+    retry: 1,
+  });
+}
+
 export function useUpcomingCompetitions(
   opts?: {
     enabled?: boolean;

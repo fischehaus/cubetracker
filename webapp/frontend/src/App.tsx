@@ -34,6 +34,7 @@ import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HistogramChart } from "./components/HistogramChart";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
 import { MultiCompareCard } from "./components/MultiCompareCard";
+import { NewsCard } from "./components/NewsCard";
 import { FeatureListPanel } from "./components/FeatureListPanel";
 import { OnboardingBanner } from "./components/OnboardingBanner";
 import { PatchNotesPanel } from "./components/PatchNotesPanel";
@@ -305,10 +306,14 @@ function DashboardTab({
       </div>
       <MultiCompareCard sessionId={sessionId} />
       <StatsCard cubeType={undefined} sessionId={sessionId} />
-      {/* W.wca-comps: WCA-Turniere in der Naehe. Temporaer hier am Ende —
-          in Phase C (Dashboard-Refactor) wandert das in eine eigene
-          „Speedcubing-Welt"-Sektion gemeinsam mit der News-Card. */}
-      <WcaUpcomingCard />
+      {/* W.wca-comps + W.news: temporaerer „Speedcubing-Welt"-Block.
+          In Phase C kommt der ordentlich in eine eigene Sektion + Story-
+          Reihenfolge im Dashboard. Auf Desktop zwei-spaltig, auf Mobile
+          gestapelt. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <WcaUpcomingCard />
+        <NewsCard />
+      </div>
     </div>
   );
 }

@@ -38,6 +38,25 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.news-frontend",
+        released=date(2026, 5, 16),
+        title="Speedcubing-News-Card im Dashboard live",
+        highlights=[
+            "Neue Karte „📰 Speedcubing-News\" im Dashboard, direkt neben "
+            "der WCA-Turniere-Card (zweispaltig ab Tablet-Breite, "
+            "Mobile gestapelt).",
+            "Pro News-Item: Titel als Link zur Quelle, Source-Badge "
+            "(farb-kodiert: WCA = lila, r/Cubers = orange), Summary "
+            "(2 Zeilen abgekuerzt), Relativ-Datum („vor 3h\", „vor 2d\").",
+            "Beim Erst-Aufruf nach Deploy ist die DB noch leer — die "
+            "Card zeigt einen Hinweis, dass der Hintergrund-Fetch "
+            "dabei ist + bittet um Reload in einer Minute.",
+            "Naechster Schritt: Phase C — Dashboard-Refactor mit "
+            "eigener „Speedcubing-Welt\"-Sektion und neuer Story-"
+            "Reihenfolge.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.news-backend",
         released=date(2026, 5, 16),
         title="Backend fuer „Speedcubing-News\" gebaut",
