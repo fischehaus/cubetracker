@@ -38,6 +38,18 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feedback-usermenu",
+        released=date(2026, 5, 17),
+        title="Feedback geben: zusaetzlich im User-Menu oben rechts",
+        highlights=[
+            "Footer-Link war versteckt — viele User scrollen nie ans Ende. "
+            "Feedback-Item jetzt auch im User-Menu (Avatar oben rechts) "
+            "neben Mein Account / Patch Notes / Was kann diese App.",
+            "Funktional identisch: oeffnet dasselbe FeedbackModal mit "
+            "GitHub-Issue-Tab + Email-Form-Tab.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feedback",
         released=date(2026, 5, 17),
         title="Feedback-Kanal: GitHub-Issues + Email-Form ohne GitHub-Account",

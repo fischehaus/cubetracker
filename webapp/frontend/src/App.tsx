@@ -537,6 +537,7 @@ function MainLayout() {
                 }}
                 onOpenPatchNotes={() => setShowPatches(true)}
                 onOpenFeatures={() => setShowFeatures(true)}
+                onOpenFeedback={() => setShowFeedback(true)}
                 onLogout={() => void logout()}
               />
             )}

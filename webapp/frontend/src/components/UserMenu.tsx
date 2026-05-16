@@ -14,6 +14,7 @@ interface Props {
   onOpenSettings: () => void;
   onOpenPatchNotes: () => void;
   onOpenFeatures: () => void;
+  onOpenFeedback: () => void;
   onLogout: () => void;
 }
 
@@ -24,6 +25,7 @@ export function UserMenu({
   onOpenSettings,
   onOpenPatchNotes,
   onOpenFeatures,
+  onOpenFeedback,
   onLogout,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -113,6 +115,9 @@ export function UserMenu({
           </MenuItem>
           <MenuItem onClick={() => run(onOpenFeatures)} icon="ℹ">
             Was kann diese App?
+          </MenuItem>
+          <MenuItem onClick={() => run(onOpenFeedback)} icon="💬">
+            Feedback geben
           </MenuItem>
 
           <div className="border-t border-gray-700" />
