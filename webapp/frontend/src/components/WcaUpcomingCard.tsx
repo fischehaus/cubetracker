@@ -119,7 +119,18 @@ export function WcaUpcomingCard() {
               : ""}
             {" — "}
             {data.total_found} Turniere im Filter, {data.competitions.length}{" "}
-            angezeigt. Daten via offizielle WCA-API.
+            angezeigt.
+            {data.filter.countries_queried &&
+              data.filter.countries_queried.length > 1 && (
+                <>
+                  {" Laender: "}
+                  <span className="text-gray-400">
+                    {data.filter.countries_queried.join(", ")}
+                  </span>
+                  .
+                </>
+              )}{" "}
+            Daten via offizielle WCA-API.
           </p>
         </>
       )}

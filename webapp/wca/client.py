@@ -15,6 +15,7 @@ In-Memory-Cache pro Worker: ist OK weil:
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from datetime import date, timedelta
@@ -154,3 +155,51 @@ async def fetch_upcoming_competitions(
 def clear_cache() -> None:
     """Test-Helper: leert den In-Memory-Cache."""
     _cache.clear()
+
+
+async def fetch_upcoming_competitions_multi(
+    country_iso2s: list[str],
+    days_ahead: int = 180,
+    today: date | None = None,
+) -> list[dict[str, Any]]:
+    """Parallel-Fetch fuer mehrere Laender (Phase W.wca-neighbors).
+
+    Ruft `fetch_upcoming_competitions` fuer jedes Land parallel via
+    `asyncio.gather` auf — bei 10 Laendern (DE + Nachbarn) ergibt das
+    10 parallele HTTP-Calls statt 10 sequentielle (Latenz ~ max statt sum).
+    Cache-Hits sind no-op, daher pro Land 0-500ms.
+
+    Per-Country-Fehler werden geschluckt (ein nicht-erreichbares Land
+    killt nicht die ganze Liste). Dedup via competition `id` — falls
+    ein Turnier aus irgendwelchen Gruenden doppelt zurueckkommt, nehmen
+    wir den ersten.
+    """
+    if not country_iso2s:
+        return []
+
+    async def _safe_fetch(country: str) -> list[dict[str, Any]]:
+        try:
+            return await fetch_upcoming_competitions(
+                country_iso2=country, days_ahead=days_ahead, today=today
+            )
+        except WcaApiError as e:
+            logger.warning("WCA fetch for %s failed: %s", country, e)
+            return []
+
+    results = await asyncio.gather(*[_safe_fetch(c) for c in country_iso2s])
+
+    # Flatten + Dedup nach competition id (falls jemand in zwei Country-Filtern
+    # auftaucht — sollte nicht passieren, aber defensiv).
+    seen_ids: set[str] = set()
+    merged: list[dict[str, Any]] = []
+    for batch in results:
+        for comp in batch:
+            cid = str(comp.get("id") or "")
+            if not cid or cid in seen_ids:
+                continue
+            seen_ids.add(cid)
+            merged.append(comp)
+
+    # Sort by start_date asc (wie single-country)
+    merged.sort(key=lambda c: str(c.get("start_date") or "9999-12-31"))
+    return merged

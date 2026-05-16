@@ -26,8 +26,16 @@ from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from db.database import get_db
 from db.models import User
-from wca.client import WcaApiError, fetch_upcoming_competitions
-from wca.distance import detect_country_from_postal_code, haversine_km
+from wca.client import (
+    WcaApiError,
+    fetch_upcoming_competitions,
+    fetch_upcoming_competitions_multi,
+)
+from wca.distance import (
+    countries_with_neighbors,
+    detect_country_from_postal_code,
+    haversine_km,
+)
 from wca.geocoding import GeocodingError, geocode_postal_code
 
 logger = logging.getLogger(__name__)
@@ -70,16 +78,20 @@ async def upcoming_competitions(
     user_lng = float(geo["lng"])
     country = geo.get("country_iso2") or detect_country_from_postal_code(postal)
 
-    # 2) WCA-API: Competitions im selben Land. Wir filtern bewusst auf
-    #    `country` statt weltweit, weil:
-    #      a) der typische User will Turniere "in der Naehe" = im eigenen Land
-    #      b) weltweite Liste waere 100+ Eintraege und langsam
-    #    Falls country=None: fallback auf weltweit, aber max_distance-Filter
-    #    macht die Liste eh klein.
+    # 2) WCA-API: Land + Nachbarlaender (Phase W.wca-neighbors, User-Wunsch
+    #    2026-05-16). DE-User bekommen DE + AT + CH + NL + BE + LU + FR +
+    #    DK + PL + CZ, AT-User entsprechend ihr DACH-Nachbar-Set, etc.
+    #    Falls Country unbekannt: fallback auf weltweit (= leeres Country-
+    #    Argument), aber max_distance-Filter macht die Liste eh klein.
+    countries_to_query = countries_with_neighbors(country)
     try:
-        comps = await fetch_upcoming_competitions(
-            country_iso2=country, days_ahead=days_ahead
-        )
+        if countries_to_query:
+            comps = await fetch_upcoming_competitions_multi(
+                country_iso2s=countries_to_query, days_ahead=days_ahead
+            )
+        else:
+            # Unknown country → weltweit fetchen (max_distance filtert dann)
+            comps = await fetch_upcoming_competitions(days_ahead=days_ahead)
     except WcaApiError as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -131,6 +143,7 @@ async def upcoming_competitions(
             "max_distance_km": max_distance_km,
             "days_ahead": days_ahead,
             "limit": limit,
+            "countries_queried": countries_to_query,
         },
         "competitions": enriched[:limit],
         "total_found": len(enriched),

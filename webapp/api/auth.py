@@ -205,6 +205,7 @@ def login(
     request: Request,
     payload: UserLogin,
     response: Response,
+    background: BackgroundTasks,
     db: OrmSession = Depends(get_db),
 ) -> AccessTokenOnly:
     """Login mit Email + Password.
@@ -234,6 +235,18 @@ def login(
     access = create_token(user.id, "access", token_version=user.token_version)
     refresh = create_token(user.id, "refresh", token_version=user.token_version)
     _set_refresh_cookie(response, refresh)
+
+    # Auto-Refresh-Hook (Phase W.auto-refresh, 2026-05-16): nach erfolgreichem
+    # Login die News + WCA-Caches im Hintergrund warm halten. Bei warmen Caches
+    # ist das ein no-op (keine HTTP-Calls). Laeuft NACH der Response, also
+    # blockt der User nicht. User-Wunsch: „bei jeder Neuanmeldung sollen die
+    # Infos aktualisiert werden".
+    # Lazy-import um Circular-Imports zu vermeiden + Auth-Module schlank zu
+    # halten.
+    from news.refresh import trigger_background_refresh
+
+    background.add_task(trigger_background_refresh)
+
     return AccessTokenOnly(access_token=access)
 
 

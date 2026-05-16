@@ -31,9 +31,24 @@ FEED_SOURCES: list[FeedSource] = [
         per_fetch_limit=10,
     ),
     FeedSource(
+        source_id="speedcubing_org",
+        label="SpeedCubing.org",
+        url="https://speedcubing.org/blogs/news.atom",
+        per_fetch_limit=10,
+    ),
+    FeedSource(
         source_id="reddit_cubers",
         label="r/Cubers",
         url="https://www.reddit.com/r/Cubers/.rss",
         per_fetch_limit=15,
     ),
+    # Weitere Quellen (rechercheresultate 2026-05-16):
+    # - SpeedCubeShop Blog: keine public Atom-URL gefunden (Shopify, aber
+    #   /blogs/news.atom 404 — vermutlich custom-theme). Wenn das Bedarf wird
+    #   spaeter HTML-Scraper.
+    # - TheCubicle Blog: dito 404.
+    # - YouTube-Channels (J Perm, CubeHead etc.): koennten via
+    #   https://www.youtube.com/feeds/videos.xml?channel_id=X eingebunden
+    #   werden — aber das wuerde Tutorial-Spam erzeugen. Lieber kuratierte
+    #   Channel-Listen wenn der News-Feed mal saturiert ist.
 ]

@@ -1545,6 +1545,7 @@ export interface UpcomingCompetitionsResponse {
     max_distance_km: number | null;
     days_ahead: number;
     limit: number;
+    countries_queried?: string[];
   };
   competitions: WcaCompetition[];
   total_found: number;

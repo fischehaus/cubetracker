@@ -38,6 +38,35 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-neighbors-news-refresh",
+        released=date(2026, 5, 16),
+        title="WCA: Nachbarlaender + News: weitere Quelle + Auto-Refresh bei Login",
+        highlights=[
+            "WCA-Turniere: zeigt jetzt nicht nur Turniere im eigenen Land, "
+            "sondern auch in direkten Nachbarlaendern. Fuer DE-User: AT, CH, "
+            "NL, BE, LU, FR, DK, PL, CZ. Fuer AT-User: DE, CH, IT, SI, HU, "
+            "SK, CZ, LI. Fuer CH-User: DE, AT, FR, IT, LI. Parallel-Fetch "
+            "via asyncio.gather, daher kaum Latenz-Aufschlag.",
+            "Speedcubing-News: dritte Quelle dazu — SpeedCubing.org/blog "
+            "(World Records, Competition Coverage). RSS-Recherche ergab "
+            "dass SpeedCubeShop + TheCubicle keinen public RSS-Endpoint "
+            "anbieten — die kaemen nur via HTML-Scraping ran, kein MVP-Wert.",
+            "Auto-Refresh bei Login (User-Wunsch): nach erfolgreichem "
+            "Login laeuft im Hintergrund (NACH der Response, blockt User "
+            "nicht) ein Refresh fuer News + WCA-Caches. Bei warmen Caches "
+            "= no-op, bei stale Caches = stiller Refresh. Effekt: wer sich "
+            "nach Pause einloggt, sieht frische Daten ohne Wartezeit.",
+            "Backend-Module: webapp/news/refresh.py als zentraler Refresh-"
+            "Helper. Wird vom Auth-Login-Endpoint als BackgroundTask "
+            "getriggert. News-Refresh = sync, WCA-Warmup = async via "
+            "asyncio.run im Background-Thread.",
+            "Frontend zeigt in der WCA-Card jetzt die Liste der "
+            "gequeryten Laender (z.B. 'Laender: DE, AT, CH, NL, ...') "
+            "als Footer-Info, damit der User weiss warum sich z.B. ein "
+            "Wiener Turnier in seiner Berliner Liste findet.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.deploy-fix",
         released=date(2026, 5, 16),
         title="Hotfix: SyntaxError-Quotes in Patch-Notes — alle Render-Deploys grün",

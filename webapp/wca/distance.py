@@ -24,6 +24,33 @@ def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     return EARTH_RADIUS_KM * c
 
 
+# Nachbarlaender-Mapping (Phase W.wca-neighbors, 2026-05-16):
+# Welche Laender bekommt ein User zu sehen, basierend auf seinem
+# Profil-Land? „In der Naehe" heisst praktisch: eigenes Land + direkt
+# angrenzende. Aktuell nur fuer DACH definiert — andere User sehen
+# nur ihr eigenes Land. Spaeter erweiterbar pro Bedarf.
+NEIGHBORING_COUNTRIES: dict[str, list[str]] = {
+    # Deutschland: alle direkten Landgrenzen
+    "DE": ["DE", "AT", "CH", "NL", "BE", "LU", "FR", "DK", "PL", "CZ"],
+    # Oesterreich: Nachbarn inkl. DE (User-Wunsch: DACH-Region zusammen)
+    "AT": ["AT", "DE", "CH", "IT", "SI", "HU", "SK", "CZ", "LI"],
+    # Schweiz: Nachbarn inkl. DE
+    "CH": ["CH", "DE", "AT", "FR", "IT", "LI"],
+}
+
+
+def countries_with_neighbors(country_iso2: str | None) -> list[str]:
+    """Liefert User-Land + direkte Nachbarn (wenn bekannt), sonst nur User-Land.
+
+    Beispiel: DE -> [DE, AT, CH, NL, BE, LU, FR, DK, PL, CZ].
+    Unknown country -> [country] oder [] wenn None.
+    """
+    if not country_iso2:
+        return []
+    upper = country_iso2.upper()
+    return NEIGHBORING_COUNTRIES.get(upper, [upper])
+
+
 def detect_country_from_postal_code(postal_code: str) -> str | None:
     """Heuristische Erkennung des Landes aus der Postleitzahl-Struktur.
 
