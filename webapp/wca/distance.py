@@ -1,0 +1,51 @@
+"""Haversine-Distance + Helpers (Phase W.wca-comps).
+
+Pure Funktionen, kein DB-Zugriff, kein HTTP — testbar ohne Mocks.
+"""
+
+from __future__ import annotations
+
+from math import asin, cos, radians, sin, sqrt
+
+EARTH_RADIUS_KM = 6371.0
+
+
+def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    """Grosskreis-Distanz zwischen zwei Lat/Lng-Punkten in Kilometern.
+
+    Genauigkeit: ca. 0.5% (Erde ist nicht perfekt sphaerisch). Fuer
+    „Turniere in 200km Entfernung"-Filter mehr als ausreichend.
+    """
+    rlat1, rlat2 = radians(lat1), radians(lat2)
+    dlat = radians(lat2 - lat1)
+    dlng = radians(lng2 - lng1)
+    a = sin(dlat / 2) ** 2 + cos(rlat1) * cos(rlat2) * sin(dlng / 2) ** 2
+    c = 2 * asin(sqrt(a))
+    return EARTH_RADIUS_KM * c
+
+
+def detect_country_from_postal_code(postal_code: str) -> str | None:
+    """Heuristische Erkennung des Landes aus der Postleitzahl-Struktur.
+
+    Kein Locking — User kann im Profil manuell ein Land setzen wenn das mal
+    relevant wird. Hier nur Best-Effort Default fuer Nominatim-Lookup.
+
+    Aktuell unterstuetzte Heuristiken (DACH-Fokus):
+      - 5-stellige numerische PLZ ohne Leerzeichen → DE
+      - 4-stellige numerische PLZ → AT oder CH (Default AT, weil
+        OpenStreetMap die meisten AT-PLZs besser indexiert hat als CH)
+      - Kein Match → None (Caller laesst country_iso2 frei → Nominatim sucht weltweit)
+
+    Hinweis: das ist KEINE perfekte Disambiguierung. CH 4-stellige PLZs
+    wie 8001 (Zuerich) werden faelschlich als AT erkannt. Realistisch ist
+    DE 99% der User → akzeptables Restrisiko bis User-Profil ein
+    `country_iso2`-Feld bekommt.
+    """
+    cleaned = postal_code.strip().replace(" ", "")
+    if not cleaned.isdigit():
+        return None
+    if len(cleaned) == 5:
+        return "DE"
+    if len(cleaned) == 4:
+        return "AT"
+    return None

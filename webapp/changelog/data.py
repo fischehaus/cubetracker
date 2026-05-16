@@ -38,6 +38,29 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-comps-backend",
+        released=date(2026, 5, 16),
+        title="Backend fuer „WCA-Turniere in der Naehe\" gebaut",
+        highlights=[
+            "Neues Backend-Modul `webapp/wca/`: WCA-API-Client (mit 1h-In-"
+            "Memory-Cache), Nominatim-Geocoding-Wrapper (mit persistentem "
+            "DB-Cache, TTL 30 Tage), Haversine-Distance-Berechnung, "
+            "Country-Detection aus PLZ-Struktur.",
+            "Endpoint `GET /wca/competitions/upcoming`: liefert die "
+            "naechsten Turniere im Land des Users (PLZ aus Profil), "
+            "sortiert nach Datum + Distanz, mit `distance_km` pro Eintrag. "
+            "Default: max 300km, 10 Eintraege, 6 Monate Vorausschau.",
+            "DB-Tabelle `postal_code_geo` (Composite-Key postal_code + "
+            "country_iso2): persistenter Geocoding-Cache. Wenn 100 User "
+            "dieselbe PLZ haben = nur 1 Nominatim-Call. PLZ-Geo aendert "
+            "sich nie, TTL 30 Tage ist konservativ.",
+            "Frontend-Card folgt im naechsten Commit.",
+            "Hintergrund: User-Wunsch nach „Turniere in deiner Naehe\". "
+            "PLZ-Feld wurde dafuer Mai 14 schon im Profil ergaenzt — "
+            "jetzt ist die andere Haelfte fertig.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.cstimer-bigfile",
         released=date(2026, 5, 16),
         title="csTimer-Import: grosse Files (30k+ Solves) jetzt importierbar",

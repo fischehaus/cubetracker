@@ -425,3 +425,29 @@ class Friendship(Base):
         UniqueConstraint("requester_id", "target_id", name="uq_friendship_directed"),
         Index("ix_friendship_status_pair", "status", "requester_id", "target_id"),
     )
+
+
+class PostalCodeGeo(Base):
+    """Geocoding-Cache fuer Postleitzahlen (Phase W.wca-comps).
+
+    Lookup ueber Nominatim/OpenStreetMap ist rate-limited (1 req/s) und
+    bei freier Nutzung schlechte Reliability — daher persistenter DB-Cache.
+    PLZ + Land aendert ihre Lat/Lng praktisch nie, TTL = 30 Tage reicht.
+
+    Geteilte Tabelle ueber alle User — wenn 100 User dieselbe PLZ haben,
+    nur ein Nominatim-Call fuer alle.
+    """
+
+    __tablename__ = "postal_code_geo"
+
+    # Composite Primary Key (postal_code, country_iso2) — selbe PLZ kann
+    # in verschiedenen Laendern existieren (z.B. 1010 = AT-Wien + CH-Zuerich).
+    postal_code: Mapped[str] = mapped_column(String(16), primary_key=True)
+    country_iso2: Mapped[str] = mapped_column(String(2), primary_key=True)
+    lat: Mapped[float] = mapped_column(nullable=False)
+    lng: Mapped[float] = mapped_column(nullable=False)
+    fetched_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    # Optional: vom Nominatim-Response uebernommener Stadtname (fuer UI-Anzeige).
+    display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)

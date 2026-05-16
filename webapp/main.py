@@ -30,6 +30,7 @@ from api import leaderboard as leaderboard_api
 from api import sessions as sessions_api
 from api import solves as solves_api
 from api import stats as stats_api
+from api import wca as wca_api
 from auth.config import IS_PROD, require_strong_secret
 from auth.rate_limit import limiter
 
@@ -173,6 +174,7 @@ app.include_router(admin_api.router)
 app.include_router(friends_api.router)
 app.include_router(leaderboard_api.router)
 app.include_router(changelog_api.router)
+app.include_router(wca_api.router)
 
 
 @app.get("/api/health")
