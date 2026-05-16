@@ -75,3 +75,40 @@ export function rollingAverages(
   }
   return result;
 }
+
+/**
+ * Arithmetisches Mittel ohne Trim — fuer mo3 (Mean of 3) und allgemein
+ * fuer Werte wo WCA keinen Trim vorschreibt.
+ *
+ * Liefert null bei:
+ *   - weniger als n Solves
+ *   - mindestens einer DNF (mo3 + DNF = DNF, ohne Ausnahme)
+ */
+export function meanOfN(solves: SolvePoint[]): number | null {
+  if (solves.length === 0) return null;
+  const times = solves.map(effectiveMs);
+  if (times.some((t) => !isFinite(t))) return null; // DNF -> Mean undefined
+  const sum = times.reduce((acc, t) => acc + t, 0);
+  return Math.round(sum / times.length);
+}
+
+/**
+ * Wie rollingAverages, aber mit Mean (kein Trim).
+ * Fuer mo3 (Mean of 3) — gibt es im WCA-Format z.B. bei Big-Cubes
+ * (6x6 / 7x7) wo nur 3 Solves pro Round zaehlen.
+ */
+export function rollingMeans(
+  solves: SolvePoint[],
+  windowSize: number,
+): (number | null)[] {
+  const result: (number | null)[] = new Array(solves.length).fill(null);
+  for (let i = 0; i < solves.length; i++) {
+    if (i + 1 < windowSize) {
+      result[i] = null;
+      continue;
+    }
+    const window = solves.slice(i - windowSize + 1, i + 1);
+    result[i] = meanOfN(window);
+  }
+  return result;
+}

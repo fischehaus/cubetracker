@@ -19,7 +19,11 @@ import {
   useUpdateSolve,
 } from "../lib/api";
 import { formatSolveTime, formatTime } from "../lib/format";
-import { rollingAverages, type SolvePoint } from "../lib/rolling";
+import {
+  rollingAverages,
+  rollingMeans,
+  type SolvePoint,
+} from "../lib/rolling";
 import {
   nextSortState,
   sortIndicator,
@@ -34,9 +38,10 @@ interface Props {
   sessionId: number | null;
 }
 
-// Lookback fuer AO12 — Tabelle zeigt X Zeilen, fetch holt X+11 damit auch
-// der aelteste angezeigte Solve seinen AO12 hat (sonst muesste man "—" zeigen).
-const AO_LOOKBACK = 11;
+// Lookback fuer AO100 — Tabelle zeigt X Zeilen, fetch holt X+99 damit auch
+// der aelteste angezeigte Solve seinen AO100 hat (sonst muesste man "—" zeigen).
+// War vorher 11 fuer AO12; jetzt 99 weil AO100 das groesste Window ist.
+const AO_LOOKBACK = 99;
 
 interface WindowOption {
   value: number;
@@ -87,30 +92,37 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
   const lastSolve = solves && solves.length > 0 ? solves[0] : null;
   const isLastPb = lastSolve != null && stats?.best_solve_id === lastSolve.id;
 
-  // Rolling AO5/AO12 pro Solve. API liefert DESC (neueste zuerst), Rolling
-  // braucht chronologisch (alt -> neu). Wir reversen + mappen zurueck per ID.
-  const { ao5Map, ao12Map } = useMemo(() => {
-    if (!solves || solves.length === 0) {
-      return {
-        ao5Map: new Map<number, number | null>(),
-        ao12Map: new Map<number, number | null>(),
-      };
-    }
+  // Rolling Mo3 / AO5 / AO12 / AO100 pro Solve. API liefert DESC, Rolling
+  // braucht chronologisch — reversen + per ID zurueckmappen.
+  const { mo3Map, ao5Map, ao12Map, ao100Map } = useMemo(() => {
+    const empty = {
+      mo3Map: new Map<number, number | null>(),
+      ao5Map: new Map<number, number | null>(),
+      ao12Map: new Map<number, number | null>(),
+      ao100Map: new Map<number, number | null>(),
+    };
+    if (!solves || solves.length === 0) return empty;
     const chronological = [...solves].reverse();
     const points: SolvePoint[] = chronological.map((s) => ({
       time_ms: s.time_ms,
       dnf: s.dnf,
       plus_two: s.plus_two,
     }));
+    const mo3s = rollingMeans(points, 3);
     const ao5s = rollingAverages(points, 5);
     const ao12s = rollingAverages(points, 12);
+    const ao100s = rollingAverages(points, 100);
+    const mo3M = new Map<number, number | null>();
     const ao5M = new Map<number, number | null>();
     const ao12M = new Map<number, number | null>();
+    const ao100M = new Map<number, number | null>();
     chronological.forEach((s, i) => {
+      mo3M.set(s.id, mo3s[i]);
       ao5M.set(s.id, ao5s[i]);
       ao12M.set(s.id, ao12s[i]);
+      ao100M.set(s.id, ao100s[i]);
     });
-    return { ao5Map: ao5M, ao12Map: ao12M };
+    return { mo3Map: mo3M, ao5Map: ao5M, ao12Map: ao12M, ao100Map: ao100M };
   }, [solves]);
 
   // Tabellen-Rows: nur die ersten tableSize aus DESC, plus Solvenummer +
@@ -125,10 +137,12 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
       time_ms: s.time_ms,
       dnf: s.dnf,
       plus_two: s.plus_two,
+      mo3: mo3Map.get(s.id) ?? null,
       ao5: ao5Map.get(s.id) ?? null,
       ao12: ao12Map.get(s.id) ?? null,
+      ao100: ao100Map.get(s.id) ?? null,
     }));
-  }, [solves, stats?.count, tableSize, ao5Map, ao12Map]);
+  }, [solves, stats?.count, tableSize, mo3Map, ao5Map, ao12Map, ao100Map]);
 
   // Sortierte Anzeige — Sort beruehrt nur die UI, Solvenummer bleibt fest.
   const sortedRows = useMemo(
@@ -348,8 +362,11 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
         </div>
 
         {sortedRows.length > 0 ? (
+          // overflow-x-auto + min-w sorgt fuer horizontalen Scroll wenn
+          // die 6 Spalten (#, Zeit, Mo3, AO5, AO12, AO100, Aktion) in
+          // die schmale Sidebar nicht passen.
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[420px] text-sm">
               <thead>
                 <tr className="border-b border-gray-700 text-left text-xs text-gray-500">
                   <SortableHeader
@@ -367,6 +384,13 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                     onClick={handleSort}
                   />
                   <SortableHeader
+                    label="Mo3"
+                    sortKey="mo3"
+                    activeKey={sortKey}
+                    dir={sortDir}
+                    onClick={handleSort}
+                  />
+                  <SortableHeader
                     label="AO5"
                     sortKey="ao5"
                     activeKey={sortKey}
@@ -379,7 +403,13 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                     activeKey={sortKey}
                     dir={sortDir}
                     onClick={handleSort}
-                    hideOnMobile
+                  />
+                  <SortableHeader
+                    label="AO100"
+                    sortKey="ao100"
+                    activeKey={sortKey}
+                    dir={sortDir}
+                    onClick={handleSort}
                   />
                   <th className="py-1.5 pr-1 text-right font-medium"></th>
                 </tr>
@@ -401,10 +431,16 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                         {formatSolveTime(row.solve)}
                       </td>
                       <td className="py-1.5 pr-2 font-mono text-gray-500">
+                        {row.mo3 !== null ? formatTime(row.mo3) : "–"}
+                      </td>
+                      <td className="py-1.5 pr-2 font-mono text-gray-500">
                         {row.ao5 !== null ? formatTime(row.ao5) : "–"}
                       </td>
-                      <td className="py-1.5 pr-2 font-mono text-gray-500 hidden md:table-cell">
+                      <td className="py-1.5 pr-2 font-mono text-gray-500">
                         {row.ao12 !== null ? formatTime(row.ao12) : "–"}
+                      </td>
+                      <td className="py-1.5 pr-2 font-mono text-gray-500">
+                        {row.ao100 !== null ? formatTime(row.ao100) : "–"}
                       </td>
                       <td className="py-1.5 pr-0 text-right">
                         <button

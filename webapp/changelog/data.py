@@ -38,6 +38,27 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.mo3-ao100",
+        released=date(2026, 5, 14),
+        title="Mo3 + AO100 in Solve-Tabellen + Mobile-Scroll",
+        highlights=[
+            "Tabellen-Spalten erweitert: Solvenummer, Zeit, Mo3, AO5, "
+            "AO12, AO100, Cube, Hardware — alle sortierbar per Spaltenkopf-"
+            "Klick",
+            "Mo3 = arithmetisches Mittel der letzten 3 Solves (kein Trim, "
+            "DNF macht Mo3 ungueltig) — WCA-Standard fuer Big-Cubes (6x6, "
+            "7x7) wo nur 3 Solves pro Round zaehlen",
+            "AO100 = trimmed mean ueber 100er-Fenster, WCA-konform (5er-"
+            "Trim pro Seite, 90er-Mittel)",
+            "Mobile: in der LastSolves-Sidebar passen die 6 Avg-Spalten "
+            "nicht — horizontaler Scroll greift jetzt sauber (min-w + "
+            "overflow-x-auto), Spalten werden nicht mehr gequetscht",
+            "Performance: AO100 rechnet auf bis zu 199 Solves pro "
+            "Tabellen-Render — sliding-window in <50ms, keine spuerbare "
+            "Verzoegerung",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.mobile-qa",
         released=date(2026, 5, 14),
         title="Mobile-Refactor QA-Fixes",

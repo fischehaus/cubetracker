@@ -5,7 +5,7 @@
 
 import { effectiveMs } from "./rolling";
 
-export type SortKey = "num" | "time" | "ao5" | "ao12";
+export type SortKey = "num" | "time" | "mo3" | "ao5" | "ao12" | "ao100";
 export type SortDir = "asc" | "desc";
 
 export interface SortableSolveRow {
@@ -13,8 +13,10 @@ export interface SortableSolveRow {
   time_ms: number;
   dnf: boolean;
   plus_two: boolean;
+  mo3: number | null;
   ao5: number | null;
   ao12: number | null;
+  ao100: number | null;
 }
 
 function nullableValue(v: number | null, dir: SortDir): number {
@@ -59,6 +61,10 @@ export function sortSolveRows<T extends SortableSolveRow>(
               plus_two: b.plus_two,
             });
         break;
+      case "mo3":
+        aVal = nullableValue(a.mo3, dir);
+        bVal = nullableValue(b.mo3, dir);
+        break;
       case "ao5":
         aVal = nullableValue(a.ao5, dir);
         bVal = nullableValue(b.ao5, dir);
@@ -66,6 +72,10 @@ export function sortSolveRows<T extends SortableSolveRow>(
       case "ao12":
         aVal = nullableValue(a.ao12, dir);
         bVal = nullableValue(b.ao12, dir);
+        break;
+      case "ao100":
+        aVal = nullableValue(a.ao100, dir);
+        bVal = nullableValue(b.ao100, dir);
         break;
     }
     const cmp = aVal - bVal;

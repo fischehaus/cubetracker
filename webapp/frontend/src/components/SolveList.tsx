@@ -21,7 +21,11 @@ import {
   formatTime,
   parseTimeInput,
 } from "../lib/format";
-import { rollingAverages, type SolvePoint } from "../lib/rolling";
+import {
+  rollingAverages,
+  rollingMeans,
+  type SolvePoint,
+} from "../lib/rolling";
 import {
   nextSortState,
   sortIndicator,
@@ -97,30 +101,37 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
     return m;
   }, [hardware]);
 
-  // Rolling ao5/ao12 berechnen — der API-Output ist DESC (neueste zuerst).
-  // Fuer rollende Avgs brauchen wir chronologisch (alt → neu), also reversed.
-  const { ao5Map, ao12Map } = useMemo(() => {
-    if (!solves || solves.length === 0) {
-      return {
-        ao5Map: new Map<number, number | null>(),
-        ao12Map: new Map<number, number | null>(),
-      };
-    }
+  // Rolling Mo3/AO5/AO12/AO100 — API liefert DESC, Rolling braucht
+  // chronologisch. Reverse + per ID zurueckmappen.
+  const { mo3Map, ao5Map, ao12Map, ao100Map } = useMemo(() => {
+    const empty = {
+      mo3Map: new Map<number, number | null>(),
+      ao5Map: new Map<number, number | null>(),
+      ao12Map: new Map<number, number | null>(),
+      ao100Map: new Map<number, number | null>(),
+    };
+    if (!solves || solves.length === 0) return empty;
     const chronological = [...solves].reverse();
     const points: SolvePoint[] = chronological.map((s) => ({
       time_ms: s.time_ms,
       dnf: s.dnf,
       plus_two: s.plus_two,
     }));
+    const mo3s = rollingMeans(points, 3);
     const ao5s = rollingAverages(points, 5);
     const ao12s = rollingAverages(points, 12);
+    const ao100s = rollingAverages(points, 100);
+    const mo3M = new Map<number, number | null>();
     const ao5M = new Map<number, number | null>();
     const ao12M = new Map<number, number | null>();
+    const ao100M = new Map<number, number | null>();
     chronological.forEach((s, i) => {
+      mo3M.set(s.id, mo3s[i]);
       ao5M.set(s.id, ao5s[i]);
       ao12M.set(s.id, ao12s[i]);
+      ao100M.set(s.id, ao100s[i]);
     });
-    return { ao5Map: ao5M, ao12Map: ao12M };
+    return { mo3Map: mo3M, ao5Map: ao5M, ao12Map: ao12M, ao100Map: ao100M };
   }, [solves]);
 
   // Solvenummer-Berechnung: API liefert die letzten `limit` Solves in DESC.
@@ -136,11 +147,13 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
       time_ms: s.time_ms,
       dnf: s.dnf,
       plus_two: s.plus_two,
+      mo3: mo3Map.get(s.id) ?? null,
       ao5: ao5Map.get(s.id) ?? null,
       ao12: ao12Map.get(s.id) ?? null,
+      ao100: ao100Map.get(s.id) ?? null,
     }));
     return sortSolveRows(rows, sortKey, sortDir);
-  }, [solves, stats?.count, ao5Map, ao12Map, sortKey, sortDir]);
+  }, [solves, stats?.count, mo3Map, ao5Map, ao12Map, ao100Map, sortKey, sortDir]);
 
   // Edit-Mode starten — nur noch Zeit, Notiz lebt im Detail-Modal.
   function startEdit(solveId: number, initial: string) {
@@ -247,9 +260,10 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         </div>
       )}
 
-      {/* Mobile-First: auf Phone sind nur #/Zeit/AO5/Aktionen sichtbar
-          (Rest hidden md:table-cell) — kein min-w noetig, w-full reicht.
-          overflow-x-auto bleibt als Fallback. */}
+      {/* Mobile-First (2026-05-14):
+          - Auf Phone sichtbar: #, Zeit, Mo3, AO5, Aktionen — der Rest
+            (AO12, AO100, Cube, Hardware) erst ab md sichtbar.
+          - overflow-x-auto bleibt als Fallback. */}
       <div className="overflow-x-auto">
         <table className="w-full text-base">
           <thead>
@@ -269,6 +283,13 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                 onClick={handleSort}
               />
               <SortableTh
+                label="Mo3"
+                sortKey="mo3"
+                activeKey={sortKey}
+                dir={sortDir}
+                onClick={handleSort}
+              />
+              <SortableTh
                 label="AO5"
                 sortKey="ao5"
                 activeKey={sortKey}
@@ -278,6 +299,14 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
               <SortableTh
                 label="AO12"
                 sortKey="ao12"
+                activeKey={sortKey}
+                dir={sortDir}
+                onClick={handleSort}
+                hideOnMobile
+              />
+              <SortableTh
+                label="AO100"
+                sortKey="ao100"
                 activeKey={sortKey}
                 dir={sortDir}
                 onClick={handleSort}
@@ -357,10 +386,16 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                     )}
                   </td>
                   <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top">
+                    {row.mo3 !== null ? formatTime(row.mo3) : "–"}
+                  </td>
+                  <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top">
                     {row.ao5 !== null ? formatTime(row.ao5) : "–"}
                   </td>
                   <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top hidden md:table-cell">
                     {row.ao12 !== null ? formatTime(row.ao12) : "–"}
+                  </td>
+                  <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top hidden md:table-cell">
+                    {row.ao100 !== null ? formatTime(row.ao100) : "–"}
                   </td>
                   <td className="py-2 pr-3 text-gray-300 align-top hidden md:table-cell">
                     {s.cube_type}
