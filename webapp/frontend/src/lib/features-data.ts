@@ -17,8 +17,10 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     icon: "⏱",
     bullets: [
       "WCA-konformer Timer mit Spacebar-Modus + Inspection (15s Countdown, +2/DNF-Penalty automatisch)",
+      "Drei Timer-Modi direkt im Timer-Tab waehlbar: Text-Eingabe / Spacebar-WCA / Spacebar-Pragmatisch",
       "Touch-Timer fuer Phone: Tippen + Halten ersetzt die Space-Taste",
-      "Scramble-Generator je Cube-Type (2x2, 3x3, 4x4, 5x5, 6x6, 7x7, Pyraminx, Skewb, Square-1, Megaminx, Clock)",
+      "Scramble-Generator fuer alle WCA-Cubes (2x2 bis 7x7, Pyraminx, Skewb, Square-1, Megaminx, Clock) PLUS Inoffizielle (Ivy, Gear, Redi, Master Pyraminx, Master Skewb, FTO) — Picker direkt in der Scramble-Karte",
+      "Trainings-Sets: 5/12/25/50/100 Solves planen, am Ende Set-Statistik + Coaching-Feedback",
       "Auto-Preselect: am haeufigsten genutzte Hardware fuer den aktuellen Cube wird vorgeschlagen",
       "Sessions strukturieren das Training (z.B. OH, PLL-Drills, Cold-Solves)",
     ],
@@ -27,9 +29,11 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     title: "Analyse",
     icon: "📈",
     bullets: [
-      "Best Times: Single, AO5, AO12, AO100 — alle WCA-konform berechnet (+2 + DNF-Trim)",
+      "Best Times: Single, Mo3, AO5, AO12, AO100 — alle WCA-konform berechnet (+2 + DNF-Trim)",
+      "Best-Avg-Timestamps: zu jedem Best-AO siehst du das Datum an dem es erreicht wurde",
       "Aktuelle Form-Anzeige: Live-AO5/AO12 vs Mittel der letzten 100/500/alle",
-      "Sortierbare Solve-Liste mit Solvenummern, AO5/AO12 als Spalten, Hardware-Zuordnung",
+      "Sortierbare Solve-Liste mit Solvenummern, Mo3/AO5/AO12/AO100 als Spalten, Hardware-Zuordnung",
+      "Detail-Modal pro Solve: vollstaendiger Scramble + Notiz + Kontext via ℹ-Button",
       "Charts: Trends ueber Zeit, Distribution-Verteilung, taegliche Aktivitaet",
       "Hardware-Performance-Vergleich: welcher Cube ist schneller fuer welchen Type",
     ],
@@ -40,7 +44,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     bullets: [
       "Achievements: 30+ Erfolge die du nebenbei freischaltest",
       "Daily Challenges: jeden Tag eine neue kleine Aufgabe",
-      "Algs-Trainer fuer PLL + OLL mit Visualisierung + Selbst-Test-Modus",
+      "Algs-Trainer fuer PLL + OLL mit Selbst-Test-Modus — OLL mit allen 57 Visualisierungen (PLL-Bilder folgen)",
     ],
   },
   {
@@ -78,6 +82,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     bullets: [
       "Email-Verifikation + Password-Reset per Mail",
       "Display-Name + Email-Change-Flow mit Re-Verifikation",
+      "Optionale Postleitzahl im Profil (Vorbereitung fuer „WCA-Turniere in deiner Naehe\")",
       "Account-Loeschung (DSGVO-konform, alle Daten weg)",
       "Multi-User-Isolation: deine Daten sind technisch von anderen getrennt",
     ],

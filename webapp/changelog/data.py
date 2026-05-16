@@ -38,6 +38,28 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.features-refresh",
+        released=date(2026, 5, 16),
+        title="Feature-Liste „Was kann cubetracker?" auf Stand gebracht",
+        highlights=[
+            "Solving: Scramble-Picker (WCA + Inoffiziell: Ivy, Gear, "
+            "Redi, Master Pyraminx, Master Skewb, FTO) ergaenzt — war "
+            "in der Marketing-Liste nicht sichtbar, obwohl seit heute "
+            "im Timer-Tab nutzbar.",
+            "Solving: Drei-Modi-Picker (Text/WCA/Pragmatisch) + "
+            "Trainings-Sets (5/12/25/50/100 + Set-Statistik + Coaching-"
+            "Feedback) waren portiert aber nicht erwaehnt — jetzt drin.",
+            "Analyse: Mo3 in Best-Times-Aufzaehlung dazu (heute neu in "
+            "den Tabellen). Best-Avg-Timestamps + Detail-Modal pro "
+            "Solve waren portiert aber stumm — jetzt erwaehnt.",
+            "Trainer: „Algs-Trainer mit Visualisierung\" war "
+            "ueberoptimistisch — gilt nur fuer OLL (57 Bilder). PLL-"
+            "Bilder folgen noch, jetzt ehrlich kommuniziert.",
+            "Account: Postleitzahl im Profil dazu (Vorbereitung fuer "
+            "„WCA-Turniere in deiner Naehe\").",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.welle2-3-qa",
         released=date(2026, 5, 16),
         title="QA-Fixes nach Welle 2 + 3",
