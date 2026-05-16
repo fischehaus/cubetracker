@@ -4,7 +4,7 @@ Projekt-spezifische Konfiguration für [Claude Code](https://claude.ai/code).
 
 ## Hooks
 
-Fuenf Mental-Model-Fehler / Klassiker-Bugs aus der Projekt-Historie
+Sechs Mental-Model-Fehler / Klassiker-Bugs aus der Projekt-Historie
 sollen automatisch aufgefangen werden:
 
 | # | Schmerzpunkt | Hook |
@@ -14,6 +14,7 @@ sollen automatisch aufgefangen werden:
 | 3 | Neuen Patch-Notes-Eintrag in `webapp/changelog/data.py` nicht getaggt | `post-git-commit.sh` Teil B (PostToolUse-Notice) |
 | 4 | Session-Start ohne Repo-Context → Mental-Model-Drift | `session-start-context.sh` (SessionStart-Notice) |
 | 5 | Hartkodiertes `localhost:` in TS/TSX-Files (v1.0.1-Klassiker-Bug) | `post-edit-hardcoded-url.sh` (PostToolUse-Notice) |
+| 6 | Session beenden mit uncommitted/unpushed Zeug oder fehlenden Tags | `stop-mini-check.sh` (Stop-Hook, 1×/Session) + `/abschluss` Slash-Command (voller Check) |
 
 ### Files
 
@@ -21,12 +22,30 @@ sollen automatisch aufgefangen werden:
 .claude/
 ├── README.md                      (dieses File)
 ├── settings.json                  (Hook-Konfig — commitbar, gilt fuer alle Sessions)
+├── commands/
+│   └── abschluss.md               (Slash-Command /abschluss — 8-Punkte-Check)
 └── hooks/
     ├── session-start-context.sh   (Repo-Stand + Reminders beim Start)
     ├── pre-bash-dev-server.sh     (Block uvicorn / npm run dev / vite)
     ├── post-git-commit.sh         (Push-Reminder + Tag-Reminder)
-    └── post-edit-hardcoded-url.sh (Warn bei localhost:/127.0.0.1: in *.ts/*.tsx)
+    ├── post-edit-hardcoded-url.sh (Warn bei localhost:/127.0.0.1: in *.ts/*.tsx)
+    └── stop-mini-check.sh         (Stop-Hook, 1×/Session: uncommitted + unpushed)
 ```
+
+### /abschluss — Session-Ende-Check
+
+Ruf am Ende einer Arbeits-Session `/abschluss` auf. Geht 8 Checks durch:
+
+1. uncommitted Aenderungen im Working-Tree
+2. ungepushte Commits
+3. `feat(W.*)`/`fix(W.*)`-Commits ohne Patch-Notes-Eintrag
+4. Patch-Notes-Versionen ohne Git-Tag
+5. neue User-facing-Features ohne `features-data.ts`-Update
+6. STATUS.md / NEXT_SESSION.md veraltet?
+7. offene Todos
+8. Backend-Smoke-Test (lokal mit venv)
+
+Bei ⚠ Befunden: bietet Fixes an. Bei allem grün: „Session kann sauber beendet werden."
 
 ### Override fuer echtes lokales Debugging
 

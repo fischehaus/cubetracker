@@ -187,3 +187,31 @@ Spaetere Phasen erweitern via Alembic-Migrations:
 - Backend: `localhost:8000` (FastAPI mit uvicorn)
 - Frontend: `localhost:5173` (Vite-Dev-Server)
 - API-Calls: Frontend → `http://localhost:8000`
+
+## Session-Workflow (verbindlich)
+
+**Bei Session-Ende:** der User kann jederzeit `/abschluss` aufrufen, um eine
+8-Punkte-Checkliste laufen zu lassen (Git-Status, Patch-Notes, Tags,
+features-data.ts, Doku, Todos, Backend-Smoke). Skill liegt in
+`.claude/commands/abschluss.md`. Wenn der User sagt **„Session beenden"**,
+**„das wars für heute"**, **„ich höre auf"** oder ähnlich → ruf den Skill
+proaktiv auf, bevor du dich verabschiedest.
+
+**Stop-Hook (Mini-Backstop):** läuft automatisch 1× pro Session (siehe
+`.claude/hooks/stop-mini-check.sh`). Meldet uncommitted Änderungen +
+unpushed Commits. Greift als Backup falls der User vergisst `/abschluss`
+aufzurufen.
+
+**Patch-Notes-Konvention:** jeder `feat(W.X)`/`fix(W.X)`-Commit braucht
+einen PatchNote-Eintrag in `webapp/changelog/data.py` mit
+`version="2.0.0-alpha.W.X"`. Plus Git-Tag `v2.0.0-alpha.W.X` nach Push.
+Der `post-git-commit.sh`-Hook erinnert daran.
+
+**Bei User-facing-Features:** Bullet in `webapp/frontend/src/lib/features-data.ts`
+ergänzen (zeigt sich auf Login-Seite + im „Was kann diese App?"-Modal).
+Wird im `/abschluss`-Check explizit kontrolliert.
+
+**Kein Bash-Heredoc mit deutschen Anführungszeichen** in Patch-Notes:
+`„...""` (U+201E + U+0022) zerschießt Python-Strings → Render-Deploy-
+Crash. Stattdessen: nur ASCII-Quotes oder Heredoc-Output via Python-
+Script regenerieren.

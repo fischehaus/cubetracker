@@ -38,6 +38,32 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.abschluss-skill",
+        released=date(2026, 5, 16),
+        title="Session-Ende-Check: /abschluss-Slash-Command + Stop-Hook-Backstop",
+        highlights=[
+            "Neuer Slash-Command /abschluss fuer den User-getriggerten "
+            "Session-Ende-Check. Geht eine 8-Punkte-Liste durch: "
+            "uncommitted Aenderungen, unpushed Commits, fehlende Patch-"
+            "Notes-Eintraege, fehlende Git-Tags, features-data.ts-Update, "
+            "Doku-Aktualitaet, offene Todos, Backend-Smoke-Test (lokal "
+            "Parse + Module-Import). Bei Luecken bietet Fixes an.",
+            "Neuer Stop-Hook stop-mini-check.sh: laeuft 1x pro Session "
+            "(via once:true) als Mini-Backstop wenn Claude zum ersten Mal "
+            "antwortet. Meldet nur das absolut Wichtigste (uncommitted + "
+            "unpushed) und verweist auf /abschluss fuer den vollen Check.",
+            "Konvention in CLAUDE.md verankert: bei Aussagen wie „Session "
+            "beenden\” / „das wars fuer heute\” → /abschluss proaktiv "
+            "aufrufen. Plus Hinweis-Block ueber Patch-Notes-Konvention, "
+            "Tag-Konvention, features-data.ts-Konvention.",
+            "Hintergrund: heute (2026-05-16) ist mehrfach was durchge"
+            "rutscht: 26 ungetaggte Patch-Notes-Versionen, features-data.ts "
+            "wurde erst nach User-Nachfrage aktualisiert, Quote-Bug hat "
+            "5 Render-Deploys gekillt. Der /abschluss-Check faengt all das "
+            "in Zukunft systematisch ab.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.features-update-wca-news",
         released=date(2026, 5, 16),
         title="Was kann die App: Speedcubing-Welt + Country-Update",
