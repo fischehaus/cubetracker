@@ -38,6 +38,32 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.scramble-picker",
+        released=date(2026, 5, 16),
+        title="Scramble-Picker: WCA + Inoffiziell (Ivy, Gear, Redi, …)",
+        highlights=[
+            "ScrambleCard hat jetzt einen Picker: Toggle WCA ↔ "
+            "Inoffiziell + Dropdown mit den verfuegbaren Typen. Default "
+            "folgt weiterhin dem gewaehlten Cube-Type — bei Override "
+            "erscheint ein „↺ auto"-Button um wieder zum Default zu "
+            "springen.",
+            "WCA-Liste: alle WCA-Cubes (3x3, 4x4, …, Pyraminx, Skewb, "
+            "Square-1, Megaminx, Clock) — werden weiterhin von scrambow "
+            "generiert (WCA-quality, Mindest-Distanz).",
+            "Inoffizielle Cubes (User-Wunsch): Ivy Cube, Gear Cube, "
+            "Redi Cube, Master Pyraminx, Master Skewb, FTO. FTO via "
+            "scrambow, die anderen via eigenem Random-Move-Generator mit "
+            "„kein direktes Wiederholen derselben Achse"-Filter — nicht "
+            "WCA-quality, aber sauber fuers Casual-Training.",
+            "Cube-Type-Wechsel resettet den Picker automatisch, sodass "
+            "der neue Cube wieder seinen passenden Scramble bekommt — "
+            "verhindert „Ivy-Scramble fuer 3x3"-Stolperfallen.",
+            "Session.scramble_type (csTimer-Import + PLL/OLL-Trainings-"
+            "Sessions) wird weiterhin respektiert — User-Picker schlaegt "
+            "es aber, falls man manuell aenderen will.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-layout",
         released=date(2026, 5, 16),
         title="Mobile-Timer-Layout: Scramble direkt ueber Timer + Selektoren unten",

@@ -1,10 +1,14 @@
-// Scramble-Generierung (Phase 8a) — duenner Wrapper um scrambow.
+// Scramble-Generierung (Phase 8a) — duenner Wrapper um scrambow + eigene
+// Random-Move-Generatoren fuer Puzzles, die scrambow nicht abdeckt.
 //
 // scrambow = csTimer-Algorithmen geportet, deckt alle WCA-Events +
-// die meisten Subsets fuer Algorithmus-Training ab.
+// die meisten Subsets fuer Algorithmus-Training ab. Aber: Ivy, Gear,
+// Redi, Master Pyraminx, Master Skewb sind NICHT in scrambow drin.
+// Fuer diese liefern wir einen einfachen Random-Move-Scrambler mit
+// „kein direktes Wiederholen derselben Achse"-Filter — nicht
+// WCA-quality, aber sauber fuer Casual-Training.
 //
-// Architektur: pure helpers + Mapping app-cube_type → scrambow-type +
-// Subset-Liste fuer den spaeteren Algorithm-Trainer (Phase 8b).
+// Architektur: pure helpers + Kategorie-Listen fuer die UI.
 //
 // Kein Singleton-State — jeder Aufruf macht eine frische Scrambow-
 // Instanz. Das ist OK weil scrambow keine teure Initialisierung hat
@@ -114,7 +118,8 @@ const CSTIMER_TO_SCRAMBOW: Record<string, string> = {
  * Loest einen Session.scramble_type-Override auf den scrambow-Code auf.
  * Reihenfolge:
  *   1. csTimer-Code (z.B. "444wca") → scrambow-Code aus der Map
- *   2. Bereits scrambow-Code oder Trainer-Subset (z.B. "pll", "333") → direkt
+ *   2. Bereits scrambow-Code, Custom-Puzzle (ivy/gear/...) oder Trainer-
+ *      Subset (z.B. "pll", "333") → direkt
  *   3. Unbekannter String → null (Caller faellt auf cube_type-Mapping zurueck)
  */
 export function resolveScrambleTypeOverride(raw: string): string | null {
@@ -124,27 +129,161 @@ export function resolveScrambleTypeOverride(raw: string): string | null {
   if (trimmed in CSTIMER_TO_SCRAMBOW) {
     return CSTIMER_TO_SCRAMBOW[trimmed];
   }
-  // 2) Bereits scrambow-Code? Wir akzeptieren alles was scrambow kennt
-  //    und alles aus der Trainer-Subset-Liste. Whitelist statt Blackbox.
-  const knownScrambow = new Set([
-    "222", "333", "444", "555", "666", "777",
-    "pyraminx", "skewb", "square-1", "megaminx", "clock",
+  // 2) Bereits scrambow-Code? Wir akzeptieren alles was scrambow kennt,
+  //    unsere Custom-Puzzles und alles aus der Trainer-Subset-Liste.
+  //    Whitelist statt Blackbox.
+  const known = new Set([
+    ...WCA_SCRAMBLE_TYPES.map((t) => t.code),
+    ...UNOFFICIAL_SCRAMBLE_TYPES.map((t) => t.code),
+    "fto",
     ...ALG_TRAINER_SUBSETS,
   ]);
-  if (knownScrambow.has(trimmed)) return trimmed;
+  if (known.has(trimmed)) return trimmed;
   // 3) Unbekannt → Caller soll Override ignorieren
   return null;
+}
+
+// =====================================================================
+// Scramble-Kategorien fuer die Picker-UI in ScrambleCard (Welle 3,
+// 2026-05-16). WCA = offizielle Wettkampf-Cubes, Inoffiziell = alles
+// andere, was wir scramblen koennen (teils via scrambow, teils via
+// unserem eigenen Random-Move-Fallback weiter unten).
+// =====================================================================
+
+export interface ScrambleTypeInfo {
+  /** scrambow-Code oder CUSTOM_PUZZLE_SPECS-Key */
+  code: string;
+  /** UI-Label (Deutsch / kurz) */
+  label: string;
+}
+
+/** WCA-Cubes — alle haben einen scrambow-Generator. */
+export const WCA_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
+  { code: "333", label: "3x3" },
+  { code: "222", label: "2x2" },
+  { code: "444", label: "4x4" },
+  { code: "555", label: "5x5" },
+  { code: "666", label: "6x6" },
+  { code: "777", label: "7x7" },
+  { code: "pyraminx", label: "Pyraminx" },
+  { code: "skewb", label: "Skewb" },
+  { code: "square-1", label: "Square-1" },
+  { code: "megaminx", label: "Megaminx" },
+  { code: "clock", label: "Clock" },
+];
+
+/**
+ * Inoffizielle Puzzles. Teilweise via scrambow (fto), teils via
+ * eigenem Random-Move-Generator (ivy, gear, redi, master pyraminx,
+ * master skewb). Die eigenen Scrambles sind NICHT WCA-quality
+ * (keine garantierte Mindest-Distanz), aber gut genug fuer Casual-
+ * Training.
+ */
+export const UNOFFICIAL_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
+  { code: "ivy", label: "Ivy Cube" },
+  { code: "gear", label: "Gear Cube" },
+  { code: "redi", label: "Redi Cube" },
+  { code: "master_pyraminx", label: "Master Pyraminx" },
+  { code: "master_skewb", label: "Master Skewb" },
+  { code: "fto", label: "FTO (Face-Turning Octahedron)" },
+];
+
+/**
+ * Defaul-Scramble-Code fuer einen App-cube_type — Convenience-Wrapper,
+ * gibt dasselbe zurueck wie cubeTypeToScrambowType, aber semantisch
+ * klar als „passender Default fuer den Picker" gemeint.
+ */
+export function defaultScrambleTypeForCube(cubeType: string): string {
+  return cubeTypeToScrambowType(cubeType);
+}
+
+/**
+ * Spec fuer den eigenen Random-Move-Generator. `moves` = Basis-Faces,
+ * `modifiers` = Suffixe (z.B. "" oder "'"), `length` = Default-Move-Count.
+ * Konsekutiv-Filter: kein direkt wiederholtes Base-Move (z.B. "L L'" raus).
+ */
+interface CustomScrambleSpec {
+  moves: string[];
+  modifiers: string[];
+  length: number;
+}
+
+const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
+  // Ivy Cube: 4 Eck-Achsen. Notation kompatibel mit gaengiger
+  // Speedcubing-Community (L, R, B, F + optionaler ').
+  ivy: {
+    moves: ["L", "R", "B", "F"],
+    modifiers: ["", "'"],
+    length: 10,
+  },
+  // Gear Cube: 3 Achsen, 180°-Drehungen sind dominant.
+  // Notation: U/R/F mit optionalem "2".
+  gear: {
+    moves: ["U", "R", "F"],
+    modifiers: ["", "2"],
+    length: 12,
+  },
+  // Redi Cube: 8 Corners (gross/klein-Buchstaben fuer obere/untere Reihe).
+  redi: {
+    moves: ["L", "R", "B", "F", "l", "r", "b", "f"],
+    modifiers: ["", "'"],
+    length: 15,
+  },
+  // Master Pyraminx: 4 Tip-Achsen + 4 Wide-Layer.
+  master_pyraminx: {
+    moves: ["U", "L", "R", "B", "u", "l", "r", "b"],
+    modifiers: ["", "'"],
+    length: 25,
+  },
+  // Master Skewb: dieselben Achsen wie Master Pyraminx (4 Corners + Wides).
+  master_skewb: {
+    moves: ["U", "L", "R", "B", "u", "l", "r", "b"],
+    modifiers: ["", "'"],
+    length: 25,
+  },
+};
+
+/** Random-Helper — Math.random ist fuer Scrambles voellig ausreichend. */
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/**
+ * Erzeugt einen Random-Move-Scramble nach der Spec. „Kein direktes
+ * Wiederholen derselben Base"-Filter (sonst kommen Moves wie "L L'"
+ * raus, die effektiv nichts tun).
+ */
+function generateCustomScramble(spec: CustomScrambleSpec): string {
+  const moves: string[] = [];
+  let lastBase: string | null = null;
+  while (moves.length < spec.length) {
+    const base = pick(spec.moves);
+    if (base === lastBase) continue;
+    lastBase = base;
+    const mod = pick(spec.modifiers);
+    moves.push(base + mod);
+  }
+  return moves.join(" ");
 }
 
 /**
  * Generiert einen Scramble-String fuer den gegebenen Typ (cube_type
  * oder scramble_type-override aus Session).
  *
- * Bei Fehler liefern wir leeren String — UI zeigt dann fallback-
- * meldung „Scramble nicht verfuegbar". Wir crashen nicht, weil ein
- * fehlender Scramble den Timer nicht blockieren soll.
+ * Reihenfolge:
+ *   1. Custom-Puzzle? → eigener Random-Move-Generator
+ *   2. Sonst scrambow probieren
+ *   3. Bei Fehler → leerer String (UI zeigt Fallback-Meldung)
+ *
+ * Wir crashen nicht, weil ein fehlender Scramble den Timer nicht
+ * blockieren soll.
  */
 export function generateScramble(typeOverride: string): string {
+  // 1) Custom Puzzles, die scrambow nicht kann
+  if (typeOverride in CUSTOM_PUZZLE_SPECS) {
+    return generateCustomScramble(CUSTOM_PUZZLE_SPECS[typeOverride]);
+  }
+  // 2) scrambow-Pfad
   try {
     const scrambow = new Scrambow().setType(typeOverride);
     const result = scrambow.get(1);

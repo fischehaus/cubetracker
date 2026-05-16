@@ -8,9 +8,12 @@
 import { describe, expect, it } from "vitest";
 import {
   cubeTypeToScrambowType,
+  defaultScrambleTypeForCube,
   generateScramble,
   isAlgTrainerSubset,
   resolveScrambleTypeOverride,
+  UNOFFICIAL_SCRAMBLE_TYPES,
+  WCA_SCRAMBLE_TYPES,
 } from "./scramble";
 
 describe("cubeTypeToScrambowType", () => {
@@ -106,4 +109,66 @@ describe("generateScramble (smoke)", () => {
       expect(s.length).toBeGreaterThan(0);
     });
   }
+});
+
+describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
+  // Inoffizielle Cubes: eigener Random-Move-Generator. Tests checken:
+  //   1. non-empty output
+  //   2. erwartete Anzahl Moves (split-by-space)
+  //   3. keine direkt wiederholten Bases (Ivy "L L'" waere sinnlos)
+  const cases: { type: string; minMoves: number }[] = [
+    { type: "ivy", minMoves: 10 },
+    { type: "gear", minMoves: 12 },
+    { type: "redi", minMoves: 15 },
+    { type: "master_pyraminx", minMoves: 25 },
+    { type: "master_skewb", minMoves: 25 },
+  ];
+  for (const { type, minMoves } of cases) {
+    it(`"${type}" produces a scramble with ${minMoves} moves`, () => {
+      const s = generateScramble(type);
+      const moves = s.split(/\s+/).filter((x) => x.length > 0);
+      expect(moves.length).toBe(minMoves);
+    });
+    it(`"${type}" never repeats the same base move directly`, () => {
+      // 10 Iterationen reichen um zufaellige Glueckstreffer auszuschliessen.
+      for (let i = 0; i < 10; i++) {
+        const s = generateScramble(type);
+        const moves = s.split(/\s+/).filter((x) => x.length > 0);
+        for (let j = 1; j < moves.length; j++) {
+          // Base = Move ohne den Modifier-Suffix (' oder 2)
+          const base = (m: string) => m.replace(/['2]$/, "");
+          expect(base(moves[j]), `Move ${j} (${moves[j]}) sollte nicht dieselbe Base haben wie ${moves[j - 1]}`).not.toBe(base(moves[j - 1]));
+        }
+      }
+    });
+  }
+  it("fto (scrambow-unterstuetzt) produces non-empty scramble", () => {
+    // FTO ist von scrambow supportiert — wir routen es zu scrambow,
+    // nicht zu unserem Custom-Generator.
+    const s = generateScramble("fto");
+    expect(s.length).toBeGreaterThan(0);
+  });
+});
+
+describe("Scramble-Type-Listen + Helpers", () => {
+  it("WCA_SCRAMBLE_TYPES enthaelt alle WCA-Events", () => {
+    const codes = WCA_SCRAMBLE_TYPES.map((t) => t.code);
+    expect(codes).toContain("333");
+    expect(codes).toContain("pyraminx");
+    expect(codes).toContain("clock");
+  });
+  it("UNOFFICIAL_SCRAMBLE_TYPES enthaelt Ivy + Gear (User-Wunsch)", () => {
+    const codes = UNOFFICIAL_SCRAMBLE_TYPES.map((t) => t.code);
+    expect(codes).toContain("ivy");
+    expect(codes).toContain("gear");
+  });
+  it("defaultScrambleTypeForCube == cubeTypeToScrambowType (Convenience-Wrapper)", () => {
+    expect(defaultScrambleTypeForCube("3x3")).toBe("333");
+    expect(defaultScrambleTypeForCube("Pyraminx")).toBe("pyraminx");
+  });
+  it("resolveScrambleTypeOverride akzeptiert Custom-Puzzles", () => {
+    expect(resolveScrambleTypeOverride("ivy")).toBe("ivy");
+    expect(resolveScrambleTypeOverride("gear")).toBe("gear");
+    expect(resolveScrambleTypeOverride("fto")).toBe("fto");
+  });
 });
