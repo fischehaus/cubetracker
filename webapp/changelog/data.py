@@ -38,6 +38,26 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-comps-frontend",
+        released=date(2026, 5, 16),
+        title="WCA-Turniere-Card im Dashboard live",
+        highlights=[
+            "Neue Karte „🏆 WCA-Turniere\" im Dashboard (temporaer am "
+            "Ende — Phase C wandert sie in eine eigene „Speedcubing-"
+            "Welt\"-Sektion gemeinsam mit den geplanten News).",
+            "Pro Turnier sichtbar: Name (Link zur WCA-Detailseite), "
+            "Datum (Range-formatiert dt.), Stadt, Anzahl Events, "
+            "Distanz in km von deiner Profil-PLZ (Luftlinie).",
+            "Distanz-Selector: 100 / 300 / 500 / 1000 / 5000 km. Bei "
+            "leerer Liste auf Default-300km: ein-Klick auf „Weltweit "
+            "suchen\".",
+            "Empty-State wenn keine PLZ im Profil: Hint mit Pfad "
+            "Verwaltung → Account zum Setzen.",
+            "Daten direkt von der offiziellen WCA-API (1h Cache); "
+            "Geocoding via OpenStreetMap-Nominatim (30 Tage DB-Cache).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-comps-backend",
         released=date(2026, 5, 16),
         title="Backend fuer „WCA-Turniere in der Naehe\" gebaut",

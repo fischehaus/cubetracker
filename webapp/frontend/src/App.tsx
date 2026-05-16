@@ -46,6 +46,7 @@ import { TabBar, type AppTab } from "./components/TabBar";
 import { TrainerTab } from "./components/TrainerTab";
 import { TrendsChart } from "./components/TrendsChart";
 import { VerwaltungTab } from "./components/VerwaltungTab";
+import { WcaUpcomingCard } from "./components/WcaUpcomingCard";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -304,6 +305,10 @@ function DashboardTab({
       </div>
       <MultiCompareCard sessionId={sessionId} />
       <StatsCard cubeType={undefined} sessionId={sessionId} />
+      {/* W.wca-comps: WCA-Turniere in der Naehe. Temporaer hier am Ende —
+          in Phase C (Dashboard-Refactor) wandert das in eine eigene
+          „Speedcubing-Welt"-Sektion gemeinsam mit der News-Card. */}
+      <WcaUpcomingCard />
     </div>
   );
 }

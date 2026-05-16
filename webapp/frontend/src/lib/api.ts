@@ -1509,3 +1509,84 @@ export function usePatchNotes(): UseQueryResult<ChangelogResponse> {
     staleTime: 5 * 60_000,
   });
 }
+
+// ============================================================
+// WCA-Turniere (Phase W.wca-comps)
+// ============================================================
+
+export interface WcaCompetition {
+  id: string;
+  name: string;
+  city: string | null;
+  country_iso2: string | null;
+  venue: string | null;
+  start_date: string;
+  end_date: string;
+  registration_open: string | null;
+  registration_close: string | null;
+  url: string;
+  website: string | null;
+  latitude_degrees: number | null;
+  longitude_degrees: number | null;
+  event_ids: string[];
+  events_count: number;
+  distance_km: number | null;
+}
+
+export interface UpcomingCompetitionsResponse {
+  user_location: {
+    postal_code: string;
+    country_iso2: string | null;
+    lat: number;
+    lng: number;
+    display_name: string | null;
+  };
+  filter: {
+    max_distance_km: number | null;
+    days_ahead: number;
+    limit: number;
+  };
+  competitions: WcaCompetition[];
+  total_found: number;
+}
+
+/**
+ * WCA-Turniere in der Naehe des Users. Voraussetzung: User hat
+ * postal_code im Profil — Backend antwortet sonst 422.
+ *
+ * Default: max 300km, 10 Eintraege, 6 Monate Vorausschau.
+ * Cache 30min (Liste aendert sich selten — WCA published Turniere
+ * Wochen vorher).
+ */
+export function useUpcomingCompetitions(
+  opts?: {
+    enabled?: boolean;
+    maxDistanceKm?: number;
+    limit?: number;
+    daysAhead?: number;
+  },
+): UseQueryResult<UpcomingCompetitionsResponse> {
+  const maxDistanceKm = opts?.maxDistanceKm ?? 300;
+  const limit = opts?.limit ?? 10;
+  const daysAhead = opts?.daysAhead ?? 180;
+  return useQuery({
+    queryKey: ["wca-upcoming", maxDistanceKm, limit, daysAhead],
+    queryFn: async () => {
+      const r = await api.get<UpcomingCompetitionsResponse>(
+        "/wca/competitions/upcoming",
+        {
+          params: {
+            max_distance_km: maxDistanceKm,
+            limit,
+            days_ahead: daysAhead,
+          },
+        },
+      );
+      return r.data;
+    },
+    enabled: opts?.enabled ?? true,
+    staleTime: 30 * 60_000,
+    // Backend caching ist 1h, kein retry-spam bei externen API-Fails.
+    retry: 1,
+  });
+}
