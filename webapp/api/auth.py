@@ -348,12 +348,16 @@ def update_me(
     zusaetzlich zum UserUpdate-Schema (das `extra=forbid` hat).
     """
     # Whitelist erweitert um is_discoverable (Phase W.9) + postal_code
-    # (Phase W.future-tournaments). Email/Password bleiben aussen vor —
-    # die haben ihre eigenen sicherheits-relevanten Flows.
-    _ALLOWED_FIELDS = {"display_name", "is_discoverable", "postal_code"}
+    # (Phase W.future-tournaments) + country_iso2 (Phase W.country-feld).
+    # Email/Password bleiben aussen vor — die haben ihre eigenen
+    # sicherheits-relevanten Flows.
+    _ALLOWED_FIELDS = {"display_name", "is_discoverable", "postal_code", "country_iso2"}
     data = payload.model_dump(exclude_unset=True)
     for key, value in data.items():
         if key in _ALLOWED_FIELDS:
+            # Phase W.country-feld: ISO-Codes uppercase normalisieren.
+            if key == "country_iso2" and isinstance(value, str):
+                value = value.strip().upper() or None
             setattr(current_user, key, value)
     db.commit()
     db.refresh(current_user)

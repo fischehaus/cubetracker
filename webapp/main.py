@@ -80,6 +80,10 @@ async def lifespan(app: FastAPI):
                 # Phase W.future-tournaments: Postleitzahl-Feld fuer
                 # spaeteres "Turniere in der Naehe"-Feature.
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS postal_code VARCHAR(16)",
+                # Phase W.country-feld (2026-05-16): explizites Land im Profil
+                # (ISO-3166-1-alpha-2). Vorher haben wir das aus der PLZ
+                # abgeleitet — funktioniert nur fuer DACH. Jetzt explizit.
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS country_iso2 VARCHAR(2)",
                 # QA-Fix H1: cross-direction Race-Schutz auf friendships.
                 # Functional unique index garantiert dass es NUR EINE Row pro
                 # User-Paar gibt, egal welche Richtung (A->B oder B->A).

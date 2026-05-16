@@ -26,7 +26,11 @@ export function WcaUpcomingCard() {
 
   // 422-Fall: keine Postleitzahl im Profil
   const errMsg = error instanceof Error ? error.message : String(error || "");
-  const isMissingPostalCode = /Postleitzahl/i.test(errMsg);
+  // Backend liefert 422 mit verschiedenen Detail-Texten je nach fehlendem
+  // Feld — wir matchen lasch (PLZ, Land, Postleitzahl) damit beide Falle
+  // den Onboarding-Empty-State triggern.
+  const isProfileIncomplete =
+    /Postleitzahl|Land|country|PLZ/i.test(errMsg);
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
@@ -55,7 +59,7 @@ export function WcaUpcomingCard() {
             onChange={(e) => setMaxDistanceKm(parseInt(e.target.value, 10))}
             className="rounded border border-gray-700 bg-gray-800 px-2 py-0.5 text-gray-200 focus:border-purple-500 focus:outline-none"
             aria-label="Maximale Distanz"
-            disabled={isLoading || isMissingPostalCode}
+            disabled={isLoading || isProfileIncomplete}
           >
             {DISTANCE_OPTIONS.map((km) => (
               <option key={km} value={km}>
@@ -71,25 +75,30 @@ export function WcaUpcomingCard() {
         <p className="text-sm text-gray-500">Lade Turniere von der WCA-API …</p>
       )}
 
-      {isMissingPostalCode && (
+      {isProfileIncomplete && (
         <div className="rounded border border-amber-500/40 bg-amber-500/5 p-3 text-sm text-amber-200">
-          <p className="font-medium">Keine Postleitzahl im Profil</p>
+          <p className="font-medium">Profil unvollstaendig</p>
           <p className="mt-1 text-amber-300/80">
-            Damit „Turniere in deiner Naehe" funktioniert, setze deine PLZ
-            unter Verwaltung → Einstellungen → Account → Profil. Die Distanz
-            wird per Luftlinie berechnet, deine genaue Adresse bleibt privat.
+            Damit „Turniere in deiner Naehe" funktioniert, setze{" "}
+            <strong>Postleitzahl und Land</strong> unter{" "}
+            <strong>Verwaltung → Einstellungen → Account → Profil</strong>.
+            Die Distanz wird per Luftlinie berechnet, deine genaue Adresse
+            bleibt privat.
+          </p>
+          <p className="mt-1 text-amber-300/60">
+            Genaue Backend-Meldung: {errMsg}
           </p>
         </div>
       )}
 
-      {error && !isMissingPostalCode && (
+      {error && !isProfileIncomplete && (
         <div className="rounded border border-red-500/40 bg-red-500/5 p-3 text-sm text-red-200">
           <p className="font-medium">Konnte WCA-Turniere nicht laden</p>
           <p className="mt-1 text-red-300/80">{errMsg}</p>
         </div>
       )}
 
-      {data && !isMissingPostalCode && (
+      {data && !isProfileIncomplete && (
         <>
           {data.competitions.length === 0 ? (
             <p className="text-sm text-gray-500">

@@ -55,18 +55,37 @@ async def upcoming_competitions(
 ) -> dict[str, Any]:
     """Naechste WCA-Turniere in der Naehe des Users."""
     postal = (current_user.postal_code or "").strip()
+    # User.country_iso2 hat Vorrang (Phase W.country-feld) — fuer Nicht-DACH-
+    # User funktioniert die PLZ-Heuristik nicht. Falls leer: fallback auf
+    # PLZ-Detection (DE/AT/CH-Default fuer 5/4-stellige Codes).
+    user_country = (current_user.country_iso2 or "").strip().upper() or None
     if not postal:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=(
                 "Keine Postleitzahl im Profil hinterlegt. "
-                "Setze sie in Verwaltung -> Einstellungen -> Account."
+                "Setze sie unter Verwaltung -> Einstellungen -> Account."
+            ),
+        )
+    # Wenn weder Land im Profil noch heuristisch aus PLZ bestimmbar →
+    # User soll Land explizit setzen (sonst geocoding-Treffer schlecht +
+    # Nachbarlaender unklar).
+    detected_country = user_country or detect_country_from_postal_code(postal)
+    if not detected_country:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                "Kein Land im Profil hinterlegt und PLZ-Format nicht "
+                "eindeutig zuordbar. Setze dein Land unter Verwaltung -> "
+                "Einstellungen -> Account."
             ),
         )
 
     # 1) Geocoding (mit DB-Cache, also meist sub-millisekunde nach erstem Lookup)
+    # Wir uebergeben das User-Land explizit, damit Nominatim die richtige
+    # Region trifft (z.B. PLZ 1234 in CH vs AT).
     try:
-        geo = await geocode_postal_code(db, postal)
+        geo = await geocode_postal_code(db, postal, country_iso2=detected_country)
     except GeocodingError as e:
         # 503 statt 500, weil's ein externer Service ist
         raise HTTPException(
@@ -76,7 +95,11 @@ async def upcoming_competitions(
 
     user_lat = float(geo["lat"])
     user_lng = float(geo["lng"])
-    country = geo.get("country_iso2") or detect_country_from_postal_code(postal)
+    # Country-Resolution-Reihenfolge:
+    # 1) User.country_iso2 (explizit gesetzt)
+    # 2) geo.country_iso2 (von Nominatim zurueck)
+    # 3) PLZ-Heuristik (DACH)
+    country = user_country or geo.get("country_iso2") or detect_country_from_postal_code(postal)
 
     # 2) WCA-API: Land + Nachbarlaender (Phase W.wca-neighbors, User-Wunsch
     #    2026-05-16). DE-User bekommen DE + AT + CH + NL + BE + LU + FR +

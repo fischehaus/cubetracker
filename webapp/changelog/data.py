@@ -38,6 +38,35 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.country-feld",
+        released=date(2026, 5, 16),
+        title="Land-Feld im Profil + WCA-Hinweise sauber",
+        highlights=[
+            "Neues Profil-Feld „Land” (Dropdown mit 55 Cuber-Laendern, "
+            "alphabetisch nach dt. Bezeichnung) zusaetzlich zur "
+            "Postleitzahl. Vorher haben wir das Land aus der PLZ-Struktur "
+            "geraten (5-stellig=DE, 4-stellig=AT, sonst nichts) — das "
+            "funktionierte nur fuer DACH-User.",
+            "WCA-Turniere-Endpoint nutzt jetzt User.country_iso2 mit "
+            "Vorrang vor der PLZ-Heuristik. Damit funktioniert das "
+            "Turnier-Feature weltweit: User in USA, Polen, Japan etc. "
+            "bekommen die richtigen Turniere ihres Landes (+ Nachbarn "
+            "wo definiert).",
+            "Sauber kommunizierte Voraussetzungen: AccountSettingsPanel "
+            "zeigt einen Amber-Hint dass „PLZ UND Land beide noetig\” "
+            "sind. WcaUpcomingCard zeigt bei fehlenden Feldern den "
+            "konkreten Pfad „Verwaltung → Einstellungen → Account → "
+            "Profil\” als Empty-State.",
+            "DB-Schema: User.country_iso2 VARCHAR(2), via Inline-Migration "
+            "(ALTER TABLE ADD COLUMN IF NOT EXISTS) idempotent eingespielt. "
+            "Pydantic-Schema mit Pattern ^[A-Za-z]{2}$, im Endpoint wird "
+            "uppercased + getrimmt.",
+            "Geocoding-Call nutzt jetzt das User-Land statt Heuristik — "
+            "Nominatim-Treffer sind deutlich praeziser (z.B. PLZ 8001 "
+            "in CH vs AT korrekt aufloesbar).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-neighbors-news-refresh",
         released=date(2026, 5, 16),
         title="WCA: Nachbarlaender + News: weitere Quelle + Auto-Refresh bei Login",

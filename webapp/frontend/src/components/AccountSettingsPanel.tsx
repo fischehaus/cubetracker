@@ -12,6 +12,7 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
+import { COUNTRIES } from "../lib/countries";
 import { InfoButton } from "./InfoButton";
 
 export function AccountSettingsPanel() {
@@ -62,6 +63,7 @@ function ProfileSection() {
   const { user, refreshMe } = useAuth();
   const [displayName, setDisplayName] = useState(user?.display_name ?? "");
   const [postalCode, setPostalCode] = useState(user?.postal_code ?? "");
+  const [country, setCountry] = useState(user?.country_iso2 ?? "");
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +79,7 @@ function ProfileSection() {
       await api.patch("/auth/me", {
         display_name: displayName || null,
         postal_code: postalCode.trim() || null,
+        country_iso2: country.trim() || null,
       });
       await refreshMe();
       setInfo("Profil aktualisiert.");
@@ -151,10 +154,36 @@ function ProfileSection() {
           autoComplete="postal-code"
           className="w-full max-w-xs rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
-        <p className="text-xs text-gray-500 max-w-xs">
-          Wird spaeter genutzt um Turniere in deiner Naehe anzuzeigen.
-          Wird sonst nicht weitergegeben.
-        </p>
+
+        <label className="block text-sm font-medium text-gray-300 pt-2">
+          Land (optional)
+        </label>
+        <select
+          value={country.toUpperCase()}
+          onChange={(e) => setCountry(e.target.value)}
+          autoComplete="country"
+          className="w-full max-w-xs rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          <option value="">— bitte waehlen —</option>
+          {COUNTRIES.map((c) => (
+            <option key={c.iso2} value={c.iso2}>
+              {c.label} ({c.iso2})
+            </option>
+          ))}
+        </select>
+
+        <div className="rounded border border-amber-500/30 bg-amber-500/5 p-2 max-w-md text-xs text-amber-200/90">
+          <p>
+            <strong>Hinweis:</strong> Postleitzahl <em>und</em> Land werden
+            zusammen fuer <strong>„WCA-Turniere in deiner Naehe"</strong>{" "}
+            (Dashboard) benoetigt. Sonst kann der Standort nicht
+            geocoded werden + die Liste bleibt leer.
+          </p>
+          <p className="mt-1 text-amber-300/70">
+            Die PLZ wird ausschliesslich zur Distanz-Berechnung genutzt,
+            nicht weitergegeben. Deine exakte Adresse bleibt privat.
+          </p>
+        </div>
 
         <button
           type="submit"

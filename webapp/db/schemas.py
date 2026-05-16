@@ -49,6 +49,8 @@ class UserRead(BaseModel):
     # Phase W.future-tournaments: Postleitzahl fuer „Turniere in der
     # Naehe"-Feature. Optional, multi-country (kein Format-Check).
     postal_code: str | None = None
+    # Phase W.country-feld (2026-05-16): ISO-3166-1-alpha-2-Land.
+    country_iso2: str | None = None
 
 
 class UserUpdate(BaseModel):
@@ -63,6 +65,12 @@ class UserUpdate(BaseModel):
     display_name: str | None = Field(default=None, max_length=64)
     is_discoverable: bool | None = Field(default=None)
     postal_code: str | None = Field(default=None, max_length=16)
+    # Phase W.country-feld (2026-05-16): ISO-3166-1-alpha-2-Code (DE, AT, US, …).
+    # Wir uppercasen im Endpoint vor dem Speichern, hier lasche Validierung
+    # (2 chars, alphanumerisch).
+    country_iso2: str | None = Field(
+        default=None, min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$"
+    )
 
 
 class PasswordChange(BaseModel):

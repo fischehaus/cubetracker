@@ -33,6 +33,8 @@ export interface UserRead {
   /** Phase W.future-tournaments: Postleitzahl fuer "Turniere in der
    *  Naehe"-Feature. Optional, multi-country-Format. */
   postal_code: string | null;
+  /** Phase W.country-feld: ISO-3166-1-alpha-2-Code (DE, AT, US, …). */
+  country_iso2: string | null;
 }
 
 export interface AuthState {
