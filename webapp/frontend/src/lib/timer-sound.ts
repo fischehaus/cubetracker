@@ -70,6 +70,50 @@ export function playInspectionWarn12s(): void {
   setTimeout(() => beep(880, 150), 200);
 }
 
+// ============================================================
+// Voice-Alert via Web Speech API (Phase W.voice-alert, 2026-05-17)
+// ============================================================
+// csTimer-aequivalent: spricht "8" / "12" statt Sinus-Beep. Nutzt das
+// im Browser verbaute speechSynthesis-API (kein Asset, keine Network-
+// Roundtrip). Fail-soft: wenn API nicht da oder TTS-Voice fehlt,
+// stiller Fallback (Beep wird vom Caller separat entschieden).
+
+/** Sprache + Text der Voice-Calls. de = deutsch, en = englisch. */
+const VOICE_PHRASES: Record<"de" | "en", { warn8: string; warn12: string }> = {
+  de: { warn8: "acht", warn12: "zwoelf" },
+  en: { warn8: "eight", warn12: "twelve" },
+};
+
+function speak(text: string, lang: "de" | "en"): void {
+  if (typeof window === "undefined") return;
+  const synth = (window as unknown as { speechSynthesis?: SpeechSynthesis })
+    .speechSynthesis;
+  if (!synth) return;
+  try {
+    // Cancel ggf. laufende Utterance — bei dichter Folge (8s → 12s = 4s
+    // Abstand) ist 12s wichtiger als ein noch nicht beendetes "acht".
+    synth.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = lang === "de" ? "de-DE" : "en-US";
+    utter.volume = 1.0;
+    utter.rate = 1.1;
+    utter.pitch = 1.0;
+    synth.speak(utter);
+  } catch {
+    // ignore — Voice ist nice-to-have
+  }
+}
+
+/** Voice-Variante der 8s-Warnung. */
+export function speakInspectionWarn8s(lang: "de" | "en"): void {
+  speak(VOICE_PHRASES[lang].warn8, lang);
+}
+
+/** Voice-Variante der 12s-Warnung. */
+export function speakInspectionWarn12s(lang: "de" | "en"): void {
+  speak(VOICE_PHRASES[lang].warn12, lang);
+}
+
 /**
  * Initialisiert AudioContext bei einem User-Gesture.
  * Wird aufgerufen bei erstem Spacebar-Press, damit spaetere Beeps

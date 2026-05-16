@@ -33,6 +33,8 @@ import {
   playInspectionWarn8s,
   playInspectionWarn12s,
   primeAudio,
+  speakInspectionWarn8s,
+  speakInspectionWarn12s,
 } from "../lib/timer-sound";
 import type { AppSettings } from "../lib/settings";
 
@@ -144,21 +146,27 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
         const total = settings.inspection_seconds * 1000;
         const left = total - elapsed;
         setInspectionLeftMs(Math.max(0, left));
-        // Sound-warnings
-        if (
-          settings.sound_enabled &&
-          !playedWarn8Ref.current &&
-          elapsed >= 8000
-        ) {
-          playInspectionWarn8s();
+        // Sound-warnings: je nach inspection_audio_mode (Phase W.voice-alert,
+        // 2026-05-17) Sinus-Beep oder Voice-Alert via TTS. "off" overridet
+        // den Sound-Toggle fuer diese spezifischen Warnings (User kann
+        // Inspection-Calls separat ausschalten ohne den Solve-Stop-Sound).
+        const audioMode = settings.inspection_audio_mode ?? "beep";
+        const audioActive =
+          settings.sound_enabled && audioMode !== "off";
+        if (audioActive && !playedWarn8Ref.current && elapsed >= 8000) {
+          if (audioMode === "de" || audioMode === "en") {
+            speakInspectionWarn8s(audioMode);
+          } else {
+            playInspectionWarn8s();
+          }
           playedWarn8Ref.current = true;
         }
-        if (
-          settings.sound_enabled &&
-          !playedWarn12Ref.current &&
-          elapsed >= 12000
-        ) {
-          playInspectionWarn12s();
+        if (audioActive && !playedWarn12Ref.current && elapsed >= 12000) {
+          if (audioMode === "de" || audioMode === "en") {
+            speakInspectionWarn12s(audioMode);
+          } else {
+            playInspectionWarn12s();
+          }
           playedWarn12Ref.current = true;
         }
         if (settings.inspection_mode === "wca") {
@@ -205,6 +213,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
     state,
     settings.inspection_seconds,
     settings.sound_enabled,
+    settings.inspection_audio_mode,
     settings.inspection_mode,
     onComplete,
   ]);

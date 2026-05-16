@@ -34,6 +34,17 @@ export type InspectionMode = "wca" | "pragmatic";
  */
 export type TimerFontSize = "sm" | "md" | "lg" | "xl" | "xxl";
 
+/**
+ * Audio-Modus fuer die Inspection-Warnings bei 8s + 12s.
+ * Phase W.voice-alert (2026-05-17): csTimer-aequivalentes Feature.
+ *
+ *   "beep"  — Sinus-Toene (Status-Quo, 660Hz bei 8s, 880Hz bei 12s)
+ *   "de"    — Voice-Alert auf Deutsch via Browser-TTS ("acht", "zwoelf")
+ *   "en"    — Voice-Alert auf Englisch ("eight", "twelve")
+ *   "off"   — kein Audio (overrides sound_enabled fuer diese Calls)
+ */
+export type InspectionAudioMode = "beep" | "de" | "en" | "off";
+
 export interface AppSettings {
   /** Spacebar-Timer aktiviert (statt Tastatur-Eingabe). */
   spacebar_enabled: boolean;
@@ -48,6 +59,13 @@ export interface AppSettings {
   inspection_mode: InspectionMode;
   /** Sound-Signale (Inspection-Warnings, Start/Stop). */
   sound_enabled: boolean;
+  /**
+   * Audio-Modus fuer die Inspection-Warnings (Phase W.voice-alert).
+   * Default "beep" (Sinus wie bisher) — bestehende User merken keinen
+   * Unterschied. Wer Voice-Calls will, wechselt auf "de" oder "en".
+   * Greift nur wenn `sound_enabled === true`.
+   */
+  inspection_audio_mode: InspectionAudioMode;
   /** Hold-Time in ms bevor „go" (gruen) wird. WCA-Empfehlung 550ms. */
   hold_time_ms: number;
   /** Multi-Phase-Splits aktiviert (Variante A). 1 = klassisch ohne splits. */
@@ -74,6 +92,7 @@ export const SETTINGS_DEFAULTS: AppSettings = {
   inspection_seconds: 15,
   inspection_mode: "pragmatic", // aktuelles Verhalten als Default
   sound_enabled: true,
+  inspection_audio_mode: "beep",
   hold_time_ms: 550,
   splits_enabled: false,
   phase_names: ["Cross", "F2L", "OLL", "PLL"], // 3x3-CFOP default

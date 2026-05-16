@@ -38,6 +38,26 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.voice-alert",
+        released=date(2026, 5, 17),
+        title="Voice-Alert fuer Inspection-Warnings (csTimer-aequivalent)",
+        highlights=[
+            "Erstes Item aus dem Quick-Wins-Sprint P1: Inspection-Audio-"
+            "Calls bei 8s + 12s koennen jetzt als gesprochene Stimme "
+            "statt Sinus-Beep abgespielt werden.",
+            "Vier Modi waehlbar (Verwaltung → Einstellungen → Inspection):"
+            " 🔔 Sinus-Beep (Default, bestehende User merken keinen "
+            "Unterschied) — 🇩🇪 Deutsch (acht, zwoelf) — 🇬🇧 Englisch "
+            "(eight, twelve) — 🔇 Aus.",
+            "Voice-Modi nutzen die Browser-Web-Speech-API — kein Asset, "
+            "kein Network-Roundtrip, funktioniert offline. Stimme/Akzent "
+            "abhaengig von Browser + OS.",
+            "Fail-soft: wenn TTS nicht verfuegbar (alter Browser, "
+            "Permission-Block), faellt der Solve-Flow unbeeintraechtigt "
+            "weiter.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feedback-usermenu",
         released=date(2026, 5, 17),
         title="Feedback geben: zusaetzlich im User-Menu oben rechts",

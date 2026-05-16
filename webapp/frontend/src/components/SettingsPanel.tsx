@@ -144,11 +144,42 @@ export function SettingsPanel() {
         />
         <Toggle
           label="Sound-Signale (8s + 12s Warnung)"
-          hint="Web-Audio-Beeps. Erstes Signal bei 8s, dringendes Doppel-Signal bei 12s."
+          hint="Audio-Signal bei 8s + dringendes Doppel-Signal bei 12s. Modus unten waehlbar."
           value={settings.sound_enabled}
           onChange={(v) => setSettings({ ...settings, sound_enabled: v })}
           disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
         />
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-gray-300">Audio-Modus fuer Inspection-Warnings</span>
+          <select
+            value={settings.inspection_audio_mode ?? "beep"}
+            onChange={(e) =>
+              setSettings({
+                ...settings,
+                inspection_audio_mode: e.target.value as
+                  | "beep"
+                  | "de"
+                  | "en"
+                  | "off",
+              })
+            }
+            disabled={
+              !settings.spacebar_enabled ||
+              !settings.inspection_enabled ||
+              !settings.sound_enabled
+            }
+            className="rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none disabled:opacity-50 max-w-xs"
+          >
+            <option value="beep">🔔 Sinus-Beep (default)</option>
+            <option value="de">🇩🇪 Stimme: Deutsch ("acht", "zwoelf")</option>
+            <option value="en">🇬🇧 Voice: English ("eight", "twelve")</option>
+            <option value="off">🔇 Aus (kein Audio fuer 8s/12s)</option>
+          </select>
+          <span className="text-xs text-gray-500">
+            Voice-Modi nutzen das Browser-TTS — funktioniert offline +
+            ohne Asset, Stimme abhaengig von Browser/OS.
+          </span>
+        </label>
       </Section>
 
       {/* Multi-Phase-Splits */}
