@@ -13,7 +13,8 @@
 // die Selektoren in TimerControlsCard live mit dem Save synchron sind).
 
 import { useEffect, useRef, useState } from "react";
-import { useCreateSolve } from "../lib/api";
+import { useCreateSolve, useDeleteSolve, useUpdateSolve } from "../lib/api";
+import type { Solve } from "../lib/types";
 import { parseTimeInput } from "../lib/format";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
@@ -57,6 +58,15 @@ export function BigTimerInput({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const create = useCreateSolve();
+  const update = useUpdateSolve();
+  const del = useDeleteSolve();
+
+  // Phase W.penalty-quick (2026-05-17): nach jedem Save halten wir den
+  // gespeicherten Solve kurz fest, damit der User direkt unter dem Timer
+  // die Penalty per Knopfdruck korrigieren kann (+2 / DNF / Loeschen).
+  // Wird beim naechsten Solve-Start (Spacebar-Press oder Text-Input
+  // gefokussiert) wieder geleert.
+  const [lastSavedSolve, setLastSavedSolve] = useState<Solve | null>(null);
 
   // Auto-Focus beim Mounten (nur Text-Mode)
   useEffect(() => {
@@ -64,6 +74,13 @@ export function BigTimerInput({
       inputRef.current?.focus();
     }
   }, [spacebarMode]);
+
+  // Quick-Penalty-Buttons verstecken wenn Cube wechselt — sonst zeigt
+  // der „Letzte Solve war 3x3"-Block weiter waehrend der User schon
+  // auf 4x4 umgestellt hat (verwirrend + falscher Context).
+  useEffect(() => {
+    setLastSavedSolve(null);
+  }, [cubeType, sessionId]);
 
   function save() {
     setError(null);
@@ -96,10 +113,11 @@ export function BigTimerInput({
         scramble: scramble && scramble.trim() !== "" ? scramble : null,
       },
       {
-        onSuccess: () => {
+        onSuccess: (savedSolve) => {
           setTimeStr("");
           setPlusTwo(false);
           setDnf(false);
+          setLastSavedSolve(savedSolve);
           requestAnimationFrame(() => inputRef.current?.focus());
           onSolveSaved?.();
         },
@@ -130,14 +148,53 @@ export function BigTimerInput({
             : null,
       },
       {
-        onSuccess: () => {
+        onSuccess: (savedSolve) => {
           // Auto-Reset des SpacebarTimer + neuer Scramble
           setSpacebarResetSeed((s) => s + 1);
+          setLastSavedSolve(savedSolve);
           onSolveSaved?.();
         },
         onError: (e) => setError(`Fehler: ${e.message}`),
       },
     );
+  }
+
+  // Quick-Penalty-Actions (Phase W.penalty-quick, 2026-05-17): wirken
+  // auf den zuletzt gespeicherten Solve. PATCH /solves/:id fuer Toggles,
+  // DELETE bei Loeschen. State lokal updaten + dann komplette
+  // Cache-Invalidate aus useUpdateSolve/useDeleteSolve.
+  function toggleLastPlusTwo() {
+    if (!lastSavedSolve) return;
+    const nextPlusTwo = !lastSavedSolve.plus_two;
+    update.mutate(
+      {
+        id: lastSavedSolve.id,
+        payload: { plus_two: nextPlusTwo, dnf: false },
+      },
+      {
+        onSuccess: (updated) => setLastSavedSolve(updated),
+      },
+    );
+  }
+  function toggleLastDnf() {
+    if (!lastSavedSolve) return;
+    const nextDnf = !lastSavedSolve.dnf;
+    update.mutate(
+      {
+        id: lastSavedSolve.id,
+        payload: { dnf: nextDnf, plus_two: false },
+      },
+      {
+        onSuccess: (updated) => setLastSavedSolve(updated),
+      },
+    );
+  }
+  function deleteLast() {
+    if (!lastSavedSolve) return;
+    if (!confirm("Letzten Solve loeschen?")) return;
+    del.mutate(lastSavedSolve.id, {
+      onSuccess: () => setLastSavedSolve(null),
+    });
   }
 
   return (
@@ -213,6 +270,61 @@ export function BigTimerInput({
             className="rounded bg-purple-600 px-6 py-3 text-base font-medium text-white hover:bg-purple-700 disabled:opacity-50"
           >
             {create.isPending ? "Speichere …" : "Speichern (Enter)"}
+          </button>
+        </div>
+      )}
+
+      {/* Penalty-Quick-Buttons (Phase W.penalty-quick, 2026-05-17):
+          erscheinen direkt nach dem Save unter dem Timer. Korrigieren
+          die Penalty oder loeschen den Solve ohne den Weg ueber die
+          Letzte-Solves-Sidebar. Verschwinden wenn lastSavedSolve null
+          ist (= neuer Solve gestartet, anderer Cube gewaehlt, manueller
+          ↺-Klick). */}
+      {lastSavedSolve && (
+        <div className="mt-4 flex items-center justify-center gap-2 flex-wrap text-sm">
+          <span className="text-gray-500">Letzter Solve:</span>
+          <button
+            type="button"
+            onClick={toggleLastPlusTwo}
+            disabled={update.isPending || lastSavedSolve.dnf}
+            className={`rounded px-3 py-1.5 transition-colors ${
+              lastSavedSolve.plus_two
+                ? "bg-amber-600/40 text-amber-100 hover:bg-amber-600/60"
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+            } disabled:opacity-40 disabled:cursor-not-allowed`}
+            title={lastSavedSolve.plus_two ? "+2 entfernen" : "+2 Strafe markieren"}
+          >
+            {lastSavedSolve.plus_two ? "✓ +2" : "+2"}
+          </button>
+          <button
+            type="button"
+            onClick={toggleLastDnf}
+            disabled={update.isPending}
+            className={`rounded px-3 py-1.5 transition-colors ${
+              lastSavedSolve.dnf
+                ? "bg-red-600/40 text-red-100 hover:bg-red-600/60"
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+            } disabled:opacity-40 disabled:cursor-not-allowed`}
+            title={lastSavedSolve.dnf ? "DNF entfernen" : "Als DNF markieren"}
+          >
+            {lastSavedSolve.dnf ? "✓ DNF" : "DNF"}
+          </button>
+          <button
+            type="button"
+            onClick={deleteLast}
+            disabled={del.isPending}
+            className="rounded px-3 py-1.5 bg-gray-800 text-gray-400 hover:bg-red-900/40 hover:text-red-200 disabled:opacity-40"
+            title="Letzten Solve loeschen"
+          >
+            🗑 Loeschen
+          </button>
+          <button
+            type="button"
+            onClick={() => setLastSavedSolve(null)}
+            className="rounded px-2 py-1.5 text-xs text-gray-500 hover:text-gray-300"
+            title="Quick-Buttons ausblenden"
+          >
+            ↺
           </button>
         </div>
       )}

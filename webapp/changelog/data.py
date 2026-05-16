@@ -38,6 +38,27 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.penalty-quick",
+        released=date(2026, 5, 17),
+        title="Penalty-Quick-Buttons direkt unter dem Timer",
+        highlights=[
+            "P1.2 aus dem Quick-Wins-Sprint. Nach jedem Save erscheint "
+            "unter dem grossen Timer-Display ein Mini-Toolbar mit "
+            "+2 / DNF / Loeschen — Korrektur ohne den Weg ueber die "
+            "Letzte-Solves-Sidebar.",
+            "Funktioniert in beiden Modi (Text + Spacebar). Im Spacebar-"
+            "Modus besonders nuetzlich: wenn die Inspection-Penalty "
+            "(automatisch detected) doch nicht passte, schnell "
+            "korrigieren.",
+            "Buttons zeigen den aktuellen Zustand visuell („✓ +2\” wenn "
+            "aktiv) und togglen bei Klick. Loeschen mit Confirm-Dialog. "
+            "↺-Button blendet die Mini-Toolbar manuell aus.",
+            "Auto-Reset bei Cube- oder Session-Wechsel — verhindert dass "
+            "die „Letzter Solve war 3x3\”-Anzeige im 4x4-Kontext weiter "
+            "blinkt.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.voice-alert",
         released=date(2026, 5, 17),
         title="Voice-Alert fuer Inspection-Warnings (csTimer-aequivalent)",
