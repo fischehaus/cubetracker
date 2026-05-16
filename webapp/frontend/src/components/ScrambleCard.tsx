@@ -22,6 +22,7 @@ import {
   cubeTypeToScrambowType,
   defaultScrambleTypeForCube,
   generateScramble,
+  isWcaQualityCustomPuzzle,
   resolveScrambleTypeOverride,
   UNOFFICIAL_SCRAMBLE_TYPES,
   WCA_SCRAMBLE_TYPES,
@@ -259,19 +260,21 @@ export function ScrambleCard({
         )}
       </div>
 
-      {/* Ehrlicher Disclaimer fuer Inoffizielle (Phase W.scramble-quality,
-          2026-05-17): unsere Custom-Scrambles fuer Ivy/Gear/Redi/Master
-          Pyra/Skewb sind Random-Move-Sequenzen mit korrektem Move-Set,
-          aber KEIN WCA-Random-State-Solver. Quality ist gut genug fuers
-          Casual-Training, aber nicht Wettkampf-aequivalent. FTO laeuft
-          via scrambow → WCA-quality. */}
-      {effectiveCategory === "unofficial" && effectiveType !== "fto" && (
-        <p className="mt-3 text-[11px] text-amber-300/70">
-          Hinweis: Inoffizielle Scrambles sind Random-Move-Sequenzen mit
-          korrekter Notation, aber kein Random-State-Solver. Gut fuers
-          Training, nicht 100% Wettkampf-vergleichbar.
-        </p>
-      )}
+      {/* Disclaimer NUR fuer Custom-Puzzles ohne Random-State-Solver
+          (Phase W.ivy-rs, 2026-05-17): Ivy hat seit jetzt einen
+          Eigenbau-Solver (29.160-State-Lookup-Table). FTO ueber scrambow.
+          Gear/Redi/Master Pyra/Skewb laufen weiter ueber Random-Move
+          (kommen schrittweise auf Random-State, wenn das Konzept hier
+          stabil ist). */}
+      {effectiveCategory === "unofficial" &&
+        !isWcaQualityCustomPuzzle(effectiveType) &&
+        effectiveType !== "fto" && (
+          <p className="mt-3 text-[11px] text-amber-300/70">
+            Hinweis: Random-Move-Sequenz mit korrekter Notation, kein
+            Random-State-Solver. Gut fuers Training, nicht 100% Wettkampf-
+            vergleichbar. Random-State folgt schrittweise.
+          </p>
+        )}
     </div>
   );
 }

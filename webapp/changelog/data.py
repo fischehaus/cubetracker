@@ -38,6 +38,35 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ivy-rs",
+        released=date(2026, 5, 17),
+        title="Ivy Cube: echte WCA-Quality-Scrambles (Eigenbau-Solver)",
+        highlights=[
+            "Erster Eigenbau-Random-State-Solver fuer ein Custom-Puzzle. "
+            "Ivy Cube hat seit jetzt echte WCA-Quality-Scrambles (4-10 "
+            "Moves, optimal kurz, garantierte Mindest-Distanz von 4).",
+            "Implementation als reines TypeScript-Modul (lib/ivyScramble.ts) "
+            "ohne externe Deps — kein cstimer_module mehr (das ist beim "
+            "vorigen Versuch am Browser-Buffer-Crash gescheitert). Code "
+            "vollstaendig lesbar, BFS-Lookup-Table 29.160 States, baut "
+            "beim ersten Aufruf in ~50-200ms.",
+            "Referenz: csTimer src/js/scramble/skewb.js (Funktion "
+            "getScrambleIvy). Gleiche State-Repraesentation (360 Center-"
+            "Permutationen × 81 Corner-Twists), gleiche Move-Notation "
+            "(R/L/D/B), aber sauber als TypeScript ohne csTimer-mathlib-"
+            "Dependency.",
+            "Bundle-Size sogar KLEINER als beim cstimer_module-Versuch: "
+            "389 KB gzipped (vs 478 KB cstimer-Variante, vs 295 KB "
+            "Random-Move-Variante davor). Eigenbau-Code = ~250 Zeilen TS.",
+            "Disclaimer in der ScrambleCard angepasst: zeigt sich nur "
+            "noch fuer Gear/Redi/Master Pyra+Skewb. Ivy ist jetzt in der "
+            "WCA-Quality-Liga.",
+            "Naechster Schritt (falls gewuenscht): Gear Cube + Redi Cube "
+            "+ Master Pyraminx + Master Skewb mit derselben Template-"
+            "Methode. Gear ist als naechstes geplant.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.revert-cstimer",
         released=date(2026, 5, 17),
         title="HOTFIX-REVERT: cstimer_module wegen Browser-Crash zurueckgerollt",

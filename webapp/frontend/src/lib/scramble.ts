@@ -21,6 +21,12 @@
 // identisch, im skewb-Scrambler-Loop). Types kommen aus dem npm-Paket
 // via *.d.ts-Stub im selben vendor-Ordner.
 import { Scrambow } from "../vendor/scrambow-patched";
+// Eigenbau-Random-State-Solver fuer einzelne Custom-Puzzles
+// (Phase W.ivy-rs, 2026-05-17 — erstes Puzzle). Reines TypeScript ohne
+// externe Deps, BFS-Lookup-Table beim ersten Aufruf. Lesson aus dem
+// cstimer_module-Browser-Crash: keine Native-Node-Globals importieren,
+// daher Eigenbau statt npm-Paket.
+import { generateIvyScramble } from "./ivyScramble";
 
 /**
  * Mappt einen App-cube_type ("3x3", "OH", "Pyraminx", …) auf den
@@ -286,23 +292,44 @@ function generateCustomScramble(spec: CustomScrambleSpec): string {
 }
 
 /**
+ * Liste der Custom-Puzzles, die einen eigenen Random-State-Solver
+ * haben (= WCA-Quality). Wird von der UI genutzt um den „nicht WCA-
+ * Quality"-Disclaimer NUR fuer die Random-Move-Puzzles anzuzeigen.
+ */
+const RANDOM_STATE_PUZZLES = new Set<string>(["ivy"]);
+
+export function isWcaQualityCustomPuzzle(code: string): boolean {
+  return RANDOM_STATE_PUZZLES.has(code);
+}
+
+/**
  * Generiert einen Scramble-String fuer den gegebenen Typ (cube_type
  * oder scramble_type-override aus Session).
  *
  * Reihenfolge:
- *   1. Custom-Puzzle? → eigener Random-Move-Generator
- *   2. Sonst scrambow probieren
- *   3. Bei Fehler → leerer String (UI zeigt Fallback-Meldung)
+ *   1. Eigener Random-State-Solver verfuegbar? → WCA-Quality
+ *   2. Sonst: Custom-Puzzle-Spec? → Random-Move-Generator
+ *   3. Sonst: scrambow probieren (WCA-Cubes + FTO)
+ *   4. Bei Fehler → leerer String (UI zeigt Fallback-Meldung)
  *
  * Wir crashen nicht, weil ein fehlender Scramble den Timer nicht
  * blockieren soll.
  */
 export function generateScramble(typeOverride: string): string {
-  // 1) Custom Puzzles, die scrambow nicht kann
+  // 1) Eigener Random-State-Solver (WCA-Quality)
+  if (typeOverride === "ivy") {
+    try {
+      const s = generateIvyScramble();
+      if (s && s.trim().length > 0) return s;
+    } catch {
+      // Fallback auf Random-Move wenn Solver-Bug auftritt
+    }
+  }
+  // 2) Custom Puzzles mit Random-Move-Spec
   if (typeOverride in CUSTOM_PUZZLE_SPECS) {
     return generateCustomScramble(CUSTOM_PUZZLE_SPECS[typeOverride]);
   }
-  // 2) scrambow-Pfad
+  // 3) scrambow-Pfad (WCA + FTO + Trainer-Subsets)
   try {
     const scrambow = new Scrambow().setType(typeOverride);
     const result = scrambow.get(1);
