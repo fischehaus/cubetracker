@@ -4,14 +4,16 @@ Projekt-spezifische Konfiguration für [Claude Code](https://claude.ai/code).
 
 ## Hooks
 
-Drei Mental-Model-Fehler aus der Session vom 2026-05-16 sollen automatisch
-auffangen werden:
+Fuenf Mental-Model-Fehler / Klassiker-Bugs aus der Projekt-Historie
+sollen automatisch aufgefangen werden:
 
 | # | Schmerzpunkt | Hook |
 |---|---|---|
 | 1 | Lokale Dev-Server starten, obwohl Cubetracker live auf cubetracker.de deployed ist | `pre-bash-dev-server.sh` (PreToolUse-Block) |
-| 2 | Commit vergessen zu pushen → Render-autoDeploy triggert nicht | `post-git-commit.sh` (PostToolUse-Notice) |
-| 3 | Neuen Patch-Notes-Eintrag in `webapp/changelog/data.py` nicht getaggt | `post-git-commit.sh` (PostToolUse-Notice) |
+| 2 | Commit vergessen zu pushen → Render-autoDeploy triggert nicht | `post-git-commit.sh` Teil A (PostToolUse-Notice) |
+| 3 | Neuen Patch-Notes-Eintrag in `webapp/changelog/data.py` nicht getaggt | `post-git-commit.sh` Teil B (PostToolUse-Notice) |
+| 4 | Session-Start ohne Repo-Context → Mental-Model-Drift | `session-start-context.sh` (SessionStart-Notice) |
+| 5 | Hartkodiertes `localhost:` in TS/TSX-Files (v1.0.1-Klassiker-Bug) | `post-edit-hardcoded-url.sh` (PostToolUse-Notice) |
 
 ### Files
 
@@ -20,8 +22,10 @@ auffangen werden:
 ├── README.md                      (dieses File)
 ├── settings.json                  (Hook-Konfig — commitbar, gilt fuer alle Sessions)
 └── hooks/
+    ├── session-start-context.sh   (Repo-Stand + Reminders beim Start)
+    ├── pre-bash-dev-server.sh     (Block uvicorn / npm run dev / vite)
     ├── post-git-commit.sh         (Push-Reminder + Tag-Reminder)
-    └── pre-bash-dev-server.sh     (Block uvicorn / npm run dev / vite)
+    └── post-edit-hardcoded-url.sh (Warn bei localhost:/127.0.0.1: in *.ts/*.tsx)
 ```
 
 ### Override fuer echtes lokales Debugging
