@@ -106,11 +106,15 @@ async def upcoming_competitions(
             continue
         enriched.append({**c, "distance_km": round(dist, 1)})
 
-    # 4) Sort: zuerst Datum (frueheste zuerst), dann Distanz
+    # 4) Sort: zuerst Datum (frueheste zuerst), dann Distanz.
+    # QA-Fix Welle A (2026-05-16): explizit `is None`-Check statt `or`.
+    # Mit `or 99_999` waere ein Turnier direkt am Wohnort des Users (dist=0.0)
+    # als „weit weg" sortiert (0.0 ist falsy in Python).
     def _sort_key(c: dict[str, Any]) -> tuple[str, float]:
+        dist = c.get("distance_km")
         return (
             str(c.get("start_date") or "9999-12-31"),
-            float(c.get("distance_km") or 99_999),
+            float(dist) if dist is not None else 99_999.0,
         )
 
     enriched.sort(key=_sort_key)

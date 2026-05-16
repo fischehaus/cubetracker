@@ -38,6 +38,32 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-news-qa",
+        released=date(2026, 5, 16),
+        title="QA-Fixes nach WCA/News-Sprint",
+        highlights=[
+            "Operator-Precedence-Bug im News-Parser behoben: bei feedparser-"
+            "Entries ohne `.get`-Methode wurde der link faelschlich None. "
+            "Helper `_attr_or_key` mit expliziten Klammern.",
+            "Session-Race im News-Fetcher: bei IntegrityError (Multi-Worker-"
+            "Race) wuerde der naive db.rollback() ALLE bisher geflushten "
+            "Items derselben Iteration wegrollen. Jetzt: SAVEPOINT pro "
+            "Item via `db.begin_nested()` — nur das eine kaputte Item "
+            "rollt zurueck.",
+            "WCA-Sortier-Bug: Turniere mit distance_km = 0.0 (User direkt "
+            "am Venue) wurden faelschlich ans Ende sortiert, weil 0.0 in "
+            "Python falsy ist. Jetzt expliziter `is None`-Check.",
+            "News-Cleanup: N+1-DELETE-Schleife → ein einzelner DELETE WHERE "
+            "(SQLAlchemy `delete()`-Construct).",
+            "PostalCodeGeo: `Float` explizit als mapped_column-Type — "
+            "SQLAlchemy 2.0 sollte das aus dem Python-Type ableiten koennen, "
+            "aber explizit ist defensiver bei Postgres-DDL-Generation.",
+            "Hygiene: ungenutzter datetime-Import in wca/client.py raus, "
+            "Doc-Strings in den __init__.py-Files der neuen Sub-Pakete "
+            "(wca, news).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.dashboard-story",
         released=date(2026, 5, 16),
         title="Dashboard-Refactor: 4-Sektionen-Story",

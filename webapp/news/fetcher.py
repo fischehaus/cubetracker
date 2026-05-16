@@ -54,17 +54,31 @@ def _parse_entry(entry: Any, source: FeedSource) -> dict[str, Any] | None:
     """Reduziert ein feedparser-Entry auf NewsItem-Felder.
 
     Returnt None wenn entry kaputt (z.B. fehlende Pflichtfelder).
+
+    QA-Fix Welle B (2026-05-16): Operator-Precedence-Bug behoben.
+    Vorher: `getattr(entry, "link", None) or entry.get("link") if hasattr(...)`
+    parste Python als `(getattr(...) or entry.get("link")) if hasattr(...) else None`
+    — bei Entries ohne `.get` waere link faelschlich None. Jetzt explizite
+    Klammern + Helper.
     """
-    link = getattr(entry, "link", None) or entry.get("link") if hasattr(entry, "get") else None
-    title = getattr(entry, "title", None) or (entry.get("title") if hasattr(entry, "get") else None)
+
+    def _attr_or_key(obj: Any, key: str) -> Any:
+        # feedparser-Entries sind FeedParserDict — sowohl Attribute als
+        # auch Dict-Keys verfuegbar. Wir probieren beides.
+        val = getattr(obj, key, None)
+        if val is None and hasattr(obj, "get"):
+            try:
+                val = obj.get(key)
+            except (TypeError, AttributeError):
+                val = None
+        return val
+
+    link = _attr_or_key(entry, "link")
+    title = _attr_or_key(entry, "title")
     if not link or not title:
         return None
 
-    summary_raw = (
-        getattr(entry, "summary", None)
-        or (entry.get("summary") if hasattr(entry, "get") else None)
-        or ""
-    )
+    summary_raw = _attr_or_key(entry, "summary") or ""
     # Plain-Text-Extract: HTML-Tags grob raus, dann auf 500 Zeichen kappen.
     import re
 
@@ -73,9 +87,7 @@ def _parse_entry(entry: Any, source: FeedSource) -> dict[str, Any] | None:
         summary = summary[:497] + "..."
 
     # published_parsed ist ein time.struct_time. Wir konvertieren auf UTC-aware datetime.
-    pub_parsed = getattr(entry, "published_parsed", None) or (
-        entry.get("published_parsed") if hasattr(entry, "get") else None
-    )
+    pub_parsed = _attr_or_key(entry, "published_parsed")
     published_at: datetime | None = None
     if pub_parsed:
         try:
@@ -152,13 +164,17 @@ def fetch_all_sources(db: OrmSession) -> dict[str, Any]:
             if existing is not None:
                 skipped += 1
                 continue
+            # QA-Fix Welle B: SAVEPOINT statt naive try/rollback.
+            # Bei IntegrityError (Race) wuerde db.rollback() ALLE bisher
+            # geflushten Items derselben Iteration wegrollen — wir verlieren
+            # alles bis zum Crash-Item. Mit nested-Transaction (SAVEPOINT)
+            # rollt nur das eine kaputte Item zurueck, alle vorherigen
+            # bleiben staged fuer den finalen commit().
             try:
-                db.add(NewsItem(**item_data, fetched_at=now))
-                db.flush()
+                with db.begin_nested():
+                    db.add(NewsItem(**item_data, fetched_at=now))
                 inserted += 1
             except IntegrityError:
-                # Race: anderer Worker hat parallel inserted
-                db.rollback()
                 skipped += 1
         stats["sources"][source.source_id] = {
             "label": source.label,
@@ -169,14 +185,17 @@ def fetch_all_sources(db: OrmSession) -> dict[str, Any]:
         total_inserted += inserted
         total_skipped += skipped
 
-    # Cleanup alte Items
+    # Cleanup alte Items. NB: published_at IS NULL bleibt erhalten —
+    # SQL `NULL < cutoff` ist NULL = falsy, also passt das Filter sie nicht.
+    # Wir behalten NULL-Items absichtlich (Edge-Case bei kaputten RSS-Items
+    # ohne Datum; selten, lieber stehen lassen als verlieren).
     cutoff = now - timedelta(days=KEEP_DAYS)
     deleted_count = 0
     try:
-        old_items = db.scalars(select(NewsItem).where(NewsItem.published_at < cutoff)).all()
-        for item in old_items:
-            db.delete(item)
-        deleted_count = len(old_items)
+        from sqlalchemy import delete as sa_delete
+
+        result = db.execute(sa_delete(NewsItem).where(NewsItem.published_at < cutoff))
+        deleted_count = result.rowcount or 0
     except Exception as e:  # noqa: BLE001
         logger.warning("News cleanup failed: %s", e)
 
