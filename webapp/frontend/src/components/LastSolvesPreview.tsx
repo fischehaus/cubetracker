@@ -189,11 +189,12 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           <InfoButton align="right">
             <p className="font-medium mb-1">Live-Karte</p>
             <p>
-              Zeigt deinen <strong>letzten Solve</strong> + die aktuellen
-              Averages (AO5/AO12 = trimmed mean der letzten 5/12 Solves,
-              WCA-konform). „Form vs" vergleicht dein aktuelles Niveau mit
-              dem Mittel eines waehlbaren Fensters (letzte 100/500/alle).
-              Gruen = besser als Schnitt, rot = schlechter.
+              Zeigt deinen <strong>letzten Solve</strong> + die vier aktuellen
+              Averages: <strong>Mo3</strong> (arithmetisches Mittel der letzten
+              3), <strong>AO5/AO12/AO100</strong> (WCA-konformer trimmed mean
+              der letzten 5/12/100). „Form vs" vergleicht dein aktuelles
+              Niveau mit dem Mittel eines waehlbaren Fensters (letzte
+              100/500/alle). Gruen = besser als Schnitt, rot = schlechter.
             </p>
           </InfoButton>
         </div>
@@ -223,7 +224,19 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
             </div>
           </div>
 
+          {/* 2x2-Grid mit den 4 aktuellen Averages. Mo3 wird clientseitig
+              aus der bereits geladenen mo3Map abgeleitet (kein Backend-
+              Endpoint dafuer) — der neueste Solve hat die ID des letzten
+              Mo3-Fenster-Endes. */}
           <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div className="text-sm text-gray-500">mo3</div>
+              <div className="font-mono text-3xl text-gray-100">
+                {lastSolve && mo3Map.get(lastSolve.id) != null
+                  ? formatTime(mo3Map.get(lastSolve.id) as number)
+                  : "–"}
+              </div>
+            </div>
             <div>
               <div className="text-sm text-gray-500">ao5</div>
               <div className="font-mono text-3xl text-gray-100">
@@ -234,6 +247,12 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
               <div className="text-sm text-gray-500">ao12</div>
               <div className="font-mono text-3xl text-gray-100">
                 {stats?.current_ao12 != null ? formatTime(stats.current_ao12) : "–"}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-500">ao100</div>
+              <div className="font-mono text-3xl text-gray-100">
+                {stats?.current_ao100 != null ? formatTime(stats.current_ao100) : "–"}
               </div>
             </div>
           </div>
@@ -362,11 +381,13 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
         </div>
 
         {sortedRows.length > 0 ? (
-          // overflow-x-auto + min-w sorgt fuer horizontalen Scroll wenn
-          // die 6 Spalten (#, Zeit, Mo3, AO5, AO12, AO100, Aktion) in
-          // die schmale Sidebar nicht passen.
+          // 5 Spalten (#, Zeit, Mo3, AO5, AO12, Aktion) — passen in die
+          // schmale Sidebar ohne horizontalen Scroll. AO100 ist in der
+          // Live-Karte oben verfuegbar; in der Tabelle wenig nuetzlich,
+          // weil 100er-Fenster sich pro Zeile fast nicht aendert (User-
+          // Wunsch 2026-05-17: AO100 aus der Tabelle raus).
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[420px] text-sm">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-700 text-left text-xs text-gray-500">
                   <SortableHeader
@@ -404,13 +425,6 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                     dir={sortDir}
                     onClick={handleSort}
                   />
-                  <SortableHeader
-                    label="AO100"
-                    sortKey="ao100"
-                    activeKey={sortKey}
-                    dir={sortDir}
-                    onClick={handleSort}
-                  />
                   <th className="py-1.5 pr-1 text-right font-medium"></th>
                 </tr>
               </thead>
@@ -438,9 +452,6 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                       </td>
                       <td className="py-1.5 pr-2 font-mono text-gray-500">
                         {row.ao12 !== null ? formatTime(row.ao12) : "–"}
-                      </td>
-                      <td className="py-1.5 pr-2 font-mono text-gray-500">
-                        {row.ao100 !== null ? formatTime(row.ao100) : "–"}
                       </td>
                       <td className="py-1.5 pr-0 text-right">
                         <button

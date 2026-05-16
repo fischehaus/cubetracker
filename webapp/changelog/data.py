@@ -38,6 +38,25 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.live-card-mo3-ao100",
+        released=date(2026, 5, 17),
+        title="LIVE-Karte: 4 Averages — Tabelle wieder ohne Scroll",
+        highlights=[
+            "Live-Karte (Timer-Tab) zeigt jetzt 4 Averages in 2x2-Grid: "
+            "Mo3, AO5, AO12, AO100. Vorher nur AO5 + AO12. Mo3 wird "
+            "clientseitig aus dem schon geladenen rolling-Map abgeleitet, "
+            "AO100 kommt aus dem bestehenden Stats-Endpoint.",
+            "Letzte-Solves-Tabelle (Timer-Tab): AO100-Spalte wieder raus. "
+            "Hintergrund: AO100 aendert sich pro Zeile praktisch nicht "
+            "(100er-Fenster). In der Tabelle wenig informativ, in der "
+            "Live-Karte oben deutlich besser aufgehoben.",
+            "Tabelle ohne AO100 hat jetzt nur 5 Spalten (Nr / Zeit / Mo3 / "
+            "AO5 / AO12 + Loeschen) — passt wieder ohne horizontalen Scroll "
+            "in die schmale Sidebar. Das min-w-[420px] + overflow-Scroll "
+            "ist raus.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.abschluss-skill",
         released=date(2026, 5, 16),
         title="Session-Ende-Check: /abschluss-Slash-Command + Stop-Hook-Backstop",
