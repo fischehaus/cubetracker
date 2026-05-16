@@ -38,6 +38,31 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.revert-cstimer",
+        released=date(2026, 5, 17),
+        title="HOTFIX-REVERT: cstimer_module wegen Browser-Crash zurueckgerollt",
+        highlights=[
+            "Sorry — cstimer_module-Einbau (6d7a0eb) hat die Seite gekillt.",
+            "Root-Cause: cstimer_module nutzt 12x Node.js-Buffer-Globals "
+            "direkt im Top-Level-Init. Im Browser existiert Buffer nicht "
+            "ohne Polyfill (vite-plugin-node-polyfills o.ae.) — Bundle "
+            "wurde sauber gebaut, crashte aber sofort beim Module-Load "
+            "im Browser.",
+            "Lokaler Vite-Build + Node-Smoke-Test waren gruen weil im "
+            "Node-Kontext Buffer immer existiert. Browser-Test haette "
+            "den Bug sofort gezeigt — das machen wir kuenftig vor jedem "
+            "neuen NPM-Package mit Headless-Chrome o.ae.",
+            "Stand wieder bei 60148cd (Random-Move-Scrambles mit "
+            "korrigierter Notation). Ivy/Gear/Redi/Master Pyra+Skewb "
+            "sind keine WCA-Quality, aber Notation ist sauber + "
+            "Disclaimer in der ScrambleCard ehrlich.",
+            "Naechster Versuch (separater Branch zuerst): "
+            "vite-plugin-node-polyfills einbauen + cstimer_module "
+            "isoliert testen mit Headless-Browser bevor wir Production "
+            "antasten.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.scramble-quality",
         released=date(2026, 5, 17),
         title="Inoffizielle Scrambles: Notations-Bugs gefixt + ehrlicher Disclaimer",
