@@ -26,7 +26,16 @@ from sqlalchemy.orm import Session as OrmSession
 from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from db.database import get_db
-from db.models import Achievement, Hardware, Session as DbSession, Snapshot, Solve, User
+from db.models import (
+    Achievement,
+    Hardware,
+    LiveTest,
+    Session as DbSession,
+    Snapshot,
+    Solve,
+    User,
+)
+from db.schemas import LiveTestCreate, LiveTestRead, LiveTestUpdate
 from emailing.service import send_admin_message
 
 logger = logging.getLogger(__name__)
@@ -508,3 +517,142 @@ def send_announcement(
         # bei vielen Empfaengern riesig werden
         "failures": failures[:20],
     }
+
+
+# ============================================================
+# Live-Tests (Phase W.live-tests, 2026-05-17)
+# ============================================================
+
+
+@router.get("/live-tests")
+@limiter.limit(ADMIN_LIMIT)
+def list_live_tests(
+    request: Request,
+    status_filter: str | None = Query(
+        default=None,
+        alias="status",
+        description="Optional Filter: open | pass | fail | skip. Default: alle.",
+    ),
+    _admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Liste aller Live-Tests, neueste zuerst.
+
+    Filter via ?status=open (oder pass/fail/skip). Ohne Filter: alle.
+    """
+    query = select(LiveTest).order_by(LiveTest.created_at.desc())
+    if status_filter:
+        if status_filter not in ("open", "pass", "fail", "skip"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="status muss open|pass|fail|skip sein.",
+            )
+        query = query.where(LiveTest.status == status_filter)
+    rows = db.execute(query).scalars().all()
+    return {
+        "tests": [LiveTestRead.model_validate(r).model_dump(mode="json") for r in rows],
+        "count": len(rows),
+    }
+
+
+@router.post("/live-tests", status_code=status.HTTP_201_CREATED)
+@limiter.limit(ADMIN_LIMIT)
+def create_live_test(
+    request: Request,
+    payload: LiveTestCreate,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Neuer Live-Test (Admin-Eintrag via UI).
+
+    status startet immer auf 'open'. created_by_user_id = der Admin.
+    """
+    test = LiveTest(
+        title=payload.title.strip(),
+        description=payload.description.strip(),
+        related_phase=payload.related_phase,
+        related_commit_sha=payload.related_commit_sha,
+        related_tag=payload.related_tag,
+        status="open",
+        created_by_user_id=admin.id,
+    )
+    db.add(test)
+    db.commit()
+    db.refresh(test)
+    logger.info(
+        "[ADMIN] %s created live-test %s ('%s')",
+        admin.email,
+        test.id,
+        test.title[:60],
+    )
+    return LiveTestRead.model_validate(test).model_dump(mode="json")
+
+
+@router.patch("/live-tests/{test_id}")
+@limiter.limit(ADMIN_LIMIT)
+def update_live_test(
+    request: Request,
+    test_id: int,
+    payload: LiveTestUpdate,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Setzt status und/oder user_response.
+
+    Beim Status-Set wird responded_at + responded_by_user_id automatisch
+    auf jetzt + den ausfuehrenden Admin gesetzt.
+
+    Phase 3 (W.live-tests-github): bei status=fail + Antwort + kein
+    bestehender Issue → wird hier auto-create-Issue triggern (kommt noch).
+    """
+    test = db.get(LiveTest, test_id)
+    if test is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Live-Test nicht gefunden."
+        )
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mindestens ein Feld (status oder user_response) muss gesetzt sein.",
+        )
+    if "status" in updates:
+        test.status = updates["status"]
+        # responded_at + responded_by setzen wenn Status sich von open weg
+        # bewegt (oder explizit zurueck zu open).
+        test.responded_at = datetime.now(UTC)
+        test.responded_by_user_id = admin.id
+    if "user_response" in updates:
+        test.user_response = updates["user_response"]
+        if test.responded_at is None:
+            test.responded_at = datetime.now(UTC)
+            test.responded_by_user_id = admin.id
+    db.commit()
+    db.refresh(test)
+    logger.info(
+        "[ADMIN] %s patched live-test %s -> %s",
+        admin.email,
+        test.id,
+        updates,
+    )
+    return LiveTestRead.model_validate(test).model_dump(mode="json")
+
+
+@router.delete("/live-tests/{test_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(ADMIN_LIMIT)
+def delete_live_test(
+    request: Request,
+    test_id: int,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> None:
+    """Loescht einen Live-Test. Kein Confirm noetig — Test-Eintraege sind
+    keine User-Daten."""
+    test = db.get(LiveTest, test_id)
+    if test is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Live-Test nicht gefunden."
+        )
+    db.delete(test)
+    db.commit()
+    logger.info("[ADMIN] %s deleted live-test %s", admin.email, test_id)

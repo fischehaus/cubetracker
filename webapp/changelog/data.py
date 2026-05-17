@@ -38,6 +38,39 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.live-tests",
+        released=date(2026, 5, 17),
+        title="Live-Test-Liste im Admin-Bereich (Phase 2 von 3)",
+        highlights=[
+            "Loest ein echtes Workflow-Problem: Test-Hinweise aus Claude-"
+            "Deploys ('Phone-Test: X, Y, Z bitte') verlieren sich aktuell "
+            "im Chat. Bei Compaction weg, bei naechster Session vergessen. "
+            "Phone-Tests passieren oft nicht.",
+            "Neuer Panel im Admin-Bereich: Liste aller Live-Tests mit "
+            "Filter (Offen / Alle / Pass / Fail). Pro Test: Titel + "
+            "Beschreibung + Status-Badge + Notiz + Aktionen "
+            "(PASS / FAIL / SKIP / Reopen).",
+            "Workflow: Claude sagt im Chat 'teste bitte X'. Du klickst "
+            "'+ Neu', paste Title + Beschreibung. Spaeter testest du auf "
+            "Phone, klickst PASS oder FAIL+Notiz. Notiz kann jederzeit "
+            "editiert werden.",
+            "Datenmodell: neue Tabelle live_tests (id, title, description, "
+            "related_phase, related_commit_sha, related_tag, status, "
+            "user_response, responded_at, responded_by_user_id, "
+            "github_issue_url, created_at, created_by_user_id). Wird "
+            "automatisch beim ersten Startup via create_all() angelegt.",
+            "Backend: 4 neue Endpoints unter /admin/live-tests (GET mit "
+            "Status-Filter, POST, PATCH, DELETE). Alle hinter require_admin, "
+            "30/min Rate-Limit.",
+            "Phase 3 (kommt noch): bei FAIL + Notiz wird automatisch ein "
+            "GitHub-Issue erstellt (mit GITHUB_TOKEN-Env-Var). Aktuell "
+            "wird github_issue_url-Feld nur fuer manuelle Eintraege "
+            "vorbereitet.",
+            "Bundle-Impact: +2.3KB gzipped (Panel + Hooks). Total "
+            "Bundle jetzt 420KB gz.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.admin-toggle",
         released=date(2026, 5, 17),
         title="Admin-Status via UI toggeln (statt nur ADMIN_EMAILS-Env-Var)",

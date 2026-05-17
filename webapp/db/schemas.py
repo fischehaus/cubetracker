@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 # ============================================================
@@ -237,3 +239,60 @@ class HardwareRead(HardwareBase):
 
     id: int
     created_at: datetime
+
+
+# ============================================================
+# LiveTest (Phase W.live-tests, 2026-05-17)
+# ============================================================
+
+LiveTestStatusLiteral = Literal["open", "pass", "fail", "skip"]
+
+
+class LiveTestCreate(BaseModel):
+    """Payload zum Anlegen eines neuen Live-Tests (Admin-only).
+
+    Wird im Admin-UI manuell befuellt — Claude gibt mir eine Test-Anweisung
+    im Chat, ich kopiere title + description rein. Optional related_phase
+    z.B. "W.scramble-image" um Tests einer Welle zuzuordnen.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    title: str = Field(min_length=1, max_length=200)
+    description: str = Field(min_length=1, max_length=4000)
+    related_phase: str | None = Field(default=None, max_length=64)
+    related_commit_sha: str | None = Field(default=None, max_length=40)
+    related_tag: str | None = Field(default=None, max_length=120)
+
+
+class LiveTestUpdate(BaseModel):
+    """Patch: Status setzen + Antwort schreiben.
+
+    Beide Felder optional damit man z.B. nur eine Notiz updaten kann
+    ohne Status zu aendern. Beim Status-Set wird responded_at +
+    responded_by_user_id serverseitig gesetzt.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    status: LiveTestStatusLiteral | None = None
+    user_response: str | None = Field(default=None, max_length=4000)
+
+
+class LiveTestRead(BaseModel):
+    """Read-Schema fuer Liste / Detail."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    title: str
+    description: str
+    related_phase: str | None
+    related_commit_sha: str | None
+    related_tag: str | None
+    status: str
+    user_response: str | None
+    responded_at: datetime | None
+    responded_by_user_id: int | None
+    github_issue_url: str | None
+    github_issue_number: int | None
+    created_at: datetime
+    created_by_user_id: int | None

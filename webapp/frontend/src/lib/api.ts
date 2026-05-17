@@ -1670,3 +1670,111 @@ export function useUpcomingCompetitions(
     retry: 1,
   });
 }
+
+// ============================================================
+// Admin: Live-Tests (Phase W.live-tests, 2026-05-17)
+// ============================================================
+
+export type LiveTestStatus = "open" | "pass" | "fail" | "skip";
+
+export interface LiveTest {
+  id: number;
+  title: string;
+  description: string;
+  related_phase: string | null;
+  related_commit_sha: string | null;
+  related_tag: string | null;
+  status: LiveTestStatus;
+  user_response: string | null;
+  responded_at: string | null;
+  responded_by_user_id: number | null;
+  github_issue_url: string | null;
+  github_issue_number: number | null;
+  created_at: string;
+  created_by_user_id: number | null;
+}
+
+export interface LiveTestsResponse {
+  tests: LiveTest[];
+  count: number;
+}
+
+export interface LiveTestCreateInput {
+  title: string;
+  description: string;
+  related_phase?: string | null;
+  related_commit_sha?: string | null;
+  related_tag?: string | null;
+}
+
+export interface LiveTestUpdateInput {
+  status?: LiveTestStatus;
+  user_response?: string | null;
+}
+
+export function useAdminLiveTests(
+  enabled: boolean,
+  statusFilter?: LiveTestStatus | "all",
+): UseQueryResult<LiveTestsResponse> {
+  return useQuery({
+    queryKey: ["admin-live-tests", statusFilter ?? "all"],
+    queryFn: async () => {
+      const params: Record<string, string> = {};
+      if (statusFilter && statusFilter !== "all") params.status = statusFilter;
+      const r = await api.get<LiveTestsResponse>("/admin/live-tests", { params });
+      return r.data;
+    },
+    enabled,
+    staleTime: 10_000,
+  });
+}
+
+export function useAdminCreateLiveTest(): UseMutationResult<
+  LiveTest,
+  Error,
+  LiveTestCreateInput
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input) => {
+      const r = await api.post<LiveTest>("/admin/live-tests", input);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-live-tests"] });
+    },
+  });
+}
+
+export function useAdminUpdateLiveTest(): UseMutationResult<
+  LiveTest,
+  Error,
+  { id: number; patch: LiveTestUpdateInput }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }) => {
+      const r = await api.patch<LiveTest>(`/admin/live-tests/${id}`, patch);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-live-tests"] });
+    },
+  });
+}
+
+export function useAdminDeleteLiveTest(): UseMutationResult<
+  void,
+  Error,
+  { id: number }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }) => {
+      await api.delete(`/admin/live-tests/${id}`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-live-tests"] });
+    },
+  });
+}

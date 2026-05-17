@@ -5,6 +5,7 @@
 // ohne die Sub-Panels anzufassen.
 
 import { AdminAnnouncePanel } from "./AdminAnnouncePanel";
+import { AdminLiveTestsPanel } from "./AdminLiveTestsPanel";
 import { AdminStatsPanel } from "./AdminStatsPanel";
 import { AdminUsersPanel } from "./AdminUsersPanel";
 
@@ -12,6 +13,7 @@ export function AdminPanel() {
   return (
     <div className="space-y-6">
       <AdminStatsPanel />
+      <AdminLiveTestsPanel />
       <AdminUsersPanel />
       <AdminAnnouncePanel />
     </div>

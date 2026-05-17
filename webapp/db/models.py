@@ -489,3 +489,55 @@ class PostalCodeGeo(Base):
     )
     # Optional: vom Nominatim-Response uebernommener Stadtname (fuer UI-Anzeige).
     display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+
+class LiveTest(Base):
+    """Live-Test-Eintrag fuer den Admin-QA-Workflow (Phase W.live-tests).
+
+    Wenn ich (Claude) ein Feature deploye, kommen oft Test-Hinweise wie
+    'Phone-Test bitte: X, Y, Z'. Diese verlieren sich im Chat / bei
+    Compaction. Statt im Chat zu lassen → Eintrag in dieser Tabelle →
+    Admin sieht im Admin-Bereich seine QA-Checkliste, klickt PASS / FAIL.
+
+    Bei FAIL + Notiz: optional automatisches GitHub-Issue (Phase 3,
+    braucht GITHUB_TOKEN-Env-Var).
+
+    Bewusst KEINE FK-Constraint auf created_by_user_id: Tests koennen
+    auch ohne User-Account angelegt werden (z.B. manuelle Admin-Eintraege
+    ohne Login, wenn man eine Welle vorbereitet). responded_by_user_id
+    ist optional FK.
+    """
+
+    __tablename__ = "live_tests"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    # Welle-Identifier z.B. "W.scramble-image" — fuers Tracking welche
+    # Tests aus welchem Push stammen.
+    related_phase: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    related_commit_sha: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    related_tag: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    # Status: 'open' (default), 'pass', 'fail', 'skip'. String statt Enum
+    # damit wir spaeter Subkategorien ohne Migration ergaenzen koennen.
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="open", server_default="open", index=True
+    )
+    user_response: Mapped[str | None] = mapped_column(Text, nullable=True)
+    responded_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    responded_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    # Phase 3: GitHub-Issue-URL + Number wenn Auto-Create gelaufen ist.
+    github_issue_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    github_issue_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC), index=True
+    )
+    # Kein FK weil Tests auch System-erstellt sein koennen (created_by NULL).
+    created_by_user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<LiveTest id={self.id} status={self.status} title={self.title[:30]!r}>"
