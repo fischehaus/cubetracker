@@ -236,7 +236,7 @@ export function SettingsPanel() {
       <Section title="Scramble-Bild (2D-Net)">
         <Toggle
           label="2D-Net unter dem Scramble anzeigen"
-          hint="Cube-Vorschau (Cross-Layout) direkt unter der Notation. Hilft beim Verifizieren ob du den Scramble korrekt ausgefuehrt hast. Aktuell nur fuer 3x3 — andere Cube-Types zeigen kein Bild."
+          hint={`Cube-Vorschau (Cross-Layout) direkt unter der Notation. Hilft beim Verifizieren ob du den Scramble korrekt ausgefuehrt hast. Aktuell nur fuer 3x3 — andere Cube-Types zeigen kein Bild. Auch direkt im /timer-Tab toggle-bar (Knopf "Bild an/aus" neben "Eigene" / "Skip").`}
           value={settings.show_scramble_image}
           onChange={(v) => setSettings({ ...settings, show_scramble_image: v })}
         />

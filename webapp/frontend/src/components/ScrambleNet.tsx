@@ -28,6 +28,16 @@ interface Props {
  *  Andere („Pyraminx", "4x4", ...) → return null, ScrambleCard zeigt nichts. */
 const SUPPORTED_TYPES = new Set(["3x3"]);
 
+/**
+ * Public-Helper: weiss der Aufrufer (z.B. ScrambleCard), ob fuer diesen
+ * Cube-Type ueberhaupt ein 2D-Net gerendert wird. Wird genutzt, um den
+ * Toggle-Button nur dann anzuzeigen wenn er auch eine Wirkung hat —
+ * sonst waere er irrefuehrend ("Toggle tut nichts").
+ */
+export function isScrambleNetSupported(cubeType: string): boolean {
+  return SUPPORTED_TYPES.has(cubeType);
+}
+
 export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
   const svgString = useMemo(() => {
     if (!SUPPORTED_TYPES.has(cubeType)) return null;

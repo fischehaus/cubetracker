@@ -38,6 +38,25 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.scramble-image-toggle",
+        released=date(2026, 5, 17),
+        title="Schnell-Toggle fuer das 2D-Net direkt im /timer-Tab",
+        highlights=[
+            "Direkter Folge-Iteration zum 2D-Net (scramble-image): "
+            "Bild ein/aus geht jetzt mit einem Klick in der "
+            "ScrambleCard, ohne den Umweg ueber /einstellungen/Timer.",
+            "Button 'Bild an' / 'Bild aus' sitzt neben 'Eigene' und "
+            "'Skip'. Visualer State: aktiviert (lila Highlight) wenn "
+            "das Bild eingeblendet ist, dim wenn aus.",
+            "Erscheint NUR fuer Cube-Types, fuer die das 2D-Net "
+            "ueberhaupt rendert (aktuell nur 3x3). Bei 4x4, Pyraminx "
+            "etc. waere der Toggle wirkungslos und wird ausgeblendet "
+            "— vermeidet Verwirrung.",
+            "Settings-Panel-Hint mit-aktualisiert: User wird auf den "
+            "Schnell-Toggle hingewiesen.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.scramble-image",
         released=date(2026, 5, 17),
         title="2D-Cube-Net unter dem Scramble (visuelle Verifikation)",

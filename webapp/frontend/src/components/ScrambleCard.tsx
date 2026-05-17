@@ -30,7 +30,7 @@ import {
 } from "../lib/scramble";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import { InfoButton } from "./InfoButton";
-import { ScrambleNet } from "./ScrambleNet";
+import { ScrambleNet, isScrambleNetSupported } from "./ScrambleNet";
 
 interface Props {
   /** App-cube_type ("3x3", "Pyraminx", …) — bestimmt den Default. */
@@ -84,8 +84,13 @@ export function ScrambleCard({
 }: Props) {
   const [scramble, setScramble] = useState<string>("");
   const [skipCounter, setSkipCounter] = useState(0);
-  const [settings] = useAppSettings();
+  const [settings, setSettings] = useAppSettings();
   const fontPx = TIMER_FONT_SCALE[settings.timer_font_size].scramble;
+
+  // Phase W.scramble-image (2026-05-17): ist das 2D-Net fuer den aktuellen
+  // Cube-Type ueberhaupt verfuegbar? Wir blenden den Toggle dann nur ein,
+  // wenn er auch eine sichtbare Wirkung hat.
+  const netSupported = isScrambleNetSupported(cubeType);
 
   // Phase W.custom-scramble (2026-05-17): Edit-Modus laesst User einen
   // eigenen Scramble eintippen. Aktivieren via Edit-Button, speichern
@@ -225,6 +230,33 @@ export function ScrambleCard({
               title="Eigenen Scramble eintippen (z.B. aus einer anderen App / Wettkampf)"
             >
               ✏ Eigene
+            </button>
+          )}
+          {/* 2D-Net-Toggle (Phase W.scramble-image-toggle): nur sichtbar wenn
+              das Bild fuer den aktuellen Cube-Type ueberhaupt was zeigen
+              wuerde — sonst waere der Toggle wirkungslos und damit
+              irrefuehrend (User-Wunsch 2026-05-17). */}
+          {netSupported && (
+            <button
+              onClick={() =>
+                setSettings({
+                  ...settings,
+                  show_scramble_image: !settings.show_scramble_image,
+                })
+              }
+              className={`text-sm rounded border px-2 py-1 transition-colors ${
+                settings.show_scramble_image
+                  ? "border-purple-500/60 bg-purple-600/20 text-purple-100 hover:bg-purple-600/30"
+                  : "border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+              }`}
+              title={
+                settings.show_scramble_image
+                  ? "2D-Net-Vorschau ausblenden"
+                  : "2D-Net-Vorschau anzeigen"
+              }
+              aria-pressed={settings.show_scramble_image}
+            >
+              {settings.show_scramble_image ? "👁 Bild an" : "👁 Bild aus"}
             </button>
           )}
           <button
