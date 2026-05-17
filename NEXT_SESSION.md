@@ -34,50 +34,59 @@
 > - **Datenuebertragung Dev↔Prod via Backup/Restore-Endpoint** (Pflicht
 >   in Phase 9)
 >
-> **LETZTER STAND (2026-05-16 spaeter abend, Session-Ende via /abschluss):**
+> **LETZTER STAND (2026-05-17 nachts, Session-Ende via /abschluss):**
 > Multi-User-Web-Variante (webapp/) ist live auf cubetracker.de.
-> Heute deployed: 27 Wellen + 1 Revert. Mobile-Timer-Refactor
-> abgeschlossen, Scramble-Picker (WCA+Inoffiziell), Mo3+AO100,
-> WCA-Turniere-in-der-Naehe (mit DACH-Nachbarn + Land-Feld im Profil),
-> Speedcubing-News (3 Quellen + Auto-Refresh bei Login),
-> Dashboard-Story-Refactor (4 Sektionen), csTimer-Bigfile-Fix,
-> /abschluss-Slash-Command + Stop-Hook + 5 weitere Claude-Code-Hooks.
-> Letzte Wellen-Items: Live-Karte 4 Averages + Tabelle ohne AO100
-> (d80c036), Scramble-Notations-Bugs gefixt + Disclaimer (60148cd),
-> Roadmap rendered. Letzter Commit `e646933`.
+> Heute deployed: **kompletter Quick-Wins-Sprint P1.1-P1.4** + QA-Fixes:
+>   - **P1.1 Voice-Alert** (`3928aaf`, tag `voice-alert`): WCA-Inspection
+>     spricht "acht"/"zwoelf" (DE) oder "eight"/"twelve" (EN) statt
+>     Sinus-Beep. Cascade-Setting in SettingsPanel: beep / de / en / off.
+>   - **P1.2 Penalty-Quick-Buttons** (`fe3b1e8`, tag `penalty-quick`):
+>     Nach jedem Save erscheinen +2 / DNF / Loeschen direkt unter dem
+>     Timer — kein Weg mehr ueber die Letzte-Solves-Sidebar.
+>   - **P1.3 Custom-Scramble-Input** (`2551a2d`, tag `custom-scramble`):
+>     Edit-Button in der ScrambleCard. Eigenen Scramble eintippen
+>     (z.B. Wettkampf-Scramble), Enter speichert, Esc bricht ab.
+>   - **P1.4 Roadmap-Frontend** (`2050e74`, tag `roadmap-frontend`):
+>     RoadmapModal mit P1-P6, Status-Badges, ✓-Markern fuer erledigte
+>     Items. Trigger via Footer-Link + User-Menu.
+>   - **QA-Fixes** (`3263f47`, tag `qa-fixes-p1`): 3 HIGH + 2 MEDIUM
+>     aus Sub-Agent-Review gefixt:
+>       - speechSynthesis.cancel() raus (Screen-Reader-safe)
+>       - Safari iOS TTS-Priming via 0-Volume-Dummy-Utterance
+>       - "Letzter Solve (3x3):" mit cube_type-Label
+>       - DNF-Button-Tooltip benennt WCA-Auto-+2-Entfernung explizit
+>       - Loeschen: window.confirm() raus, 2-Klick-Pattern mit 5s-Timeout
 >
-> **HOTFIX-EREIGNIS heute spaet:** cstimer_module-Einbau (6d7a0eb)
-> hat cubetracker.de gekillt — 12x Buffer-Globals ohne Browser-Polyfill.
-> Sofort-Revert (7596eb7), Seite wieder oben. Lesson in CLAUDE.md zu
-> ergaenzen: BEI NEUEN NPM-PACKAGES MIT NATIVE-NODE-GLOBALS (Buffer,
-> process, crypto, fs) IMMER Headless-Browser-Smoke VOR Production-
-> Push. Lokaler Vite-Build + Node-Smoke-Test sind NICHT ausreichend.
+> **Tag-Stand:** v2.0.0-alpha.W.voice-alert, penalty-quick,
+> custom-scramble, roadmap-frontend, qa-fixes-p1 — alle 5 lokal + remote.
 >
-> **EINMALIGER ROOT-CAUSE-HOTFIX heute:** Bash-Heredoc hatte deutsche
-> Schliess-Anfuehrungszeichen mit ASCII gemischt → Python-SyntaxError
-> in changelog/data.py → 5 Render-Deploys gescheitert. Fix `0a85fe0`.
-> Lesson: in CLAUDE.md verankert "kein gemischtes Quoting in
-> Bash-Heredocs mehr".
+> **Infra-Setup heute:** ntfy.sh als trusted endpoint in
+> `~/.claude/settings.json` (User-Level). Permission-Pattern:
+> `Bash(curl * https://ntfy.sh/*)`. ntfy-Topic: `jjY2OjY` (persoenlich).
+>
+> **WAS DU PARALLEL ANGEFANGEN HAST (untracked):**
+> - `scripts/render_pll.py` — PIL-basierter PLL-Renderer im OLL-Stil
+>   (700x500, gleiche Sticker-/Pill-/Arrow-Geometrie wie OLL).
+> - `webapp/frontend/src/assets/pll/PLL_Ua.png` — erstes generiertes Bild
+>   (Ua-Perm). Sieht visuell sauber aus, Indikatoren korrekt platziert.
+> - Klarer Fortschritt zu **P5 "PLL-Bilder einbinden (analog OLL)"** aus
+>   der Roadmap (~30 Min wenn alle 21 fertig).
 >
 > **OFFENE USER-AUFGABEN:**
-> - Phone-Re-Test der heute deployten Sachen (Mobile-Refactor +
->   Scramble-Picker + WCA-Card + News-Card + Dashboard)
-> - Profil-Test: PLZ + Land setzen, WCA-Turniere-Card pruefen,
->   Distanz-Selector klicken
-> - RESEND_API_KEY rotieren (alter Chat-Key revoken)
+> - Phone-Re-Test der P1-Items: Voice-Alert (8s/12s), Penalty-Quick-Buttons
+>   (Tap-Targets ausreichend gross?), Custom-Scramble (Mobile-Keyboard OK?),
+>   Loeschen-2-Klick-Confirm (Animation sichtbar?).
+> - PLL-Renderer fertig machen: restliche 20 Permutationen
+>   (Aa, Ab, E, F, Ga-d, H, Ja, Jb, Na, Nb, Ra, Rb, T, Ub, V, Y, Z),
+>   dann `frontend/src/lib/pll-images.ts` analog OLL anlegen.
+> - RESEND_API_KEY rotieren (alter Chat-Key revoken).
 >
-> **NAECHSTE Quick-Wins (User-Wahl beim naechsten Mal):**
-> - PWA-Setup (~1 Tag): Manifest + Service-Worker fuer
->   Phone-Homescreen-Install. Nach Mobile-First-Refactor konsequent.
-> - Feedback-Kanal (~1-2h): Form in Verwaltung "Rueckmeldung an
->   Entwickler", Email via vorhandene Resend-Infrastruktur.
-> - Roadmap-Anzeige im Frontend: analog Patch-Notes-Modal, aber
->   Vorwaerts-Sicht.
-> - PLL-Bilder einbinden (wartet auf User-Lieferung der 21 PNGs).
-> - i18n (Englisch fuer Reichweite).
-> - News-Quellen erweitern (HTML-Scraping fuer SpeedCubeShop/
->   TheCubicle, oder YouTube-Channel-RSS mit kurierter Liste).
-> - Friend-System-Ausbau W.11+ (Activity-Feed, Public-Profile).
+> **NAECHSTE Schritte (P1-Sprint-Restplan):**
+> - **P1.5 Scramble-Bild 2D-Net** (~1 Woche, hoechster Visual-Impact aus
+>   P1) — Standard-Erwartung an Speedcubing-Timer. Pflicht-Item.
+> - **P1.6 PWA-Setup** (~1 Tag) — Manifest + Service-Worker fuer Phone-
+>   Homescreen-Install. Konsequenz aus dem Mobile-First-Refactor.
+> - Danach P2 Hetzner-Migration (Mitte Juli, vor Postgres-90d-Limit).
 >
 > **INFRASTRUKTUR:**
 > - Mitte Juli: Hetzner-Migration (vor Render-Postgres-90d-Limit
