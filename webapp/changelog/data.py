@@ -38,6 +38,33 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gpl-license-migration",
+        released=date(2026, 5, 17),
+        title="Lizenz-Migration auf GPL-3.0-or-later",
+        highlights=[
+            "Cubetracker steht ab heute unter GNU General Public "
+            "License v3 (oder spaeter). Vorher war kein expliziter "
+            "Lizenz-Eintrag im Repo, was per Default 'all rights "
+            "reserved' bedeutet hat.",
+            "Hintergrund: Vorbereitung fuer die Integration von "
+            "csTimer-Scramble-Algorithmen (selbst GPL-v3) fuer "
+            "inoffizielle Puzzles wie Gear, Redi, Master Pyraminx, "
+            "Master Skewb. GPL ist Copyleft — alles was csTimer-"
+            "Code beinhaltet, muss komplett GPL sein.",
+            "Was sich aendert: LICENSE-File im Repo (GPL-v3 "
+            "Volltext), license-Field in package.json + pyproject.toml, "
+            "README-Sektion umgeschrieben.",
+            "Was bleibt: Source ist eh schon public auf GitHub, "
+            "die App ist non-commercial. GPL passt zum Speedcubing-"
+            "Community-Ethos.",
+            "Konsequenz: Forks/Derivate muessen ebenfalls GPL-v3 "
+            "(oder kompatibel) sein. Keine proprietaeren Closed-"
+            "Source-Forks moeglich. Re-Lizenzierung waere nur mit "
+            "Zustimmung aller Contributor moeglich — einseitiger "
+            "Schritt, bewusst.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.scramble-image-toggle",
         released=date(2026, 5, 17),
         title="Schnell-Toggle fuer das 2D-Net direkt im /timer-Tab",

@@ -91,13 +91,29 @@ cubetracker/
 └── CLAUDE.md       — Tech-Stack + Disziplin + Konventionen
 ```
 
-## Lizenz / Wiederverwendung
+## Lizenz
 
-Aktuell kein expliziter Lizenz-Eintrag — bedeutet **all rights reserved** per
-Default. Wenn du Teile des Codes nachnutzen willst (z.B. den
-[Ivy-Cube-Random-State-Solver](webapp/frontend/src/lib/ivyScramble.ts)),
-[öffne ein Issue](https://github.com/fischehaus/cubetracker/issues/new) und
-wir klären's. Ich freue mich grundsätzlich über Open-Source-Wiederverwendung.
+**GPL-3.0-or-later** — siehe [LICENSE](LICENSE) (Volltext der GNU General
+Public License Version 3).
+
+Was das bedeutet:
+
+- ✓ Du darfst den Code frei nutzen, modifizieren und weiterverteilen.
+- ✓ Du darfst eigene Forks/Derivate erstellen.
+- ⚠ **Copyleft**: Forks und abgeleitete Werke müssen ebenfalls unter
+  GPL-v3 (oder kompatibel) veröffentlicht werden — der Source-Code muss
+  verfügbar bleiben.
+- ⚠ Keine proprietären Closed-Source-Forks.
+
+Lizenz-Wechsel von vorher „all rights reserved" auf GPL-v3 wurde am
+**2026-05-17** durchgeführt, im Zuge der Integration von Scramble-
+Algorithmen aus [csTimer](https://github.com/cs0x7f/cstimer) (selbst
+GPL-v3). Detaillierte Begründung in den Patch-Notes der App
+([cubetracker.de](https://cubetracker.de) → Patch-Notes → Eintrag
+`W.gpl-license-migration`).
+
+Bei Fragen zur Wiederverwendung
+[öffne ein Issue](https://github.com/fischehaus/cubetracker/issues/new).
 
 ## Status
 
