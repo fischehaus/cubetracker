@@ -71,15 +71,11 @@ function rotateFaceCW(f: Face): Face {
   return [f[6], f[3], f[0], f[7], f[4], f[1], f[8], f[5], f[2]];
 }
 
-/** 180-Grad-Drehung = 2x CW. */
-function rotateFace180(f: Face): Face {
-  return rotateFaceCW(rotateFaceCW(f));
-}
-
-/** Counter-Clockwise = 3x CW (bzw. 1x CCW). */
-function rotateFaceCCW(f: Face): Face {
-  return rotateFaceCW(rotateFaceCW(rotateFaceCW(f)));
-}
+// rotateFace180 + rotateFaceCCW koennten als Optimierung Sinn machen,
+// sind aber aktuell nicht benoetigt — applyMove nutzt `turns`-Counter mit
+// rotateFaceCW (max 3x). Wenn Performance mal Engpass wird: hier
+// re-introducen + applyMove dispatchen. QA-Fix #7 (2026-05-17): vorher
+// als dead-code + void-ESLint-Trick — sauberer entfernt.
 
 /**
  * Zyklus-Definition fuer einen 90-Grad-CW-Move einer Face.
@@ -224,10 +220,6 @@ export function applyMove(state: CubeState, move: string): CubeState {
     state[moveDef.selfFace] = rotateFaceCW(state[moveDef.selfFace]);
     applyCycleCW(state, moveDef.cycle);
   }
-
-  // Convenience-aliases fuer rotate-functions, damit ESLint zufrieden ist.
-  void rotateFace180;
-  void rotateFaceCCW;
 
   return state;
 }

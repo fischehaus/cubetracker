@@ -104,15 +104,12 @@ describe("applyMove — Center-Invariante", () => {
 
 describe("applyScramble — bekannte Group-Orders", () => {
   it("Sexy-Move (R U R' U') hat Order 6", () => {
-    const s = solvedCube();
+    // QA-Fix #8 (2026-05-17): vorher leitete eine Loop ueber `s` ein,
+    // mutierte aber `s` nicht (applyScramble macht intern cloneState),
+    // war also dead-code. Entfernt.
     const sexy = "R U R' U'";
-    for (let i = 0; i < 5; i++) {
-      applyScramble(s, sexy); // 5x nicht identity
-    }
-    // 5x angewandt -> Re-Apply via cloneState/applyScramble bewahrt zu komplex
-    // einfacher: 5x R U R' U' direkt
-    const t = solvedCube();
     const full5 = `${sexy} ${sexy} ${sexy} ${sexy} ${sexy}`;
+    const t = solvedCube();
     const after5 = applyScramble(t, full5);
     expect(statesEqual(after5, solvedCube())).toBe(false); // 5x != solved
     const after6 = applyScramble(t, `${full5} ${sexy}`);

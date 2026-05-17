@@ -159,6 +159,21 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
     summary:
       "Features fuer Tiefen-User die wir bauen wenn jemand konkret danach fragt. Reihenfolge je nach Bedarf.",
     items: [
+      {
+        title: "csTimer-Vendor dynamic-importen (Bundle-Split)",
+        effort: "~1 Tag",
+        note: "Aktuell wird csTimer-Vendor (~50KB raw / ~16KB gz) statisch geladen, auch fuer User die nie inoffizielle Cubes nutzen. Async-Refactor: generateScramble wird Promise-basiert, csTimer-Vendor wird beim ersten Bedarf via dynamic import() geholt. QA-Befund SOLLTE #4 vom 2026-05-17.",
+      },
+      {
+        title: "csTimer solver/-Files vendoren (schaltet 8 weitere Puzzles frei)",
+        effort: "~1-2 Tage",
+        note: "Aktuell sind helicopter/gigaminx/bicube/bandaged_square/square_2/curvy_copter/diamond + megaminx-RS aus der UI entfernt weil utilscramble.js + megaminx.js leerstring/null returnen ohne solver/megaminx.js (32KB) + solver/ftocta.js (27KB) + grouplib.js (26KB) + poly3dlib.js (35KB). Zusaetzlich braucht jedes Puzzle den passenden solver-state-graph. Re-Vendoring + Smoke-Tests pro Puzzle.",
+      },
+      {
+        title: "Random-Move-Fallback-Specs fuer Dino/Floppy/Tower (csTimer-Cubes)",
+        effort: "1-2h",
+        note: "Wenn csTimer-Init crashen sollte, returnt generateScramble fuer die 3 verbleibenden csTimer-Cubes (Dino/Floppy/Tower) leerstring. Kurze Random-Move-Specs (analog ivy/gear/redi-Specs) waeren ein robusterer Fallback. QA-Befund SOLLTE #3 vom 2026-05-17.",
+      },
       { title: "Metronom (Trainings-TPS-Hilfe)", effort: "1-2 Tage" },
       { title: "BLD-Helper (Constraint-Scrambler)", effort: "1-2 Wochen" },
       { title: "FMC-Modus (Move-Counter)", effort: "1 Woche" },

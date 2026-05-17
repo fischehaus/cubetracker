@@ -38,6 +38,48 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.cstimer-more-puzzles-qa",
+        released=date(2026, 5, 17),
+        title="QA-Fixes auf csTimer-Erweiterung (8 Befunde behoben)",
+        highlights=[
+            "Sub-Agent-QA hat 1 KRITISCH + 5 SOLLTE + 4 NICE gefunden. "
+            "Davon 1 KRITISCH + 3 SOLLTE + 2 NICE sofort gefixt, 2 SOLLTE "
+            "als Roadmap-Items dokumentiert.",
+            "KRITISCH #1: COMMON_CUBE_TYPES enthielt die neuen Cubes nicht "
+            "— User konnte sie im Scramble-Picker waehlen, aber NICHT als "
+            "cube_type fuer Solve-Speicherung setzen. Ergaenzt: Ivy, Gear, "
+            "Redi, Master Pyraminx, Master Skewb, FTO, Dino, Floppy, Tower. "
+            "Plus cubeTypeToScrambowType-Cases.",
+            "SOLLTE #2: 'Bandaged 3x3 (Square)'-Label war falsch — csTimer "
+            "'bsq' ist tatsaechlich Bandaged-Square-1. Cube war eh broken "
+            "(SOLLTE #3) und wurde komplett entfernt.",
+            "QA-Runtime-Check hat aufgedeckt: 7 von 11 neuen Cubes "
+            "(helicopter/gigaminx/bicube/bandaged-sq1/square-2/curvy-copter/"
+            "diamond) returnen leerstring und Megaminx-RS returnt null, "
+            "weil src/js/solver/-Files nicht vendored sind. Saubere Loesung: "
+            "vorerst raus aus UI, in Roadmap als P6-Item mit Solver-"
+            "Vendoring-Aufwand notiert.",
+            "Nach Cleanup: inoffizielle Cube-Liste wieder bei 9 (statt 16): "
+            "Ivy, Gear, Redi, Master Pyraminx, Master Skewb, FTO, Dino, "
+            "Floppy, Tower. Alle 8 davon mit Random-State (master_skewb "
+            "weiter Random-Move).",
+            "SOLLTE #5: ScrambleNet zeigt jetzt auch 2D-Net fuer OH + 3BLD "
+            "(beides mechanisch 3x3-Scrambles).",
+            "SOLLTE #6: Test-Whitelist statt nur 'non-empty' — faengt "
+            "Bug-Klassen wie '???' oder leerstring ab. Eigenes mgmso-Test "
+            "hat damit den megaminx-Bug aufgedeckt (typeof null === "
+            "'object' war Test-Bug).",
+            "NICE #7+#8: Code-Hygiene (toter rotateFace180/CCW + void-"
+            "ESLint-Trick raus, tote Loop im Sexy-Move-Test raus).",
+            "Bundle-Win: -40KB raw / -14KB gz (utilscramble.js + "
+            "grouplib.js + poly3dlib.js + megaminx.js entfernt). Total "
+            "Bundle jetzt 418KB gz (vorher 432).",
+            "Lesson: Vendor-Smoke-Tests nicht nur 'registered' pruefen, "
+            "sondern auch 'liefert valide non-empty Output'. Im aktuellen "
+            "Test-File ergaenzt.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.cstimer-more-puzzles",
         released=date(2026, 5, 17),
         title="11 weitere Scramble-Types via csTimer (Quick-Wins + Exotische)",

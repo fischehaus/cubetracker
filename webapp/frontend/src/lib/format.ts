@@ -110,8 +110,15 @@ export function formatDate(iso: string): string {
 /**
  * Standard-Liste haeufiger Cube-Types (Reihenfolge fuer Dropdown-Default).
  * User kann beliebige andere Strings im POST schicken — das hier ist nur UX.
+ *
+ * Erweitert in Phase W.cstimer-more-puzzles-qa (2026-05-17) um die 11
+ * inoffiziellen Cubes die ueber csTimer-Vendor Scrambles bekommen. Vorher
+ * konnten User diese im Scramble-Picker waehlen, aber NICHT als cube_type
+ * fuer Solve-Speicherung setzen → Solves landen unter falschem Type
+ * (QA-Befund #1 vom 2026-05-17).
  */
 export const COMMON_CUBE_TYPES = [
+  // WCA-Events (Reihenfolge nach Geschwindigkeit / Beliebtheit)
   "3x3",
   "2x2",
   "4x4",
@@ -119,10 +126,21 @@ export const COMMON_CUBE_TYPES = [
   "6x6",
   "7x7",
   "OH",
+  "3BLD",
   "Pyraminx",
   "Skewb",
   "Square-1",
   "Megaminx",
   "Clock",
-  "3BLD",
+  // Inoffizielle Cubes (Phase W.cstimer-more-puzzles, 2026-05-17;
+  // bereinigt im QA-Fix selbentags — broken cubes raus)
+  "Ivy",
+  "Gear",
+  "Redi",
+  "Master Pyraminx",
+  "Master Skewb",
+  "FTO",
+  "Dino",
+  "Floppy",
+  "Tower",
 ] as const;

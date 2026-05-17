@@ -66,16 +66,12 @@ const APP_TO_CSTIMER: Record<string, string> = {
   dino: "dinoso",
   floppy: "133",
   tower: "223",
-  helicopter: "heli",
-  gigaminx: "giga",
-  bicube: "bic",
-  bandaged_square: "bsq",
-  square_2: "sq2",
-  curvy_copter: "ctico",
-  diamond: "dmdso",
-  // Quality-Upgrade fuer WCA-Cube: vorher scrambow random-move, jetzt
-  // csTimer Random-State.
-  megaminx: "mgmso",
+  // ENTFERNT (QA-Fix 2026-05-17): helicopter/gigaminx/bicube/bandaged_square/
+  // square_2/curvy_copter/diamond/megaminx waren im ersten Push enthalten,
+  // returnen aber leerstring/null weil src/js/solver/ + weitere lib-Files
+  // fehlen. Im Cascade landeten sie still bei scrambow (das die Codes nicht
+  // kennt) → User sah "Scramble nicht verfuegbar". Saubere Loesung: vorerst
+  // raus, in der Roadmap als P6-Item mit Solver-Vendoring-Aufwand notiert.
 };
 
 /**
@@ -114,6 +110,29 @@ export function cubeTypeToScrambowType(cubeType: string): string {
       return "megaminx";
     case "Clock":
       return "clock";
+    // Phase W.cstimer-more-puzzles-qa (2026-05-17): inoffizielle Cubes
+    // bekommen ihren passenden Scramble-Type als Default. Codes matchen
+    // UNOFFICIAL_SCRAMBLE_TYPES.code (lowercase, snake_case).
+    case "Ivy":
+      return "ivy";
+    case "Gear":
+      return "gear";
+    case "Redi":
+      return "redi";
+    case "Master Pyraminx":
+      return "master_pyraminx";
+    case "Master Skewb":
+      return "master_skewb";
+    case "FTO":
+      return "fto";
+    case "Dino":
+      return "dino";
+    case "Floppy":
+      return "floppy";
+    case "Tower":
+      return "tower";
+    // ENTFERNT (QA-Fix 2026-05-17): broken solver-deps siehe
+    // APP_TO_CSTIMER-Kommentar.
     default:
       return "333";
   }
@@ -243,17 +262,14 @@ export const UNOFFICIAL_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
   { code: "master_pyraminx", label: "Master Pyraminx" },
   { code: "master_skewb", label: "Master Skewb" },
   { code: "fto", label: "FTO (Face-Turning Octahedron)" },
-  // Phase W.cstimer-more-puzzles (2026-05-17) — 10 weitere via csTimer-Vendor
+  // Phase W.cstimer-more-puzzles (2026-05-17) — funktionierende neue Cubes
   { code: "dino", label: "Dino Cube" },
   { code: "floppy", label: "Floppy Cube (1x3x3)" },
   { code: "tower", label: "Tower Cube (2x2x3)" },
-  { code: "helicopter", label: "Helicopter Cube" },
-  { code: "gigaminx", label: "Gigaminx (5x5 Megaminx)" },
-  { code: "bicube", label: "Bicube" },
-  { code: "bandaged_square", label: "Bandaged 3x3 (Square)" },
-  { code: "square_2", label: "Square-2" },
-  { code: "curvy_copter", label: "Curvy Copter" },
-  { code: "diamond", label: "Diamond Cube" },
+  // ENTFERNT (QA-Fix 2026-05-17): helicopter/gigaminx/bicube/bandaged_square/
+  // square_2/curvy_copter/diamond brauchen src/js/solver/-Files die wir noch
+  // nicht vendored haben. Returnten leerstring → "Scramble nicht verfuegbar"
+  // in UI. Bis solver-Vendoring (Roadmap P6) raus aus User-facing Liste.
 ];
 
 /**
@@ -368,17 +384,11 @@ const RANDOM_STATE_PUZZLES = new Set<string>([
   "gear",
   "redi",
   "master_pyraminx",
-  // Phase W.cstimer-more-puzzles:
+  // Phase W.cstimer-more-puzzles (2026-05-17):
   "dino",
   "floppy",
   "tower",
-  "helicopter",
-  "gigaminx",
-  "bicube",
-  "bandaged_square",
-  "square_2",
-  "curvy_copter",
-  "diamond",
+  // 7 weitere (heli/giga/etc.) sind raus seit QA-Fix — brauchen solver/-Files.
 ]);
 
 export function isWcaQualityCustomPuzzle(code: string): boolean {

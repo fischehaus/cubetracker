@@ -24,9 +24,11 @@ interface Props {
   stickerPx?: number;
 }
 
-/** Akzeptierte Cube-Types fuer dieses Modul. Aktuell nur 3x3.
+/** Akzeptierte Cube-Types fuer dieses Modul. Aktuell 3x3 + alle Cube-Types
+ *  die mechanisch 3x3-Scrambles nutzen (OH = One-Handed, 3BLD = Blindfold
+ *  3x3) — QA-Fix #5 vom 2026-05-17.
  *  Andere („Pyraminx", "4x4", ...) → return null, ScrambleCard zeigt nichts. */
-const SUPPORTED_TYPES = new Set(["3x3"]);
+const SUPPORTED_TYPES = new Set(["3x3", "OH", "3BLD"]);
 
 /**
  * Public-Helper: weiss der Aufrufer (z.B. ScrambleCard), ob fuer diesen

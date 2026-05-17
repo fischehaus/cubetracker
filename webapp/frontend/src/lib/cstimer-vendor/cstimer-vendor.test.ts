@@ -41,47 +41,73 @@ describe("csTimer-Vendor-Module", () => {
   });
 
   it("erwartete Types sind registriert", () => {
-    // Erwartet aus den vendored modules:
+    // Funktionierende Types (vendored + getestet):
     expect(hasCstimerScramble("gearso")).toBe(true);
     expect(hasCstimerScramble("rediso")).toBe(true);
-    expect(hasCstimerScramble("dinoso")).toBe(true); // W.cstimer-more (2026-05-17)
+    expect(hasCstimerScramble("dinoso")).toBe(true);
     expect(hasCstimerScramble("mpyrso")).toBe(true);
-    // Aus pyraminx.js zusaetzlich:
     expect(hasCstimerScramble("pyrso")).toBe(true);
-    // Aus skewb.js zusaetzlich Ivy (Phase W.cstimer-ivy-switch):
     expect(hasCstimerScramble("ivyso")).toBe(true);
-    // Phase W.cstimer-more-puzzles (2026-05-17):
     expect(hasCstimerScramble("133")).toBe(true); // Floppy Cube
     expect(hasCstimerScramble("223")).toBe(true); // Tower Cube
-    expect(hasCstimerScramble("mgmso")).toBe(true); // Megaminx Random-State
-    // Aus utilscramble.js:
-    expect(hasCstimerScramble("heli")).toBe(true); // Helicopter Cube
-    expect(hasCstimerScramble("giga")).toBe(true); // Gigaminx
-    expect(hasCstimerScramble("bic")).toBe(true); // Bicube
-    expect(hasCstimerScramble("bsq")).toBe(true); // Bandaged Square
-    expect(hasCstimerScramble("sq2")).toBe(true); // Square-2
-    expect(hasCstimerScramble("ctico")).toBe(true); // Curvy Copter
-    expect(hasCstimerScramble("dmdso")).toBe(true); // Diamond
+    // Diese Types existieren NICHT (utilscramble/megaminx wurden entfernt
+    // im QA-Fix 2026-05-17 weil broken). Kommen bei Solver-Vendoring zurueck.
+    expect(hasCstimerScramble("heli")).toBe(false);
+    expect(hasCstimerScramble("giga")).toBe(false);
+    expect(hasCstimerScramble("bic")).toBe(false);
+    expect(hasCstimerScramble("mgmso")).toBe(false);
     // Nicht-registrierter Type
     expect(hasCstimerScramble("does-not-exist-xyz")).toBe(false);
   });
 
-  it("getCstimerScramble('gearso') liefert non-empty string", () => {
+  // QA-Fix #6 (2026-05-17): Char-Whitelist statt nur "non-empty".
+  // Faengt Bug-Klassen wie "???" oder "undefined undefined" ab. Pattern:
+  //   - Buchstaben (Move-Faces), Ziffern (Modifier 2 / Multi-Slice),
+  //   - ' fuer CCW, Klammern fuer Square-1, Slash fuer FTO/Cyclic, Minus
+  //     fuer negative SQ1-Werte, Komma fuer komplexe Notations
+  //   - Whitespace
+  const VALID_SCRAMBLE_CHARS = /^[A-Za-z0-9 '2()\/,\-+]+$/;
+
+  it("getCstimerScramble('gearso') liefert validen Scramble-String", () => {
     const s = getCstimerScramble("gearso");
     expect(typeof s).toBe("string");
     expect(s?.length ?? 0).toBeGreaterThan(0);
+    expect(s!).toMatch(VALID_SCRAMBLE_CHARS);
   });
 
-  it("getCstimerScramble('rediso') liefert non-empty string", () => {
+  it("getCstimerScramble('rediso') liefert validen Scramble-String", () => {
     const s = getCstimerScramble("rediso");
     expect(typeof s).toBe("string");
     expect(s?.length ?? 0).toBeGreaterThan(0);
+    expect(s!).toMatch(VALID_SCRAMBLE_CHARS);
   });
 
-  it("getCstimerScramble('mpyrso') liefert non-empty string", () => {
+  it("getCstimerScramble('mpyrso') liefert validen Scramble-String", () => {
     const s = getCstimerScramble("mpyrso");
     expect(typeof s).toBe("string");
     expect(s?.length ?? 0).toBeGreaterThan(0);
+    expect(s!).toMatch(VALID_SCRAMBLE_CHARS);
+  });
+
+  it("getCstimerScramble('dinoso') liefert validen Scramble-String", () => {
+    const s = getCstimerScramble("dinoso");
+    expect(typeof s).toBe("string");
+    expect(s?.length ?? 0).toBeGreaterThan(0);
+    expect(s!).toMatch(VALID_SCRAMBLE_CHARS);
+  });
+
+  it("getCstimerScramble('133') (Floppy) liefert validen Scramble-String", () => {
+    const s = getCstimerScramble("133");
+    expect(typeof s).toBe("string");
+    expect(s?.length ?? 0).toBeGreaterThan(0);
+    expect(s!).toMatch(VALID_SCRAMBLE_CHARS);
+  });
+
+  it("getCstimerScramble('223') (Tower) liefert validen Scramble-String", () => {
+    const s = getCstimerScramble("223");
+    expect(typeof s).toBe("string");
+    expect(s?.length ?? 0).toBeGreaterThan(0);
+    expect(s!).toMatch(VALID_SCRAMBLE_CHARS);
   });
 
   it("unbekannter Type liefert null", () => {

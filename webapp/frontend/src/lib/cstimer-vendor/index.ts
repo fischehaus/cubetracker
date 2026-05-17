@@ -36,19 +36,21 @@
 import "./shim.js";
 import "./isaac.js"; // ISAAC PRNG, mathlib braucht's fuer setSeed()
 import "./mathlib.js";
-import "./grouplib.js"; // braucht mathlib; benoetigt von Megaminx/utilscramble
-import "./poly3dlib.js"; // braucht mathlib; benoetigt von utilscramble (giga/heli/etc.)
 import "./scramble.js";
 import "./gearcube.js";
-import "./redi.js";
-import "./pyraminx.js";
-import "./skewb.js";
-import "./mgmlsll.js";
-// Phase W.cstimer-more-puzzles (2026-05-17):
+import "./redi.js"; // Redi + Dino
+import "./pyraminx.js"; // Pyraminx + Master Pyraminx
+import "./skewb.js"; // Skewb + Ivy
+import "./mgmlsll.js"; // Megaminx-LSLL (Trainer-Subsets, derzeit nicht in UI)
 import "./1x3x3.js"; // Floppy Cube
 import "./2x2x3.js"; // Tower Cube
-import "./megaminx.js"; // Megaminx Random-State (scrambow hatte nur random-move)
-import "./utilscramble.js"; // Helicopter, Gigaminx, Bicube, Bandaged Square, Square-2, Curvy Copter, Diamond, ...
+
+// NICHT mehr geladen (Phase W.cstimer-more-puzzles-qa, 2026-05-17):
+//   - megaminx.js → braucht solver/megaminx.js (32KB), liefert sonst null
+//   - utilscramble.js + grouplib.js + poly3dlib.js → broken: 7 cubes
+//     (heli, giga, bic, bsq, sq2, ctico, dmdso) registrieren sich zwar,
+//     aber returnen "" weil weitere solver-Files fehlen
+// Re-Vendoring fuer beide in der Roadmap als P6-Item.
 
 // TypeScript: die Vendor-Files erweitern window mit { mathlib, scrMgr,
 // redi, ... }. Wir typisieren nur was wir brauchen.
