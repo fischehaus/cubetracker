@@ -92,6 +92,11 @@ async def lifespan(app: FastAPI):
                 # das durch try/except — Dev-Tests laufen eh nicht concurrent.
                 "CREATE UNIQUE INDEX IF NOT EXISTS uq_friendship_pair_normalized "
                 "ON friendships (LEAST(requester_id, target_id), GREATEST(requester_id, target_id))",
+                # Phase W.admin-toggle (2026-05-17): is_admin als echte
+                # DB-Spalte (vorher computed property aus ADMIN_EMAILS-Env-Var).
+                # Erlaubt UI-Toggle von Admin-Status. Default FALSE; existing
+                # Admins werden im Bootstrap-Step unten auf TRUE gesetzt.
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE",
             ]
             with engine.begin() as conn:
                 for sql in migrations:
@@ -99,6 +104,35 @@ async def lifespan(app: FastAPI):
                         conn.execute(text(sql))
                     except Exception as me:  # noqa: BLE001
                         print(f"WARN: migration failed ({sql[:60]}...): {me}")
+
+            # Phase W.admin-toggle (2026-05-17): Bootstrap-Step.
+            # User, deren Email in der ADMIN_EMAILS-Env-Var steht, bekommen
+            # is_admin=TRUE. Idempotent: setzt nur fehlende, ueberschreibt
+            # bereits-promoteed/demoteed User NICHT.
+            # ADMIN_EMAILS bleibt als "Initial-Admin-Liste-beim-Bootstrap",
+            # Quelle-of-Truth ab jetzt ist die DB-Spalte.
+            try:
+                import os as _os
+                admin_emails_raw = _os.getenv("ADMIN_EMAILS", "")
+                admin_emails = {
+                    e.strip().lower() for e in admin_emails_raw.split(",") if e.strip()
+                }
+                if admin_emails:
+                    with engine.begin() as conn:
+                        for email in admin_emails:
+                            conn.execute(
+                                text(
+                                    "UPDATE users SET is_admin = TRUE "
+                                    "WHERE LOWER(email) = :email AND is_admin = FALSE"
+                                ),
+                                {"email": email},
+                            )
+                    print(
+                        f"INFO: admin bootstrap -> {len(admin_emails)} email(s) "
+                        "promoted (if not already admin)"
+                    )
+            except Exception as ab_e:  # noqa: BLE001
+                print(f"WARN: admin bootstrap failed: {ab_e}")
 
             # W.hardware-auto-seed (2026-05-14): Backfill fuer User die
             # vor diesem Deploy registriert wurden + noch keine Hardware

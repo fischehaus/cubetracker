@@ -13,7 +13,8 @@ DB direkt.
 
 from __future__ import annotations
 
-import os
+# os-Import entfernt mit W.admin-toggle (2026-05-17) — wurde nur fuer
+# die alte ADMIN_EMAILS-Env-Var-Lookup in is_admin-Property gebraucht.
 from datetime import UTC, datetime
 
 from sqlalchemy import (
@@ -75,6 +76,13 @@ class User(Base):
     # in seinen Claims. Wird die Spalte hochgezaehlt (Logout, Password-Change),
     # invalidiert das alle bestehenden Tokens dieses Users sofort.
     token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Phase W.admin-toggle (2026-05-17): is_admin als echte DB-Spalte
+    # statt computed property aus ADMIN_EMAILS. Erlaubt UI-Toggle durch
+    # andere Admins. Initial-Bootstrap aus ADMIN_EMAILS-Env-Var beim
+    # Startup (siehe main.py:lifespan).
+    is_admin: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
@@ -120,19 +128,10 @@ class User(Base):
         cascade="all, delete-orphan",
     )
 
-    @property
-    def is_admin(self) -> bool:
-        """Computed: True wenn email in ADMIN_EMAILS-Env-Var (comma-separated).
-
-        Persistiert NICHT in der DB — Quelle-of-Truth ist die Env-Var (auch
-        genutzt in api/admin.py:require_admin). Pydantic UserRead picked das
-        ueber from_attributes automatisch auf, ohne dass jeder Endpoint
-        manuell setzen muss.
-        Fail-closed: leere/fehlende ADMIN_EMAILS -> alle False.
-        """
-        raw = os.getenv("ADMIN_EMAILS", "")
-        admin_set = {e.strip().lower() for e in raw.split(",") if e.strip()}
-        return bool(admin_set) and self.email.lower() in admin_set
+    # Phase W.admin-toggle (2026-05-17): is_admin ist jetzt eine echte
+    # DB-Spalte (oben definiert), die alte @property aus ADMIN_EMAILS-Env-Var
+    # ist entfernt. ADMIN_EMAILS dient nur noch als Bootstrap-Quelle beim
+    # Startup (main.py lifespan). Toggle erfolgt via Admin-UI / PATCH /admin/users/:id.
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<User id={self.id} email={self.email!r}>"

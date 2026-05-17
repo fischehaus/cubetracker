@@ -185,6 +185,14 @@ function UserRow({
       patch: { email_verified: !user.email_verified },
     });
 
+  // Phase W.admin-toggle (2026-05-17): is_admin toggle. Backend faengt
+  // "letzter Admin" → 400 ab (siehe api/admin.py:update_user).
+  const toggleAdmin = () =>
+    patch.mutate({
+      userId: user.id,
+      patch: { is_admin: !user.is_admin },
+    });
+
   return (
     <tr className="border-b border-gray-800 last:border-0 hover:bg-gray-800/30">
       <td className="py-2 pr-3">
@@ -193,7 +201,7 @@ function UserRow({
           {user.is_admin && (
             <span
               className="ml-2 rounded bg-purple-500/30 px-1.5 py-0.5 text-[10px] font-medium text-purple-200"
-              title="Admin (in ADMIN_EMAILS-Env-Var)"
+              title="Admin (via DB-Spalte users.is_admin)"
             >
               ADMIN
             </span>
@@ -257,6 +265,24 @@ function UserRow({
               title="Email als verifiziert markieren (Support-Hilfe)"
             >
               ✓ verifizieren
+            </button>
+          )}
+          {!isMe && (
+            <button
+              onClick={toggleAdmin}
+              disabled={patch.isPending}
+              className={`rounded px-2 py-1 disabled:opacity-50 ${
+                user.is_admin
+                  ? "bg-purple-600/30 text-purple-200 hover:bg-purple-600/50"
+                  : "bg-gray-700/40 text-gray-300 hover:bg-purple-600/30 hover:text-purple-200"
+              }`}
+              title={
+                user.is_admin
+                  ? "Admin-Status entziehen (mind. 1 Admin muss uebrig bleiben)"
+                  : "Zum Admin machen (volle Admin-UI-Berechtigung)"
+              }
+            >
+              {user.is_admin ? "★ Admin abnehmen" : "☆ Admin machen"}
             </button>
           )}
           {!isMe && (

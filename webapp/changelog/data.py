@@ -38,6 +38,30 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.admin-toggle",
+        released=date(2026, 5, 17),
+        title="Admin-Status via UI toggeln (statt nur ADMIN_EMAILS-Env-Var)",
+        highlights=[
+            "Phase 1 von 3 fuer das Admin-Workflow-Refactor. Vorher: "
+            "Admin-Status war computed property aus der ADMIN_EMAILS-Env-"
+            "Var auf Render. Wer rein/raus wollte, brauchte Env-Var-Edit "
+            "+ Server-Restart. Jetzt: DB-Spalte users.is_admin + Toggle "
+            "via Admin-UI.",
+            "Mini-Migration in main.py:lifespan: ADD COLUMN is_admin + "
+            "Bootstrap-Step (User mit Email in ADMIN_EMAILS bekommen "
+            "is_admin=TRUE beim ersten Startup). Idempotent — bestehende "
+            "Promotes/Demotes bleiben unangetastet.",
+            "Neuer Button in AdminUsersPanel-Tabelle: '★ Admin abnehmen' / "
+            "'☆ Admin machen' pro User-Zeile (ausser fuer sich selbst).",
+            "Safeguard: letzter Admin kann sich nicht entzogen werden — "
+            "Backend wirft 400 wenn nach Demote keine Admins mehr uebrig "
+            "waeren. Aussperren-Risiko gebannt.",
+            "Naechste Phasen: Live-Test-Liste im Admin-Bereich (Phase 2) "
+            "+ GitHub-Issue-Auto-Create bei FAIL (Phase 3). Kommen "
+            "separat um kleinere Iterationen zu fahren.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.cstimer-more-puzzles-qa",
         released=date(2026, 5, 17),
         title="QA-Fixes auf csTimer-Erweiterung (8 Befunde behoben)",

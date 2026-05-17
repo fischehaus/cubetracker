@@ -1154,6 +1154,9 @@ export function useAdminUsers(enabled: boolean): UseQueryResult<AdminUsersRespon
 export interface AdminUserPatch {
   is_active?: boolean;
   email_verified?: boolean;
+  /** Phase W.admin-toggle (2026-05-17): is_admin toggle via Admin-UI.
+   *  Backend safeguard "letzter Admin" -> 400. */
+  is_admin?: boolean;
 }
 
 export function useAdminPatchUser(): UseMutationResult<

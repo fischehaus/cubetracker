@@ -15,7 +15,6 @@ aggregiert).
 from __future__ import annotations
 
 import logging
-import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -51,25 +50,23 @@ ADMIN_ANNOUNCE_LIMIT = "3/hour"
 ANNOUNCEMENT_MAX_RECIPIENTS = 80
 
 
-def _get_admin_emails() -> set[str]:
-    """ADMIN_EMAILS aus Env, comma-separated, normalisiert."""
-    raw = os.getenv("ADMIN_EMAILS", "")
-    return {e.strip().lower() for e in raw.split(",") if e.strip()}
-
-
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
     """FastAPI-Dependency fuer Admin-only-Endpoints.
 
-    Sub-Agent-QA-Finding S1: als Dependency statt manueller Aufruf
-    im Endpoint-Body — verhindert dass spaetere Admin-Endpoints den
-    Check vergessen koennen (statisch im Code-Review erkennbar).
+    Phase W.admin-toggle (2026-05-17): prueft jetzt die DB-Spalte
+    `users.is_admin` statt ADMIN_EMAILS-Env-Var. Bootstrap-Logic in
+    main.py:lifespan setzt is_admin=TRUE fuer ADMIN_EMAILS-User beim
+    Startup.
+
+    Sub-Agent-QA-Finding S1 (urspruengliches): als Dependency statt
+    manueller Aufruf im Endpoint-Body — verhindert dass spaetere
+    Admin-Endpoints den Check vergessen koennen.
 
     Sicherheits-Hinweis: liefert generischen 404 (wie bei nicht-existenten
     Endpunkten), kein 403 — verhindert das Probing ob Admin-Endpoint
-    existiert. Fail-closed: leere ADMIN_EMAILS -> alle bekommen 404.
+    existiert. Fail-closed.
     """
-    admin_emails = _get_admin_emails()
-    if not admin_emails or current_user.email.lower() not in admin_emails:
+    if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Not found.",
@@ -187,11 +184,16 @@ class AdminUserPatch(BaseModel):
     extra="forbid": Mass-Assignment-Schutz wie bei UserUpdate. Bewusst KEIN
     email/display_name/password — fuer Email-Change gibt's den User-Flow,
     Display-Name ist sein Recht, Passwort hat der Admin gar nicht (bcrypt).
+
+    Phase W.admin-toggle (2026-05-17): is_admin ist patch-bar — anderen
+    User zum Admin machen oder Admin-Status nehmen. Safeguard im Endpoint
+    verhindert dass der letzte Admin demoteed wird (Aussperren-Risiko).
     """
 
     model_config = ConfigDict(extra="forbid")
     is_active: bool | None = None
     email_verified: bool | None = None
+    is_admin: bool | None = None
 
 
 class AdminEmailPayload(BaseModel):
@@ -296,6 +298,34 @@ def update_user(
             detail="Mindestens ein Feld (is_active oder email_verified) muss gesetzt sein.",
         )
 
+    # Phase W.admin-toggle (2026-05-17): Safeguard "letzter Admin".
+    # Wenn jemand den is_admin-Status entzieht, muss mindestens ein anderer
+    # Admin uebrig bleiben — sonst kommt niemand mehr in die Admin-UI rein.
+    # admin.id != user.id ist oben schon gecheckt, also: wenn `user` der
+    # einzige weitere Admin ist und auf False gesetzt wird → 400.
+    if "is_admin" in updates and updates["is_admin"] is False and user.is_admin:
+        # Wie viele Admins gibt's insgesamt? (inklusive den hier zu demoteenden)
+        admin_count = (
+            db.scalar(select(func.count(User.id)).where(User.is_admin.is_(True))) or 0
+        )
+        # Wenn nach diesem Demote nur noch der ausfuehrende Admin uebrig
+        # waere: blocken. (admin_count enthaelt user + admin selbst →
+        # nach Demote bleiben admin_count-1 uebrig, davon ist `admin` einer.
+        # Wenn admin_count == 2, bliebe nur noch `admin` allein → wir wollen
+        # mindestens 2 Admins behalten? Nein, einer (der ausfuehrende) reicht.
+        # Wir blocken nur wenn admin_count == 1, was hier nicht passieren kann
+        # weil user.is_admin=True UND user != admin → mindestens 2 Admins.
+        # Edge-Case: wenn admin_count == 2 → nach Demote bleibt 1 (admin).
+        # Das ist OK, aber wir warnen via Log.
+        if admin_count <= 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Kann letzten Admin nicht demoten — Aussperren-Risiko. "
+                    "Mache zuerst einen anderen User zum Admin."
+                ),
+            )
+
     # Token-Revocation: Deaktivieren MUSS token_version hochzaehlen, sonst
     # koennte der gerade gesperrte User mit seinem bestehenden Access-Token
     # bis zur naechsten /auth/refresh weiter requests machen.
@@ -305,6 +335,8 @@ def update_user(
         user.is_active = bool(updates["is_active"])
     if "email_verified" in updates:
         user.email_verified = bool(updates["email_verified"])
+    if "is_admin" in updates:
+        user.is_admin = bool(updates["is_admin"])
 
     db.commit()
     db.refresh(user)
