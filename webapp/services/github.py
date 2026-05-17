@@ -76,7 +76,9 @@ def create_issue(
         "X-GitHub-Api-Version": "2022-11-28",
     }
     payload: dict[str, Any] = {
-        "title": title[:200],  # GitHub-Limit ist 256, defensive Trim
+        # QA-Fix (2026-05-17 abends): Title-Limit auf echte 256 hoch (GitHub-API
+        # erlaubt 256). Vorher 200 war defensive aber unnoetig restriktiv.
+        "title": title[:256],
         "body": body[:65000],  # GitHub-Limit ist ~65535
         "labels": labels if labels is not None else DEFAULT_LABELS,
     }
@@ -95,19 +97,21 @@ def create_issue(
                 issue_url,
             )
             return {"html_url": issue_url, "number": issue_number}
-        # Bei Fehler nur loggen, nicht propagieren
+        # Bei Fehler nur loggen, nicht propagieren.
+        # QA-Fix (2026-05-17 abends): response.text NICHT loggen —
+        # koennte bei Edge-Cases (zukuenftige API-Version) Header-Echos
+        # mit Token-Reflektion enthalten. Nur Status + Reason.
         logger.warning(
-            "[github] create_issue failed: %s %s - %s",
+            "[github] create_issue failed: %s %s",
             response.status_code,
             response.reason_phrase,
-            response.text[:300],
         )
         return None
     except httpx.HTTPError as e:
-        logger.warning("[github] network error: %s", e)
+        logger.warning("[github] network error: %s", type(e).__name__)
         return None
     except Exception as e:  # noqa: BLE001
-        logger.warning("[github] unexpected error: %s", e)
+        logger.warning("[github] unexpected error: %s", type(e).__name__)
         return None
 
 
@@ -148,8 +152,14 @@ def add_comment(
         )
         return False
     except httpx.HTTPError as e:
-        logger.warning("[github] network error in add_comment: %s", e)
+        # QA-Fix (2026-05-17 abends): kein full-Error-Text loggen,
+        # nur Klassennname (Token-Reflektion-Schutz).
+        logger.warning(
+            "[github] network error in add_comment: %s", type(e).__name__
+        )
         return False
     except Exception as e:  # noqa: BLE001
-        logger.warning("[github] unexpected error in add_comment: %s", e)
+        logger.warning(
+            "[github] unexpected error in add_comment: %s", type(e).__name__
+        )
         return False

@@ -165,6 +165,16 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         note: "Aktuell wird csTimer-Vendor (~50KB raw / ~16KB gz) statisch geladen, auch fuer User die nie inoffizielle Cubes nutzen. Async-Refactor: generateScramble wird Promise-basiert, csTimer-Vendor wird beim ersten Bedarf via dynamic import() geholt. QA-Befund SOLLTE #4 vom 2026-05-17.",
       },
       {
+        title: "Backend-Test-Suite (pytest unter webapp/tests/) einfuehren",
+        effort: "~1-2 Tage initial",
+        note: "Aktuell 0% Test-Coverage auf den Backend-Endpoints (kein webapp/tests/ Folder). pyproject.toml verweist auf testpaths=['tests'] das nicht existiert. Mindestens Smoke-Tests pro Endpoint-Cluster (auth, solves, sessions, admin, live-tests, etc.). QA-Befund 2026-05-17 abends.",
+      },
+      {
+        title: "Alembic statt Inline-Mini-Migrations in main.py",
+        effort: "~1 Tag",
+        note: "Aktuelle `ALTER TABLE IF NOT EXISTS`-Liste in main.py:lifespan ist Postgres-only-Syntax + Fehler werden silently als WARN geloggt. Alembic loest beide Probleme. Niedrige Prio solange wir nur Postgres-Prod nutzen, aber wenn SQLite-Tests dazukommen muss es kommen. QA-Befund 2026-05-17 abends.",
+      },
+      {
         title: "csTimer solver/-Files vendoren (schaltet 8 weitere Puzzles frei)",
         effort: "~1-2 Tage",
         note: "Aktuell sind helicopter/gigaminx/bicube/bandaged_square/square_2/curvy_copter/diamond + megaminx-RS aus der UI entfernt weil utilscramble.js + megaminx.js leerstring/null returnen ohne solver/megaminx.js (32KB) + solver/ftocta.js (27KB) + grouplib.js (26KB) + poly3dlib.js (35KB). Zusaetzlich braucht jedes Puzzle den passenden solver-state-graph. Re-Vendoring + Smoke-Tests pro Puzzle.",

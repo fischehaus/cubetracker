@@ -18,14 +18,22 @@ import logging
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    status,
+)
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session as OrmSession
 
 from auth.deps import get_current_user
 from auth.rate_limit import limiter
-from db.database import get_db
+from db.database import SessionLocal, get_db
 from db.models import (
     Achievement,
     Hardware,
@@ -308,26 +316,29 @@ def update_user(
             detail="Mindestens ein Feld (is_active oder email_verified) muss gesetzt sein.",
         )
 
-    # Phase W.admin-toggle (2026-05-17): Safeguard "letzter Admin".
+    # Phase W.admin-toggle (2026-05-17), QA-Race-Fix (2026-05-17 abends):
     # Wenn jemand den is_admin-Status entzieht, muss mindestens ein anderer
-    # Admin uebrig bleiben — sonst kommt niemand mehr in die Admin-UI rein.
-    # admin.id != user.id ist oben schon gecheckt, also: wenn `user` der
-    # einzige weitere Admin ist und auf False gesetzt wird → 400.
+    # Admin uebrig bleiben. Bei naivem Count-Check waere das race-condition-
+    # anfaellig (zwei parallel Demotes auf vorletzten Admin → beide sehen
+    # count=2 → beide gehen durch → 0 Admins).
+    #
+    # Fix: SELECT ... FOR UPDATE auf alle Admin-Rows. Erste Transaktion
+    # haelt den Lock bis commit, zweite wartet + sieht den aktualisierten
+    # Stand. Postgres-native row-level locking. SQLite ignoriert with_for_update
+    # (single-writer eh kein Race-Issue dort).
     if "is_admin" in updates and updates["is_admin"] is False and user.is_admin:
-        # Wie viele Admins gibt's insgesamt? (inklusive den hier zu demoteenden)
-        admin_count = (
-            db.scalar(select(func.count(User.id)).where(User.is_admin.is_(True))) or 0
+        admin_ids = set(
+            db.execute(
+                select(User.id).where(User.is_admin.is_(True)).with_for_update()
+            ).scalars().all()
         )
-        # Wenn nach diesem Demote nur noch der ausfuehrende Admin uebrig
-        # waere: blocken. (admin_count enthaelt user + admin selbst →
-        # nach Demote bleiben admin_count-1 uebrig, davon ist `admin` einer.
-        # Wenn admin_count == 2, bliebe nur noch `admin` allein → wir wollen
-        # mindestens 2 Admins behalten? Nein, einer (der ausfuehrende) reicht.
-        # Wir blocken nur wenn admin_count == 1, was hier nicht passieren kann
-        # weil user.is_admin=True UND user != admin → mindestens 2 Admins.
-        # Edge-Case: wenn admin_count == 2 → nach Demote bleibt 1 (admin).
-        # Das ist OK, aber wir warnen via Log.
-        if admin_count <= 1:
+        # Nach Demote bleiben admin_ids - {user.id} uebrig. Mindestens 1
+        # (der ausfuehrende Admin) muss da sein. admin.id != user.id ist
+        # oben schon gechecked, also bleibt admin.id in jedem Fall.
+        # Aber: wenn admin_count gerade 2 ist und der dritte concurrente
+        # Request kommt, wuerde der hier mit Lock warten + dann admin_ids
+        # neu sehen.
+        if user.id in admin_ids and (len(admin_ids) - 1) < 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
@@ -589,11 +600,66 @@ def create_live_test(
     return LiveTestRead.model_validate(test).model_dump(mode="json")
 
 
-def _build_issue_body(test: LiveTest, admin: User) -> str:
-    """Strukturierter Issue-Body fuer einen FAIL-Live-Test (Phase 3)."""
+def _sync_live_test_to_github(test_id: int, admin_email: str) -> None:
+    """Background-Task: erstellt Issue (wenn noch keiner verknuepft) oder
+    postet Comment (wenn user_response sich aendert + Issue existiert).
+
+    Eigene DB-Session, weil die Request-Session beim Background-Run
+    schon geschlossen ist. Idempotent — checkt erneut DB-Stand vor
+    GH-Call. Fail-silent.
+
+    QA-Fix (2026-05-17 abends): vorher synchron im Endpoint, blockierte
+    Worker bis zu 8s pro GitHub-Call. Bei mehrfachem FAIL-Klick parallel
+    → mehrere Worker tot. Background entkoppelt User-Response von der
+    GitHub-API-Latenz.
+    """
+    with SessionLocal() as bg_db:
+        test = bg_db.get(LiveTest, test_id)
+        if test is None:
+            return
+        if test.status != "fail" or not test.user_response:
+            return
+        # Re-fetch User fuer den admin_email (Logging)
+        if test.github_issue_url is None:
+            # Erst-Erstellung
+            issue_title = f"[Live-Test FAIL] {test.title}"
+            body = _build_issue_body_static(test, admin_email)
+            labels = ["live-test-fail", "automated"]
+            if test.related_phase:
+                labels.append(f"phase:{test.related_phase}")
+            result = gh_service.create_issue(issue_title, body, labels=labels)
+            if result is not None:
+                test.github_issue_url = result["html_url"]
+                test.github_issue_number = result["number"]
+                bg_db.commit()
+                logger.info(
+                    "[BG] live-test %s -> github issue #%s created",
+                    test.id,
+                    result["number"],
+                )
+        elif test.github_issue_number:
+            # Update zu bestehendem Issue: Comment posten
+            comment_body = (
+                f"**Notiz-Update von {admin_email}** "
+                f"({datetime.now(UTC).isoformat()}):\n\n"
+                f"{test.user_response}"
+            )
+            ok = gh_service.add_comment(test.github_issue_number, comment_body)
+            if ok:
+                logger.info(
+                    "[BG] live-test %s -> github issue #%s comment added",
+                    test.id,
+                    test.github_issue_number,
+                )
+
+
+def _build_issue_body_static(test: LiveTest, admin_email: str) -> str:
+    """Strukturierter Markdown-Issue-Body fuer einen FAIL-Live-Test.
+    Wird vom Background-Task (kein FastAPI-Dependency-Injection) aufgerufen,
+    nimmt deshalb admin_email statt User-Objekt entgegen."""
     parts = [
         f"**Live-Test failed** — automatisch erstellt aus dem Admin-Panel "
-        f"von {admin.email}.",
+        f"von {admin_email}.",
         "",
         "### Test-Beschreibung",
         test.description or "(leer)",
@@ -610,7 +676,9 @@ def _build_issue_body(test: LiveTest, admin: User) -> str:
     if test.related_tag:
         parts.append(f"- Tag: `{test.related_tag}`")
     parts.append(f"- Live-Test-ID (intern): #{test.id}")
-    parts.append(f"- Angelegt: {test.created_at.isoformat() if test.created_at else '?'}")
+    parts.append(
+        f"- Angelegt: {test.created_at.isoformat() if test.created_at else '?'}"
+    )
     parts.append("")
     parts.append("---")
     parts.append(
@@ -625,6 +693,7 @@ def update_live_test(
     request: Request,
     test_id: int,
     payload: LiveTestUpdate,
+    background_tasks: BackgroundTasks,
     admin: User = Depends(require_admin),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
@@ -650,14 +719,20 @@ def update_live_test(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Mindestens ein Feld (status oder user_response) muss gesetzt sein.",
         )
+    # QA-Fix (2026-05-17 abends): responded_at ist die "wann hat der Admin
+    # den Test wirklich getestet"-Zeit. Wird NUR bei Status-Change gesetzt,
+    # nicht bei reinen Notiz-Updates. Sonst Verwirrung: "Test-Datum verschiebt
+    # sich rueckwirkend wenn ich 3 Tage spaeter die Notiz korrigiere".
     if "status" in updates:
         test.status = updates["status"]
-        # responded_at + responded_by setzen wenn Status sich von open weg
-        # bewegt (oder explizit zurueck zu open).
         test.responded_at = datetime.now(UTC)
         test.responded_by_user_id = admin.id
     if "user_response" in updates:
         test.user_response = updates["user_response"]
+        # Sonderfall: erstes Notiz-Update auf einem `open`-Test ohne dass je
+        # ein Status gesetzt wurde — dann setzen wir responded_at trotzdem,
+        # damit das Feld nicht ewig NULL bleibt. Wer das nicht will, soll
+        # zuerst Status setzen.
         if test.responded_at is None:
             test.responded_at = datetime.now(UTC)
             test.responded_by_user_id = admin.id
@@ -671,43 +746,17 @@ def update_live_test(
     )
 
     # Phase 3: GitHub-Issue-Sync bei FAIL + Notiz.
-    # Trigger:
-    #   1. status ist (oder wurde) "fail" UND user_response ist gesetzt
-    #   2. github_issue_url IS NULL → create_issue
-    #   3. github_issue_url NOT NULL → add_comment (wenn user_response geupdated)
+    # QA-Fix (2026-05-17 abends): Aufruf jetzt asynchron via BackgroundTasks.
+    # User-API-Response geht sofort raus, GitHub-Call laeuft im Hintergrund
+    # mit eigener DB-Session. Verhindert Worker-Block bei GitHub-Latenz.
+    # User sieht github_issue_url beim naechsten Refresh (typisch <2s).
     if test.status == "fail" and test.user_response:
-        if test.github_issue_url is None:
-            # Erst-Erstellung
-            issue_title = f"[Live-Test FAIL] {test.title}"
-            body = _build_issue_body(test, admin)
-            labels = ["live-test-fail", "automated"]
-            if test.related_phase:
-                labels.append(f"phase:{test.related_phase}")
-            result = gh_service.create_issue(issue_title, body, labels=labels)
-            if result is not None:
-                test.github_issue_url = result["html_url"]
-                test.github_issue_number = result["number"]
-                db.commit()
-                db.refresh(test)
-                logger.info(
-                    "[ADMIN] live-test %s -> github issue #%s created",
-                    test.id,
-                    result["number"],
-                )
-        elif "user_response" in updates and test.github_issue_number:
-            # Update zu bestehendem Issue: Comment posten
-            comment_body = (
-                f"**Notiz-Update von {admin.email}** "
-                f"({datetime.now(UTC).isoformat()}):\n\n"
-                f"{test.user_response}"
+        # Trigger nur wenn entweder Erst-Erstellung (kein Issue) ODER
+        # user_response in diesem Patch geupdated wurde (-> Comment).
+        if test.github_issue_url is None or "user_response" in updates:
+            background_tasks.add_task(
+                _sync_live_test_to_github, test.id, admin.email
             )
-            ok = gh_service.add_comment(test.github_issue_number, comment_body)
-            if ok:
-                logger.info(
-                    "[ADMIN] live-test %s -> github issue #%s comment added",
-                    test.id,
-                    test.github_issue_number,
-                )
 
     return LiveTestRead.model_validate(test).model_dump(mode="json")
 

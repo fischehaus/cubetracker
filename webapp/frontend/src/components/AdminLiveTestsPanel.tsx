@@ -9,7 +9,7 @@
 // Phase 3 (kommt noch): bei FAIL + Notiz wird automatisch ein GitHub-
 // Issue erstellt damit die naechste Welle den Fix aufnehmen kann.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { InfoButton } from "./InfoButton";
 import {
@@ -116,6 +116,11 @@ export function AdminLiveTestsPanel() {
             active={filter === "fail"}
             onClick={() => setFilter("fail")}
           />
+          <FilterPill
+            label="Skip"
+            active={filter === "skip"}
+            onClick={() => setFilter("skip")}
+          />
           <button
             onClick={() => refetch()}
             disabled={isFetching}
@@ -184,7 +189,17 @@ function TestRow({ test }: { test: LiveTest }) {
   const del = useAdminDeleteLiveTest();
   const [response, setResponse] = useState(test.user_response ?? "");
   const [editing, setEditing] = useState(false);
+  // QA-Fix (2026-05-17 abends): 2-Klick-Pattern statt confirm() —
+  // confirm() ist Mobile-unzuverlaessig (gleicher Fix wie BigTimerInput).
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
   const colors = STATUS_COLORS[test.status];
+
+  // Auto-Reset delete-Confirm nach 5s ohne 2. Klick
+  useEffect(() => {
+    if (!deleteConfirm) return;
+    const t = setTimeout(() => setDeleteConfirm(false), 5000);
+    return () => clearTimeout(t);
+  }, [deleteConfirm]);
 
   const setStatus = (status: LiveTestStatus) => {
     update.mutate({
@@ -203,7 +218,10 @@ function TestRow({ test }: { test: LiveTest }) {
   };
 
   const remove = () => {
-    if (!confirm(`Test "${test.title.slice(0, 40)}…" loeschen?`)) return;
+    if (!deleteConfirm) {
+      setDeleteConfirm(true);
+      return;
+    }
     del.mutate({ id: test.id });
   };
 
@@ -355,10 +373,18 @@ function TestRow({ test }: { test: LiveTest }) {
           <button
             onClick={remove}
             disabled={del.isPending}
-            className="rounded bg-red-700/40 px-2 py-1 text-xs text-red-300 hover:bg-red-700/60 disabled:opacity-50"
-            title="Test loeschen"
+            className={`rounded px-2 py-1 text-xs transition-colors disabled:opacity-50 ${
+              deleteConfirm
+                ? "bg-red-700 text-red-100 animate-pulse"
+                : "bg-red-700/40 text-red-300 hover:bg-red-700/60"
+            }`}
+            title={
+              deleteConfirm
+                ? "Erneut klicken zum endgueltigen Loeschen"
+                : "Test loeschen"
+            }
           >
-            🗑
+            {deleteConfirm ? "Wirklich?" : "🗑"}
           </button>
         </div>
       </div>

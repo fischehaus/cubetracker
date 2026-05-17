@@ -38,6 +38,42 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.admin-workflow-qa",
+        released=date(2026, 5, 17),
+        title="QA-Fixes auf Admin-Workflow (2 KRITISCH + 4 SOLLTE + 2 NICE)",
+        highlights=[
+            "Sub-Agent-QA der 3 Admin-Phasen hat 2 KRITISCH + 7 SOLLTE + "
+            "5 NICE gefunden. Davon 2 KRITISCH + 4 wichtigste SOLLTE + "
+            "2 NICE sofort gefixt, 2 SOLLTE als Roadmap.",
+            "KRITISCH #1: Race-Condition beim 'letzter Admin'-Safeguard "
+            "wurde mit SELECT ... FOR UPDATE behoben. Zwei parallele "
+            "Demotes auf den vorletzten Admin koennen jetzt nicht mehr "
+            "beide durchgehen — Lock greift, zweiter Request wartet + "
+            "sieht aktualisierten Stand. Postgres-native row-level locking.",
+            "KRITISCH #2 (Alembic-Replacement): aufgeschoben als Roadmap-"
+            "Item in P6. Risiko aktuell niedrig (IS_PROD-Gate + Postgres-"
+            "Prod), aber Lesson notiert.",
+            "SOLLTE: responded_at wird jetzt NUR bei Status-Change "
+            "ueberschrieben, nicht bei reinen Notiz-Updates. 'Wann war "
+            "der Test wirklich' bleibt stabil.",
+            "SOLLTE: GitHub-API-Calls jetzt asynchron via FastAPI-"
+            "BackgroundTasks mit eigener DB-Session. User-Response geht "
+            "sofort raus, kein Worker-Block bei GitHub-Latenz oder "
+            "Rate-Limits.",
+            "SOLLTE: GitHub-API-Error-Bodies werden NICHT mehr geloggt "
+            "(defense-in-depth gegen hypothetische Token-Reflektion). "
+            "Nur Status-Code + Reason + Exception-Klassen-Name.",
+            "SOLLTE: confirm()-Dialog in AdminLiveTestsPanel raus, "
+            "2-Klick-Pattern rein (analog BigTimerInput-Fix). Button "
+            "wechselt zu 'Wirklich?' (rot-pulsierend), 5s-Auto-Reset.",
+            "NICE: Skip-Filter-Pill in der Liste ergaenzt. "
+            "title[:256] statt vorher willkuerlichem [:200].",
+            "Roadmap-Items neu: Backend-Test-Suite einfuehren (aktuell "
+            "0% Test-Coverage auf Backend!) + Alembic-Migration "
+            "statt inline ALTER TABLE.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.live-tests-github",
         released=date(2026, 5, 17),
         title="Live-Test-FAIL → automatisches GitHub-Issue (Phase 3 von 3)",
