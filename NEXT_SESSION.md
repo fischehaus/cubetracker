@@ -34,9 +34,12 @@
 > - **Datenuebertragung Dev↔Prod via Backup/Restore-Endpoint** (Pflicht
 >   in Phase 9)
 >
-> **LETZTER STAND (2026-05-17 nachts, Session-Ende via /abschluss):**
-> Multi-User-Web-Variante (webapp/) ist live auf cubetracker.de.
-> Heute deployed: **kompletter Quick-Wins-Sprint P1.1-P1.4** + QA-Fixes:
+> **LETZTER STAND (2026-05-17 abends, Session-Ende via /abschluss):**
+> Multi-User-Web-Variante (webapp/) ist live auf cubetracker.de. Heute war
+> ein Monster-Tag: 4 Wellen-Phasen + GPL-Migration + Vendor-Port + Admin-
+> Workflow + 2 QA-Reviews = 11+ Commits, 14 Tags.
+>
+> **Tag-Block 1 (Quick-Wins-Sprint P1):**
 >   - **P1.1 Voice-Alert** (`3928aaf`, tag `voice-alert`): WCA-Inspection
 >     spricht "acht"/"zwoelf" (DE) oder "eight"/"twelve" (EN) statt
 >     Sinus-Beep. Cascade-Setting in SettingsPanel: beep / de / en / off.
@@ -50,15 +53,62 @@
 >     RoadmapModal mit P1-P6, Status-Badges, ✓-Markern fuer erledigte
 >     Items. Trigger via Footer-Link + User-Menu.
 >   - **QA-Fixes** (`3263f47`, tag `qa-fixes-p1`): 3 HIGH + 2 MEDIUM
->     aus Sub-Agent-Review gefixt:
->       - speechSynthesis.cancel() raus (Screen-Reader-safe)
->       - Safari iOS TTS-Priming via 0-Volume-Dummy-Utterance
->       - "Letzter Solve (3x3):" mit cube_type-Label
->       - DNF-Button-Tooltip benennt WCA-Auto-+2-Entfernung explizit
->       - Loeschen: window.confirm() raus, 2-Klick-Pattern mit 5s-Timeout
+>     aus Sub-Agent-Review gefixt.
 >
-> **Tag-Stand:** v2.0.0-alpha.W.voice-alert, penalty-quick,
-> custom-scramble, roadmap-frontend, qa-fixes-p1 — alle 5 lokal + remote.
+> **Tag-Block 2 (Scramble-Bild + Toggle):**
+>   - **P1.5 Scramble-Bild 2D-Net** (`120efac`, tag `scramble-image`):
+>     Eigenbau-Cube-State-Simulator (lib/cube-net.ts, 250 Zeilen) +
+>     SVG-Renderer (Cross-Layout). 20 Tests (Group-Orders, Inverse-
+>     Invariante, Center-Invariante). Bundle +1.7KB gz.
+>   - **Schnell-Toggle direkt in ScrambleCard** (`9b0c22b`, tag
+>     `scramble-image-toggle`): Button "Bild an/aus" neben Eigene/Skip,
+>     nur sichtbar bei 3x3 (User-Wunsch "nur was fertig ist").
+>
+> **Tag-Block 3 (GPL + csTimer-Vendor — grosses Refactor):**
+>   - **GPL-Migration** (`545c680`, tag `gpl-license-migration`):
+>     Cubetracker steht jetzt unter GNU GPL-3.0-or-later. LICENSE-File,
+>     README-Sektion, package.json + pyproject.toml license-Fields.
+>     Vorbereitung fuer csTimer-Code-Integration (selbst GPL-v3).
+>   - **csTimer-Vendor-Port** (`cb03c16`, tag `cstimer-vendor-impl`):
+>     Vendor-Folder webapp/frontend/src/lib/cstimer-vendor/ mit
+>     mathlib, scramble, isaac, gearcube, redi, pyraminx, skewb,
+>     mgmlsll + jQuery-Shim. Public-API getCstimerScramble().
+>     Gear/Redi/Master-Pyraminx haben jetzt Random-State.
+>   - **Ivy-Switch** (`866c624`, tag `cstimer-ivy-switch`): Ivy von
+>     Eigenbau-BFS auf csTimer umgestellt (Konsistenz). Eigenbau bleibt
+>     als Fallback.
+>   - **+11 Puzzles** (`f28541e`, tag `cstimer-more-puzzles-impl`):
+>     erst 14 neue Scramble-Types verkabelt (Dino, Floppy, Tower,
+>     Helicopter, Gigaminx, Bicube, Bandaged-SQ1, Square-2, Curvy Copter,
+>     Diamond, Megaminx-RS).
+>   - **QA-Cleanup** (`b89f3f8`, tag `cstimer-more-puzzles-qa`): 7 von
+>     11 broken (utilscramble + megaminx brauchen solver/-Files die wir
+>     nicht haben). Wieder entfernt aus UI + Vendor. Inoff. Cubes-Liste
+>     auf 9 finale (Ivy, Gear, Redi, Master Pyra, Master Skewb, FTO,
+>     Dino, Floppy, Tower). COMMON_CUBE_TYPES erweitert um die 9.
+>
+> **Tag-Block 4 (Admin-Workflow-Refactor in 3 Phasen):**
+>   - **Phase 1 admin-toggle** (`cb54770`): is_admin von Env-Var-Property
+>     zu DB-Spalte. UI-Toggle '★ Admin abnehmen' / '☆ Admin machen' in
+>     AdminUsersPanel. Migration + Bootstrap-Step in main.py:lifespan
+>     promotet ADMIN_EMAILS-User auf is_admin=TRUE beim ersten Startup.
+>     Safeguard 'letzter Admin'.
+>   - **Phase 2 live-tests** (`059b5a5`): Neue Tabelle live_tests + 4
+>     Endpoints + AdminLiveTestsPanel. Loest Workflow-Problem: Claude-
+>     Test-Hinweise ('Phone-Test: X') verlieren sich im Chat. Admin
+>     klickt PASS/FAIL/SKIP + schreibt Notiz.
+>   - **Phase 3 live-tests-github** (`0a4b8f6`): services/github.py mit
+>     create_issue + add_comment. Bei FAIL + Notiz → automatisches
+>     GitHub-Issue (Labels live-test-fail/automated/phase:W.xyz).
+>     Graceful Degradation ohne GITHUB_TOKEN.
+>   - **QA-Fix** (`b763086`, tag `admin-workflow-qa`): Race-Condition
+>     Admin-Safeguard via SELECT FOR UPDATE gefixt. GitHub-Calls jetzt
+>     BackgroundTask. confirm() raus, 2-Klick rein. Skip-Filter ergaenzt.
+>     Token-Logging defense-in-depth.
+>
+> **USER-ACTION (offen):** GITHUB_TOKEN auf Render setzen (PAT mit repo-
+> Scope unter Environment-Tab im Backend-Service). Sonst kein Auto-Issue
+> bei FAIL — bleibt aber graceful.
 >
 > **Infra-Setup heute:** ntfy.sh als trusted endpoint in
 > `~/.claude/settings.json` (User-Level). Permission-Pattern:
@@ -73,20 +123,37 @@
 >   der Roadmap (~30 Min wenn alle 21 fertig).
 >
 > **OFFENE USER-AUFGABEN:**
-> - Phone-Re-Test der P1-Items: Voice-Alert (8s/12s), Penalty-Quick-Buttons
->   (Tap-Targets ausreichend gross?), Custom-Scramble (Mobile-Keyboard OK?),
->   Loeschen-2-Klick-Confirm (Animation sichtbar?).
-> - PLL-Renderer fertig machen: restliche 20 Permutationen
->   (Aa, Ab, E, F, Ga-d, H, Ja, Jb, Na, Nb, Ra, Rb, T, Ub, V, Y, Z),
->   dann `frontend/src/lib/pll-images.ts` analog OLL anlegen.
-> - RESEND_API_KEY rotieren (alter Chat-Key revoken).
+> - **GITHUB_TOKEN auf Render setzen** (Admin-Workflow-Phase-3): PAT mit
+>   repo-Scope, Env-Var auf Backend-Service. Sonst kein Auto-Issue bei
+>   Live-Test-FAIL — bleibt graceful, kein Crash.
+> - **Live-Test-Workflow ausprobieren**: Admin-Bereich → Live-Tests →
+>   '+ Neu' → einen offenen Test aus dem Chat-Verlauf eintragen
+>   (z.B. csTimer-Cubes durchklicken).
+> - **Phone-Re-Test** der heutigen Wellen: Voice-Alert / Penalty-Quick /
+>   Custom-Scramble / 2D-Net / 9 inoff. Scramble-Cubes / Admin-Toggle.
+> - **PLL-Renderer fertig machen**: restliche 20 Permutationen aus
+>   scripts/render_pll.py + frontend/src/lib/pll-images.ts anlegen.
+> - **RESEND_API_KEY rotieren** (alter Chat-Key revoken).
 >
 > **NAECHSTE Schritte (P1-Sprint-Restplan):**
-> - **P1.5 Scramble-Bild 2D-Net** (~1 Woche, hoechster Visual-Impact aus
->   P1) — Standard-Erwartung an Speedcubing-Timer. Pflicht-Item.
 > - **P1.6 PWA-Setup** (~1 Tag) — Manifest + Service-Worker fuer Phone-
->   Homescreen-Install. Konsequenz aus dem Mobile-First-Refactor.
-> - Danach P2 Hetzner-Migration (Mitte Juli, vor Postgres-90d-Limit).
+>   Homescreen-Install. Letztes offenes P1-Item.
+> - Danach P2 Hetzner-Migration (Mitte Juli, vor Postgres-90d-Limit
+>   2026-08-08).
+>
+> **NEU in Roadmap (durch heutige QA-Befunde):**
+> - **Backend-Test-Suite einfuehren** (~1-2 Tage initial, P6) — aktuell
+>   0% Coverage auf den Endpoints, pyproject.toml verweist auf nicht-
+>   existierenden tests/-Folder.
+> - **Alembic statt inline-Migrations** (~1 Tag, P6) — `ALTER TABLE IF
+>   NOT EXISTS` ist Postgres-only, bricht auf SQLite. Niedrige Prio
+>   solange wir nur Postgres-Prod nutzen.
+> - **csTimer solver/-Files vendoren** (~1-2 Tage, P6) — schaltet
+>   Helicopter, Gigaminx, Bicube, Bandaged-SQ1, Square-2, Curvy Copter,
+>   Diamond + Megaminx-RS frei. Aktuell aus UI raus weil broken ohne
+>   solver-Files.
+> - **Dynamic-Import csTimer-Vendor** (Bundle-Split, P6 SOLLTE).
+> - **Random-Move-Fallback fuer Dino/Floppy/Tower** (P6 SOLLTE).
 >
 > **INFRASTRUKTUR:**
 > - Mitte Juli: Hetzner-Migration (vor Render-Postgres-90d-Limit
