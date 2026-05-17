@@ -59,6 +59,23 @@ const APP_TO_CSTIMER: Record<string, string> = {
   redi: "rediso",
   master_pyraminx: "mpyrso",
   ivy: "ivyso",
+  // Phase W.cstimer-more-puzzles (2026-05-17): 10 weitere inoffizielle
+  // Cubes via vendored csTimer (1x3x3.js, 2x2x3.js, megaminx.js,
+  // utilscramble.js). Alle Random-State (WCA-Quality im Sinne
+  // garantierter Mindest-Distanz).
+  dino: "dinoso",
+  floppy: "133",
+  tower: "223",
+  helicopter: "heli",
+  gigaminx: "giga",
+  bicube: "bic",
+  bandaged_square: "bsq",
+  square_2: "sq2",
+  curvy_copter: "ctico",
+  diamond: "dmdso",
+  // Quality-Upgrade fuer WCA-Cube: vorher scrambow random-move, jetzt
+  // csTimer Random-State.
+  megaminx: "mgmso",
 };
 
 /**
@@ -219,12 +236,24 @@ export const WCA_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
  * Training.
  */
 export const UNOFFICIAL_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
+  // Phase 8a — urspruenglicher Bestand (Eigenbau-Random-Move / Eigenbau-BFS)
   { code: "ivy", label: "Ivy Cube" },
   { code: "gear", label: "Gear Cube" },
   { code: "redi", label: "Redi Cube" },
   { code: "master_pyraminx", label: "Master Pyraminx" },
   { code: "master_skewb", label: "Master Skewb" },
   { code: "fto", label: "FTO (Face-Turning Octahedron)" },
+  // Phase W.cstimer-more-puzzles (2026-05-17) — 10 weitere via csTimer-Vendor
+  { code: "dino", label: "Dino Cube" },
+  { code: "floppy", label: "Floppy Cube (1x3x3)" },
+  { code: "tower", label: "Tower Cube (2x2x3)" },
+  { code: "helicopter", label: "Helicopter Cube" },
+  { code: "gigaminx", label: "Gigaminx (5x5 Megaminx)" },
+  { code: "bicube", label: "Bicube" },
+  { code: "bandaged_square", label: "Bandaged 3x3 (Square)" },
+  { code: "square_2", label: "Square-2" },
+  { code: "curvy_copter", label: "Curvy Copter" },
+  { code: "diamond", label: "Diamond Cube" },
 ];
 
 /**
@@ -330,14 +359,26 @@ function generateCustomScramble(spec: CustomScrambleSpec): string {
  * Wird von der UI genutzt um den „nicht WCA-Quality"-Disclaimer NUR
  * fuer die Random-Move-Puzzles anzuzeigen.
  *
- * Ivy = Eigenbau-Solver (ivyScramble.ts).
- * Gear/Redi/Master-Pyraminx = csTimer-vendored.
+ * Alle ausser master_skewb haben jetzt Random-State (W.cstimer-vendor +
+ * W.cstimer-more-puzzles, 2026-05-17). Ivy hat zudem Eigenbau-BFS als
+ * Fallback (ivyScramble.ts).
  */
 const RANDOM_STATE_PUZZLES = new Set<string>([
   "ivy",
   "gear",
   "redi",
   "master_pyraminx",
+  // Phase W.cstimer-more-puzzles:
+  "dino",
+  "floppy",
+  "tower",
+  "helicopter",
+  "gigaminx",
+  "bicube",
+  "bandaged_square",
+  "square_2",
+  "curvy_copter",
+  "diamond",
 ]);
 
 export function isWcaQualityCustomPuzzle(code: string): boolean {

@@ -36,12 +36,19 @@
 import "./shim.js";
 import "./isaac.js"; // ISAAC PRNG, mathlib braucht's fuer setSeed()
 import "./mathlib.js";
+import "./grouplib.js"; // braucht mathlib; benoetigt von Megaminx/utilscramble
+import "./poly3dlib.js"; // braucht mathlib; benoetigt von utilscramble (giga/heli/etc.)
 import "./scramble.js";
 import "./gearcube.js";
 import "./redi.js";
 import "./pyraminx.js";
 import "./skewb.js";
 import "./mgmlsll.js";
+// Phase W.cstimer-more-puzzles (2026-05-17):
+import "./1x3x3.js"; // Floppy Cube
+import "./2x2x3.js"; // Tower Cube
+import "./megaminx.js"; // Megaminx Random-State (scrambow hatte nur random-move)
+import "./utilscramble.js"; // Helicopter, Gigaminx, Bicube, Bandaged Square, Square-2, Curvy Copter, Diamond, ...
 
 // TypeScript: die Vendor-Files erweitern window mit { mathlib, scrMgr,
 // redi, ... }. Wir typisieren nur was wir brauchen.

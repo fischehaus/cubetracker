@@ -38,6 +38,37 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.cstimer-more-puzzles",
+        released=date(2026, 5, 17),
+        title="11 weitere Scramble-Types via csTimer (Quick-Wins + Exotische)",
+        highlights=[
+            "Massiv-Erweiterung der inoffiziellen Cube-Liste. Im Scramble-"
+            "Picker stehen jetzt 16 inoffizielle Cubes zur Wahl (vorher 6).",
+            "Neu via vendored csTimer (kleine Files): Dino Cube, Floppy "
+            "Cube (1x3x3), Tower Cube (2x2x3). Plus: Megaminx hat jetzt "
+            "echte Random-State (vorher scrambow random-move) — Quality-"
+            "Upgrade fuer den WCA-Cube.",
+            "Neu via vendored csTimer (utilscramble.js): Helicopter Cube, "
+            "Gigaminx (5x5 Megaminx), Bicube, Bandaged 3x3, Square-2, "
+            "Curvy Copter, Diamond Cube. Sammler-Puzzles auf einmal "
+            "verfuegbar.",
+            "Alle 11 neuen Cubes haben Random-State-Scrambles (= Mindest-"
+            "Distanz garantiert) — der „nicht WCA-Quality\"-Disclaimer "
+            "im Scramble-Picker greift jetzt NUR noch fuer Master Skewb.",
+            "Bundle-Impact: +46KB raw / +16KB gzipped (grouplib + "
+            "poly3dlib + utilscramble + 3 Mini-Files). Insgesamt nutzt "
+            "Cubetracker jetzt 7 csTimer-Modul-Files (gearcube, redi, "
+            "pyraminx, skewb, mgmlsll, megaminx, utilscramble) plus die "
+            "Foundation-Files (mathlib, scramble, isaac, grouplib, "
+            "poly3dlib).",
+            "Geplant fuer P4 Power-User-Phase: 3x3-/4x4-Trainer-Subsets "
+            "via csTimer (ZBLL, ZBLS, VLS, COLL, Roux, EOline, 2gen, CTO, "
+            "EDO, ELL, ...). scramble_333_edit.js + scramble_444.js sind "
+            "groesser (36KB + 77KB) — daher als zukuenftige Phase, nicht "
+            "als Quick-Win.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.cstimer-ivy-switch",
         released=date(2026, 5, 17),
         title="Ivy-Cube: Scrambler von Eigenbau auf csTimer umgestellt",

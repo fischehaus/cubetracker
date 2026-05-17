@@ -117,6 +117,11 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         effort: "~3-6 Wochen",
         note: "Setzt 3D-Vis voraus. Komplex.",
       },
+      {
+        title: "3x3- + 4x4-Trainer-Subsets via csTimer (ZBLL/ZBLS/VLS/COLL/Roux/EOline/2gen/CTO/EDO/ELL/...)",
+        effort: "~1-2 Wochen",
+        note: "csTimer-Files scramble_333_edit.js (36KB, 40+ Subsets) + scramble_444.js (77KB, 14 Subsets) vendoren. Integration als Session.scramble_type-Optionen + Alg-Trainer-UI-Erweiterung. Power-User-Standard.",
+      },
     ],
   },
   {

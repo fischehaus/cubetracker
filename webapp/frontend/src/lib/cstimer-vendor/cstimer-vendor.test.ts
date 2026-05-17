@@ -44,11 +44,24 @@ describe("csTimer-Vendor-Module", () => {
     // Erwartet aus den vendored modules:
     expect(hasCstimerScramble("gearso")).toBe(true);
     expect(hasCstimerScramble("rediso")).toBe(true);
+    expect(hasCstimerScramble("dinoso")).toBe(true); // W.cstimer-more (2026-05-17)
     expect(hasCstimerScramble("mpyrso")).toBe(true);
     // Aus pyraminx.js zusaetzlich:
     expect(hasCstimerScramble("pyrso")).toBe(true);
     // Aus skewb.js zusaetzlich Ivy (Phase W.cstimer-ivy-switch):
     expect(hasCstimerScramble("ivyso")).toBe(true);
+    // Phase W.cstimer-more-puzzles (2026-05-17):
+    expect(hasCstimerScramble("133")).toBe(true); // Floppy Cube
+    expect(hasCstimerScramble("223")).toBe(true); // Tower Cube
+    expect(hasCstimerScramble("mgmso")).toBe(true); // Megaminx Random-State
+    // Aus utilscramble.js:
+    expect(hasCstimerScramble("heli")).toBe(true); // Helicopter Cube
+    expect(hasCstimerScramble("giga")).toBe(true); // Gigaminx
+    expect(hasCstimerScramble("bic")).toBe(true); // Bicube
+    expect(hasCstimerScramble("bsq")).toBe(true); // Bandaged Square
+    expect(hasCstimerScramble("sq2")).toBe(true); // Square-2
+    expect(hasCstimerScramble("ctico")).toBe(true); // Curvy Copter
+    expect(hasCstimerScramble("dmdso")).toBe(true); // Diamond
     // Nicht-registrierter Type
     expect(hasCstimerScramble("does-not-exist-xyz")).toBe(false);
   });
