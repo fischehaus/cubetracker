@@ -84,6 +84,16 @@ export interface AppSettings {
    * andere Größe wählen kann als im Haupt-Timer.
    */
   drill_font_size: TimerFontSize;
+  /**
+   * Phase W.scramble-image (2026-05-17): 2D-Net-Vorschau unter der Scramble-
+   * Notation anzeigen. Default `true` — visuelle Verifikation ist Standard-
+   * Erwartung an Speedcubing-Timer. Power-User koennen ausschalten wenn sie
+   * pure Notation wollen.
+   *
+   * Aktuell nur 3x3 unterstuetzt. Andere Cubes zeigen kein Bild + werden
+   * nicht durch das Setting beeinflusst.
+   */
+  show_scramble_image: boolean;
 }
 
 export const SETTINGS_DEFAULTS: AppSettings = {
@@ -98,6 +108,7 @@ export const SETTINGS_DEFAULTS: AppSettings = {
   phase_names: ["Cross", "F2L", "OLL", "PLL"], // 3x3-CFOP default
   timer_font_size: "xxl",
   drill_font_size: "xxl",
+  show_scramble_image: true,
 };
 
 /**

@@ -20,6 +20,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
       "Drei Timer-Modi direkt im Timer-Tab waehlbar: Text-Eingabe / Spacebar-WCA / Spacebar-Pragmatisch",
       "Touch-Timer fuer Phone: Tippen + Halten ersetzt die Space-Taste",
       "Scramble-Generator fuer alle WCA-Cubes (2x2 bis 7x7, Pyraminx, Skewb, Square-1, Megaminx, Clock) PLUS Inoffizielle (Ivy, Gear, Redi, Master Pyraminx, Master Skewb, FTO) — Picker direkt in der Scramble-Karte",
+      "2D-Cube-Net-Vorschau direkt unter dem 3x3-Scramble: siehst auf einen Blick wie der Cube nach Anwendung aussehen muss — ideal zum Verifizieren ob du den Scramble korrekt ausgefuehrt hast (in den Einstellungen abschaltbar)",
       "Trainings-Sets: 5/12/25/50/100 Solves planen, am Ende Set-Statistik + Coaching-Feedback",
       "Auto-Preselect: am haeufigsten genutzte Hardware fuer den aktuellen Cube wird vorgeschlagen",
       "Sessions strukturieren das Training (z.B. OH, PLL-Drills, Cold-Solves)",

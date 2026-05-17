@@ -232,6 +232,16 @@ export function SettingsPanel() {
         </div>
       </Section>
 
+      {/* Scramble-Bild (Phase W.scramble-image, 2026-05-17) */}
+      <Section title="Scramble-Bild (2D-Net)">
+        <Toggle
+          label="2D-Net unter dem Scramble anzeigen"
+          hint="Cube-Vorschau (Cross-Layout) direkt unter der Notation. Hilft beim Verifizieren ob du den Scramble korrekt ausgefuehrt hast. Aktuell nur fuer 3x3 — andere Cube-Types zeigen kein Bild."
+          value={settings.show_scramble_image}
+          onChange={(v) => setSettings({ ...settings, show_scramble_image: v })}
+        />
+      </Section>
+
       {/* Schrift-Größe Drill-Fenster (User-Wunsch) */}
       <Section title="Schrift-Größe — Drill-Fenster">
         <div>

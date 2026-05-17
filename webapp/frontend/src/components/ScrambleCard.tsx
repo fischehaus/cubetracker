@@ -30,6 +30,7 @@ import {
 } from "../lib/scramble";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import { InfoButton } from "./InfoButton";
+import { ScrambleNet } from "./ScrambleNet";
 
 interface Props {
   /** App-cube_type ("3x3", "Pyraminx", …) — bestimmt den Default. */
@@ -349,22 +350,29 @@ export function ScrambleCard({
           </div>
         </div>
       ) : (
-        <div
-          className="font-mono text-gray-100 leading-relaxed break-words select-all"
-          style={{ fontSize: fontPx }}
-          aria-live="polite"
-        >
-          {scramble || (
-            <span className="text-gray-500 text-base">
-              Scramble nicht verfuegbar fuer diesen Typ.
-            </span>
+        <>
+          <div
+            className="font-mono text-gray-100 leading-relaxed break-words select-all"
+            style={{ fontSize: fontPx }}
+            aria-live="polite"
+          >
+            {scramble || (
+              <span className="text-gray-500 text-base">
+                Scramble nicht verfuegbar fuer diesen Typ.
+              </span>
+            )}
+            {isCustom && (
+              <span className="ml-3 align-middle text-[11px] uppercase tracking-wide text-purple-300/80 border border-purple-500/40 rounded px-1.5 py-0.5">
+                ✏ eigene Eingabe
+              </span>
+            )}
+          </div>
+          {/* 2D-Net-Bild (Phase W.scramble-image): rendert sich selbst nur fuer
+              unterstuetzte Cube-Types (aktuell 3x3) und bei aktivem Setting. */}
+          {settings.show_scramble_image && scramble && (
+            <ScrambleNet scramble={scramble} cubeType={cubeType} />
           )}
-          {isCustom && (
-            <span className="ml-3 align-middle text-[11px] uppercase tracking-wide text-purple-300/80 border border-purple-500/40 rounded px-1.5 py-0.5">
-              ✏ eigene Eingabe
-            </span>
-          )}
-        </div>
+        </>
       )}
 
       {/* Disclaimer NUR fuer Custom-Puzzles ohne Random-State-Solver

@@ -38,6 +38,30 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.scramble-image",
+        released=date(2026, 5, 17),
+        title="2D-Cube-Net unter dem Scramble (visuelle Verifikation)",
+        highlights=[
+            "P1.5 aus dem Quick-Wins-Sprint. Unter jedem 3x3-Scramble "
+            "zeigt sich jetzt das Cross-Layout-Bild des Cubes nach "
+            "Anwendung des Scrambles. Standard-Erwartung an Speedcubing-"
+            "Timer — endlich Parity mit csTimer.",
+            "Komplett Eigenbau (lib/cube-net.ts, ~250 Zeilen): kleiner "
+            "Cube-State-Simulator (6×9 Sticker-Array, 18 Basic-Moves) + "
+            "SVG-Renderer. Bundle nur +1.7kB gzipped — kein Lib-Dep, "
+            "kein cstimer_module-Browser-Polyfill-Risiko.",
+            "Logik verifiziert durch 20 Tests (cube-net.test.ts): "
+            "Identitaeten (R+R'=solved, 4xR=solved), Centers nie "
+            "geaendert, bekannte Group-Orders (Sune Order 6, T-Perm "
+            "Order 2, Sexy-Move Order 6), 5 Random-Scrambles + Inverse.",
+            "Aktuell nur 3x3 — andere Cube-Types zeigen kein Bild "
+            "(2x2/4x4/Pyra kommen schrittweise, Code ist erweiterbar).",
+            "Setting in /einstellungen/Timer: '2D-Net unter dem "
+            "Scramble anzeigen' (default an). Power-User koennen "
+            "ausschalten wenn sie pure Notation wollen.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.qa-fixes-p1",
         released=date(2026, 5, 17),
         title="QA-Fixes zu Voice-Alert / Penalty-Buttons / Quick-Aktionen",
