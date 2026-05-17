@@ -27,6 +27,31 @@ import { Scrambow } from "../vendor/scrambow-patched";
 // cstimer_module-Browser-Crash: keine Native-Node-Globals importieren,
 // daher Eigenbau statt npm-Paket.
 import { generateIvyScramble } from "./ivyScramble";
+// csTimer-Random-State-Scrambler fuer inoffizielle Cubes (Phase
+// W.cstimer-vendor, 2026-05-17). GPL-v3, gevendorter Subset aus
+// github.com/cs0x7f/cstimer. Public-API: getCstimerScramble(type).
+// Liefert null wenn der Type nicht registriert ist (= safe-fallback
+// auf unseren Random-Move-Generator weiter unten).
+import { getCstimerScramble } from "./cstimer-vendor";
+
+/**
+ * Mapping unserer App-Codes auf csTimer-internal-Types. Nur Eintraege
+ * hier werden via csTimer-Pfad bedient — andere fallen auf scrambow
+ * oder Random-Move zurueck.
+ *
+ *   "gearso"  = Gear Cube, random-state-shortened (csTimer-Default, 4-10 moves)
+ *   "rediso"  = Redi Cube, random-state
+ *   "mpyrso"  = Master Pyraminx, random-state
+ *
+ * Master Skewb hat in csTimer keinen dedizierten Generator (`mgmlsll.js`
+ * ist Megaminx-Last-Slot-Last-Layer, nicht Master Skewb) — bleibt auf
+ * unserem Random-Move-Fallback.
+ */
+const APP_TO_CSTIMER: Record<string, string> = {
+  gear: "gearso",
+  redi: "rediso",
+  master_pyraminx: "mpyrso",
+};
 
 /**
  * Mappt einen App-cube_type ("3x3", "OH", "Pyraminx", …) auf den
@@ -292,11 +317,20 @@ function generateCustomScramble(spec: CustomScrambleSpec): string {
 }
 
 /**
- * Liste der Custom-Puzzles, die einen eigenen Random-State-Solver
- * haben (= WCA-Quality). Wird von der UI genutzt um den „nicht WCA-
- * Quality"-Disclaimer NUR fuer die Random-Move-Puzzles anzuzeigen.
+ * Liste der Custom-Puzzles, die einen Random-State-Scrambler haben
+ * (= WCA-Quality, im Sinne von "korrekte Mindest-Distanz garantiert").
+ * Wird von der UI genutzt um den „nicht WCA-Quality"-Disclaimer NUR
+ * fuer die Random-Move-Puzzles anzuzeigen.
+ *
+ * Ivy = Eigenbau-Solver (ivyScramble.ts).
+ * Gear/Redi/Master-Pyraminx = csTimer-vendored.
  */
-const RANDOM_STATE_PUZZLES = new Set<string>(["ivy"]);
+const RANDOM_STATE_PUZZLES = new Set<string>([
+  "ivy",
+  "gear",
+  "redi",
+  "master_pyraminx",
+]);
 
 export function isWcaQualityCustomPuzzle(code: string): boolean {
   return RANDOM_STATE_PUZZLES.has(code);
@@ -316,7 +350,7 @@ export function isWcaQualityCustomPuzzle(code: string): boolean {
  * blockieren soll.
  */
 export function generateScramble(typeOverride: string): string {
-  // 1) Eigener Random-State-Solver (WCA-Quality)
+  // 1) Eigener Random-State-Solver (Ivy via BFS-Lookup, WCA-Quality)
   if (typeOverride === "ivy") {
     try {
       const s = generateIvyScramble();
@@ -325,11 +359,26 @@ export function generateScramble(typeOverride: string): string {
       // Fallback auf Random-Move wenn Solver-Bug auftritt
     }
   }
-  // 2) Custom Puzzles mit Random-Move-Spec
+  // 2) csTimer-Random-State-Scrambler (Phase W.cstimer-vendor, 2026-05-17):
+  //    gear/redi/master_pyraminx via vendored GPL-v3-Modul. Fallback auf
+  //    Random-Move wenn csTimer beim Init crasht (sollte nicht passieren,
+  //    aber defensive).
+  if (typeOverride in APP_TO_CSTIMER) {
+    const cstimerType = APP_TO_CSTIMER[typeOverride];
+    try {
+      const s = getCstimerScramble(cstimerType);
+      if (s && s.trim().length > 0) return s;
+    } catch {
+      // weiter zu 3) Random-Move-Fallback
+    }
+  }
+  // 3) Custom Puzzles mit Random-Move-Spec (Fallback fuer master_skewb
+  //    + Sicherheits-Netz fuer ivy/gear/redi/master_pyraminx wenn ihr
+  //    primaerer Pfad fehlschlaegt)
   if (typeOverride in CUSTOM_PUZZLE_SPECS) {
     return generateCustomScramble(CUSTOM_PUZZLE_SPECS[typeOverride]);
   }
-  // 3) scrambow-Pfad (WCA + FTO + Trainer-Subsets)
+  // 4) scrambow-Pfad (WCA + FTO + Trainer-Subsets)
   try {
     const scrambow = new Scrambow().setType(typeOverride);
     const result = scrambow.get(1);

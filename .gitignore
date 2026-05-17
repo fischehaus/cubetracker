@@ -18,6 +18,11 @@ dist/
 build/
 .vite/
 
+# Lokale Analysis-Scratch (z.B. heruntergeladene 3rd-party-Sources zum
+# Inspizieren vor dem Port-Entscheid). Vendor-Ports gehen in den Repo,
+# aber die rohe Recherche-Kopie nicht.
+.tmp/
+
 # Phase 9 Distribution-Build-Artefakte
 installer-output/
 *.spec.bak

@@ -112,43 +112,56 @@ describe("generateScramble (smoke)", () => {
 });
 
 describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
-  // Inoffizielle Cubes: eigener Random-Move-Generator. Tests checken:
-  //   1. non-empty output
-  //   2. erwartete Anzahl Moves (split-by-space)
-  //   3. keine direkt wiederholten Bases (Ivy "L L'" waere sinnlos)
-  // Move-Counts gemaess CUSTOM_PUZZLE_SPECS in scramble.ts.
-  // NB: ivy ist seit W.ivy-rs (2026-05-17) ueber den Random-State-Solver
-  // (ivyScramble.ts) — variable Move-Anzahl 4-10. Eigene Tests in
-  // ivyScramble.test.ts. Hier raus.
-  const cases: { type: string; minMoves: number }[] = [
-    { type: "gear", minMoves: 12 },
-    { type: "redi", minMoves: 15 },
-    { type: "master_pyraminx", minMoves: 25 },
+  // Inoffizielle Cubes. Seit Phase W.cstimer-vendor (2026-05-17) unterteilt
+  // in zwei Pfade:
+  //   - csTimer-Random-State (gear/redi/master_pyraminx via vendor) →
+  //     variable Move-Anzahl, optimierte Solutions. Nur "non-empty" testen.
+  //   - Eigenbau-Random-Move (master_skewb) → feste Move-Anzahl gemaess
+  //     CUSTOM_PUZZLE_SPECS, no-repeat-base-Filter aktiv.
+  //   - ivy hat seit W.ivy-rs eigenen BFS-Solver, getestet in
+  //     ivyScramble.test.ts.
+
+  // csTimer-Pfad: variable Laenge, nur non-empty + plausible Max-Laenge.
+  const csTimerCases = ["gear", "redi", "master_pyraminx"];
+  for (const type of csTimerCases) {
+    it(`"${type}" (csTimer) produces non-empty scramble`, () => {
+      const s = generateScramble(type);
+      const moves = s.split(/\s+/).filter((x) => x.length > 0);
+      expect(moves.length).toBeGreaterThan(0);
+      // Plausibilitaets-Obergrenze — csTimer-Random-State liefert
+      // typisch ≤30 moves. >50 waere ein Bug.
+      expect(moves.length).toBeLessThan(50);
+    });
+  }
+
+  // Eigenbau-Pfad (master_skewb): feste Laenge + no-repeat-base.
+  const randomMoveCases: { type: string; minMoves: number }[] = [
     { type: "master_skewb", minMoves: 25 },
   ];
-  for (const { type, minMoves } of cases) {
-    it(`"${type}" produces a scramble with ${minMoves} moves`, () => {
+  for (const { type, minMoves } of randomMoveCases) {
+    it(`"${type}" (random-move) produces a scramble with ${minMoves} moves`, () => {
       const s = generateScramble(type);
       const moves = s.split(/\s+/).filter((x) => x.length > 0);
       expect(moves.length).toBe(minMoves);
     });
-    it(`"${type}" never repeats the same base move directly`, () => {
-      // 100 Iterationen — QA-Fix Welle 3 (2026-05-16). Bei specs mit nur
-      // 3 Bases (gear: U/R/F) ist die Trefferwahrscheinlichkeit fuer
-      // zufaellige Glueckstreffer bei 10 Iterationen noch hoch genug,
-      // dass ein kaputter Filter durchrutschen koennte. 100 Iterationen
-      // bei <50ms Total-Laufzeit kostet nichts.
+    it(`"${type}" (random-move) never repeats the same base move directly`, () => {
+      // 100 Iterationen — QA-Fix Welle 3 (2026-05-16). Geringe Base-Zahl
+      // bei einigen Specs macht Glueckstreffer wahrscheinlich, daher viele
+      // Wiederholungen.
       for (let i = 0; i < 100; i++) {
         const s = generateScramble(type);
         const moves = s.split(/\s+/).filter((x) => x.length > 0);
         for (let j = 1; j < moves.length; j++) {
-          // Base = Move ohne den Modifier-Suffix (' oder 2)
           const base = (m: string) => m.replace(/['2]$/, "");
-          expect(base(moves[j]), `Move ${j} (${moves[j]}) sollte nicht dieselbe Base haben wie ${moves[j - 1]}`).not.toBe(base(moves[j - 1]));
+          expect(
+            base(moves[j]),
+            `Move ${j} (${moves[j]}) sollte nicht dieselbe Base haben wie ${moves[j - 1]}`,
+          ).not.toBe(base(moves[j - 1]));
         }
       }
     });
   }
+
   it("fto (scrambow-unterstuetzt) produces non-empty scramble", () => {
     // FTO ist von scrambow supportiert — wir routen es zu scrambow,
     // nicht zu unserem Custom-Generator.

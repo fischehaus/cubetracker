@@ -38,6 +38,36 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.cstimer-vendor",
+        released=date(2026, 5, 17),
+        title="csTimer-Scrambles fuer Gear / Redi / Master Pyraminx",
+        highlights=[
+            "Direkter Folge-Schritt nach der GPL-Migration. csTimer-"
+            "Source-Files vendored unter webapp/frontend/src/lib/"
+            "cstimer-vendor/ (mathlib, scramble, gearcube, redi, "
+            "pyraminx, skewb, mgmlsll, isaac + Mini-jQuery-Shim).",
+            "Gear Cube, Redi Cube, Master Pyraminx haben jetzt echte "
+            "Random-State-Scrambles (vorher Random-Move-Sequenz). "
+            "Identisch zu csTimer-Output, WCA-quality im Sinne "
+            "garantierter Mindest-Distanz.",
+            "Ivy bleibt auf unserem Eigenbau-BFS-Solver — csTimer hat "
+            "kein Ivy-Modul. Master Skewb bleibt auf Random-Move-"
+            "Fallback — csTimer hat auch keinen dedizierten Master-"
+            "Skewb-Generator (mgmlsll.js ist Megaminx-LSLL, nicht "
+            "Master Skewb).",
+            "Bundle-Impact: +52KB raw / +19KB gzipped (mathlib+isaac "
+            "sind die groessten Brocken). Vergleich: cubing.js waere "
+            "~150-500KB gewesen.",
+            "Disclaimer 'kein Random-State'-Hinweis wird jetzt NUR "
+            "fuer Master Skewb angezeigt (vorher fuer alle inoffiziellen "
+            "Custom-Puzzles).",
+            "Lessons applied: csTimer-Source-Files sind reines pure-JS "
+            "(IIFE-Pattern, kein Buffer/Node). Der cstimer_module-NPM-"
+            "Crash 2026-05-16 war ein Packaging-Problem, kein Source-"
+            "Problem. Direkt-Vendoring umgeht das.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gpl-license-migration",
         released=date(2026, 5, 17),
         title="Lizenz-Migration auf GPL-3.0-or-later",
