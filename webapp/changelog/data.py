@@ -38,6 +38,39 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.live-tests-github",
+        released=date(2026, 5, 17),
+        title="Live-Test-FAIL → automatisches GitHub-Issue (Phase 3 von 3)",
+        highlights=[
+            "Schliesst den Live-Test-Loop. Bei FAIL + Notiz wird "
+            "automatisch ein GitHub-Issue im Repo erstellt — der naechste "
+            "Fix-Schritt landet sofort als trackbares Issue.",
+            "Neues Modul: services/github.py mit create_issue() + "
+            "add_comment(). Nutzt httpx (haben wir schon), GitHub-API-"
+            "Version 2022-11-28. 8s Timeout.",
+            "Konfiguration: Env-Var GITHUB_TOKEN (Personal Access Token "
+            "mit repo-Scope) + optional GITHUB_REPO (default "
+            "'fischehaus/cubetracker'). Setze auf Render unter "
+            "Environment-Tab.",
+            "Workflow: Admin markiert Test als FAIL + schreibt Notiz → "
+            "Backend baut strukturierten Issue-Body (Beschreibung + "
+            "Notiz + Welle/Commit/Tag-Kontext) → create_issue mit "
+            "Labels 'live-test-fail' + 'automated' + 'phase:W.xyz'. "
+            "Issue-URL + Nummer wird in DB gespeichert.",
+            "Update-Logik: bei spaeteren PATCHes auf einem bereits-FAIL-"
+            "Test mit existierendem Issue → add_comment() statt erneutem "
+            "create. So bleibt der Issue-Thread synchron mit den Admin-"
+            "Notizen.",
+            "Graceful Degradation: ohne GITHUB_TOKEN funktioniert alles "
+            "normal, nur ohne Issue-Verknuepfung. Bei Network-Errors / "
+            "Rate-Limits: Test wird trotzdem gespeichert, nur Warning "
+            "im Log.",
+            "Damit ist der Admin-Workflow-Refactor (3 Phasen seit "
+            "heute Mittag) abgeschlossen: Admin-User-Toggle + Live-Test-"
+            "Liste + GitHub-Sync.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.live-tests",
         released=date(2026, 5, 17),
         title="Live-Test-Liste im Admin-Bereich (Phase 2 von 3)",

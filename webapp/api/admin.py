@@ -37,6 +37,7 @@ from db.models import (
 )
 from db.schemas import LiveTestCreate, LiveTestRead, LiveTestUpdate
 from emailing.service import send_admin_message
+from services import github as gh_service
 
 logger = logging.getLogger(__name__)
 
@@ -588,6 +589,36 @@ def create_live_test(
     return LiveTestRead.model_validate(test).model_dump(mode="json")
 
 
+def _build_issue_body(test: LiveTest, admin: User) -> str:
+    """Strukturierter Issue-Body fuer einen FAIL-Live-Test (Phase 3)."""
+    parts = [
+        f"**Live-Test failed** — automatisch erstellt aus dem Admin-Panel "
+        f"von {admin.email}.",
+        "",
+        "### Test-Beschreibung",
+        test.description or "(leer)",
+        "",
+        "### Admin-Notiz (was nicht funktioniert hat)",
+        test.user_response or "(keine Notiz)",
+        "",
+        "### Kontext",
+    ]
+    if test.related_phase:
+        parts.append(f"- Welle: `{test.related_phase}`")
+    if test.related_commit_sha:
+        parts.append(f"- Commit: `{test.related_commit_sha}`")
+    if test.related_tag:
+        parts.append(f"- Tag: `{test.related_tag}`")
+    parts.append(f"- Live-Test-ID (intern): #{test.id}")
+    parts.append(f"- Angelegt: {test.created_at.isoformat() if test.created_at else '?'}")
+    parts.append("")
+    parts.append("---")
+    parts.append(
+        "_Automatisch via Cubetracker-Admin-Live-Test-Workflow (Phase W.live-tests)._"
+    )
+    return "\n".join(parts)
+
+
 @router.patch("/live-tests/{test_id}")
 @limiter.limit(ADMIN_LIMIT)
 def update_live_test(
@@ -602,8 +633,11 @@ def update_live_test(
     Beim Status-Set wird responded_at + responded_by_user_id automatisch
     auf jetzt + den ausfuehrenden Admin gesetzt.
 
-    Phase 3 (W.live-tests-github): bei status=fail + Antwort + kein
-    bestehender Issue → wird hier auto-create-Issue triggern (kommt noch).
+    Phase 3 (W.live-tests, 2026-05-17): bei status=fail UND user_response
+    gesetzt → Auto-Create GitHub-Issue (wenn noch keiner verknuepft).
+    Bei spaeteren PATCHes auf bereits-FAIL-Tests: add_comment statt
+    create_issue. Graceful Degradation wenn GITHUB_TOKEN fehlt — Test
+    wird trotzdem gespeichert, nur ohne Issue-Link.
     """
     test = db.get(LiveTest, test_id)
     if test is None:
@@ -635,6 +669,46 @@ def update_live_test(
         test.id,
         updates,
     )
+
+    # Phase 3: GitHub-Issue-Sync bei FAIL + Notiz.
+    # Trigger:
+    #   1. status ist (oder wurde) "fail" UND user_response ist gesetzt
+    #   2. github_issue_url IS NULL → create_issue
+    #   3. github_issue_url NOT NULL → add_comment (wenn user_response geupdated)
+    if test.status == "fail" and test.user_response:
+        if test.github_issue_url is None:
+            # Erst-Erstellung
+            issue_title = f"[Live-Test FAIL] {test.title}"
+            body = _build_issue_body(test, admin)
+            labels = ["live-test-fail", "automated"]
+            if test.related_phase:
+                labels.append(f"phase:{test.related_phase}")
+            result = gh_service.create_issue(issue_title, body, labels=labels)
+            if result is not None:
+                test.github_issue_url = result["html_url"]
+                test.github_issue_number = result["number"]
+                db.commit()
+                db.refresh(test)
+                logger.info(
+                    "[ADMIN] live-test %s -> github issue #%s created",
+                    test.id,
+                    result["number"],
+                )
+        elif "user_response" in updates and test.github_issue_number:
+            # Update zu bestehendem Issue: Comment posten
+            comment_body = (
+                f"**Notiz-Update von {admin.email}** "
+                f"({datetime.now(UTC).isoformat()}):\n\n"
+                f"{test.user_response}"
+            )
+            ok = gh_service.add_comment(test.github_issue_number, comment_body)
+            if ok:
+                logger.info(
+                    "[ADMIN] live-test %s -> github issue #%s comment added",
+                    test.id,
+                    test.github_issue_number,
+                )
+
     return LiveTestRead.model_validate(test).model_dump(mode="json")
 
 

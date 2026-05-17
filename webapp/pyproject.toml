@@ -49,6 +49,7 @@ packages = [
     "changelog",
     "wca",  # W.wca-comps: WCA-API-Client + Geocoding + Endpoint
     "news",  # W.news: RSS-Aggregator + Endpoint
+    "services",  # W.live-tests: GitHub-API-Client fuer Auto-Issue
 ]
 
 [tool.pytest.ini_options]
