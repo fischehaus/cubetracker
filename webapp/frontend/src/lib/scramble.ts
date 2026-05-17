@@ -42,6 +42,13 @@ import { getCstimerScramble } from "./cstimer-vendor";
  *   "gearso"  = Gear Cube, random-state-shortened (csTimer-Default, 4-10 moves)
  *   "rediso"  = Redi Cube, random-state
  *   "mpyrso"  = Master Pyraminx, random-state
+ *   "ivyso"   = Ivy Cube, random-state (in csTimer-Source ueberraschend
+ *               im skewb.js-File definiert, nicht in einem eigenen ivy.js)
+ *
+ * Phase W.cstimer-ivy-switch (2026-05-17): Ivy wurde von unserem Eigenbau-
+ * BFS-Solver (ivyScramble.ts) auf csTimer umgeschwenkt fuer Konsistenz.
+ * Eigenbau-Solver bleibt als Fallback hinter csTimer im Cascade falls
+ * csTimer-Init crashen sollte.
  *
  * Master Skewb hat in csTimer keinen dedizierten Generator (`mgmlsll.js`
  * ist Megaminx-Last-Slot-Last-Layer, nicht Master Skewb) — bleibt auf
@@ -51,6 +58,7 @@ const APP_TO_CSTIMER: Record<string, string> = {
   gear: "gearso",
   redi: "rediso",
   master_pyraminx: "mpyrso",
+  ivy: "ivyso",
 };
 
 /**
@@ -350,7 +358,21 @@ export function isWcaQualityCustomPuzzle(code: string): boolean {
  * blockieren soll.
  */
 export function generateScramble(typeOverride: string): string {
-  // 1) Eigener Random-State-Solver (Ivy via BFS-Lookup, WCA-Quality)
+  // 1) csTimer-Random-State-Scrambler (Phase W.cstimer-vendor, 2026-05-17;
+  //    Ivy ergaenzt in W.cstimer-ivy-switch): gear/redi/master_pyraminx/ivy
+  //    via vendored GPL-v3-Modul. Bei csTimer-Init-Crash → Fallback weiter
+  //    unten greift (defensive).
+  if (typeOverride in APP_TO_CSTIMER) {
+    const cstimerType = APP_TO_CSTIMER[typeOverride];
+    try {
+      const s = getCstimerScramble(cstimerType);
+      if (s && s.trim().length > 0) return s;
+    } catch {
+      // weiter zur naechsten Stufe
+    }
+  }
+  // 2) Eigenbau-BFS-Solver fuer Ivy als Fallback (falls csTimer
+   //    fehlschlaegt). Bleibt als Sicherheits-Netz seit W.cstimer-ivy-switch.
   if (typeOverride === "ivy") {
     try {
       const s = generateIvyScramble();
@@ -359,22 +381,8 @@ export function generateScramble(typeOverride: string): string {
       // Fallback auf Random-Move wenn Solver-Bug auftritt
     }
   }
-  // 2) csTimer-Random-State-Scrambler (Phase W.cstimer-vendor, 2026-05-17):
-  //    gear/redi/master_pyraminx via vendored GPL-v3-Modul. Fallback auf
-  //    Random-Move wenn csTimer beim Init crasht (sollte nicht passieren,
-  //    aber defensive).
-  if (typeOverride in APP_TO_CSTIMER) {
-    const cstimerType = APP_TO_CSTIMER[typeOverride];
-    try {
-      const s = getCstimerScramble(cstimerType);
-      if (s && s.trim().length > 0) return s;
-    } catch {
-      // weiter zu 3) Random-Move-Fallback
-    }
-  }
   // 3) Custom Puzzles mit Random-Move-Spec (Fallback fuer master_skewb
-  //    + Sicherheits-Netz fuer ivy/gear/redi/master_pyraminx wenn ihr
-  //    primaerer Pfad fehlschlaegt)
+  //    + zusaetzliches Sicherheits-Netz)
   if (typeOverride in CUSTOM_PUZZLE_SPECS) {
     return generateCustomScramble(CUSTOM_PUZZLE_SPECS[typeOverride]);
   }

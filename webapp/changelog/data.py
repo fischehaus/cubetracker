@@ -38,6 +38,29 @@ class PatchNote:
 # Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.cstimer-ivy-switch",
+        released=date(2026, 5, 17),
+        title="Ivy-Cube: Scrambler von Eigenbau auf csTimer umgestellt",
+        highlights=[
+            "User-Beobachtung: csTimer kann Ivy-Cube scramblen. Bei der "
+            "ersten Recherche zum Vendor-Port hatte ich nur nach 'ivy.js' "
+            "gesucht — der Ivy-Scrambler ist aber ueberraschend im "
+            "skewb.js-File mit-versteckt (registriert via "
+            "`scrMgr.reg(['ivyo', 'ivyso'], ...)` am Ende der Datei).",
+            "Konsequenz: Ivy laeuft jetzt ueber csTimer ('ivyso' = Random-"
+            "State). Unser Eigenbau-BFS-Solver (ivyScramble.ts mit 29.160-"
+            "State-Lookup-Tabelle) bleibt als defensiver Fallback hinter "
+            "csTimer im Cascade. Wenn csTimer crashen sollte, springt "
+            "automatisch der Eigenbau ein.",
+            "Vorteil: Konsistenz mit Gear / Redi / Master Pyraminx. "
+            "Identischer Scramble-Style wie bei csTimer-Usern.",
+            "Kein 2D-Net fuer Ivy: unser Renderer (ScrambleNet) kann "
+            "aktuell nur 3x3. csTimer rendert Ivy auch nicht in 2D. "
+            "Wenn das jemand vermisst, koennen wir's spaeter selbst bauen "
+            "(~1 Tag, Ivy-Geometrie = 4 dreieckige Faces + 4 Eck-Caps).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.cstimer-vendor",
         released=date(2026, 5, 17),
         title="csTimer-Scrambles fuer Gear / Redi / Master Pyraminx",

@@ -47,6 +47,8 @@ describe("csTimer-Vendor-Module", () => {
     expect(hasCstimerScramble("mpyrso")).toBe(true);
     // Aus pyraminx.js zusaetzlich:
     expect(hasCstimerScramble("pyrso")).toBe(true);
+    // Aus skewb.js zusaetzlich Ivy (Phase W.cstimer-ivy-switch):
+    expect(hasCstimerScramble("ivyso")).toBe(true);
     // Nicht-registrierter Type
     expect(hasCstimerScramble("does-not-exist-xyz")).toBe(false);
   });
