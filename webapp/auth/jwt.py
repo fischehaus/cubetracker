@@ -6,8 +6,8 @@ Zwei Token-Typen:
 
 Token-Revocation via `ver`-Claim:
 Jeder Token trägt das `token_version` des Users zum Ausgabezeitpunkt.
-Wird der Wert in der DB hochgezaehlt (Logout, Password-Change), invalidieren
-alle ausgegebenen Tokens dieses Users — der Decode prueft den Wert.
+Wird der Wert in der DB hochgezählt (Logout, Password-Change), invalidieren
+alle ausgegebenen Tokens dieses Users — der Decode prüft den Wert.
 
 Pure Funktionen + minimaler State — leicht testbar.
 """
@@ -64,7 +64,7 @@ def create_token(
 def decode_token(token: str, expected_type: TokenType | None = None) -> dict[str, Any]:
     """Validiert + decodiert ein JWT. Wirft `JWTError` bei invalid/expired.
 
-    Wenn `expected_type` gesetzt: zusaetzliche Validierung dass der Token-Typ
+    Wenn `expected_type` gesetzt: zusätzliche Validierung dass der Token-Typ
     passt (verhindert dass jemand einen Refresh-Token als Access nutzt).
 
     Hinweis: `ver`-Check (Token-Revocation) passiert NICHT hier — der braucht

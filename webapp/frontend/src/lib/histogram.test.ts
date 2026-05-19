@@ -19,7 +19,7 @@ describe("suggestBinWidthMs", () => {
     expect(suggestBinWidthMs(1000, 5000, 1)).toBe(1000);
   });
 
-  it("snappt auf gaengige Bucket-Werte", () => {
+  it("snappt auf gängige Bucket-Werte", () => {
     // 100 Solves, 10s Spanne → sturges ~7-8 → raw ~1300ms → snap 2000
     const w = suggestBinWidthMs(10000, 20000, 100);
     expect([1000, 2000]).toContain(w);

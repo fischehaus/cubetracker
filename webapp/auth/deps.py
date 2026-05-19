@@ -1,7 +1,7 @@
 """FastAPI-Dependencies für Auth (Phase W).
 
 `current_user`-Dep zieht den User aus dem JWT in `Authorization: Bearer <token>`,
-prueft Token-Version (Revocation) und User-Status.
+prüft Token-Version (Revocation) und User-Status.
 Wirft 401 bei fehlendem/invalidem/expired/revoked Token.
 
 KERN-ANNAHME: jeder API-Endpoint ausser /auth/* + /api/health

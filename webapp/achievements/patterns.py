@@ -120,7 +120,7 @@ def detect_patterns(solves: list[ChronoSolve]) -> PatternResult:
 
         # ===== PB-DETECTION =====
         # is_X_pb (echte Verbesserung) wird für Double-Pattern genutzt;
-        # erste Setzung zählt nicht — sonst loest jede 2-Solve-Sequenz
+        # erste Setzung zählt nicht — sonst löst jede 2-Solve-Sequenz
         # automatisch Doppel-PB aus.
         # pbs_today (alle "set-or-improved" Events) wird für Triple-Day
         # genutzt — auch erstes Setzen zählt, weil's der erste „neue

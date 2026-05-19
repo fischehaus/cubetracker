@@ -12,7 +12,7 @@ Konfiguration:
 
 Graceful degradation: wenn Token nicht gesetzt -> return None, kein Fehler
 in der Hauptlogik. Der Test wird trotzdem als FAIL gespeichert, nur ohne
-Issue-Verknuepfung.
+Issue-Verknüpfung.
 """
 
 from __future__ import annotations
@@ -99,7 +99,7 @@ def create_issue(
             return {"html_url": issue_url, "number": issue_number}
         # Bei Fehler nur loggen, nicht propagieren.
         # QA-Fix (2026-05-17 abends): response.text NICHT loggen —
-        # könnte bei Edge-Cases (zukuenftige API-Version) Header-Echos
+        # könnte bei Edge-Cases (zukünftige API-Version) Header-Echos
         # mit Token-Reflektion enthalten. Nur Status + Reason.
         logger.warning(
             "[github] create_issue failed: %s %s",

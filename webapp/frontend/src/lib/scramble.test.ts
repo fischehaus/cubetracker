@@ -3,7 +3,7 @@
 // scrambow's UMD-Bundle setzt self.scrambow als Side-Effect beim Modul-Load.
 // Im default-Node-Environment fehlen self/window → UMD crasht beim Eval.
 // happy-dom liefert beide (leichter als jsdom) → UMD installiert scrambow
-// korrekt → Tests gruen.
+// korrekt → Tests grün.
 
 import { describe, expect, it } from "vitest";
 import {
@@ -77,7 +77,7 @@ describe("resolveScrambleTypeOverride (Phase 8.1 bugfix)", () => {
     expect(resolveScrambleTypeOverride("pyraminx")).toBe("pyraminx");
   });
 
-  it("unknown string returns null (caller faellt zurück)", () => {
+  it("unknown string returns null (caller fällt zurück)", () => {
     expect(resolveScrambleTypeOverride("nonsense")).toBeNull();
     expect(resolveScrambleTypeOverride("PLL")).toBeNull(); // case-sensitive
   });
@@ -121,7 +121,7 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
   //   - ivy hat seit W.ivy-rs eigenen BFS-Solver, getestet in
   //     ivyScramble.test.ts.
 
-  // csTimer-Pfad: variable Laenge, nur non-empty + plausible Max-Laenge.
+  // csTimer-Pfad: variable Länge, nur non-empty + plausible Max-Länge.
   const csTimerCases = ["gear", "redi", "master_pyraminx"];
   for (const type of csTimerCases) {
     it(`"${type}" (csTimer) produces non-empty scramble`, () => {
@@ -134,7 +134,7 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
     });
   }
 
-  // Eigenbau-Pfad (master_skewb): feste Laenge + no-repeat-base.
+  // Eigenbau-Pfad (master_skewb): feste Länge + no-repeat-base.
   const randomMoveCases: { type: string; minMoves: number }[] = [
     { type: "master_skewb", minMoves: 25 },
   ];
@@ -162,7 +162,7 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
     });
   }
 
-  it("fto (scrambow-unterstuetzt) produces non-empty scramble", () => {
+  it("fto (scrambow-unterstützt) produces non-empty scramble", () => {
     // FTO ist von scrambow supportiert — wir routen es zu scrambow,
     // nicht zu unserem Custom-Generator.
     const s = generateScramble("fto");

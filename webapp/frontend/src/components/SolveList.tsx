@@ -136,7 +136,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
 
   // Solvenummer-Berechnung: API liefert die letzten `limit` Solves in DESC.
   // Wir nehmen `stats.count` als Total + leiten die Nummer ab.
-  // Wichtig: Solvenummer haengt am Solve, NICHT am Sortier-Index.
+  // Wichtig: Solvenummer hängt am Solve, NICHT am Sortier-Index.
   // Sort-Reihenfolge ändert nur die UI-Reihenfolge, die Nummer bleibt.
   const sortedDisplay = useMemo(() => {
     if (!solves || solves.length === 0) return [];
@@ -210,7 +210,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
             onClick={() => onCubeFilterChange("")}
             className="mt-3 text-base text-purple-400 hover:text-purple-300"
           >
-            Filter zuruecksetzen
+            Filter zurücksetzen
           </button>
         )}
       </div>

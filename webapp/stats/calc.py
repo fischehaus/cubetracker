@@ -87,7 +87,7 @@ def best_average_window(solves: list[SolvePoint], window: int) -> int | None:
 def best_average_window_with_anchor(
     solves: list[SolvePoint], window: int
 ) -> tuple[int, int] | None:
-    """Wie best_average_window, liefert zusaetzlich die solve_id des
+    """Wie best_average_window, liefert zusätzlich die solve_id des
     LETZTEN Solves im besten Window (= Ankerpunkt für den Zeitstempel
     „wann wurde dieser Best-Avg erzielt").
 

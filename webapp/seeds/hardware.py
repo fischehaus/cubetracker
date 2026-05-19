@@ -10,7 +10,7 @@ nur was er besitzt.
 
 Konvention bei Mehrdeutigkeit:
 - „QiYi Stickered" taucht in 5 Cube-Types auf — als 5 separate Einträge
-  mit primary_cube_type-Disambiguation gefuehrt.
+  mit primary_cube_type-Disambiguation geführt.
 - „Into Cube: Schwarz; Rot" wird als 2 Einträge mit cube_type "3x3"
   importiert (Annahme: Standard-3x3-Variante in 2 Farben). Notiz im
   notes-Feld dokumentiert die Unklarheit, damit User es später klaeren
@@ -103,7 +103,7 @@ HARDWARE_SEED: list[tuple[str, list[tuple[str, str | None]]]] = [
         ],
     ),
     # OH (One-Handed) teilt physisch dieselben 3x3-Cubes — wir legen sie
-    # NICHT separat an. Beim OH-Solve wählt der User aus den 3x3-Eintraegen.
+    # NICHT separat an. Beim OH-Solve wählt der User aus den 3x3-Einträgen.
     # Später könnte ein „secondary_cube_types"-Feld das explizit machen.
     (
         "Into Cube",

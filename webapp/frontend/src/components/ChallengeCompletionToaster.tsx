@@ -1,7 +1,7 @@
 // ChallengeCompletionToaster (Phase 7b): globaler Layer der auf
-// onChallengeCompleted hoert (kommt aus axios-response-interceptor)
+// onChallengeCompleted hört (kommt aus axios-response-interceptor)
 // und Toasts unten rechts anzeigt — strukturell identisch zum
-// AchievementToaster, nur in gruener Farbgebung und mit Challenge-Lookup.
+// AchievementToaster, nur in grüner Farbgebung und mit Challenge-Lookup.
 
 import { useEffect, useState } from "react";
 import { onChallengeCompleted, useChallengesToday } from "../lib/api";

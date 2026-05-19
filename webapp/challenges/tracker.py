@@ -44,7 +44,7 @@ class ChallengeState:
 def update_progress_for_solve(challenge: ChallengeState, solve: SolveSnapshot) -> int:
     """Liefert den NEUEN progress-Wert der Challenge nach diesem Solve.
 
-    Rueckgabe ist >= challenge.progress (monotonic).
+    Rückgabe ist >= challenge.progress (monotonic).
     """
     if challenge.is_completed:
         return challenge.progress  # bleibt erfüllt

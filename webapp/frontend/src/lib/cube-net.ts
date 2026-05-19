@@ -72,7 +72,7 @@ function rotateFaceCW(f: Face): Face {
 }
 
 // rotateFace180 + rotateFaceCCW könnten als Optimierung Sinn machen,
-// sind aber aktuell nicht benoetigt — applyMove nutzt `turns`-Counter mit
+// sind aber aktuell nicht benötigt — applyMove nutzt `turns`-Counter mit
 // rotateFaceCW (max 3x). Wenn Performance mal Engpass wird: hier
 // re-introducen + applyMove dispatchen. QA-Fix #7 (2026-05-17): vorher
 // als dead-code + void-ESLint-Trick — sauberer entfernt.
@@ -260,7 +260,7 @@ export function cloneState(s: CubeState): CubeState {
 const COLOR_HEX: Record<Color, string> = {
   U: "#f8f8f8", // weiss
   D: "#f8d62b", // gelb (yellow)
-  F: "#1da647", // gruen (green)
+  F: "#1da647", // grün (green)
   B: "#1257c4", // blau (blue)
   R: "#d22020", // rot (red)
   L: "#f08a1a", // orange

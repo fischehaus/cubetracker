@@ -1,7 +1,7 @@
 // ChallengesMiniCard: Dashboard-Variante (Phase 7b).
 //
 // Zeigt heutige Challenges sehr kompakt — Icon + progress-Label
-// + Mini-Bar je Eintrag. Klick fuehrt zum Trainer-Tab (Sub „Heute").
+// + Mini-Bar je Eintrag. Klick führt zum Trainer-Tab (Sub „Heute").
 
 import { useMemo } from "react";
 import { useChallengesToday } from "../lib/api";
@@ -48,7 +48,7 @@ export function ChallengesMiniCard({ onSwitchTab }: Props) {
           <InfoButton>
             <p className="font-medium mb-1">Tages-Challenges</p>
             <p>
-              Drei kleine taegliche Aufgaben, jeden Tag neu (Mitternacht
+              Drei kleine tägliche Aufgaben, jeden Tag neu (Mitternacht
               UTC). Klick auf die Card öffnet den Trainer-Tab mit der
               ausfuehrlichen Liste + Fortschritts-Anzeige. Erfolgreich
               abgeschlossene Challenges tragen langfristig zu Achievements bei.

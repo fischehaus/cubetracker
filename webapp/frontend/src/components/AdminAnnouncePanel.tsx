@@ -2,7 +2,7 @@
 //
 // Workflow:
 //   1. Subject + Body tippen
-//   2. „Vorschau Empfaenger" -> dry_run -> Backend liefert Empfaenger-Count
+//   2. „Vorschau Empfänger" -> dry_run -> Backend liefert Empfänger-Count
 //   3. „Wirklich senden" -> echter Versand
 //
 // Rate-Limit 3/h serverseitig — falls jemand zu oft probiert, kommt 429.
@@ -51,9 +51,9 @@ export function AdminAnnouncePanel() {
           <p className="font-medium mb-1">Bulk-Mail</p>
           <p>
             Schickt eine Mail an alle aktiv+verifiziert User. Dry-Run zeigt
-            erst die Empfaenger-Zahl. Rate-Limit 3/h server-seitig.
-            Hard-Cap bei 80 Empfaengern (Worker-Timeout-Schutz). Body wird
-            HTML-escaped (XSS-Defense). Use-Cases: Wartungs-Ankuendigungen,
+            erst die Empfänger-Zahl. Rate-Limit 3/h server-seitig.
+            Hard-Cap bei 80 Empfängern (Worker-Timeout-Schutz). Body wird
+            HTML-escaped (XSS-Defense). Use-Cases: Wartungs-Ankündigungen,
             Migration-Hinweise.
           </p>
         </InfoButton>
@@ -61,7 +61,7 @@ export function AdminAnnouncePanel() {
       <p className="text-sm text-gray-400">
         Geht an aktive User mit verifizierter Email. Wartung-/Ankuendigungs-
         Mails. Rate-Limit 3/h. <strong>Erst Dry-Run klicken</strong> um die
-        Empfaenger-Zahl zu sehen.
+        Empfänger-Zahl zu sehen.
       </p>
       <label className="flex flex-col text-xs text-gray-400">
         Betreff
@@ -71,7 +71,7 @@ export function AdminAnnouncePanel() {
           onChange={(e) => {
             setSubject(e.target.value);
             // QA-Fix M3: Wenn nach Dry-Run der Text geändert wird, gilt
-            // die Empfaenger-Vorschau nicht mehr → Bestaetigung zuruecksetzen.
+            // die Empfänger-Vorschau nicht mehr → Bestätigung zurücksetzen.
             setLastResult(null);
           }}
           maxLength={120}
@@ -88,7 +88,7 @@ export function AdminAnnouncePanel() {
           value={body}
           onChange={(e) => {
             setBody(e.target.value);
-            // QA-Fix M3: s.o. — geändert nach Dry-Run → erneut pruefen
+            // QA-Fix M3: s.o. — geändert nach Dry-Run → erneut prüfen
             setLastResult(null);
           }}
           rows={6}
@@ -120,12 +120,12 @@ export function AdminAnnouncePanel() {
           {lastResult.dry_run ? (
             <>
               <strong>Dry-Run:</strong> würde an{" "}
-              <strong>{lastResult.recipient_count}</strong> Empfaenger gehen.
+              <strong>{lastResult.recipient_count}</strong> Empfänger gehen.
               {lastResult.over_cap ? (
                 <span className="mt-1 block text-yellow-300">
                   ⚠ Über dem Server-Cap von {lastResult.max_recipients}
-                  {" "}Empfaengern. Echter Send wird mit 400 abgelehnt — erst
-                  Background-Job-Setup oder User-Filter noetig.
+                  {" "}Empfängern. Echter Send wird mit 400 abgelehnt — erst
+                  Background-Job-Setup oder User-Filter nötig.
                 </span>
               ) : (
                 <> Wenn das passt → „Wirklich senden" klicken.</>
@@ -135,7 +135,7 @@ export function AdminAnnouncePanel() {
             <>
               <strong>Versendet:</strong> {lastResult.sent} ok,{" "}
               {lastResult.failed} fehlgeschlagen von{" "}
-              {lastResult.recipient_count} Empfaengern.
+              {lastResult.recipient_count} Empfängern.
               {lastResult.failures && lastResult.failures.length > 0 && (
                 <details className="mt-1">
                   <summary className="cursor-pointer text-xs">
@@ -160,8 +160,8 @@ export function AdminAnnouncePanel() {
           className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
         >
           {send.isPending && send.variables?.dry_run
-            ? "Pruefe …"
-            : "Empfaenger-Vorschau (Dry-Run)"}
+            ? "Prüfe …"
+            : "Empfänger-Vorschau (Dry-Run)"}
         </button>
         <button
           onClick={() => submit(false)}

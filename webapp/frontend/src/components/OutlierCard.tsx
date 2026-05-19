@@ -1,4 +1,4 @@
-// OutlierCard: zeigt verdaechtige Solve-Zeiten gruppiert nach Cube-Type.
+// OutlierCard: zeigt verdächtige Solve-Zeiten gruppiert nach Cube-Type.
 // Quick-Actions: DNF setzen oder löschen — direkt aus der Card.
 //
 // Phase L-2: managed eigenen Session-Filter intern (vorher vom Aussen
@@ -204,7 +204,7 @@ export function OutlierCard() {
                       {formatTime(o.effective_ms)}
                     </span>
                     <span className="text-gray-500 truncate text-xs">
-                      {o.reason === "too_fast" ? "verdaechtig schnell" : "verdaechtig langsam"}
+                      {o.reason === "too_fast" ? "verdächtig schnell" : "verdächtig langsam"}
                     </span>
                   </div>
                   <div className="flex gap-1 shrink-0">

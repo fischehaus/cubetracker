@@ -16,7 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 # Sanity-Floor: time_ms unter 1000ms (1s) sind realistisch nicht erreichbar
-# (Welt-Single-Rekord ist ~3s). Schuetzt vor degenerierten Daten-Eintraegen
+# (Welt-Single-Rekord ist ~3s). Schuetzt vor degenerierten Daten-Einträgen
 # (z.B. time_ms=0 ohne DNF-Flag, wie bei manchem Import-Edge-Case).
 SPEED_3X3_SANITY_FLOOR_MS = 1_000
 
@@ -32,7 +32,7 @@ class AchievementInput:
     total_valid_solves: int  # alle solves ohne DNF
     solves_per_cube: dict[str, int]  # cube_type → count (ohne DNF)
     best_ms_per_cube: dict[str, int]  # cube_type → best_ms (effective)
-    distinct_cube_types: int  # wie viele verschiedene cubes wurden geuebt
+    distinct_cube_types: int  # wie viele verschiedene cubes wurden geübt
     hardware_count: int  # einträge in hardware-tabelle
     # Phase 8.5
     max_solves_one_day_per_cube: dict[str, int] = field(default_factory=dict)

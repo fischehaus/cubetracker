@@ -9,7 +9,7 @@ export type SortKey = "num" | "time" | "mo3" | "ao5" | "ao12" | "ao100";
 export type SortDir = "asc" | "desc";
 
 export interface SortableSolveRow {
-  solveNumber: number; // groesste Zahl = neuester Solve
+  solveNumber: number; // größte Zahl = neuester Solve
   time_ms: number;
   dnf: boolean;
   plus_two: boolean;

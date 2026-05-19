@@ -6,7 +6,7 @@
 //  - Progress-Bar + "X/Y"
 //  - Dismiss-Button (×)
 //
-// Erfuellte Challenges werden farblich abgehoben (gruen).
+// Erfuellte Challenges werden farblich abgehoben (grün).
 
 import {
   CHALLENGE_ICONS,

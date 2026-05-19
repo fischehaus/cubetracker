@@ -77,7 +77,7 @@ export function AchievementsCard() {
               Konsistenz, Streaks etc.). Werden automatisch geprüft nach
               jedem Solve. Verschlossene Erfolge zeigen Hint-Text — gibt
               dir nächstes Trainings-Ziel ohne zu spoilern. „Recheck"
-              prueft nochmal alles durch (Backup nach großen Imports).
+              prüft nochmal alles durch (Backup nach großen Imports).
             </p>
           </InfoButton>
         </div>
@@ -85,9 +85,9 @@ export function AchievementsCard() {
           onClick={() => recheck.mutate()}
           disabled={recheck.isPending}
           className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700 disabled:opacity-50"
-          title="Manuell neu pruefen — z.B. nach Daten-Import"
+          title="Manuell neu prüfen — z.B. nach Daten-Import"
         >
-          {recheck.isPending ? "Pruefe …" : "🔄 Neu pruefen"}
+          {recheck.isPending ? "Prüfe …" : "🔄 Neu prüfen"}
         </button>
       </div>
 

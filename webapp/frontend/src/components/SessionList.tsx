@@ -350,7 +350,7 @@ export function SessionList() {
               disabled={del.isPending}
               className="text-sm rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
             >
-              {del.isPending ? "Loesche …" : "Endgueltig löschen"}
+              {del.isPending ? "Lösche …" : "Endgültig löschen"}
             </button>
           </div>
         </ModalOverlay>
@@ -414,7 +414,7 @@ export function SessionList() {
 
 // ============================================================
 // Helper: Modal-Overlay (Backdrop + Centered Card)
-// Bewusst inline + simpel — keine externe Dialog-Lib noetig.
+// Bewusst inline + simpel — keine externe Dialog-Lib nötig.
 // ============================================================
 function ModalOverlay({
   onClose,

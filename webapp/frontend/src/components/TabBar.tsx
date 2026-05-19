@@ -7,7 +7,7 @@
 // - COMMUNITY:  Freunde + Bestenliste
 //
 // Mobile-first (2026-05-14): nutzt ScrollableTabBar — auf Phone
-// horizontal scrollbar, auf Desktop gleichmaessig verteilt.
+// horizontal scrollbar, auf Desktop gleichmäßig verteilt.
 
 import { ScrollableTabBar } from "./ScrollableTabBar";
 

@@ -1,6 +1,6 @@
 // ScrollableTabBar — wiederverwendbare Tab-Leiste, mobile-first.
 //
-// Problem das es loest (UX-Audit 2026-05-14): TabBar (6 Top-Tabs) + die
+// Problem das es löst (UX-Audit 2026-05-14): TabBar (6 Top-Tabs) + die
 // Sub-Tab-Bars in Verwaltung (5) + Community (2) nutzten alle `flex-1`,
 // d.h. alle Tabs zwangs-gleichbreit. Auf Phone-Breiten (320-375px) wird
 // das mit Icon+Label unleserlich oder bricht um.
@@ -8,8 +8,8 @@
 // Lösung:
 //   - Mobile (default): horizontal scrollbar, Tabs in natuerlicher Breite
 //     (shrink-0), whitespace-nowrap, snap-scroll für sauberes Wischen.
-//   - Desktop (md+): flex-1 wie vorher — alle Tabs gleichmaessig verteilt,
-//     kein Scroll noetig.
+//   - Desktop (md+): flex-1 wie vorher — alle Tabs gleichmäßig verteilt,
+//     kein Scroll nötig.
 //
 // Genutzt von: TabBar (Top-Level, size="lg"), VerwaltungTab + CommunityTab
 // (Sub-Tabs, size="md").

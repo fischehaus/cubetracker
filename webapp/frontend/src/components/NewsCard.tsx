@@ -5,7 +5,7 @@
 //
 // Quellen aktuell (Stand 2026-05-16): WCA Posts (offizielle
 // Announcements) + r/Cubers (Reddit-Community). Erweiterung erfolgt
-// im Backend (`webapp/news/sources.py`), kein Frontend-Update noetig.
+// im Backend (`webapp/news/sources.py`), kein Frontend-Update nötig.
 
 import { useLatestNews, type NewsItem } from "../lib/api";
 import { InfoButton } from "./InfoButton";

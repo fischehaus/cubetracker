@@ -1,8 +1,8 @@
 // Tests für cube-net.ts — kritische Logik, deshalb sorgfaeltig.
 //
-// Strategie: bekannte Speedcubing-Identitaeten testen.
+// Strategie: bekannte Speedcubing-Identitäten testen.
 //   1. Trivial: solved bleibt solved, R+R' = identity, etc.
-//   2. Centers nie aenderen (Centerstuecke sind fix).
+//   2. Centers nie ändern (Centerstuecke sind fix).
 //   3. Group-Order: bekannte Algorithmen mit Order N -> N-fach = identity.
 //      - Sexy-Move (R U R' U') hat Order 6
 //      - T-Perm hat Order 2
@@ -42,7 +42,7 @@ describe("solvedCube", () => {
   });
 });
 
-describe("applyMove — Identitaeten", () => {
+describe("applyMove — Identitäten", () => {
   it("R + R' = identity", () => {
     const s = solvedCube();
     applyMove(s, "R");

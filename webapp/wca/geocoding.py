@@ -1,6 +1,6 @@
 """Postleitzahl → Lat/Lng via Nominatim/OpenStreetMap (Phase W.wca-comps).
 
-Nominatim ist frei, rate-limited (1 req/s) und unzuverlaessig für
+Nominatim ist frei, rate-limited (1 req/s) und unzuverlässig für
 high-volume. Daher persistenter DB-Cache (`postal_code_geo`-Tabelle):
 PLZ-Geo ändert sich quasi nie, TTL = 30 Tage reicht.
 
@@ -45,7 +45,7 @@ async def geocode_postal_code(
 
     Strategie:
       1. country_iso2 ableiten falls nicht gegeben (PLZ-Struktur-Heuristik).
-      2. DB-Cache pruefen — wenn Treffer & TTL OK: zurück (kein HTTP).
+      2. DB-Cache prüfen — wenn Treffer & TTL OK: zurück (kein HTTP).
       3. Sonst: Nominatim-Call, persist, zurück.
 
     Raises GeocodingError bei Network-Fehler oder kein-Treffer.

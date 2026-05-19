@@ -1,4 +1,4 @@
-// ReminderCard: Trainings-Erinnerung — listet Cubes, die du laenger als
+// ReminderCard: Trainings-Erinnerung — listet Cubes, die du länger als
 // REMINDER_DAYS Tage nicht mehr angefasst hast. Sortiert: vergessenste oben.
 //
 // Hat zwei Render-Modi:
@@ -47,7 +47,7 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
           <InfoButton>
             <p className="font-medium mb-1">Reminders</p>
             <p>
-              Listet Cubes die du laenger als {REMINDER_DAYS} Tage nicht
+              Listet Cubes die du länger als {REMINDER_DAYS} Tage nicht
               mehr angefasst hast. Sortiert: vergessenste oben. Bezieht
               sich auf alle aktiven Hardware-Cubes (Verwaltung → Hardware).
             </p>
@@ -73,7 +73,7 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
           <InfoButton>
             <p className="font-medium mb-1">Reminders</p>
             <p>
-              Cubes die du laenger als {REMINDER_DAYS} Tage nicht mehr
+              Cubes die du länger als {REMINDER_DAYS} Tage nicht mehr
               angefasst hast. Klick auf einen Eintrag setzt deinen
               Timer-Cube-Filter auf den Cube — direkter Sprung ins Training.
             </p>

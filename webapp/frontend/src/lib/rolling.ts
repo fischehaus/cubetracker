@@ -38,7 +38,7 @@ export function trimForN(n: number): number {
  *   - zu wenigen Solves (n<3)
  *   - mehr als `trim` DNFs (mind. eine DNF bleibt im Mittel)
  *
- * Rueckgabe: gerundete Millisekunden.
+ * Rückgabe: gerundete Millisekunden.
  */
 export function averageOfN(solves: SolvePoint[]): number | null {
   const n = solves.length;
@@ -58,7 +58,7 @@ export function averageOfN(solves: SolvePoint[]): number | null {
  * Für Solve an Index i wird das Fenster [i-n+1 ... i] genommen.
  * Fenster, die über den Anfang hinausgehen, ergeben null.
  *
- * Rueckgabe: array gleicher Laenge wie input, jeweils Average oder null.
+ * Rückgabe: array gleicher Länge wie input, jeweils Average oder null.
  */
 export function rollingAverages(
   solves: SolvePoint[],

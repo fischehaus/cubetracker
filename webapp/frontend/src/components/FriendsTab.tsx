@@ -84,7 +84,7 @@ function DiscoverabilityCard({
     );
   }
 
-  // Aktivierter Auffindbar-State: kompakt-gruene Bestaetigungs-Card.
+  // Aktivierter Auffindbar-State: kompakt-grüne Bestätigungs-Card.
   if (isDiscoverable && hasName) {
     return (
       <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-200 space-y-1">
@@ -262,7 +262,7 @@ function SearchCard() {
     lookup.mutate({ email });
   };
 
-  // Bei Email-Lookup-Success rendern wir das Ergebnis als zusaetzlichen
+  // Bei Email-Lookup-Success rendern wir das Ergebnis als zusätzlichen
   // Search-Result darueber. Bei not-found zeigen wir Hinweis.
   const lookupResult = lookup.data;
 
@@ -428,7 +428,7 @@ function SearchResultRow({
               disabled={busy || remove.isPending}
               className="rounded bg-gray-700 px-2 py-1 text-[10px] text-gray-300 hover:bg-gray-600 disabled:opacity-50"
             >
-              ↶ Zuruecknehmen
+              ↶ Zurücknehmen
             </button>
           </>
         )}
@@ -520,7 +520,7 @@ function PendingOutgoingCard({ items }: { items: Friendship[] }) {
               disabled={remove.isPending}
               className="rounded bg-gray-700 px-3 py-1 text-xs text-gray-300 hover:bg-gray-600 disabled:opacity-50"
             >
-              ↶ Zuruecknehmen
+              ↶ Zurücknehmen
             </button>
           </li>
         ))}

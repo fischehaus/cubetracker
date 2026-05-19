@@ -3,7 +3,7 @@
 Verantwortlichkeiten:
 - export_user_data: Voll-JSON-Export eines User-Datenbestands
 - restore_user_data: JSON-Restore mit Modi `merge`/`replace` + dry_run-Stats
-- create_snapshot: Wiederherstellungspunkt anlegen + ggf. aelteste pruning
+- create_snapshot: Wiederherstellungspunkt anlegen + ggf. älteste pruning
 - list_snapshots: User-Snapshots abrufen
 - restore_from_snapshot: Snapshot laden + restore (mit Auto-Snapshot-Vorher)
 - delete_snapshot: explizit löschen
@@ -12,7 +12,7 @@ Sicherheits-Architektur:
 - Alle Funktionen brauchen `user_id`. user_id-Felder im JSON werden
   IGNORIERT und mit `user_id`-Param überschrieben — verhindert dass ein
   Angreifer ein modifiziertes Backup hochlaedt und fremde Daten überschreibt.
-- mode='replace' loescht ALLE bisherigen Daten dieses Users vor dem Import
+- mode='replace' löscht ALLE bisherigen Daten dieses Users vor dem Import
   (User-CASCADE-Behaviors greifen NICHT — wir löschen explizit).
 - mode='merge' (Default) tut Sessions/Hardware Upsert-by-Name+cube,
   Solves Dedup per (timestamp, time_ms, cube_type)-Triple.
@@ -47,12 +47,12 @@ MAX_SNAPSHOT_PAYLOAD_BYTES = 30 * 1024 * 1024
 # Security-Fix K2: JSON-Bomb-Schutz. Pre-Check vor json.loads().
 #
 # Bug-Fix Quick-Win 2026-05-16: Limit von 200_000 auf 2_000_000 hoch.
-# Vorher: csTimer-Files mit > ~30k Solves wurden faelschlich abgelehnt
+# Vorher: csTimer-Files mit > ~30k Solves wurden fälschlich abgelehnt
 # (User-Report 2026-05-13). Realistische csTimer-Density: ~6-12
 # Structural Tokens pro Solve (`[[date, time, ...], scramble, ...]`).
 # 100k Solves = ~800k-1.2M Tokens; 300k Solves = ~2-3M Tokens.
 #
-# 2M ist eine sichere Obergrenze: bei 30MB-Upload-Limit waeren echte
+# 2M ist eine sichere Obergrenze: bei 30MB-Upload-Limit wären echte
 # JSON-Bombs (dense nested brackets, ~1 Token/Byte) bei 30M Tokens —
 # also Faktor 15 über dem Limit. Schutz greift weiterhin.
 MAX_JSON_STRUCTURAL_TOKENS = 2_000_000
@@ -88,7 +88,7 @@ def check_json_bomb(raw_bytes: bytes) -> None:
             f"erlaubt max {MAX_JSON_STRUCTURAL_TOKENS:,}). Bei normalen "
             f"csTimer-Exporten reicht das für ca. 300.000 Solves — wenn "
             f"deine Datei wirklich darueber liegt, melde dich beim Entwickler. "
-            f"Sonst pruefe ob du die richtige Datei hochlaedst."
+            f"Sonst prüfe ob du die richtige Datei hochlaedst."
         )
 
 
@@ -246,13 +246,13 @@ def restore_user_data(
     dry_run: bool = False,
     auto_snapshot: bool = True,
 ) -> RestoreResult:
-    """JSON-Backup zurueckspielen.
+    """JSON-Backup zurückspielen.
 
     Modi:
     - 'merge' (default): bestehende Daten bleiben, neue Sachen dazu,
       Dedup nach Schluesseln (siehe unten). Sicher.
     - 'replace': alle eigenen Daten löschen, dann importieren. DESTRUKTIV.
-      Caller MUSS confirm-Magic-String separat pruefen.
+      Caller MUSS confirm-Magic-String separat prüfen.
 
     Dedup-Schlüssel:
     - Sessions: (name, cstimer_session_id) — manuell angelegte Sessions
@@ -280,7 +280,7 @@ def restore_user_data(
 
     snapshot_id: int | None = None
     if mode == "replace" and not dry_run and auto_snapshot:
-        # Snapshot vor dem destruktiven Delete — committet eigenstaendig.
+        # Snapshot vor dem destruktiven Delete — committet eigenständig.
         # Wichtig: bei spaeterem Import-Exception haben wir damit den
         # Recovery-Pfad (Snapshot-Restore in except-Klausel unten).
         snap = create_snapshot(db, user, reason="before_restore")
@@ -525,7 +525,7 @@ def _recover_from_snapshot(db: OrmSession, user: User, snapshot_id: int) -> None
 
     Zieht Snapshot-Payload aus DB, spielt ihn wieder ein (mode=replace,
     auto_snapshot=False um Endlos-Schleife zu verhindern). Wenn auch das
-    fehlschlaegt: nur loggen, nicht erneut raisen — User kann Snapshot
+    fehlschlägt: nur loggen, nicht erneut raisen — User kann Snapshot
     manuell via /backup/snapshots/{id}/restore wieder einspielen.
     """
     import logging
@@ -568,7 +568,7 @@ def _parse_dt(s: str | None) -> datetime | None:
 
 
 def create_snapshot(db: OrmSession, user: User, reason: str = "manual") -> Snapshot:
-    """Snapshot anlegen + ggf. aelteste verwerfen (max 2/User).
+    """Snapshot anlegen + ggf. älteste verwerfen (max 2/User).
 
     Security-Fix W.5-finding-3: Hartes Size-Limit (Storage-DoS-Schutz).
     Bei sehr großen Datensaetzen würde sonst Postgres-Free vollaufen.
@@ -597,7 +597,7 @@ def create_snapshot(db: OrmSession, user: User, reason: str = "manual") -> Snaps
 
 
 def _prune_snapshots(db: OrmSession, user_id: int) -> int:
-    """Behaelt max MAX_SNAPSHOTS_PER_USER pro User, loescht aeltere.
+    """Behaelt max MAX_SNAPSHOTS_PER_USER pro User, löscht ältere.
     Liefert die Anzahl der geloeschten."""
     rows = list(
         db.scalars(
@@ -635,7 +635,7 @@ def get_snapshot_or_none(db: OrmSession, user: User, snapshot_id: int) -> Snapsh
 def restore_from_snapshot(
     db: OrmSession, user: User, snapshot: Snapshot, dry_run: bool = False
 ) -> RestoreResult:
-    """Snapshot zurueckspielen — Mode 'replace' damit der Snapshot-Stand
+    """Snapshot zurückspielen — Mode 'replace' damit der Snapshot-Stand
     bit-genau wieder hergestellt wird. Auto-Snapshot vorher ist FALSE
     (sonst Endlos-Snapshot-Erzeugung bei mehrfach-Restore).
     """

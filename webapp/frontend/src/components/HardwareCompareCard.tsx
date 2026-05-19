@@ -162,7 +162,7 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
             <p>
               Vergleicht deine Stats pro Cube (Hardware-Eintrag) für den
               ausgewählten Cube-Type. Hilft zu sehen ob ein bestimmter
-              Speedcube wirklich schneller ist oder nur gefuehlt. Klick
+              Speedcube wirklich schneller ist oder nur gefühlt. Klick
               auf Spaltenkopf zum Sortieren.
             </p>
           </InfoButton>

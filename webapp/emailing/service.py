@@ -11,7 +11,7 @@ Drei Email-Typen:
 - send_password_reset_email: bei /auth/forgot-password
 - send_email_change_verification: bei Email-Change
 
-Fail-Soft: wenn Resend-Call fehlschlaegt, wird der Fehler geloggt aber
+Fail-Soft: wenn Resend-Call fehlschlägt, wird der Fehler geloggt aber
 NICHT propagiert (sonst könnte ein Resend-Outage Login/Register blockieren).
 Caller kann via `success` Bool den Status sehen.
 """
@@ -86,11 +86,11 @@ def send_verification_email(to: str, verification_token: str) -> EmailResult:
 <html lang="de">
 <body style="font-family: system-ui, sans-serif; max-width: 480px; margin: 32px auto; color: #111;">
   <h1 style="font-size: 24px;">Willkommen bei cubetracker</h1>
-  <p>Bitte bestaetige deine Email-Adresse mit einem Klick:</p>
+  <p>Bitte bestätige deine Email-Adresse mit einem Klick:</p>
   <p style="margin: 24px 0;">
     <a href="{link}"
        style="display: inline-block; padding: 12px 24px; background: #7c3aed; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;">
-      Email bestaetigen
+      Email bestätigen
     </a>
   </p>
   <p style="font-size: 13px; color: #666;">
@@ -98,12 +98,12 @@ def send_verification_email(to: str, verification_token: str) -> EmailResult:
     <code style="word-break: break-all;">{link}</code>
   </p>
   <p style="font-size: 13px; color: #888;">
-    Der Link ist 7 Tage gueltig. Falls du dich nicht bei cubetracker
+    Der Link ist 7 Tage gültig. Falls du dich nicht bei cubetracker
     registriert hast, ignoriere diese Mail einfach.
   </p>
 </body>
 </html>"""
-    return _send(to, "cubetracker — Email bestaetigen", html)
+    return _send(to, "cubetracker — Email bestätigen", html)
 
 
 def send_password_reset_email(to: str, reset_token: str) -> EmailResult:
@@ -113,7 +113,7 @@ def send_password_reset_email(to: str, reset_token: str) -> EmailResult:
 <!doctype html>
 <html lang="de">
 <body style="font-family: system-ui, sans-serif; max-width: 480px; margin: 32px auto; color: #111;">
-  <h1 style="font-size: 24px;">Passwort zuruecksetzen</h1>
+  <h1 style="font-size: 24px;">Passwort zurücksetzen</h1>
   <p>Klick den Link um ein neues Passwort für cubetracker zu setzen:</p>
   <p style="margin: 24px 0;">
     <a href="{link}"
@@ -126,17 +126,17 @@ def send_password_reset_email(to: str, reset_token: str) -> EmailResult:
     <code style="word-break: break-all;">{link}</code>
   </p>
   <p style="font-size: 13px; color: #888;">
-    Der Link ist 1 Stunde gueltig. Falls du keinen Reset angefordert
+    Der Link ist 1 Stunde gültig. Falls du keinen Reset angefordert
     hast, ignoriere diese Mail — dein bestehendes Passwort bleibt
-    unveraendert.
+    unverändert.
   </p>
 </body>
 </html>"""
-    return _send(to, "cubetracker — Passwort zuruecksetzen", html)
+    return _send(to, "cubetracker — Passwort zurücksetzen", html)
 
 
 def send_admin_message(to: str, subject: str, body: str) -> EmailResult:
-    """Ad-hoc-Mail vom Admin an einen User (Support, Ankuendigung).
+    """Ad-hoc-Mail vom Admin an einen User (Support, Ankündigung).
 
     `body` ist Plain-Text. Newlines werden zu <br>. Kein Markdown, kein
     HTML-Pass-Through (XSS-Risiko falls Admin-Account kompromittiert
@@ -152,7 +152,7 @@ def send_admin_message(to: str, subject: str, body: str) -> EmailResult:
     # QA-Finding M1: Subject defensiv CRLF-strippen — Resend baut den
     # SMTP-Header selbst und sollte das eigentlich tun, aber wir trauen
     # nicht über die Lib-Boundary. Ein eingeschleuster Newline könnte
-    # zusaetzliche Header (Bcc:, Reply-To:) injizieren.
+    # zusätzliche Header (Bcc:, Reply-To:) injizieren.
     safe_subject = subject.replace("\r", " ").replace("\n", " ").strip()
     full_subject = (
         safe_subject if safe_subject.startswith("[cubetracker]") else f"[cubetracker] {safe_subject}"
@@ -238,13 +238,13 @@ def send_email_change_verification(to: str, verification_token: str) -> EmailRes
 <!doctype html>
 <html lang="de">
 <body style="font-family: system-ui, sans-serif; max-width: 480px; margin: 32px auto; color: #111;">
-  <h1 style="font-size: 24px;">Neue Email-Adresse bestaetigen</h1>
+  <h1 style="font-size: 24px;">Neue Email-Adresse bestätigen</h1>
   <p>Du hast bei cubetracker eine Email-Änderung angefordert.
-     Bitte bestaetige die neue Adresse mit einem Klick:</p>
+     Bitte bestätige die neue Adresse mit einem Klick:</p>
   <p style="margin: 24px 0;">
     <a href="{link}"
        style="display: inline-block; padding: 12px 24px; background: #7c3aed; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;">
-      Neue Email bestaetigen
+      Neue Email bestätigen
     </a>
   </p>
   <p style="font-size: 13px; color: #666;">
@@ -252,9 +252,9 @@ def send_email_change_verification(to: str, verification_token: str) -> EmailRes
     <code style="word-break: break-all;">{link}</code>
   </p>
   <p style="font-size: 13px; color: #888;">
-    Der Link ist 7 Tage gueltig. Erst nach dem Klick wird die Adresse
+    Der Link ist 7 Tage gültig. Erst nach dem Klick wird die Adresse
     aktiv — bis dahin bleibt deine alte Email-Adresse im Account.
   </p>
 </body>
 </html>"""
-    return _send(to, "cubetracker — Neue Email-Adresse bestaetigen", html)
+    return _send(to, "cubetracker — Neue Email-Adresse bestätigen", html)

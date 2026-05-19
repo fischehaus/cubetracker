@@ -3,7 +3,7 @@
  * `https://www.cubetracker.de/reset-password?token=...`
  *
  * Frontend ist Static-Site; wir nutzen kein React-Router. Stattdessen
- * pruefen wir window.location.pathname + URLSearchParams (siehe App.tsx
+ * prüfen wir window.location.pathname + URLSearchParams (siehe App.tsx
  * Routing).
  */
 import { useState, type FormEvent } from "react";
@@ -40,7 +40,7 @@ export function ResetPasswordPage() {
       <Center>
         <Card>
           <h1 className="text-2xl font-bold text-gray-100 mb-2">
-            Reset-Link ungueltig
+            Reset-Link ungültig
           </h1>
           <p className="text-sm text-gray-400">
             Der Link enthält keinen Token. Probier es nochmal über{" "}

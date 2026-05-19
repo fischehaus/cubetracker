@@ -10,12 +10,12 @@
 //      • Inoffiziell — Ivy, Gear, Redi, Master Pyra/Skewb, FTO
 //    Default folgt cubeType (z.B. „3x3" → WCA + 333). User-Override
 //    bleibt bis zum nächsten cubeType-Wechsel, dann auto-reset.
-//  - Session.scramble_type-Override (Phase 8b, z.B. „pll") schlaegt
-//    cubeType — User-Picker-Override schlaegt beides (volles Steuern).
+//  - Session.scramble_type-Override (Phase 8b, z.B. „pll") schlägt
+//    cubeType — User-Picker-Override schlägt beides (volles Steuern).
 //
 // Monospace + großer Font für die Notation. Der Parent (TimerTab)
 // steuert via `regenerationSeed`-prop wann ein neuer Scramble faellig
-// ist (z.B. solve-counter erhoehen → re-gen).
+// ist (z.B. solve-counter erhöhen → re-gen).
 
 import { useEffect, useState } from "react";
 import {
@@ -38,10 +38,10 @@ interface Props {
   /**
    * Optionaler Scramble-Type-Override aus Session.scramble_type
    * (Phase 8b). Wenn gesetzt, hat dieser Vorrang vor cubeType.
-   * User-Picker-Override schlaegt aber auch das hier.
+   * User-Picker-Override schlägt aber auch das hier.
    */
   scrambleTypeOverride?: string | null;
-  /** Änderung dieser Zahl loest re-generation aus (z.B. nach save). */
+  /** Änderung dieser Zahl löst re-generation aus (z.B. nach save). */
   regenerationSeed: number;
   /**
    * Callback: bei jedem neu erzeugten Scramble — der Parent
@@ -92,7 +92,7 @@ export function ScrambleCard({
   // wenn er auch eine sichtbare Wirkung hat.
   const netSupported = isScrambleNetSupported(cubeType);
 
-  // Phase W.custom-scramble (2026-05-17): Edit-Modus laesst User einen
+  // Phase W.custom-scramble (2026-05-17): Edit-Modus lässt User einen
   // eigenen Scramble eintippen. Aktivieren via Edit-Button, speichern
   // mit Enter / Save-Button. Generator-Effekt wird mit isCustom-Flag
   // pausiert (sonst würde der nächste Render-Trigger den Custom-
@@ -211,7 +211,7 @@ export function ScrambleCard({
               Zufaellige Verdrehungs-Sequenz nach WCA-Notation. Buchstaben =
               Seite (R, L, U, D, F, B), Strich („L'") = gegen den Uhrzeiger,
               Zahl 2 = doppelte Drehung. Wende den Scramble auf einen
-              geloesten Cube an — dann sind alle Lösungen unter denselben
+              gelösten Cube an — dann sind alle Lösungen unter denselben
               Bedingungen vergleichbar. „Skip" wirft einen neuen.
             </p>
             <p>
@@ -235,7 +235,7 @@ export function ScrambleCard({
           {/* 2D-Net-Toggle (Phase W.scramble-image-toggle): nur sichtbar wenn
               das Bild für den aktuellen Cube-Type überhaupt was zeigen
               würde — sonst wäre der Toggle wirkungslos und damit
-              irrefuehrend (User-Wunsch 2026-05-17). */}
+              irreführend (User-Wunsch 2026-05-17). */}
           {netSupported && (
             <button
               onClick={() =>
@@ -376,7 +376,7 @@ export function ScrambleCard({
               Abbrechen (Esc)
             </button>
             <span className="text-xs text-gray-500">
-              Eingabe wird nicht validiert — pruefe selbst dass die
+              Eingabe wird nicht validiert — prüfe selbst dass die
               Notation zum Cube-Type passt.
             </span>
           </div>
@@ -400,7 +400,7 @@ export function ScrambleCard({
             )}
           </div>
           {/* 2D-Net-Bild (Phase W.scramble-image): rendert sich selbst nur für
-              unterstuetzte Cube-Types (aktuell 3x3) und bei aktivem Setting. */}
+              unterstützte Cube-Types (aktuell 3x3) und bei aktivem Setting. */}
           {settings.show_scramble_image && scramble && (
             <ScrambleNet scramble={scramble} cubeType={cubeType} />
           )}

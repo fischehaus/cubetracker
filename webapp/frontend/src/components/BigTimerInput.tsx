@@ -68,10 +68,10 @@ export function BigTimerInput({
   // gefokussiert) wieder geleert.
   const [lastSavedSolve, setLastSavedSolve] = useState<Solve | null>(null);
   // QA-Fix M#8 (2026-05-17): zwei-Klick-Confirm für Löschen statt
-  // window.confirm() — Browser-Native-Dialog ist auf Mobile unzuverlaessig
+  // window.confirm() — Browser-Native-Dialog ist auf Mobile unzuverlässig
   // (Back-Button schliesst Dialog, kann durch PWA-Wrapper geschluckt werden).
   // Pattern: erster Klick → Button-Label wechselt zu „Wirklich löschen?",
-  // zweiter Klick innerhalb 5s loescht. Auto-Reset nach 5s ohne Aktion.
+  // zweiter Klick innerhalb 5s löscht. Auto-Reset nach 5s ohne Aktion.
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   // Auto-Focus beim Mounten (nur Text-Mode)
@@ -89,8 +89,8 @@ export function BigTimerInput({
     setDeleteConfirm(false);
   }, [cubeType, sessionId]);
 
-  // QA-Fix M#8: Delete-Confirm nach 5s ohne 2. Klick wieder zuruecksetzen,
-  // sonst bleibt der Button gefuehlt „bewaffnet" liegen.
+  // QA-Fix M#8: Delete-Confirm nach 5s ohne 2. Klick wieder zurücksetzen,
+  // sonst bleibt der Button gefühlt „bewaffnet" liegen.
   useEffect(() => {
     if (!deleteConfirm) return;
     const t = setTimeout(() => setDeleteConfirm(false), 5000);
@@ -98,7 +98,7 @@ export function BigTimerInput({
   }, [deleteConfirm]);
 
   // Confirm beim Wechsel auf einen neuen Solve oder beim Ausblenden
-  // wieder zuruecknehmen.
+  // wieder zurücknehmen.
   useEffect(() => {
     setDeleteConfirm(false);
   }, [lastSavedSolve?.id]);
@@ -108,7 +108,7 @@ export function BigTimerInput({
     if (dnf) {
       const time_ms = timeStr.trim() ? parseTimeInput(timeStr) : 0;
       if (time_ms === null) {
-        setError("Zeit ungueltig (oder Feld leer lassen für DNF)");
+        setError("Zeit ungültig (oder Feld leer lassen für DNF)");
         return;
       }
       doCreate(time_ms);
@@ -116,7 +116,7 @@ export function BigTimerInput({
     }
     const time_ms = parseTimeInput(timeStr);
     if (time_ms === null) {
-      setError('Ungueltige Zeit. Format: "12.34", "1:23.45" oder "1234"');
+      setError('Ungültige Zeit. Format: "12.34", "1:23.45" oder "1234"');
       return;
     }
     doCreate(time_ms);
@@ -213,8 +213,8 @@ export function BigTimerInput({
   function deleteLast() {
     if (!lastSavedSolve) return;
     // Zwei-Klick-Pattern statt window.confirm(): erster Klick „bewaffnet",
-    // zweiter Klick loescht. Verhindert Fehlbedienung auf Mobile ohne
-    // Browser-Dialog-Abhaengigkeit (siehe QA M#8).
+    // zweiter Klick löscht. Verhindert Fehlbedienung auf Mobile ohne
+    // Browser-Dialog-Abhängigkeit (siehe QA M#8).
     if (!deleteConfirm) {
       setDeleteConfirm(true);
       return;
@@ -366,7 +366,7 @@ export function BigTimerInput({
             } disabled:opacity-40`}
             title={
               deleteConfirm
-                ? "Erneut klicken zum endgueltigen Löschen"
+                ? "Erneut klicken zum endgültigen Löschen"
                 : "Letzten Solve löschen"
             }
           >

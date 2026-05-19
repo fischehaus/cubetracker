@@ -557,7 +557,7 @@ export function useTemporalStats(
 export type ActivityGranularity = "day" | "week" | "month";
 
 export interface ActivityBucket {
-  /** Label-String, je nach Granularitaet:
+  /** Label-String, je nach Granularität:
    *   day:   "YYYY-MM-DD"
    *   week:  "YYYY-Www"
    *   month: "YYYY-MM"
@@ -652,7 +652,7 @@ export function useUpdateSession(): UseMutationResult<
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["sessions"] });
-      // Solves haengen am Session-Namen → invalidieren falls UI Name zeigt
+      // Solves hängen am Session-Namen → invalidieren falls UI Name zeigt
       qc.invalidateQueries({ queryKey: ["solves"] });
     },
   });
@@ -1187,7 +1187,7 @@ export function useAdminDeleteUser(): UseMutationResult<
     mutationFn: async ({ userId }) => {
       // Confirm-Param wird vom Backend exakt verglichen — Frontend baut ihn
       // genauso. Doppelter Schutz: der User muss den Text auch in der UI
-      // tippen, dann wäre er hier in einem zusaetzlichen state-Feld.
+      // tippen, dann wäre er hier in einem zusätzlichen state-Feld.
       await api.delete(`/admin/users/${userId}`, {
         params: { confirm: `DELETE_USER_${userId}` },
       });
@@ -1228,7 +1228,7 @@ export interface AdminAnnouncementResult {
   sent: number;
   failed: number;
   failures?: string[];
-  /** Server-Cap für synchron-versendbare Empfaenger (M2-Fix). */
+  /** Server-Cap für synchron-versendbare Empfänger (M2-Fix). */
   max_recipients?: number;
   /** true wenn recipient_count > max_recipients — echter Send würde 400. */
   over_cap?: boolean;
@@ -1519,7 +1519,7 @@ export interface FeedbackResponse {
 
 /**
  * Schickt User-Feedback an den Admin via Backend-Resend-Email.
- * Hartes Rate-Limit (3/h pro IP) — kein Spam-Schutz im Frontend noetig.
+ * Hartes Rate-Limit (3/h pro IP) — kein Spam-Schutz im Frontend nötig.
  * 503 wenn Resend nicht erreichbar (z.B. ADMIN_EMAILS nicht gesetzt).
  */
 export function useSubmitFeedback(): UseMutationResult<

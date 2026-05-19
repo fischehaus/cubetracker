@@ -3,17 +3,17 @@
 // Auf Touch-Devices erscheint unter der SpacebarTimerCard ein großer
 // Tap-Button. Pointerdown/-up dispatchen synthetische KeyboardEvents
 // (code="Space") aufs window — der existierende useSpacebarTimer-Hook
-// behandelt sie identisch zu echten Tastendruecken (er prueft weder
+// behandelt sie identisch zu echten Tastendruecken (er prüft weder
 // isTrusted noch das spezifische target, nur e.code === "Space" und
 // dass e.target keine INPUT/TEXTAREA ist — beim window-dispatch ist
 // target = window, also nicht-typing).
 //
 // setPointerCapture stellt sicher, dass pointerup auch dann feuert,
 // wenn der Finger vom Pad abrutscht — sonst könnte der Timer in
-// "ready"/"holding" haengen bleiben.
+// "ready"/"holding" hängen bleiben.
 //
 // Auf Desktop (pointer: fine): rendert null. User benutzt echte
-// Tastatur, der zusaetzliche Button wäre nur visueller Lärm.
+// Tastatur, der zusätzliche Button wäre nur visueller Lärm.
 
 import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
 

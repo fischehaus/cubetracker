@@ -30,7 +30,7 @@ export function suggestBinWidthMs(
   const range = maxMs - minMs;
   const sturges = Math.ceil(Math.log2(n) + 1); // ~ Anzahl Bins
   const raw = range / Math.max(sturges, 1);
-  // Snap auf gaengige Buckets
+  // Snap auf gängige Buckets
   const candidates = [50, 100, 200, 250, 500, 1000, 2000, 5000, 10000];
   for (const c of candidates) {
     if (c >= raw) return c;

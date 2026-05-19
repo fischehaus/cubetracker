@@ -22,7 +22,7 @@ interface Props {
 }
 
 export function OnboardingBanner({ onSwitchTab }: Props) {
-  // Pruefen ob die DB leer ist — eine winzige query
+  // Prüfen ob die DB leer ist — eine winzige query
   const { data: solves, isLoading } = useSolves({ limit: 1 });
   const [dismissed, setDismissed] = useState<boolean>(() => {
     try {

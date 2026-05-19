@@ -1,6 +1,6 @@
 // Audio-Beeps für den Spacebar-Timer (Phase 8.2).
 //
-// Web Audio API mit Sinus-Toenen — kein File-Asset noetig, klein und
+// Web Audio API mit Sinus-Toenen — kein File-Asset nötig, klein und
 // verstandlich. Drei Sound-Typen:
 //   - inspection-warn-8s : kurzer mid-frequency beep (Vorwarnung)
 //   - inspection-warn-12s: zwei beeps in Folge (dringende Warnung)
@@ -80,7 +80,7 @@ export function playInspectionWarn12s(): void {
 
 /** Sprache + Text der Voice-Calls. de = deutsch, en = englisch. */
 const VOICE_PHRASES: Record<"de" | "en", { warn8: string; warn12: string }> = {
-  de: { warn8: "acht", warn12: "zwoelf" },
+  de: { warn8: "acht", warn12: "zwölf" },
   en: { warn8: "eight", warn12: "twelve" },
 };
 
@@ -93,7 +93,7 @@ function speak(text: string, lang: "de" | "en"): void {
     // KEIN synth.cancel() — die SpeechSynthesis-Queue ist global pro Tab.
     // Cancel würde auch Screen-Reader-Ansagen (NVDA / VoiceOver / TalkBack)
     // killen, die parallel laufen könnten. "acht" ist <500ms; bei 4s
-    // Abstand bis "zwoelf" ist die Wahrscheinlichkeit für Overlap minimal,
+    // Abstand bis "zwölf" ist die Wahrscheinlichkeit für Overlap minimal,
     // und selbst dann werden beide Worte sequentiell ausgegeben — der User
     // verpasst nichts.
     const utter = new SpeechSynthesisUtterance(text);
@@ -126,7 +126,7 @@ export function speakInspectionWarn12s(lang: "de" | "en"): void {
  * lädt Stimmen lazy. Wenn man die erste Utterance erst 8s später
  * abfeuert, wird sie auf iOS gelegentlich stumm verschluckt. Wir feuern
  * deshalb hier eine 0-Volume-Dummy-Utterance ab, damit die Voice-Engine
- * im aktuellen User-Gesture-Kontext bereits warm laeuft.
+ * im aktuellen User-Gesture-Kontext bereits warm läuft.
  */
 export function primeAudio(): void {
   getContext();

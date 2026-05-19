@@ -56,7 +56,7 @@ export function AdminStatsPanel() {
           {error instanceof Error ? error.message : "Unbekannter Fehler"}
         </p>
         <p className="mt-2 text-xs text-red-300/70">
-          Falls 404: ADMIN_EMAILS-Env-Var im Backend pruefen.
+          Falls 404: ADMIN_EMAILS-Env-Var im Backend prüfen.
         </p>
       </div>
     );

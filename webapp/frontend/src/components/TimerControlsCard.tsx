@@ -289,8 +289,8 @@ export function TimerControlsCard({
             </p>
             <p className="mb-2">
               <strong>Spacebar — WCA:</strong> Wettkampf-Standard. Space
-              druecken startet Inspection (15s), Space druecken + halten +
-              loslassen startet Solve. Space druecken stoppt. Penalty
+              drücken startet Inspection (15s), Space drücken + halten +
+              loslassen startet Solve. Space drücken stoppt. Penalty
               automatisch (+2 ab 15s, DNF ab 17s).
             </p>
             <p>
@@ -339,7 +339,7 @@ export function TimerControlsCard({
           <p className="mt-2 text-xs text-gray-500">
             💡 Tipp:{" "}
             {isTouchDevice
-              ? "auf dem Phone ist Text-Eingabe über die Soft-Tastatur etwas muehsam — Spacebar-Tap ist meist schneller."
+              ? "auf dem Phone ist Text-Eingabe über die Soft-Tastatur etwas mühsam — Spacebar-Tap ist meist schneller."
               : "Probier den Spacebar-Timer — viel fluessigeres Training, inkl. Inspection-Countdown. Klick einfach auf einen der Spacebar-Modi oben."}
           </p>
         )}

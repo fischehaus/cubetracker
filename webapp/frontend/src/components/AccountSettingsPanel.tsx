@@ -96,7 +96,7 @@ function ProfileSection() {
     setError(null);
     try {
       await api.post("/auth/resend-verification");
-      setInfo("Verifikations-Mail erneut gesendet. Pruefe deinen Posteingang.");
+      setInfo("Verifikations-Mail erneut gesendet. Prüfe deinen Posteingang.");
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {
@@ -176,7 +176,7 @@ function ProfileSection() {
           <p>
             <strong>Hinweis:</strong> Postleitzahl <em>und</em> Land werden
             zusammen für <strong>„WCA-Turniere in deiner Nähe"</strong>{" "}
-            (Dashboard) benoetigt. Sonst kann der Standort nicht
+            (Dashboard) benötigt. Sonst kann der Standort nicht
             geocoded werden + die Liste bleibt leer.
           </p>
           <p className="mt-1 text-amber-300/70">
@@ -365,7 +365,7 @@ function EmailSection() {
   return (
     <Card title="Email-Adresse ändern">
       <p className="text-sm text-gray-400 mb-2">
-        Die alte Email-Adresse bleibt bis zur Bestaetigung der neuen aktiv.
+        Die alte Email-Adresse bleibt bis zur Bestätigung der neuen aktiv.
       </p>
       <form onSubmit={onSubmit} className="space-y-2 max-w-xs">
         <input
@@ -438,7 +438,7 @@ function DangerSection() {
         disabled={busy}
         className="rounded-lg bg-red-600 text-white text-sm font-medium px-4 py-2 hover:bg-red-700 disabled:opacity-50"
       >
-        {busy ? "Loesche…" : "Account + alle Daten löschen"}
+        {busy ? "Lösche…" : "Account + alle Daten löschen"}
       </button>
       {error && <FeedbackErr text={error} />}
     </Card>

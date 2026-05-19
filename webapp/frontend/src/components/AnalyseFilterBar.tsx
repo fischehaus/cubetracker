@@ -73,7 +73,7 @@ export function AnalyseFilterBar({
           }}
           className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-300 hover:bg-gray-600"
         >
-          Alle Filter zuruecksetzen
+          Alle Filter zurücksetzen
         </button>
       )}
     </div>

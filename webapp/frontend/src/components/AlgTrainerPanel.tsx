@@ -8,7 +8,7 @@
 //           Mini-Timer-Input, Save mit auto-tag alg_case.
 //
 // Auto-Next nach Save: gleicher Case bleibt aktiv, nur scramble-counter
-// hochzaehlen → ScrambleCard regeneriert (klassisches Drill-Verhalten).
+// hochzählen → ScrambleCard regeneriert (klassisches Drill-Verhalten).
 
 import { useMemo, useState } from "react";
 import {
@@ -143,7 +143,7 @@ export function AlgTrainerPanel() {
                     </div>
                   ) : (
                     <div className="text-xs text-gray-600 mt-0.5">
-                      noch nie geuebt
+                      noch nie geübt
                     </div>
                   )}
                   </div>
@@ -239,7 +239,7 @@ function DrillCard({
     setError(null);
     const time_ms = parseTimeInput(timeStr);
     if (time_ms === null) {
-      setError("Ungueltige Zeit");
+      setError("Ungültige Zeit");
       return;
     }
     create.mutate(

@@ -164,7 +164,7 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <span className="text-sm uppercase tracking-wide text-purple-300">
-            Set laeuft
+            Set läuft
           </span>
           <span
             className={`text-2xl font-mono font-bold ${
@@ -309,7 +309,7 @@ function computeSetStats(solves: Solve[]): SetStats {
   if (chrono.length === 0) {
     feedback = "Keine Solves im Set — beim nächsten Mal mehr durchziehen!";
   } else if (chrono.length < 5) {
-    feedback = `Kurzes Set mit ${chrono.length} Solves — für Stats waeren mind. 5 sinnvoll.`;
+    feedback = `Kurzes Set mit ${chrono.length} Solves — für Stats wären mind. 5 sinnvoll.`;
   } else {
     const dnfRate = solves.length > 0 ? (chrono.length - valid.length) / chrono.length : 0;
     if (dnfRate > 0.2) {

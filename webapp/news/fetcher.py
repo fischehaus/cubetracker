@@ -1,17 +1,17 @@
 """News-Fetcher (Phase W.news).
 
 Pull-Strategie: kein dedizierter Cron, statt dessen "fetch-if-stale" im
-Endpoint-Pfad. Wenn die letzte gespeicherte `fetched_at` aelter als
+Endpoint-Pfad. Wenn die letzte gespeicherte `fetched_at` älter als
 `STALE_AFTER_MIN` Minuten ist, triggern wir einen synchronen Fetch
 (durchschnittlich 1-2s für 2 Feeds) bevor wir die Liste returnen.
 
 In Multi-Worker-Umgebungen (Render hat 1-2 Worker) kann das zu Race-
-Conditions fuehren — zwei Worker fetchen parallel. Defensive: wir
+Conditions führen — zwei Worker fetchen parallel. Defensive: wir
 checken vor jedem Persist auf Existenz via `link`-Unique und schlucken
 IntegrityErrors.
 
 Auf Render-Free wird der Worker bei Inaktivitaet eingeschlafen — ein
-dedizierter Cron-Job liefe sowieso nicht zuverlaessig. On-demand-Fetch
+dedizierter Cron-Job liefe sowieso nicht zuverlässig. On-demand-Fetch
 ist daher angemessen.
 """
 
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 FETCH_TIMEOUT_S = 10.0
 STALE_AFTER_MIN = 60  # 1h
-KEEP_DAYS = 60  # Items aelter als 60d werden im selben Pass gelöscht
+KEEP_DAYS = 60  # Items älter als 60d werden im selben Pass gelöscht
 HTTP_HEADERS = {
     "User-Agent": "cubetracker.de/2.0 (https://cubetracker.de)",
     "Accept": "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8",
@@ -41,7 +41,7 @@ HTTP_HEADERS = {
 
 
 def is_stale(db: OrmSession) -> bool:
-    """Letzter fetched_at aelter als STALE_AFTER_MIN? Wenn ja: re-fetch sinnvoll."""
+    """Letzter fetched_at älter als STALE_AFTER_MIN? Wenn ja: re-fetch sinnvoll."""
     latest_fetched = db.scalar(select(NewsItem.fetched_at).order_by(NewsItem.fetched_at.desc()).limit(1))
     if latest_fetched is None:
         return True  # Tabelle leer → fetch
@@ -58,7 +58,7 @@ def _parse_entry(entry: Any, source: FeedSource) -> dict[str, Any] | None:
     QA-Fix Welle B (2026-05-16): Operator-Precedence-Bug behoben.
     Vorher: `getattr(entry, "link", None) or entry.get("link") if hasattr(...)`
     parste Python als `(getattr(...) or entry.get("link")) if hasattr(...) else None`
-    — bei Entries ohne `.get` wäre link faelschlich None. Jetzt explizite
+    — bei Entries ohne `.get` wäre link fälschlich None. Jetzt explizite
     Klammern + Helper.
     """
 

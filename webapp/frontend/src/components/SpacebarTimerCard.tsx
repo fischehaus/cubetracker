@@ -6,7 +6,7 @@
 //   idle       → grau, "0.00", Hint „Space halten zum starten"
 //   inspection → blau, countdown groß + Phase-Hinweis bei Sound-Threshold
 //   ready      → gelb, „loslassen wenn bereit"
-//   running    → gruen, live-tickender Timer + Phase X/N
+//   running    → grün, live-tickender Timer + Phase X/N
 //   stopped    → weiss, end-time + Splits-Liste + ggf. Penalty-Badge
 //
 // Layout: zentrierter Karten-Block mit großem Timer und farb-Status.
@@ -210,16 +210,16 @@ function hintLabel(
   switch (state) {
     case "idle":
       return inspectionEnabled
-        ? "Space druecken für Inspektion"
+        ? "Space drücken für Inspektion"
         : "Space halten und loslassen zum Starten";
     case "inspection":
       return inspectionMode === "wca"
-        ? "Space druecken: Solve in Halten-Modus · Penalty +2 ab 15s, DNF ab 17s"
+        ? "Space drücken: Solve in Halten-Modus · Penalty +2 ab 15s, DNF ab 17s"
         : "Space = Solve starten · Double-Tap = Inspektion neu · 0 = DNF";
     case "ready":
       return "Loslassen wenn bereit";
     case "running":
-      return "Space druecken zum Stoppen";
+      return "Space drücken zum Stoppen";
     case "stopped":
       return "Solve gespeichert · Space für nächsten";
     default:

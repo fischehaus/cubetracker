@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
     """Startup-Hook: secret-check + DB-Schema-Init.
 
     Aktuell nutzen wir `Base.metadata.create_all(engine)` als pragmatischen
-    Initial-Setup — legt fehlende Tabellen an, laesst existierende in Ruhe.
+    Initial-Setup — legt fehlende Tabellen an, lässt existierende in Ruhe.
 
     Sobald das erste Schema-Änderung auf bestehende Live-Daten kommt,
     wird auf Alembic umgestellt (Phase W.7+):
@@ -69,7 +69,7 @@ async def lifespan(app: FastAPI):
 
             # Mini-Migration W.8: create_all fuegt nur fehlende Tabellen an,
             # aber keine neuen Spalten zu existierenden Tabellen. Postgres
-            # unterstuetzt `ADD COLUMN IF NOT EXISTS` -> idempotent + safe.
+            # unterstützt `ADD COLUMN IF NOT EXISTS` -> idempotent + safe.
             # SQLite (lokal) braucht das nicht weil DB beim Dev-Reset eh neu.
             migrations = [
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE",
@@ -88,7 +88,7 @@ async def lifespan(app: FastAPI):
                 # QA-Fix H1: cross-direction Race-Schutz auf friendships.
                 # Functional unique index garantiert dass es NUR EINE Row pro
                 # User-Paar gibt, egal welche Richtung (A->B oder B->A).
-                # Postgres-spezifisch (LEAST/GREATEST). Auf SQLite (Dev) faellt
+                # Postgres-spezifisch (LEAST/GREATEST). Auf SQLite (Dev) fällt
                 # das durch try/except — Dev-Tests laufen eh nicht concurrent.
                 "CREATE UNIQUE INDEX IF NOT EXISTS uq_friendship_pair_normalized "
                 "ON friendships (LEAST(requester_id, target_id), GREATEST(requester_id, target_id))",

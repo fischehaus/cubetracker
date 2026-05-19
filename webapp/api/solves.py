@@ -1,6 +1,6 @@
 """Solves-CRUD-API (Phase W) — Multi-User-Variante.
 
-Alle Endpoints benoetigen Auth via current_user-Dep.
+Alle Endpoints benötigen Auth via current_user-Dep.
 ALLE Queries filtern auf user_id == current_user.id.
 
 Cross-Tenant-Sicherheits-Checks:
@@ -9,7 +9,7 @@ Cross-Tenant-Sicherheits-Checks:
 - GET/PATCH/DELETE /solves/{id}: Solve muss dem User gehören (sonst 404,
   NICHT 403 — verhindert Probing fremder IDs)
 
-Phase W.4: Nach Solve-Mutation laeuft für den aktuellen User
+Phase W.4: Nach Solve-Mutation läuft für den aktuellen User
 - Achievement-Check (X-Achievements-Unlocked-Header)
 - Challenge-Progress (X-Challenges-Completed-Header)
 - PB-Detection (X-PB-Achieved-Header)
@@ -106,7 +106,7 @@ def _set_post_mutation_headers(
 def _get_solve_or_404(solve_id: int, user: User, db: OrmSession) -> Solve:
     """Solve nach ID UND user_id holen. 404 wenn anderer User oder nicht existent.
 
-    KRITISCH: NIE nur db.get(Solve, id) — das würde fremde Solves zurueckgeben!
+    KRITISCH: NIE nur db.get(Solve, id) — das würde fremde Solves zurückgeben!
     """
     solve = db.scalar(select(Solve).where(Solve.id == solve_id, Solve.user_id == user.id))
     if solve is None:
@@ -118,7 +118,7 @@ def _get_solve_or_404(solve_id: int, user: User, db: OrmSession) -> Solve:
 
 
 def _verify_session_ownership(session_id: int | None, user: User, db: OrmSession) -> None:
-    """Wenn session_id gesetzt: pruefe dass die Session dem User gehört.
+    """Wenn session_id gesetzt: prüfe dass die Session dem User gehört.
 
     Sonst könnte ein User Solves in fremde Sessions einhaengen.
     """
@@ -135,7 +135,7 @@ def _verify_session_ownership(session_id: int | None, user: User, db: OrmSession
 
 
 def _verify_hardware_ownership(hardware_id: int | None, user: User, db: OrmSession) -> None:
-    """Wenn hardware_id gesetzt: pruefe dass die Hardware dem User gehört."""
+    """Wenn hardware_id gesetzt: prüfe dass die Hardware dem User gehört."""
     if hardware_id is None:
         return
     exists = db.scalar(

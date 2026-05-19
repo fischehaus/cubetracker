@@ -57,7 +57,7 @@ export function DailyChallengesPanel() {
           <InfoButton>
             <p className="font-medium mb-1">Tages-Challenges</p>
             <p>
-              Drei kleine taegliche Aufgaben. Werden um Mitternacht UTC
+              Drei kleine tägliche Aufgaben. Werden um Mitternacht UTC
               neu generiert. Schwierigkeitsgrade variieren (z.B. „mache
               X Solves heute", „erreiche AO5 unter Y", „kein DNF in 10
               Solves"). Dismiss-Funktion für Challenges die du heute
@@ -94,7 +94,7 @@ export function DailyChallengesPanel() {
       )}
 
       <p className="mt-4 text-xs text-gray-500">
-        Challenges werden taeglich neu generiert (basierend auf deinen Stats)
+        Challenges werden täglich neu generiert (basierend auf deinen Stats)
         und ihr Fortschritt zählt monoton hoch — auch wenn ein Solve später
         gelöscht wird, bleibt die Erfuellung erhalten.
       </p>

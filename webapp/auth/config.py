@@ -15,7 +15,7 @@ import secrets
 
 # WARNUNG: Default ist ein zufaelliger Per-Process-Secret. In Prod
 # MUSS JWT_SECRET via Env gesetzt werden, sonst werden Tokens beim
-# Server-Restart ungueltig (alle User ausgeloggt).
+# Server-Restart ungültig (alle User ausgeloggt).
 JWT_SECRET = os.getenv("JWT_SECRET", secrets.token_urlsafe(64))
 # WARNUNG: Algorithm BEWUSST hardcoded. NICHT aus Env lesen — ein Angreifer
 # der Env-Vars setzen kann, könnte sonst "none" einsetzen und damit alle
@@ -31,7 +31,7 @@ REFRESH_COOKIE_PATH = "/auth"  # nur an /auth/* geschickt
 # Production-Mode-Detection (für secure-cookies + andere Defaults)
 IS_PROD = os.getenv("CUBETRACKER_PROD") == "1"
 
-# Mindest-Passwort-Laenge — bewusst niedrig für Solo-Tool, kein Bank-System.
+# Mindest-Passwort-Länge — bewusst niedrig für Solo-Tool, kein Bank-System.
 PASSWORD_MIN_LEN = 8
 
 

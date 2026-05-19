@@ -23,7 +23,7 @@ describe("findOutliers — Grundverhalten", () => {
 
   it("überspringt Cube-Types mit < 10 Solves", () => {
     // 5 Solves, einer extrem schnell — sollte trotzdem keinen Outlier liefern,
-    // weil die Median-Schaetzung bei 5 Solves zu unsicher ist.
+    // weil die Median-Schätzung bei 5 Solves zu unsicher ist.
     const solves = [mk(1, 100), mk(2, 10000), mk(3, 11000), mk(4, 12000), mk(5, 13000)];
     expect(findOutliers(solves)).toEqual([]);
   });
@@ -74,7 +74,7 @@ describe("findOutliers — too_slow", () => {
 });
 
 describe("findOutliers — Gruppierung nach Cube-Type", () => {
-  it("erkennt Outlier pro Cube-Type unabhaengig", () => {
+  it("erkennt Outlier pro Cube-Type unabhängig", () => {
     // 3x3 normal um 10s, plus 1 zu schnell
     const cube3x3 = Array.from({ length: 10 }, (_, i) => mk(i, 10000 + i * 100, "3x3"));
     cube3x3.push(mk(100, 500, "3x3"));
@@ -137,7 +137,7 @@ describe("findOutliersBySession (Phase 8.1)", () => {
   });
 
   it("gruppiert per session_id statt cube_type", () => {
-    // Session 1: 10 normale 3x3-Solves, 1 verdaechtig
+    // Session 1: 10 normale 3x3-Solves, 1 verdächtig
     const s1 = Array.from({ length: 10 }, (_, i) => mkS(i, 10000 + i * 100, 1));
     s1.push(mkS(100, 500, 1));
     // Session 2: 10 normale OH-Solves (langsamer), keine Outliers
@@ -159,13 +159,13 @@ describe("findOutliersBySession (Phase 8.1)", () => {
   });
 
   it("session-mode trennt Cube-übergreifend (3x3 + OH in einer Session)", () => {
-    // Session 1 mischt 3x3 und OH — beim cube-mode waeren das zwei Gruppen,
+    // Session 1 mischt 3x3 und OH — beim cube-mode wären das zwei Gruppen,
     // beim session-mode eine. Median verschwimmt → andere Outlier-Detection.
     const mixed = [
       ...Array.from({ length: 5 }, (_, i) => mkS(i, 10000 + i * 100, 1, "3x3")),
       ...Array.from({ length: 5 }, (_, i) => mkS(i + 100, 25000 + i * 100, 1, "OH")),
     ];
-    mixed.push(mkS(999, 200, 1, "3x3")); // verdaechtig schnell vs gemischtem Median
+    mixed.push(mkS(999, 200, 1, "3x3")); // verdächtig schnell vs gemischtem Median
     const result = findOutliersBySession(mixed);
     expect(result).toHaveLength(1);
     expect(result[0].outliers.some((o) => o.id === 999)).toBe(true);

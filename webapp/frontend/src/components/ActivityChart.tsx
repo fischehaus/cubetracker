@@ -2,7 +2,7 @@
 // über einen wählbaren Zeitraum.
 //
 // Zeigt für jeden Bucket: count_valid (lila) + count_dnf (rot) als
-// stacked bar. Granularitaet (Tag/Woche/Monat) und Zeitraum
+// stacked bar. Granularität (Tag/Woche/Monat) und Zeitraum
 // (30T/3M/6M/1J/3J/Alle) wählbar.
 //
 // Frontend-seitige X-Achsen-Heuristik: bei vielen Buckets nur jeden
@@ -58,7 +58,7 @@ function tickInterval(bucketCount: number): number | "preserveStartEnd" {
 }
 
 /**
- * Tick-Label kompakt formatieren je nach Granularitaet:
+ * Tick-Label kompakt formatieren je nach Granularität:
  *   day   "2026-05-03"  → "03" (Tag im Monat)
  *   week  "2026-W18"    → "W18"
  *   month "2026-05"     → "2026-05" (bleibt wie ist)
@@ -135,10 +135,10 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
             </span>
           </h3>
           <InfoButton>
-            <p className="font-medium mb-1">Aktivitaets-Chart</p>
+            <p className="font-medium mb-1">Aktivitäts-Chart</p>
             <p>
               Wie viele Solves du pro Tag / Woche / Monat gemacht hast.
-              Granularitaet über den Selector rechts. Hilft Trainings-
+              Granularität über den Selector rechts. Hilft Trainings-
               Konsistenz zu sehen — lange Pausen vs Streaks.
             </p>
           </InfoButton>
@@ -148,7 +148,7 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
             value={granularity}
             onChange={(e) => setGranularity(e.target.value as ActivityGranularity)}
             className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
-            title="Aggregations-Granularitaet"
+            title="Aggregations-Granularität"
           >
             {GRANULARITY_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>

@@ -16,7 +16,7 @@ Privacy-Design:
 - Self-Match überall rausgefiltert.
 - Friend-Request darf nur über Lookup-Result-IDs gestellt werden (nicht
   "irgendeine User-ID" sondern eine zuvor durch Suche/Email-Lookup
-  ermittelte). Backend prueft das nicht explizit, weil der Client eh die
+  ermittelte). Backend prüft das nicht explizit, weil der Client eh die
   ID kennen muss — und ein Boeswilliger kann ohnehin per Brute-Force
   IDs probieren. Mitigation: Rate-Limit.
 
@@ -57,7 +57,7 @@ router = APIRouter(prefix="/friends", tags=["friends"])
 # Display-Name-Suche ist breit (prefix-match) und nur auf discoverable User
 SEARCH_LIMIT = "60/minute"
 # Email-Lookup ist exakter Match -> nuetzbar für Brute-Force von Emails;
-# QA-Fix M1 haelt das halbiert + zusaetzlich nur authentifizierte User.
+# QA-Fix M1 hält das halbiert + zusätzlich nur authentifizierte User.
 EMAIL_LOOKUP_LIMIT = "30/minute"
 MUTATION_LIMIT = "30/minute"
 
@@ -107,7 +107,7 @@ class FriendSearchResult(BaseModel):
 
     id: int
     display_name: str | None
-    # email NICHT zurueckgeben — sonst wäre Suche ein Email-Leak für
+    # email NICHT zurückgeben — sonst wäre Suche ein Email-Leak für
     # discoverable User.
     relationship: str  # "none" | "outgoing_pending" | "incoming_pending" | "accepted"
     friendship_id: int | None = None
@@ -336,7 +336,7 @@ def post_accept(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=msg
             ) from e
-        if "Empfaenger" in msg:
+        if "Empfänger" in msg:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail=msg
             ) from e

@@ -9,7 +9,7 @@ Strategie:
 
 Limitierung der Limitierung:
 - In-Memory-Store: überlebt keinen Server-Restart, nicht multi-process-fest
-  (Render Free-Tier laeuft als 1 Worker, daher OK)
+  (Render Free-Tier läuft als 1 Worker, daher OK)
 - IP-basiert: hinter Proxy/CDN muss X-Forwarded-For ausgewertet werden,
   Render setzt das automatisch — `get_remote_address` liest es korrekt
 - Später (~bezahlter Plan, Multi-Worker): Redis-Backend via storage_uri
@@ -24,7 +24,7 @@ from slowapi.util import get_remote_address
 # In main.py wird er als app.state.limiter gesetzt + Exception-Handler registriert.
 limiter = Limiter(key_func=get_remote_address)
 
-# Limits — bewusst konservativ. Bei Friends-Phase noch entspannbar wenn noetig.
+# Limits — bewusst konservativ. Bei Friends-Phase noch entspannbar wenn nötig.
 LOGIN_LIMIT = "5/minute"
 REGISTER_LIMIT = "5/minute"
 REFRESH_LIMIT = "20/minute"  # legitime Clients refreshen alle ~14min, 20/min = viel Spielraum

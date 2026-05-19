@@ -6,7 +6,7 @@
 // Gear/Redi/Master Pyraminx.
 //
 // REFERENZ: csTimer src/js/scramble/skewb.js, Funktion getScrambleIvy.
-// Gleiche State-Repraesentation + Move-Wirkung, aber sauber als
+// Gleiche State-Repräsentation + Move-Wirkung, aber sauber als
 // TypeScript ohne csTimer mathlib-Dependency neu geschrieben.
 //
 // STATE-MODELL (29.160 reachable states):
@@ -56,7 +56,7 @@ function cycle3<T>(arr: T[], c: readonly [number, number, number], dir: 1 | -1):
 type StateKey = string;
 
 function encodeState(centers: number[], corners: number[]): StateKey {
-  // 6 centers (0-5 each) + 4 corners (0-2 each) = 10 stellige Repraesentation
+  // 6 centers (0-5 each) + 4 corners (0-2 each) = 10 stellige Repräsentation
   return centers.join(",") + "|" + corners.join("");
 }
 
@@ -139,8 +139,8 @@ function buildLookupTable(): Map<
           const nextKey = encodeState(next.centers, next.corners);
           if (!table.has(nextKey)) {
             // INVERSER Move ist das Move zum Loesen DIESES States
-            // (wenn der Forward-Move von SOLVED hierhin fuehrt,
-            //  fuehrt der Backward-Move von hier nach SOLVED).
+            // (wenn der Forward-Move von SOLVED hierhin führt,
+            //  führt der Backward-Move von hier nach SOLVED).
             const forwardLabel = moveLabel(axis, dir);
             table.set(nextKey, {
               distance: depth + 1,

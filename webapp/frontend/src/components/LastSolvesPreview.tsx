@@ -39,8 +39,8 @@ interface Props {
 }
 
 // Lookback für AO100 — Tabelle zeigt X Zeilen, fetch holt X+99 damit auch
-// der aelteste angezeigte Solve seinen AO100 hat (sonst müsste man "—" zeigen).
-// War vorher 11 für AO12; jetzt 99 weil AO100 das groesste Window ist.
+// der älteste angezeigte Solve seinen AO100 hat (sonst müsste man "—" zeigen).
+// War vorher 11 für AO12; jetzt 99 weil AO100 das größte Window ist.
 const AO_LOOKBACK = 99;
 
 interface WindowOption {
@@ -167,7 +167,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
   }, [solves]);
 
   // Form-Helper: Prozent-Vergleich aktuelles aoX vs Window-Mittel.
-  // negativ → besser (gruen), positiv → schlechter (rot), ~0 → grau.
+  // negativ → besser (grün), positiv → schlechter (rot), ~0 → grau.
   function pctVsWindow(currentAvg: number | null | undefined): number | null {
     if (currentAvg == null || windowMean == null || windowMean === 0) return null;
     return (currentAvg - windowMean) / windowMean;
@@ -194,7 +194,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
               3), <strong>AO5/AO12/AO100</strong> (WCA-konformer trimmed mean
               der letzten 5/12/100). „Form vs" vergleicht dein aktuelles
               Niveau mit dem Mittel eines wählbaren Fensters (letzte
-              100/500/alle). Gruen = besser als Schnitt, rot = schlechter.
+              100/500/alle). Grün = besser als Schnitt, rot = schlechter.
             </p>
           </InfoButton>
         </div>
@@ -525,7 +525,7 @@ function SortableHeader({
 // ============================================================
 // Helper: eine Zeile im Form-Vergleichs-Block.
 //   pct = null  → '–' (z.B. weil current_aoX noch nicht da ist)
-//   pct < 0     → ▼ gruen (besser als baseline)
+//   pct < 0     → ▼ grün (besser als baseline)
 //   pct > 0     → ▲ rot   (schlechter)
 //   pct ~ 0     → •  grau (durchschnittlich)
 // ============================================================

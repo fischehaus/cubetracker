@@ -1,5 +1,5 @@
-// ActivityCard: ein einzelner Aktivitaets-Slice (heute ODER diese Woche)
-// als eigenstaendige Card. Im DASHBOARD-Tab als Top-Row in 3 Spalten:
+// ActivityCard: ein einzelner Aktivitäts-Slice (heute ODER diese Woche)
+// als eigenständige Card. Im DASHBOARD-Tab als Top-Row in 3 Spalten:
 // [Heute] [Diese Woche] [Reminders].
 
 import { useTemporalStats } from "../lib/api";

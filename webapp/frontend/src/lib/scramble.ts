@@ -150,7 +150,7 @@ export const ALG_TRAINER_SUBSETS = ["pll", "oll"] as const;
 export type AlgTrainerSubset = (typeof ALG_TRAINER_SUBSETS)[number];
 
 /**
- * Liste aller für ScrambleType-Override unterstuetzten Strings.
+ * Liste aller für ScrambleType-Override unterstützten Strings.
  * Wird in Session.scramble_type genutzt — Phase 8b verzahnt das
  * mit dem Timer.
  */
@@ -163,7 +163,7 @@ export function isAlgTrainerSubset(s: string): s is AlgTrainerSubset {
  *
  * Hintergrund: Sessions die aus csTimer-Import stammen haben in
  * `scramble_type` den csTimer-internen Code. Mein Phase-8a-Code hat
- * den unveraendert an scrambow weitergegeben → leerer Scramble bei
+ * den unverändert an scrambow weitergegeben → leerer Scramble bei
  * 4x4/5x5/Pyra/etc. weil scrambow diese Codes nicht kennt.
  *
  * Liste analog zu backend/importers/cstimer.py SCRTYPE_TO_CUBE.
@@ -190,12 +190,12 @@ const CSTIMER_TO_SCRAMBOW: Record<string, string> = {
 };
 
 /**
- * Loest einen Session.scramble_type-Override auf den scrambow-Code auf.
+ * Löst einen Session.scramble_type-Override auf den scrambow-Code auf.
  * Reihenfolge:
  *   1. csTimer-Code (z.B. "444wca") → scrambow-Code aus der Map
  *   2. Bereits scrambow-Code, Custom-Puzzle (ivy/gear/...) oder Trainer-
  *      Subset (z.B. "pll", "333") → direkt
- *   3. Unbekannter String → null (Caller faellt auf cube_type-Mapping zurück)
+ *   3. Unbekannter String → null (Caller fällt auf cube_type-Mapping zurück)
  */
 export function resolveScrambleTypeOverride(raw: string): string | null {
   const trimmed = raw.trim();
@@ -307,7 +307,7 @@ const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
   // Wegen der Zahnrad-Mechanik sind NUR 180°-Drehungen physikalisch
   // möglich — 90°-Turns gibt's nicht. Alle 6 Faces mit ausschließlich
   // "2"-Suffix. Quelle: https://en.wikipedia.org/wiki/Gear_Cube
-  // Vorher hatte ich faelschlich nur 3 Faces + Mischung 90°/180° —
+  // Vorher hatte ich fälschlich nur 3 Faces + Mischung 90°/180° —
   // beide grob falsch.
   gear: {
     moves: ["U", "D", "L", "R", "F", "B"],
@@ -351,8 +351,8 @@ function pick<T>(arr: T[]): T {
  * QA-Fix Welle 3 (2026-05-16): Defensive Guard für `spec.moves.length < 2`.
  * Ohne Guard wäre die while-Schleife ein Endlos-Loop (jeder neue Pick
  * wäre immer derselbe wie lastBase, continue, repeat). Aktuell hat keine
- * Spec nur 1 Move — aber bei einem zukuenftigen Konfig-Tippfehler würde
- * der Tab haengen. Bei <2 Moves geben wir den Filter auf — Qualitaet
+ * Spec nur 1 Move — aber bei einem zukünftigen Konfig-Tippfehler würde
+ * der Tab hängen. Bei <2 Moves geben wir den Filter auf — Qualitaet
  * wird dann schlechter, aber Tab bleibt responsive.
  */
 function generateCustomScramble(spec: CustomScrambleSpec): string {
@@ -423,7 +423,7 @@ export function generateScramble(typeOverride: string): string {
     }
   }
   // 2) Eigenbau-BFS-Solver für Ivy als Fallback (falls csTimer
-   //    fehlschlaegt). Bleibt als Sicherheits-Netz seit W.cstimer-ivy-switch.
+   //    fehlschlägt). Bleibt als Sicherheits-Netz seit W.cstimer-ivy-switch.
   if (typeOverride === "ivy") {
     try {
       const s = generateIvyScramble();
@@ -433,7 +433,7 @@ export function generateScramble(typeOverride: string): string {
     }
   }
   // 3) Custom Puzzles mit Random-Move-Spec (Fallback für master_skewb
-  //    + zusaetzliches Sicherheits-Netz)
+  //    + zusätzliches Sicherheits-Netz)
   if (typeOverride in CUSTOM_PUZZLE_SPECS) {
     return generateCustomScramble(CUSTOM_PUZZLE_SPECS[typeOverride]);
   }

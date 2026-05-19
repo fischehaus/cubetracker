@@ -23,7 +23,7 @@ export const CHALLENGE_LABELS: Record<ChallengeKind, string> = {
 
 /**
  * Liefert eine Aufgaben-Beschreibung für eine Challenge.
- * Bewusst kompakt — die Karte zeigt zusaetzlich Icon + Label.
+ * Bewusst kompakt — die Karte zeigt zusätzlich Icon + Label.
  */
 export function describeChallenge(c: ChallengeItem): string {
   switch (c.kind) {
@@ -36,7 +36,7 @@ export function describeChallenge(c: ChallengeItem): string {
       return `Schaffe einen ${c.cube_type ?? "Cube"}-Solve unter ${target}s`;
     }
     case "comeback":
-      return `Mache mind. einen ${c.cube_type ?? "Cube"}-Solve — er wurde laenger nicht trainiert`;
+      return `Mache mind. einen ${c.cube_type ?? "Cube"}-Solve — er wurde länger nicht trainiert`;
     case "diversity":
       return `Trainiere heute ${c.target_value} verschiedene Cube-Types`;
     default:

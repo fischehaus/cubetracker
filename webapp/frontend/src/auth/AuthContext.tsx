@@ -83,7 +83,7 @@ async function apiMe(): Promise<UserRead> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserRead | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  // QA-Finding (high): React-Query-Cache haelt die Antworten aller
+  // QA-Finding (high): React-Query-Cache hält die Antworten aller
   // /api-Calls bis zur Garbage-Collection. Bei Logout->Login von User A
   // zu User B im selben Browser sieht User B kurz Daten von User A bis
   // die Queries refetcht haben. qc.clear() bei Login/Logout schliesst
@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // apiClient feuert "cubetracker:logged-out" wenn Refresh fehlschlaegt.
+  // apiClient feuert "cubetracker:logged-out" wenn Refresh fehlschlägt.
   // Auch hier Cache leeren (s.o.) — Stale-Daten gehören keinem mehr.
   useEffect(() => {
     const handler = () => {
@@ -134,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .then((u) => setUser(u))
         .catch(() => {
           // Ignorieren — wenn /auth/me 401 wirft, kuemmert sich der
-          // logged-out-Handler. Hier nicht zusaetzlich loggen.
+          // logged-out-Handler. Hier nicht zusätzlich loggen.
         });
     };
     window.addEventListener("cubetracker:profile-updated", handler);

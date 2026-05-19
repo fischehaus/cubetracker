@@ -7,7 +7,7 @@
 //   - Hard-Delete (DSGVO, Confirm-Dialog mit Pflicht-Typing)
 //
 // Self-Protection: der eingeloggte Admin sieht bei sich selbst keine
-// destruktiven Buttons (Backend würde 400 zurueckgeben, aber wir
+// destruktiven Buttons (Backend würde 400 zurückgeben, aber wir
 // blenden die Knoepfe sowieso aus damit der Fehler erst gar nicht
 // kommt).
 
@@ -185,7 +185,7 @@ function UserRow({
       patch: { email_verified: !user.email_verified },
     });
 
-  // Phase W.admin-toggle (2026-05-17): is_admin toggle. Backend faengt
+  // Phase W.admin-toggle (2026-05-17): is_admin toggle. Backend fängt
   // "letzter Admin" → 400 ab (siehe api/admin.py:update_user).
   const toggleAdmin = () =>
     patch.mutate({
@@ -278,7 +278,7 @@ function UserRow({
               }`}
               title={
                 user.is_admin
-                  ? "Admin-Status entziehen (mind. 1 Admin muss uebrig bleiben)"
+                  ? "Admin-Status entziehen (mind. 1 Admin muss übrig bleiben)"
                   : "Zum Admin machen (volle Admin-UI-Berechtigung)"
               }
             >
@@ -366,7 +366,7 @@ function ConfirmDeleteDialog({
           </p>
         </div>
         <label className="flex flex-col text-xs text-gray-400">
-          Zum Bestaetigen tippe <code className="text-red-300">{expected}</code>:
+          Zum Bestätigen tippe <code className="text-red-300">{expected}</code>:
           <input
             type="text"
             value={typed}

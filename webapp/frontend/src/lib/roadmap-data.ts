@@ -1,20 +1,20 @@
 // Roadmap-Daten für das RoadmapModal (Phase W.roadmap-frontend, 2026-05-17).
 //
 // Single-Source: wenn neue Items dazukommen oder eine Phase fertig wird,
-// hier aenderen — Modal zeigt's automatisch.
+// hier ändern — Modal zeigt's automatisch.
 //
 // Status:
 //   "active"    — gerade dran (P1 typischerweise)
 //   "planned"   — kommt als nächstes
 //   "future"    — schon geplant aber später
-//   "ongoing"   — laeuft kontinuierlich (Workflow / Polish)
+//   "ongoing"   — läuft kontinuierlich (Workflow / Polish)
 
 export type PhaseStatus = "active" | "planned" | "future" | "ongoing";
 
 export interface RoadmapItem {
   title: string;
   done?: boolean; // bereits erledigt innerhalb dieser Phase
-  effort?: string; // grobe Schaetzung, optional
+  effort?: string; // grobe Schätzung, optional
   note?: string; // 1-Satz Begründung / Detail, optional
 }
 
@@ -58,7 +58,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
     title: "Hetzner-Migration",
     timeframe: "Mitte Juli 2026",
     summary:
-      "Pflicht: Render-Free-Postgres laeuft nach 90 Tagen aus (~2026-08-08). Coolify-basiertes Setup auf Hetzner Cloud.",
+      "Pflicht: Render-Free-Postgres läuft nach 90 Tagen aus (~2026-08-08). Coolify-basiertes Setup auf Hetzner Cloud.",
     items: [
       { title: "Coolify-Server aufsetzen", effort: "1-2 Tage" },
       { title: "Daten-Migration via JSON-Backup-Endpoint", effort: "1 Tag" },
@@ -142,7 +142,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         effort: "~30 Min",
         note: "Wartet auf User-Lieferung der 21 PNGs.",
       },
-      { title: "WCA-Profil-Verknuepfung", effort: "~1 Woche" },
+      { title: "WCA-Profil-Verknüpfung", effort: "~1 Woche" },
       {
         title: "Gear / Redi / Master Pyra+Skewb Random-State-Solver",
         effort: "je ~2-5 Tage",
@@ -172,17 +172,17 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       {
         title: "Alembic statt Inline-Mini-Migrations in main.py",
         effort: "~1 Tag",
-        note: "Aktuelle `ALTER TABLE IF NOT EXISTS`-Liste in main.py:lifespan ist Postgres-only-Syntax + Fehler werden silently als WARN geloggt. Alembic loest beide Probleme. Niedrige Prio solange wir nur Postgres-Prod nutzen, aber wenn SQLite-Tests dazukommen muss es kommen. QA-Befund 2026-05-17 abends.",
+        note: "Aktuelle `ALTER TABLE IF NOT EXISTS`-Liste in main.py:lifespan ist Postgres-only-Syntax + Fehler werden silently als WARN geloggt. Alembic löst beide Probleme. Niedrige Prio solange wir nur Postgres-Prod nutzen, aber wenn SQLite-Tests dazukommen muss es kommen. QA-Befund 2026-05-17 abends.",
       },
       {
         title: "csTimer solver/-Files vendoren (schaltet 8 weitere Puzzles frei)",
         effort: "~1-2 Tage",
-        note: "Aktuell sind helicopter/gigaminx/bicube/bandaged_square/square_2/curvy_copter/diamond + megaminx-RS aus der UI entfernt weil utilscramble.js + megaminx.js leerstring/null returnen ohne solver/megaminx.js (32KB) + solver/ftocta.js (27KB) + grouplib.js (26KB) + poly3dlib.js (35KB). Zusaetzlich braucht jedes Puzzle den passenden solver-state-graph. Re-Vendoring + Smoke-Tests pro Puzzle.",
+        note: "Aktuell sind helicopter/gigaminx/bicube/bandaged_square/square_2/curvy_copter/diamond + megaminx-RS aus der UI entfernt weil utilscramble.js + megaminx.js leerstring/null returnen ohne solver/megaminx.js (32KB) + solver/ftocta.js (27KB) + grouplib.js (26KB) + poly3dlib.js (35KB). Zusätzlich braucht jedes Puzzle den passenden solver-state-graph. Re-Vendoring + Smoke-Tests pro Puzzle.",
       },
       {
         title: "Random-Move-Fallback-Specs für Dino/Floppy/Tower (csTimer-Cubes)",
         effort: "1-2h",
-        note: "Wenn csTimer-Init crashen sollte, returnt generateScramble für die 3 verbleibenden csTimer-Cubes (Dino/Floppy/Tower) leerstring. Kurze Random-Move-Specs (analog ivy/gear/redi-Specs) waeren ein robusterer Fallback. QA-Befund SOLLTE #3 vom 2026-05-17.",
+        note: "Wenn csTimer-Init crashen sollte, returnt generateScramble für die 3 verbleibenden csTimer-Cubes (Dino/Floppy/Tower) leerstring. Kurze Random-Move-Specs (analog ivy/gear/redi-Specs) wären ein robusterer Fallback. QA-Befund SOLLTE #3 vom 2026-05-17.",
       },
       { title: "Metronom (Trainings-TPS-Hilfe)", effort: "1-2 Tage" },
       { title: "BLD-Helper (Constraint-Scrambler)", effort: "1-2 Wochen" },

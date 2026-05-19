@@ -194,7 +194,7 @@ def send_request(
 
     Wenn schon eine Friendship existiert:
     - status='accepted' -> Error "Ihr seid bereits Freunde."
-    - status='pending' & requester=current -> Error "Anfrage laeuft bereits."
+    - status='pending' & requester=current -> Error "Anfrage läuft bereits."
     - status='pending' & requester=other  -> Error "Anfrage liegt schon
       bei dir, bitte unter Eingehende Anfragen annehmen."
 
@@ -221,7 +221,7 @@ def send_request(
             raise FriendsServiceError("Ihr seid bereits Freunde.")
         # pending
         if existing.requester_id == requester.id:
-            raise FriendsServiceError("Anfrage laeuft bereits.")
+            raise FriendsServiceError("Anfrage läuft bereits.")
         # Andere Richtung pending — explizit auf Inbox verweisen statt
         # automatisch zu akzeptieren (H2).
         raise FriendsServiceError(
@@ -243,7 +243,7 @@ def send_request(
         # Race: parallele Session hat eine konkurrierende Row gelegt zwischen
         # unserem _check_existing und db.commit(). Functional unique index
         # auf (LEAST, GREATEST) hat den Konflikt erkannt. Rollback +
-        # erneut den Status pruefen — meldet jetzt die richtige Begründung.
+        # erneut den Status prüfen — meldet jetzt die richtige Begründung.
         db.rollback()
         _check_existing()
         # Falls _check_existing nichts wirft (extrem unwahrscheinlich, z.B.
@@ -278,7 +278,7 @@ def accept_request(
     if fs is None:
         raise FriendsServiceError("Anfrage nicht gefunden.")
     if fs.target_id != current_user.id:
-        raise FriendsServiceError("Nur der Empfaenger kann die Anfrage annehmen.")
+        raise FriendsServiceError("Nur der Empfänger kann die Anfrage annehmen.")
     if fs.status == "accepted":
         return fs  # idempotent
     if fs.status != "pending":

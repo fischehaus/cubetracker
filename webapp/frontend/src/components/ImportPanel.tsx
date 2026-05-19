@@ -96,7 +96,7 @@ export function ImportPanel() {
 
       {busy && (
         <div className="text-base text-purple-300">
-          Import laeuft … (kann bei großen Dateien 10-30 Sekunden dauern)
+          Import läuft … (kann bei großen Dateien 10-30 Sekunden dauern)
         </div>
       )}
 
@@ -134,7 +134,7 @@ export function ImportPanel() {
             )}
             {result.solves_skipped_invalid > 0 && (
               <li className="text-yellow-300">
-                ⚠ {result.solves_skipped_invalid} Solves als ungueltig
+                ⚠ {result.solves_skipped_invalid} Solves als ungültig
                 übersprungen
               </li>
             )}

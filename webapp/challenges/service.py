@@ -126,7 +126,7 @@ def get_or_generate_today(db: OrmSession, user_id: int) -> list[Challenge]:
 
 
 def regenerate_today(db: OrmSession, user_id: int) -> list[Challenge]:
-    """Loescht heutige Challenges des Users + generiert frisch."""
+    """Löscht heutige Challenges des Users + generiert frisch."""
     today = _today_start_naive_utc()
     existing = list(
         db.scalars(

@@ -3,7 +3,7 @@
 // Drei Sektionen in einer Card:
 //   1. Voll-Export (Download .json)
 //   2. Wiederherstellen aus Backup-Datei (mode=merge default, mode=replace
-//      mit Magic-String-Bestaetigung "DELETE_ALL_MY_DATA")
+//      mit Magic-String-Bestätigung "DELETE_ALL_MY_DATA")
 //   3. Snapshots (max 2/User) — anlegen, wiederherstellen, löschen
 
 import { useState } from "react";
@@ -94,7 +94,7 @@ export function BackupPanel() {
       if (restoreMode === "replace" && !dryRun) {
         if (confirmText !== REPLACE_MAGIC) {
           setRestoreError(
-            `Tippe "${REPLACE_MAGIC}" exakt in das Confirm-Feld, um den destruktiven Restore zu bestaetigen.`,
+            `Tippe "${REPLACE_MAGIC}" exakt in das Confirm-Feld, um den destruktiven Restore zu bestätigen.`,
           );
           setRestoreBusy(null);
           return;
@@ -158,7 +158,7 @@ export function BackupPanel() {
               Backup mit Merge-Modus (nichts wird überschrieben) oder
               Replace-Modus (alles wird neu geschrieben, mit Confirm-String).
               Snapshots = Wiederherstellungspunkte, max 2 pro User —
-              automatisch vor groesseren Operationen (Restore, Bulk-Import).
+              automatisch vor größeren Operationen (Restore, Bulk-Import).
             </p>
           </InfoButton>
         </div>
@@ -177,7 +177,7 @@ export function BackupPanel() {
         </h3>
         <p className="text-sm text-gray-400 mb-3">
           Lesbarer JSON-Export aller deiner Daten — Solves, Sessions,
-          Hardware, Achievements, Challenges. Empfohlen vor groesseren
+          Hardware, Achievements, Challenges. Empfohlen vor größeren
           Änderungen + als Backup gegen das 90-Tage-Postgres-Limit.
         </p>
         <button
@@ -204,8 +204,8 @@ export function BackupPanel() {
         <p className="text-sm text-amber-200/80">
           Lade ein Cubetracker-Backup-JSON hoch. <strong>Merge</strong> ist
           sicher und Default — bestehende Daten bleiben, neue werden mit
-          Dedup hinzugefuegt. <strong>Replace</strong> ist destruktiv —
-          braucht zusaetzliche Bestaetigung + erzeugt automatisch einen
+          Dedup hinzugefügt. <strong>Replace</strong> ist destruktiv —
+          braucht zusätzliche Bestätigung + erzeugt automatisch einen
           Snapshot vorher.
         </p>
 
@@ -242,7 +242,7 @@ export function BackupPanel() {
             disabled={!restoreFile || restoreBusy !== null}
             className="text-sm rounded border border-gray-600 px-3 py-1.5 text-gray-200 hover:bg-gray-800 disabled:opacity-50"
           >
-            {restoreBusy === "dry" ? "Pruefe…" : "1. Preview (Dry-Run)"}
+            {restoreBusy === "dry" ? "Prüfe…" : "1. Preview (Dry-Run)"}
           </button>
           {restoreMode === "replace" && (
             <input
@@ -269,8 +269,8 @@ export function BackupPanel() {
             {restoreBusy === "real"
               ? "Wiederherstelle…"
               : restoreMode === "replace"
-                ? "2. ⚠ REPLACE ausfuehren"
-                : "2. Merge ausfuehren"}
+                ? "2. ⚠ REPLACE ausführen"
+                : "2. Merge ausführen"}
           </button>
         </div>
 
@@ -294,7 +294,7 @@ export function BackupPanel() {
             </h3>
             <p className="text-xs text-gray-500">
               Max {snapshotsQ.data?.max_per_user ?? 2} pro User —
-              aelteste wird beim Anlegen verworfen.
+              älteste wird beim Anlegen verworfen.
             </p>
           </div>
           <button

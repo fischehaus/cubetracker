@@ -141,7 +141,7 @@ export function WcaUpcomingCard() {
             {data.filter.countries_queried &&
               data.filter.countries_queried.length > 1 && (
                 <>
-                  {" Laender: "}
+                  {" Länder: "}
                   <span className="text-gray-400">
                     {data.filter.countries_queried.join(", ")}
                   </span>

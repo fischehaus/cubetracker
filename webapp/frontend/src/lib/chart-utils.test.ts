@@ -77,7 +77,7 @@ describe("parseSecondsToMs", () => {
     expect(parseSecondsToMs("2:00")).toBe(120000);
   });
 
-  it("liefert null bei ungueltig", () => {
+  it("liefert null bei ungültig", () => {
     expect(parseSecondsToMs("")).toBeNull();
     expect(parseSecondsToMs("abc")).toBeNull();
     expect(parseSecondsToMs("-5")).toBeNull();

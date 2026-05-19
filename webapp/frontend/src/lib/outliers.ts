@@ -1,12 +1,12 @@
-// Outlier-Detection: findet verdaechtige Solve-Zeiten pro Cube-Type.
+// Outlier-Detection: findet verdächtige Solve-Zeiten pro Cube-Type.
 //
 // Heuristik (per cube_type, mind. 10 Solves):
-//   - „verdaechtig schnell" : effective_ms < median * SPEED_FACTOR
-//   - „verdaechtig langsam" : effective_ms > median * SLOW_FACTOR
+//   - „verdächtig schnell" : effective_ms < median * SPEED_FACTOR
+//   - „verdächtig langsam" : effective_ms > median * SLOW_FACTOR
 //
 // DNFs sind kein Outlier (User hat sie schon markiert) und werden ausgeschlossen.
 //
-// Ziel: User sieht „in 3x3 ist 1 solve mit 0.67s sehr verdaechtig" und kann
+// Ziel: User sieht „in 3x3 ist 1 solve mit 0.67s sehr verdächtig" und kann
 // per klick als DNF markieren oder löschen, statt in der ganzen Liste zu suchen.
 
 export interface OutlierInput {
@@ -15,7 +15,7 @@ export interface OutlierInput {
   cube_type: string;
   dnf: boolean;
   plus_two: boolean;
-  /** Phase 8.1: nur für findOutliersBySession noetig, sonst optional */
+  /** Phase 8.1: nur für findOutliersBySession nötig, sonst optional */
   session_id?: number | null;
 }
 
@@ -42,9 +42,9 @@ export interface OutlierGroup {
   outliers: OutlierEntry[];
 }
 
-const SPEED_FACTOR = 0.3; // alles unter 30% des Medians ist verdaechtig
-const SLOW_FACTOR = 5; // alles über 5x Median ist verdaechtig
-const MIN_SOLVES_PER_CUBE = 10; // unter 10 Solves keine sinnvolle Median-Schaetzung
+const SPEED_FACTOR = 0.3; // alles unter 30% des Medians ist verdächtig
+const SLOW_FACTOR = 5; // alles über 5x Median ist verdächtig
+const MIN_SOLVES_PER_CUBE = 10; // unter 10 Solves keine sinnvolle Median-Schätzung
 
 /**
  * Median einer Zahlenliste. Erwartet sortiert oder unsortiert.
@@ -136,7 +136,7 @@ function findOutliersByKey(
  * Cube-Types mit < MIN_SOLVES_PER_CUBE validen (non-DNF) Solves werden
  * übersprungen — sonst gibt es bei wenigen Solves zu viele False-Positives.
  *
- * Rueckgabe: Array von Gruppen, sortiert nach Anzahl Outliers (most-suspicious first).
+ * Rückgabe: Array von Gruppen, sortiert nach Anzahl Outliers (most-suspicious first).
  * Gruppen ohne Outliers werden weggelassen.
  */
 export function findOutliers(solves: OutlierInput[]): OutlierGroup[] {
@@ -151,7 +151,7 @@ export function findOutliers(solves: OutlierInput[]): OutlierGroup[] {
  * Phase 8.1: Outlier-Detection gruppiert nach Session-ID.
  *
  * Use-case: User hat mehrere 3x3-Sessions (Training / Speed / OH-3x3 etc.) —
- * der „Median pro Cube" ist dann oft irrefuehrend, weil eine reine OH-Session
+ * der „Median pro Cube" ist dann oft irreführend, weil eine reine OH-Session
  * langsamer ist als das normale 3x3-Training. „Median pro Session" misst
  * Anomalien innerhalb des Trainings-Kontexts.
  *

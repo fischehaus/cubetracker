@@ -62,7 +62,7 @@ const TAB_STORAGE_KEY = "cubetracker.tab";
 
 // Hash-Routing für Tabs (Phase L-3c). URL-Hash <-> AppTab.
 // Vorteile: Browser-Back, Bookmarks, Reload landet auf gleicher Sicht.
-// Bewusst einfach via window.location.hash — keine Router-Lib noetig.
+// Bewusst einfach via window.location.hash — keine Router-Lib nötig.
 const VALID_TABS: AppTab[] = [
   "timer",
   "dashboard",
@@ -74,7 +74,7 @@ const VALID_TABS: AppTab[] = [
 
 // Backward-Compat: alte URL-Hashes (#friends, #leaderboard) mappen auf
 // den neuen Community-Tab + setzen den passenden Sub-Tab. Damit landen
-// User mit Bookmarks/History-Eintraegen weiter sinnvoll.
+// User mit Bookmarks/History-Einträgen weiter sinnvoll.
 const LEGACY_HASH_MAP: Record<string, { tab: AppTab; sub?: CommunitySection }> = {
   friends: { tab: "community", sub: "friends" },
   leaderboard: { tab: "community", sub: "leaderboard" },
@@ -215,7 +215,7 @@ function TimerTab({
   // QA-Fix Welle 2 (2026-05-16): hardwareId bei Cube-Wechsel auf null
   // resetten. Sonst Race-Condition: useSuggestHardware in TimerControlsCard
   // braucht einen HTTP-Roundtrip um die passende Hardware für den neuen
-  // Cube zu finden — wenn der User in der Latenz-Luecke Enter drueckt,
+  // Cube zu finden — wenn der User in der Latenz-Luecke Enter drückt,
   // wird die alte (cube-fremde) Hardware persistiert. Reset → worst case
   // = ohne Hardware (besser als = falsche Hardware). userPickedHardware-
   // Flag in TimerControlsCard greift weiterhin: wenn User selbst geklickt
@@ -292,7 +292,7 @@ function DashboardTab({
   //
   // Welle „W.dashboard-story" (2026-05-16): Big-Bang-Refactor mit Story-
   // Reihenfolge. Vier Sektionen mit semantischen <section>-Tags + sichtbaren
-  // Mini-Headlines für Scan-Hilfe. Karten selbst unveraendert, nur
+  // Mini-Headlines für Scan-Hilfe. Karten selbst unverändert, nur
   // Gruppierung + Reihenfolge neu.
   //
   // Story:
@@ -440,7 +440,7 @@ function loadInitialTab(): {
 function MainLayout() {
   // Per-Tab-State, damit Tab-Wechsel den jeweiligen Filter NICHT verliert.
   // Bewusst NICHT geteilt zwischen Tabs (Dashboard- und Analyse-Filter
-  // sind unabhaengig).
+  // sind unabhängig).
   const [timerCubeType, setTimerCubeType] = useState<string>("3x3");
   const [dashboardSessionId, setDashboardSessionId] = useState<number | null>(
     null
@@ -497,11 +497,11 @@ function MainLayout() {
       <div className="mx-auto max-w-7xl">
         <header className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           {/* Volles Logo (mit Schriftzug + Tagline) ersetzt den separaten
-              H1+Untertitel. Klick fuehrt zurück zum Default-Tab. Logo
+              H1+Untertitel. Klick führt zurück zum Default-Tab. Logo
               enthält den App-Namen, daher visuell-doppelt wenn man's
               danebenstellen würde. H1 mit sr-only für Screenreader + SEO.
               Höhe responsiv gestaffelt: das Logo ist ~2.56:1 breit, bei
-              h-40 waeren das 410px — sprengt jeden Phone-Screen. Daher
+              h-40 wären das 410px — sprengt jeden Phone-Screen. Daher
               h-16 (Phone) → h-28 (sm) → h-52 (md+, User-Wunsch 2.5x). */}
           <button
             type="button"
@@ -526,7 +526,7 @@ function MainLayout() {
                 isAdmin={user.is_admin}
                 onOpenSettings={() => {
                   setTab("verwaltung");
-                  // Event laesst VerwaltungTab zum Sub-Tab "settings" springen.
+                  // Event lässt VerwaltungTab zum Sub-Tab "settings" springen.
                   // Sub-Tab-State lebt lokal, daher kein direkter Set-Pfad —
                   // Event-Hook ist die kleinste invasive Lösung.
                   setTimeout(() => {
@@ -549,8 +549,8 @@ function MainLayout() {
 
         {user && !user.email_verified && (
           <div className="mb-4 rounded-lg bg-amber-500/10 border border-amber-500/30 px-4 py-3 text-sm text-amber-200">
-            ⚠ Deine Email-Adresse ist noch nicht bestaetigt. Wir haben dir
-            eine Verifikations-Mail geschickt — pruefe deinen Posteingang
+            ⚠ Deine Email-Adresse ist noch nicht bestätigt. Wir haben dir
+            eine Verifikations-Mail geschickt — prüfe deinen Posteingang
             (auch Spam). Unter Verwaltung → Einstellungen kannst du die
             Mail erneut senden.
           </div>

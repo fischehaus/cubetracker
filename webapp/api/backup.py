@@ -51,7 +51,7 @@ from db.models import User
 
 router = APIRouter(prefix="/backup", tags=["backup"])
 
-# 30 MB ~= 100k Solves (Schaetzung 300 Bytes/Solve im JSON, mit Sessions/HW etc.)
+# 30 MB ~= 100k Solves (Schätzung 300 Bytes/Solve im JSON, mit Sessions/HW etc.)
 MAX_UPLOAD_BYTES = 30 * 1024 * 1024
 
 # Magic-String für destruktive Replace-Operation. Frontend baut Confirm-
@@ -97,7 +97,7 @@ async def restore_backup(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """JSON-Backup zurueckspielen — eigene Daten only.
+    """JSON-Backup zurückspielen — eigene Daten only.
 
     - mode=merge (Default): bestehende Daten bleiben, neue dazu, Dedup
     - mode=replace: ALLE eigenen Daten löschen, dann importieren —
@@ -171,7 +171,7 @@ async def restore_backup(
 
     if not dry_run and (result.solves_imported or result.achievements_imported):
         # Achievement-Recheck nach Bulk-Import (kann neue ungelockte triggern,
-        # falls Backup unvollstaendig oder aus aelterer Version)
+        # falls Backup unvollstaendig oder aus älterer Version)
         new_unlocks = run_achievement_check(db, current_user.id)
         if new_unlocks:
             response["newly_unlocked_achievements"] = new_unlocks
@@ -217,7 +217,7 @@ def create_snapshot_endpoint(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Manueller Snapshot eigener Daten. Aelteste wird ggf. verworfen."""
+    """Manueller Snapshot eigener Daten. Älteste wird ggf. verworfen."""
     try:
         snap = create_snapshot(db, current_user, reason="manual")
     except BackupServiceError as e:
@@ -236,9 +236,9 @@ def restore_snapshot_endpoint(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Auf einen Snapshot zurueckspielen — replace-Mode (bit-genau).
+    """Auf einen Snapshot zurückspielen — replace-Mode (bit-genau).
 
-    Implizit destruktiv, aber confirm-Flag NICHT noetig: User hat den
+    Implizit destruktiv, aber confirm-Flag NICHT nötig: User hat den
     Snapshot ja explizit gewählt + Snapshots sind ja deine eigenen.
     Frontend sollte trotzdem ein Confirm-Dialog vorschalten.
     """

@@ -173,7 +173,7 @@ def seed_hardware(
     force: bool = Query(
         default=False,
         description="Wenn False: nur wenn EIGENE Hardware-Liste leer ist. "
-        "Wenn True: Einträge werden zusaetzlich angelegt (kann Duplikate erzeugen).",
+        "Wenn True: Einträge werden zusätzlich angelegt (kann Duplikate erzeugen).",
     ),
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
@@ -259,7 +259,7 @@ def bulk_delete_hardware(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, int]:
-    """Loescht eine Menge eigener Hardware-Einträge.
+    """Löscht eine Menge eigener Hardware-Einträge.
 
     Betroffene Solves verlieren ihre hardware_id (FK ondelete=SET NULL).
     Fremde IDs werden ignoriert.

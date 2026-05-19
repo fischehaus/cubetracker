@@ -10,7 +10,7 @@
 //               gespeichert und ist beim Trainer-modus auto-getagged.
 //   name      = User-sichtbarer Name ("T-perm")
 //   alg       = Standard-WCA-notation, soll von rechts nach links auf
-//               einem geloesten cube angewendet werden.
+//               einem gelösten cube angewendet werden.
 //
 // Konvention: alle algs in WCA-3x3-notation. Inversion siehe inverseAlg().
 
@@ -26,7 +26,7 @@ export interface AlgCase {
 // PLL — alle 21 Cases
 // ============================================================
 //
-// Algorithmen-Auswahl: gaengige speedsolving-standards (aus wiki +
+// Algorithmen-Auswahl: gängige speedsolving-standards (aus wiki +
 // J Perm's beginner-friendly set). Konsistente notation, keine
 // rotations (x/y/z) im algorithm — die würden inversion erschweren.
 
@@ -132,8 +132,8 @@ export const ALG_SUBSETS: Record<AlgSubsetId, { name: string; cases: AlgCase[] }
 //
 // Klassisches Speedsolving-Prinzip: scramble für case X = invers(alg(X)).
 // Wenn ich X-alg auf gegebenen state anwende, lande ich beim Identitaets-
-// state (geloester cube). Also: invers(X-alg) angewendet auf geloesten
-// cube ergibt den state, von dem aus X-alg loest. → das IST der scramble.
+// state (geloester cube). Also: invers(X-alg) angewendet auf gelösten
+// cube ergibt den state, von dem aus X-alg löst. → das IST der scramble.
 //
 // Invertierungs-Regel: tokenize, reverse-order, jedes token invertieren:
 //   "R"   ↔ "R'"

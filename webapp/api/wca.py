@@ -11,7 +11,7 @@ GET /wca/competitions/upcoming
     - days_ahead (default 180): wie weit in die Zukunft schauen.
 
   Antwort: Liste sortiert nach Datum + Distanz. Jeder Eintrag enthält
-  zusaetzlich `distance_km` (gerundet auf 1 Nachkommastelle).
+  zusätzlich `distance_km` (gerundet auf 1 Nachkommastelle).
 """
 
 from __future__ import annotations
@@ -69,7 +69,7 @@ async def upcoming_competitions(
         )
     # Wenn weder Land im Profil noch heuristisch aus PLZ bestimmbar →
     # User soll Land explizit setzen (sonst geocoding-Treffer schlecht +
-    # Nachbarlaender unklar).
+    # Nachbarländer unklar).
     detected_country = user_country or detect_country_from_postal_code(postal)
     if not detected_country:
         raise HTTPException(
@@ -101,7 +101,7 @@ async def upcoming_competitions(
     # 3) PLZ-Heuristik (DACH)
     country = user_country or geo.get("country_iso2") or detect_country_from_postal_code(postal)
 
-    # 2) WCA-API: Land + Nachbarlaender (Phase W.wca-neighbors, User-Wunsch
+    # 2) WCA-API: Land + Nachbarländer (Phase W.wca-neighbors, User-Wunsch
     #    2026-05-16). DE-User bekommen DE + AT + CH + NL + BE + LU + FR +
     #    DK + PL + CZ, AT-User entsprechend ihr DACH-Nachbar-Set, etc.
     #    Falls Country unbekannt: fallback auf weltweit (= leeres Country-

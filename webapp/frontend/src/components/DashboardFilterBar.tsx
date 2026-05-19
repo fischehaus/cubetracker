@@ -45,7 +45,7 @@ export function DashboardFilterBar({ sessionId, onSessionIdChange }: Props) {
           onClick={() => onSessionIdChange(null)}
           className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-300 hover:bg-gray-600"
         >
-          Filter zuruecksetzen
+          Filter zurücksetzen
         </button>
       )}
     </div>

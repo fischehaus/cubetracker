@@ -24,8 +24,8 @@ def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     return EARTH_RADIUS_KM * c
 
 
-# Nachbarlaender-Mapping (Phase W.wca-neighbors, 2026-05-16):
-# Welche Laender bekommt ein User zu sehen, basierend auf seinem
+# Nachbarländer-Mapping (Phase W.wca-neighbors, 2026-05-16):
+# Welche Länder bekommt ein User zu sehen, basierend auf seinem
 # Profil-Land? „In der Nähe" heisst praktisch: eigenes Land + direkt
 # angrenzende. Aktuell nur für DACH definiert — andere User sehen
 # nur ihr eigenes Land. Später erweiterbar pro Bedarf.
@@ -57,14 +57,14 @@ def detect_country_from_postal_code(postal_code: str) -> str | None:
     Kein Locking — User kann im Profil manuell ein Land setzen wenn das mal
     relevant wird. Hier nur Best-Effort Default für Nominatim-Lookup.
 
-    Aktuell unterstuetzte Heuristiken (DACH-Fokus):
+    Aktuell unterstützte Heuristiken (DACH-Fokus):
       - 5-stellige numerische PLZ ohne Leerzeichen → DE
       - 4-stellige numerische PLZ → AT oder CH (Default AT, weil
         OpenStreetMap die meisten AT-PLZs besser indexiert hat als CH)
-      - Kein Match → None (Caller laesst country_iso2 frei → Nominatim sucht weltweit)
+      - Kein Match → None (Caller lässt country_iso2 frei → Nominatim sucht weltweit)
 
     Hinweis: das ist KEINE perfekte Disambiguierung. CH 4-stellige PLZs
-    wie 8001 (Zuerich) werden faelschlich als AT erkannt. Realistisch ist
+    wie 8001 (Zuerich) werden fälschlich als AT erkannt. Realistisch ist
     DE 99% der User → akzeptables Restrisiko bis User-Profil ein
     `country_iso2`-Feld bekommt.
     """

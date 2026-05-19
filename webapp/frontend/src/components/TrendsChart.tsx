@@ -6,7 +6,7 @@
 //          manuell überschreibbar via min/max Inputs. Bei jedem Filter-
 //          oder Window-Wechsel: zurück zu auto, damit man nicht eine
 //          alte Skala auf neue Daten sieht.
-// Linien: ao5 (gruen), ao12 (blau), ao100 (lila), Singles als Streupunkte (grau)
+// Linien: ao5 (grün), ao12 (blau), ao100 (lila), Singles als Streupunkte (grau)
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -48,7 +48,7 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
   const [manualMin, setManualMin] = useState<string>("");
   const [manualMax, setManualMax] = useState<string>("");
 
-  // Bei jedem Filter- oder Window-Wechsel: manuelle Werte zuruecksetzen.
+  // Bei jedem Filter- oder Window-Wechsel: manuelle Werte zurücksetzen.
   // Ohne diesen Reset würde z.B. eine 3x3-Skala (10s..14s) bei Wechsel
   // auf 2x2 die ganzen 2x2-Werte (3s..5s) abschneiden.
   useEffect(() => {

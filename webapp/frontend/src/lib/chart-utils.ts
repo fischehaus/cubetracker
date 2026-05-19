@@ -25,7 +25,7 @@ export function percentile(sortedAsc: number[], p: number): number {
  * weggekuerzt, der Hauptverlauf wird groß sichtbar.
  *
  * @param values   Liste von Mess-Werten in ms (nulls werden ignoriert)
- * @param padding  Anteil zusaetzlicher Padding oben+unten (default 0.05 = 5%)
+ * @param padding  Anteil zusätzlicher Padding oben+unten (default 0.05 = 5%)
  * @returns [minMs, maxMs] — beide ≥ 0
  */
 export function computeYDomain(

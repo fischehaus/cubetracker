@@ -3,7 +3,7 @@
 Kerndifferenz zum Desktop-Backend:
 - User-Tabelle als Wurzel
 - ALLE bisherigen Tabellen haben user_id-FK (NOT NULL, ondelete=CASCADE
-  damit User-Löschen die ganze Daten-Pyramide mit-loescht — DSGVO-relevant)
+  damit User-Löschen die ganze Daten-Pyramide mit-löscht — DSGVO-relevant)
 
 Schema 1:1 wie Desktop, nur user_id ergänzt. Pure-Logic-Module aus dem
 Desktop-Backend (stats/calc.py, achievements/check.py, etc.) bleiben
@@ -73,7 +73,7 @@ class User(Base):
     # bewusst NICHT — nur per ID/User-Suche-Result-Klick anfragbar.
     is_discoverable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     # Token-Revocation: jeder ausgegebene JWT enthält das aktuelle token_version
-    # in seinen Claims. Wird die Spalte hochgezaehlt (Logout, Password-Change),
+    # in seinen Claims. Wird die Spalte hochgezählt (Logout, Password-Change),
     # invalidiert das alle bestehenden Tokens dieses Users sofort.
     token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     # Phase W.admin-toggle (2026-05-17): is_admin als echte DB-Spalte
@@ -277,9 +277,9 @@ class Snapshot(Base):
 
     Plus MANUELL via /backup/snapshots POST.
 
-    Pro User max 2 Snapshots — beim Anlegen wird der aelteste verworfen.
+    Pro User max 2 Snapshots — beim Anlegen wird der älteste verworfen.
     Storage: das ganze Backup-JSON als Text-Blob in Postgres.
-    Schaetzung: 100k Solves ~30MB; 2*30MB pro User ist ok bis ~30 User
+    Schätzung: 100k Solves ~30MB; 2*30MB pro User ist ok bis ~30 User
     auf Free-Tier (1GB).
     """
 
@@ -387,9 +387,9 @@ class Friendship(Base):
     - Eine Friendship-Zeile pro Beziehung (nicht zwei symmetrische). Spart
       Schreib-Aufwand bei Accept (statt 2 Rows updaten nur 1). Friend-Listen-
       Abfragen müssen dafür beide Richtungen (requester OR target) checken.
-    - UniqueConstraint normalisiert (kleinste, groesste ID) verhindert dass
+    - UniqueConstraint normalisiert (kleinste, größte ID) verhindert dass
       A->B pending UND B->A pending gleichzeitig existieren (kreuz-Anfragen).
-      CHECK-Constraint LEAST/GREATEST haengt von Postgres ab -> wir loesen
+      CHECK-Constraint LEAST/GREATEST hängt von Postgres ab -> wir loesen
       es im Service-Layer via Suche nach (LEAST, GREATEST) Match.
     - CASCADE auf User-Delete: wenn ein User gelöscht wird, sind seine
       Friendships obsolet — beide Richtungen weg.
@@ -438,7 +438,7 @@ class NewsItem(Base):
 
     Globale Tabelle (kein user_id), wird vom News-Fetcher periodisch
     befuellt. Dedup über `link` (RSS-Item-URL). Cleanup von Items
-    aelter als 60 Tage erledigt der Fetcher selbst.
+    älter als 60 Tage erledigt der Fetcher selbst.
     """
 
     __tablename__ = "news_items"
@@ -479,7 +479,7 @@ class PostalCodeGeo(Base):
     __tablename__ = "postal_code_geo"
 
     # Composite Primary Key (postal_code, country_iso2) — selbe PLZ kann
-    # in verschiedenen Laendern existieren (z.B. 1010 = AT-Wien + CH-Zuerich).
+    # in verschiedenen Ländern existieren (z.B. 1010 = AT-Wien + CH-Zuerich).
     postal_code: Mapped[str] = mapped_column(String(16), primary_key=True)
     country_iso2: Mapped[str] = mapped_column(String(2), primary_key=True)
     lat: Mapped[float] = mapped_column(Float, nullable=False)

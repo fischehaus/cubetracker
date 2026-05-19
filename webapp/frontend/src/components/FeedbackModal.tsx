@@ -99,7 +99,7 @@ function GitHubMode({ onClose: _onClose }: { onClose: () => void }) {
       </ul>
       <p className="text-sm text-gray-300">
         Wir haben Templates für Bug-Report + Feature-Wunsch, die dich
-        Schritt-für-Schritt durch die wichtigen Fragen fuehren.
+        Schritt-für-Schritt durch die wichtigen Fragen führen.
       </p>
 
       <div className="flex flex-wrap gap-3 pt-2">
@@ -145,7 +145,7 @@ function EmailMode({ onClose }: { onClose: () => void }) {
       {
         onSuccess: () => {
           setMessage("");
-          // Modal kurz offen lassen damit User Bestaetigung sieht,
+          // Modal kurz offen lassen damit User Bestätigung sieht,
           // dann nach 2s auto-close
           setTimeout(onClose, 2000);
         },

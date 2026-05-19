@@ -1,7 +1,7 @@
 """WCA-API-v0-Wrapper (Phase W.wca-comps).
 
 Liest die offizielle World Cube Association API (https://www.worldcubeassociation.org/api/v0).
-Public, kein Key, kein Auth — aber rate-limited (zu viele Anfragen fuehren zu 429).
+Public, kein Key, kein Auth — aber rate-limited (zu viele Anfragen führen zu 429).
 
 Wir cachen agressiv in-memory (TTL 1h pro Query) und liefern aufbereitete
 Slim-Dicts statt der vollen WCA-Response — Frontend braucht nur 8 Felder.
@@ -162,10 +162,10 @@ async def fetch_upcoming_competitions_multi(
     days_ahead: int = 180,
     today: date | None = None,
 ) -> list[dict[str, Any]]:
-    """Parallel-Fetch für mehrere Laender (Phase W.wca-neighbors).
+    """Parallel-Fetch für mehrere Länder (Phase W.wca-neighbors).
 
     Ruft `fetch_upcoming_competitions` für jedes Land parallel via
-    `asyncio.gather` auf — bei 10 Laendern (DE + Nachbarn) ergibt das
+    `asyncio.gather` auf — bei 10 Ländern (DE + Nachbarn) ergibt das
     10 parallele HTTP-Calls statt 10 sequentielle (Latenz ~ max statt sum).
     Cache-Hits sind no-op, daher pro Land 0-500ms.
 

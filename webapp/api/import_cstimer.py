@@ -168,7 +168,7 @@ async def import_cstimer(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
                 "Datei enthält keine csTimer-Sessions (Top-Level-Keys "
-                "wie 'session1', 'session2'...). Bitte pruefe ob du "
+                "wie 'session1', 'session2'...). Bitte prüfe ob du "
                 "die richtige Datei hochgeladen hast."
             ),
         )

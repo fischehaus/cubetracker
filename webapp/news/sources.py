@@ -3,7 +3,7 @@
 Liste der RSS-/Atom-Feeds, die der News-Aggregator abklopfen soll.
 Bewusst kurz gehalten: lieber wenige hochwertige Quellen als viele.
 
-Erweiterung: einfach Eintrag hinzufuegen. `source_id` ist der interne
+Erweiterung: einfach Eintrag hinzufügen. `source_id` ist der interne
 Stable-Key (auch in DB), `label` ist user-sichtbar.
 """
 

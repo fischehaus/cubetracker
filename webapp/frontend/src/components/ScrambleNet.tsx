@@ -34,7 +34,7 @@ const SUPPORTED_TYPES = new Set(["3x3", "OH", "3BLD"]);
  * Public-Helper: weiss der Aufrufer (z.B. ScrambleCard), ob für diesen
  * Cube-Type überhaupt ein 2D-Net gerendert wird. Wird genutzt, um den
  * Toggle-Button nur dann anzuzeigen wenn er auch eine Wirkung hat —
- * sonst wäre er irrefuehrend ("Toggle tut nichts").
+ * sonst wäre er irreführend ("Toggle tut nichts").
  */
 export function isScrambleNetSupported(cubeType: string): boolean {
   return SUPPORTED_TYPES.has(cubeType);
@@ -57,7 +57,7 @@ export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
   return (
     <div
       className="mt-3 flex justify-center"
-      aria-label={`2D-Cube-Net nach Scramble: ${scramble || "geloest"}`}
+      aria-label={`2D-Cube-Net nach Scramble: ${scramble || "gelöst"}`}
     >
       <div
         // dangerouslySetInnerHTML: der String ist von cube-net.ts generiert,

@@ -190,7 +190,7 @@ function TestRow({ test }: { test: LiveTest }) {
   const [response, setResponse] = useState(test.user_response ?? "");
   const [editing, setEditing] = useState(false);
   // QA-Fix (2026-05-17 abends): 2-Klick-Pattern statt confirm() —
-  // confirm() ist Mobile-unzuverlaessig (gleicher Fix wie BigTimerInput).
+  // confirm() ist Mobile-unzuverlässig (gleicher Fix wie BigTimerInput).
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const colors = STATUS_COLORS[test.status];
 
@@ -380,7 +380,7 @@ function TestRow({ test }: { test: LiveTest }) {
             }`}
             title={
               deleteConfirm
-                ? "Erneut klicken zum endgueltigen Löschen"
+                ? "Erneut klicken zum endgültigen Löschen"
                 : "Test löschen"
             }
           >
@@ -441,7 +441,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
           />
         </label>
         <label className="flex flex-col text-xs text-gray-400">
-          Beschreibung (was zu pruefen, was du erwartest)
+          Beschreibung (was zu prüfen, was du erwartest)
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -450,7 +450,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
             className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-purple-500 focus:outline-none font-mono"
             placeholder={
               "Cube auf 3x3 stellen, Inspection-Countdown starten.\n" +
-              "Erwartung: bei 8s eine Stimme 'acht', bei 12s 'zwoelf'.\n" +
+              "Erwartung: bei 8s eine Stimme 'acht', bei 12s 'zwölf'.\n" +
               "Wenn DE/EN: passend zur Einstellung."
             }
           />

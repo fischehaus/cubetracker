@@ -6,7 +6,7 @@
 //  - Hardware-Zuordnung (csTimer kennt es nicht)
 //  - Achievements/Challenges (cubetracker-spezifisch)
 //
-// Wer Voll-Backup will: BackupPanel (sqlite/json) eine Sektion drueber.
+// Wer Voll-Backup will: BackupPanel (sqlite/json) eine Sektion drüber.
 
 import { useState } from "react";
 import { api } from "../lib/api";
@@ -54,7 +54,7 @@ export function CsTimerExportPanel() {
             Exportiert deine Solves + Sessions im csTimer-JSON-Format. Du
             kannst die Datei in csTimer importieren (dort: Settings →
             Backup → Import) — z.B. um Cubetracker-Daten auf einer
-            csTimer-Mobile-App weiterzunutzen, oder als zusaetzliche
+            csTimer-Mobile-App weiterzunutzen, oder als zusätzliche
             Backup-Variante. Datenhoheit bleibt bei dir.
           </p>
         </InfoButton>

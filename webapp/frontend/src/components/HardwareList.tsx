@@ -9,7 +9,7 @@
 // - Selektion per Checkbox + "alle in Gruppe markieren"
 // - Bulk-Aktionen pro Gruppe: aktiv-setzen / inaktiv-setzen / löschen
 // - Inline-Edit auf Name + Notiz (Click-to-Edit ODER expliziter
-//   "Umbenennen"-Button — beide Wege fuehren ins gleiche Edit-Feld)
+//   "Umbenennen"-Button — beide Wege führen ins gleiche Edit-Feld)
 
 import { useMemo, useState } from "react";
 import {

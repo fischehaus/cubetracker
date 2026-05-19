@@ -1,5 +1,5 @@
 // SettingsPanel (Phase 8.2 + W.8) — Sub-Tab in VERWALTUNG.
-// W.8: AccountSettingsPanel oben drueber gerendert (Profil + Passwort +
+// W.8: AccountSettingsPanel oben drüber gerendert (Profil + Passwort +
 // Email + Account-Löschen). Drunter dann die App-/Timer-/Drill-Settings.
 
 import { AccountSettingsPanel } from "./AccountSettingsPanel";
@@ -40,7 +40,7 @@ export function SettingsPanel() {
   }
 
   function reset() {
-    if (confirm("Alle Einstellungen auf Standard zuruecksetzen?")) {
+    if (confirm("Alle Einstellungen auf Standard zurücksetzen?")) {
       setSettings(SETTINGS_DEFAULTS);
     }
   }
@@ -87,7 +87,7 @@ export function SettingsPanel() {
       <Section title="Inspection">
         <Toggle
           label="Inspection-Phase aktivieren"
-          hint="Vor dem Solve laeuft ein Countdown."
+          hint="Vor dem Solve läuft ein Countdown."
           value={settings.inspection_enabled}
           onChange={(v) => setSettings({ ...settings, inspection_enabled: v })}
           disabled={!settings.spacebar_enabled}
@@ -171,13 +171,13 @@ export function SettingsPanel() {
             className="rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none disabled:opacity-50 max-w-xs"
           >
             <option value="beep">🔔 Sinus-Beep (default)</option>
-            <option value="de">🇩🇪 Stimme: Deutsch ("acht", "zwoelf")</option>
+            <option value="de">🇩🇪 Stimme: Deutsch ("acht", "zwölf")</option>
             <option value="en">🇬🇧 Voice: English ("eight", "twelve")</option>
             <option value="off">🔇 Aus (kein Audio für 8s/12s)</option>
           </select>
           <span className="text-xs text-gray-500">
             Voice-Modi nutzen das Browser-TTS — funktioniert offline +
-            ohne Asset, Stimme abhaengig von Browser/OS.
+            ohne Asset, Stimme abhängig von Browser/OS.
           </span>
         </label>
       </Section>

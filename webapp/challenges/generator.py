@@ -7,7 +7,7 @@ Bekommt einen `GeneratorInput`-Snapshot mit User-Stats und liefert
 Strategie: 3 verschiedene Typen pro Tag, damit Abwechslung garantiert ist.
 - 1x Volume (anzahl-solves heute)
 - 1x Speed (sub-X im Haupt-cube)
-- 1x Comeback (cube der laenger nicht angefasst wurde) — Fallback Diversity
+- 1x Comeback (cube der länger nicht angefasst wurde) — Fallback Diversity
 
 Anpassbar via Schwellwerten (CHALLENGE_*) am Datei-Anfang.
 """
@@ -112,7 +112,7 @@ def generate_daily_challenges(snap: GeneratorInput) -> list[ChallengeSpec]:
     Volume, Speed, Comeback (Fallback Diversity).
 
     Wenn weniger als 3 sinnvolle Specs gefunden werden, weniger als 3
-    zurueckgegeben — UI zeigt entsprechend leerer.
+    zurückgegeben — UI zeigt entsprechend leerer.
     """
     out: list[ChallengeSpec] = []
 

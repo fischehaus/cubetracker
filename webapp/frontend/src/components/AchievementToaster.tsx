@@ -1,5 +1,5 @@
 // AchievementToaster: globaler Layer der auf onAchievementUnlocked
-// hoert (kommt aus axios-response-interceptor) und Toasts unten
+// hört (kommt aus axios-response-interceptor) und Toasts unten
 // rechts anzeigt.
 //
 // Mehrere Toasts stacken sich. Jeder verschwindet nach 5s automatisch

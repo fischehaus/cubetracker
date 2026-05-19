@@ -11,7 +11,7 @@
 //      (load aus localStorage, partial-merge mit defaults, on save:
 //       persist + Custom-Event so dass alle Hook-Konsumenten reagieren)
 //
-// Settings sind absichtlich KOMPATIBEL beim Lesen — zukuenftige Felder
+// Settings sind absichtlich KOMPATIBEL beim Lesen — zukünftige Felder
 // haben einen sauberen default, alte Browser sehen keinen Crash.
 
 import { useEffect, useState } from "react";
@@ -39,7 +39,7 @@ export type TimerFontSize = "sm" | "md" | "lg" | "xl" | "xxl";
  * Phase W.voice-alert (2026-05-17): csTimer-aequivalentes Feature.
  *
  *   "beep"  — Sinus-Toene (Status-Quo, 660Hz bei 8s, 880Hz bei 12s)
- *   "de"    — Voice-Alert auf Deutsch via Browser-TTS ("acht", "zwoelf")
+ *   "de"    — Voice-Alert auf Deutsch via Browser-TTS ("acht", "zwölf")
  *   "en"    — Voice-Alert auf Englisch ("eight", "twelve")
  *   "off"   — kein Audio (overrides sound_enabled für diese Calls)
  */
@@ -66,7 +66,7 @@ export interface AppSettings {
    * Greift nur wenn `sound_enabled === true`.
    */
   inspection_audio_mode: InspectionAudioMode;
-  /** Hold-Time in ms bevor „go" (gruen) wird. WCA-Empfehlung 550ms. */
+  /** Hold-Time in ms bevor „go" (grün) wird. WCA-Empfehlung 550ms. */
   hold_time_ms: number;
   /** Multi-Phase-Splits aktiviert (Variante A). 1 = klassisch ohne splits. */
   splits_enabled: boolean;
@@ -90,7 +90,7 @@ export interface AppSettings {
    * Erwartung an Speedcubing-Timer. Power-User können ausschalten wenn sie
    * pure Notation wollen.
    *
-   * Aktuell nur 3x3 unterstuetzt. Andere Cubes zeigen kein Bild + werden
+   * Aktuell nur 3x3 unterstützt. Andere Cubes zeigen kein Bild + werden
    * nicht durch das Setting beeinflusst.
    */
   show_scramble_image: boolean;
@@ -141,7 +141,7 @@ const CHANGE_EVENT = "cubetracker:settings-changed";
  *
  * Touch-Device-Default-Override (2026-05-14): bei FRISCHEM localStorage
  * (= erstes App-Laden) wird auf Touch-Geräten der WCA-Spacebar-Modus
- * als Default gesetzt. Soft-Keyboard für Text-Eingabe wäre muehsam.
+ * als Default gesetzt. Soft-Keyboard für Text-Eingabe wäre mühsam.
  * Sobald der User eigene Settings hat (parsed != null), bleiben die
  * unangetastet — keine Migration, kein Reset.
  */

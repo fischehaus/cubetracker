@@ -52,7 +52,7 @@ export function VerifyEmailPage() {
       cancelled = true;
     };
     // Nur token als dep — isAuthenticated/refreshMe nutzen wir aus
-    // closure (waeren sonst weitere Re-Runs nach Mount).
+    // closure (wären sonst weitere Re-Runs nach Mount).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
@@ -70,7 +70,7 @@ export function VerifyEmailPage() {
         {state === "ok" && (
           <>
             <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm px-3 py-2 mb-4">
-              ✅ Email erfolgreich bestaetigt.
+              ✅ Email erfolgreich bestätigt.
             </div>
             <a
               href="/"
@@ -84,7 +84,7 @@ export function VerifyEmailPage() {
         {state === "fail" && (
           <>
             <div className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm px-3 py-2 mb-4">
-              {error ?? "Verifikations-Link ist ungueltig oder abgelaufen."}
+              {error ?? "Verifikations-Link ist ungültig oder abgelaufen."}
             </div>
             <p className="text-sm text-gray-400 mb-2">
               Probier es nochmal: log dich ein und klick "Verify-Mail erneut

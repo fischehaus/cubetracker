@@ -90,7 +90,7 @@ def _bump_token_version(db: OrmSession, user_id: int) -> None:
     Sub-Agent-Finding K5: `user.token_version += 1` via ORM-read-modify-
     write kann bei parallelen Requests (Logout + Change-Password gleich-
     zeitig) ein Increment verlieren. SQL-side UPDATE garantiert dass
-    JEDER Aufruf den Zähler erhoeht.
+    JEDER Aufruf den Zähler erhöht.
     """
     db.execute(
         update(User)
@@ -130,7 +130,7 @@ def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
 
 
 def _clear_refresh_cookie(response: Response) -> None:
-    """Loescht den Refresh-Cookie (Logout)."""
+    """Löscht den Refresh-Cookie (Logout)."""
     response.delete_cookie(
         key=REFRESH_COOKIE_NAME,
         path=REFRESH_COOKIE_PATH,
@@ -150,7 +150,7 @@ def register(
     Password wird via bcrypt gehasht (work-factor 12).
     W.8: nach Anlegen wird ein EmailVerificationToken erzeugt + Verify-
     Mail verschickt. User kann sich trotzdem schon einloggen, aber UI
-    zeigt einen "Email noch nicht bestaetigt"-Banner bis er klickt.
+    zeigt einen "Email noch nicht bestätigt"-Banner bis er klickt.
 
     Rate-Limit: 5/min per IP (Brute-Force + Spam-Schutz).
     """
@@ -185,7 +185,7 @@ def register(
 
     # W.hardware-auto-seed: jeder neue User bekommt die Default-Hardware-
     # Liste mit is_active=False. Fail-soft — wenn Seed scheitert, ist der
-    # Account trotzdem angelegt, User kann manuell hinzufuegen.
+    # Account trotzdem angelegt, User kann manuell hinzufügen.
     try:
         from seeds.hardware import seed_user_hardware
 
@@ -238,7 +238,7 @@ def login(
 
     # Auto-Refresh-Hook (Phase W.auto-refresh, 2026-05-16): nach erfolgreichem
     # Login die News + WCA-Caches im Hintergrund warm halten. Bei warmen Caches
-    # ist das ein no-op (keine HTTP-Calls). Laeuft NACH der Response, also
+    # ist das ein no-op (keine HTTP-Calls). Läuft NACH der Response, also
     # blockt der User nicht. User-Wunsch: „bei jeder Neuanmeldung sollen die
     # Infos aktualisiert werden".
     # Lazy-import + try/except: QA-Fix M2 (2026-05-16). Lazy-Import allein
@@ -265,10 +265,10 @@ def refresh(
     db: OrmSession = Depends(get_db),
     refresh_cookie: str | None = Cookie(default=None, alias=REFRESH_COOKIE_NAME),
 ) -> AccessTokenOnly:
-    """Tauscht einen gueltigen Refresh-Token gegen einen neuen Access-Token.
+    """Tauscht einen gültigen Refresh-Token gegen einen neuen Access-Token.
 
     Refresh-Token MUSS aus dem HttpOnly-Cookie kommen (nicht aus Body/Header).
-    Wir checken zusaetzlich:
+    Wir checken zusätzlich:
     - Token-Type == "refresh" (verhindert Access-as-Refresh-Missbrauch)
     - Token-Version == User.token_version (Revocation-Check)
     - User existiert + is_active
@@ -278,7 +278,7 @@ def refresh(
     """
     invalid = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Refresh-Token ungueltig oder abgelaufen.",
+        detail="Refresh-Token ungültig oder abgelaufen.",
     )
 
     if not refresh_cookie:
@@ -308,7 +308,7 @@ def refresh(
         _clear_refresh_cookie(response)
         raise invalid
 
-    # Access-Token erneuern. Refresh-Cookie bleibt unveraendert (keine Rotation
+    # Access-Token erneuern. Refresh-Cookie bleibt unverändert (keine Rotation
     # in dieser Phase — Finding #4 ist 🟡, kommt in v2.x).
     return AccessTokenOnly(
         access_token=create_token(user.id, "access", token_version=user.token_version)
@@ -322,10 +322,10 @@ def logout(
     db: OrmSession = Depends(get_db),
 ) -> Response:
     """Logout: token_version++ revoked ALLE existierenden Tokens dieses Users
-    serverseitig. Loescht zusaetzlich den Refresh-Cookie clientseitig.
+    serverseitig. Löscht zusätzlich den Refresh-Cookie clientseitig.
 
     Auch wenn der Angreifer Access- oder Refresh-Tokens kopiert hat:
-    sobald token_version hochgezaehlt ist, schlagen alle alten Tokens fehl.
+    sobald token_version hochgezählt ist, schlagen alle alten Tokens fehl.
     """
     _bump_token_version(db, current_user.id)
     db.commit()
@@ -352,7 +352,7 @@ def update_me(
     /auth/change-password (mit alter-Passwort-Prüfung).
 
     Sub-Agent-Finding K4: explizite Whitelist als zweite Defense-Schicht
-    zusaetzlich zum UserUpdate-Schema (das `extra=forbid` hat).
+    zusätzlich zum UserUpdate-Schema (das `extra=forbid` hat).
     """
     # Whitelist erweitert um is_discoverable (Phase W.9) + postal_code
     # (Phase W.future-tournaments) + country_iso2 (Phase W.country-feld).
@@ -377,9 +377,9 @@ def delete_me(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
-    """DSGVO: User loescht sich selbst inkl. ALLER Daten.
+    """DSGVO: User löscht sich selbst inkl. ALLER Daten.
 
-    Cascade in den Models loescht alle Solves/Sessions/Hardware/
+    Cascade in den Models löscht alle Solves/Sessions/Hardware/
     Achievements/Challenges/Snapshots/Tokens automatisch mit.
     Refresh-Cookie wird gecleart.
     """
@@ -408,7 +408,7 @@ def change_password(
     1. current_password muss korrekt sein (sonst könnte gestohlener
        Access-Token zum Passwort-Hijack benutzt werden)
     2. Nach Erfolg: token_version++ -> ALLE bestehenden JWTs (auch der
-       gerade verwendete!) werden ungueltig
+       gerade verwendete!) werden ungültig
     3. Refresh-Cookie wird auch gelöscht -> User muss neu einloggen
     """
     if not verify_password(payload.current_password, current_user.hashed_password):
@@ -479,7 +479,7 @@ def reset_password(
     """Token aus Mail-Link + neues Passwort -> Passwort setzen.
 
     Sicherheit (Sub-Agent-Finding K2):
-    - Atomares conditional UPDATE auf den Token: gleichzeitig pruefen
+    - Atomares conditional UPDATE auf den Token: gleichzeitig prüfen
       (used_at IS NULL + expires_at > now) UND used_at setzen. Zwei
       parallele Requests können nur einer durch.
     - Generische Fehler (kein Leak ob Token existiert/expired/used)
@@ -487,7 +487,7 @@ def reset_password(
     """
     invalid = HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Reset-Link ist ungueltig oder abgelaufen.",
+        detail="Reset-Link ist ungültig oder abgelaufen.",
     )
 
     # Atomares "claim" des Tokens: nur ein paralleler Aufruf gewinnt.
@@ -530,7 +530,7 @@ def verify_email(
 ) -> Response:
     """Token aus Mail-Link -> Email als verifiziert markieren.
 
-    Bei Email-Change-Flow: setzt zusaetzlich die neue Email-Adresse
+    Bei Email-Change-Flow: setzt zusätzlich die neue Email-Adresse
     (token.new_email kann von user.email abweichen).
 
     Sicherheit (Sub-Agent-Findings K1+K2):
@@ -542,7 +542,7 @@ def verify_email(
     """
     invalid = HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Verifikations-Link ist ungueltig oder abgelaufen.",
+        detail="Verifikations-Link ist ungültig oder abgelaufen.",
     )
 
     # Atomares Token-Claim

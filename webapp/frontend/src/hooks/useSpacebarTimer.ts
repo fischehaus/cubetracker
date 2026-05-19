@@ -7,7 +7,7 @@
 //                inspection → ready/holding
 //   ready      → Space-up zwischendurch nicht erlaubt; nach hold_time_ms
 //                gehts in „holding" (visuell green = go)
-//   holding    → User laesst Space los → running, timer startet
+//   holding    → User lässt Space los → running, timer startet
 //   running    → Space-press → stopped, time gefangen
 //   stopped    → User übernimmt das Save (Hook liefert finalMs);
 //                nächste Space wieder zu idle
@@ -103,7 +103,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
   const playedWarn8Ref = useRef(false);
   const playedWarn12Ref = useRef(false);
   // Multi-Phase: kumulative split-times (vom Start in ms) der bereits
-  // abgeschlossenen Phasen. length = aktuelle Phase die noch laeuft.
+  // abgeschlossenen Phasen. length = aktuelle Phase die noch läuft.
   const splitsRef = useRef<number[]>([]);
   // Inspection double-tap detection: erster Press schedulet single-tap
   // mit Latenz, zweiter Press im Fenster cancelt + reset Inspection.
@@ -171,7 +171,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
         }
         if (settings.inspection_mode === "wca") {
           // WCA: Penalty live setzen, NICHT auto-DNFen — User soll
-          // weiter Space druecken können, Penalty bleibt für Save.
+          // weiter Space drücken können, Penalty bleibt für Save.
           if (elapsed > 17000) setPenalty("DNF");
           else if (elapsed > 15000) setPenalty("+2");
           // Safety: nach 30s ohne reaktion stop the show, Auto-DNF
@@ -249,7 +249,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
           setState("inspection");
           setInspectionLeftMs(settings.inspection_seconds * 1000);
         } else {
-          // Direkt in „ready" (User haelt space)
+          // Direkt in „ready" (User hält space)
           holdStartRef.current = performance.now();
           stateRef.current = "ready";
           setState("ready");
@@ -260,7 +260,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       if (cur === "inspection") {
         // Verhalten je nach inspection_mode (siehe lib/settings.ts).
         if (settings.inspection_mode === "wca") {
-          // WCA-Standard: Single Space → in ready (User haelt jetzt
+          // WCA-Standard: Single Space → in ready (User hält jetzt
           // Space). Penalty wird im RAF-tick basierend auf inspection-
           // elapsed gesetzt (oder hier nochmal als sicherheits-set).
           const elapsed = performance.now() - inspectionStartRef.current;
@@ -311,7 +311,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
 
       if (cur === "running") {
         // Space-press während running:
-        //   - splits_enabled UND noch eine Phase uebrig → Split registrieren, weiter laufen
+        //   - splits_enabled UND noch eine Phase übrig → Split registrieren, weiter laufen
         //   - sonst → stop
         const now = performance.now();
         const cumulativeMs = Math.round(now - runStartRef.current);
@@ -355,7 +355,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       const cur = stateRef.current;
 
       if (cur === "ready") {
-        // User hat space losgelassen — pruefe ob lange genug gehalten
+        // User hat space losgelassen — prüfe ob lange genug gehalten
         const heldMs = performance.now() - holdStartRef.current;
         if (heldMs >= settings.hold_time_ms) {
           // Long enough → start running

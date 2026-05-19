@@ -33,7 +33,7 @@ export function LoginPage() {
         // forgot
         await api.post("/auth/forgot-password", { email });
         setInfo(
-          "Wenn die Email-Adresse registriert ist, ist eine Mail mit Reset-Link unterwegs. Pruefe auch Spam-Ordner.",
+          "Wenn die Email-Adresse registriert ist, ist eine Mail mit Reset-Link unterwegs. Prüfe auch Spam-Ordner.",
         );
       }
     } catch (err: unknown) {
@@ -46,7 +46,7 @@ export function LoginPage() {
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-[620px_1fr] gap-6 lg:gap-10 items-start">
-        {/* Linke Spalte: Logo + Login-Form. Card-Breite 1.5× erhoeht
+        {/* Linke Spalte: Logo + Login-Form. Card-Breite 1.5× erhöht
             damit das Logo entsprechend größer wirkt (User-Wunsch). */}
         <div className="w-full max-w-[600px] mx-auto lg:max-w-none bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
           {/* Logo prominent — wie eine Marken-Visitenkarte. Volle Card-
