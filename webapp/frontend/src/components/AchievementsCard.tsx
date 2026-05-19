@@ -74,7 +74,7 @@ export function AchievementsCard() {
             <p className="font-medium mb-1">Erfolge / Achievements</p>
             <p>
               30+ Personal-Trainer-Ziele in Kategorien (Volume, Speed,
-              Konsistenz, Streaks etc.). Werden automatisch geprueft nach
+              Konsistenz, Streaks etc.). Werden automatisch geprüft nach
               jedem Solve. Verschlossene Erfolge zeigen Hint-Text — gibt
               dir nächstes Trainings-Ziel ohne zu spoilern. „Recheck"
               prueft nochmal alles durch (Backup nach großen Imports).

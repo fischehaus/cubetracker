@@ -123,7 +123,7 @@ export function speakInspectionWarn12s(lang: "de" | "en"): void {
  * nicht von Browser-Autoplay-Policy blockiert werden.
  *
  * Safari iOS-Detail (QA-Befund M#4, 2026-05-17): die SpeechSynthesis-API
- * laedt Stimmen lazy. Wenn man die erste Utterance erst 8s später
+ * lädt Stimmen lazy. Wenn man die erste Utterance erst 8s später
  * abfeuert, wird sie auf iOS gelegentlich stumm verschluckt. Wir feuern
  * deshalb hier eine 0-Volume-Dummy-Utterance ab, damit die Voice-Engine
  * im aktuellen User-Gesture-Kontext bereits warm laeuft.

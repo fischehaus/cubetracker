@@ -182,7 +182,7 @@ def create_solve(
 ) -> Solve:
     """Neuen Solve für aktuellen User anlegen.
 
-    Cross-Refs (session_id, hardware_id) werden auf Ownership geprueft.
+    Cross-Refs (session_id, hardware_id) werden auf Ownership geprüft.
     Achievement-Check + Challenge-Progress + PB-Detect via X-Header.
     """
     _verify_session_ownership(payload.session_id, current_user, db)

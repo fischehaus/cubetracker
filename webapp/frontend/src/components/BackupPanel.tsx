@@ -307,7 +307,7 @@ export function BackupPanel() {
         </div>
 
         {snapshotsQ.isLoading && (
-          <p className="text-sm text-gray-500">Laedt…</p>
+          <p className="text-sm text-gray-500">Lädt…</p>
         )}
         {snapshotsQ.data && snapshotsQ.data.snapshots.length === 0 && (
           <p className="text-sm text-gray-500">
