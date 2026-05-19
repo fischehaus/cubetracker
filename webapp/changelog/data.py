@@ -38,6 +38,33 @@ class PatchNote:
 # Neue Einträge OBEN einfügen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.umlauts-qa",
+        released=date(2026, 5, 19),
+        title="Umlaut-Nachzieher (Bestätigung, Lädt, zwölf, …)",
+        highlights=[
+            "Folge-Welle zur grossen Umlaut-Migration. User-Befunde nach "
+            "Deploy: 'Laedt…' im Boot-Splash + Backup-Loading, 'Bestaetigung' "
+            "unter /Verwaltung/Daten, 'zwoelf' als Voice-Alert-String.",
+            "Audit-Skript extrahiert alle Worte mit ae/ue/oe-Pattern, "
+            "filtert english/Code-Identifier raus, listet echte deutsche "
+            "Treffer. Damit drei zusätzliche Skript-Pässe mit erweiterter "
+            "Wortliste durchgenudelt.",
+            "Direkt User-relevante Fixes: Bestaetigung → Bestätigung (5×), "
+            "zwoelf → zwölf (Voice-Alert auf DE), Loescht → Löscht, "
+            "Empfaenger → Empfänger, Schaetzung → Schätzung. Plus alle "
+            "Endungen (noetig/laeuft/zusaetzlich/pruefen/ungueltig/Laender/"
+            "zuruecksetzen/druecken/Granularitaet/uebrig/fehlschlaegt/"
+            "muehsam/Rueckgabe/faellt/unterstuetzt/zukuenftig/erhoeht/...).",
+            "Gesamt 487 weitere Replacements über 102 Files in 3 Pässen, "
+            "plus 5 manuelle Edits für die letzten Rest-Vorkommen.",
+            "Verbleibende Audit-Treffer sind alle false positives: "
+            "englisch (Query/Request/Issue/continue), Code-Identifier "
+            "(target_value, requester_id, github_issue_*), und deutsche "
+            "Worte ohne Umlaut (neu*/aktuell*/manuell/Quelle/visuell/"
+            "Sequenz/feuer*/Dauer).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.umlauts",
         released=date(2026, 5, 17),
         title="Umlaute zurück (ä, ö, ü, ß) auf der gesamten Webseite",

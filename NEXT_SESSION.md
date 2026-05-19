@@ -110,6 +110,27 @@
 > Scope unter Environment-Tab im Backend-Service). Sonst kein Auto-Issue
 > bei FAIL — bleibt aber graceful.
 >
+> **Folgewellen 2026-05-19/20 (Umlaut-Migration):**
+>   - **W.umlauts** (`c00e2d8`): 1417 Ersetzungen über 164 Files. Deutsche
+>     Texte wieder mit ä/ö/ü/ß statt ASCII-Substituten. Vendor-Files
+>     (cstimer-vendor + scrambow-patched) bleiben unangetastet.
+>   - **W.umlauts (followup)** (`a9408f9`): 5 manuelle Nachzieher
+>     ("Laedt…" → "Lädt…" im Boot-Splash, "geprueft" → "geprüft").
+>   - **W.umlauts-qa** (`1234798`): 487 weitere Replacements über
+>     102 Files in 3 zusätzlichen Skript-Pässen. User-gefundener
+>     Bestätigung-Bug + alle ähnlich übersehenen Worte (noetig/laeuft/
+>     zusaetzlich/Empfaenger/zwoelf/etc.). Audit-Tool unter
+>     `.tmp/umlaut_audit.py` dokumentiert.
+>
+> **PLL-Renderer-Arbeit ist weitergewachsen** (untracked):
+>   - `scripts/pll_cases.py` (~10KB) — PLL-Case-Definitionen
+>   - `scripts/render_collage.py` (~1.3KB)
+>   - `scripts/render_ua_variants.py` (~2.8KB)
+>   - `scripts/render_pll.py` (committed im W.umlauts-Push)
+>   - PLL-Bilder im `webapp/frontend/src/assets/pll/`-Folder.
+>   Geht weiter bei der nächsten Session, dann committen + in den
+>   AlgTrainer einbinden.
+>
 > **Infra-Setup heute:** ntfy.sh als trusted endpoint in
 > `~/.claude/settings.json` (User-Level). Permission-Pattern:
 > `Bash(curl * https://ntfy.sh/*)`. ntfy-Topic: `jjY2OjY` (persoenlich).
