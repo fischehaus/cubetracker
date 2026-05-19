@@ -4,7 +4,7 @@
 //   1. Voll-Export (Download .json)
 //   2. Wiederherstellen aus Backup-Datei (mode=merge default, mode=replace
 //      mit Magic-String-Bestaetigung "DELETE_ALL_MY_DATA")
-//   3. Snapshots (max 2/User) — anlegen, wiederherstellen, loeschen
+//   3. Snapshots (max 2/User) — anlegen, wiederherstellen, löschen
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -155,7 +155,7 @@ export function BackupPanel() {
             <p>
               Voll-Export deiner Daten (Solves, Sessions, Hardware,
               Achievements) als JSON-Datei. Wiederherstellen aus eigenem
-              Backup mit Merge-Modus (nichts wird ueberschrieben) oder
+              Backup mit Merge-Modus (nichts wird überschrieben) oder
               Replace-Modus (alles wird neu geschrieben, mit Confirm-String).
               Snapshots = Wiederherstellungspunkte, max 2 pro User —
               automatisch vor groesseren Operationen (Restore, Bulk-Import).
@@ -178,7 +178,7 @@ export function BackupPanel() {
         <p className="text-sm text-gray-400 mb-3">
           Lesbarer JSON-Export aller deiner Daten — Solves, Sessions,
           Hardware, Achievements, Challenges. Empfohlen vor groesseren
-          Aenderungen + als Backup gegen das 90-Tage-Postgres-Limit.
+          Änderungen + als Backup gegen das 90-Tage-Postgres-Limit.
         </p>
         <button
           onClick={downloadJson}
@@ -311,7 +311,7 @@ export function BackupPanel() {
         )}
         {snapshotsQ.data && snapshotsQ.data.snapshots.length === 0 && (
           <p className="text-sm text-gray-500">
-            Keine Snapshots. Lege einen an, bevor du Daten gross veraenderst.
+            Keine Snapshots. Lege einen an, bevor du Daten groß veraenderst.
           </p>
         )}
         {snapshotsQ.data && snapshotsQ.data.snapshots.length > 0 && (
@@ -352,7 +352,7 @@ export function BackupPanel() {
                   <button
                     onClick={() => {
                       if (
-                        window.confirm(`Snapshot #${s.id} loeschen?`)
+                        window.confirm(`Snapshot #${s.id} löschen?`)
                       ) {
                         deleteSnapshotMut.mutate(s.id);
                       }
@@ -360,7 +360,7 @@ export function BackupPanel() {
                     disabled={deleteSnapshotMut.isPending}
                     className="text-xs rounded border border-gray-600 px-2 py-1 text-gray-300 hover:bg-gray-800 disabled:opacity-50"
                   >
-                    Loeschen
+                    Löschen
                   </button>
                 </div>
               </li>
@@ -387,7 +387,7 @@ function RestoreResultBox({
     <div className={`rounded border ${color} px-3 py-2 text-sm space-y-1`}>
       <div className="font-medium">
         {kind === "dry"
-          ? `Preview (mode=${r.mode}) — wuerde importieren:`
+          ? `Preview (mode=${r.mode}) — würde importieren:`
           : `✅ Restore abgeschlossen (mode=${r.mode}):`}
       </div>
       <ul className="text-xs space-y-0.5 opacity-90">

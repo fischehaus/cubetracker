@@ -1,10 +1,10 @@
-// Pure Funktionen fuer rollende WCA-Averages, clientseitig.
-// Spiegelt die Logik aus backend/stats/calc.py (trim 1 fuer n=5..12, etc.)
+// Pure Funktionen für rollende WCA-Averages, clientseitig.
+// Spiegelt die Logik aus backend/stats/calc.py (trim 1 für n=5..12, etc.)
 // damit die Liste ohne Zusatz-API-Call die ao5/ao12 pro Solve anzeigen kann.
 
 /**
- * Eingabe-Punkt fuer Rolling-Average. Bewusst minimal — wir brauchen nur
- * die Felder, die fuer die WCA-Berechnung relevant sind.
+ * Eingabe-Punkt für Rolling-Average. Bewusst minimal — wir brauchen nur
+ * die Felder, die für die WCA-Berechnung relevant sind.
  */
 export interface SolvePoint {
   time_ms: number;
@@ -52,11 +52,11 @@ export function averageOfN(solves: SolvePoint[]): number | null {
 }
 
 /**
- * Berechnet fuer JEDEN Solve in `solves` den rollenden Average der letzten n.
+ * Berechnet für JEDEN Solve in `solves` den rollenden Average der letzten n.
  *
  * `solves` muss in chronologischer Reihenfolge sein (alt → neu).
- * Fuer Solve an Index i wird das Fenster [i-n+1 ... i] genommen.
- * Fenster, die ueber den Anfang hinausgehen, ergeben null.
+ * Für Solve an Index i wird das Fenster [i-n+1 ... i] genommen.
+ * Fenster, die über den Anfang hinausgehen, ergeben null.
  *
  * Rueckgabe: array gleicher Laenge wie input, jeweils Average oder null.
  */
@@ -77,8 +77,8 @@ export function rollingAverages(
 }
 
 /**
- * Arithmetisches Mittel ohne Trim — fuer mo3 (Mean of 3) und allgemein
- * fuer Werte wo WCA keinen Trim vorschreibt.
+ * Arithmetisches Mittel ohne Trim — für mo3 (Mean of 3) und allgemein
+ * für Werte wo WCA keinen Trim vorschreibt.
  *
  * Liefert null bei:
  *   - weniger als n Solves
@@ -94,8 +94,8 @@ export function meanOfN(solves: SolvePoint[]): number | null {
 
 /**
  * Wie rollingAverages, aber mit Mean (kein Trim).
- * Fuer mo3 (Mean of 3) — gibt es im WCA-Format z.B. bei Big-Cubes
- * (6x6 / 7x7) wo nur 3 Solves pro Round zaehlen.
+ * Für mo3 (Mean of 3) — gibt es im WCA-Format z.B. bei Big-Cubes
+ * (6x6 / 7x7) wo nur 3 Solves pro Round zählen.
  */
 export function rollingMeans(
   solves: SolvePoint[],

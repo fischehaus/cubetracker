@@ -1,6 +1,6 @@
-"""Admin-API (Phase W) — Statistiken fuer App-Betreiber.
+"""Admin-API (Phase W) — Statistiken für App-Betreiber.
 
-Nur fuer User deren Email in der `ADMIN_EMAILS`-Env-Var steht
+Nur für User deren Email in der `ADMIN_EMAILS`-Env-Var steht
 (comma-separated). Andere User: 403.
 
 Endpoints:
@@ -55,30 +55,30 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 # dass ein authentifizierter Angreifer mit gestohlenem Token die teuren
 # COUNT-Queries haemmert.
 ADMIN_LIMIT = "30/minute"
-# Single-User-Mail darf haeufiger gehen (Support-Use-Case), aber nicht
+# Single-User-Mail darf häufiger gehen (Support-Use-Case), aber nicht
 # beliebig (Spam-Schutz falls Admin-Token kompromittiert).
 ADMIN_MAIL_LIMIT = "30/hour"
 # Bulk-Announcement: sehr streng, weil es alle User trifft. 3/h reicht
-# fuer betriebliche Ankuendigungen, killt Account-Takeover-Mailbomb.
+# für betriebliche Ankuendigungen, killt Account-Takeover-Mailbomb.
 ADMIN_ANNOUNCE_LIMIT = "3/hour"
 # QA-Finding M2: synchroner Resend-Loop -> bei vielen Empfaengern
 # Render-Worker-Timeout (>30s). Harter Cap bis Background-Job-Setup.
-# 80 * ~200ms = ~16s. Wenn das ueberschritten wird, sollte ein BG-Job
+# 80 * ~200ms = ~16s. Wenn das überschritten wird, sollte ein BG-Job
 # oder Resend-Batch-Endpoint hin.
 ANNOUNCEMENT_MAX_RECIPIENTS = 80
 
 
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    """FastAPI-Dependency fuer Admin-only-Endpoints.
+    """FastAPI-Dependency für Admin-only-Endpoints.
 
     Phase W.admin-toggle (2026-05-17): prueft jetzt die DB-Spalte
     `users.is_admin` statt ADMIN_EMAILS-Env-Var. Bootstrap-Logic in
-    main.py:lifespan setzt is_admin=TRUE fuer ADMIN_EMAILS-User beim
+    main.py:lifespan setzt is_admin=TRUE für ADMIN_EMAILS-User beim
     Startup.
 
     Sub-Agent-QA-Finding S1 (urspruengliches): als Dependency statt
-    manueller Aufruf im Endpoint-Body — verhindert dass spaetere
-    Admin-Endpoints den Check vergessen koennen.
+    manueller Aufruf im Endpoint-Body — verhindert dass spätere
+    Admin-Endpoints den Check vergessen können.
 
     Sicherheits-Hinweis: liefert generischen 404 (wie bei nicht-existenten
     Endpunkten), kein 403 — verhindert das Probing ob Admin-Endpoint
@@ -99,7 +99,7 @@ def get_admin_stats(
     _admin: User = Depends(require_admin),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Cluster-Statistiken fuer App-Betreiber.
+    """Cluster-Statistiken für App-Betreiber.
 
     Liefert ANONYM aggregierte Daten:
     - User: Counts (total/active/verified/recently-active)
@@ -113,7 +113,7 @@ def get_admin_stats(
 
     Sub-Agent-QA-Finding S4: bei sehr kleinem User-Cluster (<5 User)
     sind Cube-Type-Listen theoretisch deanonymisierbar — akzeptables
-    Restrisiko fuer Friends-Phase. Bei Wachstum: k-anonymity-Threshold
+    Restrisiko für Friends-Phase. Bei Wachstum: k-anonymity-Threshold
     in der Cube-Type-Aggregation.
     """
     now = datetime.now(UTC)
@@ -197,10 +197,10 @@ def get_admin_stats(
 
 
 class AdminUserPatch(BaseModel):
-    """Felder die ein Admin an einem fremden User aendern darf.
+    """Felder die ein Admin an einem fremden User ändern darf.
 
     extra="forbid": Mass-Assignment-Schutz wie bei UserUpdate. Bewusst KEIN
-    email/display_name/password — fuer Email-Change gibt's den User-Flow,
+    email/display_name/password — für Email-Change gibt's den User-Flow,
     Display-Name ist sein Recht, Passwort hat der Admin gar nicht (bcrypt).
 
     Phase W.admin-toggle (2026-05-17): is_admin ist patch-bar — anderen
@@ -256,8 +256,8 @@ def list_users(
 ) -> dict[str, Any]:
     """Alle User mit Aggregaten (Solve-Count, letzter Solve).
 
-    Bewusst kein Pagination — bei <500 User reicht's. Wenn das ueberlaeuft,
-    waere k-anonym-Filter sowieso noetig (siehe S4-Doku).
+    Bewusst kein Pagination — bei <500 User reicht's. Wenn das überläuft,
+    wäre k-anonym-Filter sowieso noetig (siehe S4-Doku).
     """
     # Aggregat: solve_count + max(timestamp) je User in einer Query.
     # LEFT JOIN damit User ohne Solves trotzdem mit count=0 auftauchen.
@@ -299,7 +299,7 @@ def update_user(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
-                "Du kannst dich nicht selbst per Admin-API aendern. "
+                "Du kannst dich nicht selbst per Admin-API ändern. "
                 "Nutze /auth/me oder einen anderen Admin-Account."
             ),
         )
@@ -318,7 +318,7 @@ def update_user(
 
     # Phase W.admin-toggle (2026-05-17), QA-Race-Fix (2026-05-17 abends):
     # Wenn jemand den is_admin-Status entzieht, muss mindestens ein anderer
-    # Admin uebrig bleiben. Bei naivem Count-Check waere das race-condition-
+    # Admin uebrig bleiben. Bei naivem Count-Check wäre das race-condition-
     # anfaellig (zwei parallel Demotes auf vorletzten Admin → beide sehen
     # count=2 → beide gehen durch → 0 Admins).
     #
@@ -336,7 +336,7 @@ def update_user(
         # (der ausfuehrende Admin) muss da sein. admin.id != user.id ist
         # oben schon gechecked, also bleibt admin.id in jedem Fall.
         # Aber: wenn admin_count gerade 2 ist und der dritte concurrente
-        # Request kommt, wuerde der hier mit Lock warten + dann admin_ids
+        # Request kommt, würde der hier mit Lock warten + dann admin_ids
         # neu sehen.
         if user.id in admin_ids and (len(admin_ids) - 1) < 1:
             raise HTTPException(
@@ -348,8 +348,8 @@ def update_user(
             )
 
     # Token-Revocation: Deaktivieren MUSS token_version hochzaehlen, sonst
-    # koennte der gerade gesperrte User mit seinem bestehenden Access-Token
-    # bis zur naechsten /auth/refresh weiter requests machen.
+    # könnte der gerade gesperrte User mit seinem bestehenden Access-Token
+    # bis zur nächsten /auth/refresh weiter requests machen.
     if "is_active" in updates and updates["is_active"] is False and user.is_active:
         user.token_version = (user.token_version or 0) + 1
     if "is_active" in updates:
@@ -385,15 +385,15 @@ def delete_user(
     """Hard-Delete eines fremden Users incl. Cascade (Solves, Sessions,
     Hardware, Achievements, Snapshots, alles).
 
-    Confirm-Mechanik wie bei /backup/restore?mode=replace — muesste man
+    Confirm-Mechanik wie bei /backup/restore?mode=replace — müsste man
     aus Versehen mehrfach in der UI tippen damit's ausgeloest wird.
     DSGVO-Pflicht: User-Recht auf Vergessen, dokumentierte Dauer 30 Tage,
-    wir loeschen sofort. Audit ueber WARNING-Log + Render-Log-Retention.
+    wir löschen sofort. Audit über WARNING-Log + Render-Log-Retention.
     """
     if user_id == admin.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Du kannst dich nicht selbst loeschen.",
+            detail="Du kannst dich nicht selbst löschen.",
         )
     expected_confirm = f"DELETE_USER_{user_id}"
     if confirm != expected_confirm:
@@ -465,7 +465,7 @@ def send_announcement(
 ) -> dict[str, Any]:
     """Bulk-Mail an alle AKTIVEN User mit verifizierter Email.
 
-    dry_run liefert nur die Empfaenger-Zahl, kein Versand. Praktisch fuer
+    dry_run liefert nur die Empfaenger-Zahl, kein Versand. Praktisch für
     Pre-Check ("an wieviele schicke ich?") bevor man den echten Knopf
     drueckt.
 
@@ -489,7 +489,7 @@ def send_announcement(
             "over_cap": len(recipients) > ANNOUNCEMENT_MAX_RECIPIENTS,
         }
 
-    # QA-Finding M2: harter Cap gegen Worker-Timeout. Wenn das ueberschritten
+    # QA-Finding M2: harter Cap gegen Worker-Timeout. Wenn das überschritten
     # wird, ist ein Background-Job-Setup faellig (siehe Code-Kommentar oben).
     if len(recipients) > ANNOUNCEMENT_MAX_RECIPIENTS:
         raise HTTPException(
@@ -525,7 +525,7 @@ def send_announcement(
         "recipient_count": len(recipients),
         "sent": sent,
         "failed": failed,
-        # nur die ersten 20 Fehler-Details zurueck, sonst kann der Response
+        # nur die ersten 20 Fehler-Details zurück, sonst kann der Response
         # bei vielen Empfaengern riesig werden
         "failures": failures[:20],
     }
@@ -602,7 +602,7 @@ def create_live_test(
 
 def _sync_live_test_to_github(test_id: int, admin_email: str) -> None:
     """Background-Task: erstellt Issue (wenn noch keiner verknuepft) oder
-    postet Comment (wenn user_response sich aendert + Issue existiert).
+    postet Comment (wenn user_response sich ändert + Issue existiert).
 
     Eigene DB-Session, weil die Request-Session beim Background-Run
     schon geschlossen ist. Idempotent — checkt erneut DB-Stand vor
@@ -619,7 +619,7 @@ def _sync_live_test_to_github(test_id: int, admin_email: str) -> None:
             return
         if test.status != "fail" or not test.user_response:
             return
-        # Re-fetch User fuer den admin_email (Logging)
+        # Re-fetch User für den admin_email (Logging)
         if test.github_issue_url is None:
             # Erst-Erstellung
             issue_title = f"[Live-Test FAIL] {test.title}"
@@ -654,7 +654,7 @@ def _sync_live_test_to_github(test_id: int, admin_email: str) -> None:
 
 
 def _build_issue_body_static(test: LiveTest, admin_email: str) -> str:
-    """Strukturierter Markdown-Issue-Body fuer einen FAIL-Live-Test.
+    """Strukturierter Markdown-Issue-Body für einen FAIL-Live-Test.
     Wird vom Background-Task (kein FastAPI-Dependency-Injection) aufgerufen,
     nimmt deshalb admin_email statt User-Objekt entgegen."""
     parts = [
@@ -704,7 +704,7 @@ def update_live_test(
 
     Phase 3 (W.live-tests, 2026-05-17): bei status=fail UND user_response
     gesetzt → Auto-Create GitHub-Issue (wenn noch keiner verknuepft).
-    Bei spaeteren PATCHes auf bereits-FAIL-Tests: add_comment statt
+    Bei späteren PATCHes auf bereits-FAIL-Tests: add_comment statt
     create_issue. Graceful Degradation wenn GITHUB_TOKEN fehlt — Test
     wird trotzdem gespeichert, nur ohne Issue-Link.
     """
@@ -722,7 +722,7 @@ def update_live_test(
     # QA-Fix (2026-05-17 abends): responded_at ist die "wann hat der Admin
     # den Test wirklich getestet"-Zeit. Wird NUR bei Status-Change gesetzt,
     # nicht bei reinen Notiz-Updates. Sonst Verwirrung: "Test-Datum verschiebt
-    # sich rueckwirkend wenn ich 3 Tage spaeter die Notiz korrigiere".
+    # sich rueckwirkend wenn ich 3 Tage später die Notiz korrigiere".
     if "status" in updates:
         test.status = updates["status"]
         test.responded_at = datetime.now(UTC)
@@ -749,7 +749,7 @@ def update_live_test(
     # QA-Fix (2026-05-17 abends): Aufruf jetzt asynchron via BackgroundTasks.
     # User-API-Response geht sofort raus, GitHub-Call laeuft im Hintergrund
     # mit eigener DB-Session. Verhindert Worker-Block bei GitHub-Latenz.
-    # User sieht github_issue_url beim naechsten Refresh (typisch <2s).
+    # User sieht github_issue_url beim nächsten Refresh (typisch <2s).
     if test.status == "fail" and test.user_response:
         # Trigger nur wenn entweder Erst-Erstellung (kein Issue) ODER
         # user_response in diesem Patch geupdated wurde (-> Comment).
@@ -769,7 +769,7 @@ def delete_live_test(
     admin: User = Depends(require_admin),
     db: OrmSession = Depends(get_db),
 ) -> None:
-    """Loescht einen Live-Test. Kein Confirm noetig — Test-Eintraege sind
+    """Loescht einen Live-Test. Kein Confirm noetig — Test-Einträge sind
     keine User-Daten."""
     test = db.get(LiveTest, test_id)
     if test is None:

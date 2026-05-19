@@ -1,13 +1,13 @@
 // FeedbackModal (Phase W.feedback, 2026-05-17).
 //
 // Zwei Wege parallel anbieten:
-//   1. GitHub-Issue-Form (oeffnet in neuem Tab) — Profi-User mit
-//      GitHub-Account, alle anderen sehen den Issue spaeter mit.
-//   2. App-internes Email-Form — fuer Casual-User. Backend schickt
+//   1. GitHub-Issue-Form (öffnet in neuem Tab) — Profi-User mit
+//      GitHub-Account, alle anderen sehen den Issue später mit.
+//   2. App-internes Email-Form — für Casual-User. Backend schickt
 //      Email an den Admin via Resend.
 //
-// Layout: Tab-Toggle GitHub / Email mit kurzer Erklaerung warum man
-// welchen waehlen sollte.
+// Layout: Tab-Toggle GitHub / Email mit kurzer Erklärung warum man
+// welchen wählen sollte.
 
 import { useState, type FormEvent } from "react";
 import { useSubmitFeedback, type FeedbackType } from "../lib/api";
@@ -89,17 +89,17 @@ function GitHubMode({ onClose: _onClose }: { onClose: () => void }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-300">
-        Im GitHub-Issue-Tracker landen alle Reports oeffentlich + andere
-        User sehen + kommentieren mit. Bevorzugt fuer:
+        Im GitHub-Issue-Tracker landen alle Reports öffentlich + andere
+        User sehen + kommentieren mit. Bevorzugt für:
       </p>
       <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
         <li>Bug-Reports mit Reproduzier-Schritten</li>
-        <li>Feature-Wuensche bei denen Diskussion sinnvoll ist</li>
+        <li>Feature-Wünsche bei denen Diskussion sinnvoll ist</li>
         <li>Du hast schon einen GitHub-Account</li>
       </ul>
       <p className="text-sm text-gray-300">
-        Wir haben Templates fuer Bug-Report + Feature-Wunsch, die dich
-        Schritt-fuer-Schritt durch die wichtigen Fragen fuehren.
+        Wir haben Templates für Bug-Report + Feature-Wunsch, die dich
+        Schritt-für-Schritt durch die wichtigen Fragen fuehren.
       </p>
 
       <div className="flex flex-wrap gap-3 pt-2">
@@ -165,7 +165,7 @@ function EmailMode({ onClose }: { onClose: () => void }) {
       <p className="text-sm text-gray-300">
         Schreib einfach was du hast — wir schicken das als Email an den
         Entwickler. Deine Email-Adresse (aus dem Account) wird mitgesendet,
-        damit wir antworten koennen.
+        damit wir antworten können.
       </p>
 
       <label className="block">
@@ -202,7 +202,7 @@ function EmailMode({ onClose }: { onClose: () => void }) {
 
       {submit.isSuccess && (
         <div className="rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">
-          ✓ Feedback gesendet. Danke! Wir antworten so bald wir koennen.
+          ✓ Feedback gesendet. Danke! Wir antworten so bald wir können.
         </div>
       )}
 

@@ -1,10 +1,10 @@
-// Audio-Beeps fuer den Spacebar-Timer (Phase 8.2).
+// Audio-Beeps für den Spacebar-Timer (Phase 8.2).
 //
 // Web Audio API mit Sinus-Toenen — kein File-Asset noetig, klein und
 // verstandlich. Drei Sound-Typen:
 //   - inspection-warn-8s : kurzer mid-frequency beep (Vorwarnung)
 //   - inspection-warn-12s: zwei beeps in Folge (dringende Warnung)
-//   - solve-stop         : kein default — hier nur als Hook fuer spaetere
+//   - solve-stop         : kein default — hier nur als Hook für spätere
 //                          Erweiterung dokumentiert (z.B. PB-Sound)
 //
 // Implementation: lazy AudioContext (User-Gesture-Anforderung). Ein
@@ -91,9 +91,9 @@ function speak(text: string, lang: "de" | "en"): void {
   if (!synth) return;
   try {
     // KEIN synth.cancel() — die SpeechSynthesis-Queue ist global pro Tab.
-    // Cancel wuerde auch Screen-Reader-Ansagen (NVDA / VoiceOver / TalkBack)
-    // killen, die parallel laufen koennten. "acht" ist <500ms; bei 4s
-    // Abstand bis "zwoelf" ist die Wahrscheinlichkeit fuer Overlap minimal,
+    // Cancel würde auch Screen-Reader-Ansagen (NVDA / VoiceOver / TalkBack)
+    // killen, die parallel laufen könnten. "acht" ist <500ms; bei 4s
+    // Abstand bis "zwoelf" ist die Wahrscheinlichkeit für Overlap minimal,
     // und selbst dann werden beide Worte sequentiell ausgegeben — der User
     // verpasst nichts.
     const utter = new SpeechSynthesisUtterance(text);
@@ -119,11 +119,11 @@ export function speakInspectionWarn12s(lang: "de" | "en"): void {
 
 /**
  * Initialisiert AudioContext + speechSynthesis bei einem User-Gesture.
- * Wird aufgerufen bei erstem Spacebar-Press, damit spaetere Beeps
+ * Wird aufgerufen bei erstem Spacebar-Press, damit spätere Beeps
  * nicht von Browser-Autoplay-Policy blockiert werden.
  *
  * Safari iOS-Detail (QA-Befund M#4, 2026-05-17): die SpeechSynthesis-API
- * laedt Stimmen lazy. Wenn man die erste Utterance erst 8s spaeter
+ * laedt Stimmen lazy. Wenn man die erste Utterance erst 8s später
  * abfeuert, wird sie auf iOS gelegentlich stumm verschluckt. Wir feuern
  * deshalb hier eine 0-Volume-Dummy-Utterance ab, damit die Voice-Engine
  * im aktuellen User-Gesture-Kontext bereits warm laeuft.

@@ -70,15 +70,15 @@ export function parseTimeInput(input: string): number | null {
 /**
  * Interne Helper: Zifferkette nach csTimer-Stackmat-Regel parsen.
  * - Letzte 2 Ziffern  = Hundertstel
- * - Naechste 2 Ziffern = Sekunden
+ * - Nächste 2 Ziffern = Sekunden
  * - Rest             = Minuten
  *
- * Sekunden- und Hundertstel-Teile duerfen logisch jeden Wert annehmen
+ * Sekunden- und Hundertstel-Teile dürfen logisch jeden Wert annehmen
  * (User schreibt was er tippt — z.B. "1099" → 10.99s, valide).
  */
 function parseDigitsOnly(digits: string): number | null {
   if (!digits) return null;
-  const padded = digits.padStart(2, "0"); // mind. 2 Ziffern fuer centi
+  const padded = digits.padStart(2, "0"); // mind. 2 Ziffern für centi
   const centi = parseInt(padded.slice(-2), 10);
   const rest = padded.slice(0, -2);
   let seconds = 0;
@@ -108,13 +108,13 @@ export function formatDate(iso: string): string {
 }
 
 /**
- * Standard-Liste haeufiger Cube-Types (Reihenfolge fuer Dropdown-Default).
+ * Standard-Liste häufiger Cube-Types (Reihenfolge für Dropdown-Default).
  * User kann beliebige andere Strings im POST schicken — das hier ist nur UX.
  *
  * Erweitert in Phase W.cstimer-more-puzzles-qa (2026-05-17) um die 11
- * inoffiziellen Cubes die ueber csTimer-Vendor Scrambles bekommen. Vorher
- * konnten User diese im Scramble-Picker waehlen, aber NICHT als cube_type
- * fuer Solve-Speicherung setzen → Solves landen unter falschem Type
+ * inoffiziellen Cubes die über csTimer-Vendor Scrambles bekommen. Vorher
+ * konnten User diese im Scramble-Picker wählen, aber NICHT als cube_type
+ * für Solve-Speicherung setzen → Solves landen unter falschem Type
  * (QA-Befund #1 vom 2026-05-17).
  */
 export const COMMON_CUBE_TYPES = [

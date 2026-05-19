@@ -1,4 +1,4 @@
-// Tests fuer Chart-Domain-Berechnung.
+// Tests für Chart-Domain-Berechnung.
 
 import { describe, expect, it } from "vitest";
 import { computeYDomain, parseSecondsToMs, percentile } from "./chart-utils";
@@ -50,7 +50,7 @@ describe("computeYDomain — Zweck: Verlauf gut lesbar machen", () => {
     expect(hi).toBeLessThan(13000);
   });
 
-  it("padding macht Domain ein bisschen groesser als Datenbereich", () => {
+  it("padding macht Domain ein bisschen größer als Datenbereich", () => {
     const values = Array.from({ length: 50 }, (_, i) => 10000 + i * 100);
     // p2..p98 von 50 werten: ~10100..14800
     const [lo, hi] = computeYDomain(values, 0.05);

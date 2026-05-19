@@ -1,4 +1,4 @@
-// Dropdown zum Auswaehlen der aktiven Session.
+// Dropdown zum Auswählen der aktiven Session.
 // Wert wird vom Parent verwaltet (controlled component).
 
 import { useSessions } from "../lib/api";

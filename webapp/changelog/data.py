@@ -1,8 +1,8 @@
 """Patch-Notes als Single-Source-of-Truth.
 
 Konvention seit 2026-05-14:
-  - Bei JEDER Aenderung neuer Eintrag oben in PATCH_NOTES.
-  - `version` folgt SemVer-Schema `2.0.0-alpha.W.X.Y` waehrend Multi-User-
+  - Bei JEDER Änderung neuer Eintrag oben in PATCH_NOTES.
+  - `version` folgt SemVer-Schema `2.0.0-alpha.W.X.Y` während Multi-User-
     Web-Phase. v2.0.0 sobald Hetzner-Migration durch + Feature-Set stable.
   - `__version__` in main.py wird automatisch aus PATCH_NOTES[0].version
     abgeleitet — damit "vergisst man nicht" die Versionsnummer hochzuziehen.
@@ -14,7 +14,7 @@ Format:
         released=date(2026, 5, 14),
         title="Kurzer Titel",
         highlights=["Aufzaehlungs-Punkt 1", "Punkt 2"],
-        commit="abc1234",  # optional, fuer Cross-Reference
+        commit="abc1234",  # optional, für Cross-Reference
     )
 
 KEINE Markdown im title/highlights — Frontend rendert als plain text.
@@ -35,8 +35,30 @@ class PatchNote:
     commit: str | None = None
 
 
-# Neue Eintraege OBEN einfuegen — PATCH_NOTES[0] = neueste Version.
+# Neue Einträge OBEN einfügen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
+    PatchNote(
+        version="2.0.0-alpha.W.umlauts",
+        released=date(2026, 5, 17),
+        title="Umlaute zurück (ä, ö, ü, ß) auf der gesamten Webseite",
+        highlights=[
+            "User-Wunsch: deutsche Texte sollen wieder mit Umlauten "
+            "geschrieben werden, nicht mit den ASCII-Substituten "
+            "(ae/ue/oe/ss). Betrifft alle User-sichtbaren Strings — "
+            "UI-Labels, Tooltips, Patch-Notes, Roadmap, Features-Liste.",
+            "1417 Ersetzungen über 140+ Files (Frontend .ts/.tsx + "
+            "Backend .py). Skript-getrieben mit kuratierter Wortliste "
+            "von ~250 deutschen Worten und deren ASCII-Vorgänger-Form.",
+            "Sicher gehalten: Vendor-Files (cstimer-vendor/ + "
+            "scrambow-patched.*) bleiben unangetastet — GPL-Code und "
+            "3rd-Party-Patches in Originalschreibweise. Tests 158/158 "
+            "weiterhin grün, Backend startet sauber.",
+            "Konvention ab jetzt: deutsche Texte mit Umlauten + ß. "
+            "Code-Identifier (Variablen, Funktionen, Konstanten) "
+            "bleiben weiterhin ASCII — kein 'Größe = ...' als "
+            "Variable-Name.",
+        ],
+    ),
     PatchNote(
         version="2.0.0-alpha.W.admin-workflow-qa",
         released=date(2026, 5, 17),
@@ -47,14 +69,14 @@ PATCH_NOTES: list[PatchNote] = [
             "2 NICE sofort gefixt, 2 SOLLTE als Roadmap.",
             "KRITISCH #1: Race-Condition beim 'letzter Admin'-Safeguard "
             "wurde mit SELECT ... FOR UPDATE behoben. Zwei parallele "
-            "Demotes auf den vorletzten Admin koennen jetzt nicht mehr "
+            "Demotes auf den vorletzten Admin können jetzt nicht mehr "
             "beide durchgehen — Lock greift, zweiter Request wartet + "
             "sieht aktualisierten Stand. Postgres-native row-level locking.",
             "KRITISCH #2 (Alembic-Replacement): aufgeschoben als Roadmap-"
             "Item in P6. Risiko aktuell niedrig (IS_PROD-Gate + Postgres-"
             "Prod), aber Lesson notiert.",
             "SOLLTE: responded_at wird jetzt NUR bei Status-Change "
-            "ueberschrieben, nicht bei reinen Notiz-Updates. 'Wann war "
+            "überschrieben, nicht bei reinen Notiz-Updates. 'Wann war "
             "der Test wirklich' bleibt stabil.",
             "SOLLTE: GitHub-API-Calls jetzt asynchron via FastAPI-"
             "BackgroundTasks mit eigener DB-Session. User-Response geht "
@@ -66,7 +88,7 @@ PATCH_NOTES: list[PatchNote] = [
             "SOLLTE: confirm()-Dialog in AdminLiveTestsPanel raus, "
             "2-Klick-Pattern rein (analog BigTimerInput-Fix). Button "
             "wechselt zu 'Wirklich?' (rot-pulsierend), 5s-Auto-Reset.",
-            "NICE: Skip-Filter-Pill in der Liste ergaenzt. "
+            "NICE: Skip-Filter-Pill in der Liste ergänzt. "
             "title[:256] statt vorher willkuerlichem [:200].",
             "Roadmap-Items neu: Backend-Test-Suite einfuehren (aktuell "
             "0% Test-Coverage auf Backend!) + Alembic-Migration "
@@ -79,7 +101,7 @@ PATCH_NOTES: list[PatchNote] = [
         title="Live-Test-FAIL → automatisches GitHub-Issue (Phase 3 von 3)",
         highlights=[
             "Schliesst den Live-Test-Loop. Bei FAIL + Notiz wird "
-            "automatisch ein GitHub-Issue im Repo erstellt — der naechste "
+            "automatisch ein GitHub-Issue im Repo erstellt — der nächste "
             "Fix-Schritt landet sofort als trackbares Issue.",
             "Neues Modul: services/github.py mit create_issue() + "
             "add_comment(). Nutzt httpx (haben wir schon), GitHub-API-"
@@ -93,7 +115,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Notiz + Welle/Commit/Tag-Kontext) → create_issue mit "
             "Labels 'live-test-fail' + 'automated' + 'phase:W.xyz'. "
             "Issue-URL + Nummer wird in DB gespeichert.",
-            "Update-Logik: bei spaeteren PATCHes auf einem bereits-FAIL-"
+            "Update-Logik: bei späteren PATCHes auf einem bereits-FAIL-"
             "Test mit existierendem Issue → add_comment() statt erneutem "
             "create. So bleibt der Issue-Thread synchron mit den Admin-"
             "Notizen.",
@@ -113,14 +135,14 @@ PATCH_NOTES: list[PatchNote] = [
         highlights=[
             "Loest ein echtes Workflow-Problem: Test-Hinweise aus Claude-"
             "Deploys ('Phone-Test: X, Y, Z bitte') verlieren sich aktuell "
-            "im Chat. Bei Compaction weg, bei naechster Session vergessen. "
+            "im Chat. Bei Compaction weg, bei nächster Session vergessen. "
             "Phone-Tests passieren oft nicht.",
             "Neuer Panel im Admin-Bereich: Liste aller Live-Tests mit "
             "Filter (Offen / Alle / Pass / Fail). Pro Test: Titel + "
             "Beschreibung + Status-Badge + Notiz + Aktionen "
             "(PASS / FAIL / SKIP / Reopen).",
             "Workflow: Claude sagt im Chat 'teste bitte X'. Du klickst "
-            "'+ Neu', paste Title + Beschreibung. Spaeter testest du auf "
+            "'+ Neu', paste Title + Beschreibung. Später testest du auf "
             "Phone, klickst PASS oder FAIL+Notiz. Notiz kann jederzeit "
             "editiert werden.",
             "Datenmodell: neue Tabelle live_tests (id, title, description, "
@@ -133,7 +155,7 @@ PATCH_NOTES: list[PatchNote] = [
             "30/min Rate-Limit.",
             "Phase 3 (kommt noch): bei FAIL + Notiz wird automatisch ein "
             "GitHub-Issue erstellt (mit GITHUB_TOKEN-Env-Var). Aktuell "
-            "wird github_issue_url-Feld nur fuer manuelle Eintraege "
+            "wird github_issue_url-Feld nur für manuelle Einträge "
             "vorbereitet.",
             "Bundle-Impact: +2.3KB gzipped (Panel + Hooks). Total "
             "Bundle jetzt 420KB gz.",
@@ -144,7 +166,7 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 17),
         title="Admin-Status via UI toggeln (statt nur ADMIN_EMAILS-Env-Var)",
         highlights=[
-            "Phase 1 von 3 fuer das Admin-Workflow-Refactor. Vorher: "
+            "Phase 1 von 3 für das Admin-Workflow-Refactor. Vorher: "
             "Admin-Status war computed property aus der ADMIN_EMAILS-Env-"
             "Var auf Render. Wer rein/raus wollte, brauchte Env-Var-Edit "
             "+ Server-Restart. Jetzt: DB-Spalte users.is_admin + Toggle "
@@ -154,11 +176,11 @@ PATCH_NOTES: list[PatchNote] = [
             "is_admin=TRUE beim ersten Startup). Idempotent — bestehende "
             "Promotes/Demotes bleiben unangetastet.",
             "Neuer Button in AdminUsersPanel-Tabelle: '★ Admin abnehmen' / "
-            "'☆ Admin machen' pro User-Zeile (ausser fuer sich selbst).",
+            "'☆ Admin machen' pro User-Zeile (ausser für sich selbst).",
             "Safeguard: letzter Admin kann sich nicht entzogen werden — "
             "Backend wirft 400 wenn nach Demote keine Admins mehr uebrig "
             "waeren. Aussperren-Risiko gebannt.",
-            "Naechste Phasen: Live-Test-Liste im Admin-Bereich (Phase 2) "
+            "Nächste Phasen: Live-Test-Liste im Admin-Bereich (Phase 2) "
             "+ GitHub-Issue-Auto-Create bei FAIL (Phase 3). Kommen "
             "separat um kleinere Iterationen zu fahren.",
         ],
@@ -172,8 +194,8 @@ PATCH_NOTES: list[PatchNote] = [
             "Davon 1 KRITISCH + 3 SOLLTE + 2 NICE sofort gefixt, 2 SOLLTE "
             "als Roadmap-Items dokumentiert.",
             "KRITISCH #1: COMMON_CUBE_TYPES enthielt die neuen Cubes nicht "
-            "— User konnte sie im Scramble-Picker waehlen, aber NICHT als "
-            "cube_type fuer Solve-Speicherung setzen. Ergaenzt: Ivy, Gear, "
+            "— User konnte sie im Scramble-Picker wählen, aber NICHT als "
+            "cube_type für Solve-Speicherung setzen. Ergänzt: Ivy, Gear, "
             "Redi, Master Pyraminx, Master Skewb, FTO, Dino, Floppy, Tower. "
             "Plus cubeTypeToScrambowType-Cases.",
             "SOLLTE #2: 'Bandaged 3x3 (Square)'-Label war falsch — csTimer "
@@ -182,14 +204,14 @@ PATCH_NOTES: list[PatchNote] = [
             "QA-Runtime-Check hat aufgedeckt: 7 von 11 neuen Cubes "
             "(helicopter/gigaminx/bicube/bandaged-sq1/square-2/curvy-copter/"
             "diamond) returnen leerstring und Megaminx-RS returnt null, "
-            "weil src/js/solver/-Files nicht vendored sind. Saubere Loesung: "
+            "weil src/js/solver/-Files nicht vendored sind. Saubere Lösung: "
             "vorerst raus aus UI, in Roadmap als P6-Item mit Solver-"
             "Vendoring-Aufwand notiert.",
             "Nach Cleanup: inoffizielle Cube-Liste wieder bei 9 (statt 16): "
             "Ivy, Gear, Redi, Master Pyraminx, Master Skewb, FTO, Dino, "
             "Floppy, Tower. Alle 8 davon mit Random-State (master_skewb "
             "weiter Random-Move).",
-            "SOLLTE #5: ScrambleNet zeigt jetzt auch 2D-Net fuer OH + 3BLD "
+            "SOLLTE #5: ScrambleNet zeigt jetzt auch 2D-Net für OH + 3BLD "
             "(beides mechanisch 3x3-Scrambles).",
             "SOLLTE #6: Test-Whitelist statt nur 'non-empty' — faengt "
             "Bug-Klassen wie '???' oder leerstring ab. Eigenes mgmso-Test "
@@ -202,7 +224,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Bundle jetzt 418KB gz (vorher 432).",
             "Lesson: Vendor-Smoke-Tests nicht nur 'registered' pruefen, "
             "sondern auch 'liefert valide non-empty Output'. Im aktuellen "
-            "Test-File ergaenzt.",
+            "Test-File ergänzt.",
         ],
     ),
     PatchNote(
@@ -215,24 +237,24 @@ PATCH_NOTES: list[PatchNote] = [
             "Neu via vendored csTimer (kleine Files): Dino Cube, Floppy "
             "Cube (1x3x3), Tower Cube (2x2x3). Plus: Megaminx hat jetzt "
             "echte Random-State (vorher scrambow random-move) — Quality-"
-            "Upgrade fuer den WCA-Cube.",
+            "Upgrade für den WCA-Cube.",
             "Neu via vendored csTimer (utilscramble.js): Helicopter Cube, "
             "Gigaminx (5x5 Megaminx), Bicube, Bandaged 3x3, Square-2, "
             "Curvy Copter, Diamond Cube. Sammler-Puzzles auf einmal "
-            "verfuegbar.",
+            "verfügbar.",
             "Alle 11 neuen Cubes haben Random-State-Scrambles (= Mindest-"
             "Distanz garantiert) — der „nicht WCA-Quality\"-Disclaimer "
-            "im Scramble-Picker greift jetzt NUR noch fuer Master Skewb.",
+            "im Scramble-Picker greift jetzt NUR noch für Master Skewb.",
             "Bundle-Impact: +46KB raw / +16KB gzipped (grouplib + "
             "poly3dlib + utilscramble + 3 Mini-Files). Insgesamt nutzt "
             "Cubetracker jetzt 7 csTimer-Modul-Files (gearcube, redi, "
             "pyraminx, skewb, mgmlsll, megaminx, utilscramble) plus die "
             "Foundation-Files (mathlib, scramble, isaac, grouplib, "
             "poly3dlib).",
-            "Geplant fuer P4 Power-User-Phase: 3x3-/4x4-Trainer-Subsets "
+            "Geplant für P4 Power-User-Phase: 3x3-/4x4-Trainer-Subsets "
             "via csTimer (ZBLL, ZBLS, VLS, COLL, Roux, EOline, 2gen, CTO, "
             "EDO, ELL, ...). scramble_333_edit.js + scramble_444.js sind "
-            "groesser (36KB + 77KB) — daher als zukuenftige Phase, nicht "
+            "größer (36KB + 77KB) — daher als zukuenftige Phase, nicht "
             "als Quick-Win.",
         ],
     ),
@@ -243,26 +265,26 @@ PATCH_NOTES: list[PatchNote] = [
         highlights=[
             "User-Beobachtung: csTimer kann Ivy-Cube scramblen. Bei der "
             "ersten Recherche zum Vendor-Port hatte ich nur nach 'ivy.js' "
-            "gesucht — der Ivy-Scrambler ist aber ueberraschend im "
+            "gesucht — der Ivy-Scrambler ist aber überraschend im "
             "skewb.js-File mit-versteckt (registriert via "
             "`scrMgr.reg(['ivyo', 'ivyso'], ...)` am Ende der Datei).",
-            "Konsequenz: Ivy laeuft jetzt ueber csTimer ('ivyso' = Random-"
+            "Konsequenz: Ivy laeuft jetzt über csTimer ('ivyso' = Random-"
             "State). Unser Eigenbau-BFS-Solver (ivyScramble.ts mit 29.160-"
             "State-Lookup-Tabelle) bleibt als defensiver Fallback hinter "
             "csTimer im Cascade. Wenn csTimer crashen sollte, springt "
             "automatisch der Eigenbau ein.",
             "Vorteil: Konsistenz mit Gear / Redi / Master Pyraminx. "
             "Identischer Scramble-Style wie bei csTimer-Usern.",
-            "Kein 2D-Net fuer Ivy: unser Renderer (ScrambleNet) kann "
+            "Kein 2D-Net für Ivy: unser Renderer (ScrambleNet) kann "
             "aktuell nur 3x3. csTimer rendert Ivy auch nicht in 2D. "
-            "Wenn das jemand vermisst, koennen wir's spaeter selbst bauen "
+            "Wenn das jemand vermisst, können wir's später selbst bauen "
             "(~1 Tag, Ivy-Geometrie = 4 dreieckige Faces + 4 Eck-Caps).",
         ],
     ),
     PatchNote(
         version="2.0.0-alpha.W.cstimer-vendor",
         released=date(2026, 5, 17),
-        title="csTimer-Scrambles fuer Gear / Redi / Master Pyraminx",
+        title="csTimer-Scrambles für Gear / Redi / Master Pyraminx",
         highlights=[
             "Direkter Folge-Schritt nach der GPL-Migration. csTimer-"
             "Source-Files vendored unter webapp/frontend/src/lib/"
@@ -278,10 +300,10 @@ PATCH_NOTES: list[PatchNote] = [
             "Skewb-Generator (mgmlsll.js ist Megaminx-LSLL, nicht "
             "Master Skewb).",
             "Bundle-Impact: +52KB raw / +19KB gzipped (mathlib+isaac "
-            "sind die groessten Brocken). Vergleich: cubing.js waere "
+            "sind die groessten Brocken). Vergleich: cubing.js wäre "
             "~150-500KB gewesen.",
             "Disclaimer 'kein Random-State'-Hinweis wird jetzt NUR "
-            "fuer Master Skewb angezeigt (vorher fuer alle inoffiziellen "
+            "für Master Skewb angezeigt (vorher für alle inoffiziellen "
             "Custom-Puzzles).",
             "Lessons applied: csTimer-Source-Files sind reines pure-JS "
             "(IIFE-Pattern, kein Buffer/Node). Der cstimer_module-NPM-"
@@ -295,41 +317,41 @@ PATCH_NOTES: list[PatchNote] = [
         title="Lizenz-Migration auf GPL-3.0-or-later",
         highlights=[
             "Cubetracker steht ab heute unter GNU General Public "
-            "License v3 (oder spaeter). Vorher war kein expliziter "
+            "License v3 (oder später). Vorher war kein expliziter "
             "Lizenz-Eintrag im Repo, was per Default 'all rights "
             "reserved' bedeutet hat.",
-            "Hintergrund: Vorbereitung fuer die Integration von "
-            "csTimer-Scramble-Algorithmen (selbst GPL-v3) fuer "
+            "Hintergrund: Vorbereitung für die Integration von "
+            "csTimer-Scramble-Algorithmen (selbst GPL-v3) für "
             "inoffizielle Puzzles wie Gear, Redi, Master Pyraminx, "
             "Master Skewb. GPL ist Copyleft — alles was csTimer-"
             "Code beinhaltet, muss komplett GPL sein.",
-            "Was sich aendert: LICENSE-File im Repo (GPL-v3 "
+            "Was sich ändert: LICENSE-File im Repo (GPL-v3 "
             "Volltext), license-Field in package.json + pyproject.toml, "
             "README-Sektion umgeschrieben.",
             "Was bleibt: Source ist eh schon public auf GitHub, "
             "die App ist non-commercial. GPL passt zum Speedcubing-"
             "Community-Ethos.",
-            "Konsequenz: Forks/Derivate muessen ebenfalls GPL-v3 "
+            "Konsequenz: Forks/Derivate müssen ebenfalls GPL-v3 "
             "(oder kompatibel) sein. Keine proprietaeren Closed-"
-            "Source-Forks moeglich. Re-Lizenzierung waere nur mit "
-            "Zustimmung aller Contributor moeglich — einseitiger "
+            "Source-Forks möglich. Re-Lizenzierung wäre nur mit "
+            "Zustimmung aller Contributor möglich — einseitiger "
             "Schritt, bewusst.",
         ],
     ),
     PatchNote(
         version="2.0.0-alpha.W.scramble-image-toggle",
         released=date(2026, 5, 17),
-        title="Schnell-Toggle fuer das 2D-Net direkt im /timer-Tab",
+        title="Schnell-Toggle für das 2D-Net direkt im /timer-Tab",
         highlights=[
             "Direkter Folge-Iteration zum 2D-Net (scramble-image): "
             "Bild ein/aus geht jetzt mit einem Klick in der "
-            "ScrambleCard, ohne den Umweg ueber /einstellungen/Timer.",
+            "ScrambleCard, ohne den Umweg über /einstellungen/Timer.",
             "Button 'Bild an' / 'Bild aus' sitzt neben 'Eigene' und "
             "'Skip'. Visualer State: aktiviert (lila Highlight) wenn "
             "das Bild eingeblendet ist, dim wenn aus.",
-            "Erscheint NUR fuer Cube-Types, fuer die das 2D-Net "
-            "ueberhaupt rendert (aktuell nur 3x3). Bei 4x4, Pyraminx "
-            "etc. waere der Toggle wirkungslos und wird ausgeblendet "
+            "Erscheint NUR für Cube-Types, für die das 2D-Net "
+            "überhaupt rendert (aktuell nur 3x3). Bei 4x4, Pyraminx "
+            "etc. wäre der Toggle wirkungslos und wird ausgeblendet "
             "— vermeidet Verwirrung.",
             "Settings-Panel-Hint mit-aktualisiert: User wird auf den "
             "Schnell-Toggle hingewiesen.",
@@ -350,12 +372,12 @@ PATCH_NOTES: list[PatchNote] = [
             "kein cstimer_module-Browser-Polyfill-Risiko.",
             "Logik verifiziert durch 20 Tests (cube-net.test.ts): "
             "Identitaeten (R+R'=solved, 4xR=solved), Centers nie "
-            "geaendert, bekannte Group-Orders (Sune Order 6, T-Perm "
+            "geändert, bekannte Group-Orders (Sune Order 6, T-Perm "
             "Order 2, Sexy-Move Order 6), 5 Random-Scrambles + Inverse.",
             "Aktuell nur 3x3 — andere Cube-Types zeigen kein Bild "
             "(2x2/4x4/Pyra kommen schrittweise, Code ist erweiterbar).",
             "Setting in /einstellungen/Timer: '2D-Net unter dem "
-            "Scramble anzeigen' (default an). Power-User koennen "
+            "Scramble anzeigen' (default an). Power-User können "
             "ausschalten wenn sie pure Notation wollen.",
         ],
     ),
@@ -367,18 +389,18 @@ PATCH_NOTES: list[PatchNote] = [
             "Voice-Alert: globaler speechSynthesis.cancel()-Call entfernt. "
             "Vorher konnte unsere TTS-Ansage Screen-Reader-Ausgaben (NVDA / "
             "VoiceOver) abbrechen. Das Risiko ist real, der Overlap-Schutz "
-            "war eh ueberkonstruiert (4s Abstand zwischen 'acht' und 'zwoelf').",
+            "war eh überkonstruiert (4s Abstand zwischen 'acht' und 'zwoelf').",
             "Voice-Alert: Safari iOS bekommt jetzt eine 0-Volume-Dummy-"
             "Utterance beim ersten Spacebar-Press, damit die Voice-Engine "
             "warm laeuft. Vorher konnte die erste TTS-Ansage stumm bleiben.",
             "Penalty-Quick-Buttons: Klick auf DNF entfernt automatisch ein "
             "vorhandenes +2 (WCA-konform, beides ist nicht kombinierbar). "
-            "Dieses Verhalten ist jetzt im Button-Tooltip explizit erklaert, "
-            "vorher hat es das Flag still geloescht.",
+            "Dieses Verhalten ist jetzt im Button-Tooltip explizit erklärt, "
+            "vorher hat es das Flag still gelöscht.",
             "Penalty-Quick-Buttons: 'Letzter Solve:' zeigt jetzt zusaetzlich "
             "den Cube-Type (z.B. 'Letzter Solve (3x3):'), damit klar bleibt "
             "welcher Solve gerade editiert wird.",
-            "Loeschen-Quick-Aktion: window.confirm() raus, Zwei-Klick-Pattern "
+            "Löschen-Quick-Aktion: window.confirm() raus, Zwei-Klick-Pattern "
             "rein. Erster Klick aktiviert den Button (rot pulsierend), "
             "zweiter Klick innerhalb 5s loescht. Sicherer auf Mobile + ohne "
             "Browser-Native-Dialog-Abhaengigkeit.",
@@ -391,7 +413,7 @@ PATCH_NOTES: list[PatchNote] = [
         highlights=[
             "P1.4 aus dem Quick-Wins-Sprint. Neues RoadmapModal zeigt "
             "die 6 Phasen mit Items, Aufwand-Schaetzung und Status. "
-            "Transparent fuer User was geplant ist + warum.",
+            "Transparent für User was geplant ist + warum.",
             "Triggerbar via Footer-Link 'Roadmap' UND User-Menu oben "
             "rechts. Beide Wege parallel = mehr Sichtbarkeit.",
             "Single-Source webapp/frontend/src/lib/roadmap-data.ts — "
@@ -410,13 +432,13 @@ PATCH_NOTES: list[PatchNote] = [
         title="Custom-Scramble eintippen statt random generieren",
         highlights=[
             "P1.3 aus dem Quick-Wins-Sprint. Neuer Edit-Button in der "
-            "ScrambleCard. Klick darauf oeffnet eine Textarea wo der "
+            "ScrambleCard. Klick darauf öffnet eine Textarea wo der "
             "User einen eigenen Scramble eintippen kann.",
             "Use-Cases: Wettkampf-Scramble aus der WCA-Live-Anzeige "
-            "uebernehmen, Algorithmus-Drill mit fixer Sequenz, Scramble "
+            "übernehmen, Algorithmus-Drill mit fixer Sequenz, Scramble "
             "aus einer anderen App fortsetzen.",
             "Bedienung: Enter speichert, Esc bricht ab. Custom-Scramble "
-            "ueberlebt Cube-Type-Wechsel nicht (Auto-Reset). Skip-Button "
+            "überlebt Cube-Type-Wechsel nicht (Auto-Reset). Skip-Button "
             "verwirft Custom + generiert neuen Random.",
             "Visueller Hinweis bei aktivem Custom-Scramble: kleiner "
             "lila Badge ev eigene Eingabe neben dem Scramble.",
@@ -430,15 +452,15 @@ PATCH_NOTES: list[PatchNote] = [
         title="Penalty-Quick-Buttons direkt unter dem Timer",
         highlights=[
             "P1.2 aus dem Quick-Wins-Sprint. Nach jedem Save erscheint "
-            "unter dem grossen Timer-Display ein Mini-Toolbar mit "
-            "+2 / DNF / Loeschen — Korrektur ohne den Weg ueber die "
+            "unter dem großen Timer-Display ein Mini-Toolbar mit "
+            "+2 / DNF / Löschen — Korrektur ohne den Weg über die "
             "Letzte-Solves-Sidebar.",
             "Funktioniert in beiden Modi (Text + Spacebar). Im Spacebar-"
-            "Modus besonders nuetzlich: wenn die Inspection-Penalty "
+            "Modus besonders nützlich: wenn die Inspection-Penalty "
             "(automatisch detected) doch nicht passte, schnell "
             "korrigieren.",
             "Buttons zeigen den aktuellen Zustand visuell („✓ +2\” wenn "
-            "aktiv) und togglen bei Klick. Loeschen mit Confirm-Dialog. "
+            "aktiv) und togglen bei Klick. Löschen mit Confirm-Dialog. "
             "↺-Button blendet die Mini-Toolbar manuell aus.",
             "Auto-Reset bei Cube- oder Session-Wechsel — verhindert dass "
             "die „Letzter Solve war 3x3\”-Anzeige im 4x4-Kontext weiter "
@@ -448,19 +470,19 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.voice-alert",
         released=date(2026, 5, 17),
-        title="Voice-Alert fuer Inspection-Warnings (csTimer-aequivalent)",
+        title="Voice-Alert für Inspection-Warnings (csTimer-aequivalent)",
         highlights=[
             "Erstes Item aus dem Quick-Wins-Sprint P1: Inspection-Audio-"
-            "Calls bei 8s + 12s koennen jetzt als gesprochene Stimme "
+            "Calls bei 8s + 12s können jetzt als gesprochene Stimme "
             "statt Sinus-Beep abgespielt werden.",
-            "Vier Modi waehlbar (Verwaltung → Einstellungen → Inspection):"
+            "Vier Modi wählbar (Verwaltung → Einstellungen → Inspection):"
             " 🔔 Sinus-Beep (Default, bestehende User merken keinen "
             "Unterschied) — 🇩🇪 Deutsch (acht, zwoelf) — 🇬🇧 Englisch "
             "(eight, twelve) — 🔇 Aus.",
             "Voice-Modi nutzen die Browser-Web-Speech-API — kein Asset, "
             "kein Network-Roundtrip, funktioniert offline. Stimme/Akzent "
             "abhaengig von Browser + OS.",
-            "Fail-soft: wenn TTS nicht verfuegbar (alter Browser, "
+            "Fail-soft: wenn TTS nicht verfügbar (alter Browser, "
             "Permission-Block), faellt der Solve-Flow unbeeintraechtigt "
             "weiter.",
         ],
@@ -473,7 +495,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Footer-Link war versteckt — viele User scrollen nie ans Ende. "
             "Feedback-Item jetzt auch im User-Menu (Avatar oben rechts) "
             "neben Mein Account / Patch Notes / Was kann diese App.",
-            "Funktional identisch: oeffnet dasselbe FeedbackModal mit "
+            "Funktional identisch: öffnet dasselbe FeedbackModal mit "
             "GitHub-Issue-Tab + Email-Form-Tab.",
         ],
     ),
@@ -483,22 +505,22 @@ PATCH_NOTES: list[PatchNote] = [
         title="Feedback-Kanal: GitHub-Issues + Email-Form ohne GitHub-Account",
         highlights=[
             "Neuer Footer-Link 💬 Feedback in der App. Oeffnet ein Modal "
-            "mit zwei Wegen: GitHub-Issue (fuer Profi-User mit Account) "
-            "oder Email-Form (fuer alle anderen).",
+            "mit zwei Wegen: GitHub-Issue (für Profi-User mit Account) "
+            "oder Email-Form (für alle anderen).",
             "GitHub-Issue-Templates angelegt unter .github/ISSUE_TEMPLATE/ "
-            "fuer Bug-Reports + Feature-Wuensche. Strukturierte Form-Felder "
-            "fuhren Schritt-fuer-Schritt durch die wichtigen Fragen.",
+            "für Bug-Reports + Feature-Wünsche. Strukturierte Form-Felder "
+            "fuhren Schritt-für-Schritt durch die wichtigen Fragen.",
             "Email-Form-Mode: User schreibt Nachricht (10-4000 Zeichen), "
             "Backend schickt via vorhandene Resend-Infrastruktur an die "
             "erste ADMIN_EMAILS-Adresse. User-Email + Display-Name werden "
-            "im Body mitgeschickt, damit Antwort moeglich ist.",
+            "im Body mitgeschickt, damit Antwort möglich ist.",
             "Hartes Rate-Limit 3/Stunde pro IP gegen Spam. Auth pflicht "
-            "(nur eingeloggte User koennen Feedback schicken).",
+            "(nur eingeloggte User können Feedback schicken).",
             "Vorbereitung: Repo soll public werden, damit die GitHub-"
             "Issue-Links funktionieren. Secret-Audit ist clean (keine "
             ".env-Files, keine hardcoded Tokens, keine echten User-Daten "
             "im Code) — Repo-Switch via GitHub-Settings ohne weitere "
-            "Vorarbeit moeglich.",
+            "Vorarbeit möglich.",
         ],
     ),
     PatchNote(
@@ -506,7 +528,7 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 17),
         title="Ivy Cube: echte WCA-Quality-Scrambles (Eigenbau-Solver)",
         highlights=[
-            "Erster Eigenbau-Random-State-Solver fuer ein Custom-Puzzle. "
+            "Erster Eigenbau-Random-State-Solver für ein Custom-Puzzle. "
             "Ivy Cube hat seit jetzt echte WCA-Quality-Scrambles (4-10 "
             "Moves, optimal kurz, garantierte Mindest-Distanz von 4).",
             "Implementation als reines TypeScript-Modul (lib/ivyScramble.ts) "
@@ -523,11 +545,11 @@ PATCH_NOTES: list[PatchNote] = [
             "389 KB gzipped (vs 478 KB cstimer-Variante, vs 295 KB "
             "Random-Move-Variante davor). Eigenbau-Code = ~250 Zeilen TS.",
             "Disclaimer in der ScrambleCard angepasst: zeigt sich nur "
-            "noch fuer Gear/Redi/Master Pyra+Skewb. Ivy ist jetzt in der "
+            "noch für Gear/Redi/Master Pyra+Skewb. Ivy ist jetzt in der "
             "WCA-Quality-Liga.",
-            "Naechster Schritt (falls gewuenscht): Gear Cube + Redi Cube "
+            "Nächster Schritt (falls gewünscht): Gear Cube + Redi Cube "
             "+ Master Pyraminx + Master Skewb mit derselben Template-"
-            "Methode. Gear ist als naechstes geplant.",
+            "Methode. Gear ist als nächstes geplant.",
         ],
     ),
     PatchNote(
@@ -542,14 +564,14 @@ PATCH_NOTES: list[PatchNote] = [
             "wurde sauber gebaut, crashte aber sofort beim Module-Load "
             "im Browser.",
             "Lokaler Vite-Build + Node-Smoke-Test waren gruen weil im "
-            "Node-Kontext Buffer immer existiert. Browser-Test haette "
+            "Node-Kontext Buffer immer existiert. Browser-Test hätte "
             "den Bug sofort gezeigt — das machen wir kuenftig vor jedem "
             "neuen NPM-Package mit Headless-Chrome o.ae.",
             "Stand wieder bei 60148cd (Random-Move-Scrambles mit "
             "korrigierter Notation). Ivy/Gear/Redi/Master Pyra+Skewb "
             "sind keine WCA-Quality, aber Notation ist sauber + "
             "Disclaimer in der ScrambleCard ehrlich.",
-            "Naechster Versuch (separater Branch zuerst): "
+            "Nächster Versuch (separater Branch zuerst): "
             "vite-plugin-node-polyfills einbauen + cstimer_module "
             "isoliert testen mit Headless-Browser bevor wir Production "
             "antasten.",
@@ -563,16 +585,16 @@ PATCH_NOTES: list[PatchNote] = [
             "User-Befund: einige Custom-Scrambles waren falsch. Recherche "
             "bestaetigt zwei echte Bugs in scramble.ts:",
             "GEAR CUBE (kritischer Bug): wegen der Zahnrad-Mechanik sind "
-            "physikalisch nur 180-Grad-Drehungen moeglich (Quelle: Wikipedia/"
+            "physikalisch nur 180-Grad-Drehungen möglich (Quelle: Wikipedia/"
             "Gear-Cube). Meine alte Spec hatte nur 3 Faces (U/R/F) statt 6 "
             "und mischte 90 + 180 Grad. Jetzt: alle 6 Faces (U/D/L/R/F/B), "
-            "ausschliesslich 2-Suffix.",
+            "ausschließlich 2-Suffix.",
             "IVY CUBE: falsche Achse F statt U. Standard-Notation per "
-            "Speedsolving-Wiki ist U/L/R/B fuer die 4 Eck-Achsen. "
+            "Speedsolving-Wiki ist U/L/R/B für die 4 Eck-Achsen. "
             "Scramble-Laenge auf csTimer-Default 8 reduziert.",
-            "Ehrlicher UI-Disclaimer in der ScrambleCard fuer inoffizielle "
+            "Ehrlicher UI-Disclaimer in der ScrambleCard für inoffizielle "
             "Cubes: 'Random-Move-Sequenzen mit korrekter Notation, kein "
-            "Random-State-Solver — gut fuers Training, nicht 100% Wettkampf-"
+            "Random-State-Solver — gut fürs Training, nicht 100% Wettkampf-"
             "vergleichbar'. FTO bleibt ausgenommen (scrambow-generiert, "
             "WCA-quality).",
             "Redi + Master Pyra/Skewb: Notation belassen (csTimer-MoYu-"
@@ -590,11 +612,11 @@ PATCH_NOTES: list[PatchNote] = [
             "clientseitig aus dem schon geladenen rolling-Map abgeleitet, "
             "AO100 kommt aus dem bestehenden Stats-Endpoint.",
             "Letzte-Solves-Tabelle (Timer-Tab): AO100-Spalte wieder raus. "
-            "Hintergrund: AO100 aendert sich pro Zeile praktisch nicht "
+            "Hintergrund: AO100 ändert sich pro Zeile praktisch nicht "
             "(100er-Fenster). In der Tabelle wenig informativ, in der "
             "Live-Karte oben deutlich besser aufgehoben.",
             "Tabelle ohne AO100 hat jetzt nur 5 Spalten (Nr / Zeit / Mo3 / "
-            "AO5 / AO12 + Loeschen) — passt wieder ohne horizontalen Scroll "
+            "AO5 / AO12 + Löschen) — passt wieder ohne horizontalen Scroll "
             "in die schmale Sidebar. Das min-w-[420px] + overflow-Scroll "
             "ist raus.",
         ],
@@ -604,19 +626,19 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 16),
         title="Session-Ende-Check: /abschluss-Slash-Command + Stop-Hook-Backstop",
         highlights=[
-            "Neuer Slash-Command /abschluss fuer den User-getriggerten "
+            "Neuer Slash-Command /abschluss für den User-getriggerten "
             "Session-Ende-Check. Geht eine 8-Punkte-Liste durch: "
-            "uncommitted Aenderungen, unpushed Commits, fehlende Patch-"
-            "Notes-Eintraege, fehlende Git-Tags, features-data.ts-Update, "
-            "Doku-Aktualitaet, offene Todos, Backend-Smoke-Test (lokal "
+            "uncommitted Änderungen, unpushed Commits, fehlende Patch-"
+            "Notes-Einträge, fehlende Git-Tags, features-data.ts-Update, "
+            "Doku-Aktualität, offene Todos, Backend-Smoke-Test (lokal "
             "Parse + Module-Import). Bei Luecken bietet Fixes an.",
             "Neuer Stop-Hook stop-mini-check.sh: laeuft 1x pro Session "
             "(via once:true) als Mini-Backstop wenn Claude zum ersten Mal "
             "antwortet. Meldet nur das absolut Wichtigste (uncommitted + "
-            "unpushed) und verweist auf /abschluss fuer den vollen Check.",
+            "unpushed) und verweist auf /abschluss für den vollen Check.",
             "Konvention in CLAUDE.md verankert: bei Aussagen wie „Session "
-            "beenden\” / „das wars fuer heute\” → /abschluss proaktiv "
-            "aufrufen. Plus Hinweis-Block ueber Patch-Notes-Konvention, "
+            "beenden\” / „das wars für heute\” → /abschluss proaktiv "
+            "aufrufen. Plus Hinweis-Block über Patch-Notes-Konvention, "
             "Tag-Konvention, features-data.ts-Konvention.",
             "Hintergrund: heute (2026-05-16) ist mehrfach was durchge"
             "rutscht: 26 ungetaggte Patch-Notes-Versionen, features-data.ts "
@@ -632,7 +654,7 @@ PATCH_NOTES: list[PatchNote] = [
         highlights=[
             "Feature-Liste auf der Anmeldeseite + im In-App-Modal um die "
             "heute neuen Features erweitert.",
-            "Neue Kategorie Speedcubing-Welt: WCA-Turniere in der Naehe "
+            "Neue Kategorie Speedcubing-Welt: WCA-Turniere in der Nähe "
             "(mit DACH-Nachbarn-Logik), Speedcubing-News aus drei kuratierten "
             "Quellen, Auto-Refresh-Hinweis, Datenquellen-Transparenz.",
             "Account-Bullet aktualisiert: Postleitzahl ist nicht mehr "
@@ -657,7 +679,7 @@ PATCH_NOTES: list[PatchNote] = [
             "AxiosError-Type + Status-422-Match.",
             "MEDIUM-Fix: Login-Endpoint hatte lazy-import von news.refresh "
             "ohne try/except. Wenn feedparser/httpx fehlen (z.B. nach "
-            "fehlgeschlagenem Render-pip-install), wuerde Login 500 werfen "
+            "fehlgeschlagenem Render-pip-install), würde Login 500 werfen "
             "obwohl Auth funktioniert. Jetzt: try/except um den Import — "
             "Auto-Refresh ist nice-to-have, Login hat Prio.",
             "Country-Liste erweitert um 8 fehlende Cube-Communities: "
@@ -675,7 +697,7 @@ PATCH_NOTES: list[PatchNote] = [
             "alphabetisch nach dt. Bezeichnung) zusaetzlich zur "
             "Postleitzahl. Vorher haben wir das Land aus der PLZ-Struktur "
             "geraten (5-stellig=DE, 4-stellig=AT, sonst nichts) — das "
-            "funktionierte nur fuer DACH-User.",
+            "funktionierte nur für DACH-User.",
             "WCA-Turniere-Endpoint nutzt jetzt User.country_iso2 mit "
             "Vorrang vor der PLZ-Heuristik. Damit funktioniert das "
             "Turnier-Feature weltweit: User in USA, Polen, Japan etc. "
@@ -701,9 +723,9 @@ PATCH_NOTES: list[PatchNote] = [
         title="WCA: Nachbarlaender + News: weitere Quelle + Auto-Refresh bei Login",
         highlights=[
             "WCA-Turniere: zeigt jetzt nicht nur Turniere im eigenen Land, "
-            "sondern auch in direkten Nachbarlaendern. Fuer DE-User: AT, CH, "
-            "NL, BE, LU, FR, DK, PL, CZ. Fuer AT-User: DE, CH, IT, SI, HU, "
-            "SK, CZ, LI. Fuer CH-User: DE, AT, FR, IT, LI. Parallel-Fetch "
+            "sondern auch in direkten Nachbarlaendern. Für DE-User: AT, CH, "
+            "NL, BE, LU, FR, DK, PL, CZ. Für AT-User: DE, CH, IT, SI, HU, "
+            "SK, CZ, LI. Für CH-User: DE, AT, FR, IT, LI. Parallel-Fetch "
             "via asyncio.gather, daher kaum Latenz-Aufschlag.",
             "Speedcubing-News: dritte Quelle dazu — SpeedCubing.org/blog "
             "(World Records, Competition Coverage). RSS-Recherche ergab "
@@ -711,7 +733,7 @@ PATCH_NOTES: list[PatchNote] = [
             "anbieten — die kaemen nur via HTML-Scraping ran, kein MVP-Wert.",
             "Auto-Refresh bei Login (User-Wunsch): nach erfolgreichem "
             "Login laeuft im Hintergrund (NACH der Response, blockt User "
-            "nicht) ein Refresh fuer News + WCA-Caches. Bei warmen Caches "
+            "nicht) ein Refresh für News + WCA-Caches. Bei warmen Caches "
             "= no-op, bei stale Caches = stiller Refresh. Effekt: wer sich "
             "nach Pause einloggt, sieht frische Daten ohne Wartezeit.",
             "Backend-Module: webapp/news/refresh.py als zentraler Refresh-"
@@ -733,17 +755,17 @@ PATCH_NOTES: list[PatchNote] = [
             "(5 Fail-Mails: news-backend, news-frontend, dashboard-story, "
             "wca-comps-hardening, wca-news-qa).",
             "Root-Cause: in mehreren Patch-Notes-Strings hatte mein "
-            "Bash-Heredoc das deutsche Schliess-Anfuehrungszeichen (U+201D) "
+            "Bash-Heredoc das deutsche Schliess-Anführungszeichen (U+201D) "
             "faelschlich durch ein ASCII-Quote (U+0022) ersetzt. Das mittlere "
             "ASCII-Quote terminierte den Python-String an einer ungewollten "
-            "Stelle, der Rest war Syntaxmuell. 22 solcher Stellen ueber 13 "
+            "Stelle, der Rest war Syntaxmuell. 22 solcher Stellen über 13 "
             "Zeilen gefunden.",
             "Fix: alle ASCII-Quotes mitten in Patch-Notes-Strings systematisch "
-            "durch das korrekte deutsche Schliess-Anfuehrungszeichen ersetzt. "
+            "durch das korrekte deutsche Schliess-Anführungszeichen ersetzt. "
             "Backend startet jetzt sauber (lokal mit echten Deps verifiziert).",
             "Konsequenz: zukuenftige Patch-Notes nutzen nur ASCII-Quoting "
             "oder explizit-escaped Quotes — kein Mix mehr von deutschen "
-            "Anfuehrungszeichen mit Heredoc-faulen Bash-Pipes.",
+            "Anführungszeichen mit Heredoc-faulen Bash-Pipes.",
         ],
     ),
     PatchNote(
@@ -755,17 +777,17 @@ PATCH_NOTES: list[PatchNote] = [
             "Entries ohne `.get`-Methode wurde der link faelschlich None. "
             "Helper `_attr_or_key` mit expliziten Klammern.",
             "Session-Race im News-Fetcher: bei IntegrityError (Multi-Worker-"
-            "Race) wuerde der naive db.rollback() ALLE bisher geflushten "
+            "Race) würde der naive db.rollback() ALLE bisher geflushten "
             "Items derselben Iteration wegrollen. Jetzt: SAVEPOINT pro "
             "Item via `db.begin_nested()` — nur das eine kaputte Item "
-            "rollt zurueck.",
+            "rollt zurück.",
             "WCA-Sortier-Bug: Turniere mit distance_km = 0.0 (User direkt "
             "am Venue) wurden faelschlich ans Ende sortiert, weil 0.0 in "
             "Python falsy ist. Jetzt expliziter `is None`-Check.",
             "News-Cleanup: N+1-DELETE-Schleife → ein einzelner DELETE WHERE "
             "(SQLAlchemy `delete()`-Construct).",
             "PostalCodeGeo: `Float` explizit als mapped_column-Type — "
-            "SQLAlchemy 2.0 sollte das aus dem Python-Type ableiten koennen, "
+            "SQLAlchemy 2.0 sollte das aus dem Python-Type ableiten können, "
             "aber explizit ist defensiver bei Postgres-DDL-Generation.",
             "Hygiene: ungenutzter datetime-Import in wca/client.py raus, "
             "Doc-Strings in den __init__.py-Files der neuen Sub-Pakete "
@@ -784,11 +806,11 @@ PATCH_NOTES: list[PatchNote] = [
             "SPEEDCUBING-WELT (WCA-Turniere + News).",
             "Jede Sektion hat einen dezenten Mini-Header (lila, klein, "
             "Spacing wide), Karten selbst sind unveraendert. Semantisches "
-            "<section>-Markup + aria-labelledby fuer Screenreader.",
+            "<section>-Markup + aria-labelledby für Screenreader.",
             "Speedcubing-Welt-Sektion ist jetzt der „natuerliche\” Ort "
-            "fuer die heute neu hinzugefuegten Karten (WCA-Turniere + "
+            "für die heute neu hinzugefuegten Karten (WCA-Turniere + "
             "News) statt einer temporaeren Anhang-Reihe.",
-            "Spacing zwischen Sektionen leicht groesser (space-y-8 statt "
+            "Spacing zwischen Sektionen leicht größer (space-y-8 statt "
             "space-y-6) — Sektionen sollen sich visuell abgrenzen.",
             "Tab-Reihenfolge bleibt (User-Entscheidung): Timer / "
             "Dashboard / Analyse / Trainer / Community / Verwaltung.",
@@ -808,7 +830,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Beim Erst-Aufruf nach Deploy ist die DB noch leer — die "
             "Card zeigt einen Hinweis, dass der Hintergrund-Fetch "
             "dabei ist + bittet um Reload in einer Minute.",
-            "Naechster Schritt: Phase C — Dashboard-Refactor mit "
+            "Nächster Schritt: Phase C — Dashboard-Refactor mit "
             "eigener „Speedcubing-Welt\”-Sektion und neuer Story-"
             "Reihenfolge.",
         ],
@@ -816,20 +838,20 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.news-backend",
         released=date(2026, 5, 16),
-        title="Backend fuer „Speedcubing-News\” gebaut",
+        title="Backend für „Speedcubing-News\” gebaut",
         highlights=[
             "Neues Backend-Modul `webapp/news/`: RSS-Aggregator mit "
-            "feedparser, persistente DB-Tabelle `news_items` (Dedup ueber "
+            "feedparser, persistente DB-Tabelle `news_items` (Dedup über "
             "RSS-Link-URL), on-demand-Refresh-Strategie (wenn letzter "
-            "Fetch > 60min alt, sync re-fetch beim naechsten Endpoint-Call).",
+            "Fetch > 60min alt, sync re-fetch beim nächsten Endpoint-Call).",
             "Konfigurierte Sources (vorerst): WCA Posts (offizielle "
             "Announcements) + r/Cubers (Community-Reddit). Erweiterung "
-            "spaeter via `news/sources.py`.",
+            "später via `news/sources.py`.",
             "Endpoint `GET /news/latest?limit=10` mit Auth + 60/min-Rate-"
             "Limit. Liefert sortiert nach published_at DESC.",
-            "Cleanup: Items > 60 Tage werden im selben Pass geloescht — "
+            "Cleanup: Items > 60 Tage werden im selben Pass gelöscht — "
             "Tabelle bleibt schlank, kein Cron noetig.",
-            "Frontend-Card folgt im naechsten Commit.",
+            "Frontend-Card folgt im nächsten Commit.",
         ],
     ),
     PatchNote(
@@ -855,41 +877,41 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.wca-comps-backend",
         released=date(2026, 5, 16),
-        title="Backend fuer „WCA-Turniere in der Naehe\” gebaut",
+        title="Backend für „WCA-Turniere in der Nähe\” gebaut",
         highlights=[
             "Neues Backend-Modul `webapp/wca/`: WCA-API-Client (mit 1h-In-"
             "Memory-Cache), Nominatim-Geocoding-Wrapper (mit persistentem "
             "DB-Cache, TTL 30 Tage), Haversine-Distance-Berechnung, "
             "Country-Detection aus PLZ-Struktur.",
             "Endpoint `GET /wca/competitions/upcoming`: liefert die "
-            "naechsten Turniere im Land des Users (PLZ aus Profil), "
+            "nächsten Turniere im Land des Users (PLZ aus Profil), "
             "sortiert nach Datum + Distanz, mit `distance_km` pro Eintrag. "
-            "Default: max 300km, 10 Eintraege, 6 Monate Vorausschau.",
+            "Default: max 300km, 10 Einträge, 6 Monate Vorausschau.",
             "DB-Tabelle `postal_code_geo` (Composite-Key postal_code + "
             "country_iso2): persistenter Geocoding-Cache. Wenn 100 User "
-            "dieselbe PLZ haben = nur 1 Nominatim-Call. PLZ-Geo aendert "
+            "dieselbe PLZ haben = nur 1 Nominatim-Call. PLZ-Geo ändert "
             "sich nie, TTL 30 Tage ist konservativ.",
-            "Frontend-Card folgt im naechsten Commit.",
-            "Hintergrund: User-Wunsch nach „Turniere in deiner Naehe\”. "
-            "PLZ-Feld wurde dafuer Mai 14 schon im Profil ergaenzt — "
+            "Frontend-Card folgt im nächsten Commit.",
+            "Hintergrund: User-Wunsch nach „Turniere in deiner Nähe\”. "
+            "PLZ-Feld wurde dafür Mai 14 schon im Profil ergänzt — "
             "jetzt ist die andere Haelfte fertig.",
         ],
     ),
     PatchNote(
         version="2.0.0-alpha.W.cstimer-bigfile",
         released=date(2026, 5, 16),
-        title="csTimer-Import: grosse Files (30k+ Solves) jetzt importierbar",
+        title="csTimer-Import: große Files (30k+ Solves) jetzt importierbar",
         highlights=[
             "Bug-Fix: JSON-Bomb-Pre-Check (Security-Layer K2) hatte das "
-            "Limit auf 200.000 strukturelle JSON-Tokens — fuer csTimer-"
+            "Limit auf 200.000 strukturelle JSON-Tokens — für csTimer-"
             "Exporte mit > ca. 30.000 Solves zu eng. Limit jetzt auf "
             "2.000.000 hoch, was ca. 300.000 Solves abdeckt.",
             "Sicherheit bleibt: 30MB-Upload-Hardcap macht echte JSON-Bombs "
-            "(~30M Tokens) weiterhin unmoeglich. Pre-Check greift bei 1/15 "
-            "der theoretisch moeglichen Token-Last.",
-            "Error-Message verstaendlicher: vorher „Moeglicher JSON-Bomb-"
-            "Angriff\” (verwirrend fuer normale User), jetzt „Datei zu "
-            "komplex — bei normalen csTimer-Exporten reicht das fuer ca. "
+            "(~30M Tokens) weiterhin unmöglich. Pre-Check greift bei 1/15 "
+            "der theoretisch möglichen Token-Last.",
+            "Error-Message verstaendlicher: vorher „Möglicher JSON-Bomb-"
+            "Angriff\” (verwirrend für normale User), jetzt „Datei zu "
+            "komplex — bei normalen csTimer-Exporten reicht das für ca. "
             "300.000 Solves\” plus Diagnose-Hinweis.",
             "Hintergrund: User-Report 2026-05-13 (csTimer-.txt-Datei "
             "scheiterte). Hypothese im STATUS-Memo war korrekt.",
@@ -901,7 +923,7 @@ PATCH_NOTES: list[PatchNote] = [
         title="Feature-Liste „Was kann cubetracker?” auf Stand gebracht",
         highlights=[
             "Solving: Scramble-Picker (WCA + Inoffiziell: Ivy, Gear, "
-            "Redi, Master Pyraminx, Master Skewb, FTO) ergaenzt — war "
+            "Redi, Master Pyraminx, Master Skewb, FTO) ergänzt — war "
             "in der Marketing-Liste nicht sichtbar, obwohl seit heute "
             "im Timer-Tab nutzbar.",
             "Solving: Drei-Modi-Picker (Text/WCA/Pragmatisch) + "
@@ -911,10 +933,10 @@ PATCH_NOTES: list[PatchNote] = [
             "den Tabellen). Best-Avg-Timestamps + Detail-Modal pro "
             "Solve waren portiert aber stumm — jetzt erwaehnt.",
             "Trainer: „Algs-Trainer mit Visualisierung\” war "
-            "ueberoptimistisch — gilt nur fuer OLL (57 Bilder). PLL-"
+            "überoptimistisch — gilt nur für OLL (57 Bilder). PLL-"
             "Bilder folgen noch, jetzt ehrlich kommuniziert.",
-            "Account: Postleitzahl im Profil dazu (Vorbereitung fuer "
-            "„WCA-Turniere in deiner Naehe\”).",
+            "Account: Postleitzahl im Profil dazu (Vorbereitung für "
+            "„WCA-Turniere in deiner Nähe\”).",
         ],
     ),
     PatchNote(
@@ -930,20 +952,20 @@ PATCH_NOTES: list[PatchNote] = [
             "„ohne Hardware” statt „falsche Hardware”.",
             "Custom-Scramble-Generator (Ivy, Gear, …) hatte einen "
             "theoretischen Endlos-Loop wenn eine Spec nur 1 Base-Move "
-            "gehabt haette. Defensive Guard rein — bei <2 Bases "
+            "gehabt hätte. Defensive Guard rein — bei <2 Bases "
             "deaktivieren wir den „kein-Wiederholen”-Filter automatisch, "
             "damit der Tab nicht haengt.",
             "Scramble-Picker bei Session-Vorgaben (z.B. „pll” aus einer "
-            "PLL-Trainings-Session): Toggle/Dropdown wuerde inkonsistent "
+            "PLL-Trainings-Session): Toggle/Dropdown würde inkonsistent "
             "wirken, weil pll weder in WCA noch in Inoffiziell ist. "
             "Jetzt: beide Toggle-Buttons un-highlighted, statt Dropdown "
-            "ein Hinweis „Aus Session-Vorgabe: pll — Toggle waehlen "
-            "um zu aendern”. Klick auf einen Toggle wechselt sauber in "
+            "ein Hinweis „Aus Session-Vorgabe: pll — Toggle wählen "
+            "um zu ändern”. Klick auf einen Toggle wechselt sauber in "
             "die jeweilige Kategorie.",
             "Code-Hygiene: tote Props in ModeButton (disabled/disabled"
             "Title) raus, redundante mt-4 auf TouchTimerPad entfernt "
             "(space-y-4 des Parents reichte), eslint-disable-Kommentar "
-            "in ScrambleCard erklaert (Identitaets-stabile Callback-Prop).",
+            "in ScrambleCard erklärt (Identitaets-stabile Callback-Prop).",
             "Tests: „kein direktes Wiederholen”-Iterationen von 10 auf "
             "100 erhoeht — kostet <50ms, schliesst Glueckstreffer bei "
             "kleinen Move-Sets (gear hat nur 3 Bases) aus.",
@@ -955,8 +977,8 @@ PATCH_NOTES: list[PatchNote] = [
         title="Scramble-Picker: WCA + Inoffiziell (Ivy, Gear, Redi, …)",
         highlights=[
             "ScrambleCard hat jetzt einen Picker: Toggle WCA ↔ "
-            "Inoffiziell + Dropdown mit den verfuegbaren Typen. Default "
-            "folgt weiterhin dem gewaehlten Cube-Type — bei Override "
+            "Inoffiziell + Dropdown mit den verfügbaren Typen. Default "
+            "folgt weiterhin dem gewählten Cube-Type — bei Override "
             "erscheint ein „↺ auto”-Button um wieder zum Default zu "
             "springen.",
             "WCA-Liste: alle WCA-Cubes (3x3, 4x4, …, Pyraminx, Skewb, "
@@ -966,10 +988,10 @@ PATCH_NOTES: list[PatchNote] = [
             "Redi Cube, Master Pyraminx, Master Skewb, FTO. FTO via "
             "scrambow, die anderen via eigenem Random-Move-Generator mit "
             "„kein direktes Wiederholen derselben Achse”-Filter — nicht "
-            "WCA-quality, aber sauber fuers Casual-Training.",
+            "WCA-quality, aber sauber fürs Casual-Training.",
             "Cube-Type-Wechsel resettet den Picker automatisch, sodass "
             "der neue Cube wieder seinen passenden Scramble bekommt — "
-            "verhindert „Ivy-Scramble fuer 3x3”-Stolperfallen.",
+            "verhindert „Ivy-Scramble für 3x3”-Stolperfallen.",
             "Session.scramble_type (csTimer-Import + PLL/OLL-Trainings-"
             "Sessions) wird weiterhin respektiert — User-Picker schlaegt "
             "es aber, falls man manuell aenderen will.",
@@ -978,7 +1000,7 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.timer-layout",
         released=date(2026, 5, 16),
-        title="Mobile-Timer-Layout: Scramble direkt ueber Timer + Selektoren unten",
+        title="Mobile-Timer-Layout: Scramble direkt über Timer + Selektoren unten",
         highlights=[
             "Phone-Reihenfolge im Timer-Tab umgebaut: Scramble → Timer-"
             "Display → „Tippen & halten”-Pad → erst danach Cube-/Session-/"
@@ -990,7 +1012,7 @@ PATCH_NOTES: list[PatchNote] = [
             "leichter zu warten.",
             "hardwareId nach TimerTab hochgezogen — der Save-Pfad in "
             "BigTimerInput nutzt jetzt dieselbe Quelle wie der Selektor-"
-            "Block, kein State-Auseinanderdriften mehr moeglich.",
+            "Block, kein State-Auseinanderdriften mehr möglich.",
             "Desktop unveraendert: Live-Solves links (420px), Solving "
             "rechts. Nur die Reihenfolge innerhalb des Solving-Spalts "
             "folgt jetzt der mobile-Logik (Selektoren unten).",
@@ -1005,9 +1027,9 @@ PATCH_NOTES: list[PatchNote] = [
             "AO12, AO100, Cube, Hardware — alle sortierbar per Spaltenkopf-"
             "Klick",
             "Mo3 = arithmetisches Mittel der letzten 3 Solves (kein Trim, "
-            "DNF macht Mo3 ungueltig) — WCA-Standard fuer Big-Cubes (6x6, "
-            "7x7) wo nur 3 Solves pro Round zaehlen",
-            "AO100 = trimmed mean ueber 100er-Fenster, WCA-konform (5er-"
+            "DNF macht Mo3 ungueltig) — WCA-Standard für Big-Cubes (6x6, "
+            "7x7) wo nur 3 Solves pro Round zählen",
+            "AO100 = trimmed mean über 100er-Fenster, WCA-konform (5er-"
             "Trim pro Seite, 90er-Mittel)",
             "Mobile: in der LastSolves-Sidebar passen die 6 Avg-Spalten "
             "nicht — horizontaler Scroll greift jetzt sauber (min-w + "
@@ -1040,9 +1062,9 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 14),
         title="Mobile-Fixes nach Phone-Test",
         highlights=[
-            "Info-Button-Popover (ⓘ) ragte auf Phone teilweise ueber den "
+            "Info-Button-Popover (ⓘ) ragte auf Phone teilweise über den "
             "Bildschirmrand. Jetzt: auf Phone als Bottom-Sheet (klebt unten, "
-            "full-width minus Rand) — ragt nie mehr ueber. Ab Tablet wie "
+            "full-width minus Rand) — ragt nie mehr über. Ab Tablet wie "
             "bisher als Popover neben dem Button.",
             "Bestenliste + Solve-Liste: das min-w aus dem ersten Versuch "
             "blaehte die Tabelle kuenstlich auf (Leerraum rechts wirkte "
@@ -1057,13 +1079,13 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 14),
         title="Mobile-First Welle 4: Header + Padding + Abschluss",
         highlights=[
-            "Header-Logo auf Phone gefixt — war h-40 (160px Hoehe = "
+            "Header-Logo auf Phone gefixt — war h-40 (160px Höhe = "
             "~410px Breite) und sprengte jeden Phone-Screen. Jetzt "
             "responsiv gestaffelt: h-16 Phone → h-28 sm → h-52 Desktop "
-            "(2.5x-Wunsch bleibt fuer grosse Screens)",
+            "(2.5x-Wunsch bleibt für große Screens)",
             "Container-Padding p-3 auf Phone (war p-6 = 24px, zu viel auf "
             "360px-Screens), p-6 ab Tablet",
-            "Charts (Trends/Verteilung/Aktivitaet) waren bereits responsive "
+            "Charts (Trends/Verteilung/Aktivität) waren bereits responsive "
             "(ResponsiveContainer), Filter-Bars haben flex-wrap — kein Fix "
             "noetig. Mobile-First-Refactor damit abgeschlossen.",
         ],
@@ -1075,7 +1097,7 @@ PATCH_NOTES: list[PatchNote] = [
         highlights=[
             "Analyse → Solves: auf Phone zeigt die Tabelle nur noch #, "
             "Zeit, AO5, Aktionen — AO12/Cube/Hardware ab Tablet-Breite "
-            "(Details immer ueber den ℹ-Button erreichbar)",
+            "(Details immer über den ℹ-Button erreichbar)",
             "Bestenliste: auf Phone nur Rang, User, Best Single, Best AO5 "
             "— Best AO12/Aktuelle AO5/Solves/Zuletzt ab Tablet-Breite",
             "Timer → Letzte Solves: AO12-Spalte auf Phone ausgeblendet "
@@ -1103,16 +1125,16 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.postal-code",
         released=date(2026, 5, 14),
-        title="Postleitzahl im Profil — Vorbereitung fuer Turnier-Naehe",
+        title="Postleitzahl im Profil — Vorbereitung für Turnier-Nähe",
         highlights=[
             "Neues Profil-Feld 'Postleitzahl' in Verwaltung → Einstellungen "
             "→ Account → Profil (optional, multi-country-Format)",
             "Backend: User.postal_code (max 16 Zeichen) + Migration "
             "(idempotent via ALTER TABLE ADD COLUMN IF NOT EXISTS)",
-            "PATCH /auth/me Whitelist erweitert — postal_code aenderbar",
-            "Vorbereitung fuer kommendes Feature: „Naechste WCA-Turniere "
-            "in deiner Naehe\” — Daten werden bewusst jetzt schon gesammelt "
-            "damit das Feature spaeter direkt nutzbar ist",
+            "PATCH /auth/me Whitelist erweitert — postal_code änderbar",
+            "Vorbereitung für kommendes Feature: „Nächste WCA-Turniere "
+            "in deiner Nähe\” — Daten werden bewusst jetzt schon gesammelt "
+            "damit das Feature später direkt nutzbar ist",
         ],
     ),
     PatchNote(
@@ -1120,7 +1142,7 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 14),
         title="Touch-Devices: Text-Eingabe erlaubt + WCA als Default",
         highlights=[
-            "Auf Phone/Tablet ist Text-Eingabe-Modus jetzt waehlbar (war "
+            "Auf Phone/Tablet ist Text-Eingabe-Modus jetzt wählbar (war "
             "vorher zwangsgespertt). Sinnvoll wenn man z.B. Bluetooth-"
             "Keyboard hat oder ohne Inspection-Countdown solven will.",
             "Frische Touch-User starten direkt mit WCA-Spacebar als "
@@ -1137,7 +1159,7 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 14),
         title="Info-Buttons in allen Karten",
         highlights=[
-            "ⓘ-Buttons in 20+ Komponenten ergaenzt — jede groessere Card "
+            "ⓘ-Buttons in 20+ Komponenten ergänzt — jede groessere Card "
             "hat jetzt einen Hover-/Klick-Tooltip mit Erklaerungstext",
             "Dashboard: Statistiken, Activity, Reminders, Challenges-Mini, "
             "Erfolge-Mini, Vergleich",
@@ -1149,7 +1171,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Community: Bestenliste, Freunde-Suche",
             "Admin: Statistiken, User-Liste, Bulk-Mail",
             "SettingsPanel Section-Helper erweitert — kann optional einen "
-            "InfoButton-Slot rendern (Pattern fuer weitere Sub-Sektionen)",
+            "InfoButton-Slot rendern (Pattern für weitere Sub-Sektionen)",
         ],
     ),
     PatchNote(
@@ -1162,11 +1184,11 @@ PATCH_NOTES: list[PatchNote] = [
             "anzuschalten, war nicht discoverable",
             "Ein Klick wechselt sowohl spacebar_enabled als auch "
             "inspection_mode konsistent (WCA vs Pragmatisch)",
-            "Info-Button erklaert die drei Modi: Text-Eingabe / WCA / "
+            "Info-Button erklärt die drei Modi: Text-Eingabe / WCA / "
             "Pragmatisch mit konkretem User-Verhalten",
             "Wenn Text-Modus aktiv (Desktop): Tipp-Hinweis weist auf den "
             "Spacebar-Timer hin",
-            "Auf Touch-Geraeten ist Text-Modus disabled (Soft-Keyboard ist "
+            "Auf Touch-Geräten ist Text-Modus disabled (Soft-Keyboard ist "
             "muehsam) — nur die zwei Spacebar-Varianten klickbar",
         ],
     ),
@@ -1175,14 +1197,14 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 14),
         title="User-Menu oben rechts (klassisches Account-Dropdown)",
         highlights=[
-            "Klick auf Email/Avatar oben rechts oeffnet jetzt ein Dropdown-"
+            "Klick auf Email/Avatar oben rechts öffnet jetzt ein Dropdown-"
             "Menu mit den Standard-Aktionen: Mein Account, Patch Notes, "
             "Was kann diese App, Logout",
             "Avatar mit Initialen (Display-Name oder Email-Anfangsbuchstaben), "
             "ADMIN-Badge wenn du Admin bist",
             "„Mein Account & Einstellungen\” springt direkt zum richtigen "
             "Sub-Tab in der Verwaltung (Settings inkl. AccountSettingsPanel)",
-            "Patch Notes + Features-Modal sind dadurch ueber 3 Wege "
+            "Patch Notes + Features-Modal sind dadurch über 3 Wege "
             "erreichbar: Version-Badge oben rechts, User-Menu, Footer-Link",
             "Alter Email-Text + nackter Logout-Link entfernt — UserMenu "
             "ersetzt beides",
@@ -1204,9 +1226,9 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.logo-bigger",
         released=date(2026, 5, 14),
-        title="Logo groesser (Header 2.5× / Login 1.5×)",
+        title="Logo größer (Header 2.5× / Login 1.5×)",
         highlights=[
-            "App-Header-Logo von 64-80px auf 160-208px Hoehe "
+            "App-Header-Logo von 64-80px auf 160-208px Höhe "
             "(Faktor ~2.5×) — viel praesenter als Marke",
             "Login-Seite: Card-Breite max-w-md (448px) → max-w-[600px], "
             "Logo waechst proportional mit (~1.5×)",
@@ -1218,16 +1240,16 @@ PATCH_NOTES: list[PatchNote] = [
         title="Logo prominenter + Info-Buttons in Karten",
         highlights=[
             "App-Header: Logo ersetzt den separaten „cubetracker\”-"
-            "Schriftzug + Tagline (war doppelt — das Logo enthaelt beides). "
-            "Logo-Hoehe 64-80px, klickbar zum Dashboard-Tab, mit Hover-"
-            "Effekt. H1-Tag bleibt screenreader-only fuer SEO.",
+            "Schriftzug + Tagline (war doppelt — das Logo enthält beides). "
+            "Logo-Höhe 64-80px, klickbar zum Dashboard-Tab, mit Hover-"
+            "Effekt. H1-Tag bleibt screenreader-only für SEO.",
             "Anmeldeseite: Logo nimmt jetzt die volle Card-Innenbreite ein "
             "(war zu klein im Verhaeltnis zum Whitespace) — Card-Breite "
             "etwas erhoeht.",
             "Neue InfoButton-Komponente (ⓘ-Icon) mit Klick-/Hover-Popover. "
             "Schliesst bei Klick ausserhalb oder Esc.",
             "Info-Buttons platziert in: LIVE-Karte, Letzte-Solves-Tabelle, "
-            "Trainings-Set, Scramble — erklaert die wichtigsten Begriffe "
+            "Trainings-Set, Scramble — erklärt die wichtigsten Begriffe "
             "(AO5/AO12/Form-Vergleich/WCA-Scramble-Notation).",
         ],
     ),
@@ -1241,7 +1263,7 @@ PATCH_NOTES: list[PatchNote] = [
             "verstehen sofort worum's geht",
             "Feature-Liste in 7 Kategorien (Solving, Analyse, Trainer, "
             "Community, Hardware, Daten, Account+Sicherheit)",
-            "Innerhalb der App: Footer-Link „Was kann diese App?\” oeffnet "
+            "Innerhalb der App: Footer-Link „Was kann diese App?\” öffnet "
             "die selbe Feature-Liste als Modal",
             "Layout: Desktop 2-spaltig (Form links + Features rechts), "
             "Mobile gestapelt — Form bleibt prominent oben",
@@ -1261,7 +1283,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Bookmarks bleiben funktional",
             "Trainer + Verwaltung bleiben eigenstaendig (konservative "
             "Konsolidierung — Trainer-Sub-Tabs Heute/Algs/Erfolge sind "
-            "konzeptionell zu eigenstaendig fuer Zerlegung)",
+            "konzeptionell zu eigenstaendig für Zerlegung)",
         ],
     ),
     PatchNote(
@@ -1273,7 +1295,7 @@ PATCH_NOTES: list[PatchNote] = [
             "auf der Anmeldeseite",
             "Cube-Icon klein neben dem 'cubetracker'-Schriftzug im Header",
             "Browser-Tab-Favicon zeigt den Cube — endlich kein Default-Icon mehr",
-            "Apple-Touch-Icon fuer Homescreen-Install (vorab fuer PWA-Setup)",
+            "Apple-Touch-Icon für Homescreen-Install (vorab für PWA-Setup)",
         ],
     ),
     PatchNote(
@@ -1283,7 +1305,7 @@ PATCH_NOTES: list[PatchNote] = [
         highlights=[
             "Patch Notes raus aus Verwaltung — sind jetzt ein Modal das "
             "via Klick auf den Versions-Badge oben rechts aufgeht "
-            "(natuerlicherer Ort fuer Versions-Info)",
+            "(natuerlicherer Ort für Versions-Info)",
             "Discoverability-Card in Freunde-Tab konsolidiert — "
             "Display-Name jetzt inline editierbar, kein Verweis mehr "
             "nach Verwaltung → Einstellungen noetig",
@@ -1297,9 +1319,9 @@ PATCH_NOTES: list[PatchNote] = [
         title="Analyse → Solves: Hardware statt Notiz in Tabelle",
         highlights=[
             "Notiz-Spalte raus aus der Solve-Tabelle (Notiz bleibt im "
-            "Detail-Modal ueber den ℹ-Button verfuegbar)",
+            "Detail-Modal über den ℹ-Button verfügbar)",
             "Hardware-Spalte stattdessen — zeigt den Hardware-Namen "
-            "fuer jeden Solve, oder „—\” wenn keine zugeordnet",
+            "für jeden Solve, oder „—\” wenn keine zugeordnet",
             "Cube-Spalte vereinfacht (Hardware-Sub-Zeile entfernt — "
             "wird ja jetzt eigenstaendig gezeigt)",
         ],
@@ -1325,9 +1347,9 @@ PATCH_NOTES: list[PatchNote] = [
             "Jeder neue User bekommt automatisch die 30-Cube-Standard-Liste "
             "(default inaktiv) — kein Import-Button mehr noetig",
             "Lifespan-Backfill: bestehende User ohne Hardware kriegen die "
-            "Liste beim naechsten Cold-Start nachgepflegt",
+            "Liste beim nächsten Cold-Start nachgepflegt",
             "Pro Cube-Type-Gruppe: Checkbox 'alle markieren' + Bulk-Buttons "
-            "(aktivieren, deaktivieren, loeschen)",
+            "(aktivieren, deaktivieren, löschen)",
             "Expliziter Umbenennen-Button bei jedem Eintrag",
             "Header zeigt jetzt 'X aktiv von Y' statt nur Total",
         ],
@@ -1341,7 +1363,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Frontend-Seed-Button war funktionslos (Endpoint existierte nur "
             "im Desktop-Backend) — jetzt multi-user-safe geportet",
             "pyproject.toml packages-Liste um friends/leaderboard/seeds "
-            "ergaenzt fuer sauberen Pip-Install",
+            "ergänzt für sauberen Pip-Install",
         ],
         commit="8e5f3bc",
     ),
@@ -1395,7 +1417,7 @@ PATCH_NOTES: list[PatchNote] = [
         title="DB-Backup via GitHub Actions",
         highlights=[
             "Daily pg_dump 02:00 UTC, GitHub-Artifact mit 90 Tagen Retention",
-            "Manual-Trigger ueber Actions-Tab",
+            "Manual-Trigger über Actions-Tab",
             "BACKUP.md mit Restore-Anleitung",
         ],
         commit="29074ba",
@@ -1405,7 +1427,7 @@ PATCH_NOTES: list[PatchNote] = [
         released=date(2026, 5, 13),
         title="Admin User-Management + Ad-hoc-Mail + Bulk-Announcement",
         highlights=[
-            "User-Liste mit Solve-Count + Aktivitaet, Deaktivieren/Aktivieren",
+            "User-Liste mit Solve-Count + Aktivität, Deaktivieren/Aktivieren",
             "Email manuell verifizieren (Support-Hilfe)",
             "DSGVO-Hard-Delete mit Pflicht-Confirm-String",
             "Ad-hoc-Mail an einzelne User",
@@ -1428,9 +1450,9 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.touch",
         released=date(2026, 5, 13),
-        title="Touch-Timer fuer Phone + F19-Race-Fix",
+        title="Touch-Timer für Phone + F19-Race-Fix",
         highlights=[
-            "Auf Touch-Devices erscheint im Timer-Tab ein grosser Tap-Pad",
+            "Auf Touch-Devices erscheint im Timer-Tab ein großer Tap-Pad",
             "Dispatched synthetische Space-Events → useSpacebarTimer "
             "behandelt sie identisch zur echten Tastatur",
             "Auf Phone wird automatisch Spacebar-Modus aktiviert "
@@ -1479,7 +1501,7 @@ PATCH_NOTES: list[PatchNote] = [
         highlights=[
             "Achievements + Daily Challenges multi-user-faehig",
             "Stats-Endpoints filtern auf user_id",
-            "UTC-aware datetimes fuer Postgres-Kompatibilitaet",
+            "UTC-aware datetimes für Postgres-Kompatibilitaet",
         ],
         commit="b83c9df",
     ),

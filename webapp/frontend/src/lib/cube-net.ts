@@ -1,5 +1,5 @@
 // cube-net.ts (Phase W.scramble-image, 2026-05-17) —
-// Eigenbau-Cube-State-Simulator + 2D-Net-SVG-Renderer fuer 3x3.
+// Eigenbau-Cube-State-Simulator + 2D-Net-SVG-Renderer für 3x3.
 //
 // Warum Eigenbau statt cubing.js / sr-visualizer:
 //   - Kein Bundle-Bloat (~5kB statt 150-500kB)
@@ -18,7 +18,7 @@
 // Notation (WCA):
 //   - 18 Basic-Moves: U, U', U2, D, D', D2, R, R', R2, L, L', L2, F, F', F2, B, B', B2
 //   - Cube-Rotations (x, y, z) und Wide-Moves (Rw, Uw, ...) sind NICHT
-//     implementiert — fuer 3x3-Scramble-Visualisierung reichen die 18
+//     implementiert — für 3x3-Scramble-Visualisierung reichen die 18
 //     Basic-Moves voellig (WCA-Scrambles nutzen nur diese).
 //
 // SVG-Render: Cross-Layout
@@ -71,14 +71,14 @@ function rotateFaceCW(f: Face): Face {
   return [f[6], f[3], f[0], f[7], f[4], f[1], f[8], f[5], f[2]];
 }
 
-// rotateFace180 + rotateFaceCCW koennten als Optimierung Sinn machen,
+// rotateFace180 + rotateFaceCCW könnten als Optimierung Sinn machen,
 // sind aber aktuell nicht benoetigt — applyMove nutzt `turns`-Counter mit
 // rotateFaceCW (max 3x). Wenn Performance mal Engpass wird: hier
 // re-introducen + applyMove dispatchen. QA-Fix #7 (2026-05-17): vorher
 // als dead-code + void-ESLint-Trick — sauberer entfernt.
 
 /**
- * Zyklus-Definition fuer einen 90-Grad-CW-Move einer Face.
+ * Zyklus-Definition für einen 90-Grad-CW-Move einer Face.
  *
  * `cycle` listet die 12 Sticker, die zwischen 4 Adjacent-Faces zykliert
  * werden, in 4 Gruppen à 3 Stickern. Ein 90-Grad-CW-Move schiebt
@@ -190,7 +190,7 @@ function applyCycleCW(state: CubeState, cycle: MoveCycle["cycle"]): void {
 
 /**
  * Wendet einen einzelnen Move auf den State an (mutiert state in-place,
- * gibt aber state zurueck fuer Convenience-Chaining).
+ * gibt aber state zurück für Convenience-Chaining).
  *
  * Akzeptierte Notation: U, U', U2, D, D', D2, R, R', R2, L, L', L2,
  * F, F', F2, B, B', B2. Alles andere wird stillschweigend ignoriert
@@ -229,7 +229,7 @@ export function applyMove(state: CubeState, move: string): CubeState {
  * gesplittet. Leere/unbekannte Tokens werden ignoriert.
  *
  * Erzeugt eine TIEFE Kopie des input-state — der Aufrufer kann ohne Sorge
- * den solved-cube uebergeben.
+ * den solved-cube übergeben.
  */
 export function applyScramble(initial: CubeState, scramble: string): CubeState {
   const state = cloneState(initial);
@@ -256,7 +256,7 @@ export function cloneState(s: CubeState): CubeState {
 // SVG-Render
 // ============================================================
 
-/** Standard-Farben pro Color (WCA-Standard fuer 3x3). */
+/** Standard-Farben pro Color (WCA-Standard für 3x3). */
 const COLOR_HEX: Record<Color, string> = {
   U: "#f8f8f8", // weiss
   D: "#f8d62b", // gelb (yellow)
@@ -266,7 +266,7 @@ const COLOR_HEX: Record<Color, string> = {
   L: "#f08a1a", // orange
 };
 
-/** Hintergrund + Stroke fuer das SVG-Frame. */
+/** Hintergrund + Stroke für das SVG-Frame. */
 const SVG_BG = "#1f2937"; // tailwind gray-800-ish, passt zur App
 const STICKER_STROKE = "#0d1117"; // dark border zwischen Stickern
 
@@ -282,7 +282,7 @@ interface RenderOptions {
  * `<svg>...</svg>` String, der direkt in JSX als `dangerouslySetInnerHTML`
  * eingebettet werden kann (oder via React-SVG-Komponente reproduziert).
  *
- * Wir nehmen den String-Ansatz fuer Einfachheit + leichte Kopierbarkeit
+ * Wir nehmen den String-Ansatz für Einfachheit + leichte Kopierbarkeit
  * (Right-click → Bild speichern funktioniert).
  */
 export function renderCubeNetSvg(state: CubeState, opts: RenderOptions = {}): string {
@@ -291,7 +291,7 @@ export function renderCubeNetSvg(state: CubeState, opts: RenderOptions = {}): st
 
   // Cross-Layout: 4 Faces breit (L-F-R-B), 3 Faces hoch (U / mitte / D).
   // Breite: 4×3 Sticker + 3 Face-Paddings = 12s + 3p
-  // Hoehe: 3×3 Sticker + 2 Face-Paddings = 9s + 2p
+  // Höhe: 3×3 Sticker + 2 Face-Paddings = 9s + 2p
   const W = 12 * s + 3 * pad;
   const H = 9 * s + 2 * pad;
 
@@ -324,7 +324,7 @@ export function renderCubeNetSvg(state: CubeState, opts: RenderOptions = {}): st
       const x = fx + c * s;
       const y = fy + r * s;
       const fill = COLOR_HEX[face[i]];
-      // 1px rx fuer dezent abgerundete Sticker — wirkt sauberer
+      // 1px rx für dezent abgerundete Sticker — wirkt sauberer
       parts.push(
         `<rect x="${x}" y="${y}" width="${s}" height="${s}" rx="1.5" ry="1.5" fill="${fill}" stroke="${STICKER_STROKE}" stroke-width="0.7" />`,
       );

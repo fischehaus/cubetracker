@@ -3,7 +3,7 @@
 Pull-Strategie: kein dedizierter Cron, statt dessen "fetch-if-stale" im
 Endpoint-Pfad. Wenn die letzte gespeicherte `fetched_at` aelter als
 `STALE_AFTER_MIN` Minuten ist, triggern wir einen synchronen Fetch
-(durchschnittlich 1-2s fuer 2 Feeds) bevor wir die Liste returnen.
+(durchschnittlich 1-2s für 2 Feeds) bevor wir die Liste returnen.
 
 In Multi-Worker-Umgebungen (Render hat 1-2 Worker) kann das zu Race-
 Conditions fuehren — zwei Worker fetchen parallel. Defensive: wir
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 FETCH_TIMEOUT_S = 10.0
 STALE_AFTER_MIN = 60  # 1h
-KEEP_DAYS = 60  # Items aelter als 60d werden im selben Pass geloescht
+KEEP_DAYS = 60  # Items aelter als 60d werden im selben Pass gelöscht
 HTTP_HEADERS = {
     "User-Agent": "cubetracker.de/2.0 (https://cubetracker.de)",
     "Accept": "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8",
@@ -58,13 +58,13 @@ def _parse_entry(entry: Any, source: FeedSource) -> dict[str, Any] | None:
     QA-Fix Welle B (2026-05-16): Operator-Precedence-Bug behoben.
     Vorher: `getattr(entry, "link", None) or entry.get("link") if hasattr(...)`
     parste Python als `(getattr(...) or entry.get("link")) if hasattr(...) else None`
-    — bei Entries ohne `.get` waere link faelschlich None. Jetzt explizite
+    — bei Entries ohne `.get` wäre link faelschlich None. Jetzt explizite
     Klammern + Helper.
     """
 
     def _attr_or_key(obj: Any, key: str) -> Any:
         # feedparser-Entries sind FeedParserDict — sowohl Attribute als
-        # auch Dict-Keys verfuegbar. Wir probieren beides.
+        # auch Dict-Keys verfügbar. Wir probieren beides.
         val = getattr(obj, key, None)
         if val is None and hasattr(obj, "get"):
             try:
@@ -144,8 +144,8 @@ def fetch_all_sources(db: OrmSession) -> dict[str, Any]:
     Workflow:
       1. Pro Source: HTTP-Get + feedparser
       2. Pro Item: link-Lookup in DB, falls neu → INSERT (IntegrityError-
-         Schutz fuer Multi-Worker-Race)
-      3. Cleanup: alte Items (> KEEP_DAYS) loeschen
+         Schutz für Multi-Worker-Race)
+      3. Cleanup: alte Items (> KEEP_DAYS) löschen
 
     Returns Statistik-Dict (per-source counts + total inserted/skipped).
     """
@@ -165,11 +165,11 @@ def fetch_all_sources(db: OrmSession) -> dict[str, Any]:
                 skipped += 1
                 continue
             # QA-Fix Welle B: SAVEPOINT statt naive try/rollback.
-            # Bei IntegrityError (Race) wuerde db.rollback() ALLE bisher
+            # Bei IntegrityError (Race) würde db.rollback() ALLE bisher
             # geflushten Items derselben Iteration wegrollen — wir verlieren
             # alles bis zum Crash-Item. Mit nested-Transaction (SAVEPOINT)
-            # rollt nur das eine kaputte Item zurueck, alle vorherigen
-            # bleiben staged fuer den finalen commit().
+            # rollt nur das eine kaputte Item zurück, alle vorherigen
+            # bleiben staged für den finalen commit().
             try:
                 with db.begin_nested():
                     db.add(NewsItem(**item_data, fetched_at=now))

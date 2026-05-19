@@ -1,23 +1,23 @@
 // CubeStateView (Phase 8.3.1) — zeigt das visuelle Cube-State-Diagramm
-// fuer einen Algorithmus-Case (OLL/PLL).
+// für einen Algorithmus-Case (OLL/PLL).
 //
-// Aktuell: nur OLL hat Bilder (von User generiert). PLL kommt spaeter.
+// Aktuell: nur OLL hat Bilder (von User generiert). PLL kommt später.
 // Bei unbekannten/fehlenden Cases zeigt der Component dezent „kein
-// Diagramm verfuegbar".
+// Diagramm verfügbar".
 
 import { getOllImage } from "../lib/oll-images";
 
 interface Props {
   /** Case-ID wie "OLL-1", "OLL-21", "PLL-T", ... */
   caseId: string;
-  /** Visuelle Variante: "small" fuer case-grid-Tile, "large" fuer DrillCard */
+  /** Visuelle Variante: "small" für case-grid-Tile, "large" für DrillCard */
   size?: "small" | "large";
-  /** Optional: alt-text fuer screen reader */
+  /** Optional: alt-text für screen reader */
   alt?: string;
 }
 
 export function CubeStateView({ caseId, size = "small", alt }: Props) {
-  // Aktuell nur OLL — PLL gibt null zurueck und wir zeigen Placeholder.
+  // Aktuell nur OLL — PLL gibt null zurück und wir zeigen Placeholder.
   const url = caseId.startsWith("OLL-") ? getOllImage(caseId) : null;
 
   const dims =
@@ -29,7 +29,7 @@ export function CubeStateView({ caseId, size = "small", alt }: Props) {
     return (
       <div
         className={`${dims} rounded border border-dashed border-gray-700 bg-gray-900/30 flex items-center justify-center text-gray-600 text-xs`}
-        title={`Kein Diagramm verfuegbar fuer ${caseId}`}
+        title={`Kein Diagramm verfügbar für ${caseId}`}
       >
         ∅
       </div>
@@ -39,7 +39,7 @@ export function CubeStateView({ caseId, size = "small", alt }: Props) {
   return (
     <img
       src={url}
-      alt={alt ?? `Cube-State-Diagramm fuer ${caseId}`}
+      alt={alt ?? `Cube-State-Diagramm für ${caseId}`}
       className={`${dims} rounded object-contain bg-gray-900/40`}
       loading="lazy"
     />

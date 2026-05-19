@@ -1,9 +1,9 @@
-// AnalyseFilterBar: zentrale Filter-Leiste fuer den ANALYSE-Tab.
+// AnalyseFilterBar: zentrale Filter-Leiste für den ANALYSE-Tab.
 // Wirkt auf alle Karten unten (Stats, TrendsChart, ActivityChart,
 // HistogramChart, HardwareCompareCard, SolveList).
 //
 // Phase L-2: Session-Selektor zog hier hin (war vorher global im Header).
-// Damit ist der Filter klar lokal — was hier gewaehlt ist, gilt nur fuer
+// Damit ist der Filter klar lokal — was hier gewählt ist, gilt nur für
 // ANALYSE; DASHBOARD/VERWALTUNG haben eigene Filter.
 
 import { useSessions } from "../lib/api";

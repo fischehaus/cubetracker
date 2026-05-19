@@ -49,7 +49,7 @@ export function ChallengesMiniCard({ onSwitchTab }: Props) {
             <p className="font-medium mb-1">Tages-Challenges</p>
             <p>
               Drei kleine taegliche Aufgaben, jeden Tag neu (Mitternacht
-              UTC). Klick auf die Card oeffnet den Trainer-Tab mit der
+              UTC). Klick auf die Card öffnet den Trainer-Tab mit der
               ausfuehrlichen Liste + Fortschritts-Anzeige. Erfolgreich
               abgeschlossene Challenges tragen langfristig zu Achievements bei.
             </p>
@@ -62,7 +62,7 @@ export function ChallengesMiniCard({ onSwitchTab }: Props) {
 
       {visible.length === 0 ? (
         <p className="text-sm text-gray-500">
-          Noch keine Challenges fuer heute.
+          Noch keine Challenges für heute.
         </p>
       ) : (
         <ul className="space-y-2">

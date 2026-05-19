@@ -1,6 +1,6 @@
 """cubetracker-webapp — Multi-User-Variante (Phase W).
 
-Entry-Point fuer uvicorn. In Production via Render.com gestartet.
+Entry-Point für uvicorn. In Production via Render.com gestartet.
 
 Aktuell minimal: nur Auth + Health. Solve/Session/etc-Endpoints
 kommen in Sub-Phasen W.3+.
@@ -37,7 +37,7 @@ from auth.config import IS_PROD, require_strong_secret
 from auth.rate_limit import limiter
 
 # Version-String wird automatisch aus PATCH_NOTES[0].version abgeleitet —
-# Single-Source-of-Truth ist `changelog/data.py`. Bei jeder Aenderung
+# Single-Source-of-Truth ist `changelog/data.py`. Bei jeder Änderung
 # einen neuen Eintrag dort einfuegen, hier passiert nichts manuell.
 from changelog.data import current_version
 
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
     Aktuell nutzen wir `Base.metadata.create_all(engine)` als pragmatischen
     Initial-Setup — legt fehlende Tabellen an, laesst existierende in Ruhe.
 
-    Sobald das erste Schema-Aenderung auf bestehende Live-Daten kommt,
+    Sobald das erste Schema-Änderung auf bestehende Live-Daten kommt,
     wird auf Alembic umgestellt (Phase W.7+):
         from alembic import command
         from alembic.config import Config
@@ -78,12 +78,12 @@ async def lifespan(app: FastAPI):
                 # create_all() oben legt friendships-Tabelle an, hier nur die
                 # neue Spalte auf existierende users-Tabelle.
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_discoverable BOOLEAN NOT NULL DEFAULT FALSE",
-                # Phase W.future-tournaments: Postleitzahl-Feld fuer
-                # spaeteres "Turniere in der Naehe"-Feature.
+                # Phase W.future-tournaments: Postleitzahl-Feld für
+                # späteres "Turniere in der Nähe"-Feature.
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS postal_code VARCHAR(16)",
                 # Phase W.country-feld (2026-05-16): explizites Land im Profil
                 # (ISO-3166-1-alpha-2). Vorher haben wir das aus der PLZ
-                # abgeleitet — funktioniert nur fuer DACH. Jetzt explizit.
+                # abgeleitet — funktioniert nur für DACH. Jetzt explizit.
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS country_iso2 VARCHAR(2)",
                 # QA-Fix H1: cross-direction Race-Schutz auf friendships.
                 # Functional unique index garantiert dass es NUR EINE Row pro
@@ -107,7 +107,7 @@ async def lifespan(app: FastAPI):
 
             # Phase W.admin-toggle (2026-05-17): Bootstrap-Step.
             # User, deren Email in der ADMIN_EMAILS-Env-Var steht, bekommen
-            # is_admin=TRUE. Idempotent: setzt nur fehlende, ueberschreibt
+            # is_admin=TRUE. Idempotent: setzt nur fehlende, überschreibt
             # bereits-promoteed/demoteed User NICHT.
             # ADMIN_EMAILS bleibt als "Initial-Admin-Liste-beim-Bootstrap",
             # Quelle-of-Truth ab jetzt ist die DB-Spalte.
@@ -134,10 +134,10 @@ async def lifespan(app: FastAPI):
             except Exception as ab_e:  # noqa: BLE001
                 print(f"WARN: admin bootstrap failed: {ab_e}")
 
-            # W.hardware-auto-seed (2026-05-14): Backfill fuer User die
+            # W.hardware-auto-seed (2026-05-14): Backfill für User die
             # vor diesem Deploy registriert wurden + noch keine Hardware
             # angelegt haben. Idempotent — User mit existierender Hardware
-            # (egal ob 1 oder 30 Eintraege) bleiben unangetastet.
+            # (egal ob 1 oder 30 Einträge) bleiben unangetastet.
             try:
                 from seeds.hardware import backfill_users_without_hardware
                 from db.database import SessionLocal
@@ -163,7 +163,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Rate-Limiter (slowapi) — Brute-Force-Schutz fuer /login + /register.
+# Rate-Limiter (slowapi) — Brute-Force-Schutz für /login + /register.
 # Limiter selbst kommt aus auth.rate_limit, hier nur die App-Verdrahtung.
 app.state.limiter = limiter
 # Default-Handler liefert 429 + Retry-After-Header.
@@ -177,7 +177,7 @@ app.add_middleware(SlowAPIMiddleware)
 #   "https://cubetracker-frontend.onrender.com,https://cubetracker.iiiiii.org"
 # - Dev: localhost:5173 + 127.0.0.1:5173 (Vite-Default)
 # allow_credentials=True ist Pflicht damit der HttpOnly-Refresh-Cookie
-# ueberhaupt mit cross-origin Requests gesendet wird.
+# überhaupt mit cross-origin Requests gesendet wird.
 if IS_PROD:
     raw = os.getenv("WEBAPP_FRONTEND_ORIGIN", "")
     allowed_origins = [o.strip() for o in raw.split(",") if o.strip()]

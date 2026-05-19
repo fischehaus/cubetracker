@@ -1,10 +1,10 @@
 // TimerControlsCard — Selektoren + Timer-Modus-Picker.
 //
-// Frueher Teil von BigTimerInput. Mit dem Mobile-Layout-Refactor (Welle 2,
+// Früher Teil von BigTimerInput. Mit dem Mobile-Layout-Refactor (Welle 2,
 // 2026-05-16) ausgelagert, damit der Block auf Phone UNTER den TouchTimerPad
 // rutscht — sodass „Tippen & halten" und das Timer-Display direkt unter dem
 // Scramble sichtbar sind. Die Eingabefelder (Cube/Session/Hardware/Modus)
-// braucht der User nur selten waehrend des Solvens — sie duerfen scrollen.
+// braucht der User nur selten während des Solvens — sie dürfen scrollen.
 //
 // State-Verteilung:
 //   - cubeType / sessionId / hardwareId  → controlled vom TimerTab (Parent),
@@ -48,8 +48,8 @@ export function TimerControlsCard({
   const isTouchDevice = useIsTouchDevice();
   const spacebarMode = settings.spacebar_enabled;
 
-  // „User hat in diesem Cube manuell gewaehlt" → wenn ja, kein Auto-Suggest-
-  // Override mehr. Reset bei Cube-Wechsel, sodass der naechste Cube wieder
+  // „User hat in diesem Cube manuell gewählt" → wenn ja, kein Auto-Suggest-
+  // Override mehr. Reset bei Cube-Wechsel, sodass der nächste Cube wieder
   // seinen eigenen Suggest bekommt.
   const [userPickedSession, setUserPickedSession] = useState(false);
   const [userPickedHardware, setUserPickedHardware] = useState(false);
@@ -70,11 +70,11 @@ export function TimerControlsCard({
     setUserPickedHardware(false);
   }, [cubeType]);
 
-  // Session-Suggest anwenden, wenn User nicht manuell gewaehlt hat.
+  // Session-Suggest anwenden, wenn User nicht manuell gewählt hat.
   // Race-Condition-Gate (vorher in BigTimerInput) — bei schnellem
-  // Cube-Wechsel kann die alte Suggestion-Response noch ankommen waehrend
+  // Cube-Wechsel kann die alte Suggestion-Response noch ankommen während
   // cubeType schon ein anderer ist. cube_type-Match verhindert dass die
-  // stale Antwort den neuen Cube ueberschreibt.
+  // stale Antwort den neuen Cube überschreibt.
   useEffect(() => {
     if (
       sessionSuggestion &&
@@ -85,7 +85,7 @@ export function TimerControlsCard({
     }
   }, [sessionSuggestion, userPickedSession, onSessionIdChange, cubeType]);
 
-  // Hardware-Suggest anwenden, wenn User nicht manuell gewaehlt hat.
+  // Hardware-Suggest anwenden, wenn User nicht manuell gewählt hat.
   useEffect(() => {
     if (
       hardwareSuggestion &&
@@ -121,7 +121,7 @@ export function TimerControlsCard({
     );
   }
 
-  // Hilfs-Variablen fuer UI-Hints
+  // Hilfs-Variablen für UI-Hints
   const suggestedSessionLabel =
     sessionSuggestion && sessionSuggestion.session_id !== null
       ? sessions?.find((s) => s.id === sessionSuggestion.session_id)?.name ?? null
@@ -158,7 +158,7 @@ export function TimerControlsCard({
             {sessionSuggestion?.session_id !== null && !userPickedSession && (
               <span
                 className="text-[10px] text-emerald-400"
-                title={`Vorgeschlagen: meiste Solves fuer ${cubeType}`}
+                title={`Vorgeschlagen: meiste Solves für ${cubeType}`}
               >
                 ★ auto
               </span>
@@ -193,7 +193,7 @@ export function TimerControlsCard({
                 className="text-[10px] text-emerald-400"
                 title={
                   hardwareSuggestion?.reason === "most_used"
-                    ? `Vorgeschlagen: am haeufigsten fuer ${cubeType} verwendet`
+                    ? `Vorgeschlagen: am häufigsten für ${cubeType} verwendet`
                     : `Vorgeschlagen: erste aktive ${cubeType}-Hardware`
                 }
               >
@@ -232,7 +232,7 @@ export function TimerControlsCard({
         </label>
       </div>
 
-      {/* Inline-Form fuer neue Session */}
+      {/* Inline-Form für neue Session */}
       {showNewSessionForm && (
         <div className="mt-4 rounded border border-purple-500/40 bg-purple-500/5 p-3 flex gap-2 items-end flex-wrap">
           <label className="flex flex-col text-sm text-gray-300 flex-1 min-w-[12rem]">
@@ -258,7 +258,7 @@ export function TimerControlsCard({
             disabled={createSession.isPending || !newSessionName.trim()}
             className="text-base rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
           >
-            Anlegen + auswaehlen
+            Anlegen + auswählen
           </button>
           <button
             onClick={() => {
@@ -272,7 +272,7 @@ export function TimerControlsCard({
         </div>
       )}
 
-      {/* Timer-Modus-Picker — frueher nur in Verwaltung → Einstellungen
+      {/* Timer-Modus-Picker — früher nur in Verwaltung → Einstellungen
           versteckt, war nicht discoverable. Jetzt direkt im Timer-Tab.
           3 Modi: Text-Eingabe / Spacebar-WCA / Spacebar-Pragmatisch.
           Auf Touch-Devices ist Text-Mode nicht sinnvoll (Soft-Keyboard) —
@@ -295,7 +295,7 @@ export function TimerControlsCard({
             </p>
             <p>
               <strong>Spacebar — Pragmatisch:</strong> User-Training. Single
-              Tap waehrend Inspection startet Solve, Double-Tap startet
+              Tap während Inspection startet Solve, Double-Tap startet
               Inspection neu. Auto-DNF bei Countdown 0. Etwas entspannter als
               WCA.
             </p>
@@ -339,7 +339,7 @@ export function TimerControlsCard({
           <p className="mt-2 text-xs text-gray-500">
             💡 Tipp:{" "}
             {isTouchDevice
-              ? "auf dem Phone ist Text-Eingabe ueber die Soft-Tastatur etwas muehsam — Spacebar-Tap ist meist schneller."
+              ? "auf dem Phone ist Text-Eingabe über die Soft-Tastatur etwas muehsam — Spacebar-Tap ist meist schneller."
               : "Probier den Spacebar-Timer — viel fluessigeres Training, inkl. Inspection-Countdown. Klick einfach auf einen der Spacebar-Modi oben."}
           </p>
         )}

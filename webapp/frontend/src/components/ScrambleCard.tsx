@@ -5,15 +5,15 @@
 //  - Beim Mount + bei cube_type-Wechsel + nach Save: neuer Scramble
 //    (passend zum aktuellen Cube-Type, falls kein User-Override)
 //  - „Skip"-Button generiert manuell einen neuen Scramble
-//  - Welle 3: User kann den Scramble-Typ aendern. Zwei Kategorien:
+//  - Welle 3: User kann den Scramble-Typ ändern. Zwei Kategorien:
 //      • WCA — alle offiziellen Wettkampf-Cubes (3x3, 4x4, Pyraminx, …)
 //      • Inoffiziell — Ivy, Gear, Redi, Master Pyra/Skewb, FTO
 //    Default folgt cubeType (z.B. „3x3" → WCA + 333). User-Override
-//    bleibt bis zum naechsten cubeType-Wechsel, dann auto-reset.
+//    bleibt bis zum nächsten cubeType-Wechsel, dann auto-reset.
 //  - Session.scramble_type-Override (Phase 8b, z.B. „pll") schlaegt
 //    cubeType — User-Picker-Override schlaegt beides (volles Steuern).
 //
-// Monospace + grosser Font fuer die Notation. Der Parent (TimerTab)
+// Monospace + großer Font für die Notation. Der Parent (TimerTab)
 // steuert via `regenerationSeed`-prop wann ein neuer Scramble faellig
 // ist (z.B. solve-counter erhoehen → re-gen).
 
@@ -41,7 +41,7 @@ interface Props {
    * User-Picker-Override schlaegt aber auch das hier.
    */
   scrambleTypeOverride?: string | null;
-  /** Aenderung dieser Zahl loest re-generation aus (z.B. nach save). */
+  /** Änderung dieser Zahl loest re-generation aus (z.B. nach save). */
   regenerationSeed: number;
   /**
    * Callback: bei jedem neu erzeugten Scramble — der Parent
@@ -55,7 +55,7 @@ type Category = "wca" | "unofficial";
 /**
  * Hilfs-Funktion: in welcher Picker-Kategorie ist der Code?
  *
- * Returnt `null` fuer Codes, die in keiner unserer beiden Listen sind —
+ * Returnt `null` für Codes, die in keiner unserer beiden Listen sind —
  * z.B. Trainer-Subsets wie „pll", „oll" oder ein csTimer-Override wie
  * „333oh". Der Caller (ScrambleCard) deaktiviert den Dropdown in diesem
  * Fall und zeigt einen Hinweis, statt einen `<select>` mit value zu
@@ -67,7 +67,7 @@ function categoryFor(code: string): Category | null {
   return null;
 }
 
-/** UI-Label fuer einen Code aus den beiden Listen (Fallback = Code). */
+/** UI-Label für einen Code aus den beiden Listen (Fallback = Code). */
 function labelFor(code: string): string {
   const all: ScrambleTypeInfo[] = [
     ...WCA_SCRAMBLE_TYPES,
@@ -87,22 +87,22 @@ export function ScrambleCard({
   const [settings, setSettings] = useAppSettings();
   const fontPx = TIMER_FONT_SCALE[settings.timer_font_size].scramble;
 
-  // Phase W.scramble-image (2026-05-17): ist das 2D-Net fuer den aktuellen
-  // Cube-Type ueberhaupt verfuegbar? Wir blenden den Toggle dann nur ein,
+  // Phase W.scramble-image (2026-05-17): ist das 2D-Net für den aktuellen
+  // Cube-Type überhaupt verfügbar? Wir blenden den Toggle dann nur ein,
   // wenn er auch eine sichtbare Wirkung hat.
   const netSupported = isScrambleNetSupported(cubeType);
 
   // Phase W.custom-scramble (2026-05-17): Edit-Modus laesst User einen
   // eigenen Scramble eintippen. Aktivieren via Edit-Button, speichern
   // mit Enter / Save-Button. Generator-Effekt wird mit isCustom-Flag
-  // pausiert (sonst wuerde der naechste Render-Trigger den Custom-
-  // Scramble ueberschreiben).
+  // pausiert (sonst würde der nächste Render-Trigger den Custom-
+  // Scramble überschreiben).
   const [editMode, setEditMode] = useState(false);
   const [editValue, setEditValue] = useState("");
   const [isCustom, setIsCustom] = useState(false);
 
   // User-Override aus dem Picker. null = „folgt automatisch dem Cube".
-  // Wir resetten ihn bei cubeType-Wechsel, sodass der naechste Cube
+  // Wir resetten ihn bei cubeType-Wechsel, sodass der nächste Cube
   // wieder seinen passenden Default zeigt.
   const [userPickedType, setUserPickedType] = useState<string | null>(null);
   useEffect(() => {
@@ -115,7 +115,7 @@ export function ScrambleCard({
 
   // Override-Resolution: Session-scramble_type → scrambow-Code, falls
   // bekannt. csTimer-Codes (444wca, pyrso, …) werden hier in scrambow-
-  // Codes uebersetzt — sonst leerer Scramble fuer importierte Sessions.
+  // Codes übersetzt — sonst leerer Scramble für importierte Sessions.
   const resolvedSessionOverride = scrambleTypeOverride
     ? resolveScrambleTypeOverride(scrambleTypeOverride)
     : null;
@@ -126,19 +126,19 @@ export function ScrambleCard({
     resolvedSessionOverride ??
     cubeTypeToScrambowType(cubeType);
 
-  // Kategorie fuer den Toggle — derived aus dem effektivenType.
+  // Kategorie für den Toggle — derived aus dem effektivenType.
   const effectiveCategory = categoryFor(effectiveType);
 
   // QA-Hinweis: onScrambleGenerated bewusst NICHT in den deps. Der Parent
   // (TimerTab) gibt `setCurrentScramble` direkt aus `useState` rein — die
-  // Identitaet bleibt stabil. Wuerde der Parent das mal in einen inline-
-  // Callback umbauen, koennte dieser Effect ungewollt bei jedem Render
+  // Identität bleibt stabil. Würde der Parent das mal in einen inline-
+  // Callback umbauen, könnte dieser Effect ungewollt bei jedem Render
   // feuern und einen neuen Scramble erzeugen. Wenn das jemals nervt,
   // entweder useEvent (React 19+ stable?) oder den Parent zwingen,
   // useCallback zu nutzen.
   useEffect(() => {
     // Wenn der User gerade einen Custom-Scramble eingegeben hat,
-    // nicht ueberschreiben. Nach Skip / Save / Cube-Wechsel wird
+    // nicht überschreiben. Nach Skip / Save / Cube-Wechsel wird
     // isCustom resetet.
     if (isCustom) return;
     const next = generateScramble(effectiveType);
@@ -147,12 +147,12 @@ export function ScrambleCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effectiveType, regenerationSeed, skipCounter, isCustom]);
 
-  /** Custom-Scramble uebernehmen: validiert nicht streng (nur Trim),
+  /** Custom-Scramble übernehmen: validiert nicht streng (nur Trim),
    *  verlaesst sich darauf dass User die Notation kennt. */
   function applyCustomScramble() {
     const trimmed = editValue.trim();
     if (!trimmed) {
-      // Leerer Input → Edit-Modus verlassen ohne aenderung
+      // Leerer Input → Edit-Modus verlassen ohne änderung
       setEditMode(false);
       return;
     }
@@ -211,14 +211,14 @@ export function ScrambleCard({
               Zufaellige Verdrehungs-Sequenz nach WCA-Notation. Buchstaben =
               Seite (R, L, U, D, F, B), Strich („L'") = gegen den Uhrzeiger,
               Zahl 2 = doppelte Drehung. Wende den Scramble auf einen
-              geloesten Cube an — dann sind alle Loesungen unter denselben
+              geloesten Cube an — dann sind alle Lösungen unter denselben
               Bedingungen vergleichbar. „Skip" wirft einen neuen.
             </p>
             <p>
               <strong>Picker:</strong> Standard ist der passende Scramble zum
-              gewaehlten Cube-Type. Toggle „WCA" ↔ „Inoffiziell" + Dropdown
-              waehlt einen anderen Typ. Wechsel des Cube-Types setzt den
-              Override automatisch zurueck.
+              gewählten Cube-Type. Toggle „WCA" ↔ „Inoffiziell" + Dropdown
+              wählt einen anderen Typ. Wechsel des Cube-Types setzt den
+              Override automatisch zurück.
             </p>
           </InfoButton>
         </div>
@@ -233,8 +233,8 @@ export function ScrambleCard({
             </button>
           )}
           {/* 2D-Net-Toggle (Phase W.scramble-image-toggle): nur sichtbar wenn
-              das Bild fuer den aktuellen Cube-Type ueberhaupt was zeigen
-              wuerde — sonst waere der Toggle wirkungslos und damit
+              das Bild für den aktuellen Cube-Type überhaupt was zeigen
+              würde — sonst wäre der Toggle wirkungslos und damit
               irrefuehrend (User-Wunsch 2026-05-17). */}
           {netSupported && (
             <button
@@ -265,7 +265,7 @@ export function ScrambleCard({
               setSkipCounter((c) => c + 1);
             }}
             className="text-sm rounded border border-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-800 hover:text-gray-100"
-            title="Diesen Scramble ueberspringen, neuen generieren"
+            title="Diesen Scramble überspringen, neuen generieren"
           >
             ⏭ Skip
           </button>
@@ -322,7 +322,7 @@ export function ScrambleCard({
           // jeweilige Kategorie. „↺ auto" stellt den Cube-Default wieder her.
           <span className="text-xs text-gray-500 italic">
             Aus Session-Vorgabe: „{labelFor(effectiveType)}" — Toggle
-            waehlen um zu aendern
+            wählen um zu ändern
           </span>
         )}
         {isOverridden && (
@@ -330,7 +330,7 @@ export function ScrambleCard({
             type="button"
             onClick={() => setUserPickedType(null)}
             className="text-xs rounded border border-gray-700 px-2 py-1 text-gray-400 hover:bg-gray-800 hover:text-gray-200"
-            title={`Zurueck zum Default fuer ${cubeType}`}
+            title={`Zurück zum Default für ${cubeType}`}
           >
             ↺ auto
           </button>
@@ -340,7 +340,7 @@ export function ScrambleCard({
       {editMode ? (
         // Edit-Modus (Phase W.custom-scramble): Textarea + Save/Abbrechen.
         // Enter speichert (ohne Shift), Esc bricht ab. Auto-Focus + select
-        // damit User direkt ueberschreiben kann.
+        // damit User direkt überschreiben kann.
         <div className="space-y-2">
           <textarea
             value={editValue}
@@ -366,7 +366,7 @@ export function ScrambleCard({
               onClick={applyCustomScramble}
               className="rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"
             >
-              ✓ Uebernehmen (Enter)
+              ✓ Übernehmen (Enter)
             </button>
             <button
               type="button"
@@ -390,7 +390,7 @@ export function ScrambleCard({
           >
             {scramble || (
               <span className="text-gray-500 text-base">
-                Scramble nicht verfuegbar fuer diesen Typ.
+                Scramble nicht verfügbar für diesen Typ.
               </span>
             )}
             {isCustom && (
@@ -399,7 +399,7 @@ export function ScrambleCard({
               </span>
             )}
           </div>
-          {/* 2D-Net-Bild (Phase W.scramble-image): rendert sich selbst nur fuer
+          {/* 2D-Net-Bild (Phase W.scramble-image): rendert sich selbst nur für
               unterstuetzte Cube-Types (aktuell 3x3) und bei aktivem Setting. */}
           {settings.show_scramble_image && scramble && (
             <ScrambleNet scramble={scramble} cubeType={cubeType} />
@@ -407,10 +407,10 @@ export function ScrambleCard({
         </>
       )}
 
-      {/* Disclaimer NUR fuer Custom-Puzzles ohne Random-State-Solver
+      {/* Disclaimer NUR für Custom-Puzzles ohne Random-State-Solver
           (Phase W.ivy-rs, 2026-05-17): Ivy hat seit jetzt einen
-          Eigenbau-Solver (29.160-State-Lookup-Table). FTO ueber scrambow.
-          Gear/Redi/Master Pyra/Skewb laufen weiter ueber Random-Move
+          Eigenbau-Solver (29.160-State-Lookup-Table). FTO über scrambow.
+          Gear/Redi/Master Pyra/Skewb laufen weiter über Random-Move
           (kommen schrittweise auf Random-State, wenn das Konzept hier
           stabil ist). */}
       {effectiveCategory === "unofficial" &&
@@ -418,7 +418,7 @@ export function ScrambleCard({
         effectiveType !== "fto" && (
           <p className="mt-3 text-[11px] text-amber-300/70">
             Hinweis: Random-Move-Sequenz mit korrekter Notation, kein
-            Random-State-Solver. Gut fuers Training, nicht 100% Wettkampf-
+            Random-State-Solver. Gut fürs Training, nicht 100% Wettkampf-
             vergleichbar. Random-State folgt schrittweise.
           </p>
         )}
@@ -426,7 +426,7 @@ export function ScrambleCard({
   );
 }
 
-/** Kleiner Pill-Button fuer die Kategorie-Toggle. */
+/** Kleiner Pill-Button für die Kategorie-Toggle. */
 function CategoryButton({
   active,
   onClick,

@@ -1,6 +1,6 @@
 // TabBar: Top-Level-Navigation zwischen den 6 Haupt-Modi der App.
-// - TIMER:      Solving-Modus, Eingabe gross + zentriert
-// - DASHBOARD:  Live-Uebersicht, Tagesform + Reminders
+// - TIMER:      Solving-Modus, Eingabe groß + zentriert
+// - DASHBOARD:  Live-Übersicht, Tagesform + Reminders
 // - ANALYSE:    Deep-Dive, Charts + volle Solveliste (NUR Auswertung)
 // - VERWALTUNG: Sessions, Hardware, Import, Outlier-Pflege (Daten-Pflege)
 // - TRAINER:    Personal Trainer — Erfolge + Daily Challenges

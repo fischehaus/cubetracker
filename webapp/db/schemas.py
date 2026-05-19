@@ -1,7 +1,7 @@
-"""Pydantic-Schemas fuer cubetracker-webapp.
+"""Pydantic-Schemas für cubetracker-webapp.
 
 API-Surface bewusst OHNE user_id — der wird IMMER aus current_user gezogen,
-nie vom Client uebergeben (sonst koennte ein User Daten anderer User
+nie vom Client übergeben (sonst könnte ein User Daten anderer User
 manipulieren).
 """
 
@@ -42,14 +42,14 @@ class UserRead(BaseModel):
     display_name: str | None
     created_at: datetime
     # Computed-Property aus dem User-Model — abgeleitet von ADMIN_EMAILS-Env-Var.
-    # Frontend nutzt das um den Admin-Sub-Tab im VerwaltungTab nur fuer
-    # Admins zu rendern. Default False fuer Tests die UserRead manuell bauen.
+    # Frontend nutzt das um den Admin-Sub-Tab im VerwaltungTab nur für
+    # Admins zu rendern. Default False für Tests die UserRead manuell bauen.
     is_admin: bool = False
-    # Phase W.9: Opt-In fuer User-Suche per display_name. Frontend zeigt
+    # Phase W.9: Opt-In für User-Suche per display_name. Frontend zeigt
     # einen Toggle in den Einstellungen.
     is_discoverable: bool = False
-    # Phase W.future-tournaments: Postleitzahl fuer „Turniere in der
-    # Naehe"-Feature. Optional, multi-country (kein Format-Check).
+    # Phase W.future-tournaments: Postleitzahl für „Turniere in der
+    # Nähe"-Feature. Optional, multi-country (kein Format-Check).
     postal_code: str | None = None
     # Phase W.country-feld (2026-05-16): ISO-3166-1-alpha-2-Land.
     country_iso2: str | None = None
@@ -60,7 +60,7 @@ class UserUpdate(BaseModel):
 
     Sub-Agent-Finding K4: extra="forbid" als zweite Defense-Schicht gegen
     Mass-Assignment. Zusammen mit Whitelist im Endpoint defensiv genug
-    auch wenn diese Klasse spaeter erweitert wird.
+    auch wenn diese Klasse später erweitert wird.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -76,7 +76,7 @@ class UserUpdate(BaseModel):
 
 
 class PasswordChange(BaseModel):
-    """POST /auth/change-password — eingeloggter User aendert Passwort."""
+    """POST /auth/change-password — eingeloggter User ändert Passwort."""
 
     current_password: str
     new_password: str = Field(min_length=8, max_length=128)
@@ -96,7 +96,7 @@ class ResetPasswordRequest(BaseModel):
 
 
 class EmailChangeRequest(BaseModel):
-    """POST /auth/change-email — eingeloggter User aendert Email."""
+    """POST /auth/change-email — eingeloggter User ändert Email."""
 
     current_password: str
     new_email: EmailStr
@@ -111,7 +111,7 @@ class VerifyEmailRequest(BaseModel):
 class AccessTokenOnly(BaseModel):
     """Login + Refresh + Logout-Renew Response.
 
-    Nur Access-Token im Body — der Refresh-Token wird ausschliesslich
+    Nur Access-Token im Body — der Refresh-Token wird ausschließlich
     als HttpOnly-Cookie gesetzt (XSS-sicher, Security-Finding #1).
     """
 
@@ -268,7 +268,7 @@ class LiveTestUpdate(BaseModel):
     """Patch: Status setzen + Antwort schreiben.
 
     Beide Felder optional damit man z.B. nur eine Notiz updaten kann
-    ohne Status zu aendern. Beim Status-Set wird responded_at +
+    ohne Status zu ändern. Beim Status-Set wird responded_at +
     responded_by_user_id serverseitig gesetzt.
     """
 
@@ -278,7 +278,7 @@ class LiveTestUpdate(BaseModel):
 
 
 class LiveTestRead(BaseModel):
-    """Read-Schema fuer Liste / Detail."""
+    """Read-Schema für Liste / Detail."""
 
     model_config = ConfigDict(from_attributes=True)
 

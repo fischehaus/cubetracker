@@ -1,4 +1,4 @@
-// Tests fuer Outlier-Detection.
+// Tests für Outlier-Detection.
 
 import { describe, expect, it } from "vitest";
 import { findOutliers, findOutliersBySession, type OutlierInput } from "./outliers";
@@ -21,7 +21,7 @@ describe("findOutliers — Grundverhalten", () => {
     expect(findOutliers([])).toEqual([]);
   });
 
-  it("ueberspringt Cube-Types mit < 10 Solves", () => {
+  it("überspringt Cube-Types mit < 10 Solves", () => {
     // 5 Solves, einer extrem schnell — sollte trotzdem keinen Outlier liefern,
     // weil die Median-Schaetzung bei 5 Solves zu unsicher ist.
     const solves = [mk(1, 100), mk(2, 10000), mk(3, 11000), mk(4, 12000), mk(5, 13000)];
@@ -53,7 +53,7 @@ describe("findOutliers — too_fast", () => {
   });
 
   it("findet KEINEN Outlier bei knapp unter Median", () => {
-    // 10 Solves um 10s, einer bei 5s — das ist 50% des Medians, ueber dem 30%-Schwellwert
+    // 10 Solves um 10s, einer bei 5s — das ist 50% des Medians, über dem 30%-Schwellwert
     const solves = Array.from({ length: 10 }, (_, i) => mk(i, 10000));
     solves.push(mk(100, 5000));
     expect(findOutliers(solves)).toEqual([]);
@@ -61,7 +61,7 @@ describe("findOutliers — too_fast", () => {
 });
 
 describe("findOutliers — too_slow", () => {
-  it("findet Solve ueber 5x Median", () => {
+  it("findet Solve über 5x Median", () => {
     // 10 Solves um 10s, plus 1 mit 117 Minuten
     const solves = Array.from({ length: 10 }, (_, i) => mk(i, 10000 + i * 100));
     solves.push(mk(200, 117 * 60 * 1000));
@@ -88,7 +88,7 @@ describe("findOutliers — Gruppierung nach Cube-Type", () => {
     expect(types).toEqual(["3x3", "4x4"]);
   });
 
-  it("nutzt cube-spezifischen Median (Skewb 5s ist OK, fuer 3x3 Outlier)", () => {
+  it("nutzt cube-spezifischen Median (Skewb 5s ist OK, für 3x3 Outlier)", () => {
     // Skewb median ~5s — 4s ist normal, kein Outlier
     const skewb = Array.from({ length: 10 }, (_, i) => mk(i, 4500 + i * 100, "Skewb"));
     skewb.push(mk(100, 4000, "Skewb")); // knapp unter 5s, kein Outlier
@@ -158,7 +158,7 @@ describe("findOutliersBySession (Phase 8.1)", () => {
     expect(result[0].session_id).toBeNull();
   });
 
-  it("session-mode trennt Cube-uebergreifend (3x3 + OH in einer Session)", () => {
+  it("session-mode trennt Cube-übergreifend (3x3 + OH in einer Session)", () => {
     // Session 1 mischt 3x3 und OH — beim cube-mode waeren das zwei Gruppen,
     // beim session-mode eine. Median verschwimmt → andere Outlier-Detection.
     const mixed = [

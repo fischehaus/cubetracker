@@ -57,7 +57,7 @@ def _slim_competition(comp: dict[str, Any]) -> dict[str, Any]:
 
     WCA-Response hat ~30 Felder pro Competition — wir nehmen 10 davon plus
     eine berechnete `events_count`-Convenience. Hervorhebung der Felder
-    die fuer das Frontend wichtig sind, der Rest wird vom Backend
+    die für das Frontend wichtig sind, der Rest wird vom Backend
     geschluckt.
     """
     return {
@@ -84,13 +84,13 @@ async def fetch_upcoming_competitions(
     days_ahead: int = 180,
     today: date | None = None,
 ) -> list[dict[str, Any]]:
-    """Holt die naechsten Competitions ab `today` bis +`days_ahead` Tage.
+    """Holt die nächsten Competitions ab `today` bis +`days_ahead` Tage.
 
     Optional Land-Filter (`country_iso2`, ISO-3166-alpha-2, z.B. "DE").
 
     Pagination: WCA liefert per_page=25 Default, wir setzen 100. Wir
-    folgen aktuell nicht der Pagination — fuer DE liefert das ~10-20
-    Eintraege in einem typischen Halbjahr, fuer „weltweit" auch noch
+    folgen aktuell nicht der Pagination — für DE liefert das ~10-20
+    Einträge in einem typischen Halbjahr, für „weltweit" auch noch
     < 100. Wenn das mal nicht reicht: paginate.
 
     Returns: Liste slim-formatierter Competition-Dicts. Bei Fehler:
@@ -133,7 +133,7 @@ async def fetch_upcoming_competitions(
 
     # Filter: nur noch nicht abgelaufene Competitions (defensive — der
     # `start` Param sollte das schon machen, aber WCA hat manchmal alte
-    # Eintraege drin).
+    # Einträge drin).
     today_iso = start.isoformat()
     items = [
         _slim_competition(c)
@@ -162,9 +162,9 @@ async def fetch_upcoming_competitions_multi(
     days_ahead: int = 180,
     today: date | None = None,
 ) -> list[dict[str, Any]]:
-    """Parallel-Fetch fuer mehrere Laender (Phase W.wca-neighbors).
+    """Parallel-Fetch für mehrere Laender (Phase W.wca-neighbors).
 
-    Ruft `fetch_upcoming_competitions` fuer jedes Land parallel via
+    Ruft `fetch_upcoming_competitions` für jedes Land parallel via
     `asyncio.gather` auf — bei 10 Laendern (DE + Nachbarn) ergibt das
     10 parallele HTTP-Calls statt 10 sequentielle (Latenz ~ max statt sum).
     Cache-Hits sind no-op, daher pro Land 0-500ms.

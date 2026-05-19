@@ -1,8 +1,8 @@
 // Ivy Cube Random-State-Scrambler (Phase W.ivy-rs, 2026-05-17).
 //
 // User-Wunsch: echte WCA-Quality-Scrambles (Random-State + Optimal-Solver)
-// statt Random-Move-Sequenzen. Erster Eigenbau-Solver fuer ein nicht-WCA-
-// Puzzle. Wenn das Konzept hier funktioniert, dient es als Template fuer
+// statt Random-Move-Sequenzen. Erster Eigenbau-Solver für ein nicht-WCA-
+// Puzzle. Wenn das Konzept hier funktioniert, dient es als Template für
 // Gear/Redi/Master Pyraminx.
 //
 // REFERENZ: csTimer src/js/scramble/skewb.js, Funktion getScrambleIvy.
@@ -52,7 +52,7 @@ function cycle3<T>(arr: T[], c: readonly [number, number, number], dir: 1 | -1):
   return next;
 }
 
-/** State-Encoding als kompakter String fuer Map-Keys. */
+/** State-Encoding als kompakter String für Map-Keys. */
 type StateKey = string;
 
 function encodeState(centers: number[], corners: number[]): StateKey {
@@ -82,7 +82,7 @@ function applyMove(
 ): { centers: number[]; corners: number[] } {
   const newCenters = cycle3(centers, MOVE_CENTERS[axisIdx], dir);
   const newCorners = corners.slice();
-  // Corner-Twist: +1 mod 3 fuer CW, +2 mod 3 (= -1) fuer CCW
+  // Corner-Twist: +1 mod 3 für CW, +2 mod 3 (= -1) für CCW
   newCorners[axisIdx] = (newCorners[axisIdx] + (dir === 1 ? 1 : 2)) % 3;
   return { centers: newCenters, corners: newCorners };
 }
@@ -105,7 +105,7 @@ function inverseMoveLabel(label: string): string {
 }
 
 /**
- * BFS vom solved state: berechnet fuer jeden erreichbaren State die
+ * BFS vom solved state: berechnet für jeden erreichbaren State die
  * Distanz + das erste Move zum Lösen. Wird beim ersten getIvyScramble-
  * Aufruf einmal initialisiert (~50-200ms).
  *
@@ -126,7 +126,7 @@ function buildLookupTable(): Map<
   // BFS-Queue
   let frontier: StateKey[] = [SOLVED_KEY];
   let depth = 0;
-  const MAX_DEPTH = 12; // Gott-Zahl von Ivy ist 6, doppelt fuer Sicherheit
+  const MAX_DEPTH = 12; // Gott-Zahl von Ivy ist 6, doppelt für Sicherheit
 
   while (frontier.length > 0 && depth < MAX_DEPTH) {
     const nextFrontier: StateKey[] = [];
@@ -163,7 +163,7 @@ function buildLookupTable(): Map<
  * Pick a random non-solved state from the lookup table.
  *
  * Wir picken einen State mit distance >= 4 — kuerzere Scrambles wirken
- * fuer User als „trivial". csTimer hat dieselbe Konvention: ivyso macht
+ * für User als „trivial". csTimer hat dieselbe Konvention: ivyso macht
  * 6-Move-Scrambles, ivyo (ohne Mindest-Distanz) 0+.
  */
 function pickRandomState(
@@ -179,7 +179,7 @@ function pickRandomState(
 }
 
 /**
- * Loese einen State: gebe optimalen Move-Pfad zum Solved-State zurueck.
+ * Löse einen State: gebe optimalen Move-Pfad zum Solved-State zurück.
  *
  * Reverse-BFS-Walk: gegeben State, hol firstMoveToSolve, wende an, hol
  * nächsten Move, … bis SOLVED erreicht.
@@ -195,7 +195,7 @@ function solveState(
     const info = table.get(current);
     if (!info || !info.firstMoveToSolve) break;
     solution.push(info.firstMoveToSolve);
-    // Wende den Move an um zum naechsten State zu kommen
+    // Wende den Move an um zum nächsten State zu kommen
     const { centers, corners } = decodeState(current);
     const label = info.firstMoveToSolve;
     const axis = MOVE_LABELS.indexOf(label.replace("'", "") as (typeof MOVE_LABELS)[number]);
@@ -221,8 +221,8 @@ function invertSequence(moves: string[]): string[] {
  * Workflow:
  *   1. Build lookup table (lazy, einmalig)
  *   2. Pick random state mit min-distance 4 (csTimer-Konvention)
- *   3. Solve state → optimale Loesung
- *   4. Inverse der Loesung = Scramble
+ *   3. Solve state → optimale Lösung
+ *   4. Inverse der Lösung = Scramble
  *
  * Returns: Scramble-String wie "R L' B R'" (csTimer-kompatibel).
  */
@@ -235,14 +235,14 @@ export function generateIvyScramble(): string {
 }
 
 /**
- * Test-Helper: leere den Cache. Nur fuer Vitest.
+ * Test-Helper: leere den Cache. Nur für Vitest.
  */
 export function _clearIvyCache(): void {
   cachedTable = null;
 }
 
 /**
- * Test-Helper: gibt die State-Space-Groesse zurueck. Sollte 29160 sein
+ * Test-Helper: gibt die State-Space-Größe zurück. Sollte 29160 sein
  * (6!/2 = 360 Center-Permutationen × 3^4 = 81 Corner-Twists).
  */
 export function _getStateSpaceSize(): number {

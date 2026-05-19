@@ -1,8 +1,8 @@
 """Changelog/Patch-Notes-API.
 
 Liefert die PATCH_NOTES als JSON. Source-of-Truth: `changelog/data.py`.
-Endpoint ist nicht-authentifiziert (auch fuer Logged-Out-User sichtbar) —
-die App-Version + Highlights sind oeffentlich, kein Privacy-Risiko.
+Endpoint ist nicht-authentifiziert (auch für Logged-Out-User sichtbar) —
+die App-Version + Highlights sind öffentlich, kein Privacy-Risiko.
 
 Rate-Limit weggelassen — pure Konstanten-Antwort, billig.
 """

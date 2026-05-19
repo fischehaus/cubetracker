@@ -1,11 +1,11 @@
-"""SQLAlchemy-Models fuer cubetracker-webapp (Phase W) — Multi-User.
+"""SQLAlchemy-Models für cubetracker-webapp (Phase W) — Multi-User.
 
 Kerndifferenz zum Desktop-Backend:
 - User-Tabelle als Wurzel
 - ALLE bisherigen Tabellen haben user_id-FK (NOT NULL, ondelete=CASCADE
-  damit User-Loeschen die ganze Daten-Pyramide mit-loescht — DSGVO-relevant)
+  damit User-Löschen die ganze Daten-Pyramide mit-loescht — DSGVO-relevant)
 
-Schema 1:1 wie Desktop, nur user_id ergaenzt. Pure-Logic-Module aus dem
+Schema 1:1 wie Desktop, nur user_id ergänzt. Pure-Logic-Module aus dem
 Desktop-Backend (stats/calc.py, achievements/check.py, etc.) bleiben
 wiederverwendbar — sie operieren auf SolvePoint-Tupeln, nicht auf der
 DB direkt.
@@ -13,7 +13,7 @@ DB direkt.
 
 from __future__ import annotations
 
-# os-Import entfernt mit W.admin-toggle (2026-05-17) — wurde nur fuer
+# os-Import entfernt mit W.admin-toggle (2026-05-17) — wurde nur für
 # die alte ADMIN_EMAILS-Env-Var-Lookup in is_admin-Property gebraucht.
 from datetime import UTC, datetime
 
@@ -39,7 +39,7 @@ class User(Base):
 
     `email`: unique, Kleinbuchstaben (Caller normalisiert).
     `hashed_password`: bcrypt-Hash, NIE Plaintext.
-    `is_active`: Soft-Delete-Flag (deaktiviert = kein Login moeglich,
+    `is_active`: Soft-Delete-Flag (deaktiviert = kein Login möglich,
         Daten bleiben).
     `created_at`: Registrierungs-Zeitstempel.
     """
@@ -52,17 +52,17 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     # Phase W.8: User-Management.
     # email_verified=False bei Register, wird True nach Klick auf Verify-Link.
-    # Nicht-verifizierte User koennen sich trotzdem einloggen (sonst chicken-egg
+    # Nicht-verifizierte User können sich trotzdem einloggen (sonst chicken-egg
     # wenn Mail nicht ankommt), aber UI zeigt einen Hinweis-Banner.
     email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     display_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    # Phase W.future-tournaments: Postleitzahl fuer "Turniere in der Naehe"-
+    # Phase W.future-tournaments: Postleitzahl für "Turniere in der Nähe"-
     # Feature. Optional, kein Format-Constraint (multi-country: DE 5-stellig,
     # AT 4-stellig, UK alphanumerisch, etc.). Frontend validiert lasch.
     postal_code: Mapped[str | None] = mapped_column(String(16), nullable=True)
     # Phase W.country-feld (2026-05-16): explizites Land im Profil. Vorher
     # haben wir das aus der PLZ-Struktur abgeleitet (5stellig→DE etc.), was
-    # nur fuer DACH funktioniert. Jetzt explizit ISO-3166-1-alpha-2-Code
+    # nur für DACH funktioniert. Jetzt explizit ISO-3166-1-alpha-2-Code
     # damit User weltweit korrekt geocoded + die richtigen WCA-Comps
     # angezeigt bekommen.
     country_iso2: Mapped[str | None] = mapped_column(String(2), nullable=True)
@@ -72,7 +72,7 @@ class User(Base):
     # Privacy-Schutz. Friend-Request per exakter Email umgeht diese Sperre
     # bewusst NICHT — nur per ID/User-Suche-Result-Klick anfragbar.
     is_discoverable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    # Token-Revocation: jeder ausgegebene JWT enthaelt das aktuelle token_version
+    # Token-Revocation: jeder ausgegebene JWT enthält das aktuelle token_version
     # in seinen Claims. Wird die Spalte hochgezaehlt (Logout, Password-Change),
     # invalidiert das alle bestehenden Tokens dieses Users sofort.
     token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -87,7 +87,7 @@ class User(Base):
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
 
-    # Relationships fuer DSGVO-Cascade beim User-Delete
+    # Relationships für DSGVO-Cascade beim User-Delete
     solves: Mapped[list[Solve]] = relationship(
         "Solve", back_populates="user", cascade="all, delete-orphan"
     )
@@ -114,7 +114,7 @@ class User(Base):
     )
     # Phase W.9 Friend-System. Zwei separate Relations weil eine Friendship
     # einen Requester + ein Target hat. Cascade beim User-Delete: alle eigenen
-    # Friendships (egal welche Rolle) werden mit-geloescht.
+    # Friendships (egal welche Rolle) werden mit-gelöscht.
     sent_friend_requests: Mapped[list[Friendship]] = relationship(
         "Friendship",
         foreign_keys="Friendship.requester_id",
@@ -273,7 +273,7 @@ class Snapshot(Base):
 
     Wird AUTOMATISCH erzeugt vor destruktiven Ops:
     - /backup/restore?mode=replace
-    - /import/cstimer mit grossem Volumen (>100 neuen Solves)
+    - /import/cstimer mit großem Volumen (>100 neuen Solves)
 
     Plus MANUELL via /backup/snapshots POST.
 
@@ -299,18 +299,18 @@ class Snapshot(Base):
     # neuer Restore-Punkt angelegt, weil der Vor-Import-Stand via
     # Solve-Delete erreichbar bleibt + der Bulk-Import sonst Worker-blockt.)
     reason: Mapped[str] = mapped_column(String(32), nullable=False, default="manual")
-    # Anzahl Solves im Snapshot — fuers UI ohne JSON-Parse abrufbar.
+    # Anzahl Solves im Snapshot — fürs UI ohne JSON-Parse abrufbar.
     solve_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     session_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     hardware_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    # Voll-Backup als JSON-Text (sqlalchemy Text fuer arbitrary length).
+    # Voll-Backup als JSON-Text (sqlalchemy Text für arbitrary length).
     payload_json: Mapped[str] = mapped_column(Text, nullable=False)
 
     user: Mapped[User] = relationship("User", back_populates="snapshots")
 
 
 class PasswordResetToken(Base):
-    """Single-Use-Token fuer Password-Reset-Flow (Phase W.8).
+    """Single-Use-Token für Password-Reset-Flow (Phase W.8).
 
     Vom User per /auth/forgot-password angefordert -> Mail mit Link
     https://www.cubetracker.de/reset-password?token=<token-hex> -> Klick
@@ -320,7 +320,7 @@ class PasswordResetToken(Base):
     Sicherheit:
     - token = secrets.token_urlsafe(48) (288 Bit Entropie, brute-force-sicher)
     - expires_at: 1h nach Erstellung
-    - used_at: timestamp wenn benutzt -> kein Re-Use moeglich
+    - used_at: timestamp wenn benutzt -> kein Re-Use möglich
     - Pro Password-Change: token_version++ am User -> alle alten JWTs revoked
     """
 
@@ -341,7 +341,7 @@ class PasswordResetToken(Base):
 
 
 class EmailVerificationToken(Base):
-    """Single-Use-Token fuer Email-Verification (Phase W.8).
+    """Single-Use-Token für Email-Verification (Phase W.8).
 
     Wird beim Register + bei /auth/resend-verification erstellt.
     Mail-Link: https://www.cubetracker.de/verify-email?token=<token-hex>
@@ -350,7 +350,7 @@ class EmailVerificationToken(Base):
 
     Sicherheit:
     - token = secrets.token_urlsafe(48)
-    - expires_at: 7 Tage nach Erstellung (User lange Zeit fuer Verify)
+    - expires_at: 7 Tage nach Erstellung (User lange Zeit für Verify)
     - used_at: timestamp wenn benutzt -> kein Re-Use
     """
 
@@ -363,7 +363,7 @@ class EmailVerificationToken(Base):
     token: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
     # Bei Email-Change-Flow: hier steht die NEUE Email-Adresse. Bei Register-
     # Flow: gleich user.email. Wir speichern explizit damit Email-Change
-    # sauber funktioniert (User klickt Link -> ueberschreibe email mit dem
+    # sauber funktioniert (User klickt Link -> überschreibe email mit dem
     # Wert hier, nicht mit aktuellem user.email).
     new_email: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -381,17 +381,17 @@ class Friendship(Base):
     Workflow:
       A klickt "Anfrage senden" zu B -> Row {requester=A, target=B, status='pending'}
       B klickt "Annehmen"           -> status='accepted', accepted_at=now
-      A oder B klickt "Entfernen"   -> Row wird geloescht (kein status='removed')
+      A oder B klickt "Entfernen"   -> Row wird gelöscht (kein status='removed')
 
     Design-Entscheidungen:
     - Eine Friendship-Zeile pro Beziehung (nicht zwei symmetrische). Spart
       Schreib-Aufwand bei Accept (statt 2 Rows updaten nur 1). Friend-Listen-
-      Abfragen muessen dafuer beide Richtungen (requester OR target) checken.
+      Abfragen müssen dafür beide Richtungen (requester OR target) checken.
     - UniqueConstraint normalisiert (kleinste, groesste ID) verhindert dass
       A->B pending UND B->A pending gleichzeitig existieren (kreuz-Anfragen).
       CHECK-Constraint LEAST/GREATEST haengt von Postgres ab -> wir loesen
       es im Service-Layer via Suche nach (LEAST, GREATEST) Match.
-    - CASCADE auf User-Delete: wenn ein User geloescht wird, sind seine
+    - CASCADE auf User-Delete: wenn ein User gelöscht wird, sind seine
       Friendships obsolet — beide Richtungen weg.
     """
 
@@ -404,9 +404,9 @@ class Friendship(Base):
     target_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    # Aktuell nur "pending" + "accepted". "blocked" bewusst draussen — wer
-    # blockieren will, kann Friendship loeschen + die Person nicht mehr
-    # findbar machen (is_discoverable=false). Block-Liste waere Phase W.10+.
+    # Aktuell nur "pending" + "accepted". "blocked" bewusst draußen — wer
+    # blockieren will, kann Friendship löschen + die Person nicht mehr
+    # findbar machen (is_discoverable=false). Block-Liste wäre Phase W.10+.
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending", index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
@@ -425,7 +425,7 @@ class Friendship(Base):
     __table_args__ = (
         # Self-Friendship verhindern (zus. zur Service-Check)
         CheckConstraint("requester_id <> target_id", name="ck_friendship_no_self"),
-        # Eine Friendship pro Paar — egal welche Richtung. Pruefung passiert
+        # Eine Friendship pro Paar — egal welche Richtung. Prüfung passiert
         # im Service via Symmetrie-Suche, hier ist nur (requester, target)
         # unique (verhindert Doppel-Request derselben Richtung).
         UniqueConstraint("requester_id", "target_id", name="uq_friendship_directed"),
@@ -437,7 +437,7 @@ class NewsItem(Base):
     """News-Item aus dem RSS-Aggregator (Phase W.news).
 
     Globale Tabelle (kein user_id), wird vom News-Fetcher periodisch
-    befuellt. Dedup ueber `link` (RSS-Item-URL). Cleanup von Items
+    befuellt. Dedup über `link` (RSS-Item-URL). Cleanup von Items
     aelter als 60 Tage erledigt der Fetcher selbst.
     """
 
@@ -446,7 +446,7 @@ class NewsItem(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     # Source = interne ID des Feeds (z.B. "wca" oder "reddit_cubers").
     source: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
-    # User-sichtbarer Label fuer die Source ("WCA", "r/Cubers").
+    # User-sichtbarer Label für die Source ("WCA", "r/Cubers").
     source_label: Mapped[str] = mapped_column(String(64), nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     # URL zum Original-Item — UNIQUE-Constraint dient als Dedup-Key.
@@ -460,20 +460,20 @@ class NewsItem(Base):
     )
 
     __table_args__ = (
-        # Sort-Index fuer "neueste zuerst"-Query (published_at DESC).
+        # Sort-Index für "neueste zuerst"-Query (published_at DESC).
         Index("ix_news_published", "published_at"),
     )
 
 
 class PostalCodeGeo(Base):
-    """Geocoding-Cache fuer Postleitzahlen (Phase W.wca-comps).
+    """Geocoding-Cache für Postleitzahlen (Phase W.wca-comps).
 
-    Lookup ueber Nominatim/OpenStreetMap ist rate-limited (1 req/s) und
+    Lookup über Nominatim/OpenStreetMap ist rate-limited (1 req/s) und
     bei freier Nutzung schlechte Reliability — daher persistenter DB-Cache.
-    PLZ + Land aendert ihre Lat/Lng praktisch nie, TTL = 30 Tage reicht.
+    PLZ + Land ändert ihre Lat/Lng praktisch nie, TTL = 30 Tage reicht.
 
-    Geteilte Tabelle ueber alle User — wenn 100 User dieselbe PLZ haben,
-    nur ein Nominatim-Call fuer alle.
+    Geteilte Tabelle über alle User — wenn 100 User dieselbe PLZ haben,
+    nur ein Nominatim-Call für alle.
     """
 
     __tablename__ = "postal_code_geo"
@@ -487,12 +487,12 @@ class PostalCodeGeo(Base):
     fetched_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
-    # Optional: vom Nominatim-Response uebernommener Stadtname (fuer UI-Anzeige).
+    # Optional: vom Nominatim-Response übernommener Stadtname (für UI-Anzeige).
     display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
 class LiveTest(Base):
-    """Live-Test-Eintrag fuer den Admin-QA-Workflow (Phase W.live-tests).
+    """Live-Test-Eintrag für den Admin-QA-Workflow (Phase W.live-tests).
 
     Wenn ich (Claude) ein Feature deploye, kommen oft Test-Hinweise wie
     'Phone-Test bitte: X, Y, Z'. Diese verlieren sich im Chat / bei
@@ -502,8 +502,8 @@ class LiveTest(Base):
     Bei FAIL + Notiz: optional automatisches GitHub-Issue (Phase 3,
     braucht GITHUB_TOKEN-Env-Var).
 
-    Bewusst KEINE FK-Constraint auf created_by_user_id: Tests koennen
-    auch ohne User-Account angelegt werden (z.B. manuelle Admin-Eintraege
+    Bewusst KEINE FK-Constraint auf created_by_user_id: Tests können
+    auch ohne User-Account angelegt werden (z.B. manuelle Admin-Einträge
     ohne Login, wenn man eine Welle vorbereitet). responded_by_user_id
     ist optional FK.
     """
@@ -513,13 +513,13 @@ class LiveTest(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    # Welle-Identifier z.B. "W.scramble-image" — fuers Tracking welche
+    # Welle-Identifier z.B. "W.scramble-image" — fürs Tracking welche
     # Tests aus welchem Push stammen.
     related_phase: Mapped[str | None] = mapped_column(String(64), nullable=True)
     related_commit_sha: Mapped[str | None] = mapped_column(String(40), nullable=True)
     related_tag: Mapped[str | None] = mapped_column(String(120), nullable=True)
     # Status: 'open' (default), 'pass', 'fail', 'skip'. String statt Enum
-    # damit wir spaeter Subkategorien ohne Migration ergaenzen koennen.
+    # damit wir später Subkategorien ohne Migration ergänzen können.
     status: Mapped[str] = mapped_column(
         String(16), nullable=False, default="open", server_default="open", index=True
     )
@@ -536,7 +536,7 @@ class LiveTest(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC), index=True
     )
-    # Kein FK weil Tests auch System-erstellt sein koennen (created_by NULL).
+    # Kein FK weil Tests auch System-erstellt sein können (created_by NULL).
     created_by_user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     def __repr__(self) -> str:  # pragma: no cover

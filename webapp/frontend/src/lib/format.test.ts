@@ -1,4 +1,4 @@
-// Tests fuer parseTimeInput — speziell die csTimer-Stackmat-Konvention.
+// Tests für parseTimeInput — speziell die csTimer-Stackmat-Konvention.
 
 import { describe, expect, it } from "vitest";
 import { parseTimeInput, formatTime } from "./format";
@@ -70,13 +70,13 @@ describe("parseTimeInput — csTimer-Stackmat (nur Ziffern)", () => {
 });
 
 describe("parseTimeInput — Roundtrip mit formatTime", () => {
-  // Wichtigste Eigenschaft: parse(format(x)) === x fuer typische Zeiten
+  // Wichtigste Eigenschaft: parse(format(x)) === x für typische Zeiten
   it.each([
     [9450, "9.45"],
     [12340, "12.34"],
     [111020, "1:51.02"],
     [754560, "12:34.56"],
-  ])("formatTime(%i) === %s und parseTimeInput davon gibt %i zurueck", (ms, str) => {
+  ])("formatTime(%i) === %s und parseTimeInput davon gibt %i zurück", (ms, str) => {
     expect(formatTime(ms)).toBe(str);
     expect(parseTimeInput(str)).toBe(ms);
   });

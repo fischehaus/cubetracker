@@ -1,8 +1,8 @@
-// Helper fuer Daily-Challenges-UI (Phase 7b).
+// Helper für Daily-Challenges-UI (Phase 7b).
 //
 // Backend liefert die Roh-Felder kind/cube_type/target_value/progress,
 // die menschen-lesbare Beschreibung wird hier im Frontend zusammengesetzt.
-// So koennen wir Texte ohne Backend-Deploy aendern.
+// So können wir Texte ohne Backend-Deploy ändern.
 
 import { formatTime } from "./format";
 import type { ChallengeItem, ChallengeKind } from "./types";
@@ -22,7 +22,7 @@ export const CHALLENGE_LABELS: Record<ChallengeKind, string> = {
 };
 
 /**
- * Liefert eine Aufgaben-Beschreibung fuer eine Challenge.
+ * Liefert eine Aufgaben-Beschreibung für eine Challenge.
  * Bewusst kompakt — die Karte zeigt zusaetzlich Icon + Label.
  */
 export function describeChallenge(c: ChallengeItem): string {
@@ -46,7 +46,7 @@ export function describeChallenge(c: ChallengeItem): string {
 
 /**
  * Progress als 0-100-prozent-Wert (zum Rendern der bar).
- * Cap bei 100, weil monotonic-Progress > target moeglich ist.
+ * Cap bei 100, weil monotonic-Progress > target möglich ist.
  */
 export function progressPercent(c: ChallengeItem): number {
   if (c.target_value <= 0) return 0;
@@ -55,9 +55,9 @@ export function progressPercent(c: ChallengeItem): number {
 }
 
 /**
- * Kurz-Label fuer den progress-Status: "3/10", "✓ erfuellt".
+ * Kurz-Label für den progress-Status: "3/10", "✓ erfüllt".
  */
 export function progressLabel(c: ChallengeItem): string {
-  if (c.completed_at) return "✓ erfuellt";
+  if (c.completed_at) return "✓ erfüllt";
   return `${c.progress}/${c.target_value}`;
 }

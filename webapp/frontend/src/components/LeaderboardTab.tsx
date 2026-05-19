@@ -5,7 +5,7 @@
 //   - Tabelle: Display-Name, Best-Single, Best-AO5, Best-AO12, Current-AO5,
 //     Solves 30d, Last Active
 //   - Self ist optisch hervorgehoben + immer oben
-//   - Freunde ohne Solves fuer den Cube zeigen "—" + landen unten
+//   - Freunde ohne Solves für den Cube zeigen "—" + landen unten
 //
 // Empty-State: wenn keine Friends accepted -> Hinweis-Card mit Link zum
 // Friends-Tab.
@@ -22,8 +22,8 @@ import {
 } from "../lib/api";
 
 // Default-Reihe falls weder User noch Friends bisher Solves haben —
-// QA-Fix M3: sonst waere der Picker komplett unsichtbar und ein hartcodiertes
-// "3x3" wuerde geladen ohne Auswahlmoeglichkeit. Wir nutzen die gleichen
+// QA-Fix M3: sonst wäre der Picker komplett unsichtbar und ein hartcodiertes
+// "3x3" würde geladen ohne Auswahlmoeglichkeit. Wir nutzen die gleichen
 // COMMON_CUBE_TYPES wie im BigTimerInput-Selector.
 const FALLBACK_CUBES = COMMON_CUBE_TYPES;
 
@@ -92,7 +92,7 @@ export function LeaderboardTab() {
           <InfoButton>
             <p className="font-medium mb-1">Bestenliste</p>
             <p>
-              Vergleicht dich + accepted-Freunde fuer den ausgewaehlten
+              Vergleicht dich + accepted-Freunde für den ausgewählten
               Cube-Type. Spalten: Best Single, Best AO5, Best AO12,
               Aktuelle AO5, Solves (30d), Last Active. Du bist immer oben
               hervorgehoben, Freunde sortiert nach Best Single (Top-3 mit
@@ -145,8 +145,8 @@ export function LeaderboardTab() {
       )}
 
       <p className="text-xs text-gray-500">
-        Best-Times werden mit WCA-Konvention berechnet: +2 zaehlt als
-        Zeit+2.0s, DNF zaehlt als „unendlich" / wird beim Average getrimmt.
+        Best-Times werden mit WCA-Konvention berechnet: +2 zählt als
+        Zeit+2.0s, DNF zählt als „unendlich" / wird beim Average getrimmt.
         AO5 = trimmed mean of 5 Solves (best+worst raus, Mittel von 3).
       </p>
     </div>
@@ -217,7 +217,7 @@ function LeaderboardRow({
   const nameClass = row.is_me ? "font-semibold text-purple-200" : "text-gray-200";
 
   // Top-3-Medaillen — nur Best-Single-Rang, nur wenn jemand wirklich Zeit hat
-  // (rank ist nach Sortierung incl. Self; fuer Show: 🥇🥈🥉 nur fuer Friends-
+  // (rank ist nach Sortierung incl. Self; für Show: 🥇🥈🥉 nur für Friends-
   // Tier, Self bekommt eigenen Marker)
   let rankBadge: string;
   if (row.is_me) {

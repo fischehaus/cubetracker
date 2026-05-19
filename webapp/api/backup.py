@@ -5,14 +5,14 @@ Endpoints:
 - POST   /backup/restore?mode=merge|replace      — JSON-Upload, mode + dry_run
 - GET    /backup/snapshots                       — eigene Snapshots
 - POST   /backup/snapshots                       — manueller Snapshot
-- POST   /backup/snapshots/{id}/restore          — auf Snapshot zurueck
-- DELETE /backup/snapshots/{id}                  — eigenen Snapshot loeschen
+- POST   /backup/snapshots/{id}/restore          — auf Snapshot zurück
+- DELETE /backup/snapshots/{id}                  — eigenen Snapshot löschen
 
 Sicherheits-/Limits:
 - File-Size 30 MB (~100k Solves)
 - Rate-Limit 5/h auf Restore + Import (CPU-Schutz, Achievement-Recheck nach Bulk)
 - mode='replace' braucht confirm=DELETE_ALL_MY_DATA als Magic-String
-- alle user_id-Felder im JSON werden ignoriert + ueberschrieben mit current_user
+- alle user_id-Felder im JSON werden ignoriert + überschrieben mit current_user
 """
 
 from __future__ import annotations
@@ -54,7 +54,7 @@ router = APIRouter(prefix="/backup", tags=["backup"])
 # 30 MB ~= 100k Solves (Schaetzung 300 Bytes/Solve im JSON, mit Sessions/HW etc.)
 MAX_UPLOAD_BYTES = 30 * 1024 * 1024
 
-# Magic-String fuer destruktive Replace-Operation. Frontend baut Confirm-
+# Magic-String für destruktive Replace-Operation. Frontend baut Confirm-
 # Dialog mit Texteingabe ("Tippe DELETE_ALL_MY_DATA ein").
 REPLACE_CONFIRM = "DELETE_ALL_MY_DATA"
 
@@ -100,9 +100,9 @@ async def restore_backup(
     """JSON-Backup zurueckspielen — eigene Daten only.
 
     - mode=merge (Default): bestehende Daten bleiben, neue dazu, Dedup
-    - mode=replace: ALLE eigenen Daten loeschen, dann importieren —
+    - mode=replace: ALLE eigenen Daten löschen, dann importieren —
       braucht confirm=DELETE_ALL_MY_DATA + erzeugt Auto-Snapshot vorher
-    - dry_run=true: nur Stats was passieren wuerde, kein Schreiben
+    - dry_run=true: nur Stats was passieren würde, kein Schreiben
     """
     if mode == "replace" and not dry_run and confirm != REPLACE_CONFIRM:
         raise HTTPException(
@@ -116,12 +116,12 @@ async def restore_backup(
     # Security-Fix W.5-finding-1: chunked read mit hard limit damit
     # nicht erst 500MB in den Worker-Memory geladen werden bevor wir 413
     # antworten. Wir lesen MAX_UPLOAD_BYTES+1, so erkennen wir Overflow
-    # mit minimalem Memory-Hit ueber dem Limit.
+    # mit minimalem Memory-Hit über dem Limit.
     raw = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Upload zu gross (max {MAX_UPLOAD_BYTES} bytes).",
+            detail=f"Upload zu groß (max {MAX_UPLOAD_BYTES} bytes).",
         )
     # Security-Fix K2: JSON-Bomb-Pre-Check vor json.loads()
     try:
@@ -239,7 +239,7 @@ def restore_snapshot_endpoint(
     """Auf einen Snapshot zurueckspielen — replace-Mode (bit-genau).
 
     Implizit destruktiv, aber confirm-Flag NICHT noetig: User hat den
-    Snapshot ja explizit gewaehlt + Snapshots sind ja deine eigenen.
+    Snapshot ja explizit gewählt + Snapshots sind ja deine eigenen.
     Frontend sollte trotzdem ein Confirm-Dialog vorschalten.
     """
     snap = get_snapshot_or_none(db, current_user, snapshot_id)
@@ -260,7 +260,7 @@ def delete_snapshot_endpoint(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
-    """Eigenen Snapshot loeschen."""
+    """Eigenen Snapshot löschen."""
     snap = get_snapshot_or_none(db, current_user, snapshot_id)
     if snap is None:
         raise HTTPException(

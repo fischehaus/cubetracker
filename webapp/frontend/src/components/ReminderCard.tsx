@@ -10,7 +10,7 @@ import { useStatsByCube, type CubeStats } from "../lib/api";
 import { InfoButton } from "./InfoButton";
 
 const REMINDER_DAYS = 7;
-const MAX_VISIBLE = 6; // bei vielen Reminder-Cubes nicht ueberlaufen lassen
+const MAX_VISIBLE = 6; // bei vielen Reminder-Cubes nicht überlaufen lassen
 
 interface Props {
   sessionId: number | null;

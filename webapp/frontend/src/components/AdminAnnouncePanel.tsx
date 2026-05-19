@@ -70,7 +70,7 @@ export function AdminAnnouncePanel() {
           value={subject}
           onChange={(e) => {
             setSubject(e.target.value);
-            // QA-Fix M3: Wenn nach Dry-Run der Text geaendert wird, gilt
+            // QA-Fix M3: Wenn nach Dry-Run der Text geändert wird, gilt
             // die Empfaenger-Vorschau nicht mehr → Bestaetigung zuruecksetzen.
             setLastResult(null);
           }}
@@ -88,7 +88,7 @@ export function AdminAnnouncePanel() {
           value={body}
           onChange={(e) => {
             setBody(e.target.value);
-            // QA-Fix M3: s.o. — geaendert nach Dry-Run → erneut pruefen
+            // QA-Fix M3: s.o. — geändert nach Dry-Run → erneut pruefen
             setLastResult(null);
           }}
           rows={6}
@@ -119,11 +119,11 @@ export function AdminAnnouncePanel() {
         >
           {lastResult.dry_run ? (
             <>
-              <strong>Dry-Run:</strong> wuerde an{" "}
+              <strong>Dry-Run:</strong> würde an{" "}
               <strong>{lastResult.recipient_count}</strong> Empfaenger gehen.
               {lastResult.over_cap ? (
                 <span className="mt-1 block text-yellow-300">
-                  ⚠ Ueber dem Server-Cap von {lastResult.max_recipients}
+                  ⚠ Über dem Server-Cap von {lastResult.max_recipients}
                   {" "}Empfaengern. Echter Send wird mit 400 abgelehnt — erst
                   Background-Job-Setup oder User-Filter noetig.
                 </span>
@@ -175,7 +175,7 @@ export function AdminAnnouncePanel() {
             !lastResult?.dry_run
               ? "Erst Dry-Run klicken — die Vorschau ist Pflicht."
               : lastResult?.over_cap
-                ? "Ueber Server-Cap — echter Send wuerde 400."
+                ? "Über Server-Cap — echter Send würde 400."
                 : ""
           }
         >

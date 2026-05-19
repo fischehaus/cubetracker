@@ -57,7 +57,7 @@ def search_discoverable_users(
     if len(q) < 2:
         return []
     # ILIKE statt LIKE damit case-insensitive auf Postgres. SQLite-fallback
-    # waere LIKE — wir laufen aber in Prod immer auf Postgres.
+    # wäre LIKE — wir laufen aber in Prod immer auf Postgres.
     pattern = f"{q}%"
     stmt = (
         select(User)
@@ -199,7 +199,7 @@ def send_request(
       bei dir, bitte unter Eingehende Anfragen annehmen."
 
     QA-Fix H2: KEIN Auto-Accept mehr. Wenn B vorher A angefragt hat und A
-    klickt jetzt "Anfragen", wuerde Auto-Accept B's Email an A leaken
+    klickt jetzt "Anfragen", würde Auto-Accept B's Email an A leaken
     (FriendshipRead.email wird ab status='accepted' mit-geliefert). User
     muss aktiv "Annehmen" klicken — keine Magic-Path-Privacy-Surprise.
 
@@ -243,11 +243,11 @@ def send_request(
         # Race: parallele Session hat eine konkurrierende Row gelegt zwischen
         # unserem _check_existing und db.commit(). Functional unique index
         # auf (LEAST, GREATEST) hat den Konflikt erkannt. Rollback +
-        # erneut den Status pruefen — meldet jetzt die richtige Begruendung.
+        # erneut den Status pruefen — meldet jetzt die richtige Begründung.
         db.rollback()
         _check_existing()
         # Falls _check_existing nichts wirft (extrem unwahrscheinlich, z.B.
-        # andere Session hat die Row inzwischen wieder geloescht), retry
+        # andere Session hat die Row inzwischen wieder gelöscht), retry
         # einmal — sonst geben wir generisch auf.
         fs = Friendship(
             requester_id=requester.id,
@@ -293,19 +293,19 @@ def accept_request(
 def remove_friendship(
     db: OrmSession, current_user: User, friendship_id: int
 ) -> None:
-    """Friendship loeschen. Ein einziger Endpunkt deckt drei Use-Cases ab:
+    """Friendship löschen. Ein einziger Endpunkt deckt drei Use-Cases ab:
 
     - eigene ausgehende pending Anfrage abbrechen (current=requester)
     - eingehende pending Anfrage ablehnen (current=target)
     - bestehenden Friend entfernen (current=requester ODER target,
       status='accepted')
 
-    Symmetrisch fuer 'accepted': beide Seiten duerfen unfriend'n.
+    Symmetrisch für 'accepted': beide Seiten dürfen unfriend'n.
     """
     fs = db.get(Friendship, friendship_id)
     if fs is None:
         raise FriendsServiceError("Anfrage/Friendship nicht gefunden.")
     if fs.requester_id != current_user.id and fs.target_id != current_user.id:
-        raise FriendsServiceError("Diese Anfrage gehoert nicht dir.")
+        raise FriendsServiceError("Diese Anfrage gehört nicht dir.")
     db.delete(fs)
     db.commit()

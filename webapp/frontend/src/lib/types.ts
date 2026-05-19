@@ -1,5 +1,5 @@
 // TypeScript-Types passend zu den Pydantic-Schemas im Backend (db/schemas.py).
-// Bei Schema-Aenderungen im Backend hier mit-aktualisieren.
+// Bei Schema-Änderungen im Backend hier mit-aktualisieren.
 
 export interface Solve {
   id: number;

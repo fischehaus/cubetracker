@@ -1,19 +1,19 @@
-"""Seed-Daten fuer Hardware-Inventar (Phase 5 / F16 + W.hardware-auto-seed).
+"""Seed-Daten für Hardware-Inventar (Phase 5 / F16 + W.hardware-auto-seed).
 
 Quelle: User-Eingabe vom 2026-05-03, dokumentiert in
 `docs/hardware-inventory-seed.md`.
 
 Seit W.hardware-auto-seed (2026-05-14): wird automatisch beim Register
-neuer User + via Lifespan-Backfill fuer bestehende User ohne Hardware
+neuer User + via Lifespan-Backfill für bestehende User ohne Hardware
 angelegt. Default-Aktivierung: is_active=False — User aktiviert selbst
 nur was er besitzt.
 
 Konvention bei Mehrdeutigkeit:
-- „QiYi Stickered" taucht in 5 Cube-Types auf — als 5 separate Eintraege
+- „QiYi Stickered" taucht in 5 Cube-Types auf — als 5 separate Einträge
   mit primary_cube_type-Disambiguation gefuehrt.
-- „Into Cube: Schwarz; Rot" wird als 2 Eintraege mit cube_type "3x3"
+- „Into Cube: Schwarz; Rot" wird als 2 Einträge mit cube_type "3x3"
   importiert (Annahme: Standard-3x3-Variante in 2 Farben). Notiz im
-  notes-Feld dokumentiert die Unklarheit, damit User es spaeter klaeren
+  notes-Feld dokumentiert die Unklarheit, damit User es später klaeren
   kann.
 """
 
@@ -103,8 +103,8 @@ HARDWARE_SEED: list[tuple[str, list[tuple[str, str | None]]]] = [
         ],
     ),
     # OH (One-Handed) teilt physisch dieselben 3x3-Cubes — wir legen sie
-    # NICHT separat an. Beim OH-Solve waehlt der User aus den 3x3-Eintraegen.
-    # Spaeter koennte ein „secondary_cube_types"-Feld das explizit machen.
+    # NICHT separat an. Beim OH-Solve wählt der User aus den 3x3-Eintraegen.
+    # Später könnte ein „secondary_cube_types"-Feld das explizit machen.
     (
         "Into Cube",
         [
@@ -122,14 +122,14 @@ HARDWARE_SEED: list[tuple[str, list[tuple[str, str | None]]]] = [
 
 
 def total_count() -> int:
-    """Anzahl der Eintraege im Seed."""
+    """Anzahl der Einträge im Seed."""
     return sum(len(items) for _, items in HARDWARE_SEED)
 
 
 def seed_user_hardware(
     db: OrmSession, user_id: int, *, default_active: bool = False
 ) -> int:
-    """Legt die HARDWARE_SEED-Liste fuer einen User an.
+    """Legt die HARDWARE_SEED-Liste für einen User an.
 
     Wird genutzt von:
     - /auth/register (neuer User → Default-Inventar)
@@ -139,9 +139,9 @@ def seed_user_hardware(
     `default_active=False` (neu seit W.hardware-auto-seed): User soll selbst
     bewusst aktivieren was er besitzt — sonst stehen ihm 30 Cubes ungewollt
     als "im Besitz" in den Selectoren. Mit `default_active=True` werden
-    alle als aktiv angelegt (Legacy-Verhalten fuer Recovery-Use-Cases).
+    alle als aktiv angelegt (Legacy-Verhalten für Recovery-Use-Cases).
 
-    Idempotenz: ueberprueft NICHT ob schon Hardware da ist — Caller muss
+    Idempotenz: überprüft NICHT ob schon Hardware da ist — Caller muss
     selber entscheiden. Doppelaufruf legt Duplikate an.
 
     Returns: Anzahl angelegter Hardware-Rows.
@@ -167,7 +167,7 @@ def seed_user_hardware(
 
 
 def backfill_users_without_hardware(db: OrmSession) -> tuple[int, int]:
-    """Idempotenter Backfill: fuer jeden User ohne Hardware-Eintrag wird
+    """Idempotenter Backfill: für jeden User ohne Hardware-Eintrag wird
     die Default-Liste mit is_active=False angelegt.
 
     Wird vom lifespan einmalig (pro Cold-Start) gerufen. Bei n=0 User-

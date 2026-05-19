@@ -1,7 +1,7 @@
 // InfoButton — kleines ⓘ-Icon mit Erklaerungs-Popover.
 //
 // Verhalten:
-//   - Hover (Desktop): Popover oeffnet automatisch nach kurzer Delay
+//   - Hover (Desktop): Popover öffnet automatisch nach kurzer Delay
 //   - Klick (auch Touch): Popover toggelt
 //   - Klick ausserhalb / Esc: Popover schliesst
 //
@@ -13,10 +13,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 interface Props {
   /** Erklaerungs-Inhalt — Text oder kleine Markup-Struktur. */
   children: ReactNode;
-  /** Position relativ zum Button. Default "right" — Popover oeffnet sich
+  /** Position relativ zum Button. Default "right" — Popover öffnet sich
    *  rechts neben dem Icon. Bei "left" links davon. */
   align?: "left" | "right";
-  /** Optional: aria-Label fuer Screenreader (Default "Mehr Info"). */
+  /** Optional: aria-Label für Screenreader (Default "Mehr Info"). */
   label?: string;
 }
 
@@ -71,10 +71,10 @@ export function InfoButton({
           role="tooltip"
           // Mobile-First (2026-05-14): auf Phone (< sm) als fixed Bottom-
           // Sheet — full-width minus Rand, klebt unten. So ragt das
-          // Popover nie ueber einen Bildschirmrand, egal wo der Button
+          // Popover nie über einen Bildschirmrand, egal wo der Button
           // sitzt. Ab sm: klassisches absolute-Popover relativ zum Button
           // (align steuert links/rechts).
-          // z-40: ueber UserMenu-Dropdown (z-30), unter Modals (z-50).
+          // z-40: über UserMenu-Dropdown (z-30), unter Modals (z-50).
           className={`fixed left-3 right-3 bottom-3 z-40 sm:absolute sm:left-auto sm:right-auto sm:bottom-auto sm:top-full sm:mt-2 sm:w-64 rounded-lg border border-purple-500/40 bg-gray-900 px-3 py-2 text-xs leading-relaxed text-gray-200 shadow-xl ${
             align === "right" ? "sm:right-0" : "sm:left-0"
           }`}

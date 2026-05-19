@@ -3,7 +3,7 @@
 //
 // Phase L-2: Filter pro Bereich. Es gibt keinen globalen Filter mehr —
 // jeder Tab hat seine eigene Filter-Bar, deren State in App.tsx
-// lokalisiert ist (damit Tab-Wechsel den jeweiligen Filter erhaelt).
+// lokalisiert ist (damit Tab-Wechsel den jeweiligen Filter erhält).
 //
 // Header zeigt nur noch Title + Backend-Badge.
 
@@ -60,7 +60,7 @@ const queryClient = new QueryClient({
 
 const TAB_STORAGE_KEY = "cubetracker.tab";
 
-// Hash-Routing fuer Tabs (Phase L-3c). URL-Hash <-> AppTab.
+// Hash-Routing für Tabs (Phase L-3c). URL-Hash <-> AppTab.
 // Vorteile: Browser-Back, Bookmarks, Reload landet auf gleicher Sicht.
 // Bewusst einfach via window.location.hash — keine Router-Lib noetig.
 const VALID_TABS: AppTab[] = [
@@ -104,7 +104,7 @@ interface Health {
 }
 
 function HealthBadge({ onClick }: { onClick: () => void }) {
-  // Version-Badge — Klick oeffnet Patch-Notes-Modal (State lebt im
+  // Version-Badge — Klick öffnet Patch-Notes-Modal (State lebt im
   // MainLayout, damit auch das UserMenu denselben Modal nutzen kann).
   const { data, error } = useQuery<Health>({
     queryKey: ["health"],
@@ -185,41 +185,41 @@ function TimerTab({
   setTimerCubeType: (s: string) => void;
 }) {
   // TIMER hat keine externe Filter-Leiste — Cube/Session/Hardware
-  // werden in der TimerControlsCard gewaehlt.
+  // werden in der TimerControlsCard gewählt.
   // Welle 2 (2026-05-16): hardwareId aus BigTimerInput hochgezogen, damit
-  // die Controls UNTER dem TouchPad als eigene Karte leben koennen ohne
+  // die Controls UNTER dem TouchPad als eigene Karte leben können ohne
   // dass die Hardware-Auswahl mit dem Save-Pfad in BigTimerInput auseinander
   // fallt.
   const [timerSessionId, setTimerSessionId] = useState<number | null>(null);
   const [timerHardwareId, setTimerHardwareId] = useState<number | null>(null);
 
   // Scramble-State im TimerTab orchestriert.
-  // - currentScramble: aktueller String, an BigTimerInput fuer Save
+  // - currentScramble: aktueller String, an BigTimerInput für Save
   // - regenSeed: counter den BigTimerInput nach jedem Save bumpt,
   //              damit ScrambleCard re-generiert
   const [currentScramble, setCurrentScramble] = useState<string>("");
   const [regenSeed, setRegenSeed] = useState(0);
 
-  // Session-Override: wenn die gewaehlte Session einen scramble_type
+  // Session-Override: wenn die gewählte Session einen scramble_type
   // setzt (Phase 8b — z.B. "pll" oder "oll"), nutzt ScrambleCard den
   // statt cube_type. So kann man eine PLL-Trainings-Session anlegen.
   const { data: sessions } = useSessions();
   const activeSession = sessions?.find((s) => s.id === timerSessionId);
   const scrambleTypeOverride = activeSession?.scramble_type ?? null;
 
-  // Settings nur fuer TouchPad-Sichtbarkeit — Tap-Pad nur im Spacebar-Modus,
+  // Settings nur für TouchPad-Sichtbarkeit — Tap-Pad nur im Spacebar-Modus,
   // sonst gibt es nichts zu „triggern" (Text-Mode = Soft-Tastatur).
   const [settings] = useAppSettings();
   const showTouchPad = settings.spacebar_enabled;
 
   // QA-Fix Welle 2 (2026-05-16): hardwareId bei Cube-Wechsel auf null
   // resetten. Sonst Race-Condition: useSuggestHardware in TimerControlsCard
-  // braucht einen HTTP-Roundtrip um die passende Hardware fuer den neuen
+  // braucht einen HTTP-Roundtrip um die passende Hardware für den neuen
   // Cube zu finden — wenn der User in der Latenz-Luecke Enter drueckt,
   // wird die alte (cube-fremde) Hardware persistiert. Reset → worst case
   // = ohne Hardware (besser als = falsche Hardware). userPickedHardware-
   // Flag in TimerControlsCard greift weiterhin: wenn User selbst geklickt
-  // hat, ueberschreibt der Auto-Suggest danach nicht mehr.
+  // hat, überschreibt der Auto-Suggest danach nicht mehr.
   // initialMountRef verhindert dass beim ersten Mount der Suggest geblockt
   // wird (initial gilt hardwareId === null sowieso → no-op).
   const initialMountRef = useRef(true);
@@ -234,9 +234,9 @@ function TimerTab({
   return (
     // Layout: Desktop = Live/Letzte-Solves links (420px), Solving rechts.
     // DOM-Reihenfolge im main = mobile-visuelle Reihenfolge (Welle 2,
-    // 2026-05-16, User-Wunsch): Scramble direkt ueber Timer-Display,
+    // 2026-05-16, User-Wunsch): Scramble direkt über Timer-Display,
     // dann TouchPad ("Tippen & halten"), erst danach die Selektoren —
-    // weil man die nur selten waehrend des Solvens braucht. SessionPlan
+    // weil man die nur selten während des Solvens braucht. SessionPlan
     // ganz oben weil's eine optionale Trainings-Karte ist.
     // Auf lg dreht `lg:order-1/2` nur die zwei Hauptspalten um (aside
     // links, main rechts) — die DOM-Reihenfolge bleibt a11y-korrekt.
@@ -288,11 +288,11 @@ function DashboardTab({
   onSwitchTab: (tab: AppTab) => void;
 }) {
   // DASHBOARD = Live-Sicht. Optionaler Session-Filter (default 'alle').
-  // Cube-Filter bewusst NICHT — Dashboard vergleicht cube-uebergreifend.
+  // Cube-Filter bewusst NICHT — Dashboard vergleicht cube-übergreifend.
   //
   // Welle „W.dashboard-story" (2026-05-16): Big-Bang-Refactor mit Story-
   // Reihenfolge. Vier Sektionen mit semantischen <section>-Tags + sichtbaren
-  // Mini-Headlines fuer Scan-Hilfe. Karten selbst unveraendert, nur
+  // Mini-Headlines für Scan-Hilfe. Karten selbst unveraendert, nur
   // Gruppierung + Reihenfolge neu.
   //
   // Story:
@@ -341,7 +341,7 @@ function DashboardTab({
 
 /**
  * Dashboard-Sektion: schmaler Header + Inhalts-Block. Semantisches
- * <section> mit aria-labelledby fuer Screenreader. Header ist visuell
+ * <section> mit aria-labelledby für Screenreader. Header ist visuell
  * dezent (kleine Schrift, hellerer Akzent), damit die Karten dominieren.
  */
 function DashboardSection({
@@ -449,14 +449,14 @@ function MainLayout() {
   const [analyseCubeFilter, setAnalyseCubeFilter] = useState<string>("");
   const initial = loadInitialTab();
   const [tab, setTab] = useState<AppTab>(initial.tab);
-  // Modals fuer Patch-Notes + Features-Liste — State lebt hier zentral,
+  // Modals für Patch-Notes + Features-Liste — State lebt hier zentral,
   // weil mehrere Trigger drauf zugreifen (Version-Badge, UserMenu, Footer).
   const [showPatches, setShowPatches] = useState(false);
   const [showFeatures, setShowFeatures] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
   // Initial-Sub-Tab im Community-Tab — wird nur beim ersten Mount aus
-  // dem URL-Hash gelesen (z.B. legacy #friends → friends). Spaetere
+  // dem URL-Hash gelesen (z.B. legacy #friends → friends). Spätere
   // Wechsel innerhalb des CommunityTabs leben in dessen lokalem state.
   const [communityInitial] = useState<CommunitySection | undefined>(
     initial.communityInitial,
@@ -471,14 +471,14 @@ function MainLayout() {
       // localStorage kann blockiert sein (private mode, etc.) — egal.
     }
     // URL-Hash setzen ohne page-reload. Nur wenn wirklich anders,
-    // sonst gibt es overschuessige history-eintraege.
+    // sonst gibt es overschuessige history-einträge.
     const target = `#${tab}`;
     if (window.location.hash !== target) {
       window.history.replaceState(null, "", target);
     }
   }, [tab]);
 
-  // Browser-Back/Forward: hash-aenderung von aussen reagieren.
+  // Browser-Back/Forward: hash-änderung von aussen reagieren.
   useEffect(() => {
     function onHashChange() {
       const result = tabFromHash();
@@ -497,10 +497,10 @@ function MainLayout() {
       <div className="mx-auto max-w-7xl">
         <header className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           {/* Volles Logo (mit Schriftzug + Tagline) ersetzt den separaten
-              H1+Untertitel. Klick fuehrt zurueck zum Default-Tab. Logo
-              enthaelt den App-Namen, daher visuell-doppelt wenn man's
-              danebenstellen wuerde. H1 mit sr-only fuer Screenreader + SEO.
-              Hoehe responsiv gestaffelt: das Logo ist ~2.56:1 breit, bei
+              H1+Untertitel. Klick fuehrt zurück zum Default-Tab. Logo
+              enthält den App-Namen, daher visuell-doppelt wenn man's
+              danebenstellen würde. H1 mit sr-only für Screenreader + SEO.
+              Höhe responsiv gestaffelt: das Logo ist ~2.56:1 breit, bei
               h-40 waeren das 410px — sprengt jeden Phone-Screen. Daher
               h-16 (Phone) → h-28 (sm) → h-52 (md+, User-Wunsch 2.5x). */}
           <button
@@ -662,9 +662,9 @@ function FeaturesModal({ onClose }: { onClose: () => void }) {
 function AuthGuard() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  // W.8: spezielle URL-Routen, die OHNE Login erreichbar sein muessen
+  // W.8: spezielle URL-Routen, die OHNE Login erreichbar sein müssen
   // (Mail-Links: ResetPassword + VerifyEmail). Render-Static-Site liefert
-  // index.html fuer alle Pfade aus (siehe routes-rewrite in render.yaml),
+  // index.html für alle Pfade aus (siehe routes-rewrite in render.yaml),
   // wir checken hier auf pathname.
   const pathname = window.location.pathname;
   if (pathname === "/reset-password") {

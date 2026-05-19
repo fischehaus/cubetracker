@@ -1,4 +1,4 @@
-// File-Upload-Panel fuer csTimer-Export-Dateien.
+// File-Upload-Panel für csTimer-Export-Dateien.
 // Zeigt nach Import die Statistik-Zusammenfassung.
 
 import { useRef, useState } from "react";
@@ -60,11 +60,11 @@ export function ImportPanel() {
           <p className="font-medium mb-1">csTimer-Import</p>
           <p>
             Lade deine csTimer-Export-Datei (.txt oder .json) hoch und
-            cubetracker uebernimmt deinen kompletten Bestand: Sessions,
+            cubetracker übernimmt deinen kompletten Bestand: Sessions,
             Solves, Scrambles, Notizen, +2/DNF-Penalties, Timestamps.
             Re-Import erkennt Duplikate (timestamp + time_ms) automatisch —
             nichts wird doppelt angelegt. Dry-Run-Option zeigt vorher was
-            passieren wuerde.
+            passieren würde.
           </p>
         </InfoButton>
       </div>
@@ -75,7 +75,7 @@ export function ImportPanel() {
       </p>
 
       <p className="text-xs text-gray-500">
-        ⚠ Nicht das Cubetracker-Backup-JSON hier hochladen — das gehoert
+        ⚠ Nicht das Cubetracker-Backup-JSON hier hochladen — das gehört
         zu „Backup &amp; Wiederherstellung" oben. csTimer-Export-Dateien
         heissen typischerweise <code>cstimer_YYYYMMDD_HHMMSS.txt</code>.
       </p>
@@ -96,7 +96,7 @@ export function ImportPanel() {
 
       {busy && (
         <div className="text-base text-purple-300">
-          Import laeuft … (kann bei grossen Dateien 10-30 Sekunden dauern)
+          Import laeuft … (kann bei großen Dateien 10-30 Sekunden dauern)
         </div>
       )}
 
@@ -118,7 +118,7 @@ export function ImportPanel() {
             {result.solves_skipped_duplicate > 0 && (
               <li>
                 <strong>{result.solves_skipped_duplicate}</strong> als
-                Duplikat ueberspruengen (Re-Import)
+                Duplikat übersprungen (Re-Import)
               </li>
             )}
             {result.sessions_created > 0 && (
@@ -135,7 +135,7 @@ export function ImportPanel() {
             {result.solves_skipped_invalid > 0 && (
               <li className="text-yellow-300">
                 ⚠ {result.solves_skipped_invalid} Solves als ungueltig
-                uebersprungen
+                übersprungen
               </li>
             )}
           </ul>

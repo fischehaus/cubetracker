@@ -1,8 +1,8 @@
 """Postleitzahl → Lat/Lng via Nominatim/OpenStreetMap (Phase W.wca-comps).
 
-Nominatim ist frei, rate-limited (1 req/s) und unzuverlaessig fuer
+Nominatim ist frei, rate-limited (1 req/s) und unzuverlaessig für
 high-volume. Daher persistenter DB-Cache (`postal_code_geo`-Tabelle):
-PLZ-Geo aendert sich quasi nie, TTL = 30 Tage reicht.
+PLZ-Geo ändert sich quasi nie, TTL = 30 Tage reicht.
 
 User-Agent-Header ist Pflicht laut Nominatim-ToS. Wir setzen einen
 eindeutigen String mit Kontakt-URL — sonst riskiert man Block.
@@ -32,7 +32,7 @@ class GeocodingError(Exception):
     """Geocoding-Lookup ist gescheitert (Network, Rate-Limit, kein Treffer).
 
     Caller sollten das fangen + dem User „Postleitzahl konnte nicht
-    geocodiert werden, versuche es spaeter nochmal" zeigen, statt 500.
+    geocodiert werden, versuche es später nochmal" zeigen, statt 500.
     """
 
 
@@ -45,8 +45,8 @@ async def geocode_postal_code(
 
     Strategie:
       1. country_iso2 ableiten falls nicht gegeben (PLZ-Struktur-Heuristik).
-      2. DB-Cache pruefen — wenn Treffer & TTL OK: zurueck (kein HTTP).
-      3. Sonst: Nominatim-Call, persist, zurueck.
+      2. DB-Cache pruefen — wenn Treffer & TTL OK: zurück (kein HTTP).
+      3. Sonst: Nominatim-Call, persist, zurück.
 
     Raises GeocodingError bei Network-Fehler oder kein-Treffer.
     """
@@ -64,7 +64,7 @@ async def geocode_postal_code(
     cached = db.get(PostalCodeGeo, (cleaned, cache_country))
     if cached and cached.fetched_at:
         fetched = cached.fetched_at
-        # Fallback fuer naive DB-Timestamps (SQLite-Dev)
+        # Fallback für naive DB-Timestamps (SQLite-Dev)
         if fetched.tzinfo is None:
             fetched = fetched.replace(tzinfo=UTC)
         age = datetime.now(UTC) - fetched
@@ -101,7 +101,7 @@ async def geocode_postal_code(
 
     if not isinstance(results, list) or not results:
         raise GeocodingError(
-            f"Keine Geo-Daten fuer Postleitzahl '{cleaned}'"
+            f"Keine Geo-Daten für Postleitzahl '{cleaned}'"
             + (f" in {country}" if country else "")
         )
 

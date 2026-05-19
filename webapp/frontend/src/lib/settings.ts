@@ -1,6 +1,6 @@
 // User-Settings (Phase 8.2) — bewusst client-only via localStorage.
 // Keine DB-Tabelle, kein Backup-Update — Speedcubing-Settings sind
-// per-Geraet sinnvoll (Tastatur-Layout, Inspection-Vorliebe, Sound an/aus).
+// per-Gerät sinnvoll (Tastatur-Layout, Inspection-Vorliebe, Sound an/aus).
 //
 // Wenn das Bedarf wird (z.B. „meine Settings auf zweitem Rechner"),
 // kommt eine Settings-Tabelle in Phase 8.5 dazu.
@@ -18,30 +18,30 @@ import { useEffect, useState } from "react";
 
 /**
  * Inspection-Verhalten:
- *   - "wca":        WCA-Standard. Single Space waehrend Inspection geht
+ *   - "wca":        WCA-Standard. Single Space während Inspection geht
  *                   in ready (Hold halten → Release startet Solve).
  *                   Penalty +2 ab 15s, DNF ab 17s.
- *   - "pragmatic":  User-Trainings-Flow. Single Space waehrend Inspection
- *                   startet Solve direkt (mit 250ms Latenz fuer Double-Tap-
+ *   - "pragmatic":  User-Trainings-Flow. Single Space während Inspection
+ *                   startet Solve direkt (mit 250ms Latenz für Double-Tap-
  *                   Erkennung). Double-Tap = Inspection-Reset. Auto-DNF
  *                   bei Countdown 0.
  */
 export type InspectionMode = "wca" | "pragmatic";
 
 /**
- * Schrift-Groesse fuer Timer + ScrambleCard. Default `lg`.
+ * Schrift-Größe für Timer + ScrambleCard. Default `lg`.
  * Wirkt auf font-size + line-height beider Karten konsistent.
  */
 export type TimerFontSize = "sm" | "md" | "lg" | "xl" | "xxl";
 
 /**
- * Audio-Modus fuer die Inspection-Warnings bei 8s + 12s.
+ * Audio-Modus für die Inspection-Warnings bei 8s + 12s.
  * Phase W.voice-alert (2026-05-17): csTimer-aequivalentes Feature.
  *
  *   "beep"  — Sinus-Toene (Status-Quo, 660Hz bei 8s, 880Hz bei 12s)
  *   "de"    — Voice-Alert auf Deutsch via Browser-TTS ("acht", "zwoelf")
  *   "en"    — Voice-Alert auf Englisch ("eight", "twelve")
- *   "off"   — kein Audio (overrides sound_enabled fuer diese Calls)
+ *   "off"   — kein Audio (overrides sound_enabled für diese Calls)
  */
 export type InspectionAudioMode = "beep" | "de" | "en" | "off";
 
@@ -53,14 +53,14 @@ export interface AppSettings {
   /** Inspection-Dauer in Sekunden. */
   inspection_seconds: number;
   /**
-   * Verhalten waehrend Inspection. „pragmatic" = User-Trainings-Flow,
+   * Verhalten während Inspection. „pragmatic" = User-Trainings-Flow,
    * „wca" = WCA-Wettkampf-Standard. Siehe InspectionMode-Doku.
    */
   inspection_mode: InspectionMode;
   /** Sound-Signale (Inspection-Warnings, Start/Stop). */
   sound_enabled: boolean;
   /**
-   * Audio-Modus fuer die Inspection-Warnings (Phase W.voice-alert).
+   * Audio-Modus für die Inspection-Warnings (Phase W.voice-alert).
    * Default "beep" (Sinus wie bisher) — bestehende User merken keinen
    * Unterschied. Wer Voice-Calls will, wechselt auf "de" oder "en".
    * Greift nur wenn `sound_enabled === true`.
@@ -87,7 +87,7 @@ export interface AppSettings {
   /**
    * Phase W.scramble-image (2026-05-17): 2D-Net-Vorschau unter der Scramble-
    * Notation anzeigen. Default `true` — visuelle Verifikation ist Standard-
-   * Erwartung an Speedcubing-Timer. Power-User koennen ausschalten wenn sie
+   * Erwartung an Speedcubing-Timer. Power-User können ausschalten wenn sie
    * pure Notation wollen.
    *
    * Aktuell nur 3x3 unterstuetzt. Andere Cubes zeigen kein Bild + werden
@@ -114,7 +114,7 @@ export const SETTINGS_DEFAULTS: AppSettings = {
 /**
  * Tailwind-style font-size + line-height pro TimerFontSize-Stufe.
  * Wird vom ScrambleCard, BigTimerInput, SpacebarTimerCard inline
- * gesetzt — wir vermeiden CSS-Variables fuer Build-Einfachheit.
+ * gesetzt — wir vermeiden CSS-Variables für Build-Einfachheit.
  */
 export const TIMER_FONT_SCALE: Record<TimerFontSize, { timer: string; scramble: string }> = {
   sm: { timer: "3rem", scramble: "1rem" },
@@ -140,8 +140,8 @@ const CHANGE_EVENT = "cubetracker:settings-changed";
  * Defensive: bei JSON-parse-error oder fehlender feldern → defaults.
  *
  * Touch-Device-Default-Override (2026-05-14): bei FRISCHEM localStorage
- * (= erstes App-Laden) wird auf Touch-Geraeten der WCA-Spacebar-Modus
- * als Default gesetzt. Soft-Keyboard fuer Text-Eingabe waere muehsam.
+ * (= erstes App-Laden) wird auf Touch-Geräten der WCA-Spacebar-Modus
+ * als Default gesetzt. Soft-Keyboard für Text-Eingabe wäre muehsam.
  * Sobald der User eigene Settings hat (parsed != null), bleiben die
  * unangetastet — keine Migration, kein Reset.
  */
@@ -183,7 +183,7 @@ export function saveSettings(next: AppSettings): void {
 }
 
 /**
- * Hook fuer Konsumenten: liefert aktuelle settings + Setter.
+ * Hook für Konsumenten: liefert aktuelle settings + Setter.
  * Reagiert auf andere Tabs/Komponenten via custom-event.
  */
 export function useAppSettings(): [AppSettings, (next: AppSettings) => void] {

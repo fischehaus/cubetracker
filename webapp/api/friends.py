@@ -10,11 +10,11 @@ Endpoints:
 
 Privacy-Design:
 - User-Suche per Display-Name: nur User mit is_discoverable=true tauchen auf.
-- Email-Lookup: exakte Adresse Pflicht, auch fuer nicht-discoverable User
-  findbar. Begruendung: man kann nur die Email kennen wenn man sie kennt —
+- Email-Lookup: exakte Adresse Pflicht, auch für nicht-discoverable User
+  findbar. Begründung: man kann nur die Email kennen wenn man sie kennt —
   also ist's kein Enumeration-Pfad.
-- Self-Match ueberall rausgefiltert.
-- Friend-Request darf nur ueber Lookup-Result-IDs gestellt werden (nicht
+- Self-Match überall rausgefiltert.
+- Friend-Request darf nur über Lookup-Result-IDs gestellt werden (nicht
   "irgendeine User-ID" sondern eine zuvor durch Suche/Email-Lookup
   ermittelte). Backend prueft das nicht explizit, weil der Client eh die
   ID kennen muss — und ein Boeswilliger kann ohnehin per Brute-Force
@@ -49,14 +49,14 @@ from friends.service import (
     status_between,
 )
 
-# Type-Alias fuer die Pre-Loaded Friendship-Map (siehe _bulk_status_map)
+# Type-Alias für die Pre-Loaded Friendship-Map (siehe _bulk_status_map)
 _StatusMap = dict[int, tuple[str, int | None]]
 
 router = APIRouter(prefix="/friends", tags=["friends"])
 
 # Display-Name-Suche ist breit (prefix-match) und nur auf discoverable User
 SEARCH_LIMIT = "60/minute"
-# Email-Lookup ist exakter Match -> nuetzbar fuer Brute-Force von Emails;
+# Email-Lookup ist exakter Match -> nuetzbar für Brute-Force von Emails;
 # QA-Fix M1 haelt das halbiert + zusaetzlich nur authentifizierte User.
 EMAIL_LOOKUP_LIMIT = "30/minute"
 MUTATION_LIMIT = "30/minute"
@@ -73,7 +73,7 @@ class FriendUserBrief(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     display_name: str | None
-    # email wird NUR fuer accepted-Friends mit-ausgeliefert (Friend-Mail-
+    # email wird NUR für accepted-Friends mit-ausgeliefert (Friend-Mail-
     # Wunsch). Bei pending requests / suchen NICHT. Wird im Endpoint
     # gesteuert (per separate Helper-Funktion). Default None.
     email: EmailStr | None = None
@@ -107,7 +107,7 @@ class FriendSearchResult(BaseModel):
 
     id: int
     display_name: str | None
-    # email NICHT zurueckgeben — sonst waere Suche ein Email-Leak fuer
+    # email NICHT zurueckgeben — sonst wäre Suche ein Email-Leak für
     # discoverable User.
     relationship: str  # "none" | "outgoing_pending" | "incoming_pending" | "accepted"
     friendship_id: int | None = None
@@ -145,7 +145,7 @@ def _to_friendship_read(fs: Friendship, current_user_id: int) -> FriendshipRead:
     else:
         other = fs.requester
         direction = "incoming"
-    # Email nur fuer accepted-Friends ausliefern — sie sind aktiv verbunden,
+    # Email nur für accepted-Friends ausliefern — sie sind aktiv verbunden,
     # Email-Versand untereinander ist gewollter Friend-Feature-Stub
     # (W.10+). Pending-Anfragen leaken keine Email.
     email = other.email if fs.status == "accepted" else None
@@ -180,7 +180,7 @@ def _bulk_status_map(
     holen wir alle relevanten Friendships in EINER Query und mappen sie.
 
     Returns: {candidate_id -> (relationship_string, friendship_id|None)}
-    Default fuer nicht-vorhandene IDs: ("none", None).
+    Default für nicht-vorhandene IDs: ("none", None).
     """
     if not candidate_ids:
         return {}
@@ -277,8 +277,8 @@ def lookup_email(
     """Exakter Email-Match. Umgeht is_discoverable, weil exakte Email
     schon ein Beleg ist dass beide sich kennen.
 
-    Antwort fuer 'nicht gefunden' und 'inaktiv' ist identisch ({found:false}),
-    sodass kein Account-Existence-Probing moeglich ist.
+    Antwort für 'nicht gefunden' und 'inaktiv' ist identisch ({found:false}),
+    sodass kein Account-Existence-Probing möglich ist.
     """
     user = lookup_user_by_email(db, current_user, payload.email)
     if user is None:
@@ -354,8 +354,8 @@ def delete_friendship(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
-    """Friendship loeschen — Mehrzweck-Endpoint (abbrechen, ablehnen,
-    entfreunden). Beide Seiten duerfen bei accepted-Status loeschen.
+    """Friendship löschen — Mehrzweck-Endpoint (abbrechen, ablehnen,
+    entfreunden). Beide Seiten dürfen bei accepted-Status löschen.
     """
     try:
         remove_friendship(db, current_user, friendship_id)
@@ -365,7 +365,7 @@ def delete_friendship(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=msg
             ) from e
-        if "gehoert" in msg:
+        if "gehört" in msg:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail=msg
             ) from e

@@ -1,10 +1,10 @@
-// DashboardFilterBar: optionaler Filter fuer den DASHBOARD-Tab.
+// DashboardFilterBar: optionaler Filter für den DASHBOARD-Tab.
 //
 // Default ist „alle Solves, alle Sessions" — Dashboard ist die
 // Uebersichts-Sicht und sollte ohne Filter sinnvoll sein. Der Filter
 // kann aber auf eine Session eingeschraenkt werden, z.B. „nur Daten
 // dieser Trainings-Session". Cube-Filter ist hier bewusst NICHT,
-// weil das Dashboard cube-uebergreifend vergleichen soll.
+// weil das Dashboard cube-übergreifend vergleichen soll.
 
 import { useSessions } from "../lib/api";
 

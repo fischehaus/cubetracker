@@ -2,8 +2,8 @@
 //
 // Bewusst getrennt von ANALYSE: dort wird ausgewertet, hier wird
 // administriert. Vier sub-bereiche, intern via sub-tab-state
-// umgeschaltet (kein routing — die wahl bleibt nicht ueber app-
-// reload erhalten, das ist OK fuer einen verwaltungs-tab).
+// umgeschaltet (kein routing — die wahl bleibt nicht über app-
+// reload erhalten, das ist OK für einen verwaltungs-tab).
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
@@ -41,8 +41,8 @@ const SUB_TABS: SubTab[] = [
   { id: "settings", label: "Einstellungen", icon: "⚙" },
 ];
 
-// Admin-Tab nur fuer User mit is_admin === true (env-driven, siehe
-// backend api/admin.py). Liegt am Ende um die Tab-Reihenfolge fuer
+// Admin-Tab nur für User mit is_admin === true (env-driven, siehe
+// backend api/admin.py). Liegt am Ende um die Tab-Reihenfolge für
 // Non-Admins stabil zu halten.
 const ADMIN_TAB: SubTab = { id: "admin", label: "Admin", icon: "🛡" };
 
@@ -55,7 +55,7 @@ export function VerwaltungTab() {
 
   // UserMenu (App.tsx) feuert "cubetracker:goto-verwaltung-section" wenn
   // der User "Mein Account & Einstellungen" klickt — wir springen dann
-  // direkt zum Settings-Sub-Tab. Generisch fuer kuenftige Direkt-Links.
+  // direkt zum Settings-Sub-Tab. Generisch für kuenftige Direkt-Links.
   useEffect(() => {
     function onGoto(e: Event) {
       const detail = (e as CustomEvent<{ section?: string }>).detail;
@@ -91,7 +91,7 @@ export function VerwaltungTab() {
       />
 
       {/* Aktive Sektion — Outliers managed Session-Filter intern.
-          „Daten" enthaelt Import + Backup/Export untereinander. */}
+          „Daten" enthält Import + Backup/Export untereinander. */}
       {section === "sessions" && <SessionList />}
       {section === "hardware" && <HardwareList />}
       {section === "daten" && (
@@ -116,7 +116,7 @@ export function VerwaltungTab() {
           </div>
 
           {/* Reihenfolge nach Haeufigkeit/Use-Case:
-              1. Voll-Backup (haeufigste Aktion: Sicherung)
+              1. Voll-Backup (häufigste Aktion: Sicherung)
               2. csTimer-Import (Migration-Brücke)
               3. csTimer-Export (Export an csTimer-Mobile-App) */}
           <BackupPanel />

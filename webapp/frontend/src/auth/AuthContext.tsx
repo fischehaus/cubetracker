@@ -1,5 +1,5 @@
 /**
- * AuthContext — global state fuer "wer ist eingeloggt".
+ * AuthContext — global state für "wer ist eingeloggt".
  *
  * Bei App-Start probiert er /auth/me. Erfolg = noch eingeloggter
  * Access-Token im localStorage. 401 + erfolgreichem Refresh = auch
@@ -28,10 +28,10 @@ export interface UserRead {
   /** Computed from ADMIN_EMAILS-Env-Var im Backend. Steuert ob die
    *  Admin-Card im VerwaltungTab sichtbar ist. */
   is_admin: boolean;
-  /** Phase W.9: Opt-In fuer User-Suche per display_name. */
+  /** Phase W.9: Opt-In für User-Suche per display_name. */
   is_discoverable: boolean;
-  /** Phase W.future-tournaments: Postleitzahl fuer "Turniere in der
-   *  Naehe"-Feature. Optional, multi-country-Format. */
+  /** Phase W.future-tournaments: Postleitzahl für "Turniere in der
+   *  Nähe"-Feature. Optional, multi-country-Format. */
   postal_code: string | null;
   /** Phase W.country-feld: ISO-3166-1-alpha-2-Code (DE, AT, US, …). */
   country_iso2: string | null;
@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // apiClient feuert "cubetracker:logged-out" wenn Refresh fehlschlaegt.
-  // Auch hier Cache leeren (s.o.) — Stale-Daten gehoeren keinem mehr.
+  // Auch hier Cache leeren (s.o.) — Stale-Daten gehören keinem mehr.
   useEffect(() => {
     const handler = () => {
       setUser(null);
@@ -167,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     qc.clear();
   }, [qc]);
 
-  // Nach Profil-Aenderungen via PATCH /me / verify-email etc: User reloaden.
+  // Nach Profil-Änderungen via PATCH /me / verify-email etc: User reloaden.
   const refreshMe = useCallback(async () => {
     try {
       const me = await apiMe();

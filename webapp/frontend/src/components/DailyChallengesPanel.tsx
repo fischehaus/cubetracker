@@ -2,7 +2,7 @@
 //
 // - Header mit Datum + "Neu generieren"-Button
 // - Grid der nicht-dismissten Challenges (ChallengeCard)
-// - Hint, wenn alle dismissed/erfuellt
+// - Hint, wenn alle dismissed/erfüllt
 
 import { useMemo } from "react";
 import {
@@ -51,7 +51,7 @@ export function DailyChallengesPanel() {
           <h2 className="text-2xl font-semibold text-gray-100">
             Tages-Challenges{" "}
             <span className="text-base text-gray-400">
-              ({completedCount} / {visible.length} erfuellt)
+              ({completedCount} / {visible.length} erfüllt)
             </span>
           </h2>
           <InfoButton>
@@ -60,7 +60,7 @@ export function DailyChallengesPanel() {
               Drei kleine taegliche Aufgaben. Werden um Mitternacht UTC
               neu generiert. Schwierigkeitsgrade variieren (z.B. „mache
               X Solves heute", „erreiche AO5 unter Y", „kein DNF in 10
-              Solves"). Dismiss-Funktion fuer Challenges die du heute
+              Solves"). Dismiss-Funktion für Challenges die du heute
               nicht angehen willst. Refresh-Button generiert neu (z.B.
               wenn du was unmoegliches bekommen hast).
             </p>
@@ -78,7 +78,7 @@ export function DailyChallengesPanel() {
 
       {visible.length === 0 ? (
         <p className="text-base text-gray-400">
-          Keine aktiven Challenges fuer heute. Klicke „Neu generieren" um
+          Keine aktiven Challenges für heute. Klicke „Neu generieren" um
           welche zu erstellen.
         </p>
       ) : (
@@ -95,8 +95,8 @@ export function DailyChallengesPanel() {
 
       <p className="mt-4 text-xs text-gray-500">
         Challenges werden taeglich neu generiert (basierend auf deinen Stats)
-        und ihr Fortschritt zaehlt monoton hoch — auch wenn ein Solve spaeter
-        geloescht wird, bleibt die Erfuellung erhalten.
+        und ihr Fortschritt zählt monoton hoch — auch wenn ein Solve später
+        gelöscht wird, bleibt die Erfuellung erhalten.
       </p>
     </div>
   );

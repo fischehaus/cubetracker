@@ -12,7 +12,7 @@ import { FEATURE_CATEGORIES } from "../lib/features-data";
 interface Props {
   /** Header anzeigen (in Modal: ja; embedded auf LoginPage: optional). */
   showHeader?: boolean;
-  /** Compact-Mode reduziert Padding + Font-Size — fuer schmale Sidebar. */
+  /** Compact-Mode reduziert Padding + Font-Size — für schmale Sidebar. */
   compact?: boolean;
 }
 

@@ -2,15 +2,15 @@
 
 POST /import/cstimer
 - Multipart-File-Upload (.txt oder .json)
-- ?dry_run=true: Stats was importiert wuerde, kein Schreiben
+- ?dry_run=true: Stats was importiert würde, kein Schreiben
 - File-Size-Limit + Rate-Limit gegen DoS
-- Auto-Snapshot + Achievement-Recheck nach grossem Import (>=100 Solves)
+- Auto-Snapshot + Achievement-Recheck nach großem Import (>=100 Solves)
   laufen via BackgroundTask — Endpoint antwortet sofort nach DB-Commit,
-  Snapshot/Recheck koennen 10-30s im Hintergrund laufen.
+  Snapshot/Recheck können 10-30s im Hintergrund laufen.
 
 Performance-Fix 2026-05-12 (csTimer-Import "Network Error" bei 6000+
 Solves): vorher serielle Doppel-Import (Dry-Run + Echt) + sync Snapshot
-+ sync Achievement-Recheck = 35-45s Worker-Block, oft groesser als
++ sync Achievement-Recheck = 35-45s Worker-Block, oft größer als
 Connection-Timeout. Jetzt: einmal echt importieren -> sofort 200 OK ->
 Snapshot + Recheck im BackgroundTask.
 """
@@ -60,7 +60,7 @@ def _post_import_background(user_id: int, did_import_solves: bool) -> None:
     mehr nutzen kann (die ist beim Response-Send schon geschlossen).
 
     Security-Fix K3: defensive Exception-Handling + User-Lookup-Check.
-    Wenn User zwischenzeitlich geloescht wurde (CASCADE): silent return.
+    Wenn User zwischenzeitlich gelöscht wurde (CASCADE): silent return.
     Wenn beliebige Exception: rollback + log + continue (verhindert
     Worker-Crash bei BG-Task-Fail).
     """
@@ -68,7 +68,7 @@ def _post_import_background(user_id: int, did_import_solves: bool) -> None:
     try:
         user = db.get(User, user_id)
         if user is None or not user.is_active:
-            # User geloescht oder deaktiviert -> kein Snapshot/Recheck
+            # User gelöscht oder deaktiviert -> kein Snapshot/Recheck
             return
         if not did_import_solves:
             return
@@ -104,18 +104,18 @@ async def import_cstimer(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """csTimer-Datei fuer aktuellen User importieren — Merge-by-Default,
+    """csTimer-Datei für aktuellen User importieren — Merge-by-Default,
     Dedup nach (timestamp, time_ms), kein Datenverlust.
 
-    dry_run=true: liefert Stats was importiert wuerde, ohne DB-Aenderung.
+    dry_run=true: liefert Stats was importiert würde, ohne DB-Änderung.
     Empfehlung: erst Dry-Run, dann real.
     """
-    # Chunked read damit grosse Uploads nicht voll in Memory landen
+    # Chunked read damit große Uploads nicht voll in Memory landen
     raw = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Upload zu gross (max {MAX_UPLOAD_BYTES} bytes).",
+            detail=f"Upload zu groß (max {MAX_UPLOAD_BYTES} bytes).",
         )
     # Security-Fix K2: JSON-Bomb-Pre-Check vor json.loads()
     try:
@@ -167,7 +167,7 @@ async def import_cstimer(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
-                "Datei enthaelt keine csTimer-Sessions (Top-Level-Keys "
+                "Datei enthält keine csTimer-Sessions (Top-Level-Keys "
                 "wie 'session1', 'session2'...). Bitte pruefe ob du "
                 "die richtige Datei hochgeladen hast."
             ),
@@ -186,7 +186,7 @@ async def import_cstimer(
 
     # Bei echtem Import + nennenswertem Volumen: Snapshot + Recheck
     # im Hintergrund laufen lassen, damit der HTTP-Response sofort
-    # zurueck geht (vorher: 35-45s Worker-Block -> Connection-Drops).
+    # zurück geht (vorher: 35-45s Worker-Block -> Connection-Drops).
     if result.solves_created >= SNAPSHOT_THRESHOLD:
         background.add_task(
             _post_import_background, current_user.id, result.solves_created > 0

@@ -1,10 +1,10 @@
 // Liste der Solves als Tabelle, mit Filter (Cube-Type, Session, Limit) und
-// Loeschen/Toggle-Buttons. Zeigt rollende ao5/ao12 unter jeder Zeit, sowie
+// Löschen/Toggle-Buttons. Zeigt rollende ao5/ao12 unter jeder Zeit, sowie
 // PB-Marker (Best-Solve goldfarben) basierend auf Stats-API.
 //
-// F7: Inline-Edit fuer Zeit + Notizen — click auf den Wert wechselt in
+// F7: Inline-Edit für Zeit + Notizen — click auf den Wert wechselt in
 // Edit-Mode, Enter speichert, Esc bricht ab. Cube-Type bleibt
-// read-only (Aenderungen seltener; ggf. spaeter via Edit-Dialog).
+// read-only (Änderungen seltener; ggf. später via Edit-Dialog).
 
 import { useMemo, useState } from "react";
 import {
@@ -43,7 +43,7 @@ interface Props {
   onCubeFilterChange: (cube: string) => void;
 }
 
-// Auswahl-Optionen fuer den Limit-Selector. -1 steht fuer „alles".
+// Auswahl-Optionen für den Limit-Selector. -1 steht für „alles".
 const LIMIT_OPTIONS: { value: number; label: string }[] = [
   { value: 50, label: "50" },
   { value: 100, label: "100" },
@@ -83,7 +83,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
   if (sessionId !== null) params.session_id = sessionId;
   const { data: solves, isLoading, error } = useSolves(params);
 
-  // Stats fuer denselben Filter — fuer Best-Marker brauchen wir nur die best_solve_id
+  // Stats für denselben Filter — für Best-Marker brauchen wir nur die best_solve_id
   const statsParams: { cube_type?: string; session_id?: number } = {};
   if (cubeFilter) statsParams.cube_type = cubeFilter;
   if (sessionId !== null) statsParams.session_id = sessionId;
@@ -93,7 +93,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
   const del = useDeleteSolve();
   const update = useUpdateSolve();
 
-  // Hardware-Lookup: id → name, fuer Anzeige in der Cube-Spalte
+  // Hardware-Lookup: id → name, für Anzeige in der Cube-Spalte
   const { data: hardware } = useHardware();
   const hardwareById = useMemo(() => {
     const m = new Map<number, string>();
@@ -137,7 +137,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
   // Solvenummer-Berechnung: API liefert die letzten `limit` Solves in DESC.
   // Wir nehmen `stats.count` als Total + leiten die Nummer ab.
   // Wichtig: Solvenummer haengt am Solve, NICHT am Sortier-Index.
-  // Sort-Reihenfolge aendert nur die UI-Reihenfolge, die Nummer bleibt.
+  // Sort-Reihenfolge ändert nur die UI-Reihenfolge, die Nummer bleibt.
   const sortedDisplay = useMemo(() => {
     if (!solves || solves.length === 0) return [];
     const totalCount = stats?.count ?? solves.length;
@@ -202,7 +202,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         <h2 className="text-2xl font-semibold text-gray-100 mb-2">Solves</h2>
         <p className="text-base text-gray-400">
           {cubeFilter
-            ? `Keine Solves fuer "${cubeFilter}" vorhanden.`
+            ? `Keine Solves für "${cubeFilter}" vorhanden.`
             : "Noch keine Solves. Trag oben einen ein oder importier deine csTimer-Daten."}
         </p>
         {cubeFilter && (
@@ -449,10 +449,10 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm("Solve loeschen?")) del.mutate(s.id);
+                        if (confirm("Solve löschen?")) del.mutate(s.id);
                       }}
                       className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-                      title="Loeschen"
+                      title="Löschen"
                     >
                       🗑
                     </button>
@@ -466,7 +466,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
 
       <p className="mt-3 text-xs text-gray-500">
         Tipp: Klick auf Spaltenkopf (#, Zeit, AO5, AO12) zum Sortieren ·
-        Klick auf Zeit zum Bearbeiten · ℹ fuer Detail (Scramble, Notiz,
+        Klick auf Zeit zum Bearbeiten · ℹ für Detail (Scramble, Notiz,
         Hardware, Session). Enter speichert, Esc bricht ab.
       </p>
 
@@ -500,7 +500,7 @@ function SortableTh({
   activeKey: SortKey;
   dir: SortDir;
   onClick: (k: SortKey) => void;
-  /** Mobile-First: Spalte auf <md ausblenden (Details ueber ℹ-Button). */
+  /** Mobile-First: Spalte auf <md ausblenden (Details über ℹ-Button). */
   hideOnMobile?: boolean;
 }) {
   const isActive = sortKey === activeKey;

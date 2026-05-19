@@ -1,6 +1,6 @@
 // TouchTimerPad — Touch-Eingabe-Pad das die Space-Taste simuliert.
 //
-// Auf Touch-Devices erscheint unter der SpacebarTimerCard ein grosser
+// Auf Touch-Devices erscheint unter der SpacebarTimerCard ein großer
 // Tap-Button. Pointerdown/-up dispatchen synthetische KeyboardEvents
 // (code="Space") aufs window — der existierende useSpacebarTimer-Hook
 // behandelt sie identisch zu echten Tastendruecken (er prueft weder
@@ -9,11 +9,11 @@
 // target = window, also nicht-typing).
 //
 // setPointerCapture stellt sicher, dass pointerup auch dann feuert,
-// wenn der Finger vom Pad abrutscht — sonst koennte der Timer in
+// wenn der Finger vom Pad abrutscht — sonst könnte der Timer in
 // "ready"/"holding" haengen bleiben.
 //
 // Auf Desktop (pointer: fine): rendert null. User benutzt echte
-// Tastatur, der zusaetzliche Button waere nur visueller Lärm.
+// Tastatur, der zusaetzliche Button wäre nur visueller Lärm.
 
 import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
 
@@ -36,7 +36,7 @@ export function TouchTimerPad() {
       type="button"
       onPointerDown={(e) => {
         // Pointer-Capture verhindert "lost pointerup" wenn Finger
-        // ueber den Rand des Buttons rutscht waehrend "ready"/"running"
+        // über den Rand des Buttons rutscht während "ready"/"running"
         try {
           e.currentTarget.setPointerCapture(e.pointerId);
         } catch {

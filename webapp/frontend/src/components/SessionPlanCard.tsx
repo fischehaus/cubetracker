@@ -1,7 +1,7 @@
 // SessionPlanCard (Phase 8.4) — Trainings-Set-Counter im TIMER.
 //
 // Konzept: ein Trainings-Set ist eine UI-Layer auf den Solves —
-// keine DB-Aenderung. User klickt "Set starten", waehlt Anzahl
+// keine DB-Änderung. User klickt "Set starten", wählt Anzahl
 // Solves (Plan), macht die Solves, am Ende kommt End-Feedback.
 //
 // State liegt im Component (kein localStorage), weil ein Reload
@@ -30,7 +30,7 @@ interface ActiveSet {
   baselineSolveIds: Set<number>;
   /** Geplante Anzahl Solves (oder null = open-ended) */
   planCount: number | null;
-  /** Wann gestartet (fuer Display) */
+  /** Wann gestartet (für Display) */
   startedAt: number;
 }
 
@@ -41,7 +41,7 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
   const [showEndFeedback, setShowEndFeedback] = useState<Solve[] | null>(null);
   const [planInput, setPlanInput] = useState<number | null>(12);
 
-  // Live solves im aktuellen Filter — wir verwenden das fuer counter
+  // Live solves im aktuellen Filter — wir verwenden das für counter
   const { data: solves } = useSolves({
     cube_type: cubeType,
     session_id: sessionId === null ? undefined : sessionId,
@@ -96,10 +96,10 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
                 <p className="font-medium mb-1">Trainings-Set</p>
                 <p>
                   Setze dir eine feste Anzahl Solves als Ziel (z.B. 12 oder
-                  50). Waehrend du solvest, zaehlt das Set runter und zeigt
+                  50). Während du solvest, zählt das Set runter und zeigt
                   Live-Stats. Am Ende kriegst du eine Zusammenfassung: Best,
                   Worst, AO5, AO12, AO100, plus DNF/+2-Statistik. Praktisch
-                  fuer fokussiertes Training mit klarem Stoppzeitpunkt.
+                  für fokussiertes Training mit klarem Stoppzeitpunkt.
                 </p>
               </InfoButton>
             </div>
@@ -177,7 +177,7 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
             )}
           </span>
           {isComplete && (
-            <span className="text-emerald-300 font-medium">✓ erfuellt</span>
+            <span className="text-emerald-300 font-medium">✓ erfüllt</span>
           )}
         </div>
         <button
@@ -290,7 +290,7 @@ function computeSetStats(solves: Solve[]): SetStats {
     ? Math.round(valid.reduce((acc, s) => acc + eff(s), 0) / valid.length)
     : null;
 
-  // WCA-trim avg fuer 5/12 (trim 1 each side)
+  // WCA-trim avg für 5/12 (trim 1 each side)
   function trimmedAvg(times: number[], window: number): number | null {
     if (times.length < window) return null;
     const sub = times.slice(-window);
@@ -307,15 +307,15 @@ function computeSetStats(solves: Solve[]): SetStats {
   // Sehr einfaches Feedback nach Best/Mean-Verhältnis und DNF-Quote
   let feedback = "";
   if (chrono.length === 0) {
-    feedback = "Keine Solves im Set — beim naechsten Mal mehr durchziehen!";
+    feedback = "Keine Solves im Set — beim nächsten Mal mehr durchziehen!";
   } else if (chrono.length < 5) {
-    feedback = `Kurzes Set mit ${chrono.length} Solves — fuer Stats waeren mind. 5 sinnvoll.`;
+    feedback = `Kurzes Set mit ${chrono.length} Solves — für Stats waeren mind. 5 sinnvoll.`;
   } else {
     const dnfRate = solves.length > 0 ? (chrono.length - valid.length) / chrono.length : 0;
     if (dnfRate > 0.2) {
       feedback = `Hohe DNF-Quote (${Math.round(dnfRate * 100)}%) — vielleicht zu schnell? Konzentration vor Speed.`;
     } else if (best !== null && mean !== null && mean > best * 1.4) {
-      feedback = "Inkonsistente Zeiten — Range zwischen Best und Mean ist gross. Fokus auf Konsistenz.";
+      feedback = "Inkonsistente Zeiten — Range zwischen Best und Mean ist groß. Fokus auf Konsistenz.";
     } else if (best !== null && mean !== null && mean < best * 1.15) {
       feedback = "Sehr konsistentes Set — saubere Arbeit!";
     } else {

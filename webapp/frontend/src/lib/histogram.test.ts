@@ -1,4 +1,4 @@
-// Tests fuer Histogramm-Bucketing.
+// Tests für Histogramm-Bucketing.
 
 import { describe, expect, it } from "vitest";
 import { buildHistogram, suggestBinWidthMs } from "./histogram";
@@ -37,7 +37,7 @@ describe("buildHistogram", () => {
     );
   });
 
-  it("bucket-zaehlt Solves korrekt mit fester Bin-Breite", () => {
+  it("bucket-zählt Solves korrekt mit fester Bin-Breite", () => {
     // 5 Solves: 9.5, 10.0, 10.5, 11.0, 11.5 sec — Bin-Breite 1s
     const solves = [9500, 10000, 10500, 11000, 11500].map((t) => sp(t));
     const bins = buildHistogram(solves, 1000);

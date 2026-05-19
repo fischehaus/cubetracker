@@ -6,7 +6,7 @@ ALLE Queries filtern auf user_id == current_user.id. Pro-User-Stats:
 - /stats/by-session        — pro Session
 - /stats/by-hardware       — pro Hardware-Eintrag innerhalb eines Cubes
 - /stats/temporal          — heute + diese Woche
-- /stats/activity          — Aggregierte Solve-Counts ueber Zeit
+- /stats/activity          — Aggregierte Solve-Counts über Zeit
 - /stats/by-alg-case       — pro PLL/OLL-Case (Algorithm-Trainer)
 """
 
@@ -37,7 +37,7 @@ def get_stats(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Gesamt-Stats fuer die gefilterte Solve-Menge des aktuellen Users."""
+    """Gesamt-Stats für die gefilterte Solve-Menge des aktuellen Users."""
     stmt = (
         select(Solve)
         .where(Solve.user_id == current_user.id)
@@ -291,7 +291,7 @@ def get_activity(
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Aggregierte Solve-Counts pro Periode, eigene Solves, gap-gefuellt."""
-    # UTC-aware fuer Postgres-Kompatibilitaet
+    # UTC-aware für Postgres-Kompatibilitaet
     now = datetime.now(UTC)
     to_d = now.date()
     from_d = to_d - timedelta(days=days - 1)
@@ -492,7 +492,7 @@ def get_stats_by_alg_case(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Per-case-Stats fuer alg_case-Tags — eigene only."""
+    """Per-case-Stats für alg_case-Tags — eigene only."""
     prefix = f"{subset}-"
     stmt = (
         select(Solve)

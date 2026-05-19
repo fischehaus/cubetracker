@@ -5,7 +5,7 @@
 //   - „Algs"    (Phase 8b): AlgTrainerPanel (PLL/OLL-Drill mit per-case-Stats)
 //   - „Erfolge" (Phase 7a): AchievementsCard
 //
-// Sub-Tab-Bar analog zu VerwaltungTab. Wahl persistiert NICHT ueber
+// Sub-Tab-Bar analog zu VerwaltungTab. Wahl persistiert NICHT über
 // app-reload — bewusst, „Heute" soll der primaere Einstieg bleiben.
 
 import { useState } from "react";

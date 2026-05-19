@@ -4,12 +4,12 @@
 //
 // State-Mapping zu Visual:
 //   idle       → grau, "0.00", Hint „Space halten zum starten"
-//   inspection → blau, countdown gross + Phase-Hinweis bei Sound-Threshold
+//   inspection → blau, countdown groß + Phase-Hinweis bei Sound-Threshold
 //   ready      → gelb, „loslassen wenn bereit"
 //   running    → gruen, live-tickender Timer + Phase X/N
 //   stopped    → weiss, end-time + Splits-Liste + ggf. Penalty-Badge
 //
-// Layout: zentrierter Karten-Block mit grossem Timer und farb-Status.
+// Layout: zentrierter Karten-Block mit großem Timer und farb-Status.
 
 import { useEffect } from "react";
 import { formatTime } from "../lib/format";
@@ -99,14 +99,14 @@ export function SpacebarTimerCard({
                 ? "bg-red-600 text-white"
                 : "bg-amber-600 text-white"
             }`}
-            title="Inspection ueberschritten"
+            title="Inspection überschritten"
           >
             {timer.penalty}
           </span>
         )}
       </div>
 
-      {/* Mitte: grosser Timer */}
+      {/* Mitte: großer Timer */}
       <div
         className={`text-center font-mono ${timerColorClass(timer.state)}`}
         style={{
@@ -210,7 +210,7 @@ function hintLabel(
   switch (state) {
     case "idle":
       return inspectionEnabled
-        ? "Space druecken fuer Inspektion"
+        ? "Space druecken für Inspektion"
         : "Space halten und loslassen zum Starten";
     case "inspection":
       return inspectionMode === "wca"
@@ -221,7 +221,7 @@ function hintLabel(
     case "running":
       return "Space druecken zum Stoppen";
     case "stopped":
-      return "Solve gespeichert · Space fuer naechsten";
+      return "Solve gespeichert · Space für nächsten";
     default:
       return "";
   }

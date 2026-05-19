@@ -69,7 +69,7 @@ import oll57 from '../assets/oll/OLL_57.png';
 
 /**
  * Map: case-id ("OLL-1" .. "OLL-57") → Bild-URL.
- * Liefert null fuer unbekannte oder noch nicht abgedeckte Cases.
+ * Liefert null für unbekannte oder noch nicht abgedeckte Cases.
  */
 export const OLL_IMAGES: Record<string, string> = {
   'OLL-1': oll01,

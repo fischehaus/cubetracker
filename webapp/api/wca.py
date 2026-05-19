@@ -1,16 +1,16 @@
 """WCA-API-Endpoints (Phase W.wca-comps).
 
 GET /wca/competitions/upcoming
-  Liefert die naechsten WCA-Turniere in der Naehe der User-Postleitzahl.
+  Liefert die nächsten WCA-Turniere in der Nähe der User-Postleitzahl.
   Voraussetzung: User hat postal_code im Profil. Sonst 422.
 
   Query-Parameter:
     - max_distance_km (default 300): Filter, nur Turniere innerhalb dieser
       Distanz vom User. None = kein Distanz-Filter.
-    - limit (default 10, max 50): max. Anzahl Eintraege.
+    - limit (default 10, max 50): max. Anzahl Einträge.
     - days_ahead (default 180): wie weit in die Zukunft schauen.
 
-  Antwort: Liste sortiert nach Datum + Distanz. Jeder Eintrag enthaelt
+  Antwort: Liste sortiert nach Datum + Distanz. Jeder Eintrag enthält
   zusaetzlich `distance_km` (gerundet auf 1 Nachkommastelle).
 """
 
@@ -53,11 +53,11 @@ async def upcoming_competitions(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Naechste WCA-Turniere in der Naehe des Users."""
+    """Nächste WCA-Turniere in der Nähe des Users."""
     postal = (current_user.postal_code or "").strip()
-    # User.country_iso2 hat Vorrang (Phase W.country-feld) — fuer Nicht-DACH-
+    # User.country_iso2 hat Vorrang (Phase W.country-feld) — für Nicht-DACH-
     # User funktioniert die PLZ-Heuristik nicht. Falls leer: fallback auf
-    # PLZ-Detection (DE/AT/CH-Default fuer 5/4-stellige Codes).
+    # PLZ-Detection (DE/AT/CH-Default für 5/4-stellige Codes).
     user_country = (current_user.country_iso2 or "").strip().upper() or None
     if not postal:
         raise HTTPException(
@@ -82,7 +82,7 @@ async def upcoming_competitions(
         )
 
     # 1) Geocoding (mit DB-Cache, also meist sub-millisekunde nach erstem Lookup)
-    # Wir uebergeben das User-Land explizit, damit Nominatim die richtige
+    # Wir übergeben das User-Land explizit, damit Nominatim die richtige
     # Region trifft (z.B. PLZ 1234 in CH vs AT).
     try:
         geo = await geocode_postal_code(db, postal, country_iso2=detected_country)
@@ -97,7 +97,7 @@ async def upcoming_competitions(
     user_lng = float(geo["lng"])
     # Country-Resolution-Reihenfolge:
     # 1) User.country_iso2 (explizit gesetzt)
-    # 2) geo.country_iso2 (von Nominatim zurueck)
+    # 2) geo.country_iso2 (von Nominatim zurück)
     # 3) PLZ-Heuristik (DACH)
     country = user_country or geo.get("country_iso2") or detect_country_from_postal_code(postal)
 
@@ -143,7 +143,7 @@ async def upcoming_competitions(
 
     # 4) Sort: zuerst Datum (frueheste zuerst), dann Distanz.
     # QA-Fix Welle A (2026-05-16): explizit `is None`-Check statt `or`.
-    # Mit `or 99_999` waere ein Turnier direkt am Wohnort des Users (dist=0.0)
+    # Mit `or 99_999` wäre ein Turnier direkt am Wohnort des Users (dist=0.0)
     # als „weit weg" sortiert (0.0 ist falsy in Python).
     def _sort_key(c: dict[str, Any]) -> tuple[str, float]:
         dist = c.get("distance_km")

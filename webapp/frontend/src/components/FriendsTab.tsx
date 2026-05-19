@@ -7,7 +7,7 @@
 //   4. Ausgehende Anfragen (Cancel)
 //   5. Eigene Friends-Liste (Unfriend)
 //
-// Privacy-Hinweis: Suche und Email-Lookup laufen ausschliesslich gegen
+// Privacy-Hinweis: Suche und Email-Lookup laufen ausschließlich gegen
 // Backend-Endpoints, die User-Status + Self-Filtering enforcen.
 
 import { useState } from "react";
@@ -69,7 +69,7 @@ function DiscoverabilityCard({
   const update = useUpdateProfile();
   const hasName = !!displayName?.trim();
 
-  // Inline-Edit-State fuer Display-Name (UX-Refactor 2026-05-14: war
+  // Inline-Edit-State für Display-Name (UX-Refactor 2026-05-14: war
   // vorher nur in Verwaltung→Einstellungen, das forcierte einen Tab-
   // Wechsel — jetzt direkt hier, wo man's braucht).
   const [editingName, setEditingName] = useState(false);
@@ -90,7 +90,7 @@ function DiscoverabilityCard({
       <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-200 space-y-1">
         <div>
           <strong>Auffindbar</strong> als „{displayName}". Andere User
-          koennen dich per Display-Name-Suche finden.
+          können dich per Display-Name-Suche finden.
         </div>
         <div className="flex flex-wrap gap-3 text-xs">
           <button
@@ -100,7 +100,7 @@ function DiscoverabilityCard({
             }}
             className="underline hover:text-emerald-100"
           >
-            Display-Name aendern
+            Display-Name ändern
           </button>
           <button
             onClick={() => update.mutate({ is_discoverable: false })}
@@ -131,7 +131,7 @@ function DiscoverabilityCard({
         <p className="mt-1">
           Aktuell <strong>nicht auffindbar</strong>. Du kannst trotzdem
           andere per Email-Lookup finden + ihnen Freundes-Anfragen schicken.
-          Damit DICH andere per Display-Name finden koennen, brauchst du
+          Damit DICH andere per Display-Name finden können, brauchst du
           beides:
         </p>
       </div>
@@ -165,7 +165,7 @@ function DiscoverabilityCard({
             }}
             className="text-xs underline text-blue-200 hover:text-blue-100"
           >
-            Aendern
+            Ändern
           </button>
         )}
       </div>
@@ -330,7 +330,7 @@ function SearchCard() {
       {query.trim().length >= 2 && (
         <div className="rounded border border-gray-700 bg-gray-800/40 p-3 space-y-1.5">
           <div className="text-xs text-gray-500">
-            Display-Name-Treffer fuer „{query}":
+            Display-Name-Treffer für „{query}":
           </div>
           {search.isLoading && (
             <p className="text-sm text-gray-400">Suche …</p>

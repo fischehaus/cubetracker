@@ -1,10 +1,10 @@
-// TrendsChart: Verlauf von Single-Zeit + ao5 + ao12 + ao100 ueber die Zeit.
+// TrendsChart: Verlauf von Single-Zeit + ao5 + ao12 + ao100 über die Zeit.
 // Clientseitig berechnet aus geladenen Solves (chronologisch sortiert).
 //
 // X-Achse: Solve-Index (1 = aeltester geladener Solve)
 // Y-Achse: Zeit in Sekunden — smart auto-skaliert (P2..P98 mit Padding) und
-//          manuell ueberschreibbar via min/max Inputs. Bei jedem Filter-
-//          oder Window-Wechsel: zurueck zu auto, damit man nicht eine
+//          manuell überschreibbar via min/max Inputs. Bei jedem Filter-
+//          oder Window-Wechsel: zurück zu auto, damit man nicht eine
 //          alte Skala auf neue Daten sieht.
 // Linien: ao5 (gruen), ao12 (blau), ao100 (lila), Singles als Streupunkte (grau)
 
@@ -49,7 +49,7 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
   const [manualMax, setManualMax] = useState<string>("");
 
   // Bei jedem Filter- oder Window-Wechsel: manuelle Werte zuruecksetzen.
-  // Ohne diesen Reset wuerde z.B. eine 3x3-Skala (10s..14s) bei Wechsel
+  // Ohne diesen Reset würde z.B. eine 3x3-Skala (10s..14s) bei Wechsel
   // auf 2x2 die ganzen 2x2-Werte (3s..5s) abschneiden.
   useEffect(() => {
     setManualMin("");
@@ -63,7 +63,7 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
 
   const chartData: ChartPoint[] = useMemo(() => {
     if (!solves || solves.length === 0) return [];
-    // API liefert DESC (neueste zuerst). Fuer Trend-Chart chronologisch:
+    // API liefert DESC (neueste zuerst). Für Trend-Chart chronologisch:
     const chronological = [...solves].reverse();
     const points: SolvePoint[] = chronological.map((s) => ({
       time_ms: s.time_ms,
@@ -83,7 +83,7 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
   }, [solves]);
 
   // Auto-Domain: nur aus den Avgs berechnen, nicht aus Singles. Singles
-  // koennen wild streuen (DNFs, vergessene Timer) — die Avgs sind die
+  // können wild streuen (DNFs, vergessene Timer) — die Avgs sind die
   // ehrliche Bandbreite des Hauptverlaufs.
   const autoDomain = useMemo<[number, number]>(() => {
     if (chartData.length === 0) return [0, 1000];
@@ -94,7 +94,7 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
     return computeYDomain(avgValues);
   }, [chartData]);
 
-  // Effektive Domain: manuelle Werte ueberschreiben jeweils einzeln.
+  // Effektive Domain: manuelle Werte überschreiben jeweils einzeln.
   const manualMinMs = parseSecondsToMs(manualMin);
   const manualMaxMs = parseSecondsToMs(manualMax);
   const effectiveDomain: [number, number] = [
@@ -138,10 +138,10 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
           <InfoButton>
             <p className="font-medium mb-1">Trends-Chart</p>
             <p>
-              Verlauf deiner Solve-Zeiten ueber Zeit. Punkte = einzelne
+              Verlauf deiner Solve-Zeiten über Zeit. Punkte = einzelne
               Solves (Singles), Linien = gleitende Mittel (AO5/AO12).
               Y-Achse: Zeit (kleiner = besser). Hilft Plateaus + Sprung-
-              Verbesserungen zu erkennen. Y-Bereich manuell setzbar fuer
+              Verbesserungen zu erkennen. Y-Bereich manuell setzbar für
               Detail-Fokus.
             </p>
           </InfoButton>

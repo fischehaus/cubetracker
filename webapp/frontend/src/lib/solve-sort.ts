@@ -1,4 +1,4 @@
-// Wiederverwendbare Sort-Logik fuer Solve-Tabellen (LastSolvesPreview +
+// Wiederverwendbare Sort-Logik für Solve-Tabellen (LastSolvesPreview +
 // SolveList). Die Tabellen haben gleiche Sort-Keys: Solvenummer, Zeit, AO5,
 // AO12. Sortierung beruecksichtigt +2 (effektive Zeit) und schiebt DNFs
 // + null-Averages ans Ende beider Richtungen, weil sie "kein Wert" sind.
@@ -20,7 +20,7 @@ export interface SortableSolveRow {
 }
 
 function nullableValue(v: number | null, dir: SortDir): number {
-  // null landet im asc + desc immer am Ende — sonst koennte ein User
+  // null landet im asc + desc immer am Ende — sonst könnte ein User
   // beim Klick auf "Zeit asc" lauter "—" oben sehen, was Quatsch ist.
   if (v === null) return dir === "asc" ? Infinity : -Infinity;
   return v;
@@ -41,7 +41,7 @@ export function sortSolveRows<T extends SortableSolveRow>(
         bVal = b.solveNumber;
         break;
       case "time":
-        // effektive Zeit fuer Sortierung — +2 zaehlt, DNF = +Inf (Ende)
+        // effektive Zeit für Sortierung — +2 zählt, DNF = +Inf (Ende)
         aVal = a.dnf
           ? dir === "asc"
             ? Infinity
@@ -84,7 +84,7 @@ export function sortSolveRows<T extends SortableSolveRow>(
   return copy;
 }
 
-/** UI-Helper: passendes Pfeil-Symbol fuer einen Spalten-Header. */
+/** UI-Helper: passendes Pfeil-Symbol für einen Spalten-Header. */
 export function sortIndicator(
   thisKey: SortKey,
   activeKey: SortKey,
@@ -95,7 +95,7 @@ export function sortIndicator(
 }
 
 /**
- * Toggle-Logik fuer einen Header-Klick: derselbe Key zweimal klicken
+ * Toggle-Logik für einen Header-Klick: derselbe Key zweimal klicken
  * dreht die Richtung um, anderer Key setzt Default-Richtung (Solvenummer
  * + Zeiten initial DESC = neueste/schnellste zuerst).
  */

@@ -6,14 +6,14 @@ Verantwortlichkeiten:
 - create_snapshot: Wiederherstellungspunkt anlegen + ggf. aelteste pruning
 - list_snapshots: User-Snapshots abrufen
 - restore_from_snapshot: Snapshot laden + restore (mit Auto-Snapshot-Vorher)
-- delete_snapshot: explizit loeschen
+- delete_snapshot: explizit löschen
 
 Sicherheits-Architektur:
 - Alle Funktionen brauchen `user_id`. user_id-Felder im JSON werden
-  IGNORIERT und mit `user_id`-Param ueberschrieben — verhindert dass ein
-  Angreifer ein modifiziertes Backup hochlaedt und fremde Daten ueberschreibt.
+  IGNORIERT und mit `user_id`-Param überschrieben — verhindert dass ein
+  Angreifer ein modifiziertes Backup hochlaedt und fremde Daten überschreibt.
 - mode='replace' loescht ALLE bisherigen Daten dieses Users vor dem Import
-  (User-CASCADE-Behaviors greifen NICHT — wir loeschen explizit).
+  (User-CASCADE-Behaviors greifen NICHT — wir löschen explizit).
 - mode='merge' (Default) tut Sessions/Hardware Upsert-by-Name+cube,
   Solves Dedup per (timestamp, time_ms, cube_type)-Triple.
 """
@@ -40,9 +40,9 @@ from db.models import (
 
 SCHEMA_VERSION = "webapp-2.0"
 MAX_SNAPSHOTS_PER_USER = 2
-# Hartes Limit fuer Snapshot-Payload-Size (Storage-DoS-Schutz auf
+# Hartes Limit für Snapshot-Payload-Size (Storage-DoS-Schutz auf
 # Render-Free). 30 MB entspricht ~100k Solves; 2 Snapshots * Postgres-Free
-# 1GB = max ~16 User die einen vollen Datensatz haben koennen.
+# 1GB = max ~16 User die einen vollen Datensatz haben können.
 MAX_SNAPSHOT_PAYLOAD_BYTES = 30 * 1024 * 1024
 # Security-Fix K2: JSON-Bomb-Schutz. Pre-Check vor json.loads().
 #
@@ -54,21 +54,21 @@ MAX_SNAPSHOT_PAYLOAD_BYTES = 30 * 1024 * 1024
 #
 # 2M ist eine sichere Obergrenze: bei 30MB-Upload-Limit waeren echte
 # JSON-Bombs (dense nested brackets, ~1 Token/Byte) bei 30M Tokens —
-# also Faktor 15 ueber dem Limit. Schutz greift weiterhin.
+# also Faktor 15 über dem Limit. Schutz greift weiterhin.
 MAX_JSON_STRUCTURAL_TOKENS = 2_000_000
 
 RestoreMode = Literal["merge", "replace"]
 
 
 class BackupServiceError(ValueError):
-    """Eigene Exception fuer Backup-Service-Validation, damit das
+    """Eigene Exception für Backup-Service-Validation, damit das
     API-Layer sie 400-mappen kann."""
 
 
 def check_json_bomb(raw_bytes: bytes) -> None:
     """Security-Fix K2: Pre-Check gegen JSON-Bombs vor `json.loads()`.
 
-    Zaehlt strukturelle Tokens (`[`, `]`, `{`, `}`) — bei normalen
+    Zählt strukturelle Tokens (`[`, `]`, `{`, `}`) — bei normalen
     Backup-Payloads sind das ~1-1.5M (100k Solves + Sessions etc.).
     Bei manipulierten deep-nested-JSONs kann diese Zahl in die
     Millionen gehen und Python-RecursionError oder schlicht riesige
@@ -86,7 +86,7 @@ def check_json_bomb(raw_bytes: bytes) -> None:
         raise BackupServiceError(
             f"Datei zu komplex ({structural_count:,} JSON-Strukturzeichen; "
             f"erlaubt max {MAX_JSON_STRUCTURAL_TOKENS:,}). Bei normalen "
-            f"csTimer-Exporten reicht das fuer ca. 300.000 Solves — wenn "
+            f"csTimer-Exporten reicht das für ca. 300.000 Solves — wenn "
             f"deine Datei wirklich darueber liegt, melde dich beim Entwickler. "
             f"Sonst pruefe ob du die richtige Datei hochlaedst."
         )
@@ -100,8 +100,8 @@ def check_json_bomb(raw_bytes: bytes) -> None:
 def export_user_data(db: OrmSession, user: User) -> dict[str, Any]:
     """Voll-Export aller Daten eines Users als JSON-Dict.
 
-    user_id-Felder werden mit ausgegeben, aber beim spaeteren Re-Import
-    ignoriert + mit dem aktuellen current_user.id ueberschrieben.
+    user_id-Felder werden mit ausgegeben, aber beim späteren Re-Import
+    ignoriert + mit dem aktuellen current_user.id überschrieben.
     """
     solves = db.scalars(select(Solve).where(Solve.user_id == user.id)).all()
     sessions = db.scalars(select(DbSession).where(DbSession.user_id == user.id)).all()
@@ -114,7 +114,7 @@ def export_user_data(db: OrmSession, user: User) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "exported_at": datetime.now(UTC).isoformat(),
-        "user_email": user.email,  # Info fuer User, nicht fuer Restore
+        "user_email": user.email,  # Info für User, nicht für Restore
         "counts": {
             "solves": len(solves),
             "sessions": len(sessions),
@@ -251,10 +251,10 @@ def restore_user_data(
     Modi:
     - 'merge' (default): bestehende Daten bleiben, neue Sachen dazu,
       Dedup nach Schluesseln (siehe unten). Sicher.
-    - 'replace': alle eigenen Daten loeschen, dann importieren. DESTRUKTIV.
+    - 'replace': alle eigenen Daten löschen, dann importieren. DESTRUKTIV.
       Caller MUSS confirm-Magic-String separat pruefen.
 
-    Dedup-Schluessel:
+    Dedup-Schlüssel:
     - Sessions: (name, cstimer_session_id) — manuell angelegte Sessions
       mit gleichem Namen werden nicht dupliziert
     - Hardware: (name, primary_cube_type)
@@ -262,11 +262,11 @@ def restore_user_data(
     - Achievements: (code) — pro User unique-Index existiert eh
 
     `auto_snapshot=True` (Default): bei mode='replace' wird vor der
-    Loeschung automatisch ein Snapshot angelegt. Bei dry_run=True
+    Löschung automatisch ein Snapshot angelegt. Bei dry_run=True
     natuerlich nicht.
     """
-    # Security-Fix W.5-finding-5: leerer Replace-Payload haette ALLE
-    # eigenen Daten geloescht ohne neue zu importieren. Verhindern.
+    # Security-Fix W.5-finding-5: leerer Replace-Payload hätte ALLE
+    # eigenen Daten gelöscht ohne neue zu importieren. Verhindern.
     if mode == "replace" and not dry_run:
         has_data = bool(
             payload.get("solves")
@@ -287,9 +287,9 @@ def restore_user_data(
         snapshot_id = snap.id
 
     if mode == "replace" and not dry_run:
-        # Eigene Daten loeschen (Cascade-Behavior beim Solve-Delete:
+        # Eigene Daten löschen (Cascade-Behavior beim Solve-Delete:
         # session_id/hardware_id wird NULL bei FK ondelete=SET NULL,
-        # aber wir loeschen Sessions/Hardware ja auch, also egal.)
+        # aber wir löschen Sessions/Hardware ja auch, also egal.)
         # Security-Fix K1: alles in try/except + bei Exception
         # Snapshot wieder einspielen, damit User-Daten nicht verloren gehen.
         try:
@@ -317,7 +317,7 @@ def restore_user_data(
         achievements_skipped_duplicate=0,
     )
 
-    # ID-Mapping alte (Backup) IDs -> neue IDs, fuer Cross-Refs.
+    # ID-Mapping alte (Backup) IDs -> neue IDs, für Cross-Refs.
     # Security-Fix K1: Final-Commit weiter unten in try/except, bei Fail
     # Snapshot-Recovery (siehe Ende der Funktion).
     session_id_map: dict[int, int] = {}
@@ -325,7 +325,7 @@ def restore_user_data(
 
     # ---- Sessions ----
     # session_id_map oben schon deklariert. Mapping alte (Backup) session_id
-    # -> neue session_id, fuer Solves-FK-Aufloesung.
+    # -> neue session_id, für Solves-FK-Aufloesung.
     # Security-Fix S5: cstimer_session_id-Dedup im Replace-Mode, sonst kann
     # ein manipuliertes Backup mit zwei Sessions gleicher cstimer_session_id
     # einen Unique-Index-IntegrityError ausloesen + den Loop killen.
@@ -351,7 +351,7 @@ def restore_user_data(
             continue
 
         # Security-Fix W.5-finding-6: cstimer_session_id validieren
-        # (manipuliertes Backup koennte negative/nicht-int Werte haben)
+        # (manipuliertes Backup könnte negative/nicht-int Werte haben)
         # + Security-Fix S5: doppelte cstimer_session_ids in einem
         # Backup-Payload dedupen (sonst Unique-Constraint-Crash)
         raw_cs_id = s_data.get("cstimer_session_id")
@@ -505,7 +505,7 @@ def restore_user_data(
     # IntegrityError, ConnectionLost) im Replace-Mode wird der vorher
     # angelegte Snapshot automatisch wieder eingespielt, damit User-Daten
     # nicht halb-zerstoert bleiben. Bei Merge-Mode reicht rollback —
-    # keine Daten waren geloescht.
+    # keine Daten waren gelöscht.
     if dry_run:
         db.rollback()  # sicher gegen Halb-State, kein commit
         return result
@@ -571,13 +571,13 @@ def create_snapshot(db: OrmSession, user: User, reason: str = "manual") -> Snaps
     """Snapshot anlegen + ggf. aelteste verwerfen (max 2/User).
 
     Security-Fix W.5-finding-3: Hartes Size-Limit (Storage-DoS-Schutz).
-    Bei sehr grossen Datensaetzen wuerde sonst Postgres-Free vollaufen.
+    Bei sehr großen Datensaetzen würde sonst Postgres-Free vollaufen.
     """
     payload = export_user_data(db, user)
     payload_str = json.dumps(payload, ensure_ascii=False)
     if len(payload_str.encode("utf-8")) > MAX_SNAPSHOT_PAYLOAD_BYTES:
         raise BackupServiceError(
-            f"Snapshot-Payload zu gross ({len(payload_str)} bytes; "
+            f"Snapshot-Payload zu groß ({len(payload_str)} bytes; "
             f"max {MAX_SNAPSHOT_PAYLOAD_BYTES})."
         )
     snap = Snapshot(

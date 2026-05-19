@@ -5,7 +5,7 @@ Zwei Token-Typen:
 - Refresh-Token: lang (30 Tage), in HttpOnly-Cookie
 
 Token-Revocation via `ver`-Claim:
-Jeder Token traegt das `token_version` des Users zum Ausgabezeitpunkt.
+Jeder Token trägt das `token_version` des Users zum Ausgabezeitpunkt.
 Wird der Wert in der DB hochgezaehlt (Logout, Password-Change), invalidieren
 alle ausgegebenen Tokens dieses Users — der Decode prueft den Wert.
 
@@ -68,7 +68,7 @@ def decode_token(token: str, expected_type: TokenType | None = None) -> dict[str
     passt (verhindert dass jemand einen Refresh-Token als Access nutzt).
 
     Hinweis: `ver`-Check (Token-Revocation) passiert NICHT hier — der braucht
-    den DB-Wert und gehoert in die get_current_user-Dependency / Refresh-Endpoint.
+    den DB-Wert und gehört in die get_current_user-Dependency / Refresh-Endpoint.
     """
     payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
     if expected_type is not None:

@@ -7,8 +7,8 @@ Rohdaten gefiltert auf erlaubte User.
 
 Privacy:
 - Email wird NIE ausgeliefert (Leaderboard zeigt Display-Name only).
-- Display-Name-Fallback `User #ID` fuer User ohne Name.
-- Nur accepted-Friendships zaehlen — pending/none-Friends bleiben unsichtbar.
+- Display-Name-Fallback `User #ID` für User ohne Name.
+- Nur accepted-Friendships zählen — pending/none-Friends bleiben unsichtbar.
 - Self wird explizit per is_me=True markiert (nicht in friend-Set gemixt).
 """
 
@@ -62,15 +62,15 @@ def _accepted_friend_ids(db: OrmSession, current_user: User) -> list[int]:
 
 def list_cube_types(db: OrmSession, current_user: User) -> list[str]:
     """Welche Cube-Types haben current_user + seine accepted-Friends in
-    Benutzung? Liste fuer den Cube-Type-Picker im Frontend.
+    Benutzung? Liste für den Cube-Type-Picker im Frontend.
 
-    Sortiert nach Solve-Volumen (haeufigste oben) damit der Default-Cube
-    fuer den User sinnvoll ist.
+    Sortiert nach Solve-Volumen (häufigste oben) damit der Default-Cube
+    für den User sinnvoll ist.
     """
     friend_ids = _accepted_friend_ids(db, current_user)
     all_ids = [current_user.id, *friend_ids]
-    # Vereinigung Cube-Types ueber alle relevanten User. GROUP BY mit count
-    # damit wir nach Haeufigkeit sortieren koennen.
+    # Vereinigung Cube-Types über alle relevanten User. GROUP BY mit count
+    # damit wir nach Haeufigkeit sortieren können.
     from sqlalchemy import func
 
     rows = db.execute(
@@ -85,11 +85,11 @@ def list_cube_types(db: OrmSession, current_user: User) -> list[str]:
 def build_leaderboard(
     db: OrmSession, current_user: User, cube_type: str
 ) -> list[LeaderboardRow]:
-    """Vergleichs-Tabelle fuer einen Cube-Type.
+    """Vergleichs-Tabelle für einen Cube-Type.
 
     Datenfluss:
     1. accepted-Friend-IDs + Self-ID sammeln
-    2. EINE Query: alle nicht-DNF/auch-DNF-Solves dieser User fuer cube_type,
+    2. EINE Query: alle nicht-DNF/auch-DNF-Solves dieser User für cube_type,
        geordnet nach (user_id, timestamp asc) — Stats brauchen chronologisch
     3. In Python pro user_id gruppieren, SolvePoint-Liste bauen
     4. compute_stats() auf jede Liste, daraus LeaderboardRow
@@ -143,7 +143,7 @@ def build_leaderboard(
         stats = compute_stats(points)
         # QA-Fix M4: defensiv TZ-awareness sicherstellen — falls Solves mal
         # mit naive timestamp angelegt wurden (z.B. alter csTimer-Import-
-        # Pfad), wuerde der >=-Vergleich gegen tz-aware thirty_days_ago
+        # Pfad), würde der >=-Vergleich gegen tz-aware thirty_days_ago
         # einen TypeError werfen und den ganzen Endpoint killen.
         def _aware(ts: datetime | None) -> datetime | None:
             if ts is None:

@@ -1,15 +1,15 @@
 """Leaderboard-API (Phase W.10) — Vergleich mit accepted-Friends.
 
 Endpoints:
-    GET /leaderboard/cube-types         — Cube-Types fuer Picker
-    GET /leaderboard?cube_type=3x3      — Bestenliste fuer einen Cube-Type
+    GET /leaderboard/cube-types         — Cube-Types für Picker
+    GET /leaderboard?cube_type=3x3      — Bestenliste für einen Cube-Type
 
 Privacy:
 - Nur accepted-Friends + Self tauchen auf
 - KEINE Emails im Output
-- Display-Name-Fallback "User #ID" fuer Friends ohne Name
+- Display-Name-Fallback "User #ID" für Friends ohne Name
 
-Rate-Limit: 60/min — etwas hoeher als CRUD weil das Frontend bei
+Rate-Limit: 60/min — etwas höher als CRUD weil das Frontend bei
 Cube-Type-Wechsel re-fetched, aber nicht massiv (nur authentifizierte User).
 """
 
@@ -94,9 +94,9 @@ def get_cube_types(
     db: OrmSession = Depends(get_db),
 ) -> CubeTypesResponse:
     """Liste aller Cube-Types die der current_user ODER seine accepted-Friends
-    benutzt haben. Sortiert nach Solve-Volumen (haeufigste oben).
+    benutzt haben. Sortiert nach Solve-Volumen (häufigste oben).
 
-    Frontend nutzt das fuer den Cube-Type-Picker. Wenn die Liste leer ist
+    Frontend nutzt das für den Cube-Type-Picker. Wenn die Liste leer ist
     (kein User hat irgendwas gesolved), zeigt das Frontend eine
     Default-Auswahl an.
     """
@@ -112,13 +112,13 @@ def get_leaderboard(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> LeaderboardResponse:
-    """Bestenliste fuer einen Cube-Type — Self + accepted-Friends.
+    """Bestenliste für einen Cube-Type — Self + accepted-Friends.
 
     Sortierung: Self immer oben, dann Friends nach best_ms ASC (None = Ende).
-    Wer noch keine Solves fuer diesen Cube hat, bekommt None-Stats und landet
+    Wer noch keine Solves für diesen Cube hat, bekommt None-Stats und landet
     am Ende — sichtbar damit man Lust kriegt zum Solven.
 
-    Keine Pagination — bei Friends-Phase erwarten wir <30 Eintraege.
+    Keine Pagination — bei Friends-Phase erwarten wir <30 Einträge.
     """
     rows = build_leaderboard(db, current_user, cube_type)
     return LeaderboardResponse(

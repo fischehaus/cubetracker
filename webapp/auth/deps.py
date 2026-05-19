@@ -1,4 +1,4 @@
-"""FastAPI-Dependencies fuer Auth (Phase W).
+"""FastAPI-Dependencies für Auth (Phase W).
 
 `current_user`-Dep zieht den User aus dem JWT in `Authorization: Bearer <token>`,
 prueft Token-Version (Revocation) und User-Status.
@@ -21,7 +21,7 @@ from db.models import User
 
 from .jwt import extract_user_id_and_version
 
-# OAuth2-Scheme — FastAPI nutzt das fuer Swagger-UI-Auth-Button.
+# OAuth2-Scheme — FastAPI nutzt das für Swagger-UI-Auth-Button.
 # tokenUrl muss zu unserem login-endpoint passen.
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 

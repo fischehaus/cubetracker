@@ -2,7 +2,7 @@
 // hervorgehoben wenn unlocked. Gruppiert nach category.
 //
 // „Recheck"-Button triggert manuelles Re-Evaluieren (z.B. nach
-// Bestandsdaten-Import oder wenn Definitionen sich geaendert haben).
+// Bestandsdaten-Import oder wenn Definitionen sich geändert haben).
 
 import { useMemo } from "react";
 import { useAchievements, useRecheckAchievements } from "../lib/api";
@@ -76,8 +76,8 @@ export function AchievementsCard() {
               30+ Personal-Trainer-Ziele in Kategorien (Volume, Speed,
               Konsistenz, Streaks etc.). Werden automatisch geprueft nach
               jedem Solve. Verschlossene Erfolge zeigen Hint-Text — gibt
-              dir naechstes Trainings-Ziel ohne zu spoilern. „Recheck"
-              prueft nochmal alles durch (Backup nach grossen Imports).
+              dir nächstes Trainings-Ziel ohne zu spoilern. „Recheck"
+              prueft nochmal alles durch (Backup nach großen Imports).
             </p>
           </InfoButton>
         </div>
@@ -121,8 +121,8 @@ export function AchievementsCard() {
 
       <p className="mt-4 text-xs text-gray-500">
         Erfolge sind monotonic: einmal freigeschaltet bleiben sie erhalten,
-        auch wenn die Voraussetzung spaeter nicht mehr erfuellt ist
-        (z.B. nach Solve-Loeschen).
+        auch wenn die Voraussetzung später nicht mehr erfüllt ist
+        (z.B. nach Solve-Löschen).
       </p>
     </div>
   );

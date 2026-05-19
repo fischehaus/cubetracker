@@ -47,7 +47,7 @@ export function LoginPage() {
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-[620px_1fr] gap-6 lg:gap-10 items-start">
         {/* Linke Spalte: Logo + Login-Form. Card-Breite 1.5× erhoeht
-            damit das Logo entsprechend groesser wirkt (User-Wunsch). */}
+            damit das Logo entsprechend größer wirkt (User-Wunsch). */}
         <div className="w-full max-w-[600px] mx-auto lg:max-w-none bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
           {/* Logo prominent — wie eine Marken-Visitenkarte. Volle Card-
               Innenbreite (Card ist max-w-md = 448px, Padding p-6 = 24px,
@@ -59,7 +59,7 @@ export function LoginPage() {
           />
           <p className="text-base text-gray-400 mb-6 text-center">
             {mode === "login"
-              ? "Willkommen zurueck."
+              ? "Willkommen zurück."
               : mode === "register"
                 ? "Account erstellen."
                 : "Passwort vergessen."}
@@ -168,7 +168,7 @@ export function LoginPage() {
               }}
               className="text-purple-400 hover:text-purple-300 underline"
             >
-              ← zurueck zum Login
+              ← zurück zum Login
             </button>
           )}
         </div>
@@ -179,7 +179,7 @@ export function LoginPage() {
           </p>
         </div>
 
-        {/* Rechte Spalte: Was-ist-das + Feature-Liste fuer Besucher
+        {/* Rechte Spalte: Was-ist-das + Feature-Liste für Besucher
             ohne Account. Auf Desktop nebeneinander, auf Mobile gestapelt. */}
         <aside className="space-y-4 max-w-2xl mx-auto lg:mx-0">
           <div className="rounded-2xl border border-purple-500/30 bg-purple-500/5 p-5">

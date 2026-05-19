@@ -1,12 +1,12 @@
-// Roadmap-Daten fuer das RoadmapModal (Phase W.roadmap-frontend, 2026-05-17).
+// Roadmap-Daten für das RoadmapModal (Phase W.roadmap-frontend, 2026-05-17).
 //
 // Single-Source: wenn neue Items dazukommen oder eine Phase fertig wird,
 // hier aenderen — Modal zeigt's automatisch.
 //
 // Status:
 //   "active"    — gerade dran (P1 typischerweise)
-//   "planned"   — kommt als naechstes
-//   "future"    — schon geplant aber spaeter
+//   "planned"   — kommt als nächstes
+//   "future"    — schon geplant aber später
 //   "ongoing"   — laeuft kontinuierlich (Workflow / Polish)
 
 export type PhaseStatus = "active" | "planned" | "future" | "ongoing";
@@ -15,7 +15,7 @@ export interface RoadmapItem {
   title: string;
   done?: boolean; // bereits erledigt innerhalb dieser Phase
   effort?: string; // grobe Schaetzung, optional
-  note?: string; // 1-Satz Begruendung / Detail, optional
+  note?: string; // 1-Satz Begründung / Detail, optional
 }
 
 export interface RoadmapPhase {
@@ -113,7 +113,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         note: "Power-User-Standard. Web-Bluetooth-API.",
       },
       {
-        title: "Reconstruction-Tool (Solver findet Loesung zum Solve)",
+        title: "Reconstruction-Tool (Solver findet Lösung zum Solve)",
         effort: "~3-6 Wochen",
         note: "Setzt 3D-Vis voraus. Komplex.",
       },
@@ -157,12 +157,12 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
     title: "Nische / Spezial-User (auf Anfrage)",
     timeframe: "offen",
     summary:
-      "Features fuer Tiefen-User die wir bauen wenn jemand konkret danach fragt. Reihenfolge je nach Bedarf.",
+      "Features für Tiefen-User die wir bauen wenn jemand konkret danach fragt. Reihenfolge je nach Bedarf.",
     items: [
       {
         title: "csTimer-Vendor dynamic-importen (Bundle-Split)",
         effort: "~1 Tag",
-        note: "Aktuell wird csTimer-Vendor (~50KB raw / ~16KB gz) statisch geladen, auch fuer User die nie inoffizielle Cubes nutzen. Async-Refactor: generateScramble wird Promise-basiert, csTimer-Vendor wird beim ersten Bedarf via dynamic import() geholt. QA-Befund SOLLTE #4 vom 2026-05-17.",
+        note: "Aktuell wird csTimer-Vendor (~50KB raw / ~16KB gz) statisch geladen, auch für User die nie inoffizielle Cubes nutzen. Async-Refactor: generateScramble wird Promise-basiert, csTimer-Vendor wird beim ersten Bedarf via dynamic import() geholt. QA-Befund SOLLTE #4 vom 2026-05-17.",
       },
       {
         title: "Backend-Test-Suite (pytest unter webapp/tests/) einfuehren",
@@ -180,9 +180,9 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         note: "Aktuell sind helicopter/gigaminx/bicube/bandaged_square/square_2/curvy_copter/diamond + megaminx-RS aus der UI entfernt weil utilscramble.js + megaminx.js leerstring/null returnen ohne solver/megaminx.js (32KB) + solver/ftocta.js (27KB) + grouplib.js (26KB) + poly3dlib.js (35KB). Zusaetzlich braucht jedes Puzzle den passenden solver-state-graph. Re-Vendoring + Smoke-Tests pro Puzzle.",
       },
       {
-        title: "Random-Move-Fallback-Specs fuer Dino/Floppy/Tower (csTimer-Cubes)",
+        title: "Random-Move-Fallback-Specs für Dino/Floppy/Tower (csTimer-Cubes)",
         effort: "1-2h",
-        note: "Wenn csTimer-Init crashen sollte, returnt generateScramble fuer die 3 verbleibenden csTimer-Cubes (Dino/Floppy/Tower) leerstring. Kurze Random-Move-Specs (analog ivy/gear/redi-Specs) waeren ein robusterer Fallback. QA-Befund SOLLTE #3 vom 2026-05-17.",
+        note: "Wenn csTimer-Init crashen sollte, returnt generateScramble für die 3 verbleibenden csTimer-Cubes (Dino/Floppy/Tower) leerstring. Kurze Random-Move-Specs (analog ivy/gear/redi-Specs) waeren ein robusterer Fallback. QA-Befund SOLLTE #3 vom 2026-05-17.",
       },
       { title: "Metronom (Trainings-TPS-Hilfe)", effort: "1-2 Tage" },
       { title: "BLD-Helper (Constraint-Scrambler)", effort: "1-2 Wochen" },
@@ -198,4 +198,4 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
   },
 ];
 
-export const ROADMAP_INTRO = `Cubetracker ist in aktiver Entwicklung — kein Feature-Freeze. Diese Liste zeigt was als Naechstes kommt + warum. Reihenfolge orientiert sich an User-Wert vs Aufwand vs strategischer Differenzierung von csTimer.`;
+export const ROADMAP_INTRO = `Cubetracker ist in aktiver Entwicklung — kein Feature-Freeze. Diese Liste zeigt was als Nächstes kommt + warum. Reihenfolge orientiert sich an User-Wert vs Aufwand vs strategischer Differenzierung von csTimer.`;

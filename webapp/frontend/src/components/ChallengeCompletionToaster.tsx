@@ -84,7 +84,7 @@ export function ChallengeCompletionToaster() {
           <span className="text-2xl shrink-0">{t.icon}</span>
           <div className="flex-1 min-w-0">
             <div className="text-sm text-emerald-200/80 uppercase tracking-wide">
-              🎯 Challenge erfuellt — {t.label}
+              🎯 Challenge erfüllt — {t.label}
             </div>
             <div className="text-sm text-emerald-100 mt-0.5">{t.text}</div>
           </div>
@@ -99,7 +99,7 @@ export function ChallengeCompletionToaster() {
       ))}
       {extraCount > 0 && (
         <div className="rounded border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200 flex items-center gap-2">
-          <span>+ {extraCount} weitere Challenges erfuellt!</span>
+          <span>+ {extraCount} weitere Challenges erfüllt!</span>
           <button
             onClick={dismissAll}
             className="ml-auto text-xs underline hover:text-emerald-100"

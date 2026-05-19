@@ -1,10 +1,10 @@
-// CommunityTab (UX-Refactor 2026-05-14): Sammel-Tab fuer alles soziale —
+// CommunityTab (UX-Refactor 2026-05-14): Sammel-Tab für alles soziale —
 // Freunde + Bestenliste. Macht aus 7 Top-Tabs 6 ohne dass jemand Features
 // suchen muss.
 //
 // Sub-Tab-Logik identisch zum VerwaltungTab: lokaler useState, kein
-// URL-Routing fuer Sub-Tabs (kostet sonst Komplexitaet). Initial-Section
-// kann ueber Prop gesetzt werden — fuer URL-Hash-Backward-Compat
+// URL-Routing für Sub-Tabs (kostet sonst Komplexitaet). Initial-Section
+// kann über Prop gesetzt werden — für URL-Hash-Backward-Compat
 // (#friends → community/friends, #leaderboard → community/leaderboard).
 
 import { useState } from "react";
@@ -26,7 +26,7 @@ const SUB_TABS: SubTab[] = [
 ];
 
 interface Props {
-  /** Initial-Sub-Tab — fuer URL-Hash-Backward-Compat (#friends, #leaderboard). */
+  /** Initial-Sub-Tab — für URL-Hash-Backward-Compat (#friends, #leaderboard). */
   initialSection?: CommunitySection;
 }
 

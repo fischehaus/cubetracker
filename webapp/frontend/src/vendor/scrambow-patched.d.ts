@@ -1,4 +1,4 @@
-// Type-Stub fuer den lokalen patched scrambow-Bundle.
+// Type-Stub für den lokalen patched scrambow-Bundle.
 // Re-exports von scrambow's eigenen Types (im node_modules), das Bundle
 // hier ist nur die Implementierung mit gefixtem `f`-Identifier-Konflikt.
 //

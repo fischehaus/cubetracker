@@ -3,8 +3,8 @@
 Alle Endpoints brauchen Auth + filtern auf user_id == current_user.id.
 
 Cross-Tenant-Sicherheits-Checks:
-- DELETE /sessions/{id}?move_solves_to=Y: Y muss demselben User gehoeren
-- POST /sessions/{id}/merge?target_id=Y: Y muss demselben User gehoeren
+- DELETE /sessions/{id}?move_solves_to=Y: Y muss demselben User gehören
+- POST /sessions/{id}/merge?target_id=Y: Y muss demselben User gehören
 - /suggest filtert auf user-eigene Solves
 """
 
@@ -122,18 +122,18 @@ def delete_session(
     session_id: int,
     move_solves_to: int | None = Query(
         default=None,
-        description="Wenn gesetzt: Solves der zu loeschenden Session werden "
-        "VOR dem Loeschen auf diese Ziel-Session umgelegt. Sonst: "
+        description="Wenn gesetzt: Solves der zu löschenden Session werden "
+        "VOR dem Löschen auf diese Ziel-Session umgelegt. Sonst: "
         "session_id wird NULL (FK SET NULL).",
     ),
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
-    """Session loeschen.
+    """Session löschen.
 
     Default: Betroffene Solves verlieren ihre session_id (FK SET NULL).
-    Mit `move_solves_to=Y`: Solves werden VOR dem Loeschen zu Y umgelegt.
-    Y muss dem aktuellen User gehoeren!
+    Mit `move_solves_to=Y`: Solves werden VOR dem Löschen zu Y umgelegt.
+    Y muss dem aktuellen User gehören!
     """
     s = _get_or_404(session_id, current_user, db)
 
@@ -141,9 +141,9 @@ def delete_session(
         if move_solves_to == session_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="move_solves_to darf nicht die zu loeschende Session sein",
+                detail="move_solves_to darf nicht die zu löschende Session sein",
             )
-        # Ziel muss existieren UND demselben User gehoeren
+        # Ziel muss existieren UND demselben User gehören
         _get_or_404(move_solves_to, current_user, db)
         # Solves umlegen — auch hier user_id-Filter zur Sicherheit
         db.execute(
@@ -163,11 +163,11 @@ def merge_session(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> DbSession:
-    """Source-Session in target mergen. Beide muessen demselben User gehoeren."""
+    """Source-Session in target mergen. Beide müssen demselben User gehören."""
     if session_id == target_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Source und Target duerfen nicht gleich sein",
+            detail="Source und Target dürfen nicht gleich sein",
         )
     source = _get_or_404(session_id, current_user, db)
     target = _get_or_404(target_id, current_user, db)

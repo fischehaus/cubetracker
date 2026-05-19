@@ -1,9 +1,9 @@
-// OnboardingBanner: Begruessung + drei Quick-Aktionen, sichtbar wenn die
+// OnboardingBanner: Begrüßung + drei Quick-Aktionen, sichtbar wenn die
 // DB leer ist (kein einziger Solve vorhanden).
 //
 // Bewusst klein und dismissable — wer einen leeren App-State eh kennt,
 // will nicht jedesmal den Banner sehen. Nach „Ausblenden" merkt sich
-// localStorage das, und der Banner bleibt weg auch wenn die DB spaeter
+// localStorage das, und der Banner bleibt weg auch wenn die DB später
 // erneut leer wird (z.B. nach DB-Reset).
 //
 // Drei klare Pfade nach drin:
@@ -80,7 +80,7 @@ export function OnboardingBanner({ onSwitchTab }: Props) {
           </div>
           <p className="mt-4 text-sm text-gray-500">
             Tipp: csTimer-Import erkennt Duplikate — du kannst die selbe
-            Datei mehrfach laden, ohne doppelte Eintraege zu bekommen.
+            Datei mehrfach laden, ohne doppelte Einträge zu bekommen.
           </p>
         </div>
         <button

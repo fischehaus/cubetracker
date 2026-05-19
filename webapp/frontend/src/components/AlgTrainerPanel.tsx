@@ -70,10 +70,10 @@ export function AlgTrainerPanel() {
           <InfoButton>
             <p className="font-medium mb-1">Algorithm-Trainer</p>
             <p>
-              Drill-Modus fuer PLL- + OLL-Algorithmen. Sub-Sets waehlbar
+              Drill-Modus für PLL- + OLL-Algorithmen. Sub-Sets wählbar
               (z.B. „nur Edge-Permutationen"), Scrambles werden zufaellig
               generiert mit der Inversion des gewuenschten Algorithmus.
-              Loese den Scramble + speichere die Zeit pro Algorithm —
+              Löse den Scramble + speichere die Zeit pro Algorithm —
               hilft Schwachstellen zu identifizieren.
             </p>
           </InfoButton>
@@ -179,7 +179,7 @@ export function AlgTrainerPanel() {
 }
 
 // ============================================================
-// DrillCard — der „kleine Timer" fuer einen einzelnen case
+// DrillCard — der „kleine Timer" für einen einzelnen case
 // ============================================================
 
 function DrillCard({
@@ -227,7 +227,7 @@ function DrillCard({
   }
 
   // scramble wird hier per-render neu erzeugt sobald sich case oder
-  // seed aendert — useMemo macht das preisgunstig + deterministisch
+  // seed ändert — useMemo macht das preisgunstig + deterministisch
   // im selben render.
   const scramble = useMemo(
     () => scrambleForCase(caseDef, true),
@@ -337,7 +337,7 @@ function DrillCard({
         <button
           onClick={() => setScrambleSeed((s) => s + 1)}
           className="flex-1 text-sm rounded border border-gray-700 px-3 py-2 text-gray-300 hover:bg-gray-800"
-          title="Neuen Scramble fuer denselben Case generieren"
+          title="Neuen Scramble für denselben Case generieren"
         >
           ⏭ Skip
         </button>
@@ -363,7 +363,7 @@ function DrillCard({
 }
 
 // ============================================================
-// DrillSolveList — letzte N Solves dieses cases mit +2/DNF/Loeschen
+// DrillSolveList — letzte N Solves dieses cases mit +2/DNF/Löschen
 // ============================================================
 
 function DrillSolveList({ caseId }: { caseId: string }) {
@@ -375,7 +375,7 @@ function DrillSolveList({ caseId }: { caseId: string }) {
   if (!solves || solves.length === 0) {
     return (
       <div className="mt-4 text-xs text-gray-500 text-center">
-        Noch keine Drill-Solves fuer diesen Case.
+        Noch keine Drill-Solves für diesen Case.
       </div>
     );
   }
@@ -387,7 +387,7 @@ function DrillSolveList({ caseId }: { caseId: string }) {
     update.mutate({ id: s.id, payload: { dnf: !s.dnf } });
   }
   function remove(id: number) {
-    if (confirm(`Solve #${id} wirklich loeschen?`)) del.mutate(id);
+    if (confirm(`Solve #${id} wirklich löschen?`)) del.mutate(id);
   }
 
   return (
@@ -436,7 +436,7 @@ function DrillSolveList({ caseId }: { caseId: string }) {
             <button
               onClick={() => remove(s.id)}
               className="rounded px-1.5 py-0.5 text-[10px] text-gray-400 hover:bg-red-700/50 hover:text-red-200"
-              title="Solve loeschen"
+              title="Solve löschen"
             >
               🗑
             </button>

@@ -1,7 +1,7 @@
 // PatchNotesPanel — Anzeige aller Versions-Highlights.
 //
 // Liest /api/changelog (PATCH_NOTES aus webapp/changelog/data.py).
-// Source-of-Truth fuer Versions-Bumps + Highlights ist die Backend-
+// Source-of-Truth für Versions-Bumps + Highlights ist die Backend-
 // Datei — kein Doppel-Pflege-Risiko.
 
 import { usePatchNotes, type PatchNote } from "../lib/api";
@@ -55,7 +55,7 @@ export function PatchNotesPanel() {
         <h2 className="text-2xl font-semibold text-gray-100">
           Patch Notes{" "}
           <span className="text-sm text-gray-500">
-            ({data.patches.length} Eintraege)
+            ({data.patches.length} Einträge)
           </span>
         </h2>
         <p className="mt-1 text-sm text-gray-400">

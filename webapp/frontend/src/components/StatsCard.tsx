@@ -1,4 +1,4 @@
-// Stats-Card: zeigt Avg5/12/100, Best, Worst, Mean fuer die
+// Stats-Card: zeigt Avg5/12/100, Best, Worst, Mean für die
 // aktuell gefilterte Solve-Menge (cube_type + session_id).
 
 import { useStats } from "../lib/api";
@@ -93,17 +93,17 @@ export function StatsCard({ cubeType, sessionId }: Props) {
           <InfoButton>
             <p className="font-medium mb-1">Statistiken</p>
             <p>
-              Best Single + Best/Aktuelle AO5/AO12/AO100 fuer die aktuelle
-              Auswahl (Cube + Session). WCA-konform: +2 zaehlt als Zeit+2s,
+              Best Single + Best/Aktuelle AO5/AO12/AO100 für die aktuelle
+              Auswahl (Cube + Session). WCA-konform: +2 zählt als Zeit+2s,
               DNF wird beim Average getrimmt. „Best AO5" = beste je
-              erreichte AO5 ueber alle Solves; „aktuelle AO5" = die letzten 5.
+              erreichte AO5 über alle Solves; „aktuelle AO5" = die letzten 5.
             </p>
           </InfoButton>
         </div>
         <span className="text-sm text-gray-500">{filterLabel}</span>
       </div>
 
-      {/* Counter — gross + bauchig */}
+      {/* Counter — groß + bauchig */}
       <div className="grid grid-cols-3 gap-3 mb-5 text-center">
         <div className="rounded bg-gray-800/50 py-3">
           <div className="text-3xl font-semibold text-gray-100">{data.count}</div>

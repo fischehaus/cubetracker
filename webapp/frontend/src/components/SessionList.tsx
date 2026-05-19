@@ -2,12 +2,12 @@
 //
 // Features:
 // - Liste aller Sessions mit name, scramble_type, cstimer-id-badge, notes
-// - Click-to-edit fuer name + notes (Enter speichert, Esc bricht ab)
+// - Click-to-edit für name + notes (Enter speichert, Esc bricht ab)
 // - „+ Neue Session"-Button mit Inline-Form
-// - Aktionen pro Session: Mergen ↔ Loeschen
-// - Loeschen mit Modal: 'Solves verwaisen' (default) oder 'in andere Session
+// - Aktionen pro Session: Mergen ↔ Löschen
+// - Löschen mit Modal: 'Solves verwaisen' (default) oder 'in andere Session
 //   verschieben' — vermeidet versehentlichen Daten-Verlust
-// - Mergen mit Modal: Ziel-Session auswaehlen, Solves wandern + Notes appended
+// - Mergen mit Modal: Ziel-Session auswählen, Solves wandern + Notes appended
 
 import { useState } from "react";
 import {
@@ -111,8 +111,8 @@ export function SessionList() {
             <p>
               Sessions strukturieren dein Training (z.B. „OH", „PLL-Drill",
               „Cold-Solves"). Solves werden einer Session zugeordnet, Stats
-              koennen pro Session gefiltert werden. „Merge"-Funktion kombiniert
-              Sessions, „Migrate" verschiebt Solves vor dem Loeschen.
+              können pro Session gefiltert werden. „Merge"-Funktion kombiniert
+              Sessions, „Migrate" verschiebt Solves vor dem Löschen.
             </p>
           </InfoButton>
         </div>
@@ -223,9 +223,9 @@ export function SessionList() {
                         setModal({ kind: "delete", session: s, targetId: null })
                       }
                       className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-                      title="Loeschen — mit optionaler Solve-Migration"
+                      title="Löschen — mit optionaler Solve-Migration"
                     >
-                      🗑 Loeschen
+                      🗑 Löschen
                     </button>
                   </div>
                 </div>
@@ -266,17 +266,17 @@ export function SessionList() {
 
       <p className="mt-4 text-xs text-gray-500">
         Click auf Name oder Notiz zum Bearbeiten. Mergen verschiebt alle
-        Solves in eine andere Session, loeschen kann optional Solves
+        Solves in eine andere Session, löschen kann optional Solves
         umlegen statt sie verwaisen zu lassen.
       </p>
 
       {/* ============================================================
-          Modal: Loeschen — mit optionaler Migration
+          Modal: Löschen — mit optionaler Migration
           ============================================================ */}
       {modal?.kind === "delete" && (
         <ModalOverlay onClose={() => setModal(null)}>
           <h3 className="text-xl font-semibold text-gray-100 mb-2">
-            Session „{modal.session.name}" loeschen?
+            Session „{modal.session.name}" löschen?
           </h3>
           <p className="text-sm text-gray-400 mb-4">
             Was soll mit den Solves dieser Session passieren?
@@ -350,7 +350,7 @@ export function SessionList() {
               disabled={del.isPending}
               className="text-sm rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
             >
-              {del.isPending ? "Loesche …" : "Endgueltig loeschen"}
+              {del.isPending ? "Loesche …" : "Endgueltig löschen"}
             </button>
           </div>
         </ModalOverlay>
@@ -367,7 +367,7 @@ export function SessionList() {
           <p className="text-sm text-gray-400 mb-4">
             Alle Solves dieser Session wandern in die Ziel-Session. Notizen
             werden in der Ziel-Session angehaengt. Diese Session wird danach
-            geloescht. Aktion ist <strong>nicht umkehrbar</strong>.
+            gelöscht. Aktion ist <strong>nicht umkehrbar</strong>.
           </p>
           <label className="flex flex-col text-sm text-gray-400 mb-5">
             Ziel-Session
@@ -381,7 +381,7 @@ export function SessionList() {
               }
               className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
             >
-              <option value="">— bitte waehlen —</option>
+              <option value="">— bitte wählen —</option>
               {sessions
                 ?.filter((x) => x.id !== modal.source.id)
                 .map((x) => (

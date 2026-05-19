@@ -1,4 +1,4 @@
-// Pure Funktion: Solve-Zeiten in Bins gruppieren fuer Histogramm.
+// Pure Funktion: Solve-Zeiten in Bins gruppieren für Histogramm.
 // DNFs werden ausgeschlossen, +2 wird in die effektive Zeit eingerechnet.
 
 import type { SolvePoint } from "./rolling";
@@ -8,17 +8,17 @@ export interface HistogramBin {
   from_ms: number;
   /** Obere Grenze des Bins in ms (exklusiv, ausser beim letzten Bin) */
   to_ms: number;
-  /** Mittelpunkt des Bins (fuer X-Achse), in ms */
+  /** Mittelpunkt des Bins (für X-Achse), in ms */
   center_ms: number;
   /** Anzahl Solves im Bin */
   count: number;
-  /** Label fuer Anzeige (z.B. "10.0–11.0s") */
+  /** Label für Anzeige (z.B. "10.0–11.0s") */
   label: string;
 }
 
 /**
  * Berechnet sinnvolle Bin-Breite via Sturges-Regel + Snap auf
- * „runde" Sekunden-/Hundertstel-Werte. Fuer typische Cube-Zeiten
+ * „runde" Sekunden-/Hundertstel-Werte. Für typische Cube-Zeiten
  * landet man bei 0.5s, 1s oder 2s breiten Bins.
  */
 export function suggestBinWidthMs(
@@ -55,7 +55,7 @@ export function buildHistogram(
   const maxMs = Math.max(...valid);
   const width = binWidthMs ?? suggestBinWidthMs(minMs, maxMs, valid.length);
 
-  // Bin-Start am naechsten Vielfachen von `width` unterhalb minMs
+  // Bin-Start am nächsten Vielfachen von `width` unterhalb minMs
   const start = Math.floor(minMs / width) * width;
   const end = Math.ceil((maxMs + 1) / width) * width;
   const numBins = Math.max(1, Math.round((end - start) / width));
@@ -82,7 +82,7 @@ export function buildHistogram(
   return bins;
 }
 
-/** Kompaktes Label "10.0–11.0s" oder "1:00–1:05" fuer eine Bin-Spanne. */
+/** Kompaktes Label "10.0–11.0s" oder "1:00–1:05" für eine Bin-Spanne. */
 function formatBinLabel(fromMs: number, toMs: number): string {
   return `${fmt(fromMs)}–${fmt(toMs)}`;
 }

@@ -1,5 +1,5 @@
 /**
- * ResetPasswordPage — Landing fuer Mail-Link
+ * ResetPasswordPage — Landing für Mail-Link
  * `https://www.cubetracker.de/reset-password?token=...`
  *
  * Frontend ist Static-Site; wir nutzen kein React-Router. Stattdessen
@@ -43,7 +43,7 @@ export function ResetPasswordPage() {
             Reset-Link ungueltig
           </h1>
           <p className="text-sm text-gray-400">
-            Der Link enthaelt keinen Token. Probier es nochmal ueber{" "}
+            Der Link enthält keinen Token. Probier es nochmal über{" "}
             <a
               href="/"
               className="text-purple-400 underline hover:text-purple-300"

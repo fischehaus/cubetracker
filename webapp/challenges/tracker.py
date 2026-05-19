@@ -1,10 +1,10 @@
 """Pure Daily-Challenge-Tracker (Phase 7b).
 
 Berechnet den neuen progress-Wert einer Challenge nach einem Solve-Ereignis.
-Die service-layer ruft das fuer jede aktive Challenge auf.
+Die service-layer ruft das für jede aktive Challenge auf.
 
 Monotonic-Eigenschaft (User-decision): progress kann nur >= alter wert
-werden. Auch wenn ein Solve nachtraeglich geloescht wird, bleibt
+werden. Auch wenn ein Solve nachtraeglich gelöscht wird, bleibt
 progress + completed_at erhalten.
 
 Diversity wird hier NICHT behandelt (braucht DB-context: alle solves heute).
@@ -18,7 +18,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class SolveSnapshot:
-    """Minimale Solve-Info fuer den tracker — wir wollen DB-Modelle nicht hier."""
+    """Minimale Solve-Info für den tracker — wir wollen DB-Modelle nicht hier."""
 
     cube_type: str
     time_ms: int
@@ -47,14 +47,14 @@ def update_progress_for_solve(challenge: ChallengeState, solve: SolveSnapshot) -
     Rueckgabe ist >= challenge.progress (monotonic).
     """
     if challenge.is_completed:
-        return challenge.progress  # bleibt erfuellt
+        return challenge.progress  # bleibt erfüllt
 
     if challenge.kind == "volume":
-        # cube_type=None: jeder cube zaehlt
+        # cube_type=None: jeder cube zählt
         if challenge.cube_type and solve.cube_type != challenge.cube_type:
             return challenge.progress
         if solve.dnf:
-            return challenge.progress  # DNFs zaehlen nicht fuer volume
+            return challenge.progress  # DNFs zählen nicht für volume
         return challenge.progress + 1
 
     if challenge.kind == "speed":

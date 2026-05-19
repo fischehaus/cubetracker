@@ -20,7 +20,7 @@ import type { ChallengeItem } from "../lib/types";
 interface Props {
   challenge: ChallengeItem;
   onDismiss?: (id: number) => void;
-  /** kompakte Variante fuer Dashboard-Mini-Card */
+  /** kompakte Variante für Dashboard-Mini-Card */
   compact?: boolean;
 }
 
@@ -55,7 +55,7 @@ export function ChallengeCard({ challenge, onDismiss, compact = false }: Props) 
               {label}
             </span>
             {isDone && (
-              <span className="text-xs text-emerald-400" title="erfuellt">
+              <span className="text-xs text-emerald-400" title="erfüllt">
                 ✓
               </span>
             )}

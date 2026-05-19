@@ -1,4 +1,4 @@
-"""Postgres-Engine + Session-Factory fuer cubetracker-webapp (Phase W).
+"""Postgres-Engine + Session-Factory für cubetracker-webapp (Phase W).
 
 Unterschied zum Desktop-Backend:
 - Postgres statt SQLite (multi-user concurrent writes)
@@ -15,7 +15,7 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-# Default-DB fuer lokale Entwicklung: SQLite-File neben dem Code.
+# Default-DB für lokale Entwicklung: SQLite-File neben dem Code.
 # In Production: Render setzt DATABASE_URL auf Postgres.
 DEFAULT_LOCAL_DB = Path(__file__).resolve().parent.parent / "local-dev.db"
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_LOCAL_DB}")
@@ -32,11 +32,11 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
 class Base(DeclarativeBase):
-    """Gemeinsame Base-Klasse fuer alle ORM-Models."""
+    """Gemeinsame Base-Klasse für alle ORM-Models."""
 
 
 def get_db() -> Generator[Session, None, None]:
-    """FastAPI-Dependency fuer DB-Sessions.
+    """FastAPI-Dependency für DB-Sessions.
 
     Liefert eine Session, schliesst sie nach Request-Ende automatisch.
     """

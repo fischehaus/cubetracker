@@ -1,7 +1,7 @@
 """Pure Daily-Challenge-Generator (Phase 7b).
 
 Bekommt einen `GeneratorInput`-Snapshot mit User-Stats und liefert
-3 sinnvolle Challenges fuer heute. Jede Challenge ist ein
+3 sinnvolle Challenges für heute. Jede Challenge ist ein
 `ChallengeSpec`-dataclass — der Caller persistiert sie in der DB.
 
 Strategie: 3 verschiedene Typen pro Tag, damit Abwechslung garantiert ist.
@@ -26,9 +26,9 @@ DIVERSITY_TARGET = 3  # x verschiedene cubes als fallback
 
 @dataclass(frozen=True)
 class GeneratorInput:
-    """Snapshot der User-Stats fuer Challenge-Generierung."""
+    """Snapshot der User-Stats für Challenge-Generierung."""
 
-    avg_solves_per_active_day: int  # mittel ueber letzte 7-30 tage
+    avg_solves_per_active_day: int  # mittel über letzte 7-30 tage
     most_active_cube: str | None  # wo der user am meisten solved
     best_ms_per_cube: dict[str, int]  # PB pro cube
     cubes_unused_for_days: dict[str, int]  # cube_type → tage seit letztem solve
@@ -37,12 +37,12 @@ class GeneratorInput:
 
 @dataclass(frozen=True)
 class ChallengeSpec:
-    """Plan fuer eine Challenge — wird von der service-layer in DB persistiert."""
+    """Plan für eine Challenge — wird von der service-layer in DB persistiert."""
 
     kind: str  # "volume" | "speed" | "comeback" | "diversity"
     cube_type: str | None
     target_value: int
-    description: str  # menschen-lesbarer text fuers UI
+    description: str  # menschen-lesbarer text fürs UI
     params: dict[str, int | str] = field(default_factory=dict)
 
 
@@ -50,7 +50,7 @@ def _volume_challenge(snap: GeneratorInput) -> ChallengeSpec:
     target = max(VOLUME_MIN, snap.avg_solves_per_active_day)
     return ChallengeSpec(
         kind="volume",
-        cube_type=None,  # any cube zaehlt
+        cube_type=None,  # any cube zählt
         target_value=target,
         description=f"Mache heute {target} Solves (egal welcher Cube)",
     )
@@ -83,7 +83,7 @@ def _comeback_challenge(snap: GeneratorInput) -> ChallengeSpec | None:
     candidates = [c for c, d in snap.cubes_unused_for_days.items() if d >= COMEBACK_MIN_DAYS_UNUSED]
     if not candidates:
         return None
-    # Zufaellig waehlen, sonst immer derselbe
+    # Zufaellig wählen, sonst immer derselbe
     cube = random.choice(candidates)
     days = snap.cubes_unused_for_days[cube]
     return ChallengeSpec(
@@ -108,7 +108,7 @@ def _diversity_challenge(snap: GeneratorInput) -> ChallengeSpec | None:
 
 
 def generate_daily_challenges(snap: GeneratorInput) -> list[ChallengeSpec]:
-    """Generiert bis zu 3 Challenges fuer heute. Reihenfolge:
+    """Generiert bis zu 3 Challenges für heute. Reihenfolge:
     Volume, Speed, Comeback (Fallback Diversity).
 
     Wenn weniger als 3 sinnvolle Specs gefunden werden, weniger als 3

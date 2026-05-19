@@ -1,5 +1,5 @@
 /**
- * VerifyEmailPage — Landing fuer Mail-Link
+ * VerifyEmailPage — Landing für Mail-Link
  * `https://www.cubetracker.de/verify-email?token=...`
  *
  * Triggert auto den Verify-Call. Falls erfolgreich + User bereits
@@ -20,7 +20,7 @@ export function VerifyEmailPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Single-Shot-Flag: verhindert doppeltes Feuern in React-19-StrictMode
-  // (DEV-only) ODER wenn deps wie isAuthenticated/refreshMe sich aendern
+  // (DEV-only) ODER wenn deps wie isAuthenticated/refreshMe sich ändern
   // nachdem der erste Call schon den Token "used" markiert hat. Sonst
   // sieht die UI 400 "abgelaufen" trotz erfolgreicher Verifizierung.
   const attemptedRef = useRef(false);
@@ -64,7 +64,7 @@ export function VerifyEmailPage() {
         </h1>
 
         {state === "running" && (
-          <p className="text-sm text-gray-400">Wird ueberprueft…</p>
+          <p className="text-sm text-gray-400">Wird überprüft…</p>
         )}
 
         {state === "ok" && (

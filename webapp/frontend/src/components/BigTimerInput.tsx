@@ -1,4 +1,4 @@
-// BigTimerInput: das Solving-Eingabefeld fuer den TIMER-Tab.
+// BigTimerInput: das Solving-Eingabefeld für den TIMER-Tab.
 //
 // Mit dem Mobile-Layout-Refactor (Welle 2, 2026-05-16) auf das eigentliche
 // Timer-Display reduziert: zeigt SpacebarTimerCard oder das klassische
@@ -22,14 +22,14 @@ import type { TimerPenalty } from "../hooks/useSpacebarTimer";
 
 interface Props {
   cubeType: string;
-  /** Aktuell gewaehlte Session — controlled vom TimerTab. */
+  /** Aktuell gewählte Session — controlled vom TimerTab. */
   sessionId: number | null;
-  /** Aktuell gewaehlte Hardware — controlled vom TimerTab (Lifting
-   *  fuer Welle 2, damit der Selektor unter dem TouchPad leben kann). */
+  /** Aktuell gewählte Hardware — controlled vom TimerTab (Lifting
+   *  für Welle 2, damit der Selektor unter dem TouchPad leben kann). */
   hardwareId: number | null;
   /**
    * Aktueller Scramble-String — wird beim Save mit dem Solve persistiert.
-   * null/empty wenn keiner verfuegbar (kein crash).
+   * null/empty wenn keiner verfügbar (kein crash).
    */
   scramble: string | null;
   /**
@@ -51,7 +51,7 @@ export function BigTimerInput({
   const [dnf, setDnf] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [settings] = useAppSettings();
-  // Reset-Counter fuer SpacebarTimerCard nach erfolgreichem Save
+  // Reset-Counter für SpacebarTimerCard nach erfolgreichem Save
   const [spacebarResetSeed, setSpacebarResetSeed] = useState(0);
   const spacebarMode = settings.spacebar_enabled;
 
@@ -63,14 +63,14 @@ export function BigTimerInput({
 
   // Phase W.penalty-quick (2026-05-17): nach jedem Save halten wir den
   // gespeicherten Solve kurz fest, damit der User direkt unter dem Timer
-  // die Penalty per Knopfdruck korrigieren kann (+2 / DNF / Loeschen).
-  // Wird beim naechsten Solve-Start (Spacebar-Press oder Text-Input
+  // die Penalty per Knopfdruck korrigieren kann (+2 / DNF / Löschen).
+  // Wird beim nächsten Solve-Start (Spacebar-Press oder Text-Input
   // gefokussiert) wieder geleert.
   const [lastSavedSolve, setLastSavedSolve] = useState<Solve | null>(null);
-  // QA-Fix M#8 (2026-05-17): zwei-Klick-Confirm fuer Loeschen statt
+  // QA-Fix M#8 (2026-05-17): zwei-Klick-Confirm für Löschen statt
   // window.confirm() — Browser-Native-Dialog ist auf Mobile unzuverlaessig
   // (Back-Button schliesst Dialog, kann durch PWA-Wrapper geschluckt werden).
-  // Pattern: erster Klick → Button-Label wechselt zu „Wirklich loeschen?",
+  // Pattern: erster Klick → Button-Label wechselt zu „Wirklich löschen?",
   // zweiter Klick innerhalb 5s loescht. Auto-Reset nach 5s ohne Aktion.
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
@@ -82,7 +82,7 @@ export function BigTimerInput({
   }, [spacebarMode]);
 
   // Quick-Penalty-Buttons verstecken wenn Cube wechselt — sonst zeigt
-  // der „Letzte Solve war 3x3"-Block weiter waehrend der User schon
+  // der „Letzte Solve war 3x3"-Block weiter während der User schon
   // auf 4x4 umgestellt hat (verwirrend + falscher Context).
   useEffect(() => {
     setLastSavedSolve(null);
@@ -108,7 +108,7 @@ export function BigTimerInput({
     if (dnf) {
       const time_ms = timeStr.trim() ? parseTimeInput(timeStr) : 0;
       if (time_ms === null) {
-        setError("Zeit ungueltig (oder Feld leer lassen fuer DNF)");
+        setError("Zeit ungueltig (oder Feld leer lassen für DNF)");
         return;
       }
       doCreate(time_ms);
@@ -181,8 +181,8 @@ export function BigTimerInput({
   }
 
   // Quick-Penalty-Actions (Phase W.penalty-quick, 2026-05-17): wirken
-  // auf den zuletzt gespeicherten Solve. PATCH /solves/:id fuer Toggles,
-  // DELETE bei Loeschen. State lokal updaten + dann komplette
+  // auf den zuletzt gespeicherten Solve. PATCH /solves/:id für Toggles,
+  // DELETE bei Löschen. State lokal updaten + dann komplette
   // Cache-Invalidate aus useUpdateSolve/useDeleteSolve.
   function toggleLastPlusTwo() {
     if (!lastSavedSolve) return;
@@ -269,7 +269,7 @@ export function BigTimerInput({
       )}
 
       {/* Toggles + Save — nur im Text-Mode (Spacebar regelt +2/DNF
-          automatisch ueber Inspection-Penalty + auto-save). */}
+          automatisch über Inspection-Penalty + auto-save). */}
       {!spacebarMode && (
         <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
           <label className="flex items-center gap-2 rounded border border-gray-700 bg-gray-800/50 px-4 py-2 text-base text-gray-200 cursor-pointer hover:bg-gray-800">
@@ -306,13 +306,13 @@ export function BigTimerInput({
 
       {/* Penalty-Quick-Buttons (Phase W.penalty-quick, 2026-05-17):
           erscheinen direkt nach dem Save unter dem Timer. Korrigieren
-          die Penalty oder loeschen den Solve ohne den Weg ueber die
+          die Penalty oder löschen den Solve ohne den Weg über die
           Letzte-Solves-Sidebar. Verschwinden wenn lastSavedSolve null
-          ist (= neuer Solve gestartet, anderer Cube gewaehlt, manueller
+          ist (= neuer Solve gestartet, anderer Cube gewählt, manueller
           ↺-Klick). */}
       {lastSavedSolve && (
         <div className="mt-4 flex items-center justify-center gap-2 flex-wrap text-sm">
-          {/* QA-Fix H#2: cube_type ins Label, damit User auch ueber
+          {/* QA-Fix H#2: cube_type ins Label, damit User auch über
               Cube-Wechsel hinweg weiss, welcher Solve gerade bearbeitet wird. */}
           <span className="text-gray-500">
             Letzter Solve ({lastSavedSolve.cube_type}):
@@ -330,7 +330,7 @@ export function BigTimerInput({
               lastSavedSolve.plus_two
                 ? "+2 entfernen"
                 : lastSavedSolve.dnf
-                ? "Nicht moeglich auf DNF-Solve (zuerst DNF entfernen)"
+                ? "Nicht möglich auf DNF-Solve (zuerst DNF entfernen)"
                 : "+2 Strafe markieren"
             }
           >
@@ -366,11 +366,11 @@ export function BigTimerInput({
             } disabled:opacity-40`}
             title={
               deleteConfirm
-                ? "Erneut klicken zum endgueltigen Loeschen"
-                : "Letzten Solve loeschen"
+                ? "Erneut klicken zum endgueltigen Löschen"
+                : "Letzten Solve löschen"
             }
           >
-            {deleteConfirm ? "Wirklich loeschen?" : "🗑 Loeschen"}
+            {deleteConfirm ? "Wirklich löschen?" : "🗑 Löschen"}
           </button>
           <button
             type="button"

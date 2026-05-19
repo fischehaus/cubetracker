@@ -53,7 +53,7 @@ export function ActivityCard({ sessionId, slice }: Props) {
         <InfoButton>
           <p className="font-medium mb-1">{SLICE_LABELS[slice]}</p>
           <p>
-            Zeigt Anzahl Solves + Cube-Verteilung fuer{" "}
+            Zeigt Anzahl Solves + Cube-Verteilung für{" "}
             {slice === "today" ? "heute (seit 0:00 deiner Zeit)" : "die letzten 7 Tage"}.
             Aktive Cubes als Top-3, Rest aggregiert. Aktualisiert sich
             live nach jedem neuen Solve.

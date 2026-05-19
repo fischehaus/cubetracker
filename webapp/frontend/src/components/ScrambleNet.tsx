@@ -1,15 +1,15 @@
 // ScrambleNet (Phase W.scramble-image, 2026-05-17) — React-Wrapper um
-// cube-net.ts. Rendert das 2D-Cross-Layout-Bild fuer einen 3x3-Scramble.
+// cube-net.ts. Rendert das 2D-Cross-Layout-Bild für einen 3x3-Scramble.
 //
 // Bewusst gehalten:
 //   - Nur 3x3 (cubeType "3x3"). Andere Cubes → nichts rendern (kein
-//     misleading-Bild, kein Crash). Wenn spaeter 2x2/4x4-Support kommt,
+//     misleading-Bild, kein Crash). Wenn später 2x2/4x4-Support kommt,
 //     hier dispatchen.
 //   - useMemo cached das SVG pro (scramble, stickerPx) — bei jedem Re-
-//     Render der ScrambleCard ohne Scramble-Aenderung kein erneutes Parsen.
+//     Render der ScrambleCard ohne Scramble-Änderung kein erneutes Parsen.
 //   - SVG via dangerouslySetInnerHTML — der String ist 100% von uns
 //     generiert, kein User-Input → XSS-frei.
-//   - Aria-label damit Screen-Reader was Sinnvolles vorlesen koennen,
+//   - Aria-label damit Screen-Reader was Sinnvolles vorlesen können,
 //     sonst „img" ohne Beschreibung.
 
 import { useMemo } from "react";
@@ -24,17 +24,17 @@ interface Props {
   stickerPx?: number;
 }
 
-/** Akzeptierte Cube-Types fuer dieses Modul. Aktuell 3x3 + alle Cube-Types
+/** Akzeptierte Cube-Types für dieses Modul. Aktuell 3x3 + alle Cube-Types
  *  die mechanisch 3x3-Scrambles nutzen (OH = One-Handed, 3BLD = Blindfold
  *  3x3) — QA-Fix #5 vom 2026-05-17.
  *  Andere („Pyraminx", "4x4", ...) → return null, ScrambleCard zeigt nichts. */
 const SUPPORTED_TYPES = new Set(["3x3", "OH", "3BLD"]);
 
 /**
- * Public-Helper: weiss der Aufrufer (z.B. ScrambleCard), ob fuer diesen
- * Cube-Type ueberhaupt ein 2D-Net gerendert wird. Wird genutzt, um den
+ * Public-Helper: weiss der Aufrufer (z.B. ScrambleCard), ob für diesen
+ * Cube-Type überhaupt ein 2D-Net gerendert wird. Wird genutzt, um den
  * Toggle-Button nur dann anzuzeigen wenn er auch eine Wirkung hat —
- * sonst waere er irrefuehrend ("Toggle tut nichts").
+ * sonst wäre er irrefuehrend ("Toggle tut nichts").
  */
 export function isScrambleNetSupported(cubeType: string): boolean {
   return SUPPORTED_TYPES.has(cubeType);

@@ -1,6 +1,6 @@
 // UserMenu — Dropdown oben rechts mit Account-Zugaengen.
 //
-// Klassisches SaaS-Pattern: Klick auf Email/Avatar oeffnet Menu mit
+// Klassisches SaaS-Pattern: Klick auf Email/Avatar öffnet Menu mit
 // Profil, Einstellungen, Hilfe-Links, Logout. Bisher hatten wir nur
 // einen Email-Span + Logout-Link nebeneinander — funktional, aber
 // versteckt die zugehoerigen Aktionen.
@@ -116,7 +116,7 @@ export function UserMenu({
             Patch Notes
           </MenuItem>
           <MenuItem onClick={() => run(onOpenRoadmap)} icon="🗺">
-            Roadmap (was kommt als naechstes?)
+            Roadmap (was kommt als nächstes?)
           </MenuItem>
           <MenuItem onClick={() => run(onOpenFeatures)} icon="ℹ">
             Was kann diese App?

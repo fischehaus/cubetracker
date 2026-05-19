@@ -1,7 +1,7 @@
 """News + WCA Auto-Refresh-Helpers (Phase W.auto-refresh, 2026-05-16).
 
 Wird vom Login-Endpoint als BackgroundTask aufgerufen — fetcht News +
-WCA-Comps fuer die Standard-Laender, wenn die jeweiligen Caches stale
+WCA-Comps für die Standard-Laender, wenn die jeweiligen Caches stale
 sind. Bei warmen Caches: no-op (kein HTTP, kein DB-Write).
 
 Damit ist ein User der sich nach laengerer Pause einloggt mit
@@ -47,13 +47,13 @@ def refresh_news_if_stale() -> None:
 
 
 async def refresh_wca_caches_if_stale() -> None:
-    """Warmt die WCA-In-Memory-Caches fuer die DACH-Region.
+    """Warmt die WCA-In-Memory-Caches für die DACH-Region.
 
     Der WCA-Cache ist pro Worker — das hier waermt nur den Login-Worker.
     Andere Worker fetchen beim ersten Aufruf selbst. Akzeptabel, weil
     WCA-API ~500ms pro Call ist und der Cache 1h haelt.
 
-    Wir warmen die 3 grossen Sub-Sets (DE-Nachbarn, AT-Nachbarn,
+    Wir warmen die 3 großen Sub-Sets (DE-Nachbarn, AT-Nachbarn,
     CH-Nachbarn) — alle drei werden parallel gefetcht. Bei warmen Caches
     sind das 0ms (kein HTTP). Bei kaltem Worker maximal ~1-2s.
     """
@@ -75,9 +75,9 @@ async def refresh_wca_caches_if_stale() -> None:
 def trigger_background_refresh() -> None:
     """Sync-Wrapper: ruft beide Refreshs auf — News sync, WCA async via
     asyncio.run. FastAPI BackgroundTask laeuft in Thread-Pool, daher
-    duerfen wir asyncio.run() benutzen.
+    dürfen wir asyncio.run() benutzen.
 
-    Wenn ein Refresh failed: kein Crash, weiter mit dem naechsten.
+    Wenn ein Refresh failed: kein Crash, weiter mit dem nächsten.
     """
     # 1) News (sync)
     try:

@@ -1,12 +1,12 @@
-// AdminStatsPanel (Phase W.admin) — Cluster-Statistiken fuer App-Betreiber.
+// AdminStatsPanel (Phase W.admin) — Cluster-Statistiken für App-Betreiber.
 //
 // Nutzt GET /admin/stats (limit 30/min). Endpoint liefert nur AGGREGAT-
 // Daten, keine personenbezogenen Felder — DSGVO-konform.
 //
-// Sichtbar nur fuer User mit is_admin === true (von /auth/me geliefert,
+// Sichtbar nur für User mit is_admin === true (von /auth/me geliefert,
 // abgeleitet aus ADMIN_EMAILS-Env-Var im Backend). Sub-Tab im Verwaltung-
 // Tab rendert die Komponente nur conditional — Direkt-Render bei nicht-
-// Admin wuerde 404 ergeben.
+// Admin würde 404 ergeben.
 
 import { useAuth } from "../auth/AuthContext";
 import { useAdminStats } from "../lib/api";
@@ -33,7 +33,7 @@ function formatRelative(iso: string): string {
 
 export function AdminStatsPanel() {
   // Defense-in-Depth (QA-Finding low): enabled=user.is_admin statt true.
-  // Aktuell rendert VerwaltungTab die Komponente eh nur fuer Admins, aber
+  // Aktuell rendert VerwaltungTab die Komponente eh nur für Admins, aber
   // falls ein zukuenftiger Caller den Guard vergisst, fetcht der Hook
   // nichts und das Backend 404'd ohnehin.
   const { user } = useAuth();
@@ -71,7 +71,7 @@ export function AdminStatsPanel() {
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-semibold text-gray-100">
             Admin-Statistiken{" "}
-            <span className="text-sm text-gray-500">(nur fuer App-Betreiber)</span>
+            <span className="text-sm text-gray-500">(nur für App-Betreiber)</span>
           </h2>
           <InfoButton>
             <p className="font-medium mb-1">Admin-Statistiken</p>

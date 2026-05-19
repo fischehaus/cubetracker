@@ -3,9 +3,9 @@
  *
  * 4 Sektionen:
  * - Profil (Email-Status, display_name)
- * - Passwort aendern (current + new)
- * - Email aendern (current_pw + new_email -> Verify-Mail an neue Adresse)
- * - Account loeschen (DSGVO, mit Confirm)
+ * - Passwort ändern (current + new)
+ * - Email ändern (current_pw + new_email -> Verify-Mail an neue Adresse)
+ * - Account löschen (DSGVO, mit Confirm)
  *
  * Resend-Verify-Mail-Button bei email_verified=false.
  */
@@ -27,10 +27,10 @@ export function AccountSettingsPanel() {
         <InfoButton>
           <p className="font-medium mb-1">Account</p>
           <p>
-            Profil-Daten + Sicherheit. Display-Name aendern, Passwort
-            aendern (logged dich automatisch aus), Email-Adresse aendern
+            Profil-Daten + Sicherheit. Display-Name ändern, Passwort
+            ändern (logged dich automatisch aus), Email-Adresse ändern
             (mit Re-Verifikation der neuen Adresse), Auffindbar-Toggle
-            fuer die Freunde-Suche, Account komplett loeschen (DSGVO).
+            für die Freunde-Suche, Account komplett löschen (DSGVO).
           </p>
         </InfoButton>
       </div>
@@ -164,7 +164,7 @@ function ProfileSection() {
           autoComplete="country"
           className="w-full max-w-xs rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
-          <option value="">— bitte waehlen —</option>
+          <option value="">— bitte wählen —</option>
           {COUNTRIES.map((c) => (
             <option key={c.iso2} value={c.iso2}>
               {c.label} ({c.iso2})
@@ -175,12 +175,12 @@ function ProfileSection() {
         <div className="rounded border border-amber-500/30 bg-amber-500/5 p-2 max-w-md text-xs text-amber-200/90">
           <p>
             <strong>Hinweis:</strong> Postleitzahl <em>und</em> Land werden
-            zusammen fuer <strong>„WCA-Turniere in deiner Naehe"</strong>{" "}
+            zusammen für <strong>„WCA-Turniere in deiner Nähe"</strong>{" "}
             (Dashboard) benoetigt. Sonst kann der Standort nicht
             geocoded werden + die Liste bleibt leer.
           </p>
           <p className="mt-1 text-amber-300/70">
-            Die PLZ wird ausschliesslich zur Distanz-Berechnung genutzt,
+            Die PLZ wird ausschließlich zur Distanz-Berechnung genutzt,
             nicht weitergegeben. Deine exakte Adresse bleibt privat.
           </p>
         </div>
@@ -219,7 +219,7 @@ function DiscoverabilitySection() {
     try {
       await api.patch("/auth/me", { is_discoverable: next });
       await refreshMe();
-      setInfo(next ? "Du bist jetzt fuer andere User auffindbar." : "Auffindbarkeit deaktiviert.");
+      setInfo(next ? "Du bist jetzt für andere User auffindbar." : "Auffindbarkeit deaktiviert.");
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {
@@ -230,10 +230,10 @@ function DiscoverabilitySection() {
   return (
     <div className="mt-4 border-t border-gray-700 pt-3 space-y-2">
       <div className="text-sm font-medium text-gray-300">
-        Auffindbar fuer andere (Freunde-Suche)
+        Auffindbar für andere (Freunde-Suche)
       </div>
       <p className="text-xs text-gray-400">
-        Wenn aktiv, koennen andere User dich per <em>Display-Name</em> in
+        Wenn aktiv, können andere User dich per <em>Display-Name</em> in
         der Freunde-Suche finden. Per <em>Email</em> bist du immer findbar
         (wer die Adresse kennt). Default: aus.
       </p>
@@ -245,7 +245,7 @@ function DiscoverabilitySection() {
           disabled={busy || !hasName}
           className="accent-purple-500 w-4 h-4"
         />
-        Andere User koennen mich per Display-Name finden
+        Andere User können mich per Display-Name finden
       </label>
       {!hasName && (
         <p className="text-xs text-amber-300">
@@ -259,7 +259,7 @@ function DiscoverabilitySection() {
 }
 
 // ============================================================
-// Passwort aendern
+// Passwort ändern
 // ============================================================
 
 function PasswordSection() {
@@ -280,11 +280,11 @@ function PasswordSection() {
         new_password: newPw,
       });
       setInfo(
-        "Passwort geaendert. Du wirst gleich automatisch ausgeloggt — bitte mit neuem Passwort neu einloggen.",
+        "Passwort geändert. Du wirst gleich automatisch ausgeloggt — bitte mit neuem Passwort neu einloggen.",
       );
       setCurrentPw("");
       setNewPw("");
-      // Backend hat token_version++ gemacht → naechster API-Call kriegt 401
+      // Backend hat token_version++ gemacht → nächster API-Call kriegt 401
       // → AuthContext bekommt 'cubetracker:logged-out'-Event → LoginPage erscheint.
     } catch (err) {
       setError(extractErrorMessage(err));
@@ -294,7 +294,7 @@ function PasswordSection() {
   }
 
   return (
-    <Card title="Passwort aendern">
+    <Card title="Passwort ändern">
       <form onSubmit={onSubmit} className="space-y-2 max-w-xs">
         <input
           type="password"
@@ -320,7 +320,7 @@ function PasswordSection() {
           disabled={busy}
           className="rounded-lg bg-purple-600 text-white text-sm font-medium px-4 py-2 hover:bg-purple-700 disabled:opacity-50"
         >
-          {busy ? "…" : "Passwort aendern"}
+          {busy ? "…" : "Passwort ändern"}
         </button>
         {info && <FeedbackOk text={info} />}
         {error && <FeedbackErr text={error} />}
@@ -330,7 +330,7 @@ function PasswordSection() {
 }
 
 // ============================================================
-// Email aendern
+// Email ändern
 // ============================================================
 
 function EmailSection() {
@@ -363,7 +363,7 @@ function EmailSection() {
   }
 
   return (
-    <Card title="Email-Adresse aendern">
+    <Card title="Email-Adresse ändern">
       <p className="text-sm text-gray-400 mb-2">
         Die alte Email-Adresse bleibt bis zur Bestaetigung der neuen aktiv.
       </p>
@@ -400,7 +400,7 @@ function EmailSection() {
 }
 
 // ============================================================
-// Account loeschen (DSGVO)
+// Account löschen (DSGVO)
 // ============================================================
 
 function DangerSection() {
@@ -411,7 +411,7 @@ function DangerSection() {
   async function onDelete() {
     if (
       !window.confirm(
-        "Konto WIRKLICH loeschen?\n\nALLE deine Daten (Solves, Sessions, Hardware, Achievements, Snapshots) werden unwiderruflich entfernt.\n\nFortfahren?",
+        "Konto WIRKLICH löschen?\n\nALLE deine Daten (Solves, Sessions, Hardware, Achievements, Snapshots) werden unwiderruflich entfernt.\n\nFortfahren?",
       )
     )
       return;
@@ -428,17 +428,17 @@ function DangerSection() {
   }
 
   return (
-    <Card title="Account loeschen" danger>
+    <Card title="Account löschen" danger>
       <p className="text-sm text-gray-400 mb-3">
         DSGVO: Du kannst dein Konto + alle Daten jederzeit unwiderruflich
-        loeschen. Vorher empfohlen: Voll-Backup unter „Daten" runterladen.
+        löschen. Vorher empfohlen: Voll-Backup unter „Daten" runterladen.
       </p>
       <button
         onClick={() => void onDelete()}
         disabled={busy}
         className="rounded-lg bg-red-600 text-white text-sm font-medium px-4 py-2 hover:bg-red-700 disabled:opacity-50"
       >
-        {busy ? "Loesche…" : "Account + alle Daten loeschen"}
+        {busy ? "Loesche…" : "Account + alle Daten löschen"}
       </button>
       {error && <FeedbackErr text={error} />}
     </Card>

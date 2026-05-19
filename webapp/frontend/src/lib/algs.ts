@@ -1,7 +1,7 @@
-// PLL + OLL Algorithm-Datenbank fuer den Trainer (Phase 8b).
+// PLL + OLL Algorithm-Datenbank für den Trainer (Phase 8b).
 //
 // Strategie: statt scrambow's random-state pll/oll zu nutzen (wo wir
-// den case-namen nicht kennen), drillen wir gezielte cases. Fuer jeden
+// den case-namen nicht kennen), drillen wir gezielte cases. Für jeden
 // case kennen wir den Standard-Algorithm und generieren den Scramble
 // als invertierten Algorithmus — klassische speedcubing-praxis.
 //
@@ -28,7 +28,7 @@ export interface AlgCase {
 //
 // Algorithmen-Auswahl: gaengige speedsolving-standards (aus wiki +
 // J Perm's beginner-friendly set). Konsistente notation, keine
-// rotations (x/y/z) im algorithm — die wuerden inversion erschweren.
+// rotations (x/y/z) im algorithm — die würden inversion erschweren.
 
 export const PLL_CASES: AlgCase[] = [
   { id: "PLL-Aa", name: "Aa-perm", alg: "x R' U R' D2 R U' R' D2 R2 x'" },
@@ -130,7 +130,7 @@ export const ALG_SUBSETS: Record<AlgSubsetId, { name: string; cases: AlgCase[] }
 // Algorithm-Inversion (Drill-Scramble-Generator)
 // ============================================================
 //
-// Klassisches Speedsolving-Prinzip: scramble fuer case X = invers(alg(X)).
+// Klassisches Speedsolving-Prinzip: scramble für case X = invers(alg(X)).
 // Wenn ich X-alg auf gegebenen state anwende, lande ich beim Identitaets-
 // state (geloester cube). Also: invers(X-alg) angewendet auf geloesten
 // cube ergibt den state, von dem aus X-alg loest. → das IST der scramble.
@@ -139,7 +139,7 @@ export const ALG_SUBSETS: Record<AlgSubsetId, { name: string; cases: AlgCase[] }
 //   "R"   ↔ "R'"
 //   "R2"  ↔ "R2"     (selbstinvers)
 //   "R'"  ↔ "R"
-// Gilt analog fuer alle moves: U/D/L/R/F/B/M/E/S/x/y/z + lowercase r/u/...
+// Gilt analog für alle moves: U/D/L/R/F/B/M/E/S/x/y/z + lowercase r/u/...
 
 const TOKEN_RE = /\s+/;
 
@@ -165,7 +165,7 @@ export function inverseAlg(alg: string): string {
 }
 
 /**
- * Liefert einen Drill-Scramble fuer einen bestimmten case.
+ * Liefert einen Drill-Scramble für einen bestimmten case.
  * Optional Praefix mit zufaelliger AUF-Rotation (U/U2/U'), damit
  * der case nicht immer in derselben Orientierung steht.
  */

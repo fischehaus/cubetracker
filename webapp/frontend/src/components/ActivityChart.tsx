@@ -1,9 +1,9 @@
 // ActivityChart: Bar-Chart der Solve-Anzahl pro Tag/Woche/Monat
-// ueber einen waehlbaren Zeitraum.
+// über einen wählbaren Zeitraum.
 //
-// Zeigt fuer jeden Bucket: count_valid (lila) + count_dnf (rot) als
+// Zeigt für jeden Bucket: count_valid (lila) + count_dnf (rot) als
 // stacked bar. Granularitaet (Tag/Woche/Monat) und Zeitraum
-// (30T/3M/6M/1J/3J/Alle) waehlbar.
+// (30T/3M/6M/1J/3J/Alle) wählbar.
 //
 // Frontend-seitige X-Achsen-Heuristik: bei vielen Buckets nur jeden
 // n-ten Tick anzeigen, sonst wird die Achse unleserlich.
@@ -90,7 +90,7 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
     session_id: sessionId,
   });
 
-  // Stats fuers Card-Header (Summe, Avg pro Bucket, Max-Tag)
+  // Stats fürs Card-Header (Summe, Avg pro Bucket, Max-Tag)
   const summary = useMemo(() => {
     if (!data || data.buckets.length === 0) return null;
     const counts = data.buckets.map((b) => b.count);
@@ -138,7 +138,7 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
             <p className="font-medium mb-1">Aktivitaets-Chart</p>
             <p>
               Wie viele Solves du pro Tag / Woche / Monat gemacht hast.
-              Granularitaet ueber den Selector rechts. Hilft Trainings-
+              Granularitaet über den Selector rechts. Hilft Trainings-
               Konsistenz zu sehen — lange Pausen vs Streaks.
             </p>
           </InfoButton>

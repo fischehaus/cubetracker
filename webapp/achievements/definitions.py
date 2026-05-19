@@ -2,7 +2,7 @@
 
 Statische Code-Konstanten — die DB speichert nur welche codes der User
 schon unlocked hat (siehe `db.models.Achievement`). Vorteil: einfache
-Migration zwischen App-Versionen, keine Schema-Aenderung wenn neue
+Migration zwischen App-Versionen, keine Schema-Änderung wenn neue
 Achievements dazukommen.
 
 Categories steuern die UI-Gruppierung (lila Sektionen im AchievementsCard).
@@ -17,9 +17,9 @@ from dataclasses import dataclass
 class AchievementDef:
     code: str  # eindeutiger Identifier, in DB als unique-constraint
     name: str  # angezeigter Titel
-    description: str  # ein-satz-erklaerung
+    description: str  # ein-satz-erklärung
     category: str  # "volume" | "speed" | "variety" | "hardware"
-    icon: str  # emoji fuer UI
+    icon: str  # emoji für UI
 
 
 # ============================================================
@@ -35,7 +35,7 @@ VOLUME_TOTAL: list[AchievementDef] = [
 ]
 
 # ============================================================
-# Volume pro Cube — fuer 3x3 (relevantester Cube)
+# Volume pro Cube — für 3x3 (relevantester Cube)
 # Plus generische 'irgendein cube hat N solves'
 # ============================================================
 
@@ -102,7 +102,7 @@ VARIETY: list[AchievementDef] = [
 HARDWARE: list[AchievementDef] = [
     AchievementDef(
         "hardware_first",
-        "Erstes Stueck",
+        "Erstes Stück",
         "Erste Hardware im Inventar angelegt",
         "hardware",
         "🧊",
@@ -110,7 +110,7 @@ HARDWARE: list[AchievementDef] = [
     AchievementDef(
         "hardware_5",
         "Cuber-Sammler",
-        "5+ Hardware-Eintraege im Inventar",
+        "5+ Hardware-Einträge im Inventar",
         "hardware",
         "📦",
     ),

@@ -3,14 +3,14 @@
 //
 // State-Machine:
 //   idle       → User druckt Space → (inspection_enabled ? inspection : ready)
-//   inspection → 15s countdown, sound bei 8s + 12s; Space-press waehrend
+//   inspection → 15s countdown, sound bei 8s + 12s; Space-press während
 //                inspection → ready/holding
 //   ready      → Space-up zwischendurch nicht erlaubt; nach hold_time_ms
 //                gehts in „holding" (visuell green = go)
 //   holding    → User laesst Space los → running, timer startet
 //   running    → Space-press → stopped, time gefangen
-//   stopped    → User uebernimmt das Save (Hook liefert finalMs);
-//                naechste Space wieder zu idle
+//   stopped    → User übernimmt das Save (Hook liefert finalMs);
+//                nächste Space wieder zu idle
 //
 // WCA-Penalty-Logic:
 //   inspection > 15s aber <= 17s → +2 (penalty)
@@ -18,15 +18,15 @@
 //
 // Der Hook expose:
 //   - state            : aktueller phase-string
-//   - displayMs        : was angezeigt werden soll (waehrend running tickt es)
+//   - displayMs        : was angezeigt werden soll (während running tickt es)
 //   - inspectionLeftMs : countdown remaining (nur in inspection)
 //   - penalty          : "none" | "+2" | "DNF" (nach inspection-overrun)
-//   - reset()          : zurueck zu idle (nach Save)
+//   - reset()          : zurück zu idle (nach Save)
 //
 // Achtung: Hook bindet GLOBAL keydown/keyup an window. Das funktioniert
 // nur wenn der TIMER/Drill-Tab aktiv ist. Wenn der User in einem Input
 // tippt (target.tagName === "INPUT"), ignorieren wir Spacebar — sonst
-// wuerde Spacebar im SuchFeld den Timer triggern.
+// würde Spacebar im SuchFeld den Timer triggern.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -53,13 +53,13 @@ export interface SpacebarTimerResult {
   state: TimerState;
   /** Anzuzeigende Zeit in ms (running: live-tick, stopped: end-time) */
   displayMs: number;
-  /** Inspection-countdown remaining in ms — nur waehrend `inspection` */
+  /** Inspection-countdown remaining in ms — nur während `inspection` */
   inspectionLeftMs: number;
-  /** Penalty wenn Inspection ueberschritten wurde */
+  /** Penalty wenn Inspection überschritten wurde */
   penalty: TimerPenalty;
   /**
    * Phase 8.2 Multi-Phase: bisher abgeschlossene Phasen-Zeiten
-   * (kumulativ vom Start). Length = phaseIndex (= naechste zu beendende
+   * (kumulativ vom Start). Length = phaseIndex (= nächste zu beendende
    * Phase ist phaseIndex). [] wenn splits_enabled=false.
    */
   splits: number[];
@@ -94,7 +94,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
   const [splits, setSplits] = useState<number[]>([]);
   const [phaseIndex, setPhaseIndex] = useState(0);
 
-  // Refs fuer state-machine — useRef vermeidet stale-closure in keydown-handler
+  // Refs für state-machine — useRef vermeidet stale-closure in keydown-handler
   const stateRef = useRef<TimerState>("idle");
   const inspectionStartRef = useRef<number>(0);
   const holdStartRef = useRef<number>(0);
@@ -132,7 +132,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
     }
   }, []);
 
-  // RAF-tick fuer running + inspection countdown
+  // RAF-tick für running + inspection countdown
   useEffect(() => {
     if (state !== "running" && state !== "inspection") return;
     let mounted = true;
@@ -148,7 +148,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
         setInspectionLeftMs(Math.max(0, left));
         // Sound-warnings: je nach inspection_audio_mode (Phase W.voice-alert,
         // 2026-05-17) Sinus-Beep oder Voice-Alert via TTS. "off" overridet
-        // den Sound-Toggle fuer diese spezifischen Warnings (User kann
+        // den Sound-Toggle für diese spezifischen Warnings (User kann
         // Inspection-Calls separat ausschalten ohne den Solve-Stop-Sound).
         const audioMode = settings.inspection_audio_mode ?? "beep";
         const audioActive =
@@ -171,7 +171,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
         }
         if (settings.inspection_mode === "wca") {
           // WCA: Penalty live setzen, NICHT auto-DNFen — User soll
-          // weiter Space druecken koennen, Penalty bleibt fuer Save.
+          // weiter Space druecken können, Penalty bleibt für Save.
           if (elapsed > 17000) setPenalty("DNF");
           else if (elapsed > 15000) setPenalty("+2");
           // Safety: nach 30s ohne reaktion stop the show, Auto-DNF
@@ -310,7 +310,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       }
 
       if (cur === "running") {
-        // Space-press waehrend running:
+        // Space-press während running:
         //   - splits_enabled UND noch eine Phase uebrig → Split registrieren, weiter laufen
         //   - sonst → stop
         const now = performance.now();
@@ -322,7 +322,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
         const isFinalPhase = completedPhases + 1 >= totalPhases;
 
         if (settings.splits_enabled && !isFinalPhase) {
-          // Phase abgeschlossen, weiter zur naechsten — stay in running
+          // Phase abgeschlossen, weiter zur nächsten — stay in running
           splitsRef.current = [...splitsRef.current, cumulativeMs];
           setSplits(splitsRef.current);
           setPhaseIndex(splitsRef.current.length);
@@ -335,7 +335,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
         setState("stopped");
         setDisplayMs(cumulativeMs);
         // Final splits = previous splits + this terminal time (cumulative).
-        // Wir konvertieren am Ende zu RELATIVEN phase-durations fuer onComplete.
+        // Wir konvertieren am Ende zu RELATIVEN phase-durations für onComplete.
         const finalCumulative = settings.splits_enabled
           ? [...splitsRef.current, cumulativeMs]
           : null;
@@ -364,7 +364,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
           setState("running");
           setDisplayMs(0);
         } else {
-          // Zu kurz → zurueck zu idle (mit Penalty falls aus inspection)
+          // Zu kurz → zurück zu idle (mit Penalty falls aus inspection)
           // Wenn aus inspection mit penalty: bleibt der penalty erhalten
           stateRef.current = "idle";
           setState("idle");

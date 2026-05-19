@@ -1,14 +1,14 @@
 // HardwareCompareCard: Hardware-Performance-Vergleich innerhalb eines
 // Cube-Types (Phase 5d + Sortierung).
 //
-// Zeigt fuer den aktuellen Cube-Filter, mit welchem Cube der User die
+// Zeigt für den aktuellen Cube-Filter, mit welchem Cube der User die
 // besten/schlechtesten Zeiten hatte. Spalten: Hardware | PB | Schnitt |
 // aktueller ao5 | Best ao5 | aktueller ao12 | Best ao12 | Solves.
 // Click auf Spalten-Header -> Sortierung wechseln (asc <-> desc).
 // „Ohne Hardware" (csTimer-Importe ohne Hardware-Zuordnung) als eigene Zeile.
 //
 // Wenn kein Cube-Filter gesetzt: leere Card mit Hinweis. Hardware-Vergleich
-// ueber alle Cubes hinweg waere bedeutungslos (verschiedene Skalen).
+// über alle Cubes hinweg wäre bedeutungslos (verschiedene Skalen).
 
 import { useMemo, useState } from "react";
 import { useStatsByHardware, type HardwareCubeStats } from "../lib/api";
@@ -51,7 +51,7 @@ const COLUMNS: ColumnDef[] = [
 ];
 
 /**
- * Vergleichs-Funktion fuer Sortierung. Behandelt Strings, Zahlen, null.
+ * Vergleichs-Funktion für Sortierung. Behandelt Strings, Zahlen, null.
  * Null-Werte landen IMMER ans Ende (egal ob asc oder desc), damit
  * „keine Daten" nicht oben steht.
  */
@@ -111,7 +111,7 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
           Hardware-Vergleich
         </h2>
         <p className="text-base text-gray-500">
-          Setze oben einen Cube-Filter, um zu sehen, mit welchem Wuerfel du
+          Setze oben einen Cube-Filter, um zu sehen, mit welchem Würfel du
           schneller bist.
         </p>
       </div>
@@ -139,13 +139,13 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
           Hardware-Vergleich ({cubeType})
         </h2>
         <p className="text-base text-gray-500">
-          Noch keine Daten fuer diesen Cube.
+          Noch keine Daten für diesen Cube.
         </p>
       </div>
     );
   }
 
-  // Bester PB-Wert fuer optisches Highlight (★)
+  // Bester PB-Wert für optisches Highlight (★)
   const bestEver = data.hardware.find((h) => h.best_ms !== null)?.best_ms ?? null;
   const sortLabel = COLUMNS.find((c) => c.key === sortKey)?.label ?? "";
 
@@ -160,8 +160,8 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
           <InfoButton>
             <p className="font-medium mb-1">Hardware-Vergleich</p>
             <p>
-              Vergleicht deine Stats pro Cube (Hardware-Eintrag) fuer den
-              ausgewaehlten Cube-Type. Hilft zu sehen ob ein bestimmter
+              Vergleicht deine Stats pro Cube (Hardware-Eintrag) für den
+              ausgewählten Cube-Type. Hilft zu sehen ob ein bestimmter
               Speedcube wirklich schneller ist oder nur gefuehlt. Klick
               auf Spaltenkopf zum Sortieren.
             </p>
@@ -263,7 +263,7 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
       <p className="mt-3 text-xs text-gray-500">
         ★ = Cube mit dem besten Single-PB. Click auf eine Spalten-Ueberschrift
         sortiert nach dieser Spalte (Click erneut = Richtung wechseln).
-        „Ohne Hardware" enthaelt csTimer-Importe und Solves ohne explizite
+        „Ohne Hardware" enthält csTimer-Importe und Solves ohne explizite
         Hardware-Zuordnung.
       </p>
     </div>

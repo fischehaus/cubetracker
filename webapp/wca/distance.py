@@ -13,7 +13,7 @@ EARTH_RADIUS_KM = 6371.0
 def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """Grosskreis-Distanz zwischen zwei Lat/Lng-Punkten in Kilometern.
 
-    Genauigkeit: ca. 0.5% (Erde ist nicht perfekt sphaerisch). Fuer
+    Genauigkeit: ca. 0.5% (Erde ist nicht perfekt sphaerisch). Für
     „Turniere in 200km Entfernung"-Filter mehr als ausreichend.
     """
     rlat1, rlat2 = radians(lat1), radians(lat2)
@@ -26,9 +26,9 @@ def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
 
 # Nachbarlaender-Mapping (Phase W.wca-neighbors, 2026-05-16):
 # Welche Laender bekommt ein User zu sehen, basierend auf seinem
-# Profil-Land? „In der Naehe" heisst praktisch: eigenes Land + direkt
-# angrenzende. Aktuell nur fuer DACH definiert — andere User sehen
-# nur ihr eigenes Land. Spaeter erweiterbar pro Bedarf.
+# Profil-Land? „In der Nähe" heisst praktisch: eigenes Land + direkt
+# angrenzende. Aktuell nur für DACH definiert — andere User sehen
+# nur ihr eigenes Land. Später erweiterbar pro Bedarf.
 NEIGHBORING_COUNTRIES: dict[str, list[str]] = {
     # Deutschland: alle direkten Landgrenzen
     "DE": ["DE", "AT", "CH", "NL", "BE", "LU", "FR", "DK", "PL", "CZ"],
@@ -55,7 +55,7 @@ def detect_country_from_postal_code(postal_code: str) -> str | None:
     """Heuristische Erkennung des Landes aus der Postleitzahl-Struktur.
 
     Kein Locking — User kann im Profil manuell ein Land setzen wenn das mal
-    relevant wird. Hier nur Best-Effort Default fuer Nominatim-Lookup.
+    relevant wird. Hier nur Best-Effort Default für Nominatim-Lookup.
 
     Aktuell unterstuetzte Heuristiken (DACH-Fokus):
       - 5-stellige numerische PLZ ohne Leerzeichen → DE

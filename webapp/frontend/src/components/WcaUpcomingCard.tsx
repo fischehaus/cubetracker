@@ -1,10 +1,10 @@
-// WcaUpcomingCard (Phase W.wca-comps) — die naechsten WCA-Turniere in der
-// Naehe des Users.
+// WcaUpcomingCard (Phase W.wca-comps) — die nächsten WCA-Turniere in der
+// Nähe des Users.
 //
 // Voraussetzung: User hat Postleitzahl im Profil. Sonst Hint-Empty-State
 // mit Link zur Verwaltung -> Account.
 //
-// Backend: GET /wca/competitions/upcoming, default max 300km, 10 Eintraege,
+// Backend: GET /wca/competitions/upcoming, default max 300km, 10 Einträge,
 // 6 Monate vorausschauend. Geocoding via Nominatim (DB-cached), WCA via
 // offizielle API v0 (1h-Cache).
 
@@ -13,8 +13,8 @@ import { AxiosError } from "axios";
 import { useUpcomingCompetitions, type WcaCompetition } from "../lib/api";
 import { InfoButton } from "./InfoButton";
 
-// Aufsteigende Distanz-Toggles fuer "Distanz erweitern" — User kann mit
-// einem Klick die Suche vergroessern wenn die naechstgelegene Comp zu
+// Aufsteigende Distanz-Toggles für "Distanz erweitern" — User kann mit
+// einem Klick die Suche vergrößern wenn die nächstgelegene Comp zu
 // weit weg ist.
 const DISTANCE_OPTIONS = [100, 300, 500, 1000, 5000] as const;
 
@@ -51,13 +51,13 @@ export function WcaUpcomingCard() {
         <InfoButton>
           <p className="font-medium mb-1">WCA-Turniere</p>
           <p className="mb-2">
-            Liste der naechsten offiziellen WCA-Wettkaempfe in deiner Naehe,
+            Liste der nächsten offiziellen WCA-Wettkaempfe in deiner Nähe,
             sortiert nach Datum. Distanz wird basierend auf deiner Profil-PLZ
             (Verwaltung → Account) berechnet (Luftlinie).
           </p>
           <p>
             Daten kommen direkt von der offiziellen World Cube Association
-            API. Click auf den Turnier-Namen oeffnet die WCA-Detailseite mit
+            API. Click auf den Turnier-Namen öffnet die WCA-Detailseite mit
             Anmelde-Status, Events, Venue.
           </p>
         </InfoButton>
@@ -88,7 +88,7 @@ export function WcaUpcomingCard() {
         <div className="rounded border border-amber-500/40 bg-amber-500/5 p-3 text-sm text-amber-200">
           <p className="font-medium">Profil unvollstaendig</p>
           <p className="mt-1 text-amber-300/80">
-            Damit „Turniere in deiner Naehe" funktioniert, setze{" "}
+            Damit „Turniere in deiner Nähe" funktioniert, setze{" "}
             <strong>Postleitzahl und Land</strong> unter{" "}
             <strong>Verwaltung → Einstellungen → Account → Profil</strong>.
             Die Distanz wird per Luftlinie berechnet, deine genaue Adresse
@@ -112,7 +112,7 @@ export function WcaUpcomingCard() {
           {data.competitions.length === 0 ? (
             <p className="text-sm text-gray-500">
               Keine WCA-Turniere innerhalb {maxDistanceKm} km in den
-              naechsten {Math.round(data.filter.days_ahead / 30)} Monaten.{" "}
+              nächsten {Math.round(data.filter.days_ahead / 30)} Monaten.{" "}
               {maxDistanceKm < 5000 && (
                 <button
                   type="button"

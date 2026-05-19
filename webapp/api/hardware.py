@@ -1,6 +1,6 @@
 """Hardware-CRUD-API (Phase W) — Multi-User-Variante.
 
-Per-User Hardware-Eintraege. Inkl. Seed-Endpoint (W.hardware-fix):
+Per-User Hardware-Einträge. Inkl. Seed-Endpoint (W.hardware-fix):
 jeder User kann sich die Standard-Liste vom 2026-05-03 als
 Starthilfe in sein leeres Inventar laden — empty-Check + Insert
 beide auf user_id gefiltert (kein Cross-User-Bleed).
@@ -43,7 +43,7 @@ def list_hardware(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> list[Hardware]:
-    """Liste eigener Hardware-Eintraege, sortiert: aktiv zuerst, dann name."""
+    """Liste eigener Hardware-Einträge, sortiert: aktiv zuerst, dann name."""
     stmt = (
         select(Hardware)
         .where(Hardware.user_id == current_user.id)
@@ -62,7 +62,7 @@ def create_hardware(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> Hardware:
-    """Neuen Hardware-Eintrag fuer aktuellen User anlegen.
+    """Neuen Hardware-Eintrag für aktuellen User anlegen.
 
     Namen sind nicht unique — derselbe Modellname in zwei cube_types
     ist ein gewollter Use-Case (z.B. „QiYi Stickered" als 3x3 + 2x2).
@@ -80,7 +80,7 @@ def suggest_hardware_for_cube(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Empfehle die Hardware, die der User am haeufigsten fuer diesen
+    """Empfehle die Hardware, die der User am häufigsten für diesen
     Cube-Type benutzt hat. Fallback: erste eigene aktive Hardware mit
     passendem primary_cube_type.
     """
@@ -159,7 +159,7 @@ def delete_hardware(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
-    """Hardware loeschen.
+    """Hardware löschen.
 
     Betroffene Solves verlieren ihre hardware_id (FK ondelete=SET NULL).
     """
@@ -173,7 +173,7 @@ def seed_hardware(
     force: bool = Query(
         default=False,
         description="Wenn False: nur wenn EIGENE Hardware-Liste leer ist. "
-        "Wenn True: Eintraege werden zusaetzlich angelegt (kann Duplikate erzeugen).",
+        "Wenn True: Einträge werden zusaetzlich angelegt (kann Duplikate erzeugen).",
     ),
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
@@ -182,7 +182,7 @@ def seed_hardware(
 
     Seit W.hardware-auto-seed: Recovery-Endpoint. Neuer User bekommt eh
     automatisch beim Register die Liste (is_active=False). Dieser Endpoint
-    bleibt fuer Force-Recovery falls jemand bewusst alles geloescht hat
+    bleibt für Force-Recovery falls jemand bewusst alles gelöscht hat
     und neu starten will.
     """
     existing = db.scalar(
@@ -197,7 +197,7 @@ def seed_hardware(
 
     created = seed_user_hardware(db, current_user.id, default_active=False)
     # Achievement-Recheck nach Bulk-Insert — Hardware-related Achievements
-    # (z.B. "5 verschiedene Cubes") koennten getriggert werden.
+    # (z.B. "5 verschiedene Cubes") könnten getriggert werden.
     new_unlocks = run_achievement_check(db, current_user.id)
     return {
         "loaded": created,
@@ -212,7 +212,7 @@ def seed_hardware(
 
 
 class HardwareBulkUpdate(BaseModel):
-    """Body fuer Bulk-Patch — gleicher Patch wird auf alle IDs angewendet."""
+    """Body für Bulk-Patch — gleicher Patch wird auf alle IDs angewendet."""
 
     model_config = ConfigDict(extra="forbid")
     ids: list[int] = Field(min_length=1, max_length=200)
@@ -230,7 +230,7 @@ def bulk_update_hardware(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, int]:
-    """Setzt is_active auf eine Menge eigener Hardware-Eintraege.
+    """Setzt is_active auf eine Menge eigener Hardware-Einträge.
 
     Multi-User: WHERE user_id = current_user filtert — fremde IDs werden
     stillschweigend ignoriert (kein 403, kein 404 — sonst leakt Existenz).
@@ -259,7 +259,7 @@ def bulk_delete_hardware(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, int]:
-    """Loescht eine Menge eigener Hardware-Eintraege.
+    """Loescht eine Menge eigener Hardware-Einträge.
 
     Betroffene Solves verlieren ihre hardware_id (FK ondelete=SET NULL).
     Fremde IDs werden ignoriert.

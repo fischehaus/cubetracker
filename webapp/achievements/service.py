@@ -19,7 +19,7 @@ from .patterns import ChronoSolve, detect_patterns, merge_patterns
 
 
 def _build_snapshot(db: OrmSession, user_id: int) -> AchievementInput:
-    """Baut den AchievementInput aus DB-queries fuer einen User."""
+    """Baut den AchievementInput aus DB-queries für einen User."""
     total_solves = (
         db.scalar(select(func.count(Solve.id)).where(Solve.user_id == user_id)) or 0
     )
@@ -153,14 +153,14 @@ RECHECK_SOLVE_CAP = 200_000
 
 
 def run_achievement_check(db: OrmSession, user_id: int) -> list[str]:
-    """Vollst. check + DB-update fuer einen User. Liefert codes der
+    """Vollst. check + DB-update für einen User. Liefert codes der
     NEU unlockten Achievements.
 
     Idempotent: wenn alle bereits unlocked, liefert leere Liste.
 
     Security-Fix W.5-finding-2: Soft-Cap bei RECHECK_SOLVE_CAP.
     `_build_snapshot` macht zwei volle in-Memory-Loads aller User-Solves,
-    plus pro-Cube chronologische Sortierung. Bei sehr grossen Mengen
+    plus pro-Cube chronologische Sortierung. Bei sehr großen Mengen
     (>200k Solves) blockiert das den FastAPI-Worker mehrere Sekunden.
     Bei Ueberschreitung: skip + leere Liste — der User kann manuell via
     POST /achievements/recheck triggern (bewusst, akzeptiert Wartezeit).
@@ -172,7 +172,7 @@ def run_achievement_check(db: OrmSession, user_id: int) -> list[str]:
         or 0
     )
     if total_solves > RECHECK_SOLVE_CAP:
-        # Skip — zu teuer fuer synchronen Recheck. User kann manuell.
+        # Skip — zu teuer für synchronen Recheck. User kann manuell.
         return []
 
     snapshot = _build_snapshot(db, user_id)

@@ -1,4 +1,4 @@
-// Tests fuer rollende WCA-Averages (clientseitig).
+// Tests für rollende WCA-Averages (clientseitig).
 
 import { describe, expect, it } from "vitest";
 import {
@@ -19,7 +19,7 @@ const sp = (
 });
 
 describe("effectiveMs", () => {
-  it("gibt time_ms ohne Strafe zurueck", () => {
+  it("gibt time_ms ohne Strafe zurück", () => {
     expect(effectiveMs(sp(10000))).toBe(10000);
   });
 
@@ -100,8 +100,8 @@ describe("averageOfN", () => {
   });
 });
 
-describe("rollingAverages — die Kernfunktion fuer die Liste", () => {
-  it("gibt fuer alle Indizes < window-1 ein null zurueck", () => {
+describe("rollingAverages — die Kernfunktion für die Liste", () => {
+  it("gibt für alle Indizes < window-1 ein null zurück", () => {
     const solves = [sp(1000), sp(2000), sp(3000), sp(4000), sp(5000)];
     const result = rollingAverages(solves, 5);
     expect(result.length).toBe(5);
@@ -109,7 +109,7 @@ describe("rollingAverages — die Kernfunktion fuer die Liste", () => {
     expect(result[4]).not.toBeNull();
   });
 
-  it("ao5 fuer 7 Solves: indices 0..3 = null, 4..6 = avg des Fensters", () => {
+  it("ao5 für 7 Solves: indices 0..3 = null, 4..6 = avg des Fensters", () => {
     const solves = [
       sp(10000), // idx 0
       sp(11000), // idx 1
@@ -127,7 +127,7 @@ describe("rollingAverages — die Kernfunktion fuer die Liste", () => {
     expect(result[6]).toBe(14000); // [12k,13k,14k,15k,16k] → trim 12k+16k → 14k
   });
 
-  it("Reihenfolge der Solves: chronologisch alt → neu, Window schaut zurueck", () => {
+  it("Reihenfolge der Solves: chronologisch alt → neu, Window schaut zurück", () => {
     // Solve an Index i bekommt ao5 von [i-4..i] (also seinen eigenen + 4 vorher)
     const solves = Array.from({ length: 12 }, (_, i) => sp(10000 + i * 1000));
     const ao5 = rollingAverages(solves, 5);
@@ -136,7 +136,7 @@ describe("rollingAverages — die Kernfunktion fuer die Liste", () => {
     // ao5 an Index 4: [10..14k] → 12000
     expect(ao5[4]).toBe(12000);
 
-    // ao12 nur an Index 11 verfuegbar (alle 12)
+    // ao12 nur an Index 11 verfügbar (alle 12)
     expect(ao12[10]).toBeNull();
     expect(ao12[11]).toBe(15500);
   });

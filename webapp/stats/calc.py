@@ -2,9 +2,9 @@
 
 Speedcubing-Konvention (WCA):
 - Average of N (AvgN) = trimmed mean: trim die N*5%-besten und
-  N*5%-schlechtesten (mind. 1 each side fuer N=5 und N=12), dann
+  N*5%-schlechtesten (mind. 1 each side für N=5 und N=12), dann
   arithmetisches Mittel der restlichen.
-- DNF zaehlt als „unendlich" beim Sortieren.
+- DNF zählt als „unendlich" beim Sortieren.
 - Wenn mehr DNFs als trimmbar → ganzer Avg ist DNF (None).
 
 Konkrete Trim-Werte (WCA + Praxis):
@@ -21,12 +21,12 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class SolvePoint:
-    """Pure Daten-Klasse fuer Stats-Input — entkoppelt von ORM.
+    """Pure Daten-Klasse für Stats-Input — entkoppelt von ORM.
 
     `time_ms`: Roh-Zeit in ms.
-    `dnf`: True → zaehlt als "unendlich" / Avg-DNF.
+    `dnf`: True → zählt als "unendlich" / Avg-DNF.
     `plus_two`: +2-Strafe → effektive Zeit = time_ms + 2000.
-    `solve_id`: ORM-ID, fuer Best-Marker im Frontend.
+    `solve_id`: ORM-ID, für Best-Marker im Frontend.
     """
 
     time_ms: int
@@ -36,14 +36,14 @@ class SolvePoint:
 
     @property
     def effective_ms(self) -> float:
-        """Zeit fuer Vergleich/Avg. DNF = inf."""
+        """Zeit für Vergleich/Avg. DNF = inf."""
         if self.dnf:
             return math.inf
         return float(self.time_ms + (2000 if self.plus_two else 0))
 
 
 def trim_for_n(n: int) -> int:
-    """WCA-Trim-Konvention: 1 each side fuer 5/12, sonst max(1, floor(n*5%))."""
+    """WCA-Trim-Konvention: 1 each side für 5/12, sonst max(1, floor(n*5%))."""
     if n < 3:
         return 0
     if n <= 12:
@@ -68,9 +68,9 @@ def average_of_n(solves: list[SolvePoint]) -> int | None:
 
 
 def best_average_window(solves: list[SolvePoint], window: int) -> int | None:
-    """Best Avg aus allen Sliding-Windows der Groesse `window`.
+    """Best Avg aus allen Sliding-Windows der Größe `window`.
 
-    Solves muessen in chronologischer Reihenfolge sein (timestamp asc).
+    Solves müssen in chronologischer Reihenfolge sein (timestamp asc).
     Liefert min. Avg, oder None wenn nicht genug Solves oder alle Avgs DNF.
     """
     n = len(solves)
@@ -88,7 +88,7 @@ def best_average_window_with_anchor(
     solves: list[SolvePoint], window: int
 ) -> tuple[int, int] | None:
     """Wie best_average_window, liefert zusaetzlich die solve_id des
-    LETZTEN Solves im besten Window (= Ankerpunkt fuer den Zeitstempel
+    LETZTEN Solves im besten Window (= Ankerpunkt für den Zeitstempel
     „wann wurde dieser Best-Avg erzielt").
 
     Phase 8.4: erlaubt dem Frontend Anzeige „Best Ao5 12.34 (am 03.05.)".
@@ -111,7 +111,7 @@ def best_average_window_with_anchor(
 
 @dataclass
 class StatsResult:
-    """Vollstaendige Statistik-Antwort fuer eine Solve-Menge."""
+    """Vollstaendige Statistik-Antwort für eine Solve-Menge."""
 
     count: int
     count_valid: int  # ohne DNF
@@ -135,7 +135,7 @@ class StatsResult:
     best_ao100: int | None
 
     # Phase 8.4: Anker-Solve-IDs (letzter Solve im besten Window)
-    # → Frontend resolved daraus den Timestamp fuer Anzeige.
+    # → Frontend resolved daraus den Timestamp für Anzeige.
     best_ao5_solve_id: int | None
     best_ao12_solve_id: int | None
     best_ao100_solve_id: int | None
@@ -173,7 +173,7 @@ def compute_stats(solves: list[SolvePoint]) -> StatsResult:
     count_dnf = n - len(valid)
 
     if valid:
-        # Best Single (nach effective_ms aufsteigend, weil +2 zaehlt)
+        # Best Single (nach effective_ms aufsteigend, weil +2 zählt)
         best = min(valid, key=lambda s: s.effective_ms)
         worst = max(valid, key=lambda s: s.effective_ms)
         best_ms = int(best.effective_ms)

@@ -6,7 +6,7 @@ Drift zwischen passlib + bcrypt.
 
 Bcrypt-Spec: max 72 Byte Password (stillschweigend abgeschnitten in
 aelteren Versionen). Wir machen das explizit via [:72] um konsistentes
-Verhalten zwischen Versionen zu garantieren. Fuer normale ASCII-Passwoerter
+Verhalten zwischen Versionen zu garantieren. Für normale ASCII-Passwoerter
 < 72 Zeichen kein Effekt.
 """
 

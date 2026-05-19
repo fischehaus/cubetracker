@@ -7,7 +7,7 @@
 // DNFs sind kein Outlier (User hat sie schon markiert) und werden ausgeschlossen.
 //
 // Ziel: User sieht „in 3x3 ist 1 solve mit 0.67s sehr verdaechtig" und kann
-// per klick als DNF markieren oder loeschen, statt in der ganzen Liste zu suchen.
+// per klick als DNF markieren oder löschen, statt in der ganzen Liste zu suchen.
 
 export interface OutlierInput {
   id: number;
@@ -15,7 +15,7 @@ export interface OutlierInput {
   cube_type: string;
   dnf: boolean;
   plus_two: boolean;
-  /** Phase 8.1: nur fuer findOutliersBySession noetig, sonst optional */
+  /** Phase 8.1: nur für findOutliersBySession noetig, sonst optional */
   session_id?: number | null;
 }
 
@@ -31,11 +31,11 @@ export interface OutlierEntry {
 export interface OutlierGroup {
   /** Bei findOutliers (cube-mode) gleich dem cube_type. Bei
    *  findOutliersBySession (session-mode) gleich der session-id-as-string
-   *  oder "no-session". UI nutzt das fuer das group-Label-Lookup. */
+   *  oder "no-session". UI nutzt das für das group-Label-Lookup. */
   group_key: string;
   /** Backwards-compat: bei cube-mode der cube_type, bei session-mode leer. */
   cube_type: string;
-  /** Bei session-mode gefuellt mit der session-id (oder null fuer „ohne Session"). */
+  /** Bei session-mode gefuellt mit der session-id (oder null für „ohne Session"). */
   session_id?: number | null;
   median_ms: number;
   count_total: number;
@@ -43,7 +43,7 @@ export interface OutlierGroup {
 }
 
 const SPEED_FACTOR = 0.3; // alles unter 30% des Medians ist verdaechtig
-const SLOW_FACTOR = 5; // alles ueber 5x Median ist verdaechtig
+const SLOW_FACTOR = 5; // alles über 5x Median ist verdaechtig
 const MIN_SOLVES_PER_CUBE = 10; // unter 10 Solves keine sinnvolle Median-Schaetzung
 
 /**
@@ -134,7 +134,7 @@ function findOutliersByKey(
  * Findet Outlier-Solves, gruppiert nach Cube-Type.
  *
  * Cube-Types mit < MIN_SOLVES_PER_CUBE validen (non-DNF) Solves werden
- * uebersprungen — sonst gibt es bei wenigen Solves zu viele False-Positives.
+ * übersprungen — sonst gibt es bei wenigen Solves zu viele False-Positives.
  *
  * Rueckgabe: Array von Gruppen, sortiert nach Anzahl Outliers (most-suspicious first).
  * Gruppen ohne Outliers werden weggelassen.

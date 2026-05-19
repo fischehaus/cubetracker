@@ -2,7 +2,7 @@
 
 User-Storage = User-Model in db/models.py.
 Password-Hashing = bcrypt via auth/password.py.
-Token = JWT via auth/jwt.py (mit ver-Claim fuer Revocation).
+Token = JWT via auth/jwt.py (mit ver-Claim für Revocation).
 
 Sicherheits-Architektur:
 - Access-Token im Response-Body (kurz, 15 min)
@@ -68,7 +68,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 PASSWORD_RESET_TOKEN_LIFETIME = timedelta(hours=1)
 EMAIL_VERIFICATION_TOKEN_LIFETIME = timedelta(days=7)
 
-# Rate-Limits fuer Email-Endpoints (Spam-Schutz, jede Mail kostet Resend-Quota)
+# Rate-Limits für Email-Endpoints (Spam-Schutz, jede Mail kostet Resend-Quota)
 FORGOT_PASSWORD_LIMIT = "3/hour"  # pro IP
 VERIFY_RESEND_LIMIT = "3/hour"
 CHANGE_PASSWORD_LIMIT = "10/hour"
@@ -85,12 +85,12 @@ def _now_utc() -> datetime:
 
 
 def _bump_token_version(db: OrmSession, user_id: int) -> None:
-    """Atomares Increment fuer User.token_version — race-safe.
+    """Atomares Increment für User.token_version — race-safe.
 
     Sub-Agent-Finding K5: `user.token_version += 1` via ORM-read-modify-
     write kann bei parallelen Requests (Logout + Change-Password gleich-
     zeitig) ein Increment verlieren. SQL-side UPDATE garantiert dass
-    JEDER Aufruf den Zaehler erhoeht.
+    JEDER Aufruf den Zähler erhoeht.
     """
     db.execute(
         update(User)
@@ -104,7 +104,7 @@ def _dummy_hash() -> str:
     """Echter bcrypt-Hash eines unbenutzten Werts. Lazy-init via cache damit
     er nicht beim Modul-Import gerechnet wird (~250ms — Security-Finding #9).
 
-    Wird im Login-Endpoint genutzt damit User-existiert-vs-nicht NICHT ueber
+    Wird im Login-Endpoint genutzt damit User-existiert-vs-nicht NICHT über
     Response-Time leakable ist (Timing-Attack-Verteidigung).
     """
     return hash_password("dummy-for-timing-attack-defense")
@@ -114,7 +114,7 @@ def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
     """Setzt den Refresh-Token als HttpOnly-Cookie.
 
     - HttpOnly: JavaScript kann nicht draufzugreifen (XSS-sicher)
-    - Secure: nur ueber HTTPS uebertragen (in Prod)
+    - Secure: nur über HTTPS übertragen (in Prod)
     - SameSite=lax: kein CSRF aus Drittanbieter-Sites
     - Path=/auth: nur an Auth-Endpoints geschickt (kleiner Angriffsvektor)
     """
@@ -192,7 +192,7 @@ def register(
         seed_user_hardware(db, user.id, default_active=False)
     except Exception:  # noqa: BLE001
         # Logger ist auf Endpoint-Level evtl. nicht da, swallow silent —
-        # in den lifespan-Backfill wird der User dann beim naechsten
+        # in den lifespan-Backfill wird der User dann beim nächsten
         # Cold-Start nachgepflegt.
         db.rollback()
 
@@ -225,7 +225,7 @@ def login(
     )
     if user is None or not user.is_active:
         # Trotzdem hash-vergleich machen damit User-existiert vs not
-        # nicht ueber Timing rausfindbar ist. Wir nutzen einen echten
+        # nicht über Timing rausfindbar ist. Wir nutzen einen echten
         # bcrypt-hash von einem unbenutzten Wert (lazy via cache).
         verify_password(payload.password, _dummy_hash())
         raise invalid_credentials
@@ -242,9 +242,9 @@ def login(
     # blockt der User nicht. User-Wunsch: „bei jeder Neuanmeldung sollen die
     # Infos aktualisiert werden".
     # Lazy-import + try/except: QA-Fix M2 (2026-05-16). Lazy-Import allein
-    # verhindert nur Circular-Imports — wenn `feedparser` o.ae. fehlt, wuerde
+    # verhindert nur Circular-Imports — wenn `feedparser` o.ae. fehlt, würde
     # der ImportError synchron im Login-Endpoint vor add_task knallen und
-    # Login waere 500 obwohl Auth funktioniert. Defensive: failure des
+    # Login wäre 500 obwohl Auth funktioniert. Defensive: failure des
     # Background-Hooks darf den Login NIE blockieren.
     try:
         from news.refresh import trigger_background_refresh
@@ -304,7 +304,7 @@ def refresh(
     if user is None or not user.is_active:
         raise invalid
     if user.token_version != token_ver:
-        # Revoked (Logout / Password-Change). Zur Sicherheit Cookie loeschen.
+        # Revoked (Logout / Password-Change). Zur Sicherheit Cookie löschen.
         _clear_refresh_cookie(response)
         raise invalid
 
@@ -336,7 +336,7 @@ def logout(
 
 @router.get("/me", response_model=UserRead)
 def me(current_user: User = Depends(get_current_user)) -> User:
-    """Liefert den aktuell eingeloggten User. Nuetzlich fuer Frontend
+    """Liefert den aktuell eingeloggten User. Nützlich für Frontend
     um nach Login die User-Info zu holen."""
     return current_user
 
@@ -347,9 +347,9 @@ def update_me(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> User:
-    """Profil-Update: aktuell nur display_name. Email-Change geht ueber
-    /auth/change-email (mit Re-Verification), Passwort-Change ueber
-    /auth/change-password (mit alter-Passwort-Pruefung).
+    """Profil-Update: aktuell nur display_name. Email-Change geht über
+    /auth/change-email (mit Re-Verification), Passwort-Change über
+    /auth/change-password (mit alter-Passwort-Prüfung).
 
     Sub-Agent-Finding K4: explizite Whitelist als zweite Defense-Schicht
     zusaetzlich zum UserUpdate-Schema (das `extra=forbid` hat).
@@ -402,14 +402,14 @@ def change_password(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> Response:
-    """Eingeloggter User aendert sein Passwort.
+    """Eingeloggter User ändert sein Passwort.
 
     Sicherheits-Workflow:
-    1. current_password muss korrekt sein (sonst koennte gestohlener
+    1. current_password muss korrekt sein (sonst könnte gestohlener
        Access-Token zum Passwort-Hijack benutzt werden)
     2. Nach Erfolg: token_version++ -> ALLE bestehenden JWTs (auch der
        gerade verwendete!) werden ungueltig
-    3. Refresh-Cookie wird auch geloescht -> User muss neu einloggen
+    3. Refresh-Cookie wird auch gelöscht -> User muss neu einloggen
     """
     if not verify_password(payload.current_password, current_user.hashed_password):
         raise HTTPException(
@@ -437,13 +437,13 @@ def forgot_password(
 
     Sicherheit:
     - Antwortet IMMER 204 + sofort (Mail-Send via BackgroundTask),
-      egal ob Email existiert. Verhindert Email-Enumeration ueber
+      egal ob Email existiert. Verhindert Email-Enumeration über
       Response-Timing (Sub-Agent-Finding K3 + S7).
     - Token ist 288-bit secrets.token_urlsafe, in DB als Single-Use
     - Expires after 1h
     - Beim Erzeugen eines neuen Reset-Tokens werden ALLE bestehenden
       offenen Tokens dieses Users invalidiert (Finding S4) — sonst
-      koennten alte (geleakte) Tokens noch bis Expiry genutzt werden.
+      könnten alte (geleakte) Tokens noch bis Expiry genutzt werden.
     """
     email_lc = payload.email.lower().strip()
     user = db.scalar(select(User).where(User.email == email_lc))
@@ -464,7 +464,7 @@ def forgot_password(
         db.commit()
         # K3: Mail-Send in BackgroundTask -> Response sofort, kein Timing-Leak
         background.add_task(send_password_reset_email, email_lc, reset_token.token)
-    # Immer 204 — kein Leak ueber Existenz
+    # Immer 204 — kein Leak über Existenz
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -481,7 +481,7 @@ def reset_password(
     Sicherheit (Sub-Agent-Finding K2):
     - Atomares conditional UPDATE auf den Token: gleichzeitig pruefen
       (used_at IS NULL + expires_at > now) UND used_at setzen. Zwei
-      parallele Requests koennen nur einer durch.
+      parallele Requests können nur einer durch.
     - Generische Fehler (kein Leak ob Token existiert/expired/used)
     - token_version atomar inkrementiert
     """
@@ -613,13 +613,13 @@ def change_email(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> Response:
-    """User aendert Email. Workflow:
+    """User ändert Email. Workflow:
 
     1. current_password muss korrekt sein (verhindert Email-Hijack
        bei gestohlenem Access-Token)
     2. Token wird mit der NEUEN Email gespeichert, NICHT in user.email
-    3. User klickt Link in der Mail an die neue Adresse -> ueberschreibe
-       user.email (erst dann ist die Aenderung aktiv)
+    3. User klickt Link in der Mail an die neue Adresse -> überschreibe
+       user.email (erst dann ist die Änderung aktiv)
     4. Alte Email bleibt aktiv + funktional bis Klick
 
     Wenn die neue Adresse schon registriert ist: 409. Aber: wir

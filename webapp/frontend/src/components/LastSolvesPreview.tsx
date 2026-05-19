@@ -1,10 +1,10 @@
-// LastSolvesPreview: kompakte Live-Anzeige fuer den TIMER-Tab.
+// LastSolvesPreview: kompakte Live-Anzeige für den TIMER-Tab.
 //
-// Dazu eine kleine FormRow-Helper-Komponente fuer die Form-Vergleichszeilen.
+// Dazu eine kleine FormRow-Helper-Komponente für die Form-Vergleichszeilen.
 //
 // Zeigt zwei Bloecke:
 //  1. LIVE-Card: letzter Solve, ao5, ao12, plus Form-Vergleich gegen das
-//     Mittel der letzten N Solves (N waehlbar: 100/500/alle).
+//     Mittel der letzten N Solves (N wählbar: 100/500/alle).
 //  2. Letzte X Solves als sortierbare Tabelle (Solvenummer, Zeit, AO5,
 //     AO12). X einstellbar 10/20/50/100. Sortierung per Spalten-Klick.
 //
@@ -38,9 +38,9 @@ interface Props {
   sessionId: number | null;
 }
 
-// Lookback fuer AO100 — Tabelle zeigt X Zeilen, fetch holt X+99 damit auch
-// der aelteste angezeigte Solve seinen AO100 hat (sonst muesste man "—" zeigen).
-// War vorher 11 fuer AO12; jetzt 99 weil AO100 das groesste Window ist.
+// Lookback für AO100 — Tabelle zeigt X Zeilen, fetch holt X+99 damit auch
+// der aelteste angezeigte Solve seinen AO100 hat (sonst müsste man "—" zeigen).
+// War vorher 11 für AO12; jetzt 99 weil AO100 das groesste Window ist.
 const AO_LOOKBACK = 99;
 
 interface WindowOption {
@@ -53,7 +53,7 @@ const WINDOW_OPTIONS: WindowOption[] = [
   { value: 100_000, label: "alle" },
 ];
 
-// X-Picker fuer die Letzte-Solves-Tabelle
+// X-Picker für die Letzte-Solves-Tabelle
 const TABLE_SIZE_OPTIONS: { value: number; label: string }[] = [
   { value: 10, label: "10" },
   { value: 20, label: "20" },
@@ -62,7 +62,7 @@ const TABLE_SIZE_OPTIONS: { value: number; label: string }[] = [
 ];
 
 export function LastSolvesPreview({ cubeType, sessionId }: Props) {
-  // Window fuer Form-Vergleich (default 100, persistiert lokal pro session)
+  // Window für Form-Vergleich (default 100, persistiert lokal pro session)
   const [windowSize, setWindowSize] = useState<number>(100);
 
   // Tabelle: X-Picker + Sort-State. Default 20, Default-Sort: Solvenummer desc.
@@ -71,7 +71,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   // Wir laden max(windowSize, tableSize + AO_LOOKBACK) — eine Query reicht
-  // fuer beide Use-Cases (Form-Vergleich + Tabelle).
+  // für beide Use-Cases (Form-Vergleich + Tabelle).
   const fetchLimit = Math.max(windowSize, tableSize + AO_LOOKBACK);
   const params: { cube_type: string; session_id?: number; limit: number } = {
     cube_type: cubeType,
@@ -193,7 +193,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
               Averages: <strong>Mo3</strong> (arithmetisches Mittel der letzten
               3), <strong>AO5/AO12/AO100</strong> (WCA-konformer trimmed mean
               der letzten 5/12/100). „Form vs" vergleicht dein aktuelles
-              Niveau mit dem Mittel eines waehlbaren Fensters (letzte
+              Niveau mit dem Mittel eines wählbaren Fensters (letzte
               100/500/alle). Gruen = besser als Schnitt, rot = schlechter.
             </p>
           </InfoButton>
@@ -226,7 +226,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
 
           {/* 2x2-Grid mit den 4 aktuellen Averages. Mo3 wird clientseitig
               aus der bereits geladenen mo3Map abgeleitet (kein Backend-
-              Endpoint dafuer) — der neueste Solve hat die ID des letzten
+              Endpoint dafür) — der neueste Solve hat die ID des letzten
               Mo3-Fenster-Endes. */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -258,7 +258,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           </div>
 
           {/* Form-Vergleich: aktuelle ao5/ao12/ao100 vs Mittel des Fensters.
-              Selector gilt fuer alle drei Zeilen gleichzeitig. */}
+              Selector gilt für alle drei Zeilen gleichzeitig. */}
           <div className="pt-3 border-t border-gray-800">
             <div className="flex items-center justify-between gap-2 text-sm text-gray-500 mb-2">
               <div className="flex items-center gap-2">
@@ -337,7 +337,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
             </button>
             <button
               onClick={() => {
-                if (confirm("Letzten Solve loeschen?")) del.mutate(lastSolve.id);
+                if (confirm("Letzten Solve löschen?")) del.mutate(lastSolve.id);
               }}
               className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
             >
@@ -358,7 +358,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
               <p className="font-medium mb-1">Letzte Solves</p>
               <p>
                 Die zuletzt eingetragenen Solves dieses Cube-Typs. Anzahl
-                ueber den Selector waehlbar (10/20/50/100). Klick auf
+                über den Selector wählbar (10/20/50/100). Klick auf
                 Spaltenkopf sortiert (Solvenummer, Zeit, AO5, AO12). DNF
                 und leere Averages landen beim Sortieren am Ende.
               </p>
@@ -383,8 +383,8 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
         {sortedRows.length > 0 ? (
           // 5 Spalten (#, Zeit, Mo3, AO5, AO12, Aktion) — passen in die
           // schmale Sidebar ohne horizontalen Scroll. AO100 ist in der
-          // Live-Karte oben verfuegbar; in der Tabelle wenig nuetzlich,
-          // weil 100er-Fenster sich pro Zeile fast nicht aendert (User-
+          // Live-Karte oben verfügbar; in der Tabelle wenig nützlich,
+          // weil 100er-Fenster sich pro Zeile fast nicht ändert (User-
           // Wunsch 2026-05-17: AO100 aus der Tabelle raus).
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -458,13 +458,13 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                           onClick={() => {
                             if (
                               confirm(
-                                `Solve ${formatSolveTime(row.solve)} loeschen?`,
+                                `Solve ${formatSolveTime(row.solve)} löschen?`,
                               )
                             )
                               del.mutate(row.solve.id);
                           }}
                           className="text-xs rounded bg-gray-800 px-1.5 py-0.5 text-gray-500 hover:bg-red-700/40 hover:text-red-200"
-                          title="Solve loeschen"
+                          title="Solve löschen"
                         >
                           🗑
                         </button>
@@ -477,7 +477,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           </div>
         ) : (
           <p className="text-base text-gray-500">
-            Noch keine Solves fuer {cubeType}. Tipp eine Zeit rechts ein.
+            Noch keine Solves für {cubeType}. Tipp eine Zeit rechts ein.
           </p>
         )}
         <p className="mt-2 text-[10px] text-gray-600">
@@ -489,7 +489,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
 }
 
 // ============================================================
-// Sortable Table Header (kleiner Helper — nur fuer diese Komponente)
+// Sortable Table Header (kleiner Helper — nur für diese Komponente)
 // ============================================================
 
 function SortableHeader({

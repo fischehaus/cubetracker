@@ -5,9 +5,9 @@
 // d.h. alle Tabs zwangs-gleichbreit. Auf Phone-Breiten (320-375px) wird
 // das mit Icon+Label unleserlich oder bricht um.
 //
-// Loesung:
+// Lösung:
 //   - Mobile (default): horizontal scrollbar, Tabs in natuerlicher Breite
-//     (shrink-0), whitespace-nowrap, snap-scroll fuer sauberes Wischen.
+//     (shrink-0), whitespace-nowrap, snap-scroll für sauberes Wischen.
 //   - Desktop (md+): flex-1 wie vorher — alle Tabs gleichmaessig verteilt,
 //     kein Scroll noetig.
 //
@@ -26,7 +26,7 @@ interface Props {
   tabs: ScrollableTabItem[];
   current: string;
   onChange: (id: string) => void;
-  /** Pflicht — aria-label fuer die <nav>. */
+  /** Pflicht — aria-label für die <nav>. */
   ariaLabel: string;
   /** "lg" = Top-Level (h-14, text-lg), "md" = Sub-Tabs (h-11, text-base). */
   size?: "lg" | "md";

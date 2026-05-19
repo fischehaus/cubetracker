@@ -57,7 +57,7 @@ export function AdminUsersPanel() {
   const isAdmin = me?.is_admin ?? false;
   const { data, isLoading, error, refetch, isFetching } = useAdminUsers(isAdmin);
 
-  // Inline-State fuer Confirm-/Mail-Dialoge
+  // Inline-State für Confirm-/Mail-Dialoge
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
   const [deleteTyped, setDeleteTyped] = useState("");
   const [mailFor, setMailFor] = useState<AdminUser | null>(null);
@@ -96,7 +96,7 @@ export function AdminUsersPanel() {
               Badges. Aktionen pro User: Mail senden, Email manuell als
               verifiziert markieren (Support-Hilfe), Deaktivieren/Aktivieren,
               DSGVO-Hard-Delete (mit Pflicht-Confirm-String). Du kannst
-              dich selbst nicht deaktivieren/loeschen.
+              dich selbst nicht deaktivieren/löschen.
             </p>
           </InfoButton>
         </div>
@@ -308,7 +308,7 @@ function UserRow({
               onClick={onWantDelete}
               disabled={patch.isPending}
               className="rounded bg-red-600/30 px-2 py-1 text-red-200 hover:bg-red-600/50 disabled:opacity-50"
-              title="DSGVO-Loeschen (Cascade, alle Daten weg)"
+              title="DSGVO-Löschen (Cascade, alle Daten weg)"
             >
               🗑 löschen
             </button>

@@ -1,8 +1,8 @@
 // CsTimerExportPanel: exportiert die DB im csTimer-JSON-Format.
 // Spiegel zum ImportPanel — wer csTimer als Hauptwerkzeug nutzt
-// (oder zurueck-migrieren will), bekommt seine Daten zurueck.
+// (oder zurück-migrieren will), bekommt seine Daten zurück.
 //
-// Was nicht im Export ist (im Hilfetext erklaert):
+// Was nicht im Export ist (im Hilfetext erklärt):
 //  - Hardware-Zuordnung (csTimer kennt es nicht)
 //  - Achievements/Challenges (cubetracker-spezifisch)
 //
@@ -89,7 +89,7 @@ export function CsTimerExportPanel() {
       <p className="text-xs text-gray-500">
         <strong>Nicht im Export</strong>: Hardware-Zuordnung (csTimer
         kennt das Konzept nicht) und cubetracker-Achievements/Challenges.
-        Fuer Voll-Backup bitte das BackupPanel oben verwenden.
+        Für Voll-Backup bitte das BackupPanel oben verwenden.
         Solves ohne Session-Zuordnung landen in einer Pseudo-Session
         „Ohne Session".
       </p>

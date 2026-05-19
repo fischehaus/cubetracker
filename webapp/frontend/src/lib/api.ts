@@ -1,6 +1,6 @@
-// API-Layer: axios-Setup + Tanstack-Query-Hooks fuer alle Solve+Session-Endpoints.
+// API-Layer: axios-Setup + Tanstack-Query-Hooks für alle Solve+Session-Endpoints.
 //
-// Phase W (Multi-User-Web): umgebaut fuer Auth.
+// Phase W (Multi-User-Web): umgebaut für Auth.
 // - baseURL kommt aus VITE_API_BASE-Env (Render-Build) oder localhost:8000 (Dev)
 // - Bearer-Token-Header automatisch via Request-Interceptor
 // - 401 -> /auth/refresh -> Retry (Single-Flight via refreshPromise)
@@ -107,7 +107,7 @@ api.interceptors.response.use(
 );
 
 // ============================================================
-// Stub-Helper fuer Endpoints, die im Webapp-Backend (Phase W.3)
+// Stub-Helper für Endpoints, die im Webapp-Backend (Phase W.3)
 // noch nicht existieren — schluckt 404 + liefert default.
 // ============================================================
 async function withStub<T>(call: () => Promise<T>, fallback: T): Promise<T> {
@@ -211,7 +211,7 @@ api.interceptors.response.use((response) => {
 export interface SolveListParams {
   cube_type?: string;
   session_id?: number;
-  /** Phase 8.1: Filter auf alg_case (z.B. "PLL-Tperm") fuer DrillCard-Liste */
+  /** Phase 8.1: Filter auf alg_case (z.B. "PLL-Tperm") für DrillCard-Liste */
   alg_case?: string;
   limit?: number;
   offset?: number;
@@ -551,7 +551,7 @@ export function useTemporalStats(
 }
 
 // ============================================================
-// Activity (aggregierte Solve-Counts ueber Zeit, day/week/month)
+// Activity (aggregierte Solve-Counts über Zeit, day/week/month)
 // ============================================================
 
 export type ActivityGranularity = "day" | "week" | "month";
@@ -686,7 +686,7 @@ export function useDeleteSession(): UseMutationResult<
 }
 
 /**
- * Mergt source-Session in target — Solves wandern, source wird geloescht,
+ * Mergt source-Session in target — Solves wandern, source wird gelöscht,
  * Notes werden in target appended.
  */
 export function useMergeSession(): UseMutationResult<
@@ -723,7 +723,7 @@ export interface SessionSuggestion {
 }
 
 /**
- * Empfohlene Session fuer einen Cube-Type (jene mit den meisten Solves).
+ * Empfohlene Session für einen Cube-Type (jene mit den meisten Solves).
  * Liefert session_id=null wenn es keinen passenden Solve gibt.
  */
 export function useSuggestSession(
@@ -891,7 +891,7 @@ export interface HardwareSuggestion {
 }
 
 /**
- * Empfohlene Hardware fuer einen Cube-Type:
+ * Empfohlene Hardware für einen Cube-Type:
  * - meiste Solves dieses Cubes (most_used), oder
  * - erste aktive Hardware mit passendem primary_cube_type (first_active),
  *   wenn noch keine Solves vorliegen.
@@ -1070,7 +1070,7 @@ export function useDismissChallenge(): UseMutationResult<
 }
 
 // ============================================================
-// Admin (Phase W.admin) — Cluster-Statistiken fuer App-Betreiber
+// Admin (Phase W.admin) — Cluster-Statistiken für App-Betreiber
 // ============================================================
 
 export interface AdminTopCube {
@@ -1102,8 +1102,8 @@ export interface AdminStats {
 }
 
 /**
- * Cluster-Statistiken — nur fuer Admins (ADMIN_EMAILS-Env-Var).
- * Backend liefert 404 fuer Non-Admins (kein Probing). Frontend
+ * Cluster-Statistiken — nur für Admins (ADMIN_EMAILS-Env-Var).
+ * Backend liefert 404 für Non-Admins (kein Probing). Frontend
  * sollte den Hook nur enable'n wenn user.is_admin.
  */
 export function useAdminStats(
@@ -1116,8 +1116,8 @@ export function useAdminStats(
       return r.data;
     },
     enabled,
-    // Stats sind teuer (COUNT auf grossen Tabellen), Rate-Limit 30/min.
-    // 60s staleTime ist mehr als genug fuer ein Admin-Dashboard.
+    // Stats sind teuer (COUNT auf großen Tabellen), Rate-Limit 30/min.
+    // 60s staleTime ist mehr als genug für ein Admin-Dashboard.
     staleTime: 60_000,
   });
 }
@@ -1187,7 +1187,7 @@ export function useAdminDeleteUser(): UseMutationResult<
     mutationFn: async ({ userId }) => {
       // Confirm-Param wird vom Backend exakt verglichen — Frontend baut ihn
       // genauso. Doppelter Schutz: der User muss den Text auch in der UI
-      // tippen, dann waere er hier in einem zusaetzlichen state-Feld.
+      // tippen, dann wäre er hier in einem zusaetzlichen state-Feld.
       await api.delete(`/admin/users/${userId}`, {
         params: { confirm: `DELETE_USER_${userId}` },
       });
@@ -1228,9 +1228,9 @@ export interface AdminAnnouncementResult {
   sent: number;
   failed: number;
   failures?: string[];
-  /** Server-Cap fuer synchron-versendbare Empfaenger (M2-Fix). */
+  /** Server-Cap für synchron-versendbare Empfaenger (M2-Fix). */
   max_recipients?: number;
-  /** true wenn recipient_count > max_recipients — echter Send wuerde 400. */
+  /** true wenn recipient_count > max_recipients — echter Send würde 400. */
   over_cap?: boolean;
 }
 
@@ -1258,7 +1258,7 @@ export function useAdminAnnouncement(): UseMutationResult<
 export interface FriendUserBrief {
   id: number;
   display_name: string | null;
-  /** Nur fuer accepted-Friends gesetzt. pending-Anfragen leaken keine Email. */
+  /** Nur für accepted-Friends gesetzt. pending-Anfragen leaken keine Email. */
   email: string | null;
 }
 
@@ -1403,7 +1403,7 @@ export function useRemoveFriendship(): UseMutationResult<
   });
 }
 
-/** Toggle is_discoverable + display_name via PATCH /auth/me. Auch fuer
+/** Toggle is_discoverable + display_name via PATCH /auth/me. Auch für
  *  Display-Name-Updates wiederverwendbar (existierender Endpoint). */
 export function useUpdateProfile(): UseMutationResult<
   unknown,
@@ -1419,7 +1419,7 @@ export function useUpdateProfile(): UseMutationResult<
     onSuccess: () => {
       // /auth/me liefert neuen User — AuthContext muss refreshen.
       // Wir feuern unser eigenes Event statt direkt im Hook auf
-      // AuthContext zuzugreifen (zirkulaer waere doof).
+      // AuthContext zuzugreifen (zirkulaer wäre doof).
       window.dispatchEvent(new Event("cubetracker:profile-updated"));
       qc.invalidateQueries({ queryKey: ["friends-list"] });
     },
@@ -1542,7 +1542,7 @@ export function usePatchNotes(): UseQueryResult<ChangelogResponse> {
       const r = await api.get<ChangelogResponse>("/api/changelog");
       return r.data;
     },
-    // Patch-Notes aendern sich nur bei Deploy — 5min Cache reicht.
+    // Patch-Notes ändern sich nur bei Deploy — 5min Cache reicht.
     staleTime: 5 * 60_000,
   });
 }
@@ -1589,11 +1589,11 @@ export interface UpcomingCompetitionsResponse {
 }
 
 /**
- * WCA-Turniere in der Naehe des Users. Voraussetzung: User hat
+ * WCA-Turniere in der Nähe des Users. Voraussetzung: User hat
  * postal_code im Profil — Backend antwortet sonst 422.
  *
- * Default: max 300km, 10 Eintraege, 6 Monate Vorausschau.
- * Cache 30min (Liste aendert sich selten — WCA published Turniere
+ * Default: max 300km, 10 Einträge, 6 Monate Vorausschau.
+ * Cache 30min (Liste ändert sich selten — WCA published Turniere
  * Wochen vorher).
  */
 // ============================================================

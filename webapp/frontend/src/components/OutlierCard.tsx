@@ -1,5 +1,5 @@
 // OutlierCard: zeigt verdaechtige Solve-Zeiten gruppiert nach Cube-Type.
-// Quick-Actions: DNF setzen oder loeschen — direkt aus der Card.
+// Quick-Actions: DNF setzen oder löschen — direkt aus der Card.
 //
 // Phase L-2: managed eigenen Session-Filter intern (vorher vom Aussen
 // per prop) — die Card lebt jetzt im VERWALTUNG-Tab und hat dort
@@ -30,7 +30,7 @@ export function OutlierCard() {
   const [groupMode, setGroupMode] = useState<GroupMode>("cube");
   const { data: sessions } = useSessions();
 
-  // Cube-uebergreifend laden, optional auf Session einschraenken.
+  // Cube-übergreifend laden, optional auf Session einschraenken.
   const params: SolveListParams = { limit: 100_000 };
   if (sessionId !== null) params.session_id = sessionId;
   const { data: solves, isLoading } = useSolves(params);
@@ -95,8 +95,8 @@ export function OutlierCard() {
               Listet Solves die deutlich vom Median deines Cube-Typs
               abweichen (z.B. 3x mehr als der Median). Typische Ursachen:
               vertippte Zeit, csTimer-Import mit falscher Skalierung,
-              Misclicks. Du kannst sie direkt loeschen oder DNF/+2 nachpflegen.
-              Per-Session oder per-Cube-Median waehlbar.
+              Misclicks. Du kannst sie direkt löschen oder DNF/+2 nachpflegen.
+              Per-Session oder per-Cube-Median wählbar.
             </p>
           </InfoButton>
         </div>
@@ -104,7 +104,7 @@ export function OutlierCard() {
           {/* Phase 8.1: Toggle Median-pro-Cube vs Median-pro-Session.
               Sinnvoll wenn man mehrere Sessions desselben Cubes hat
               (z.B. „3x3 Training" + „3x3 Speed") — pro-Session-Median
-              ist ehrlicher fuer Anomalie-Erkennung. */}
+              ist ehrlicher für Anomalie-Erkennung. */}
           <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 text-xs">
             <button
               onClick={() => setGroupMode("cube")}
@@ -154,7 +154,7 @@ export function OutlierCard() {
       {groups.length === 0 ? (
         <p className="text-base text-gray-400">
           Keine verdaechtigen Zeiten in
-          {sessionId !== null ? " der gewaehlten Session" : " den Daten"}. ✅
+          {sessionId !== null ? " der gewählten Session" : " den Daten"}. ✅
         </p>
       ) : (
         <p className="text-sm text-gray-400 mb-4">
@@ -179,7 +179,7 @@ export function OutlierCard() {
             <div className="text-sm text-gray-400 mb-2">
               <span className="text-gray-200 font-medium">{label}</span>
               <span className="ml-2">
-                Median {formatTime(g.median_ms)} ueber {g.count_total} Solves
+                Median {formatTime(g.median_ms)} über {g.count_total} Solves
               </span>
             </div>
             <ul className="space-y-1.5">
@@ -217,11 +217,11 @@ export function OutlierCard() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm(`Solve #${o.id} (${formatTime(o.effective_ms)}) wirklich loeschen?`))
+                        if (confirm(`Solve #${o.id} (${formatTime(o.effective_ms)}) wirklich löschen?`))
                           del.mutate(o.id);
                       }}
                       className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-                      title="Solve loeschen"
+                      title="Solve löschen"
                     >
                       🗑
                     </button>

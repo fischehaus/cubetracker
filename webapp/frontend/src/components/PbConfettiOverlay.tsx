@@ -2,7 +2,7 @@
 // (Backend-Header X-PB-Achieved) eine Konfetti-Animation feuert plus
 // einen kleinen Toast-Banner unten oben anzeigt.
 //
-// Mehrere PB-Typen pro Solve moeglich (single + ao5 + ao12 gemeinsam =
+// Mehrere PB-Typen pro Solve möglich (single + ao5 + ao12 gemeinsam =
 // "perfect storm"). Wir spielen dann ein dichteres Konfetti-Pattern.
 
 import { useEffect, useState } from "react";

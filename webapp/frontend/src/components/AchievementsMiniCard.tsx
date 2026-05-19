@@ -5,7 +5,7 @@
 //  - die 3 zuletzt freigeschalteten Erfolge (icon + name)
 //  - Link „Alle Erfolge ansehen" → wechselt zum Trainer-Tab
 //
-// Bewusst klein gehalten — fuer das Dashboard-Top-Row.
+// Bewusst klein gehalten — für das Dashboard-Top-Row.
 
 import { useMemo } from "react";
 import { useAchievements } from "../lib/api";
@@ -53,7 +53,7 @@ export function AchievementsMiniCard({ onSwitchTab }: Props) {
             <p>
               30+ Personal-Trainer-Ziele die du nebenbei freischaltest
               (z.B. „erstes Sub-20-Solve", „100 Solves an einem Tag",
-              „PB-Streak"). Klick auf die Card oeffnet den Trainer-Tab
+              „PB-Streak"). Klick auf die Card öffnet den Trainer-Tab
               mit allen Erfolgen + Fortschritts-Anzeige.
             </p>
           </InfoButton>

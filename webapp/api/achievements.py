@@ -29,7 +29,7 @@ def list_achievements(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    """Alle Definitionen mit unlocked-Status fuer den aktuellen User."""
+    """Alle Definitionen mit unlocked-Status für den aktuellen User."""
     unlocked_rows = db.scalars(
         select(Achievement).where(Achievement.user_id == current_user.id)
     ).all()
@@ -54,7 +54,7 @@ def recheck_achievements(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Manueller Voll-Recheck (z.B. nach Import grosser Datenmengen)."""
+    """Manueller Voll-Recheck (z.B. nach Import großer Datenmengen)."""
     new_codes = run_achievement_check(db, current_user.id)
     total_unlocked = db.scalar(
         select(func.count(Achievement.id)).where(Achievement.user_id == current_user.id)

@@ -42,7 +42,7 @@ export function RoadmapModal({ onClose }: Props) {
         </div>
 
         <p className="mt-4 mb-5 text-xs text-gray-500">
-          Hast du Wuensche oder fehlende Punkte? Sag's uns via Footer-Link
+          Hast du Wünsche oder fehlende Punkte? Sag's uns via Footer-Link
           „Feedback" oder direkt auf GitHub.
         </p>
 

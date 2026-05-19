@@ -1,10 +1,10 @@
 """Feedback-API (Phase W.feedback, 2026-05-17).
 
 POST /feedback — User schickt Feedback an den Admin via Resend-Email.
-Alternative zu GitHub-Issues fuer User ohne GitHub-Account.
+Alternative zu GitHub-Issues für User ohne GitHub-Account.
 
 Hartes Rate-Limit (3/Stunde pro IP) gegen Spam. Auth pflicht damit nur
-echte User schreiben koennen + Sender-Info im Email-Body landet.
+echte User schreiben können + Sender-Info im Email-Body landet.
 """
 
 from __future__ import annotations
@@ -31,8 +31,8 @@ class FeedbackPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     # type bewusst eingeschraenkt — User soll keinen freien String setzen
-    # damit wir die Email-Betreffs vorhersagbar halten + ggf. spaeter
-    # routen koennen (Bug → Issue-Tracker, Feature → Roadmap-Doku, etc.).
+    # damit wir die Email-Betreffs vorhersagbar halten + ggf. später
+    # routen können (Bug → Issue-Tracker, Feature → Roadmap-Doku, etc.).
     feedback_type: Literal["bug", "feature", "other"] = "other"
     message: str = Field(min_length=10, max_length=4000)
 
@@ -58,7 +58,7 @@ def submit_feedback(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=(
                 f"Feedback konnte nicht versendet werden ({result.error}). "
-                "Bitte versuche es spaeter erneut oder oeffne direkt ein "
+                "Bitte versuche es später erneut oder oeffne direkt ein "
                 "GitHub-Issue."
             ),
         )

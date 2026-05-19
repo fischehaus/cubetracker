@@ -1,33 +1,33 @@
 // Scramble-Generierung (Phase 8a) — duenner Wrapper um scrambow + eigene
-// Random-Move-Generatoren fuer Puzzles, die scrambow nicht abdeckt.
+// Random-Move-Generatoren für Puzzles, die scrambow nicht abdeckt.
 //
 // scrambow = csTimer-Algorithmen geportet, deckt alle WCA-Events +
-// die meisten Subsets fuer Algorithmus-Training ab. Aber: Ivy, Gear,
+// die meisten Subsets für Algorithmus-Training ab. Aber: Ivy, Gear,
 // Redi, Master Pyraminx, Master Skewb sind NICHT in scrambow drin.
-// Fuer diese liefern wir einen einfachen Random-Move-Scrambler mit
+// Für diese liefern wir einen einfachen Random-Move-Scrambler mit
 // „kein direktes Wiederholen derselben Achse"-Filter — nicht
-// WCA-quality, aber sauber fuer Casual-Training.
+// WCA-quality, aber sauber für Casual-Training.
 //
-// Architektur: pure helpers + Kategorie-Listen fuer die UI.
+// Architektur: pure helpers + Kategorie-Listen für die UI.
 //
 // Kein Singleton-State — jeder Aufruf macht eine frische Scrambow-
 // Instanz. Das ist OK weil scrambow keine teure Initialisierung hat
 // und wir so race-conditions zwischen concurrent generations vermeiden.
 
 // Wir importieren NICHT von "scrambow" direkt, weil dessen UMD-Bundle
-// von Vite 8 / Rolldown wegen scope-uebergreifender `f`-Wiederverwendung
+// von Vite 8 / Rolldown wegen scope-übergreifender `f`-Wiederverwendung
 // nicht geparst werden kann. Stattdessen patched-vendor-copy unter
 // src/vendor/, die das zweite `f` zu `_F` umbenennt (semantisch
 // identisch, im skewb-Scrambler-Loop). Types kommen aus dem npm-Paket
 // via *.d.ts-Stub im selben vendor-Ordner.
 import { Scrambow } from "../vendor/scrambow-patched";
-// Eigenbau-Random-State-Solver fuer einzelne Custom-Puzzles
+// Eigenbau-Random-State-Solver für einzelne Custom-Puzzles
 // (Phase W.ivy-rs, 2026-05-17 — erstes Puzzle). Reines TypeScript ohne
 // externe Deps, BFS-Lookup-Table beim ersten Aufruf. Lesson aus dem
 // cstimer_module-Browser-Crash: keine Native-Node-Globals importieren,
 // daher Eigenbau statt npm-Paket.
 import { generateIvyScramble } from "./ivyScramble";
-// csTimer-Random-State-Scrambler fuer inoffizielle Cubes (Phase
+// csTimer-Random-State-Scrambler für inoffizielle Cubes (Phase
 // W.cstimer-vendor, 2026-05-17). GPL-v3, gevendorter Subset aus
 // github.com/cs0x7f/cstimer. Public-API: getCstimerScramble(type).
 // Liefert null wenn der Type nicht registriert ist (= safe-fallback
@@ -35,18 +35,18 @@ import { generateIvyScramble } from "./ivyScramble";
 import { getCstimerScramble } from "./cstimer-vendor";
 
 /**
- * Mapping unserer App-Codes auf csTimer-internal-Types. Nur Eintraege
+ * Mapping unserer App-Codes auf csTimer-internal-Types. Nur Einträge
  * hier werden via csTimer-Pfad bedient — andere fallen auf scrambow
- * oder Random-Move zurueck.
+ * oder Random-Move zurück.
  *
  *   "gearso"  = Gear Cube, random-state-shortened (csTimer-Default, 4-10 moves)
  *   "rediso"  = Redi Cube, random-state
  *   "mpyrso"  = Master Pyraminx, random-state
- *   "ivyso"   = Ivy Cube, random-state (in csTimer-Source ueberraschend
+ *   "ivyso"   = Ivy Cube, random-state (in csTimer-Source überraschend
  *               im skewb.js-File definiert, nicht in einem eigenen ivy.js)
  *
  * Phase W.cstimer-ivy-switch (2026-05-17): Ivy wurde von unserem Eigenbau-
- * BFS-Solver (ivyScramble.ts) auf csTimer umgeschwenkt fuer Konsistenz.
+ * BFS-Solver (ivyScramble.ts) auf csTimer umgeschwenkt für Konsistenz.
  * Eigenbau-Solver bleibt als Fallback hinter csTimer im Cascade falls
  * csTimer-Init crashen sollte.
  *
@@ -70,7 +70,7 @@ const APP_TO_CSTIMER: Record<string, string> = {
   // square_2/curvy_copter/diamond/megaminx waren im ersten Push enthalten,
   // returnen aber leerstring/null weil src/js/solver/ + weitere lib-Files
   // fehlen. Im Cascade landeten sie still bei scrambow (das die Codes nicht
-  // kennt) → User sah "Scramble nicht verfuegbar". Saubere Loesung: vorerst
+  // kennt) → User sah "Scramble nicht verfügbar". Saubere Lösung: vorerst
   // raus, in der Roadmap als P6-Item mit Solver-Vendoring-Aufwand notiert.
 };
 
@@ -79,7 +79,7 @@ const APP_TO_CSTIMER: Record<string, string> = {
  * scrambow-internen Typen-Code.
  *
  * OH und 3BLD nutzen jeweils 3x3-WCA-Scrambles (csTimer-Konvention).
- * Unbekannte cube_types fallen auf 333 zurueck — sicherer Default,
+ * Unbekannte cube_types fallen auf 333 zurück — sicherer Default,
  * weil 3x3 immer scrambelbar ist.
  */
 export function cubeTypeToScrambowType(cubeType: string): string {
@@ -139,18 +139,18 @@ export function cubeTypeToScrambowType(cubeType: string): string {
 }
 
 /**
- * Subset-IDs fuer den Algorithm-Trainer (Phase 8b verwendet).
+ * Subset-IDs für den Algorithm-Trainer (Phase 8b verwendet).
  * Bewusst eine eigene Liste: nicht jeder scrambow-type ist ein
  * Trainings-Subset (444, mega etc. sind Events, keine Subsets).
  *
  * Liste konservativ — nur was im MVP wirklich getestet ist.
- * Erweiterung spaeter ohne Backend-Aenderung moeglich.
+ * Erweiterung später ohne Backend-Änderung möglich.
  */
 export const ALG_TRAINER_SUBSETS = ["pll", "oll"] as const;
 export type AlgTrainerSubset = (typeof ALG_TRAINER_SUBSETS)[number];
 
 /**
- * Liste aller fuer ScrambleType-Override unterstuetzten Strings.
+ * Liste aller für ScrambleType-Override unterstuetzten Strings.
  * Wird in Session.scramble_type genutzt — Phase 8b verzahnt das
  * mit dem Timer.
  */
@@ -195,7 +195,7 @@ const CSTIMER_TO_SCRAMBOW: Record<string, string> = {
  *   1. csTimer-Code (z.B. "444wca") → scrambow-Code aus der Map
  *   2. Bereits scrambow-Code, Custom-Puzzle (ivy/gear/...) oder Trainer-
  *      Subset (z.B. "pll", "333") → direkt
- *   3. Unbekannter String → null (Caller faellt auf cube_type-Mapping zurueck)
+ *   3. Unbekannter String → null (Caller faellt auf cube_type-Mapping zurück)
  */
 export function resolveScrambleTypeOverride(raw: string): string | null {
   const trimmed = raw.trim();
@@ -219,9 +219,9 @@ export function resolveScrambleTypeOverride(raw: string): string | null {
 }
 
 // =====================================================================
-// Scramble-Kategorien fuer die Picker-UI in ScrambleCard (Welle 3,
+// Scramble-Kategorien für die Picker-UI in ScrambleCard (Welle 3,
 // 2026-05-16). WCA = offizielle Wettkampf-Cubes, Inoffiziell = alles
-// andere, was wir scramblen koennen (teils via scrambow, teils via
+// andere, was wir scramblen können (teils via scrambow, teils via
 // unserem eigenen Random-Move-Fallback weiter unten).
 // =====================================================================
 
@@ -251,7 +251,7 @@ export const WCA_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
  * Inoffizielle Puzzles. Teilweise via scrambow (fto), teils via
  * eigenem Random-Move-Generator (ivy, gear, redi, master pyraminx,
  * master skewb). Die eigenen Scrambles sind NICHT WCA-quality
- * (keine garantierte Mindest-Distanz), aber gut genug fuer Casual-
+ * (keine garantierte Mindest-Distanz), aber gut genug für Casual-
  * Training.
  */
 export const UNOFFICIAL_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
@@ -268,21 +268,21 @@ export const UNOFFICIAL_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
   { code: "tower", label: "Tower Cube (2x2x3)" },
   // ENTFERNT (QA-Fix 2026-05-17): helicopter/gigaminx/bicube/bandaged_square/
   // square_2/curvy_copter/diamond brauchen src/js/solver/-Files die wir noch
-  // nicht vendored haben. Returnten leerstring → "Scramble nicht verfuegbar"
+  // nicht vendored haben. Returnten leerstring → "Scramble nicht verfügbar"
   // in UI. Bis solver-Vendoring (Roadmap P6) raus aus User-facing Liste.
 ];
 
 /**
- * Defaul-Scramble-Code fuer einen App-cube_type — Convenience-Wrapper,
- * gibt dasselbe zurueck wie cubeTypeToScrambowType, aber semantisch
- * klar als „passender Default fuer den Picker" gemeint.
+ * Defaul-Scramble-Code für einen App-cube_type — Convenience-Wrapper,
+ * gibt dasselbe zurück wie cubeTypeToScrambowType, aber semantisch
+ * klar als „passender Default für den Picker" gemeint.
  */
 export function defaultScrambleTypeForCube(cubeType: string): string {
   return cubeTypeToScrambowType(cubeType);
 }
 
 /**
- * Spec fuer den eigenen Random-Move-Generator. `moves` = Basis-Faces,
+ * Spec für den eigenen Random-Move-Generator. `moves` = Basis-Faces,
  * `modifiers` = Suffixe (z.B. "" oder "'"), `length` = Default-Move-Count.
  * Konsekutiv-Filter: kein direkt wiederholtes Base-Move (z.B. "L L'" raus).
  */
@@ -296,7 +296,7 @@ const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
   // Ivy Cube — Fix 2026-05-17 nach User-Hinweis dass Scrambles nicht
   // korrekt waren. Korrekte Standard-Notation (Speedsolving-Wiki):
   // 4 Eck-Achsen U/L/R/B (NICHT F — meine vorherige Liste war falsch).
-  // Modifier "'" fuer CCW. 8-Move-Scrambles sind csTimer-Default.
+  // Modifier "'" für CCW. 8-Move-Scrambles sind csTimer-Default.
   // Quelle: https://www.speedsolving.com/wiki/index.php/Ivy_Cube
   ivy: {
     moves: ["U", "L", "R", "B"],
@@ -305,7 +305,7 @@ const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
   },
   // Gear Cube — Fix 2026-05-17 (kritischster Bug der alten Version).
   // Wegen der Zahnrad-Mechanik sind NUR 180°-Drehungen physikalisch
-  // moeglich — 90°-Turns gibt's nicht. Alle 6 Faces mit ausschliesslich
+  // möglich — 90°-Turns gibt's nicht. Alle 6 Faces mit ausschließlich
   // "2"-Suffix. Quelle: https://en.wikipedia.org/wiki/Gear_Cube
   // Vorher hatte ich faelschlich nur 3 Faces + Mischung 90°/180° —
   // beide grob falsch.
@@ -316,14 +316,14 @@ const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
   },
   // Redi Cube — csTimer nutzt eine MoYu-Notation, die uneinheitlich
   // dokumentiert ist (mehrere Varianten in der Community). Wir bleiben
-  // bei der Gross-/Kleinbuchstaben-Variante mit CCW-Suffix. Nicht
+  // bei der Groß-/Kleinbuchstaben-Variante mit CCW-Suffix. Nicht
   // perfekt csTimer-kompatibel, aber inhaltlich plausibel.
   redi: {
     moves: ["L", "R", "B", "F", "l", "r", "b", "f"],
     modifiers: ["", "'"],
     length: 15,
   },
-  // Master Pyraminx: 4 Tip-Achsen (gross) + 4 Wide-Layer (klein),
+  // Master Pyraminx: 4 Tip-Achsen (groß) + 4 Wide-Layer (klein),
   // jeweils mit CCW-Option.
   master_pyraminx: {
     moves: ["U", "L", "R", "B", "u", "l", "r", "b"],
@@ -338,7 +338,7 @@ const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
   },
 };
 
-/** Random-Helper — Math.random ist fuer Scrambles voellig ausreichend. */
+/** Random-Helper — Math.random ist für Scrambles voellig ausreichend. */
 function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -348,10 +348,10 @@ function pick<T>(arr: T[]): T {
  * Wiederholen derselben Base"-Filter (sonst kommen Moves wie "L L'"
  * raus, die effektiv nichts tun).
  *
- * QA-Fix Welle 3 (2026-05-16): Defensive Guard fuer `spec.moves.length < 2`.
- * Ohne Guard waere die while-Schleife ein Endlos-Loop (jeder neue Pick
- * waere immer derselbe wie lastBase, continue, repeat). Aktuell hat keine
- * Spec nur 1 Move — aber bei einem zukuenftigen Konfig-Tippfehler wuerde
+ * QA-Fix Welle 3 (2026-05-16): Defensive Guard für `spec.moves.length < 2`.
+ * Ohne Guard wäre die while-Schleife ein Endlos-Loop (jeder neue Pick
+ * wäre immer derselbe wie lastBase, continue, repeat). Aktuell hat keine
+ * Spec nur 1 Move — aber bei einem zukuenftigen Konfig-Tippfehler würde
  * der Tab haengen. Bei <2 Moves geben wir den Filter auf — Qualitaet
  * wird dann schlechter, aber Tab bleibt responsive.
  */
@@ -373,7 +373,7 @@ function generateCustomScramble(spec: CustomScrambleSpec): string {
  * Liste der Custom-Puzzles, die einen Random-State-Scrambler haben
  * (= WCA-Quality, im Sinne von "korrekte Mindest-Distanz garantiert").
  * Wird von der UI genutzt um den „nicht WCA-Quality"-Disclaimer NUR
- * fuer die Random-Move-Puzzles anzuzeigen.
+ * für die Random-Move-Puzzles anzuzeigen.
  *
  * Alle ausser master_skewb haben jetzt Random-State (W.cstimer-vendor +
  * W.cstimer-more-puzzles, 2026-05-17). Ivy hat zudem Eigenbau-BFS als
@@ -396,11 +396,11 @@ export function isWcaQualityCustomPuzzle(code: string): boolean {
 }
 
 /**
- * Generiert einen Scramble-String fuer den gegebenen Typ (cube_type
+ * Generiert einen Scramble-String für den gegebenen Typ (cube_type
  * oder scramble_type-override aus Session).
  *
  * Reihenfolge:
- *   1. Eigener Random-State-Solver verfuegbar? → WCA-Quality
+ *   1. Eigener Random-State-Solver verfügbar? → WCA-Quality
  *   2. Sonst: Custom-Puzzle-Spec? → Random-Move-Generator
  *   3. Sonst: scrambow probieren (WCA-Cubes + FTO)
  *   4. Bei Fehler → leerer String (UI zeigt Fallback-Meldung)
@@ -410,7 +410,7 @@ export function isWcaQualityCustomPuzzle(code: string): boolean {
  */
 export function generateScramble(typeOverride: string): string {
   // 1) csTimer-Random-State-Scrambler (Phase W.cstimer-vendor, 2026-05-17;
-  //    Ivy ergaenzt in W.cstimer-ivy-switch): gear/redi/master_pyraminx/ivy
+  //    Ivy ergänzt in W.cstimer-ivy-switch): gear/redi/master_pyraminx/ivy
   //    via vendored GPL-v3-Modul. Bei csTimer-Init-Crash → Fallback weiter
   //    unten greift (defensive).
   if (typeOverride in APP_TO_CSTIMER) {
@@ -419,10 +419,10 @@ export function generateScramble(typeOverride: string): string {
       const s = getCstimerScramble(cstimerType);
       if (s && s.trim().length > 0) return s;
     } catch {
-      // weiter zur naechsten Stufe
+      // weiter zur nächsten Stufe
     }
   }
-  // 2) Eigenbau-BFS-Solver fuer Ivy als Fallback (falls csTimer
+  // 2) Eigenbau-BFS-Solver für Ivy als Fallback (falls csTimer
    //    fehlschlaegt). Bleibt als Sicherheits-Netz seit W.cstimer-ivy-switch.
   if (typeOverride === "ivy") {
     try {
@@ -432,7 +432,7 @@ export function generateScramble(typeOverride: string): string {
       // Fallback auf Random-Move wenn Solver-Bug auftritt
     }
   }
-  // 3) Custom Puzzles mit Random-Move-Spec (Fallback fuer master_skewb
+  // 3) Custom Puzzles mit Random-Move-Spec (Fallback für master_skewb
   //    + zusaetzliches Sicherheits-Netz)
   if (typeOverride in CUSTOM_PUZZLE_SPECS) {
     return generateCustomScramble(CUSTOM_PUZZLE_SPECS[typeOverride]);

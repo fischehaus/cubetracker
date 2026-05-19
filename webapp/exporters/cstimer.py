@@ -2,10 +2,10 @@
 
 Erzeugt csTimer-JSON-Format aus Cubetracker-Daten. Spiegel zum Importer
 (importers/cstimer.py). Round-Trip: cubetracker → csTimer → cubetracker
-ist ueber den Dedup-Mechanismus idempotent.
+ist über den Dedup-Mechanismus idempotent.
 
 Multi-User-Sicherheit: alle Queries scope-en auf user_id. Kein Daten-Leak
-zwischen Usern moeglich.
+zwischen Usern möglich.
 
 Selektoren (W.5):
 - session_ids: nur diese Sessions exportieren (None = alle)
@@ -74,7 +74,7 @@ def export_to_cstimer(
     2. csTimer-IDs vergeben (existierende cstimer_session_id behalten,
        sonst max+1)
     3. Solves laden (gefiltert), gruppieren
-    4. Pseudo-Session "Ohne Session" fuer session_id=NULL-Solves
+    4. Pseudo-Session "Ohne Session" für session_id=NULL-Solves
     5. properties.sessionData als JSON-String einbetten (csTimer-Format)
     """
     # Sessions
@@ -127,7 +127,7 @@ def export_to_cstimer(
     if cube_types is not None:
         solve_stmt = solve_stmt.where(Solve.cube_type.in_(cube_types))
     if session_ids is not None:
-        # Nur Solves der gewaehlten Sessions (session-lose excluded)
+        # Nur Solves der gewählten Sessions (session-lose excluded)
         solve_stmt = solve_stmt.where(Solve.session_id.in_(session_ids))
     all_solves = list(db.scalars(solve_stmt).all())
 

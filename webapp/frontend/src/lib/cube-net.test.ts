@@ -1,4 +1,4 @@
-// Tests fuer cube-net.ts — kritische Logik, deshalb sorgfaeltig.
+// Tests für cube-net.ts — kritische Logik, deshalb sorgfaeltig.
 //
 // Strategie: bekannte Speedcubing-Identitaeten testen.
 //   1. Trivial: solved bleibt solved, R+R' = identity, etc.
@@ -82,7 +82,7 @@ describe("applyMove — Identitaeten", () => {
 });
 
 describe("applyMove — Center-Invariante", () => {
-  it("Centers (Index 4) aendern sich nie nach beliebigem Move", () => {
+  it("Centers (Index 4) ändern sich nie nach beliebigem Move", () => {
     const moves = [
       "R", "R'", "R2",
       "L", "L'", "L2",
@@ -104,7 +104,7 @@ describe("applyMove — Center-Invariante", () => {
 
 describe("applyScramble — bekannte Group-Orders", () => {
   it("Sexy-Move (R U R' U') hat Order 6", () => {
-    // QA-Fix #8 (2026-05-17): vorher leitete eine Loop ueber `s` ein,
+    // QA-Fix #8 (2026-05-17): vorher leitete eine Loop über `s` ein,
     // mutierte aber `s` nicht (applyScramble macht intern cloneState),
     // war also dead-code. Entfernt.
     const sexy = "R U R' U'";
@@ -154,8 +154,8 @@ describe("applyScramble — Inverse-Invariante", () => {
       .join(" ");
   }
 
-  // Wenn wir einen Scramble S anwenden und dann S^-1, muessen wir zu
-  // solved zurueckkehren. Klassischer Smoke-Test ueber mehrere Scrambles.
+  // Wenn wir einen Scramble S anwenden und dann S^-1, müssen wir zu
+  // solved zurueckkehren. Klassischer Smoke-Test über mehrere Scrambles.
   const scrambles = [
     "R U R' F' R U R' U' R' F R2 U' R' U'",
     "F R U' R' U' R U R' F' R U R' U' R' F R F'",
@@ -173,7 +173,7 @@ describe("applyScramble — Inverse-Invariante", () => {
 });
 
 describe("renderScrambleSvg", () => {
-  it("erzeugt einen vollstaendigen <svg>-String fuer solved cube", () => {
+  it("erzeugt einen vollstaendigen <svg>-String für solved cube", () => {
     const svg = renderScrambleSvg("");
     expect(svg).toMatch(/^<svg[\s\S]*<\/svg>$/);
     // 54 rect-Sticker + 1 Hintergrund-rect = 55 rects
@@ -181,7 +181,7 @@ describe("renderScrambleSvg", () => {
     expect(rectCount).toBe(55);
   });
 
-  it("erzeugt ein anderes SVG fuer Scramble vs Identity", () => {
+  it("erzeugt ein anderes SVG für Scramble vs Identity", () => {
     const solvedSvg = renderScrambleSvg("");
     const scrambledSvg = renderScrambleSvg("R U R' U'");
     expect(scrambledSvg).not.toBe(solvedSvg);
@@ -193,18 +193,18 @@ describe("renderScrambleSvg", () => {
     expect(a).toBe(b);
   });
 
-  it("respektiert opts.stickerPx fuer custom size", () => {
+  it("respektiert opts.stickerPx für custom size", () => {
     const small = renderScrambleSvg("", { stickerPx: 10 });
     const large = renderScrambleSvg("", { stickerPx: 30 });
     expect(small).not.toBe(large);
-    // viewBox sollte unterschiedlich gross sein
+    // viewBox sollte unterschiedlich groß sein
     expect(small).toMatch(/viewBox="0 0 \d+/);
     expect(large).toMatch(/viewBox="0 0 \d+/);
   });
 });
 
 describe("cloneState", () => {
-  it("liefert tiefe Kopie — Aenderungen am Klon beeinflussen Original nicht", () => {
+  it("liefert tiefe Kopie — Änderungen am Klon beeinflussen Original nicht", () => {
     const original = solvedCube();
     const clone = cloneState(original);
     applyMove(clone, "R");

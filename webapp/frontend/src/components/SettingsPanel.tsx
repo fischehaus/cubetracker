@@ -1,6 +1,6 @@
 // SettingsPanel (Phase 8.2 + W.8) — Sub-Tab in VERWALTUNG.
 // W.8: AccountSettingsPanel oben drueber gerendert (Profil + Passwort +
-// Email + Account-Loeschen). Drunter dann die App-/Timer-/Drill-Settings.
+// Email + Account-Löschen). Drunter dann die App-/Timer-/Drill-Settings.
 
 import { AccountSettingsPanel } from "./AccountSettingsPanel";
 import { InfoButton } from "./InfoButton";
@@ -47,18 +47,18 @@ export function SettingsPanel() {
 
   return (
     <div className="space-y-4">
-      {/* W.8: Account-Settings (Profil, Passwort, Email, Account-Loeschen) */}
+      {/* W.8: Account-Settings (Profil, Passwort, Email, Account-Löschen) */}
       <AccountSettingsPanel />
 
-      {/* App-Settings (Spacebar, Drills, Font-Size) — Geraete-spezifisch */}
+      {/* App-Settings (Spacebar, Drills, Font-Size) — Geräte-spezifisch */}
       <Section
         title="Spacebar-Timer"
         info={
           <>
             <p className="font-medium mb-1">Spacebar-Timer-Settings</p>
             <p>
-              Tiefere Einstellungen fuer den Spacebar-Timer. Mode (WCA vs
-              Pragmatisch) kann auch direkt im Timer-Tab gewaehlt werden.
+              Tiefere Einstellungen für den Spacebar-Timer. Mode (WCA vs
+              Pragmatisch) kann auch direkt im Timer-Tab gewählt werden.
               Inspection-Dauer, Hold-Time, Sound-Signale, Phase-Splits sind
               hier konfigurierbar.
             </p>
@@ -144,13 +144,13 @@ export function SettingsPanel() {
         />
         <Toggle
           label="Sound-Signale (8s + 12s Warnung)"
-          hint="Audio-Signal bei 8s + dringendes Doppel-Signal bei 12s. Modus unten waehlbar."
+          hint="Audio-Signal bei 8s + dringendes Doppel-Signal bei 12s. Modus unten wählbar."
           value={settings.sound_enabled}
           onChange={(v) => setSettings({ ...settings, sound_enabled: v })}
           disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
         />
         <label className="flex flex-col gap-1 text-sm">
-          <span className="text-gray-300">Audio-Modus fuer Inspection-Warnings</span>
+          <span className="text-gray-300">Audio-Modus für Inspection-Warnings</span>
           <select
             value={settings.inspection_audio_mode ?? "beep"}
             onChange={(e) =>
@@ -173,7 +173,7 @@ export function SettingsPanel() {
             <option value="beep">🔔 Sinus-Beep (default)</option>
             <option value="de">🇩🇪 Stimme: Deutsch ("acht", "zwoelf")</option>
             <option value="en">🇬🇧 Voice: English ("eight", "twelve")</option>
-            <option value="off">🔇 Aus (kein Audio fuer 8s/12s)</option>
+            <option value="off">🔇 Aus (kein Audio für 8s/12s)</option>
           </select>
           <span className="text-xs text-gray-500">
             Voice-Modi nutzen das Browser-TTS — funktioniert offline +
@@ -236,7 +236,7 @@ export function SettingsPanel() {
       <Section title="Scramble-Bild (2D-Net)">
         <Toggle
           label="2D-Net unter dem Scramble anzeigen"
-          hint={`Cube-Vorschau (Cross-Layout) direkt unter der Notation. Hilft beim Verifizieren ob du den Scramble korrekt ausgefuehrt hast. Aktuell nur fuer 3x3 — andere Cube-Types zeigen kein Bild. Auch direkt im /timer-Tab toggle-bar (Knopf "Bild an/aus" neben "Eigene" / "Skip").`}
+          hint={`Cube-Vorschau (Cross-Layout) direkt unter der Notation. Hilft beim Verifizieren ob du den Scramble korrekt ausgeführt hast. Aktuell nur für 3x3 — andere Cube-Types zeigen kein Bild. Auch direkt im /timer-Tab toggle-bar (Knopf "Bild an/aus" neben "Eigene" / "Skip").`}
           value={settings.show_scramble_image}
           onChange={(v) => setSettings({ ...settings, show_scramble_image: v })}
         />

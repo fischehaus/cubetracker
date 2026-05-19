@@ -1,12 +1,12 @@
-"""GitHub-API-Client fuer Auto-Issue-Erstellung (Phase W.live-tests, 2026-05-17).
+"""GitHub-API-Client für Auto-Issue-Erstellung (Phase W.live-tests, 2026-05-17).
 
 Wird genutzt im Live-Test-Workflow: wenn ein Admin einen Test als FAIL
 markiert und eine Notiz schreibt, soll automatisch ein GitHub-Issue im
-cubetracker-Repo angelegt werden — fuer die naechste Welle als Fix-TODO.
+cubetracker-Repo angelegt werden — für die nächste Welle als Fix-TODO.
 
 Konfiguration:
 - Env-Var `GITHUB_TOKEN`: Personal Access Token (classic oder fine-grained)
-  mit `repo`-Scope (oder fuer fine-grained: Issues=write auf das Repo).
+  mit `repo`-Scope (oder für fine-grained: Issues=write auf das Repo).
   Bei Render unter Environment-Tab setzen.
 - Env-Var `GITHUB_REPO`: default "fischehaus/cubetracker" — Owner/Repo-Name.
 
@@ -99,7 +99,7 @@ def create_issue(
             return {"html_url": issue_url, "number": issue_number}
         # Bei Fehler nur loggen, nicht propagieren.
         # QA-Fix (2026-05-17 abends): response.text NICHT loggen —
-        # koennte bei Edge-Cases (zukuenftige API-Version) Header-Echos
+        # könnte bei Edge-Cases (zukuenftige API-Version) Header-Echos
         # mit Token-Reflektion enthalten. Nur Status + Reason.
         logger.warning(
             "[github] create_issue failed: %s %s",
@@ -122,7 +122,7 @@ def add_comment(
     """Postet einen Kommentar zu einem bestehenden Issue.
 
     Wird beim 2., 3., n-ten Update genutzt — initial wird create_issue
-    aufgerufen, danach add_comment fuer weitere Notizen.
+    aufgerufen, danach add_comment für weitere Notizen.
 
     Returns True bei Erfolg, False bei jedem Fehler.
     """

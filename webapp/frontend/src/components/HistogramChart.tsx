@@ -1,5 +1,5 @@
 // HistogramChart: Verteilung der Solve-Zeiten als Bar-Chart.
-// Zeigt, wo die meisten deiner Zeiten liegen — gibt Auskunft ueber
+// Zeigt, wo die meisten deiner Zeiten liegen — gibt Auskunft über
 // Form-Konsistenz (schmaler Peak) vs. Streuung (breite Verteilung).
 
 import { useMemo } from "react";
@@ -23,7 +23,7 @@ interface Props {
 }
 
 export function HistogramChart({ cubeType, sessionId }: Props) {
-  // Histogramm braucht moeglichst viele Daten fuer aussagekraeftige
+  // Histogramm braucht möglichst viele Daten für aussagekraeftige
   // Verteilung. Default: alle (mit hartem Cap auf 100k zur Sicherheit).
   const params: SolveListParams = { limit: 100_000 };
   if (cubeType) params.cube_type = cubeType;
@@ -83,7 +83,7 @@ export function HistogramChart({ cubeType, sessionId }: Props) {
               Wie oft welche Zeit vorkam — gruppiert in Zeit-Bins.
               Schoene Glocken-Form = konsistente Performance. Lange
               Schwaenze rechts = Outlier (z.B. Mistake-Solves). DNFs
-              fliegen raus (Achse waere sonst unendlich).
+              fliegen raus (Achse wäre sonst unendlich).
             </p>
           </InfoButton>
         </div>

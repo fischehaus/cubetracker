@@ -3,7 +3,7 @@
 GET /news/latest
   Liefert die letzten News-Items aus dem RSS-Aggregator. Pull-Strategie:
   wenn die letzte gespeicherte `fetched_at` aelter als 60 Min ist, wird
-  vorher synchron neu gefetcht (durchschnittlich 1-2s fuer 2 Feeds).
+  vorher synchron neu gefetcht (durchschnittlich 1-2s für 2 Feeds).
 
   Auth erforderlich (keine anonymen Calls — vermeidet Aufruf-Spam).
   Rate-Limit 60/min.

@@ -4,12 +4,12 @@ Alle Endpoints benoetigen Auth via current_user-Dep.
 ALLE Queries filtern auf user_id == current_user.id.
 
 Cross-Tenant-Sicherheits-Checks:
-- POST /solves: session_id + hardware_id muessen dem aktuellen User gehoeren
-- PATCH /solves/{id}: dito + Solve selbst muss dem User gehoeren
-- GET/PATCH/DELETE /solves/{id}: Solve muss dem User gehoeren (sonst 404,
+- POST /solves: session_id + hardware_id müssen dem aktuellen User gehören
+- PATCH /solves/{id}: dito + Solve selbst muss dem User gehören
+- GET/PATCH/DELETE /solves/{id}: Solve muss dem User gehören (sonst 404,
   NICHT 403 — verhindert Probing fremder IDs)
 
-Phase W.4: Nach Solve-Mutation laeuft fuer den aktuellen User
+Phase W.4: Nach Solve-Mutation laeuft für den aktuellen User
 - Achievement-Check (X-Achievements-Unlocked-Header)
 - Challenge-Progress (X-Challenges-Completed-Header)
 - PB-Detection (X-PB-Achieved-Header)
@@ -37,7 +37,7 @@ router = APIRouter(prefix="/solves", tags=["solves"])
 
 def _detect_pbs_for_user(db: OrmSession, user_id: int, solve: Solve) -> list[str]:
     """Liefert Liste der PB-Typen die DIESER Solve gerade gesetzt hat.
-    Mogliche Typen: 'single', 'ao5', 'ao12'. Nur eigene Solves zaehlen.
+    Mogliche Typen: 'single', 'ao5', 'ao12'. Nur eigene Solves zählen.
     """
     rows = db.scalars(
         select(Solve)
@@ -87,7 +87,7 @@ def _detect_pbs_for_user(db: OrmSession, user_id: int, solve: Solve) -> list[str
 def _set_post_mutation_headers(
     response: Response, db: OrmSession, user: User, solve: Solve | None
 ) -> None:
-    """Achievement-Check + Challenge-Progress + PB-Detect, fuer den aktuellen
+    """Achievement-Check + Challenge-Progress + PB-Detect, für den aktuellen
     User. Setzt entsprechende X-Header damit das Frontend Toaster/Confetti
     triggern kann.
     """
@@ -106,7 +106,7 @@ def _set_post_mutation_headers(
 def _get_solve_or_404(solve_id: int, user: User, db: OrmSession) -> Solve:
     """Solve nach ID UND user_id holen. 404 wenn anderer User oder nicht existent.
 
-    KRITISCH: NIE nur db.get(Solve, id) — das wuerde fremde Solves zurueckgeben!
+    KRITISCH: NIE nur db.get(Solve, id) — das würde fremde Solves zurueckgeben!
     """
     solve = db.scalar(select(Solve).where(Solve.id == solve_id, Solve.user_id == user.id))
     if solve is None:
@@ -118,9 +118,9 @@ def _get_solve_or_404(solve_id: int, user: User, db: OrmSession) -> Solve:
 
 
 def _verify_session_ownership(session_id: int | None, user: User, db: OrmSession) -> None:
-    """Wenn session_id gesetzt: pruefe dass die Session dem User gehoert.
+    """Wenn session_id gesetzt: pruefe dass die Session dem User gehört.
 
-    Sonst koennte ein User Solves in fremde Sessions einhaengen.
+    Sonst könnte ein User Solves in fremde Sessions einhaengen.
     """
     if session_id is None:
         return
@@ -130,12 +130,12 @@ def _verify_session_ownership(session_id: int | None, user: User, db: OrmSession
     if exists is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Session {session_id} gehoert nicht dem aktuellen User oder existiert nicht",
+            detail=f"Session {session_id} gehört nicht dem aktuellen User oder existiert nicht",
         )
 
 
 def _verify_hardware_ownership(hardware_id: int | None, user: User, db: OrmSession) -> None:
-    """Wenn hardware_id gesetzt: pruefe dass die Hardware dem User gehoert."""
+    """Wenn hardware_id gesetzt: pruefe dass die Hardware dem User gehört."""
     if hardware_id is None:
         return
     exists = db.scalar(
@@ -144,7 +144,7 @@ def _verify_hardware_ownership(hardware_id: int | None, user: User, db: OrmSessi
     if exists is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Hardware {hardware_id} gehoert nicht dem aktuellen User oder existiert nicht",
+            detail=f"Hardware {hardware_id} gehört nicht dem aktuellen User oder existiert nicht",
         )
 
 
@@ -154,7 +154,7 @@ def list_solves(
     session_id: int | None = Query(default=None, description="Filter auf Session-ID"),
     alg_case: str | None = Query(
         default=None,
-        description="Filter auf alg_case (z.B. 'PLL-Tperm') fuer DrillCard-Liste",
+        description="Filter auf alg_case (z.B. 'PLL-Tperm') für DrillCard-Liste",
     ),
     limit: int = Query(default=100, ge=1, le=100_000),
     offset: int = Query(default=0, ge=0),
@@ -180,7 +180,7 @@ def create_solve(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> Solve:
-    """Neuen Solve fuer aktuellen User anlegen.
+    """Neuen Solve für aktuellen User anlegen.
 
     Cross-Refs (session_id, hardware_id) werden auf Ownership geprueft.
     Achievement-Check + Challenge-Progress + PB-Detect via X-Header.
@@ -219,7 +219,7 @@ def update_solve(
 ) -> Solve:
     """Teil-Update eines Solves (alle Felder optional, nur eigene).
 
-    PATCH (z.B. +2/DNF-Toggle) kann Stats + Challenge-Progress aendern,
+    PATCH (z.B. +2/DNF-Toggle) kann Stats + Challenge-Progress ändern,
     daher Header-Helper auch hier aufrufen.
     """
     solve = _get_solve_or_404(solve_id, current_user, db)
@@ -245,12 +245,12 @@ def delete_solve(
     current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
-    """Solve loeschen (nur eigene). Achievements bleiben unlocked
+    """Solve löschen (nur eigene). Achievements bleiben unlocked
     (monotonic), aber Recheck damit ggf. neu unlockte sichtbar werden
     (z.B. wenn Delete andere Schwellwerte unterschreitet).
     """
     solve = _get_solve_or_404(solve_id, current_user, db)
     db.delete(solve)
     db.commit()
-    # Bei delete gibt's keinen Solve fuer PB/Challenge-Progress
+    # Bei delete gibt's keinen Solve für PB/Challenge-Progress
     _set_post_mutation_headers(response, db, current_user, None)

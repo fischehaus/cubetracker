@@ -3,7 +3,7 @@
 Bewusst getrennt von DB/API: nimmt einen `AchievementInput`-Snapshot
 und liefert die Liste codes, die UNLOCKED sein sollten. Caller-Code
 in der API entscheidet dann, welche neu sind und in die DB inserted
-werden muessen.
+werden müssen.
 
 Vorteile:
 - voll testbar (keine DB-deps)
@@ -23,7 +23,7 @@ SPEED_3X3_SANITY_FLOOR_MS = 1_000
 
 @dataclass(frozen=True)
 class AchievementInput:
-    """Snapshot des aktuellen User-Stands fuer Achievement-Pruefung.
+    """Snapshot des aktuellen User-Stands für Achievement-Prüfung.
 
     Wird vom Caller (api/achievements.py) aus DB-queries zusammengebaut.
     """
@@ -33,12 +33,12 @@ class AchievementInput:
     solves_per_cube: dict[str, int]  # cube_type → count (ohne DNF)
     best_ms_per_cube: dict[str, int]  # cube_type → best_ms (effective)
     distinct_cube_types: int  # wie viele verschiedene cubes wurden geuebt
-    hardware_count: int  # eintraege in hardware-tabelle
+    hardware_count: int  # einträge in hardware-tabelle
     # Phase 8.5
     max_solves_one_day_per_cube: dict[str, int] = field(default_factory=dict)
-    """Bestes Tagesvolumen pro Cube-Type (ueber alle Tage gerechnet)."""
+    """Bestes Tagesvolumen pro Cube-Type (über alle Tage gerechnet)."""
     max_solves_one_day_any: int = 0
-    """Bestes Tagesvolumen ueber alle Cubes zusammen (an EINEM Tag)."""
+    """Bestes Tagesvolumen über alle Cubes zusammen (an EINEM Tag)."""
     max_consecutive_days_3x3_100plus: int = 0
     """Laengste Streak von Tagen in Folge mit ≥100 3x3-Solves."""
     max_solve_streak_days: int = 0
@@ -58,12 +58,12 @@ def check_achievements(snapshot: AchievementInput) -> list[str]:
     """Liefert die Liste codes, die jetzt UNLOCKED sein sollten.
 
     Caller filtert dann selbst, welche schon unlocked sind und welche
-    neu in DB inserted werden muessen.
+    neu in DB inserted werden müssen.
     """
     unlocked: list[str] = []
 
-    # --- Volume gesamt (zaehlt nur valide solves, sonst ueberraschend
-    # wenn DNFs bei einem volume_100 mit-zaehlen)
+    # --- Volume gesamt (zählt nur valide solves, sonst überraschend
+    # wenn DNFs bei einem volume_100 mit-zählen)
     if snapshot.total_valid_solves >= 100:
         unlocked.append("volume_100")
     if snapshot.total_valid_solves >= 500:
@@ -84,7 +84,7 @@ def check_achievements(snapshot: AchievementInput) -> list[str]:
     if n_3x3 >= 1000:
         unlocked.append("cube_3x3_1000")
 
-    # --- Volume any-cube (max ueber alle cubes)
+    # --- Volume any-cube (max über alle cubes)
     max_per_cube = max(snapshot.solves_per_cube.values(), default=0)
     if max_per_cube >= 500:
         unlocked.append("cube_any_500")
@@ -157,4 +157,4 @@ def check_achievements(snapshot: AchievementInput) -> list[str]:
 
 def _event_code(event: str) -> str:
     """Cube-Type-Name in achievement-code-friendly Form."""
-    return event.lower().replace("x", "x")  # Identitaet, ein-Konventions-Hook
+    return event.lower().replace("x", "x")  # Identität, ein-Konventions-Hook

@@ -23,7 +23,7 @@ from stats.calc import SolvePoint, average_of_n
 
 @dataclass(frozen=True)
 class ChronoSolve:
-    """Minimaler Solve-Snapshot fuer pattern-detection."""
+    """Minimaler Solve-Snapshot für pattern-detection."""
 
     day: date
     effective_ms: float  # math.inf wenn DNF
@@ -32,7 +32,7 @@ class ChronoSolve:
     time_ms: int
 
     def to_point(self, solve_id: int = 0) -> SolvePoint:
-        """Konvertiert zu SolvePoint fuer average_of_n."""
+        """Konvertiert zu SolvePoint für average_of_n."""
         return SolvePoint(
             time_ms=self.time_ms,
             dnf=self.dnf,
@@ -43,9 +43,9 @@ class ChronoSolve:
 
 @dataclass(frozen=True)
 class PatternResult:
-    """Aggregierte Pattern-Flags fuer EINEN cube_type.
+    """Aggregierte Pattern-Flags für EINEN cube_type.
 
-    Caller (service.py) ODert ueber alle cube_types fuer
+    Caller (service.py) ODert über alle cube_types für
     achievement-aggregation.
     """
 
@@ -66,7 +66,7 @@ class PatternResult:
 def detect_patterns(solves: list[ChronoSolve]) -> PatternResult:
     """Findet alle PB-Patterns in chronologisch sortierten Solves.
 
-    Solves muessen nach timestamp aufsteigend sortiert sein.
+    Solves müssen nach timestamp aufsteigend sortiert sein.
     """
     best_single: float | None = None
     best_ao5: int | None = None
@@ -83,7 +83,7 @@ def detect_patterns(solves: list[ChronoSolve]) -> PatternResult:
 
     window5: list[SolvePoint] = []
     window12: list[SolvePoint] = []
-    prev_window12: list[SolvePoint] = []  # die 12 SOLVES VOR dem aktuellen (fuer Konsistenz-Check)
+    prev_window12: list[SolvePoint] = []  # die 12 SOLVES VOR dem aktuellen (für Konsistenz-Check)
 
     for s in solves:
         point = s.to_point()
@@ -119,17 +119,17 @@ def detect_patterns(solves: list[ChronoSolve]) -> PatternResult:
             window12.pop(0)
 
         # ===== PB-DETECTION =====
-        # is_X_pb (echte Verbesserung) wird fuer Double-Pattern genutzt;
-        # erste Setzung zaehlt nicht — sonst loest jede 2-Solve-Sequenz
+        # is_X_pb (echte Verbesserung) wird für Double-Pattern genutzt;
+        # erste Setzung zählt nicht — sonst loest jede 2-Solve-Sequenz
         # automatisch Doppel-PB aus.
-        # pbs_today (alle "set-or-improved" Events) wird fuer Triple-Day
-        # genutzt — auch erstes Setzen zaehlt, weil's der erste „neue
+        # pbs_today (alle "set-or-improved" Events) wird für Triple-Day
+        # genutzt — auch erstes Setzen zählt, weil's der erste „neue
         # Bestwert" ist und der User es als Erfolg empfindet.
         is_single_pb = False
         if not s.dnf and not math.isinf(eff):
             if best_single is None:
                 best_single = eff
-                pbs_today.add("single")  # first-set zaehlt fuer Triple-Day
+                pbs_today.add("single")  # first-set zählt für Triple-Day
             elif eff < best_single:
                 best_single = eff
                 is_single_pb = True
@@ -147,7 +147,7 @@ def detect_patterns(solves: list[ChronoSolve]) -> PatternResult:
                     is_ao5_pb = True
                     pbs_today.add("ao5")
 
-        # Ao12-PB-Event: nur fuer Triple-Day-Tracking, kein eigenes Pattern
+        # Ao12-PB-Event: nur für Triple-Day-Tracking, kein eigenes Pattern
         if len(window12) == 12:
             cur_ao12 = average_of_n(window12)
             if cur_ao12 is not None and (best_ao12 is None or cur_ao12 < best_ao12):
@@ -164,7 +164,7 @@ def detect_patterns(solves: list[ChronoSolve]) -> PatternResult:
             had_double = True
         last_was_single_pb = is_single_pb
 
-        # Triple-Day: an EINEM Tag alle 3 PB-Typen (kann ueber den Tag
+        # Triple-Day: an EINEM Tag alle 3 PB-Typen (kann über den Tag
         # akkumuliert werden — verschiedene Solves)
         if "single" in pbs_today and "ao5" in pbs_today and "ao12" in pbs_today:
             days_with_triple.add(day)
@@ -178,8 +178,8 @@ def detect_patterns(solves: list[ChronoSolve]) -> PatternResult:
 
 
 def merge_patterns(results: list[PatternResult]) -> PatternResult:
-    """ODert die Flags ueber mehrere cube_types — wird in service.py
-    aggregiert weil Achievement-Definitionen cube-uebergreifend sind
+    """ODert die Flags über mehrere cube_types — wird in service.py
+    aggregiert weil Achievement-Definitionen cube-übergreifend sind
     (z.B. „Doppel-PB" = jemals in IRGENDEINEM Event 2 PBs in Folge)."""
     return PatternResult(
         had_pb_double=any(r.had_pb_double for r in results),

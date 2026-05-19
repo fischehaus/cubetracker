@@ -1,7 +1,7 @@
-// AdminPanel — Wrapper fuer alle Admin-Bereiche.
+// AdminPanel — Wrapper für alle Admin-Bereiche.
 //
 // Stackt die drei Panels untereinander (Stats / Users / Bulk-Mail).
-// Wenn das spaeter zu lang wird, kann man hier auf inner-Tabs umstellen
+// Wenn das später zu lang wird, kann man hier auf inner-Tabs umstellen
 // ohne die Sub-Panels anzufassen.
 
 import { AdminAnnouncePanel } from "./AdminAnnouncePanel";

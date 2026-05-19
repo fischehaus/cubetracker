@@ -1,12 +1,12 @@
 // ISO-3166-1-alpha-2-Country-Liste (Phase W.country-feld, 2026-05-16).
 //
 // Curated Subset der relevantesten Cuber-Laender — fokussiert auf
-// EU, Nordamerika, grosse asiatische Cube-Communities. Sortiert nach
+// EU, Nordamerika, große asiatische Cube-Communities. Sortiert nach
 // deutscher Bezeichnung (Browser-Locale-agnostisch).
 //
 // Falls ein User sein Land nicht in der Liste findet: einfach via
 // PATCH /auth/me mit beliebigem ISO-Code setzen. Frontend-Dropdown
-// kann sicher erweitert werden, ohne Backend-Aenderung.
+// kann sicher erweitert werden, ohne Backend-Änderung.
 
 export interface Country {
   iso2: string; // ISO-3166-1-alpha-2 (e.g. "DE")
@@ -16,7 +16,7 @@ export interface Country {
 /**
  * Wichtigste Cuber-Laender, alphabetisch nach dt. Bezeichnung.
  *
- * Quelle: WCA aktive Laender + EU + grosse Cubing-Communities.
+ * Quelle: WCA aktive Laender + EU + große Cubing-Communities.
  * Liste ist keine offizielle Quelle, kann jederzeit erweitert werden.
  */
 export const COUNTRIES: Country[] = [

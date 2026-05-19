@@ -1,4 +1,4 @@
-"""Rate-Limiting fuer Auth-Endpoints (Phase W).
+"""Rate-Limiting für Auth-Endpoints (Phase W).
 
 Schuetzt /login und /register vor Brute-Force + Account-Enumeration.
 
@@ -8,11 +8,11 @@ Strategie:
 - 429-Response mit Retry-After-Header bei Ueberschreitung
 
 Limitierung der Limitierung:
-- In-Memory-Store: ueberlebt keinen Server-Restart, nicht multi-process-fest
+- In-Memory-Store: überlebt keinen Server-Restart, nicht multi-process-fest
   (Render Free-Tier laeuft als 1 Worker, daher OK)
 - IP-basiert: hinter Proxy/CDN muss X-Forwarded-For ausgewertet werden,
   Render setzt das automatisch — `get_remote_address` liest es korrekt
-- Spaeter (~bezahlter Plan, Multi-Worker): Redis-Backend via storage_uri
+- Später (~bezahlter Plan, Multi-Worker): Redis-Backend via storage_uri
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from __future__ import annotations
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-# Globaler Limiter — Single-Source-of-Truth fuer alle Auth-Endpoints.
+# Globaler Limiter — Single-Source-of-Truth für alle Auth-Endpoints.
 # In main.py wird er als app.state.limiter gesetzt + Exception-Handler registriert.
 limiter = Limiter(key_func=get_remote_address)
 

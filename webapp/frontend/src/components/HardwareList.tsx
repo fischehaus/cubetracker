@@ -7,7 +7,7 @@
 // Features:
 // - Gruppierung pro primary_cube_type
 // - Selektion per Checkbox + "alle in Gruppe markieren"
-// - Bulk-Aktionen pro Gruppe: aktiv-setzen / inaktiv-setzen / loeschen
+// - Bulk-Aktionen pro Gruppe: aktiv-setzen / inaktiv-setzen / löschen
 // - Inline-Edit auf Name + Notiz (Click-to-Edit ODER expliziter
 //   "Umbenennen"-Button — beide Wege fuehren ins gleiche Edit-Feld)
 
@@ -43,7 +43,7 @@ export function HardwareList() {
     value: string;
   } | null>(null);
 
-  // Selektions-State fuer Bulk-Aktionen — Set aus Hardware-IDs.
+  // Selektions-State für Bulk-Aktionen — Set aus Hardware-IDs.
   const [selected, setSelected] = useState<Set<number>>(new Set());
 
   // Gruppieren nach primary_cube_type
@@ -122,7 +122,7 @@ export function HardwareList() {
     if (ids.length === 0) return;
     if (
       !window.confirm(
-        `${ids.length} markierte Hardware-Eintraege wirklich loeschen?\n` +
+        `${ids.length} markierte Hardware-Einträge wirklich löschen?\n` +
           `Betroffene Solves verlieren ihre Hardware-Zuordnung, bleiben aber erhalten.`,
       )
     )
@@ -169,7 +169,7 @@ export function HardwareList() {
               Standard-Cubes (alle inaktiv) — markier die ab die du wirklich
               besitzt + Bulk-Aktiviere sie. Aktive Cubes erscheinen im
               Timer-Hardware-Selector + im Hardware-Vergleich. Solves
-              behalten ihre Hardware-Zuordnung auch nach Loeschen.
+              behalten ihre Hardware-Zuordnung auch nach Löschen.
             </p>
           </InfoButton>
         </div>
@@ -223,7 +223,7 @@ export function HardwareList() {
       )}
 
       {/* Empty-State falls noch nichts da (extremer Edge-Case nach
-          Auto-Seed-Backfill — User hat ALLES geloescht). */}
+          Auto-Seed-Backfill — User hat ALLES gelöscht). */}
       {totalCount === 0 && (
         <div className="rounded border border-gray-700 bg-gray-800/30 p-4 mb-4 text-sm text-gray-400">
           Inventar ist leer. Lege oben einen neuen Cube an, oder logge dich
@@ -265,7 +265,7 @@ export function HardwareList() {
                 {someSelected && (
                   <div className="flex items-center gap-1.5 ml-auto text-xs">
                     <span className="text-gray-500">
-                      {selectedInGroup.length} ausgewaehlt:
+                      {selectedInGroup.length} ausgewählt:
                     </span>
                     <button
                       onClick={() => bulkActivate(items, true)}
@@ -286,7 +286,7 @@ export function HardwareList() {
                       disabled={bulkDelete.isPending}
                       className="rounded bg-red-700/40 px-2 py-1 text-red-200 hover:bg-red-700/60 disabled:opacity-50"
                     >
-                      🗑 loeschen
+                      🗑 löschen
                     </button>
                   </div>
                 )}
@@ -316,14 +316,14 @@ export function HardwareList() {
         is_active=false. Du markierst selbst was du wirklich besitzt
         (Checkbox + ▶ aktivieren). „Umbenennen"-Button oder Klick auf
         den Namen zum Editieren — Enter speichert, Esc bricht ab.
-        Loeschen entfernt nur den Hardware-Eintrag, alte Solves bleiben.
+        Löschen entfernt nur den Hardware-Eintrag, alte Solves bleiben.
       </p>
     </div>
   );
 }
 
 // ============================================================
-// Eine Hardware-Zeile (in eigene Komponente fuer Lesbarkeit)
+// Eine Hardware-Zeile (in eigene Komponente für Lesbarkeit)
 // ============================================================
 
 function HardwareRow({
@@ -366,7 +366,7 @@ function HardwareRow({
         checked={selected}
         onChange={onToggleSelected}
         className="accent-purple-500 w-4 h-4"
-        aria-label={`${h.name} auswaehlen`}
+        aria-label={`${h.name} auswählen`}
       />
 
       {/* Name (click-to-edit) */}
@@ -465,13 +465,13 @@ function HardwareRow({
         onClick={() => {
           if (
             window.confirm(
-              `Hardware „${h.name}" wirklich loeschen?\n\nBetroffene Solves bleiben erhalten, verlieren aber ihre Hardware-Zuordnung.`,
+              `Hardware „${h.name}" wirklich löschen?\n\nBetroffene Solves bleiben erhalten, verlieren aber ihre Hardware-Zuordnung.`,
             )
           )
             del.mutate(h.id);
         }}
         className="text-sm rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-        title="Loeschen — Solves bleiben, hardware_id wird NULL"
+        title="Löschen — Solves bleiben, hardware_id wird NULL"
       >
         🗑
       </button>

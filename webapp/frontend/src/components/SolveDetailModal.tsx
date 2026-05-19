@@ -4,8 +4,8 @@
 //  - Notiz (komplett, mehrzeilig)
 //  - Hardware (Name + Cube-Type)
 //  - Session (Name)
-//  - rolling ao5/ao12 (vom Caller uebergeben)
-//  - Aktionen: +2/DNF/Loeschen
+//  - rolling ao5/ao12 (vom Caller übergeben)
+//  - Aktionen: +2/DNF/Löschen
 //
 // Schliessen: Klick auf Backdrop, Esc, X-Button oben rechts.
 
@@ -61,7 +61,7 @@ export function SolveDetailModal({ solve, ao5, ao12, isPb, onClose }: Props) {
         className="rounded-lg border border-gray-700 bg-gray-900 p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header: Zeit gross + Aktionen */}
+        {/* Header: Zeit groß + Aktionen */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
             <div className="text-sm text-gray-500 uppercase tracking-wide">
@@ -195,13 +195,13 @@ export function SolveDetailModal({ solve, ao5, ao12, isPb, onClose }: Props) {
           </button>
           <button
             onClick={() => {
-              if (confirm(`Solve ${formatSolveTime(solve)} wirklich loeschen?`)) {
+              if (confirm(`Solve ${formatSolveTime(solve)} wirklich löschen?`)) {
                 del.mutate(solve.id, { onSuccess: onClose });
               }
             }}
             className="text-base rounded bg-gray-700 px-3 py-2 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
           >
-            🗑 Loeschen
+            🗑 Löschen
           </button>
           <button
             onClick={onClose}

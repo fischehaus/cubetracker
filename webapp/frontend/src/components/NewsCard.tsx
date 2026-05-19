@@ -31,7 +31,7 @@ export function NewsCard() {
           </p>
           <p>
             Aktualisierung 1x pro Stunde im Hintergrund. Klick auf den
-            Titel oeffnet das Original.
+            Titel öffnet das Original.
           </p>
         </InfoButton>
       </div>
@@ -51,7 +51,7 @@ export function NewsCard() {
 
       {data && data.items.length === 0 && (
         <p className="text-sm text-gray-500">
-          Aktuell keine News verfuegbar. Das passiert beim ersten Aufruf —
+          Aktuell keine News verfügbar. Das passiert beim ersten Aufruf —
           Lade die Seite in einer Minute erneut, dann sollten die News
           da sein.
         </p>

@@ -1,14 +1,14 @@
-// MultiCompareCard: kombinierte Vergleichs-Card fuer Dashboard (Phase 6).
+// MultiCompareCard: kombinierte Vergleichs-Card für Dashboard (Phase 6).
 //
 // Toggle oben: [Cube-Vergleich] [Session-Vergleich]
 //   - cube  → /stats/by-cube,    sortiert nach Tagesform
 //   - session → /stats/by-session, sortiert nach Tagesform
 //
 // Drilldown: Klick auf eine Cube-Zeile → expandiert Inline-Block mit
-//   /stats/by-hardware fuer diesen Cube. Zeigt mit welchem cube-modell
+//   /stats/by-hardware für diesen Cube. Zeigt mit welchem cube-modell
 //   der user die besten zeiten hatte.
 // Klick auf eine Session-Zeile → analoger drilldown mit den top-cubes
-//   in dieser session (wir nutzen by-cube?session_id=X dafuer).
+//   in dieser session (wir nutzen by-cube?session_id=X dafür).
 
 import { useState } from "react";
 import {
@@ -245,7 +245,7 @@ function CubeHardwareDrilldown({
   if (data.hardware.length === 0) {
     return (
       <div className="ml-4 mt-1 mb-3 p-3 bg-gray-900/40 rounded text-sm text-gray-500">
-        Keine Hardware-Daten fuer {cubeType}.
+        Keine Hardware-Daten für {cubeType}.
       </div>
     );
   }

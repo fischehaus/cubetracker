@@ -1,6 +1,6 @@
-// Tests fuer ivyScramble.ts (Phase W.ivy-rs, 2026-05-17).
+// Tests für ivyScramble.ts (Phase W.ivy-rs, 2026-05-17).
 //
-// Verifiziert: BFS-Korrektheit, State-Space-Groesse, Scramble-Format,
+// Verifiziert: BFS-Korrektheit, State-Space-Größe, Scramble-Format,
 // Determinismus (gleicher RNG → gleicher Output).
 
 import { describe, expect, it, beforeEach } from "vitest";
@@ -57,7 +57,7 @@ describe("ivyScramble", () => {
       scrambles.add(generateIvyScramble());
     }
     // Bei 29160 states + min-distance 4 sollte die Wahrscheinlichkeit
-    // fuer 30 unterschiedliche Scrambles praktisch 1 sein.
+    // für 30 unterschiedliche Scrambles praktisch 1 sein.
     expect(scrambles.size).toBeGreaterThan(20);
   });
 });

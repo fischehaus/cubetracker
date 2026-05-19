@@ -3,7 +3,7 @@
 // rechts anzeigt.
 //
 // Mehrere Toasts stacken sich. Jeder verschwindet nach 5s automatisch
-// — oder wenn der User auf × klickt. Bei Bulk-import (csTimer) koennen
+// — oder wenn der User auf × klickt. Bei Bulk-import (csTimer) können
 // es viele auf einmal sein, dann Cap auf 5 sichtbar; rest geht in
 // summen-toast „+N weitere".
 

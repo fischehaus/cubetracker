@@ -86,7 +86,7 @@ COMMON_CUBE_NAMES = {
 
 
 def _to_aware_utc(ts: datetime) -> datetime:
-    """Normalisiert datetime auf aware UTC fuer Postgres-Vergleiche.
+    """Normalisiert datetime auf aware UTC für Postgres-Vergleiche.
 
     Phase W: Postgres (Render) hat aware datetimes. SQLite (lokal)
     hat naive zurueckgeliefert; wir machen beides aware-UTC konsistent.
@@ -99,7 +99,7 @@ def _to_aware_utc(ts: datetime) -> datetime:
 def derive_cube_type(session_name: str | int | None, scramble_type: str | None) -> str:
     """Cube-Type aus Session-Name + scrType ableiten.
 
-    Defensiv gegen csTimer-Default-Namen die Integers sein koennen
+    Defensiv gegen csTimer-Default-Namen die Integers sein können
     (Session ohne eigenen Namen heisst dann z.B. `1`, nicht `"1"`).
     """
     name = str(session_name).strip() if session_name is not None else ""
@@ -207,7 +207,7 @@ def import_cstimer_json(
     user_id: int,
     dry_run: bool = False,
 ) -> ImportResult:
-    """csTimer-JSON-Daten fuer einen User importieren.
+    """csTimer-JSON-Daten für einen User importieren.
 
     Multi-User-Sicherheit:
     - cstimer_session_id ist pro User unique (siehe models.py),
@@ -218,7 +218,7 @@ def import_cstimer_json(
     Idempotent: bei Re-Import werden Sessions per (user_id, cstimer_session_id)
     wiedererkannt, Solves per (session_id, timestamp, time_ms)-Triple.
 
-    dry_run=True: rollt am Ende zurueck (alle Counts bleiben aussagekraeftig).
+    dry_run=True: rollt am Ende zurück (alle Counts bleiben aussagekraeftig).
     """
     properties = payload.get("properties", {})
     session_meta = parse_session_data(properties)

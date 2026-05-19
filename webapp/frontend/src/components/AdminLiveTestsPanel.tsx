@@ -7,7 +7,7 @@
 // Notiz.
 //
 // Phase 3 (kommt noch): bei FAIL + Notiz wird automatisch ein GitHub-
-// Issue erstellt damit die naechste Welle den Fix aufnehmen kann.
+// Issue erstellt damit die nächste Welle den Fix aufnehmen kann.
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
@@ -89,7 +89,7 @@ export function AdminLiveTestsPanel() {
             </p>
             <p>
               <strong>Workflow:</strong> Claude sagt im Chat „Phone-Test: X".
-              Du klickst hier „+ Neu", paste Title + Beschreibung. Spaeter
+              Du klickst hier „+ Neu", paste Title + Beschreibung. Später
               testest du auf Phone, klickst PASS oder FAIL+Notiz. Bei FAIL
               wird (Phase 3) automatisch ein GitHub-Issue erstellt.
             </p>
@@ -335,7 +335,7 @@ function TestRow({ test }: { test: LiveTest }) {
               onClick={() => setStatus("skip")}
               disabled={update.isPending}
               className="rounded bg-gray-600/30 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600/50 disabled:opacity-50"
-              title="Test uebersprungen (nicht relevant / spaeter)"
+              title="Test übersprungen (nicht relevant / später)"
             >
               ↷ SKIP
             </button>
@@ -345,7 +345,7 @@ function TestRow({ test }: { test: LiveTest }) {
               onClick={() => setStatus("open")}
               disabled={update.isPending}
               className="rounded bg-blue-600/30 px-2 py-1 text-xs text-blue-200 hover:bg-blue-600/50 disabled:opacity-50"
-              title="Zurueck zu offen"
+              title="Zurück zu offen"
             >
               ↺ Reopen
             </button>
@@ -380,8 +380,8 @@ function TestRow({ test }: { test: LiveTest }) {
             }`}
             title={
               deleteConfirm
-                ? "Erneut klicken zum endgueltigen Loeschen"
-                : "Test loeschen"
+                ? "Erneut klicken zum endgueltigen Löschen"
+                : "Test löschen"
             }
           >
             {deleteConfirm ? "Wirklich?" : "🗑"}

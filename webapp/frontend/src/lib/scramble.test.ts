@@ -77,7 +77,7 @@ describe("resolveScrambleTypeOverride (Phase 8.1 bugfix)", () => {
     expect(resolveScrambleTypeOverride("pyraminx")).toBe("pyraminx");
   });
 
-  it("unknown string returns null (caller faellt zurueck)", () => {
+  it("unknown string returns null (caller faellt zurück)", () => {
     expect(resolveScrambleTypeOverride("nonsense")).toBeNull();
     expect(resolveScrambleTypeOverride("PLL")).toBeNull(); // case-sensitive
   });
@@ -129,7 +129,7 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
       const moves = s.split(/\s+/).filter((x) => x.length > 0);
       expect(moves.length).toBeGreaterThan(0);
       // Plausibilitaets-Obergrenze — csTimer-Random-State liefert
-      // typisch ≤30 moves. >50 waere ein Bug.
+      // typisch ≤30 moves. >50 wäre ein Bug.
       expect(moves.length).toBeLessThan(50);
     });
   }
@@ -171,13 +171,13 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
 });
 
 describe("Scramble-Type-Listen + Helpers", () => {
-  it("WCA_SCRAMBLE_TYPES enthaelt alle WCA-Events", () => {
+  it("WCA_SCRAMBLE_TYPES enthält alle WCA-Events", () => {
     const codes = WCA_SCRAMBLE_TYPES.map((t) => t.code);
     expect(codes).toContain("333");
     expect(codes).toContain("pyraminx");
     expect(codes).toContain("clock");
   });
-  it("UNOFFICIAL_SCRAMBLE_TYPES enthaelt Ivy + Gear (User-Wunsch)", () => {
+  it("UNOFFICIAL_SCRAMBLE_TYPES enthält Ivy + Gear (User-Wunsch)", () => {
     const codes = UNOFFICIAL_SCRAMBLE_TYPES.map((t) => t.code);
     expect(codes).toContain("ivy");
     expect(codes).toContain("gear");
