@@ -24,6 +24,51 @@ Commits sind.
 
 ---
 
+## ⭐⭐ LETZTER STAND (2026-05-21) — HETZNER-MIGRATION (P2) MITTENDRIN
+
+**Status:** Backend läuft LIVE auf Hetzner via Coolify + DB verbunden. Frontend-
+Deploy + One-Domain-Routing = nächster Schritt. **Render läuft unberührt parallel
+weiter** (KEIN Cutover bisher — cubetracker.de zeigt noch auf Render).
+
+**Server:** Hetzner CPX22, Ubuntu 24.04, Falkenstein, IP **178.105.103.78**.
+SSH: `ssh root@178.105.103.78` (Key `~/.ssh/id_ed25519`, passwortlos, funktioniert).
+Coolify v4 läuft (UI `http://178.105.103.78:8000`, Admin-Account angelegt).
+
+**Coolify (Projekt „My first project", env production, Server „localhost", einziges Netz `coolify`):**
+- **Postgres** `postgres:16-alpine` — läuft, DB **leer**. Interne URL steht in Backend-Env.
+- **Backend** (App-UUID `w3dw05zc8nv2izxa3v2qi911`): Build Pack **Dockerfile**, Base `/webapp`,
+  Port 8000, Branch `feature/W-api-prefix`. **Läuft, `/api/health`=200 getestet.** DB-Verbindung
+  verifiziert (admin-bootstrap-Query lief). Env: DATABASE_URL(intern), JWT_SECRET, CUBETRACKER_PROD=1,
+  WEBAPP_FRONTEND_ORIGIN+FRONTEND_URL=https://cubetracker.de, ADMIN_EMAILS=henning.fietz@hotmail.de.
+  RESEND_API_KEY noch NICHT gesetzt (optional).
+- **Frontend** (App-UUID `c45fw9k0hzpgh2xxuveopqj7`): angelegt, Branch `feature/W-api-prefix`,
+  Base `/webapp/frontend`, VITE_API_BASE=/api. **NOCH NICHT korrekt deployed** (muss auf Dockerfile).
+
+**Branch `feature/W-api-prefix`** (NICHT gemergt, NICHT der Render-Branch!) — Migrations-Commits:
+- `8f69642` /api-Prefix (main.py Router unter /api, api.ts API_BASE=/api, REFRESH_COOKIE_PATH=/api/auth, test_api_prefix.py)
+- `94cd1d5` `webapp/Dockerfile` (Backend, python:3.12-slim, mirror Render)
+- `fa956e4` `webapp/frontend/Dockerfile` + `webapp/frontend/nginx.conf` (Frontend nginx-Proxy)
+
+**ROUTING-ENTSCHEIDUNG (wichtig!):** Coolify-Path-Routing **strippt `/api`** → Konflikt mit
+unserem /api-Backend (gab FastAPI-404). Lösung: **Frontend-nginx proxyt `/api` intern ans Backend**
+(`proxy_pass http://cubetracker-backend:8000;` OHNE Slash → kein Strip). Eine Domain, kein CORS.
+Backend braucht KEINE öffentliche Domain mehr.
+
+**EXAKTE NÄCHSTE SCHRITTE (genau hier weitermachen):**
+1. **Backend** in Coolify: General → Network → „Network Aliases" = `cubetracker-backend` → Save.
+   Domains-Feld **leeren** → **Redeploy**.
+2. Per SSH verifizieren: `cubetracker-backend:8000` intern erreichbar.
+3. **Frontend** in Coolify: Build Pack → **Dockerfile**, Ports Exposes → **80**,
+   Domain → `http://178-105-103-78.sslip.io` → **Deploy**.
+4. **Testen:** `http://178-105-103-78.sslip.io` lädt + `…/api/health`=200 (via Proxy). Voll-Test (Register/Login, Stats, PB-Chart).
+5. **Phase 3 Daten:** `pg_dump` (Render external DB-URL aus Render-Dashboard) → `pg_restore` (Coolify-Postgres, auf dem Server) → Tabellen-Counts vergleichen.
+6. **Phase 4 Cutover:** cubetracker.de A-Record → 178.105.103.78; Frontend-Domain in Coolify → cubetracker.de (VITE_API_BASE bleibt /api, KEIN Rebuild — relativ); WEBAPP_FRONTEND_ORIGIN+FRONTEND_URL → https://cubetracker.de; Let's-Encrypt automatisch. TTL vorher senken, Rollback = A-Record zurück.
+7. **Phase 6:** 1–2 Wochen parallel, dann Render abbauen + Coolify-Backups (Postgres, off-site) einrichten.
+
+**Runbook:** `docs/hetzner-migration-runbook.md`. **ntfy:** Topic `jjY2OjY`. **Render-Postgres-Deadline:** ~2026-08-08.
+
+---
+
 ## ⭐ LETZTER STAND (2026-05-20) — Claude-Code-Setup-Audit (Welle 1 + 2)
 
 **Worum ging's:** Großer Audit unseres `.claude/`-Setups gegen die offizielle
