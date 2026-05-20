@@ -241,6 +241,7 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       // Auch suggest-queries (most-used) sind betroffen.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["pb-history"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-by-session"] });
       qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
@@ -273,6 +274,7 @@ export function useUpdateSolve(): UseMutationResult<
       // Auch suggest-queries (most-used) sind betroffen.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["pb-history"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-by-session"] });
       qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
@@ -300,6 +302,7 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       // Auch suggest-queries (most-used) sind betroffen.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["pb-history"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-by-session"] });
       qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
@@ -340,6 +343,8 @@ export interface StatsResponse {
   best_ao5_at: string | null;
   best_ao12_at: string | null;
   best_ao100_at: string | null;
+  /** W.pb-history: IDs aller Solves die ein Single-PB waren (Listen-Marker) */
+  pb_solve_ids: number[];
   filter: { cube_type: string | null; session_id: number | null };
 }
 
@@ -369,6 +374,7 @@ const EMPTY_STATS: StatsResponse = {
   best_ao5_at: null,
   best_ao12_at: null,
   best_ao100_at: null,
+  pb_solve_ids: [],
   filter: { cube_type: null, session_id: null },
 };
 
@@ -379,6 +385,44 @@ export function useStats(params: StatsParams = {}): UseQueryResult<StatsResponse
       withStub(
         async () => (await api.get<StatsResponse>("/stats", { params })).data,
         EMPTY_STATS,
+      ),
+  });
+}
+
+// ============================================================
+// PB-History (W.pb-history) — PB-Progression fuer Chart im ANALYSE-Tab
+// ============================================================
+
+export interface PbHistoryPoint {
+  solve_id: number;
+  ms: number;
+  at: string | null;
+}
+
+export interface PbHistoryResponse {
+  single: PbHistoryPoint[];
+  ao5: PbHistoryPoint[];
+  ao12: PbHistoryPoint[];
+  filter: { cube_type: string | null; session_id: number | null };
+}
+
+const EMPTY_PB_HISTORY: PbHistoryResponse = {
+  single: [],
+  ao5: [],
+  ao12: [],
+  filter: { cube_type: null, session_id: null },
+};
+
+export function usePbHistory(
+  params: StatsParams = {},
+): UseQueryResult<PbHistoryResponse> {
+  return useQuery({
+    queryKey: ["pb-history", params],
+    queryFn: () =>
+      withStub(
+        async () =>
+          (await api.get<PbHistoryResponse>("/stats/pb-history", { params })).data,
+        EMPTY_PB_HISTORY,
       ),
   });
 }
@@ -677,6 +721,7 @@ export function useDeleteSession(): UseMutationResult<
       // Solves wandern oder verlieren ihre session_id
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["pb-history"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });
@@ -708,6 +753,7 @@ export function useMergeSession(): UseMutationResult<
       qc.invalidateQueries({ queryKey: ["sessions"] });
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["pb-history"] });
       qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
       qc.invalidateQueries({ queryKey: ["stats-temporal"] });
       qc.invalidateQueries({ queryKey: ["stats-activity"] });

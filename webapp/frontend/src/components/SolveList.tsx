@@ -1,6 +1,7 @@
 // Liste der Solves als Tabelle, mit Filter (Cube-Type, Session, Limit) und
 // Löschen/Toggle-Buttons. Zeigt rollende ao5/ao12 unter jeder Zeit, sowie
-// PB-Marker (Best-Solve goldfarben) basierend auf Stats-API.
+// PB-Marker: aktueller Allzeit-Best gold ★, alte (ueberbotene) PBs dezent ☆
+// (W.pb-history) — basierend auf Stats-API (best_solve_id + pb_solve_ids).
 //
 // F7: Inline-Edit für Zeit + Notizen — click auf den Wert wechselt in
 // Edit-Mode, Enter speichert, Esc bricht ab. Cube-Type bleibt
@@ -89,6 +90,11 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
   if (sessionId !== null) statsParams.session_id = sessionId;
   const { data: stats } = useStats(statsParams);
   const bestSolveId = stats?.best_solve_id ?? null;
+  // W.pb-history: alle Solves, die je ein Single-PB waren (auch alte/ueberbotene).
+  const pbSolveIds = useMemo(
+    () => new Set<number>(stats?.pb_solve_ids ?? []),
+    [stats],
+  );
 
   const del = useDeleteSolve();
   const update = useUpdateSolve();
@@ -325,6 +331,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
             {sortedDisplay.map((row) => {
               const s = row.solve;
               const isBest = s.id === bestSolveId;
+              const isOldPb = !isBest && pbSolveIds.has(s.id);
               const isEditingTime =
                 editing?.solveId === s.id && editing.field === "time";
               const hardwareName =
@@ -367,17 +374,27 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                       >
                         {isBest && (
                           <span
-                            className="inline-block mr-1.5 text-xs"
-                            title="Persoenliche Bestzeit (PB)"
+                            className="inline-block mr-1.5 text-xs text-yellow-300"
+                            title="Aktuelle persoenliche Bestzeit (PB)"
                           >
                             ★
+                          </span>
+                        )}
+                        {isOldPb && (
+                          <span
+                            className="inline-block mr-1.5 text-xs text-yellow-600/80"
+                            title="War PB (inzwischen ueberboten)"
+                          >
+                            ☆
                           </span>
                         )}
                         <span
                           className={
                             isBest
                               ? "text-yellow-300 font-semibold"
-                              : "text-gray-100"
+                              : isOldPb
+                                ? "text-yellow-500/90"
+                                : "text-gray-100"
                           }
                         >
                           {formatSolveTime(s)}

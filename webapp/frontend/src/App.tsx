@@ -48,6 +48,7 @@ import { StatsCard } from "./components/StatsCard";
 import { TabBar, type AppTab } from "./components/TabBar";
 import { TrainerTab } from "./components/TrainerTab";
 import { TrendsChart } from "./components/TrendsChart";
+import { PbProgressionCard } from "./components/PbProgressionCard";
 import { VerwaltungTab } from "./components/VerwaltungTab";
 import { WcaUpcomingCard } from "./components/WcaUpcomingCard";
 import "./App.css";
@@ -390,6 +391,8 @@ function AnalyseTab({
       <StatsCard cubeType={cubeFilter || undefined} sessionId={sessionId} />
 
       <TrendsChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
+
+      <PbProgressionCard cubeType={cubeFilter || undefined} sessionId={sessionId} />
 
       <ActivityChart cubeType={cubeFilter || undefined} sessionId={sessionId} />
 

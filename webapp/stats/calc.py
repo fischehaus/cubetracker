@@ -109,6 +109,47 @@ def best_average_window_with_anchor(
     return (best_avg, best_anchor_id)
 
 
+def single_pb_progression(solves: list[SolvePoint]) -> list[tuple[int, int]]:
+    """PB-Progression der Single-Zeiten in chronologischer Reihenfolge.
+
+    Solves muessen chronologisch (timestamp asc) sein. Liefert fuer jede Solve,
+    die den bisherigen Rekord UNTERBIETET (strikt <), ein (solve_id, ms)-Paar.
+    DNF wird uebersprungen, +2 zaehlt (effective_ms). Das letzte Paar = der
+    aktuelle Allzeit-PB.
+    """
+    out: list[tuple[int, int]] = []
+    best = math.inf
+    for s in solves:
+        if s.dnf:
+            continue
+        e = s.effective_ms
+        if e < best:
+            best = e
+            out.append((s.solve_id, int(e)))
+    return out
+
+
+def avg_pb_progression(solves: list[SolvePoint], window: int) -> list[tuple[int, int]]:
+    """PB-Progression eines Average-of-N (ao5/ao12/...) in chronologischer Folge.
+
+    Laeuft alle Sliding-Windows der Groesse `window` durch (Solves asc) und
+    emittiert fuer jeden neuen Best-Avg (strikt <) ein (anchor_solve_id, avg_ms)-
+    Paar. Anker = letzter Solve im Window (= „wann wurde dieser Avg-PB erzielt").
+    """
+    n = len(solves)
+    out: list[tuple[int, int]] = []
+    if n < window:
+        return out
+    best: int | None = None
+    for i in range(n - window + 1):
+        avg = average_of_n(solves[i : i + window])
+        if avg is not None and (best is None or avg < best):
+            best = avg
+            anchor_id = solves[i + window - 1].solve_id
+            out.append((anchor_id, avg))
+    return out
+
+
 @dataclass
 class StatsResult:
     """Vollstaendige Statistik-Antwort für eine Solve-Menge."""
@@ -140,6 +181,10 @@ class StatsResult:
     best_ao12_solve_id: int | None
     best_ao100_solve_id: int | None
 
+    # W.pb-history: IDs aller Solves, die zum Zeitpunkt ihres Setzens ein
+    # Single-PB waren (chronologische Progression). Fuer Listen-Marker.
+    pb_solve_ids: list[int]
+
 
 def compute_stats(solves: list[SolvePoint]) -> StatsResult:
     """Vollstaendige Statistik aus einer Solve-Liste.
@@ -167,6 +212,7 @@ def compute_stats(solves: list[SolvePoint]) -> StatsResult:
             best_ao5_solve_id=None,
             best_ao12_solve_id=None,
             best_ao100_solve_id=None,
+            pb_solve_ids=[],
         )
 
     valid = [s for s in solves if not s.dnf]
@@ -211,4 +257,29 @@ def compute_stats(solves: list[SolvePoint]) -> StatsResult:
         best_ao5_solve_id=ao5_anchor[1] if ao5_anchor else None,
         best_ao12_solve_id=ao12_anchor[1] if ao12_anchor else None,
         best_ao100_solve_id=ao100_anchor[1] if ao100_anchor else None,
+        pb_solve_ids=[sid for sid, _ in single_pb_progression(solves)],
+    )
+
+
+@dataclass
+class PbHistoryResult:
+    """PB-Progressionen fuer die Visualisierung (W.pb-history).
+
+    Jede Liste enthaelt (solve_id, ms)-Paare in chronologischer Reihenfolge —
+    je ein Eintrag pro neuem Rekord. solve_id ist beim Single die Solve selbst,
+    bei den Averages der Anker (letzter Solve im Window). Den Timestamp loest
+    die API-Schicht aus der solve_id auf.
+    """
+
+    single: list[tuple[int, int]]
+    ao5: list[tuple[int, int]]
+    ao12: list[tuple[int, int]]
+
+
+def pb_history(solves: list[SolvePoint]) -> PbHistoryResult:
+    """Single- + ao5- + ao12-PB-Progression. Solves muessen chronologisch sein."""
+    return PbHistoryResult(
+        single=single_pb_progression(solves),
+        ao5=avg_pb_progression(solves, 5),
+        ao12=avg_pb_progression(solves, 12),
     )

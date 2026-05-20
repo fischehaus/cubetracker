@@ -36,6 +36,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
       "Sortierbare Solve-Liste mit Solvenummern, Mo3/AO5/AO12/AO100 als Spalten, Hardware-Zuordnung",
       "Detail-Modal pro Solve: vollstaendiger Scramble + Notiz + Kontext via ℹ-Button",
       "Charts: Trends über Zeit, Distribution-Verteilung, tägliche Aktivität",
+      "PB-Verlauf: alle persönlichen Bestzeiten bleiben als PB markiert (auch alte/überbotene), plus ein Verlaufs-Chart der Single-/AO5-/AO12-Rekorde über die Zeit",
       "Hardware-Performance-Vergleich: welcher Cube ist schneller für welchen Type",
     ],
   },

@@ -38,6 +38,24 @@ class PatchNote:
 # Neue Einträge OBEN einfügen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.pb-history",
+        released=date(2026, 5, 20),
+        title="Alle PBs sichtbar + PB-Verlauf-Chart",
+        highlights=[
+            "User-Wunsch: nicht nur die aktuelle Bestzeit, sondern JEDE Zeit, "
+            "die zum Zeitpunkt ihres Setzens ein persönlicher Rekord war, wird "
+            "in der Solve-Liste als PB markiert. Aktueller Allzeit-PB kräftig "
+            "gold (Stern ★), alte (inzwischen überbotene) PBs dezent (☆).",
+            "Neuer 'PB-Verlauf'-Chart im Analyse-Tab: die absteigende Treppe "
+            "deiner Rekorde über die Zeit. Umschaltbar zwischen Single, ao5 und "
+            "ao12 — so siehst du deine Verbesserung auf einen Blick.",
+            "Die PB-Progression wird serverseitig über ALLE Solves des aktuellen "
+            "Filters berechnet (nicht nur das geladene Listen-Fenster), damit "
+            "auch sehr alte Rekorde korrekt erscheinen. DNF zählt nicht, +2 wird "
+            "als Effektivzeit gewertet.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.umlauts-qa",
         released=date(2026, 5, 19),
         title="Umlaut-Nachzieher (Bestätigung, Lädt, zwölf, …)",

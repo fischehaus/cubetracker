@@ -98,7 +98,9 @@ function parseDigitsOnly(digits: string): number | null {
  * Formatiert ein ISO-Datum kompakt: "02.05.2026 14:23".
  */
 export function formatDate(iso: string): string {
+  if (!iso) return "—";
   const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
   const dd = String(d.getDate()).padStart(2, "0");
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const yyyy = d.getFullYear();

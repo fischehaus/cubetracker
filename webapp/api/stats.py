@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session as OrmSession
 from auth.deps import get_current_user
 from db.database import get_db
 from db.models import Hardware, Session as DbSession, Solve, User
-from stats.calc import SolvePoint, compute_stats
+from stats.calc import SolvePoint, compute_stats, pb_history
 
 router = APIRouter(prefix="/stats", tags=["stats"])
 
@@ -87,6 +87,56 @@ def get_stats(
         "best_ao5_at": _ts(result.best_ao5_solve_id),
         "best_ao12_at": _ts(result.best_ao12_solve_id),
         "best_ao100_at": _ts(result.best_ao100_solve_id),
+        "pb_solve_ids": result.pb_solve_ids,
+        "filter": {"cube_type": cube_type, "session_id": session_id},
+    }
+
+
+@router.get("/pb-history")
+def get_pb_history(
+    cube_type: str | None = Query(default=None, description="Filter auf Cube-Type"),
+    session_id: int | None = Query(default=None, description="Filter auf Session-ID"),
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """PB-Progression (Single + ao5 + ao12) fuer die Visualisierung im ANALYSE-Tab.
+
+    Liefert pro Metrik die Rekord-Punkte mit aufgeloestem Timestamp, chronologisch.
+    Filter wie /stats (cube_type, session_id). Pro User.
+    """
+    stmt = (
+        select(Solve)
+        .where(Solve.user_id == current_user.id)
+        .order_by(Solve.timestamp.asc())
+    )
+    if cube_type is not None:
+        stmt = stmt.where(Solve.cube_type == cube_type)
+    if session_id is not None:
+        stmt = stmt.where(Solve.session_id == session_id)
+    rows = db.scalars(stmt).all()
+
+    points = [
+        SolvePoint(time_ms=s.time_ms, dnf=s.dnf, plus_two=s.plus_two, solve_id=s.id) for s in rows
+    ]
+    hist = pb_history(points)
+
+    by_id = {s.id: s for s in rows}
+
+    def _ts(sid: int) -> str | None:
+        s = by_id.get(sid)
+        if s is None or s.timestamp is None:
+            return None
+        ts = s.timestamp
+        ts_aware = ts.replace(tzinfo=UTC) if ts.tzinfo is None else ts
+        return ts_aware.isoformat()
+
+    def _series(pairs: list[tuple[int, int]]) -> list[dict[str, Any]]:
+        return [{"solve_id": sid, "ms": ms, "at": _ts(sid)} for sid, ms in pairs]
+
+    return {
+        "single": _series(hist.single),
+        "ao5": _series(hist.ao5),
+        "ao12": _series(hist.ao12),
         "filter": {"cube_type": cube_type, "session_id": session_id},
     }
 
