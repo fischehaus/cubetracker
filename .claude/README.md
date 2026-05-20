@@ -4,7 +4,7 @@ Projekt-spezifische Konfiguration für [Claude Code](https://claude.ai/code).
 
 ## Hooks
 
-Sechs Mental-Model-Fehler / Klassiker-Bugs aus der Projekt-Historie
+Acht Mental-Model-Fehler / Klassiker-Bugs aus der Projekt-Historie
 sollen automatisch aufgefangen werden:
 
 | # | Schmerzpunkt | Hook |
@@ -15,21 +15,31 @@ sollen automatisch aufgefangen werden:
 | 4 | Session-Start ohne Repo-Context → Mental-Model-Drift | `session-start-context.sh` (SessionStart-Notice) |
 | 5 | Hartkodiertes `localhost:` in TS/TSX-Files (v1.0.1-Klassiker-Bug) | `post-edit-hardcoded-url.sh` (PostToolUse-Notice) |
 | 6 | Session beenden mit uncommitted/unpushed Zeug oder fehlenden Tags | `stop-mini-check.sh` (Stop-Hook, 1×/Session) + `/abschluss` Slash-Command (voller Check) |
+| 7 | Tag landet am falschen Commit, weil pre-commit den Commit abgebrochen hat (2× erlebt) | `pre-git-tag-check.sh` (PreToolUse-Block bei `git tag` + dirty tree) — siehe unten |
+| 8 | `git push` schlägt fehl (non-fast-forward / kein Upstream / Auth) → kryptischer Git-Stacktrace | `post-push-failure-diagnose.sh` (PostToolUseFailure-Notice) — siehe unten |
 
 ### Files
 
 ```
 .claude/
-├── README.md                      (dieses File)
-├── settings.json                  (Hook-Konfig — commitbar, gilt fuer alle Sessions)
+├── README.md                          (dieses File)
+├── settings.json                      (Hook + Permissions Konfig — commitbar)
+├── agents/
+│   ├── qa-reviewer.md                 (Sub-Agent: strukturierte QA-Reviews)
+│   └── patch-notes-writer.md          (Sub-Agent: PatchNote aus Commit-Diff)
 ├── commands/
-│   └── abschluss.md               (Slash-Command /abschluss — 8-Punkte-Check)
+│   └── abschluss.md                   (Slash-Command /abschluss — 8-Punkte-Check)
+├── rules/
+│   └── discipline.md                  (path-scoped Code-Disziplin, lädt bei Code-Work)
 └── hooks/
-    ├── session-start-context.sh   (Repo-Stand + Reminders beim Start)
-    ├── pre-bash-dev-server.sh     (Block uvicorn / npm run dev / vite)
-    ├── post-git-commit.sh         (Push-Reminder + Tag-Reminder)
-    ├── post-edit-hardcoded-url.sh (Warn bei localhost:/127.0.0.1: in *.ts/*.tsx)
-    └── stop-mini-check.sh         (Stop-Hook, 1×/Session: uncommitted + unpushed)
+    ├── session-start-context.sh       (Repo-Stand + Reminders beim Start)
+    ├── pre-bash-dev-server.sh         (Block uvicorn / npm run dev / vite)
+    ├── pre-git-tag-check.sh           (Block git tag bei modifizierten tracked-Files)
+    ├── post-git-commit.sh             (Push-Reminder + Tag-Reminder)
+    ├── post-edit-hardcoded-url.sh     (Warn bei localhost: in *.ts/*.tsx)
+    ├── post-push-failure-diagnose.sh  (Diagnose bei fehlgeschlagenem git push)
+    ├── permission-request-auto-approve.sh (Auto-Approve safe Read-Commands)
+    └── stop-mini-check.sh             (Stop-Hook, 1×/Session: uncommitted + unpushed)
 ```
 
 ### /abschluss — Session-Ende-Check
@@ -99,6 +109,39 @@ Patterns: `git status/log/diff/branch`, `ls/pwd/cat/head/tail/wc`,
 `python -c`, `npm test/run build/run lint/ls`. Reduziert Permission-Dialog-
 Fatigue im Auto-Mode.
 
+## pre-git-tag-check: Misplaced-Tag-Schutz
+
+`pre-git-tag-check.sh` (Phase Audit-2026-05-20-D) blockt `git tag`-Erzeugung,
+wenn der Working-Tree **modifizierte tracked-Files** enthält. Hintergrund: 2×
+ist passiert, dass ein pre-commit-Hook eine Datei modifiziert + den Commit
+abgebrochen hat, ich aber trotzdem getaggt habe → Tag hing am falschen Commit
+(siehe `docs/lessons-archive.md`).
+
+- Greift nur bei Tag-**Erzeugung**, nicht bei `git tag -d/-l/-v` (Listing/Delete).
+- **Untracked-Files** (z.B. `scripts/`, Scratch-`.docx`) zählen NICHT als Schmutz.
+- Block läuft via JSON `permissionDecision: "deny"` mit Diagnose (zeigt den
+  aktuellen HEAD + die modifizierten Files).
+- Override für den dokumentierten Recovery-Workflow (alten Commit mit
+  `-impl`-Suffix nachtaggen):
+
+```bash
+CUBETRACKER_ALLOW_DIRTY_TAG=1 git tag -a v... -m "..."
+```
+
+## post-push-failure-diagnose: Push-Fehler-Diagnose
+
+`post-push-failure-diagnose.sh` (Phase Audit-2026-05-20-D) läuft am
+`PostToolUseFailure`-Event, wenn ein `git push` fehlschlägt. Scannt die
+Fehlermeldung und liefert einen zielgerichteten Fix-Command statt rohem
+Git-Stacktrace:
+
+- **non-fast-forward** → `git pull --rebase origin <branch>` + erneut pushen
+- **kein Upstream** → `git push -u origin <branch>`
+- **Auth/SSH** (publickey, authentication failed) → PAT / SSH-Key prüfen
+- **Netzwerk** (could not resolve host) → Connection/VPN prüfen
+- **Branch-Protection** (pre-receive declined) → remote:-Zeile lesen, ggf. PR
+- **Unbekannt** → generischer `git status` + `git remote -v`-Hinweis
+
 ## Erweiterung
 
 Neuen Hook hinzufuegen:
@@ -114,4 +157,7 @@ Hook-Doku: https://code.claude.com/docs/en/hooks
 ## Audit-Trail
 
 Letzter Setup-Audit: `docs/audit-2026-05-20.md` (Doku-vs-Setup-Abgleich
-mit 4 Sub-Agents parallel).
+mit 4 Sub-Agents parallel). Phase D umgesetzt: 10 Quick-Wins (Commit
+`7330b81`) + 3 Präsentations-Items P3/H2/S2 (`pre-git-tag-check.sh`,
+`post-push-failure-diagnose.sh`, `agents/patch-notes-writer.md`). Offen:
+M4 (NEXT_SESSION-Update-Hook) + S3 (audit-loop-Subagent, zurückgestellt).

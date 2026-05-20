@@ -56,6 +56,13 @@
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-bash-dev-server.sh\"",
             "timeout": 5,
             "shell": "bash"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git tag *)",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-git-tag-check.sh\"",
+            "timeout": 5,
+            "shell": "bash"
           }
         ]
       }
@@ -92,6 +99,20 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/post-edit-hardcoded-url.sh\"",
+            "timeout": 5,
+            "shell": "bash"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push *)",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/post-push-failure-diagnose.sh\"",
             "timeout": 5,
             "shell": "bash"
           }
