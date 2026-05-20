@@ -24,7 +24,85 @@ Commits sind.
 
 ---
 
-## ⭐⭐ LETZTER STAND (2026-05-21) — HETZNER-MIGRATION (P2) MITTENDRIN
+## ⭐⭐ LETZTER STAND (2026-05-21, abends) — HETZNER-MIGRATION (P2): ARCHITEKTUR LÄUFT ✅
+
+**Status:** Eine-Domain-Architektur auf Hetzner/Coolify **funktioniert end-to-end**,
+getestet über `http://178-105-103-78.sslip.io`:
+- `/` → 200 (Frontend-SPA)
+- `/api/health` → 200 `{"status":"ok","mode":"prod","version":"...W.pb-history"}` (durch Frontend-nginx → Backend)
+- `/api/auth/me` → 401 (Backend verarbeitet Auth-Routen korrekt)
+
+**Render läuft unberührt parallel** — cubetracker.de zeigt noch auf Render, KEIN Cutover.
+DB auf Hetzner ist noch **leer** (Daten-Migration steht aus).
+
+**Server/Coolify:** Hetzner CPX22, IP **178.105.103.78**, SSH `ssh root@178.105.103.78`
+(Key `id_ed25519`). Coolify v4 UI `http://178.105.103.78:8000`. Projekt `my-first-project`,
+env `production`, Netz `coolify`.
+- **Postgres** (Resource `a10kg8z6...`): läuft, **leer**. Interne URL in Backend-Env.
+- **Backend-App:** Coolify-UUID **`wvj3lwq00uuw29uqf5y47vhq`** (applicationId 1; Container-Name-
+  Prefix `w3dw05zc8...` — das ist NICHT die App-UUID!). Dockerfile, Base `/webapp`, Port 8000,
+  Branch `feature/W-api-prefix`, **Domains LEER**, **Labels LEER** (= privat, nur intern),
+  Network-Alias `cubetracker-backend`. Env gesetzt: DATABASE_URL(intern), JWT_SECRET,
+  CUBETRACKER_PROD=1, WEBAPP_FRONTEND_ORIGIN+FRONTEND_URL=https://cubetracker.de, ADMIN_EMAILS.
+  RESEND_API_KEY fehlt (optional).
+- **Frontend-App:** Coolify-UUID **`c45fw9k0hzpgh2xxuveopqj7`** (applicationId 2; Container-Prefix
+  `pcixgncs671...`). Dockerfile, Base `/webapp/frontend`, Port **80**, Domain
+  `http://178-105-103-78.sslip.io`, VITE_API_BASE=/api. nginx serviert SPA + proxyt `/api` an
+  `cubetracker-backend:8000`.
+
+**Branch `feature/W-api-prefix`** (Hetzner-Branch, NICHT der Render-Branch): Commits `8f69642`
+(/api-Prefix), `94cd1d5` (Backend-Dockerfile), `fa956e4` (Frontend-Dockerfile + nginx.conf).
+
+**⚠️ COOLIFY-LESSONS (heute teuer gelernt — beim nächsten Mal Zeit sparen):**
+1. **Container-Name ≠ App-UUID.** Container = `w3dw05zc8...` (`coolify.name`), App-UUID in der
+   Browser-URL = `wvj3lwq...` (`coolify.resourceName`). App immer über Resources-Liste/URL finden,
+   nie über den Container-Namen. Per SSH prüfbar:
+   `docker inspect <container> --format '{{json .Config.Labels}}' | tr ',' '\n' | grep coolify.resourceName`.
+2. **Domain leeren reicht NICHT** — die generierten Traefik-Labels bleiben kleben (Redeploy schreibt
+   sie immer wieder). Fix: App → Configuration → ganz unten **„Labels" → „Reset Labels to Defaults"**
+   (Bestätigung: App-URL `/` eintippen) → Redeploy.
+3. **nginx cached die Backend-IP beim Start.** Nach jedem Backend-Redeploy (neue Container-IP) → 502,
+   bis das **Frontend neu gestartet** wird. Dauerlösung = FIX B unten (nginx-Resolver).
+
+**🔧 2 OFFENE FIXES (vor dem Cutover, beide auf `feature/W-api-prefix`):**
+- **FIX A — Bug (Backend):** `webapp/api/changelog.py` Z.18:
+  `APIRouter(prefix="/api", tags=["changelog"])` → `APIRouter(tags=["changelog"])` (prefix RAUS!).
+  `main.py` wrappt schon `/api` drum → sonst landet die Route bei `/api/api/changelog` (per curl
+  bestätigt: 200), und `/api/changelog` = 404 → Changelog-Modal tot. NUR dieser Router betroffen
+  (alle anderen haben saubere Prefixes wie `/auth`, `/stats`). Danach **Backend-Redeploy**, Test
+  `/api/changelog`=200.
+- **FIX B — Härtung (Frontend):** `webapp/frontend/nginx.conf`, im `location /api/` Resolver ergänzen:
+  ```
+  location /api/ {
+      resolver 127.0.0.11 valid=10s ipv6=off;
+      set $cbe http://cubetracker-backend:8000;
+      proxy_pass $cbe;
+      proxy_http_version 1.1;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+  }
+  ```
+  (Variable in `proxy_pass` erzwingt Laufzeit-DNS via Docker-DNS 127.0.0.11 → kein 502 mehr nach
+  Backend-Redeploys/Cutover.) Danach **Frontend-Redeploy**.
+
+**EXAKTE NÄCHSTE SCHRITTE:**
+1. FIX A + FIX B committen + pushen (feature/W-api-prefix), dann **Backend- + Frontend-Redeploy**.
+   Test: `/api/changelog`=200, `/api/health`=200, `/`=200.
+2. **Phase 3 Daten:** `pg_dump` von Render-External-DB-URL (Render-Dashboard) → `pg_restore` in
+   Coolify-Postgres (auf dem Server). Tabellen-Counts (users/solves/sessions/...) Render vs. Hetzner
+   vergleichen. Browser-Voll-Test auf sslip.io (Register/Login, Stats, PB-Chart, Changelog).
+3. **Phase 4 Cutover:** cubetracker.de A-Record → 178.105.103.78; Frontend-Domain in Coolify →
+   cubetracker.de (VITE_API_BASE bleibt /api, KEIN Rebuild); WEBAPP_FRONTEND_ORIGIN+FRONTEND_URL →
+   https://cubetracker.de; Let's-Encrypt automatisch. TTL vorher senken, Rollback = A-Record zurück.
+4. **Phase 6:** 1–2 Wochen parallel, dann Render abbauen + Coolify-Postgres-Backups (off-site).
+
+**Runbook:** `docs/hetzner-migration-runbook.md`. **ntfy:** `jjY2OjY`. **Render-Postgres-Deadline:** ~2026-08-08.
+
+---
+
+## ⭐ LETZTER STAND (2026-05-21, früher Stand — ÜBERHOLT vom Block oben) — HETZNER-MIGRATION (P2) MITTENDRIN
 
 **Status:** Backend läuft LIVE auf Hetzner via Coolify + DB verbunden. Frontend-
 Deploy + One-Domain-Routing = nächster Schritt. **Render läuft unberührt parallel
