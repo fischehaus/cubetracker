@@ -1,6 +1,38 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "_comment": "Cubetracker-projekt-spezifische Claude-Code-Settings. Hooks gegen die wiederkehrenden Mental-Model-Fehler + Klassiker-Bugs aus der Projekt-Historie: (1) lokale Dev-Server statt Render-Deploy, (2) Commits vergessen zu pushen, (3) Patch-Notes ohne Git-Tag, (4) hartkodiertes localhost in Frontend (v1.0.1-Bug), (5) Session-Start ohne Repo-Context (heutiger Mental-Model-Drift).",
+  "_comment": "Cubetracker-projekt-spezifische Claude-Code-Settings. Hooks gegen die wiederkehrenden Mental-Model-Fehler + Klassiker-Bugs. Permissions als Allow-/Deny-Liste fuer typische Workflow-Patterns (reduziert Classifier-Dialoge) plus Safety-Net gegen versehentliche Repo-Schaeden. Erweitert am 2026-05-20 nach Doku-Audit (siehe docs/audit-2026-05-20.md).",
+  "permissions": {
+    "allow": [
+      "Bash(gh api repos/cs0x7f/*)",
+      "Bash(gh api repos/fischehaus/cubetracker/*)",
+      "Bash(npm test*)",
+      "Bash(npm run build*)",
+      "Bash(npm run lint*)",
+      "Bash(python -c *)",
+      "Bash(git tag *)",
+      "Bash(git log*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git push*)",
+      "Bash(find * -delete)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~/*)",
+      "Bash(rm -rf D:/*)",
+      "Bash(rm -rf C:/*)",
+      "Bash(git push --force *)",
+      "Bash(git push *--force* main*)",
+      "Bash(git push origin :refs/heads/main)",
+      "Edit(.git/**)",
+      "Write(.git/**)",
+      "Edit(.claude/projects/**)",
+      "Write(.claude/projects/**)"
+    ]
+  },
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "180000"
+  },
   "hooks": {
     "SessionStart": [
       {
@@ -23,6 +55,19 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-bash-dev-server.sh\"",
             "timeout": 5,
+            "shell": "bash"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/permission-request-auto-approve.sh\"",
+            "timeout": 3,
             "shell": "bash"
           }
         ]

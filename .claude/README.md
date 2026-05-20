@@ -9,7 +9,7 @@ sollen automatisch aufgefangen werden:
 
 | # | Schmerzpunkt | Hook |
 |---|---|---|
-| 1 | Lokale Dev-Server starten, obwohl Cubetracker live auf cubetracker.de deployed ist | `pre-bash-dev-server.sh` (PreToolUse-Block) |
+| 1 | Lokale Dev-Server starten, obwohl Cubetracker live auf cubetracker.de deployed ist | `pre-bash-dev-server.sh` (PreToolUse-Block) — siehe Klarstellung unten |
 | 2 | Commit vergessen zu pushen → Render-autoDeploy triggert nicht | `post-git-commit.sh` Teil A (PostToolUse-Notice) |
 | 3 | Neuen Patch-Notes-Eintrag in `webapp/changelog/data.py` nicht getaggt | `post-git-commit.sh` Teil B (PostToolUse-Notice) |
 | 4 | Session-Start ohne Repo-Context → Mental-Model-Drift | `session-start-context.sh` (SessionStart-Notice) |
@@ -75,14 +75,43 @@ und extrahiert neue `version="..."`-Strings. Fuer jede neue Version:
 Konvention: Tag-Name = `v` + Patch-Notes-Version-String. Beispiel:
 `version="2.0.0-alpha.W.welle2-3-qa"` → Tag `v2.0.0-alpha.W.welle2-3-qa`.
 
+## pre-bash-dev-server: Block-Logik
+
+Der Hook matched folgende Patterns (Glob, case-aware):
+- `*uvicorn*` — alle Aufrufe inkl. `pip install uvicorn` (False Positive!)
+- `npm run dev`, `yarn dev`, `pnpm dev`
+- `*vite*`, `npx vite` (außer `vite build`, das ist erlaubt)
+
+**Wichtig:** Pattern `*uvicorn*` blockt auch Dependency-Installation. Falls
+du legit `pip install uvicorn` o.ä. brauchst → Override:
+
+```bash
+CUBETRACKER_ALLOW_LOCAL_DEV=1 pip install uvicorn
+```
+
+Das deaktiviert den Hook für die gesamte Shell-Session.
+
+## PermissionRequest: Auto-Approve safe commands
+
+`permission-request-auto-approve.sh` (Phase Audit-2026-05-20) auto-approved
+Read-Only-Commands die nicht in `settings.json:permissions.allow` stehen.
+Patterns: `git status/log/diff/branch`, `ls/pwd/cat/head/tail/wc`,
+`python -c`, `npm test/run build/run lint/ls`. Reduziert Permission-Dialog-
+Fatigue im Auto-Mode.
+
 ## Erweiterung
 
 Neuen Hook hinzufuegen:
 
 1. Bash-Script unter `.claude/hooks/` anlegen (siehe Vorlage)
-2. In `settings.json` unter passendem Event (`PreToolUse`, `PostToolUse`, …)
-   registrieren mit `matcher` + `if`-Bedingung
+2. In `settings.json` unter passendem Event (`PreToolUse`, `PostToolUse`,
+   `PermissionRequest`, `Stop`, …) registrieren mit `matcher` + `if`-Bedingung
 3. Manuell testen mit `echo '{...}' | bash .claude/hooks/<script>.sh`
 4. Commit + push
 
 Hook-Doku: https://code.claude.com/docs/en/hooks
+
+## Audit-Trail
+
+Letzter Setup-Audit: `docs/audit-2026-05-20.md` (Doku-vs-Setup-Abgleich
+mit 4 Sub-Agents parallel).

@@ -35,101 +35,48 @@ Trainings-Reminder und Hardware-Performance-Analyse.
 - Prettier, ESLint (TS-Format/Lint)
 - pre-commit (Hooks vor Commit)
 
-## Disziplin (verbindlich)
+## Permission-Modes (Claude-Code-Workflow)
 
-1. **Edit statt Write.** Bei Aenderungen an bestehenden Files immer
-   `Edit`-Tool mit praezisem Anker. NIEMALS `Write` ueber eine
-   bestehende Datei.
+Permission-Modes via **Shift+Tab** wechseln. Empfehlung pro Use-Case:
 
-2. **Type-Hints durchgehend.** Python: alle Funktions-Signaturen
-   typisiert. TypeScript: kein `any`, strict-mode aktiv.
+| Mode | Wann nutzen |
+|------|------|
+| `default` | Standard, jeder Tool-Call wird gefragt |
+| `acceptEdits` | Iteratives Codieren in bekanntem Pfad — Edit/Write ohne Prompt |
+| `plan` | Major-Refactors, Architektur-Spikes — Claude plant, fragt vor Execution |
 
-3. **Tests vor Merge.** Jedes Feature braucht mindestens
-   Unit-Tests fuer die Kernlogik. Pre-commit muss gruen sein.
+**Project-Permissions** in `.claude/settings.json` decken die wiederkehrenden
+Workflow-Patterns ab (`gh api repos/cs0x7f/*`, `npm test`, `python -c`,
+`git tag`, etc.). **Deny-Liste** schützt gegen `rm -rf /*`, force-push
+auf main, `.git/**`-Edits.
 
-4. **DB-Migrations sauber.** Jede Schema-Aenderung als Alembic-
-   Revision. Keine direkten DB-Mutationen.
+## Code-Disziplin
 
-5. **Bei Tooling-Ausfall, Quellen-Widerspruch oder Architektur-
-   Schnitt-Frage:** nicht eigenmaechtig pivotieren, sondern fragen.
+→ Siehe `.claude/rules/discipline.md` — wird automatisch geladen bei
+Arbeit an Python- oder TypeScript-Files (Path-scoped). Enthält:
+- Edit statt Write
+- Type-Hints durchgehend
+- Tests vor Merge
+- Modul-Check (Layout / Datensicherung / Cross-Modul) vor Bau
+- QA-Sub-Agent-Pflicht nach wesentlichen Änderungen
+- Sub-Agent-Nutzungs-Konventionen
 
-6. **Modul-Check vor Bau.** Bei jedem neuen Modul / jeder neuen
-   Funktion / jeder Anpassung VOR dem Code drei Dimensionen explizit
-   durchdenken — nicht ueberspringen, auch wenn das modul "klein"
-   wirkt:
+## Sub-Agents
 
-   a) **Layout-Impact**: Wo erscheint das Modul? Braucht es einen
-      neuen Reiter? Passt es in eine bestehende Sektion? Aendert
-      sich die Tab-Anzahl oder Sub-Tab-Struktur?
+Eigene Sub-Agent-Files unter `.claude/agents/`:
+- `qa-reviewer.md` — strukturierte QA-Reviews nach wesentlichen Änderungen
 
-   b) **Datensicherung + Export**: Aendert sich das DB-Schema
-      (neue Tabelle, neue Spalte)? Muessen Backup-Routinen
-      angepasst werden? Wenn JSON-Export existiert: muss das neue
-      Modul mit-exportiert werden? Idempotent bei Re-Import?
+Built-in Sub-Agents via `Agent`-Tool: `general-purpose`, `Plan`, `Explore`,
+`claude-code-guide`.
 
-   c) **Cross-Modul-Auswirkung**: Triggert das neue Modul
-      Aenderungen in anderen Modulen (z.B. Solve-Save loest
-      Achievement-Check aus)? Reagieren bestehende Endpoints/
-      Komponenten anders? Brauchen Mutation-Hooks zusaetzliche
-      Cache-Invalidierung?
+## QA-Audit-Trail
 
-   Ergebnis dieser Ueberlegung wird in der Antwort an User
-   sichtbar dokumentiert (z.B. „Layout: neuer Tab", „Backup:
-   neue Tabelle muss in /export aufgenommen werden", etc.) —
-   und bei strittigen Punkten wird gefragt, nicht eigenmaechtig
-   entschieden.
-
-## Sub-Agent-Nutzung
-
-Bei spezialisierten Aufgaben **bevorzuge Sub-Agents** mit
-`context: fork`:
-- Neue API-Endpoint schreiben → `code-writer`
-- Test-Suite generieren → `test-writer`
-- Code-Review vor Commit → `reviewer`
-- Docstrings/README-Update → `doc-writer`
-
-Bei kleinen Edits, kurzen Frage-Antwort-Loops oder wenn der
-Kontext minimal ist: direkt im Hauptkontext, ohne Sub-Agent.
-
-## QA nach jeder wesentlichen Aenderung (verbindlich seit 2026-05-11)
-
-**User-Anweisung 2026-05-11:** Nach JEDER wesentlichen Aenderung
-einen Security-Sub-Agent-Review starten — nicht erst am Ende einer
-Phase.
-
-**Was ist "wesentlich"** (Trigger fuer QA-Pass):
-- Neue API-Endpoints (POST/PATCH/DELETE die DB schreiben)
-- Schema-Aenderung (neue Tabelle, neue Spalte, neue FK)
-- Auth- oder Permission-relevanter Code (Login, Token, current_user-
-  Dep, Cross-User-Filter)
-- File-Upload oder External-Service-Integration (Email, Storage,
-  Payment, ...)
-- Bulk-Operations (Import, Backup-Restore, Achievement-Recheck)
-- Komplette Sub-Phase abgeschlossen (z.B. W.4, W.5, W.8)
-
-**Was ist NICHT wesentlich** (kein QA-Pass noetig):
-- UI-/Styling-Polish
-- Doku-/README-Updates
-- Tippfehler-/Kleinst-Fixes
-- ENV-Var-Aenderungen ohne Code
-
-**QA-Workflow:**
-1. Code committed (oder push-bereit)
-2. Sub-Agent (general-purpose oder spezialisiert) mit klarem
-   Review-Auftrag starten, structured Findings
-   (🔴 KRITISCH / 🟡 SOLLTE / 🟢 NICE / ✅ Positiv)
-3. KRITISCH-Findings sofort fixen vor Live-Deploy
-4. SOLLTE-Findings dokumentieren + priorisieren (oft vor v2.x)
-5. NICE-Findings nur falls billig
-
-**Bisherige QA-Findings + Fixes (Audit-Trail):**
-- W.2 (Auth-Skeleton, 2026-05-10) -> 14 Findings, 3 KRITISCH gefixt
-  (HttpOnly-Cookie, token_version, Rate-Limit)
-- W.5 (Backup/csTimer, 2026-05-10) -> 7 KRITISCH+SOLLTE-Findings
-  gefixt (Upload-DoS, Achievement-Recheck-Cap, Snapshot-Size etc.)
-- W.8 (User-Management, 2026-05-11) -> 5 KRITISCH-Findings gefixt
-  (BackgroundTask gegen Email-Enumeration, atomare Token-Claims,
-  Mass-Assignment-Whitelist, atomares token_version-Increment)
+Wesentliche Welle-Reviews:
+- W.2 (Auth-Skeleton, 2026-05-10): 14 Findings, 3 KRITISCH gefixt
+- W.5 (Backup/csTimer, 2026-05-10): 7 KRITISCH+SOLLTE gefixt
+- W.8 (User-Management, 2026-05-11): 5 KRITISCH gefixt
+- W.admin-workflow (2026-05-17): 2 KRITISCH + 4 SOLLTE + 2 NICE gefixt
+- W.cstimer-more-puzzles (2026-05-17): 1 KRITISCH + 5 SOLLTE gefixt
 
 ## Branching-Strategie
 
@@ -211,16 +158,16 @@ Der `post-git-commit.sh`-Hook erinnert daran.
 ergänzen (zeigt sich auf Login-Seite + im „Was kann diese App?"-Modal).
 Wird im `/abschluss`-Check explizit kontrolliert.
 
-**Kein Bash-Heredoc mit deutschen Anführungszeichen** in Patch-Notes:
-`„...""` (U+201E + U+0022) zerschießt Python-Strings → Render-Deploy-
-Crash. Stattdessen: nur ASCII-Quotes oder Heredoc-Output via Python-
-Script regenerieren.
+## Lessons-Archive
 
-**Neue NPM-Packages mit Native-Node-Globals immer Browser-getestet:**
-bei Paketen die `Buffer`, `process`, `crypto.randomBytes`, `fs`, etc.
-nutzen — lokaler `npm run build` UND `node -e "..."`-Smoke sind NICHT
-ausreichend. Diese Globals existieren in Node, aber nicht im Browser
-ohne Polyfill (`vite-plugin-node-polyfills` o.ae.). Vor Production-
-Push: separates Test-Branch + Headless-Browser-Smoke (Playwright /
-Puppeteer). Klassiker-Bug: cstimer_module-Einbau am 2026-05-16 hat
-cubetracker.de gekillt obwohl alle lokalen Tests gruen waren.
+Spezifische Bug-Events / Postmortems / Architektur-Lessons liegen in
+`docs/lessons-archive.md` (chronologisch, neueste zuerst). Klassiker:
+- Browser-Polyfill-Risiko bei Node-Globals (cstimer_module-Crash 2026-05-16)
+- Bash-Heredoc-Quote-Bug (mehrfach 2026-05-16)
+- Pre-Commit-Tag-Falle (mehrfach 2026-05-17)
+- Auto-Mode-Classifier-Blocks + Permission-Allowlist-Pflege
+
+## Audit-Log (Setup-Reviews)
+
+- `docs/audit-2026-05-20.md` — Doku-vs-Setup-Audit (10 Quick-Wins implementiert,
+  4 Präsentations-Items + 1 Strategie-Item offen)

@@ -2,6 +2,25 @@
 
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
 > ansetzt, wo wir aufgehoert haben.
+
+## Single-Source-Files (canonical)
+
+Diese Files sind die einzige Wahrheit für ihren Bereich — alles andere
+liest aus / referenziert sie:
+
+| File | Inhalt | Update bei |
+|---|---|---|
+| `webapp/changelog/data.py` | Patch-Notes (PATCH_NOTES list) — neueste oben | Jedem `feat()` / `fix()`-Commit, vor Tag-Push |
+| `webapp/frontend/src/lib/roadmap-data.ts` | Roadmap-Phasen P1-P6 (Frontend-Modal) | Wenn neue Items / Phasen-Wechsel |
+| `webapp/frontend/src/lib/features-data.ts` | User-facing Feature-Liste (Login-Page + Modal) | Bei jedem User-facing-Feature |
+| `webapp/db/models.py` + `webapp/main.py:lifespan` | Schema + Mini-Migrations (ALTER TABLE IF NOT EXISTS) | Bei Schema-Änderungen |
+| `webapp/frontend/src/lib/api.ts` | React-Query-Hooks (Single-Source für Frontend-API-Calls) | Bei neuen Endpoints |
+| `webapp/frontend/src/lib/format.ts:COMMON_CUBE_TYPES` | Liste der erlaubten cube_type-Werte | Bei neuen Cubes |
+| `docs/audit-2026-05-20.md` | Letzter Setup-Audit (Claude-Code-Konfig) | Quartalsweise via `/audit`-Skill (geplant) |
+| `docs/lessons-archive.md` | Bug-Postmortems chronologisch | Nach jedem Production-Crash / Workflow-Lesson |
+
+`/abschluss` prüft im Check 3-5 ob diese Files konsistent mit den letzten
+Commits sind.
 >
 > **WICHTIG (User-Festlegung 2026-05-03):** Phase 9 (Distribution → v1.0)
 > ist KEIN End-Punkt. **Nach v1.0 wird weiter an der App gebaut.**
