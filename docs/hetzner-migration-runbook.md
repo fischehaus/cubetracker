@@ -68,13 +68,19 @@ Aus `render.yaml` + Render-Dashboard (manuell gesetzte Secrets) + Code:
 | `ADMIN_EMAILS` | Render-Dashboard (manuell) | **kopieren** | Admin-Bootstrap beim Start (main.py:lifespan). |
 | `RESEND_API_KEY` | Render-Dashboard (manuell) | **kopieren ODER rotieren** | Email-Versand. Du wolltest ihn eh rotieren → guter Moment, neuen erzeugen. |
 | `GITHUB_TOKEN` | Render-Dashboard (optional) | kopieren falls gesetzt | Live-Test-Auto-Issues (graceful ohne). |
+| `FRONTEND_URL` | Render-Dashboard (Default `www.cubetracker.de`) | `https://cubetracker.de` | Basis für Email-Links (Verify/Reset) — auf die kanonische Domain setzen. |
+| `RESEND_FROM` | Render-Dashboard (optional) | kopieren falls gesetzt | Absender-Adresse der Emails (Default `onboarding@resend.dev`). |
 
 > ⚠ Secrets nie ins Repo, nie ins Log. In Coolify als „Environment Variables"
 > (secret) pro Service hinterlegen.
 
 ---
 
-## 3. Phase 0 — Code-Vorbereitung: globaler `/api`-Prefix  *(eigene Welle `W.api-prefix`)*
+## 3. Phase 0 — Code-Vorbereitung: globaler `/api`-Prefix  ✅ ERLEDIGT (2026-05-20)
+
+> **Status:** Umgesetzt + getestet auf Branch `feature/W-api-prefix` (Commit
+> `8f69642`, NICHT auf dem Render-Auto-Deploy-Branch). 11 Backend-Tests + Build
+> grün. Geht mit dem Hetzner-Deploy live, e2e-Auth-Test auf Staging (Phase 5).
 
 **Warum nötig:** Die API-Routen liegen aktuell auf **Root** (`/auth`, `/solves`,
 `/stats`, …), nur `/api/health` ist explizit. Für *eine* Domain mit sauberem
