@@ -1,7 +1,8 @@
 // API-Layer: axios-Setup + Tanstack-Query-Hooks für alle Solve+Session-Endpoints.
 //
 // Phase W (Multi-User-Web): umgebaut für Auth.
-// - baseURL kommt aus VITE_API_BASE-Env (Render-Build) oder localhost:8000 (Dev)
+// - baseURL kommt aus VITE_API_BASE-Env oder Default "/api" (Prod, eine Domain)
+//   bzw. "http://localhost:8000/api" (Dev). Backend serviert alle Routen unter /api.
 // - Bearer-Token-Header automatisch via Request-Interceptor
 // - 401 -> /auth/refresh -> Retry (Single-Flight via refreshPromise)
 // - withCredentials: true damit der HttpOnly-Refresh-Cookie mitgeschickt wird
@@ -33,7 +34,7 @@ import type {
 
 const API_BASE =
   (import.meta.env.VITE_API_BASE as string | undefined) ??
-  (import.meta.env.DEV ? "http://localhost:8000" : "");
+  (import.meta.env.DEV ? "http://localhost:8000/api" : "/api");
 
 const ACCESS_TOKEN_KEY = "cubetracker_access_token";
 

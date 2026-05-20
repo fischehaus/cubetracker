@@ -11,7 +11,7 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -199,24 +199,29 @@ app.add_middleware(
     ],
 )
 
-# Router
-app.include_router(auth_api.router)
-app.include_router(solves_api.router)
-app.include_router(sessions_api.router)
-app.include_router(hardware_api.router)
-app.include_router(stats_api.router)
-app.include_router(achievements_api.router)
-app.include_router(challenges_api.router)
-app.include_router(backup_api.router)
-app.include_router(import_api.router)
-app.include_router(export_api.router)
-app.include_router(admin_api.router)
-app.include_router(friends_api.router)
-app.include_router(leaderboard_api.router)
-app.include_router(changelog_api.router)
-app.include_router(wca_api.router)
-app.include_router(news_api.router)
-app.include_router(feedback_api.router)
+# Router — alle unter gemeinsamem /api-Prefix (W.api-prefix, Hetzner-Migration).
+# Ermoeglicht das Eine-Domain-Setup: cubetracker.de/ = Frontend,
+# cubetracker.de/api/* = Backend. Frueher lagen die Routen auf Root
+# (/auth, /solves, ...). /api/health (unten) bleibt unveraendert.
+api_router = APIRouter(prefix="/api")
+api_router.include_router(auth_api.router)
+api_router.include_router(solves_api.router)
+api_router.include_router(sessions_api.router)
+api_router.include_router(hardware_api.router)
+api_router.include_router(stats_api.router)
+api_router.include_router(achievements_api.router)
+api_router.include_router(challenges_api.router)
+api_router.include_router(backup_api.router)
+api_router.include_router(import_api.router)
+api_router.include_router(export_api.router)
+api_router.include_router(admin_api.router)
+api_router.include_router(friends_api.router)
+api_router.include_router(leaderboard_api.router)
+api_router.include_router(changelog_api.router)
+api_router.include_router(wca_api.router)
+api_router.include_router(news_api.router)
+api_router.include_router(feedback_api.router)
+app.include_router(api_router)
 
 
 @app.get("/api/health")

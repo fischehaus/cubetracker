@@ -26,7 +26,7 @@ JWT_REFRESH_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_EXPIRE_DAYS", "30"))
 
 # Cookie-Settings für Refresh-Token (HttpOnly, in Prod: Secure)
 REFRESH_COOKIE_NAME = "cubetracker_refresh"
-REFRESH_COOKIE_PATH = "/auth"  # nur an /auth/* geschickt
+REFRESH_COOKIE_PATH = "/api/auth"  # nur an /api/auth/* geschickt (W.api-prefix)
 
 # Production-Mode-Detection (für secure-cookies + andere Defaults)
 IS_PROD = os.getenv("CUBETRACKER_PROD") == "1"
