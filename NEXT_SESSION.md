@@ -21,7 +21,64 @@ liest aus / referenziert sie:
 
 `/abschluss` prüft im Check 3-5 ob diese Files konsistent mit den letzten
 Commits sind.
->
+
+---
+
+## ⭐ LETZTER STAND (2026-05-20) — Claude-Code-Setup-Audit (Welle 1 + 2)
+
+**Worum ging's:** Großer Audit unseres `.claude/`-Setups gegen die offizielle
+Claude-Code-Doku (Ziel: selbst-verbesserndes Methodik-System). **KEIN App-Code
+angefasst** — reine Tooling-/Konfig-/Doku-Arbeit. App läuft unverändert auf
+cubetracker.de.
+
+**3 Commits (alle gepusht, Branch `feature/W-multi-user-web`):**
+- `7330b81` (Tag `v2.0.0-alpha.W.setup-audit-quickwins`): 10 Quick-Wins
+  (Allow/Deny-Listen, Env-Timeout, qa-reviewer-Subagent, `rules/discipline.md`,
+  `docs/lessons-archive.md`, CLAUDE.md geschrumpft).
+- `b3312fc` (Tag `v2.0.0-alpha.W.setup-audit-phase-d`): P3 `pre-git-tag-check.sh`
+  (blockt `git tag` bei dirty tree), H2 `post-push-failure-diagnose.sh`,
+  S2 `agents/patch-notes-writer.md`.
+- `31ae57d` (Tag `v2.0.0-alpha.W.setup-audit-welle2`): `/audit`-Command,
+  PreCompact-Checkpoint-Hook, ntfy-Stop-Hook, CM2/CM5-Context-Doku in CLAUDE.md.
+
+**⚠ WICHTIG beim nächsten Start:** Die neu registrierten Hooks (P3, H2,
+PreCompact, ntfy-Stop) werden erst bei einem **Claude-Code-Neustart** aktiv —
+der `/hooks`-Befehl ist in dieser Umgebung NICHT verfügbar, also Neustart =
+Aktivierung. Beim Start evtl. Hook-Änderungen bestätigen.
+
+**Neue Fähigkeiten im Setup:**
+- **`/audit <sektion>`** — reproduzierbarer Doku-vs-Setup-Audit (z.B. `/audit mcp`),
+  schreibt Report selbst in `docs/audit-2026-05-20.md`.
+- **PreCompact-Checkpoint** — friert vor Kompaktierung den git-Stand nach
+  `.tmp/last-compact-checkpoint.md`. Nach Kontextverlust: dieses File + diese
+  NEXT_SESSION.md lesen.
+- **ntfy-Auto-Ping** (Topic `jjY2OjY`) via `stop-ntfy-notify.sh` bei Turn-Ende.
+
+**OFFEN — Audit (jederzeit via `/audit` nachholbar, niedrige Prio):**
+mcp, output-styles, status-line, plugins. Zurückgestellt: M4 (NEXT_SESSION-
+Update-Hook), S3 (audit-loop-Subagent — „erst wenn die anderen Sektionen durch
+sind"). Add-ons offen: SC1 (`/abschluss`-Frontmatter-Härtung), SC3
+(`/patchnote`-Command) — Frontmatter-Felder vor Bau verifizieren.
+
+**OFFEN — App (eigentliche Produktarbeit, Empfehlung: hier weitermachen):**
+- **PLL-Renderer** (`scripts/` untracked: `render_pll.py`, `pll_cases.py`,
+  `render_collage.py`, `render_ua_variants.py` + Bilder unter
+  `webapp/frontend/src/assets/pll/`). ~20 Min bis fertig: restliche
+  Permutationen rendern + `lib/pll-images.ts` + Einbindung analog OLL.
+  → war der Pivot-Plan nach dem Audit.
+- **P1.6 PWA-Setup** (~1 Tag) — letztes offenes P1-Item.
+- Danach P2 Hetzner-Migration (Mitte Juli, vor Render-Postgres-90d-Limit ~2026-08-08).
+
+**OFFENE USER-AKTIONEN (carry-over):**
+- GITHUB_TOKEN auf Render setzen (Admin-Workflow-Phase-3, sonst kein Auto-Issue).
+- RESEND_API_KEY rotieren (alter Chat-Key revoken).
+- Phone-Re-Test der letzten Wellen (Voice-Alert / Penalty-Quick / Custom-Scramble /
+  2D-Net / 9 inoff. Cubes / Admin-Toggle).
+
+**Working-Tree:** clean (nur untracked `scripts/` + `.claude/Protokoll_Session_20_05_2026.docx`).
+
+---
+
 > **WICHTIG (User-Festlegung 2026-05-03):** Phase 9 (Distribution → v1.0)
 > ist KEIN End-Punkt. **Nach v1.0 wird weiter an der App gebaut.**
 > Phase 9 ist nicht-destruktiv: Source-Code aenderungen sind minimal
