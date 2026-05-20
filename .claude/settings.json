@@ -47,6 +47,19 @@
         ]
       }
     ],
+    "PreCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-compact-checkpoint.sh\"",
+            "timeout": 10,
+            "shell": "bash"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -128,6 +141,12 @@
             "timeout": 5,
             "shell": "bash",
             "once": true
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/stop-ntfy-notify.sh\"",
+            "timeout": 8,
+            "shell": "bash"
           }
         ]
       }

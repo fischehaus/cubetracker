@@ -28,18 +28,21 @@ sollen automatisch aufgefangen werden:
 │   ├── qa-reviewer.md                 (Sub-Agent: strukturierte QA-Reviews)
 │   └── patch-notes-writer.md          (Sub-Agent: PatchNote aus Commit-Diff)
 ├── commands/
-│   └── abschluss.md                   (Slash-Command /abschluss — 8-Punkte-Check)
+│   ├── abschluss.md                   (Slash-Command /abschluss — 8-Punkte-Check)
+│   └── audit.md                       (Slash-Command /audit <sektion> — Doku-vs-Setup)
 ├── rules/
 │   └── discipline.md                  (path-scoped Code-Disziplin, lädt bei Code-Work)
 └── hooks/
     ├── session-start-context.sh       (Repo-Stand + Reminders beim Start)
+    ├── pre-compact-checkpoint.sh      (PreCompact: git-Stand → .tmp/ vor Kompaktierung)
     ├── pre-bash-dev-server.sh         (Block uvicorn / npm run dev / vite)
     ├── pre-git-tag-check.sh           (Block git tag bei modifizierten tracked-Files)
     ├── post-git-commit.sh             (Push-Reminder + Tag-Reminder)
     ├── post-edit-hardcoded-url.sh     (Warn bei localhost: in *.ts/*.tsx)
     ├── post-push-failure-diagnose.sh  (Diagnose bei fehlgeschlagenem git push)
     ├── permission-request-auto-approve.sh (Auto-Approve safe Read-Commands)
-    └── stop-mini-check.sh             (Stop-Hook, 1×/Session: uncommitted + unpushed)
+    ├── stop-mini-check.sh             (Stop-Hook, 1×/Session: uncommitted + unpushed)
+    └── stop-ntfy-notify.sh            (Stop-Hook: ntfy-Ping wenn Claude auf Eingabe wartet)
 ```
 
 ### /abschluss — Session-Ende-Check
@@ -141,6 +144,35 @@ Git-Stacktrace:
 - **Netzwerk** (could not resolve host) → Connection/VPN prüfen
 - **Branch-Protection** (pre-receive declined) → remote:-Zeile lesen, ggf. PR
 - **Unbekannt** → generischer `git status` + `git remote -v`-Hinweis
+
+## /audit — reproduzierbarer Doku-vs-Setup-Audit
+
+`/audit <sektion>` (z.B. `/audit mcp`) auditiert eine Claude-Code-Doku-Sektion
+gegen unser Setup und liefert den 5-Felder-Report (Doku-Kern / Status-Quo / Gap /
+konkrete Vorschläge / Effort+Risiko+Schwelle), den er an `docs/audit-2026-05-20.md`
+anhängt. Macht aus dem einmaligen Audit eine wiederholbare Routine (quartalsweise
+oder wenn die Doku sich ändert). Schon auditiert: hooks, subagents, settings,
+memory, slash-commands, skills, background-tasks, context-management. Offen: mcp,
+output-styles, status-line, plugins.
+
+## Context-Safety: pre-compact-checkpoint
+
+`pre-compact-checkpoint.sh` (PreCompact-Event, Audit-2026-05-20-Welle2) feuert VOR
+jeder Kontext-Kompaktierung (manuell via `/compact` oder automatisch am Limit) und
+friert den git-Stand (branch, status, letzte Commits, diff-stat) nach
+`.tmp/last-compact-checkpoint.md` ein (gitignored). Hintergrund: eine Session war
+nach Auto-Kompaktierung kontextlos. Ehrliche Grenze: erfasst nur git-Stand, nicht
+die Konversation — die inhaltliche Übergabe bleibt `NEXT_SESSION.md`. Nach einer
+Kompaktierung: `.tmp/last-compact-checkpoint.md` + `NEXT_SESSION.md` lesen.
+
+## stop-ntfy-notify
+
+`stop-ntfy-notify.sh` (Stop-Event, kein `once`) sendet bei jedem Turn-Ende einen
+ntfy-Ping an Topic `jjY2OjY`, damit der User weiss wann Claude fertig ist und auf
+Eingabe wartet. Als Hook statt manuellem Curl, weil manuelle Pings nach
+Kompaktierung verloren gehen (Claude „vergisst" die Gewohnheit) — der Hook
+überlebt das. ntfy.sh ist als trusted endpoint in `~/.claude/settings.json`
+hinterlegt.
 
 ## Erweiterung
 

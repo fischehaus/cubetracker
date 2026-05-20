@@ -158,6 +158,31 @@ Der `post-git-commit.sh`-Hook erinnert daran.
 ergänzen (zeigt sich auf Login-Seite + im „Was kann diese App?"-Modal).
 Wird im `/abschluss`-Check explizit kontrolliert.
 
+## Context-Management & Session-Resume
+
+**Bei langer Session / drohender Kompaktierung:** mit `/context` die aktuelle
+Context-Auslastung prüfen. Bei hoher Auslastung ODER vor einem geplanten Stopp:
+`/compact` mit Fokus (z.B. `/compact konzentrier dich auf den aktuellen Task`)
+ODER NEXT_SESSION.md aktualisieren, BEVOR der Context kippt. Kontext-Verlust ist
+am 2026-05-20 real passiert (Session aus Auto-Kompaktierung gestartet, Stand
+musste aus einem manuell gespeicherten Protokoll rekonstruiert werden).
+
+**Automatischer Backstop:** der `pre-compact-checkpoint.sh`-Hook (PreCompact-Event)
+friert vor JEDER Kompaktierung den git-Stand nach `.tmp/last-compact-checkpoint.md`
+ein (gitignored). Ehrliche Grenze: erfasst nur git-Stand, nicht die Konversation.
+
+**Session-Wiederaufnahme (nach Kompaktierung / Crash / neuer Session):**
+1. `.tmp/last-compact-checkpoint.md` lesen (mechanischer git-Stand, falls vorhanden)
+2. `NEXT_SESSION.md` lesen (inhaltliche State-Übergabe — die Single-Source)
+3. `CLAUDE.md` ist beim Start schon geladen (Disziplin + Konventionen)
+
+→ Prompt-Vorlage: „Lies `.tmp/last-compact-checkpoint.md` + `NEXT_SESSION.md` und gib mir den Stand."
+
+**Memory-Konsolidierung (Ritual):** gelegentlich (z.B. beim `/abschluss` oder
+monatlich) die User-Memory `~/.claude/projects/.../memory/MEMORY.md` durchsehen:
+Duplikate mergen, veraltete Fakten korrigieren, Index ausdünnen. Der Skill
+`/consolidate-memory` automatisiert diesen Pass.
+
 ## Lessons-Archive
 
 Spezifische Bug-Events / Postmortems / Architektur-Lessons liegen in
@@ -169,5 +194,9 @@ Spezifische Bug-Events / Postmortems / Architektur-Lessons liegen in
 
 ## Audit-Log (Setup-Reviews)
 
-- `docs/audit-2026-05-20.md` — Doku-vs-Setup-Audit (10 Quick-Wins implementiert,
-  4 Präsentations-Items + 1 Strategie-Item offen)
+- `docs/audit-2026-05-20.md` — Doku-vs-Setup-Audit. Welle 1: 10 Quick-Wins +
+  Phase-D P3/H2/S2 (Pre-Tag-Hook, Push-Failure-Diagnose, patch-notes-writer).
+  Welle 2: Context-Mgmt / Slash-Commands / Skills / Background-Tasks auditiert;
+  Bundle umgesetzt (`/audit`-Command, CM2/CM5-Doku, PreCompact-Checkpoint-Hook,
+  ntfy-Stop-Hook). Audit jetzt reproduzierbar via `/audit <sektion>`.
+  Offen: mcp, output-styles, status-line, plugins (+ M4, S3 zurückgestellt).
