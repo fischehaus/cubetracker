@@ -29,3 +29,10 @@ def test_no_root_level_api_routes() -> None:
         p.startswith(("/stats", "/solves", "/auth", "/sessions"))
         for p in ROUTE_PATHS
     )
+
+
+def test_changelog_single_api_prefix() -> None:
+    # Regression (W.api-prefix): changelog-Router hatte selbst prefix="/api",
+    # main.py wrappt nochmal /api -> Route lag faelschlich auf /api/api/changelog.
+    assert "/api/changelog" in ROUTE_PATHS
+    assert "/api/api/changelog" not in ROUTE_PATHS

@@ -15,7 +15,10 @@ from fastapi import APIRouter
 
 from changelog.data import PATCH_NOTES
 
-router = APIRouter(prefix="/api", tags=["changelog"])
+# KEIN prefix="/api" hier! main.py wrappt bereits alle Router unter /api
+# (api_router = APIRouter(prefix="/api")). Ein zweites /api an dieser Stelle
+# wuerde die Route auf /api/api/changelog legen (Doppel-Prefix-Bug, W.api-prefix).
+router = APIRouter(tags=["changelog"])
 
 
 @router.get("/changelog")
