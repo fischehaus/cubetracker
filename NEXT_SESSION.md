@@ -24,7 +24,51 @@ Commits sind.
 
 ---
 
-## ⭐⭐ LETZTER STAND (2026-05-21, abends) — HETZNER-MIGRATION (P2): ARCHITEKTUR LÄUFT ✅
+## ⭐⭐⭐ LETZTER STAND (2026-05-22) — HETZNER-MIGRATION LIVE ✅✅ (cubetracker.de auf Hetzner!)
+
+**Status:** Migration **KOMPLETT + LIVE**. **cubetracker.de läuft jetzt auf Hetzner** (Coolify),
+nicht mehr auf Render. Daten (13.590 Solves + alle 13 Tabellen) 1:1 migriert + verifiziert, HTTPS via
+Let's Encrypt gültig, vom User am Handy getestet (Login + Daten aktuell). **Render läuft noch parallel
+als Rollback** (1–2 Wochen).
+
+**Live-Setup:**
+- **Server:** Hetzner CPX22, IP **178.105.103.78**, `ssh root@178.105.103.78` (Key id_ed25519). Coolify v4 UI :8000.
+- **Frontend-App** (Coolify-UUID `c45fw9k0...`, Container-Prefix `pcixgncs671...`): Dockerfile, Port 80,
+  Domains `https://www.cubetracker.de,http://178-105-103-78.sslip.io`. Let's-Encrypt-Cert (R12, gültig bis
+  20.08.2026, Traefik auto-renew). nginx serviert SPA + proxyt `/api` an `cubetracker-backend:8000` (mit Resolver).
+- **Backend-App** (Coolify-UUID `wvj3lwq...`, Container-Prefix `w3dw05zc8...`): Dockerfile, Port 8000,
+  Network-Alias `cubetracker-backend`, **Domains+Labels LEER** (privat, nur intern). Env: DATABASE_URL(intern),
+  JWT_SECRET, CUBETRACKER_PROD=1, WEBAPP_FRONTEND_ORIGIN+FRONTEND_URL=https://cubetracker.de, ADMIN_EMAILS.
+  **RESEND_API_KEY fehlt noch** (Mails inaktiv, Logins gehen).
+- **Postgres** (Coolify `a10kg8z6...`): PG **16**, gefüllt + `VACUUM ANALYZE` gelaufen (Queries ~4ms).
+  Render war PG **18** → Dump via `postgres:18`-Tools, `transaction_timeout`-SET rausgefiltert, `--clean`-Restore,
+  ON_ERROR_STOP. Dump-Datei auf Server unter `/root/migration/render.sql`.
+- **DNS bei INWX** (NICHT Cloudflare — das „cloudflare" in den Headern war Renders eigenes Cloudflare-for-SaaS!):
+  `www` = **A 178.105.103.78, DNS-only**. apex `cubetracker.de` zeigt **noch auf Render** (216.24.57.1) →
+  301-Redirect auf www → landet auf Hetzner. E-Mail-Records (send-MX/TXT, _dmarc, resend._domainkey) unangetastet.
+
+**Branch `feature/W-api-prefix`** = der live-deployte Branch (NICHT gemergt). Commits:
+`8f69642`/`94cd1d5`/`fa956e4` (/api-Prefix + Dockerfiles + nginx-Proxy), `1abf8a2` (changelog-Doppelprefix-Fix +
+Regr.-Test), `3902c2f` (nginx-Resolver gegen Backend-IP-Cache), `672d313` (Frontend health+changelog-Pfad-Fix).
+
+**🔧 OFFEN (Phase 5/6, nicht dringend):**
+1. **RESEND_API_KEY** (rotiert!) am Backend in Coolify setzen → Backend-Redeploy. Sonst keine Verifizierungs-/
+   Passwort-Mails (existierende Logins funktionieren).
+2. **apex `cubetracker.de`** sauber nachziehen **VOR Render-Abbau**: bei INWX A-Record 216.24.57.1 →
+   178.105.103.78, UND `https://cubetracker.de` zur Coolify-Frontend-Domain hinzufügen (sonst apex→503).
+3. **Render 1–2 Wochen als Rollback** behalten. **Rollback** = INWX `www` zurück auf CNAME
+   `cubetracker-frontend.onrender.com`. Danach Render abbauen (Postgres-90d-Deadline ~2026-08-08 wird obsolet).
+4. **Coolify-Postgres-Backups** (off-site) einrichten — aktuell KEIN automatisches Backup!
+5. Branch-Strategie klären: `feature/W-api-prefix` ist live, `feature/W-multi-user-web` war Render — ggf. mergen/umbenennen.
+
+**Lessons (Cutover):** (a) DNS-TTL VOR Cutover senken — sonst trifft die erste LE-ACME-Challenge noch die alte
+IP (1 Fehlversuch); Fix: Frontend-Container-Restart triggert erfolgreichen Retry, sobald DNS global propagiert.
+(b) Coolify: Container-Name ≠ App-UUID (`coolify.resourceName`). (c) Domain-Änderung → „Reset Labels to Defaults".
+(d) Frontend-`api.get`-Pfade NIE mit `/api` prefixen (baseURL ist schon `/api`).
+
+---
+
+## ⭐ (überholt, siehe Block oben) LETZTER STAND (2026-05-21, abends) — HETZNER-MIGRATION (P2): ARCHITEKTUR LÄUFT ✅
 
 **Status:** Eine-Domain-Architektur auf Hetzner/Coolify **funktioniert end-to-end**,
 getestet über `http://178-105-103-78.sslip.io`:
