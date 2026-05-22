@@ -111,7 +111,7 @@ function HealthBadge({ onClick }: { onClick: () => void }) {
     queryKey: ["health"],
     queryFn: async () => {
       try {
-        return (await api.get<Health>("/api/health")).data;
+        return (await api.get<Health>("/health")).data;
       } catch {
         return (await api.get<Health>("/")).data;
       }

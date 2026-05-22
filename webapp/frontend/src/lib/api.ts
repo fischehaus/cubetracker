@@ -1586,7 +1586,7 @@ export function usePatchNotes(): UseQueryResult<ChangelogResponse> {
   return useQuery({
     queryKey: ["patch-notes"],
     queryFn: async () => {
-      const r = await api.get<ChangelogResponse>("/api/changelog");
+      const r = await api.get<ChangelogResponse>("/changelog");
       return r.data;
     },
     // Patch-Notes ändern sich nur bei Deploy — 5min Cache reicht.
