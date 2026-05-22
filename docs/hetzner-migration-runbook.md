@@ -1,5 +1,39 @@
 # Hetzner-Migration — Runbook (Roadmap P2)
 
+## ✅ EXECUTION POST-MORTEM (2026-05-22) — MIGRATION LIVE
+
+**Ergebnis:** Erfolgreich. **cubetracker.de läuft auf Hetzner** (Coolify), Daten 1:1
+migriert (13.590 Solves), HTTPS via Let's Encrypt, E-Mail (Resend) + tägliches DB-Backup
+aktiv. Render läuft 1–2 Wochen als Rollback weiter. Detaillierter Live-Stand: `NEXT_SESSION.md`.
+
+**Abweichungen vom Plan (Realität ≠ Annahme):**
+1. **DNS lag bei INWX, nicht „Cloudflare".** Die `Server: cloudflare`/CF-RAY-Header kamen von
+   **Renders eigenem** Cloudflare-for-SaaS — der eigene Cloudflare-Account des Users war leer.
+   Cutover = `www`-Record bei INWX von CNAME(Render) → **A 178.105.103.78, DNS-only**.
+   `www` ist kanonisch; apex `cubetracker.de` redirectet (noch via Render) auf www.
+2. **Versions-Sprung Render PG18 → Hetzner PG16.** `pg_dump` muss ≥ Quell-Version sein → Dump mit
+   `postgres:18`-Tools. Beim Restore in PG16 die PG17+-Zeile `SET transaction_timeout` rausgefiltert,
+   `--clean --if-exists --no-owner`, `psql -v ON_ERROR_STOP=1`. Counts 1:1 verifiziert, danach `VACUUM ANALYZE`.
+3. **Coolify-Eigenheiten** (kosteten die meiste Zeit):
+   - Container-Name (`coolify.name`, z.B. `w3dw05zc8…`) ≠ App-UUID in der URL (`coolify.resourceName`, `wvj3lwq…`).
+   - Domain leeren entfernt die generierten Traefik-Labels NICHT → **„Reset Labels to Defaults"** nötig.
+   - nginx cacht die Backend-IP beim Start → nach Backend-Redeploy 502; Fix: **`resolver 127.0.0.11` + Variable in `proxy_pass`**.
+4. **`/api`-Doppelprefix-Bug** (vom /api-Refactor übersehen): `changelog.py` hatte selbst `prefix="/api"`,
+   Frontend rief `/api/health` + `/api/changelog` hart (baseURL ist schon `/api`) → `/api/api/…`.
+   Fix: Commits `1abf8a2` (Backend) + `672d313` (Frontend), Regressions-Test ergänzt.
+5. **Cert-Timing beim Cutover:** DNS-TTL war NICHT vorab gesenkt (3600s) → erste Let's-Encrypt-Challenge
+   traf noch die alte IP (Render) = 1 Fehlversuch. Sobald DNS global propagiert war, **Frontend-Restart**
+   → erfolgreicher ACME-Retry → Cert in Sekunden. **Lesson: TTL 24–48h VOR Cutover auf 300s senken.**
+
+**Offen (Phase 6, ~1–2 Wochen — erst wenn Hetzner sich bewährt hat):**
+- apex `cubetracker.de` bei INWX → A 178.105.103.78 + `https://cubetracker.de` zur Coolify-Frontend-Domain
+  (sonst apex→503), damit nichts mehr von Render abhängt.
+- Render abbauen (3 Services). Rollback bis dahin = INWX `www` zurück auf CNAME `cubetracker-frontend.onrender.com`.
+- Branch konsolidieren: live ist `feature/W-api-prefix`; `feature/W-multi-user-web` ist eingefrorener Render-Stand.
+- Optional: Off-site-S3-Backup zusätzlich zum lokalen Coolify-Dump + Hetzner-Server-Snapshot.
+
+---
+
 > **Zweck:** Cubetracker von Render (Free-Tier, Postgres läuft ~2026-08-08 aus)
 > auf eine eigene Hetzner-Cloud-VM mit **Coolify** umziehen. **Eine Domain**
 > (`cubetracker.de` = Frontend + `/api` = Backend). Daten via `pg_dump`/`pg_restore`.
