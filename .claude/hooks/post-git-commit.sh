@@ -41,7 +41,7 @@ if [[ -n "$upstream" ]]; then
   unpushed_count="$(git log --oneline "$upstream"..HEAD 2>/dev/null | wc -l | tr -d ' ')"
   if [[ "${unpushed_count:-0}" -gt 0 ]]; then
     notes+="⚠️ ${unpushed_count} unpushed commit(s) auf $(git branch --show-current). "
-    notes+="Render-autoDeploy triggert erst beim Push. → \`git push\` wenn fertig.\n"
+    notes+="Coolify-Auto-Deploy triggert erst beim Push. → \`git push\` wenn fertig.\n"
   fi
 fi
 
@@ -61,6 +61,21 @@ if git diff-tree --no-commit-id --name-only HEAD 2>/dev/null | grep -q "changelo
         notes+="🏷  Patch-Notes-Version ${v}: Tag fehlt. → \`git tag -a ${tag} -m \"...\" HEAD && git push origin ${tag}\`\n"
       fi
     done <<< "$new_versions"
+  fi
+fi
+
+# === Check 3: feat/fix-Commit ohne Patch-Notes-Eintrag ===
+# Schliesst die Luecke: bisher wurde nur an Tags erinnert (wenn data.py
+# geaendert wurde), aber NICHT wenn ein feat/fix-Commit den Patch-Note
+# ganz vergessen hat. Heuristik ueber die Commit-Message (feat(/fix() ->
+# wenig False-Positives (chore/docs/refactor loesen nichts aus).
+subject="$(git log -1 --format=%s HEAD 2>/dev/null || true)"
+if echo "$subject" | grep -qE '^(feat|fix)[(:]'; then
+  if ! git diff-tree --no-commit-id --name-only HEAD 2>/dev/null | grep -q "changelog/data.py"; then
+    notes+="📝 feat/fix-Commit ohne neuen Patch-Notes-Eintrag (webapp/changelog/data.py). "
+    notes+="Konvention: jeder feat/fix braucht einen PatchNote (oben einfuegen) — sonst "
+    notes+="haengt das Versions-Badge hinterher. Bei erledigten Roadmap-Items zusaetzlich "
+    notes+="in webapp/frontend/src/lib/roadmap-data.ts done:true setzen.\n"
   fi
 fi
 
