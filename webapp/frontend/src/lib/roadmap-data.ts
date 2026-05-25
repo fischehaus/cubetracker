@@ -47,11 +47,13 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       { title: "Roadmap-Anzeige im Frontend (du bist gerade hier)", done: true, effort: "2h" },
       {
         title: "Impressum + Datenschutzerklärung",
+        done: true,
         effort: "~1 Tag",
         note: "Rechtliche Pflichtseiten + Footer-Links. Kein Cookie-Banner — wir tracken dich nicht.",
       },
       {
         title: "Meine Daten — Backup & Export sichtbar machen",
+        done: true,
         effort: "~0.5 Tag",
         note: "Dein vollständiges Backup jederzeit herunter- und wieder hochladen, direkt in den Konto-Einstellungen.",
       },

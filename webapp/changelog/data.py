@@ -38,6 +38,44 @@ class PatchNote:
 # Neue Einträge OBEN einfügen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.meine-daten",
+        released=date(2026, 5, 25),
+        title="Meine Daten — deine Daten gehören dir",
+        highlights=[
+            "Neuer Bereich Verwaltung → 'Meine Daten': ein Klick lädt ein "
+            "vollständiges Backup all deiner Solves, Sessions, Hardware und "
+            "Achievements als offenes JSON herunter.",
+            "Klare Botschaft dahinter: du behältst die volle Kontrolle — "
+            "jederzeit exportieren, wieder importieren oder den Account komplett "
+            "löschen. Zusätzlich sichern wir die Datenbank täglich automatisch "
+            "(Server in Deutschland/EU).",
+        ],
+        commit="0c1169d",
+    ),
+    PatchNote(
+        version="2.0.0-alpha.W.legal",
+        released=date(2026, 5, 25),
+        title="Impressum & Datenschutzerklärung",
+        highlights=[
+            "Impressum und Datenschutzerklärung sind jetzt über die "
+            "Footer-Links erreichbar — auch ohne Login.",
+            "Kein Cookie-Banner nötig: cubetracker nutzt nur ein technisch "
+            "notwendiges Login-Cookie und kein Tracking. Keine Analyse- oder "
+            "Werbe-Dienste von Drittanbietern.",
+        ],
+        commit="5747ea3",
+    ),
+    PatchNote(
+        version="2.0.0-alpha.W.hetzner",
+        released=date(2026, 5, 22),
+        title="Eigene Infrastruktur (Hetzner Cloud, EU)",
+        highlights=[
+            "cubetracker läuft jetzt auf einer eigenen Hetzner-Cloud in "
+            "Deutschland (EU) — mit eigener Domain, HTTPS und täglichen "
+            "Backups. Alle Daten wurden 1:1 übernommen.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.pb-history",
         released=date(2026, 5, 20),
         title="Alle PBs sichtbar + PB-Verlauf-Chart",
