@@ -9,6 +9,39 @@ Konsequenz (was wurde im Setup geändert).
 
 ---
 
+## 2026-05-25 — Claude Code aus dem Repo starten, sonst laden die Hooks nicht
+
+**Event:** Eine ganze Session lief mit Projekt-Wurzel `D:\Claude-Projekte` (Multi-Chat-
+Methodik-Ordner) statt aus dem cubetracker-Repo. Folge: cubetrackers `.claude/settings.json`
++ ALLE Hooks wurden nicht geladen — ntfy-Stop-Ping weg, post-git-commit-Reminder inaktiv
+(Patch-Notes/Tags blieben liegen), pre-bash-dev-server-Guard inaktiv (npm-Builds liefen
+ungebremst), kein Session-Start-Kontext. Die Hooks existierten alle korrekt — sie lagen nur
+in der falschen (nicht-aktiven) Projekt-Wurzel. Erklärte auf einen Schlag: „ntfy ist weg" +
+„Patch-Notes wurden vergessen".
+
+**Konsequenz:**
+- Claude Code für cubetracker IMMER aus `D:\Projekte\cubetracker` starten.
+- Start-Selbsttest: kommt der Session-Start-Kontext? Kommt am Turn-Ende ein ntfy-Ping
+  (Topic `jjY2OjY`)? Wenn nein → falsches Verzeichnis, Hooks schlafen.
+- Als 🚨-Block ganz oben in NEXT_SESSION.md verankert.
+
+---
+
+## 2026-05-25 — Auto-Deploy-Workflow: fetch-depth bei Multi-Commit-Pushes
+
+**Event:** Der Coolify-Auto-Deploy (`.github/workflows/deploy.yml`) ermittelt geänderte
+Pfade via `git diff <github.event.before> HEAD`, aber `actions/checkout` holte nur
+`fetch-depth: 2`. Beim Push mit >1 Commit (die 3 Rechtsseiten-Commits) lag der
+`before`-Commit nicht im Checkout → `git` Exit 128 → Workflow rot → Frontend wurde NICHT
+deployt (Rechtsseiten blieben unsichtbar, bis ich's per gh-run-Log bemerkte).
+
+**Konsequenz:**
+- `fetch-depth: 0` (volle Historie) + `git cat-file -e`-Guard mit Fallback.
+- Danach beidseitig bewiesen (Frontend + Backend deployen gezielt nach geänderten Pfaden).
+- Lehre: bei diff-basierter Change-Detection in CI immer die volle Historie holen.
+
+---
+
 ## 2026-05-22 — Hetzner-Cutover: DNS-TTL, Coolify-Fallen, /api-Pfad
 
 **Event:** Migration von Render auf Hetzner/Coolify. Mehrere teuer gelernte

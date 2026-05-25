@@ -49,3 +49,9 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Lokale Rechts-/Recherche-Dokumente (e-recht24-PDFs, AV-Vertraege, Notizen) —
+# enthalten teils personenbezogene Daten, gehoeren NICHT ins Repo.
+*.docx
+docs/*.pdf
+dpa-*.pdf

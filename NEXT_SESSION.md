@@ -24,7 +24,65 @@ Commits sind.
 
 ---
 
-## ⭐⭐⭐ LETZTER STAND (2026-05-25, später) — DOKU-KONSOLIDIERUNG + BRANCH-SINGLE-SOURCE + MAINTENANCE
+## ⭐⭐⭐ LETZTER STAND (2026-05-25, Abend) — #1+#6 LIVE · Auto-Deploy rund · Prozess-Härtung
+
+> ### 🚨 ALLERERSTES BEIM START (sonst läuft die halbe Automatik nicht!)
+> **Claude Code MUSS aus dem cubetracker-Repo gestartet werden:**
+> ```
+> cd D:\Projekte\cubetracker
+> claude
+> ```
+> Läuft Claude aus `D:\Claude-Projekte` (Multi-Chat-Ordner), wird cubetrackers
+> `.claude/` (Hooks + settings) **nicht geladen** → ntfy-Ping weg, kein Patch-Notes-/
+> Commit-Reminder, Dev-Server-Guard inaktiv, kein Session-Start-Kontext. Genau das ist
+> am 2026-05-25 passiert. **Start-Selbsttest:** kommt ein Session-Start-Kontext? Kommt am
+> Turn-Ende ein ntfy-Ping (Topic `jjY2OjY`)? Wenn nein → falsches Verzeichnis.
+
+**Live-Stand:** cubetracker.de läuft auf Hetzner. **Live-Branch = `feature/W-api-prefix`**
+(= einzige Wahrheit für Code UND Doku). Versions-Badge: `W.meine-daten`. **Auto-Deploy
+funktioniert** (Push auf W-api-prefix → GitHub-Action deployt gezielt Frontend und/oder
+Backend via Coolify-per-App-API; beidseitig bewiesen).
+
+**Heute live gegangen:**
+- **#1 Impressum + Datenschutz** (`/impressum`, `/datenschutz`, öffentlich, Footer-Links):
+  offizielle e-recht24-Texte + App-Ergänzungen. **Kein Cookie-Banner** (nur funktionales
+  Login-Cookie). Kontakt **datenschutz@cubetracker.de** → **Forward Email** (Weiterleitung
+  ans Betreiber-Postfach, verschlüsselter DNS-TXT bei INWX). Telefon raus, Adresse drin.
+  Pflichtangaben: `webapp/frontend/src/lib/legal-data.ts`.
+- **#6 „Meine Daten"-Panel** (Verwaltung → „Meine Daten"): Ownership-Botschaft + prominenter
+  Voll-Backup-Download. Helper `webapp/frontend/src/lib/backup.ts` (DRY mit BackupPanel).
+- **Patch-Notes + Roadmap synchronisiert:** 3 Patch-Notes (W.meine-daten/legal/hetzner);
+  #1+#6 in `roadmap-data.ts` als `done` markiert.
+- **QA-Review** (Sub-Agent) durch: Features sauber (kein Auth-Bypass/Datenleck); SOLLTE/NICE gefixt.
+- **Auto-Deploy-Bug gefixt:** Multi-Commit-Push brach die Pfad-Erkennung (fetch-depth 2→0);
+  **post-git-commit-Hook gehärtet** (warnt jetzt bei feat/fix OHNE Patch-Note).
+
+**NÄCHSTER SCHRITT — Backlog in dieser Reihenfolge:**
+1. **#5 Patch-Notes intern/öffentlich:** `internal: bool` pro PatchNote in
+   `webapp/changelog/data.py` + Filter (Admin sieht alles, User nur öffentliche/geglättete).
+   Bestehende Einträge einmal kuratieren.
+2. **#2 Average-PBs:** kleiner farbiger Punkt an ao5/ao12-Rekorden in der Solve-Liste
+   (Backend-Logik `avg_pb_progression` existiert).
+3. **#3 Dashboard „Letzte Rekorde":** kompakte Liste der letzten ~5 PB-Ereignisse.
+
+**OFFEN / HÄRTUNG:**
+- **#43 Coolify-API über HTTPS** (QA-KRITISCH): `deploy.yml` curlt Coolify über HTTP →
+  `COOLIFY_TOKEN` unverschlüsselt. Braucht Coolify hinter HTTPS (Domain+Cert). Kurzfristig
+  Hobby-vertretbar; Token klein halten + rotieren.
+- **Git-Tags** seit `wca-comps` nicht gesetzt — heutige Patch-Notes ungetaggt. Optional
+  nachziehen (Tag-Falle: erst `git commit` verifizieren, DANN `git tag`).
+- **features-data.ts** nicht für #1/#6 ergänzt (keine „Capability"-Features — minor).
+- **Phase 6 (~05.06.):** apex `cubetracker.de` → Hetzner (A 178.105.103.78) + Render abbauen
+  (3 Services) + `feature/W-api-prefix` → `main` konsolidieren. Bis dahin Render = Rollback.
+- **MAINTENANCE.md** noch nie gelaufen — bei Gelegenheit „lauf MAINTENANCE.md durch".
+
+**Infra-Kurzref:** Hetzner CPX22 `178.105.103.78`; Coolify-UI `http://178.105.103.78:8000`.
+Frontend-App-uuid `pcixgncs671tifdx9e3rxr7h`, Backend-App-uuid `w3dw05zc8nv2izxa3v2qi911`.
+Auto-Deploy: GitHub-Secret `COOLIFY_TOKEN` + `.github/workflows/deploy.yml`. ntfy-Topic `jjY2OjY`.
+
+---
+
+## ⭐⭐ (überholt, siehe Block oben) LETZTER STAND (2026-05-25, später) — DOKU-KONSOLIDIERUNG + BRANCH-SINGLE-SOURCE + MAINTENANCE
 
 **Heute (Nachmittag/Abend) aufgeräumt — alles auf den aktuellen Stand gebracht:**
 
