@@ -46,6 +46,31 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       { title: "Custom-Scramble-Input", done: true, effort: "1 Tag" },
       { title: "Roadmap-Anzeige im Frontend (du bist gerade hier)", done: true, effort: "2h" },
       {
+        title: "Impressum + Datenschutzerklärung",
+        effort: "~1 Tag",
+        note: "Rechtliche Pflichtseiten + Footer-Links. Kein Cookie-Banner — wir tracken dich nicht.",
+      },
+      {
+        title: "Meine Daten — Backup & Export sichtbar machen",
+        effort: "~0.5 Tag",
+        note: "Dein vollständiges Backup jederzeit herunter- und wieder hochladen, direkt in den Konto-Einstellungen.",
+      },
+      {
+        title: "Patch-Notes aufgeräumt (nur das Wesentliche)",
+        effort: "~0.5-1 Tag",
+        note: "Übersichtlichere Änderungs-Hinweise — ohne internen Technik-Kram.",
+      },
+      {
+        title: "Average-Rekorde in der Solve-Liste markieren",
+        effort: "~0.5 Tag",
+        note: "Kleiner farbiger Punkt an deinen besten ao5/ao12 in der Solve-Liste.",
+      },
+      {
+        title: "Dashboard: Letzte Rekorde auf einen Blick",
+        effort: "~1 Tag",
+        note: "Kompakte Liste deiner jüngsten Bestzeiten mit Verbesserung — Klick führt zum PB-Verlauf.",
+      },
+      {
         title: "Scramble-Bild 2D-Net pro Scramble",
         effort: "~1 Woche",
         note: "Visuelle Verifikation — Standard-Erwartung an Speedcubing-Timer.",
