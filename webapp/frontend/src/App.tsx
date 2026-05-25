@@ -666,8 +666,8 @@ function AuthGuard() {
   const { isAuthenticated, isLoading } = useAuth();
 
   // W.8: spezielle URL-Routen, die OHNE Login erreichbar sein müssen
-  // (Mail-Links: ResetPassword + VerifyEmail). Render-Static-Site liefert
-  // index.html für alle Pfade aus (siehe routes-rewrite in render.yaml),
+  // (Mail-Links: ResetPassword + VerifyEmail). Der Static-Host (nginx)
+  // liefert index.html für alle Pfade aus (SPA-Fallback),
   // wir checken hier auf pathname.
   const pathname = window.location.pathname;
   if (pathname === "/reset-password") {

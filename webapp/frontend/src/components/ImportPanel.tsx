@@ -31,7 +31,7 @@ export function ImportPanel() {
       fd.append("file", file);
       const r = await api.post<ImportResult>("/import/cstimer", fd, {
         headers: { "Content-Type": "multipart/form-data" },
-        // 5 Min Timeout defensiv. Render Free + 6000+ Solves hat
+        // 5 Min Timeout defensiv. Import von 6000+ Solves hat
         // gemessen ~20s gebraucht; Snapshot+Recheck laufen jetzt
         // im Hintergrund (Backend-Fix 2026-05-12), also sollte der
         // synchron-Anteil unter 30s liegen.
