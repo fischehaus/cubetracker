@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Geaenderte Bereiche erkennen
         id: changes
@@ -39,10 +39,12 @@ jobs:
             exit 0
           fi
           BASE="${{ github.event.before }}"
-          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+          # BASE muss ein existierender Commit sein (bei Multi-Commit-Pushes
+          # oder Force-Pushes ggf. nicht vorhanden) - sonst Fallback.
+          if [ -z "$BASE" ] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
             BASE="$(git rev-parse HEAD~1 2>/dev/null || true)"
           fi
-          if [ -n "$BASE" ]; then
+          if [ -n "$BASE" ] && git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
             CHANGED="$(git diff --name-only "$BASE" HEAD)"
           else
             CHANGED="$(git diff-tree --no-commit-id --name-only -r HEAD)"

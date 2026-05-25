@@ -2,6 +2,8 @@
 // Impressum- und Datenschutz-Seite lesen ausschliesslich hier raus.
 //
 // Daten ausgefüllt 2026-05-25 (Privatperson, Hobby). Bei Änderungen NUR hier.
+// Kontakt datenschutz@cubetracker.de laeuft ueber Forward Email (Weiterleitung
+// ans Betreiber-Postfach, verschluesselter DNS-TXT). Telefon bewusst leer.
 //
 // Hinweis: Die Datenschutzerklärung (DatenschutzPage.tsx) ist eine sorgfältig
 // auf diese App zugeschnittene Vorlage. Vor der Veröffentlichung idealerweise
