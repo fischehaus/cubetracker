@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { AdminPanel } from "./AdminPanel";
 import { BackupPanel } from "./BackupPanel";
+import { MeineDatenCard } from "./MeineDatenCard";
 import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
 import { ImportPanel } from "./ImportPanel";
@@ -36,7 +37,7 @@ interface SubTab {
 const SUB_TABS: SubTab[] = [
   { id: "sessions", label: "Sessions", icon: "📁" },
   { id: "hardware", label: "Hardware", icon: "🧊" },
-  { id: "daten", label: "Daten", icon: "📥" },
+  { id: "daten", label: "Meine Daten", icon: "📥" },
   { id: "outliers", label: "Outliers", icon: "⚠" },
   { id: "settings", label: "Einstellungen", icon: "⚙" },
 ];
@@ -96,6 +97,8 @@ export function VerwaltungTab() {
       {section === "hardware" && <HardwareList />}
       {section === "daten" && (
         <div className="space-y-4">
+          {/* Roadmap #6: Ownership-Botschaft + prominenter Backup-Download oben */}
+          <MeineDatenCard />
           {/* Orientierungs-Hilfe: zwei verschiedene JSON-Formate
               im Spiel (Cubetracker-Backup vs csTimer-Export).
               User-Verwirrung-Potenzial hoch -> klarer Aufmacher. */}

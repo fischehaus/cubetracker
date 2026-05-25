@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { downloadFullBackup } from "../lib/backup";
 import { InfoButton } from "./InfoButton";
 
 type RestoreMode = "merge" | "replace";
@@ -49,18 +50,7 @@ export function BackupPanel() {
     setExportBusy(true);
     setExportError(null);
     try {
-      const r = await api.get("/backup/json");
-      const data = r.data;
-      const ts = new Date()
-        .toISOString()
-        .replace(/[-:T]/g, "")
-        .slice(0, 15);
-      const userPart = (data.user_email || "user").split("@")[0];
-      const filename = `cubetracker_${userPart}_${ts}.json`;
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
-      });
-      triggerBlobDownload(blob, filename);
+      await downloadFullBackup();
     } catch (e: unknown) {
       setExportError(extractErrorMessage(e));
     } finally {
@@ -459,13 +449,4 @@ function extractErrorMessage(err: unknown): string {
   return "Unbekannter Fehler.";
 }
 
-function triggerBlobDownload(blob: Blob, filename: string) {
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
-}
+// (Download-Helper ausgelagert nach lib/backup.ts -> downloadFullBackup)
