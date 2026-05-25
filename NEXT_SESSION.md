@@ -24,7 +24,47 @@ Commits sind.
 
 ---
 
-## ⭐⭐⭐ LETZTER STAND (2026-05-22) — HETZNER-MIGRATION LIVE ✅✅ (cubetracker.de auf Hetzner!)
+## ⭐⭐⭐ LETZTER STAND (2026-05-25) — POST-MIGRATION: #4 erledigt + Auto-Deploy + Roadmap-Backlog
+
+**Migration läuft stabil live** (cubetracker.de auf Hetzner). Heute aufgeräumt + Roadmap besprochen.
+
+**Erledigt heute (alles auf Branch `feature/W-api-prefix`):**
+- **#4 Render-Bezüge raus** (live): Login-„Render-Free schläft"-Tipp entfernt, Roadmap **P2 = grün/erledigt**
+  (neuer `done`-PhaseStatus + Badge), Render-Erwähnungen in Code-Kommentaren bereinigt. Commits `d2806b3` + `4d8872b`.
+- **Auto-Deploy (Frontend)** eingerichtet: EIN GitHub-Webhook (push) → Coolify deployt das **Frontend**
+  automatisch bei jedem Push. **Monorepo-Lektion:** zwei Webhooks für ein Repo → Coolify dedupliziert den
+  Commit → nur EINE App deployt (zufällig welche); darum nur EINER, fürs Frontend.
+  → **Backend-only-Änderungen weiterhin manuell „Redeploy"** in Coolify (selten). Volle Beidseitig-Automatik
+  ginge via Deploy-Webhooks (`…/api/v1/deploy?uuid=…`) + Coolify-API-Token (später optional).
+- **Coolify-UUID-Korrektur:** Frontend-App-URL = **`pcixgncs671tifdx9e3rxr7h`** (NICHT `c45fw9k0…` — das ist
+  nur Anzeigename/`resourceName`!). Backend-App-URL = `wvj3lwq00uuw29uqf5y47vhq`. Container-Prefixe wieder anders.
+
+**📋 ROADMAP-BACKLOG (besprochen 2026-05-25 — Reihenfolge fix, alles außer #4 noch offen):**
+1. ✅ **#4 Render-Bezüge** — erledigt (s.o.).
+2. **#1 Recht (HÖCHSTE Prio):** `/impressum` + `/datenschutz` (SPA-Routen + Footer). **KEIN Cookie-Banner**
+   (nur funktionale Auth-Cookies, kein Tracking). Privat-Hobby; kommerziell wäre GPL-konform (Hosting löst
+   keine Quellcode-Pflicht aus, nur Distribution → GitHub public reicht). Analytics später nur cookieless
+   (Umami/Plausible). User füllt echte Daten (Name/Anschrift) via Generator (e-recht24). **Kein Rechtsrat.**
+3. **#6 User-Backup sichtbar:** „Meine Daten"-Panel in Account-Settings — Button „Vollständiges Backup
+   herunterladen" + „Importieren" + „letztes Backup vor X" + beruhigender Satz (Daten gehören dir + tägliche
+   Server-Backups/EU). Nutzt bestehende Backup/Export-Endpoints.
+4. **#5 Patch-Notes Admin/User:** `internal: bool` pro PatchNote in `changelog/data.py` + optional geglättete
+   `user_title`/`user_highlights`. API/Frontend filtert: Admin sieht alles, User nur nicht-interne/geglättete.
+   Bestehende Einträge einmal kuratieren.
+5. **#2 Average-PBs:** ao5/ao12-Rekord-Solve-IDs ausgeben (analog `pb_solve_ids`) + in der Solve-Liste an der
+   ao5/ao12-Zahl einen **kleinen farbigen Punkt** (dezent). Backend-Logik (`avg_pb_progression`) existiert schon.
+6. **#3 Dashboard „Letzte Rekorde":** kompakte Liste der letzten ~5 PB-Ereignisse (🏆 Cube + Metrik + Zeit +
+   „vor X Tagen" + Δ-Verbesserung), Klick → Analyse-PB-Chart.
+
+**⏰ Erinnerung gesetzt (Kalender 05.06.2026):** Phase-6 — apex `cubetracker.de` auf Hetzner umstellen +
+Render abbauen + Branch konsolidieren. Rollback bis dahin = INWX `www` zurück auf Render-CNAME.
+
+**Workflow ab jetzt:** Ich pushe Frontend-Änderungen auf `feature/W-api-prefix` → Coolify deployt das
+Frontend automatisch. Backend-Änderungen → ich pushe + sage dir Bescheid, du klickst „Redeploy" am Backend.
+
+---
+
+## ⭐⭐ LETZTER STAND (2026-05-22) — HETZNER-MIGRATION LIVE ✅✅ (cubetracker.de auf Hetzner!)
 
 **Status:** Migration **KOMPLETT + LIVE**. **cubetracker.de läuft jetzt auf Hetzner** (Coolify),
 nicht mehr auf Render. Daten (13.590 Solves + alle 13 Tabellen) 1:1 migriert + verifiziert, HTTPS via
