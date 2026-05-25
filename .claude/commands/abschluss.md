@@ -1,11 +1,11 @@
 ---
-description: Session-Ende-Check fuer Cubetracker — geht eine 8-Punkte-Checkliste durch und meldet Luecken (Git, Patch-Notes, Tags, Features-Liste, Doku, Todos, Backend-Smoke).
+description: Session-Ende-Check fuer Cubetracker — geht eine 10-Punkte-Checkliste durch und meldet Luecken (Git, Patch-Notes, Tags, Features-Liste, Doku, Todos, Backend-Smoke, Live-Deploy-Verifikation, MAINTENANCE-Faelligkeit).
 allowed-tools: Bash, Read, Grep, Glob, TodoWrite
 ---
 
 # /abschluss — Cubetracker Session-Ende-Check
 
-Du wurdest vom User per `/abschluss` aufgerufen. **Geh die folgende 8-Punkte-Checkliste systematisch durch, jeden Punkt explizit reporten (✓ oder ⚠), am Ende eine Zusammenfassung.** Wenn etwas fehlt: konkret nachfragen ob du es jetzt fixt.
+Du wurdest vom User per `/abschluss` aufgerufen. **Geh die folgende 10-Punkte-Checkliste systematisch durch, jeden Punkt explizit reporten (✓ oder ⚠), am Ende eine Zusammenfassung.** Wenn etwas fehlt: konkret nachfragen ob du es jetzt fixt.
 
 Halte dich knapp — keine ausschweifenden Erklärungen, nur Checks + Befunde.
 
@@ -104,7 +104,7 @@ Nutze das `TodoWrite`-Tool oder lies aus dem aktuellen Kontext den Stand der Tod
 
 ### 8. Backend-Smoke-Test (lokal)
 
-Damit Render-Deploy-Fails wie heute (Quote-Bug) BEVOR dem Push gefangen werden.
+Damit Deploy-Fails (z.B. Syntax-/Quote-Bugs) BEVOR dem Push gefangen werden — der Coolify-Build bricht sonst ab.
 
 ```bash
 cd webapp && python -c "import ast; ast.parse(open('changelog/data.py', encoding='utf-8').read()); print('Parse OK')"
@@ -128,7 +128,53 @@ rm -f test-abschluss.db 2>/dev/null
 ```
 
 - **Beides grün:** ✓.
-- **Parse-Error / Import-Error:** ⚠ HARD STOP — das wäre auf Render gescheitert. Fix bevor du die Session beendest.
+- **Parse-Error / Import-Error:** ⚠ HARD STOP — das wäre im Coolify-Build gescheitert. Fix bevor du die Session beendest.
+
+### 9. Live-Deploy-Verifikation (ist der Push wirklich live?)
+
+Seit der Hetzner-Migration ist der Auto-Deploy NICHT garantiert (Monorepo-Dedup —
+Coolify deployt pro Push nur eine App; siehe Task #37 / NEXT_SESSION). Darum am
+Session-Ende prüfen, dass die Live-App läuft UND gepushte Frontend-Änderungen
+wirklich draußen sind. Live-Host = **www.cubetracker.de** (Hetzner).
+
+```bash
+# App erreichbar? (erwartet: 200 bzw. {"status":"ok",...})
+curl -s -o /dev/null -w "Frontend www: %{http_code}\n" https://www.cubetracker.de/
+curl -s -w "\nHealth: %{http_code}\n" https://www.cubetracker.de/api/health
+
+# Wurden in dieser Session Frontend-Files gepusht?
+LAST_TAG=$(git -C "D:/Projekte/cubetracker" describe --tags --abbrev=0 2>/dev/null)
+git -C "D:/Projekte/cubetracker" log "$LAST_TAG..HEAD" --name-only --pretty=format:"%h %s" \
+  | grep -E "webapp/frontend/" | head
+```
+
+- **App 200 + Health ok + KEINE Frontend-Commits seit letztem Tag:** ✓.
+- **Frontend-Commits vorhanden:** ⚠ Verifizieren, dass das Live-Bundle die Änderung
+  enthält — am verlässlichsten per String-Check auf einen Text, den du in dieser
+  Session NEU ins Frontend gebracht hast:
+
+```bash
+b=$(curl -s https://www.cubetracker.de/ | grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' | head -1)
+curl -s "https://www.cubetracker.de/$b" | grep -c "HIER_EINEN_NEUEN_STRING_AUS_DIESER_SESSION"
+```
+
+  - **Treffer > 0:** ✓ Deploy ist live.
+  - **Treffer = 0:** ⚠ Push ist NICHT deployt → in Coolify die **Frontend-App
+    manuell „Redeploy"** + Build-Log prüfen. Dauerlösung: Task #37 (per-App-Webhook).
+
+### 10. MAINTENANCE-Lauf fällig?
+
+`MAINTENANCE.md` ist der periodische Tiefen-Check (~monatlich). Hier NUR die
+Fälligkeit prüfen, nicht den ganzen Lauf machen.
+
+```bash
+# jüngstes Datum im Lauf-Protokoll von MAINTENANCE.md (Eintraege "- YYYY-MM-DD ..."):
+grep -oE "^- 202[0-9]-[0-9]{2}-[0-9]{2}" "D:/Projekte/cubetracker/MAINTENANCE.md" | sort | tail -1
+```
+
+- **Letzter Lauf < 4 Wochen her:** ✓.
+- **Letzter Lauf > 4 Wochen her / noch nie:** ⚠ anbieten: „Voller MAINTENANCE-Lauf
+  ist fällig — jetzt durchgehen? (`lauf MAINTENANCE.md durch`)". Nicht erzwingen.
 
 ---
 
@@ -146,6 +192,8 @@ Tabellarisch:
 | 6 | Doku | … |
 | 7 | Todos | … |
 | 8 | Backend-Smoke | … |
+| 9 | Live-Deploy | … |
+| 10 | MAINTENANCE faellig | … |
 
 **Wenn alles grün:** „Session kann sauber beendet werden."
 **Wenn ⚠:** „Ich empfehle folgendes vor Session-Ende zu fixen: [Liste]. Soll ich?"

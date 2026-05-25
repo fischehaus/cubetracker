@@ -1,0 +1,76 @@
+# Auto-Deploy zu Coolify (Hetzner).
+#
+# Loest den Monorepo-Dedup des generischen Coolify-Source-Webhooks ab: triggert
+# GEZIELT die App(s), deren Dateien sich geaendert haben, ueber Coolifys
+# per-App-Deploy-API. So gilt verlaesslich "push = live".
+#
+# Voraussetzungen (einmalig):
+#   - Coolify: Settings -> Advanced -> "API Access" aktiviert (Allowed IPs offen).
+#   - GitHub: Repo-Secret COOLIFY_TOKEN = Coolify-API-Token (Keys & Tokens).
+#
+# Manueller Test: Actions-Tab -> "Deploy to Coolify" -> "Run workflow"
+# (oder `gh workflow run deploy.yml --ref feature/W-api-prefix`) -> deployt beide.
+name: Deploy to Coolify
+
+on:
+  push:
+    branches: [feature/W-api-prefix]
+  workflow_dispatch: {}
+
+concurrency:
+  group: coolify-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Geaenderte Bereiche erkennen
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manueller Lauf -> Frontend + Backend deployen."
+            echo "frontend=true" >> "$GITHUB_OUTPUT"
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          BASE="${{ github.event.before }}"
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            BASE="$(git rev-parse HEAD~1 2>/dev/null || true)"
+          fi
+          if [ -n "$BASE" ]; then
+            CHANGED="$(git diff --name-only "$BASE" HEAD)"
+          else
+            CHANGED="$(git diff-tree --no-commit-id --name-only -r HEAD)"
+          fi
+          echo "Geaenderte Dateien:"; echo "$CHANGED"
+          if echo "$CHANGED" | grep -q '^webapp/frontend/'; then
+            echo "frontend=true" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED" | grep '^webapp/' | grep -qv '^webapp/frontend/'; then
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Frontend deployen
+        if: steps.changes.outputs.frontend == 'true'
+        run: |
+          echo "Triggere Frontend-Deploy ..."
+          curl -fsS -X GET \
+            "http://178.105.103.78:8000/api/v1/deploy?uuid=pcixgncs671tifdx9e3rxr7h&force=false" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
+
+      - name: Backend deployen
+        if: steps.changes.outputs.backend == 'true'
+        run: |
+          echo "Triggere Backend-Deploy ..."
+          curl -fsS -X GET \
+            "http://178.105.103.78:8000/api/v1/deploy?uuid=w3dw05zc8nv2izxa3v2qi911&force=false" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
+
+      - name: Nichts zu deployen
+        if: steps.changes.outputs.frontend != 'true' && steps.changes.outputs.backend != 'true'
+        run: echo "Keine App-relevanten Aenderungen (z.B. nur Docs/.claude) -> kein Deploy noetig."
