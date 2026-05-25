@@ -1,20 +1,34 @@
 # Backup-Strategie
 
-Drei Schutz-Ebenen — von Anwender- bis Disaster-Recovery:
+> **Stand 2026-05-25 (Hetzner-live):** Die App läuft auf Hetzner Cloud +
+> Coolify. Aktive Backups: **(A) Coolify Daily-DB-Backup** (täglicher pg_dump
+> on-server) + **(B) Hetzner Server-Backup** (VM-Snapshots, gebucht). Die
+> GitHub-Actions/Render-Anleitung weiter unten ist **Legacy** — sie sichert die
+> alte Render-DB und ist nur noch bis zum Render-Abbau (~2026-06-05) relevant.
+> Off-Site-S3-Sync ist optional und noch offen.
 
-1. **App-interne Snapshots** (W.5, bereits live) — pro User max 2 Snapshots,
-   schuetzt vor User-Eigenfehlern (versehentliches Loeschen). Bringt nichts
-   bei DB-Verlust.
+Schutz-Ebenen — von Anwender- bis Disaster-Recovery:
 
-2. **Daily pg_dump via GitHub-Actions** (W.backup, dieser Setup) — sichert
-   den kompletten Cluster-Stand taeglich + auf Knopfdruck als GitHub-Artifact
-   mit 90 Tagen Retention. Schuetzt vor Render-DB-Verlust, Schema-Migration-
-   Fehlern, Hetzner-Migration-Mishaps.
+1. **App-interne Snapshots** (W.5, live) — pro User max 2 Snapshots, schuetzt
+   vor User-Eigenfehlern (versehentliches Loeschen). Bringt nichts bei DB-Verlust.
 
-3. **Render Postgres "Daily Backup"** (paid, nicht aktiv) — kommt mit jedem
-   bezahlten Render-Postgres-Plan. Solange Free-Tier: nicht verfuegbar.
+2. **Coolify Daily-DB-Backup** (aktiv) — täglicher pg_dump der Postgres-16-DB
+   auf dem Hetzner-Server. Schuetzt vor DB-Korruption / Schema-Migration-Fehlern.
 
-## Setup Daily-Backup — Einmal-Schritte
+3. **Hetzner Server-Backup** (aktiv, gebucht) — automatische VM-Snapshots des
+   ganzen Servers. Disaster-Recovery bei Server-Verlust.
+
+4. **Off-Site (offen)** — S3/Backblaze-Sync der Coolify-Dumps wäre die nächste
+   Härtung (aktuell liegen alle Backups auf demselben Server → Restrisiko).
+
+5. **Legacy: Daily pg_dump via GitHub-Actions** (unten dokumentiert) — sicherte
+   die Render-DB als GitHub-Artifact. Läuft bis Render-Abbau, dann obsolet.
+
+## Setup Daily-Backup via GitHub-Actions — LEGACY (sichert die Render-DB)
+
+> ⚠️ **Legacy seit der Hetzner-Migration.** Dieser Workflow sichert noch die
+> alte Render-DB und wird mit dem Render-Abbau (~2026-06-05) abgeschaltet. Die
+> Live-DB auf Hetzner wird stattdessen vom Coolify-Daily-Backup gesichert.
 
 GitHub Actions kann nicht ohne den DB-Connection-String. Den setzt du
 selbst als Repo-Secret (kein Push moeglich, Security):
@@ -105,25 +119,20 @@ Repo privat — passt.
 - App-Code — das ist Git
 - Build-Artifacts (Frontend-Bundle) — wird bei jedem Deploy neu gebaut
 
-## Vor der Hetzner-Migration (~Mitte Juli 2026)
+## Hetzner-Migration (abgeschlossen 2026-05-22) ✅
 
-1. Manuellen Dump via "Run workflow" triggern (zur Sicherheit, frischester Stand)
-2. Dump per `gh run download` lokal holen
-3. Auf Hetzner-Postgres restoren via `pg_restore` mit der neuen
-   `DATABASE_URL`
-4. Frontend-/Backend-URLs (Render-onrender.com -> hetzner-Domain) im
-   Frontend-`VITE_API_BASE` umstellen
-5. DNS (INWX) auf neue Hetzner-IP zeigen lassen
+Die Migration ist durch. Tatsächlicher Ablauf (wich vom Plan ab):
+1. `pg_dump` direkt von der Render-External-DB-URL (mit `postgres:18`-Tools, da
+   Render PG18 fuhr) → `pg_restore` in die Coolify-Postgres-16 auf dem Server.
+2. One-Domain-Architektur statt getrennter Backend-Domain (nginx proxyt `/api`).
+3. DNS bei INWX (`www` A-Record → 178.105.103.78), Let's-Encrypt via Traefik.
 
-Details werden in einem separaten `MIGRATION.md` dokumentiert, sobald
-der Plan steht.
+Vollständiges Runbook + Execution-Post-Mortem: `docs/hetzner-migration-runbook.md`.
 
 ## Backup-Retention
 
-- **GitHub-Artifact**: 90 Tage (Free-Tier-Maximum)
-- **Render-DB**: lebt bis 90-Tage-Limit (~08.08.2026), dann hart geloescht
-- **Kein Off-Site-Storage** ausser GitHub — falls GitHub auch ausfaellt,
-  ist alles weg. Akzeptables Restrisiko fuer Friends-Phase.
-
-Wenn die App produktiv wird: zusaetzlich S3/Backblaze-Sync (Cron-Step
-im Workflow) — ~$0.30/Monat fuer ein paar GB.
+- **Coolify Daily-DB-Backup**: on-server, Retention nach Coolify-Einstellung.
+- **Hetzner Server-Backup**: rollierende VM-Snapshots (Hetzner-Plan).
+- **GitHub-Artifact** (Legacy/Render): 90 Tage — obsolet nach Render-Abbau.
+- **Kein Off-Site-Storage** bisher (Coolify-Dumps liegen auf demselben Server).
+  Nächste Härtung: S3/Backblaze-Sync (~$0.30/Monat für ein paar GB).

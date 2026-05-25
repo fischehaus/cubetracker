@@ -4,8 +4,9 @@
 > **Multi-User-Web-Variante** zum Online-Hosten. User koennen sich
 > anmelden + ihre eigenen Solves tracken.
 >
-> **Status**: Phase W in Bau. Desktop-Version (`backend/`) bleibt
-> parallel intakt + voll funktional.
+> **Status**: **LIVE auf [cubetracker.de](https://cubetracker.de)** (Hetzner
+> Cloud + Coolify, seit 2026-05-22). Aktiver Ausbau, kein Feature-Freeze.
+> Desktop-Version (`backend/`) bleibt parallel intakt.
 
 ---
 
@@ -16,7 +17,7 @@
 - **DB**: PostgreSQL (Render-managed, später ggf. eigene Instanz)
 - **Auth**: Email + Password mit `passlib[bcrypt]` Hashing + JWT-Tokens via `python-jose`
 - **Frontend**: dasselbe React-Frontend wie Desktop, mit Auth-Wrapper drumrum
-- **Hosting**: Render.com (Free-Tier zum Start, spaeter Migration auf VPS möglich)
+- **Hosting**: Hetzner Cloud (CPX22) + Coolify v4 (Docker + Traefik). Migration von Render abgeschlossen 2026-05-22.
 
 ### Was unterscheidet sich vom Desktop-Backend (`backend/`)
 
@@ -26,7 +27,7 @@
 | DB | SQLite, 1 Datei | PostgreSQL, multi-tenant via `user_id`-FK |
 | Auth | keine | Email+Password + JWT |
 | Schema | Solve/Session/etc. ohne user_id | alle Tabellen + `user_id NOT NULL FK` |
-| Deploy | PyInstaller + Inno-Setup | Render.com via `render.yaml` |
+| Deploy | PyInstaller + Inno-Setup | Hetzner + Coolify (Dockerfile, Git-Push-Auto-Deploy) |
 | Mode-Detection | dev/prod via env | dev/prod via env |
 
 ### Was bleibt identisch
@@ -45,7 +46,7 @@
 webapp/
 ├── README.md              (dieses File)
 ├── pyproject.toml         (separate deps: passlib, python-jose, psycopg2-binary)
-├── render.yaml            (Render-Deploy-Konfig)
+├── (kein render.yaml mehr) Deploy via Dockerfile + frontend/nginx.conf → Coolify (Live-Branch feature/W-api-prefix)
 ├── alembic/               (DB-Migrations, separat vom Desktop)
 ├── alembic.ini
 ├── api/
@@ -109,27 +110,37 @@ synchronisiert. **Entscheidung folgt** im Implementations-Schritt.
 
 ---
 
-## Deploy-Plan
+## Deploy (Hetzner + Coolify — LIVE seit 2026-05-22)
 
-### Render.com Free-Tier
-- 1× Web Service (FastAPI via uvicorn)
-- 1× PostgreSQL (Free, 1GB, 90-Tage-Limit ⚠️)
-- Auto-Deploy via Git-Push auf `feature/W-multi-user-web` → spaeter `main`
-- Custom Subdomain via DNS-CNAME (DomainFactory)
+### Setup
+- **Server**: Hetzner Cloud CPX22 (Falkenstein), Coolify v4, Traefik-Proxy.
+- **3 Container**: Frontend (nginx, Port 80, Dockerfile), Backend (uvicorn,
+  Port 8000, Dockerfile, **nicht öffentlich**), PostgreSQL 16.
+- **One-Domain**: cubetracker.de → Frontend-nginx liefert die SPA + proxyt
+  `/api` intern ans Backend (`cubetracker-backend:8000`, mit DNS-Resolver gegen
+  IP-Caching). Kein CORS, Backend privat.
+- **Auto-Deploy**: EIN GitHub-Webhook → Push auf `feature/W-api-prefix` deployt
+  das **Frontend** automatisch. Reine Backend-Änderungen = manueller „Redeploy"
+  in Coolify (Monorepo-Dedup: zwei Webhooks würden sich gegenseitig schlucken).
+- **Live-Branch**: `feature/W-api-prefix` (NICHT gemergt, NICHT `main`).
 
-### Env-Variables (nicht im Repo!)
-- `DATABASE_URL` — Render setzt automatisch
-- `JWT_SECRET` — manuell setzen, lang + zufaellig
-- `JWT_ALGORITHM=HS256`
-- `JWT_ACCESS_EXPIRE_MIN=15`
-- `JWT_REFRESH_EXPIRE_DAYS=30`
+### Env-Variables (im Coolify-Dashboard, nicht im Repo!)
+- `DATABASE_URL` — interne Coolify-Postgres-URL
+- `JWT_SECRET` — lang + zufaellig
 - `CUBETRACKER_PROD=1` — main.py-Mode-Detection
+- `WEBAPP_FRONTEND_ORIGIN` + `FRONTEND_URL` = https://cubetracker.de
+- `ADMIN_EMAILS`, `RESEND_API_KEY` (Email), `RESEND_FROM`
 
-### Postgres-90-Tage-Limit
-Render-Free-Postgres wird nach 90 Tagen geloescht. Mitigation:
-- **Backup-Endpoint** existiert (User kann jederzeit JSON-Backup laden)
-- Vor Tag 85: pg_dump als Sicherheitsnetz
-- Spaeter Migration auf bezahlten Postgres (~7€/Monat) oder VPS
+### Backups
+- **Coolify Daily-DB-Backup** aktiv (täglich, on-server).
+- **Hetzner Server-Backup** gebucht (VM-Snapshots).
+- Off-Site-S3-Backup optional (später).
+
+### Historie: Render.com Free-Tier (abgelöst)
+Bis 2026-05-22 lief die App auf Render.com Free-Tier (Backend + Frontend-Static-
+Site + PostgreSQL via `render.yaml`). Der Render-Free-Postgres-90-Tage-Cutoff
+(~2026-08-08) war der Auslöser für die Hetzner-Migration. Render läuft noch als
+Rollback bis ~2026-06-05 (Phase 6), danach Abbau.
 
 ---
 
@@ -155,9 +166,10 @@ Falls User die Web-Variante einstellen will:
 | W.3 | Solve/Session/Hardware-Endpoints mit user_id-Filter, alle Tests anpassen | ✅ |
 | W.4 | Achievements/Challenges/Stats per-User | ✅ |
 | W.5 | Backup/Restore + csTimer-Import/Export per-User + Snapshots | ✅ |
-| W.6 | Frontend-Adaption (Login-Page, Token-Storage, Auth-Wrapper) | ⏳ |
-| W.7 | Render-Deploy + DNS-Setup + Live-Smoke-Test | ⏳ |
-| W.8 | Doku-Finalisierung, Tag `v2.0` (Web-Launch) | ⏳ |
+| W.6 | Frontend-Adaption (Login-Page, Token-Storage, Auth-Wrapper) | ✅ |
+| W.7 | Deploy + DNS + Live-Smoke (zuerst Render 05/2026, dann Hetzner) | ✅ |
+| W.8 | Laufender Ausbau (Friends, Leaderboard, Admin, Touch, PB-History, …) | 🔄 |
+| W.hetzner | Migration Render → Hetzner/Coolify (eigene Infra, /api-Prefix) | ✅ 2026-05-22 |
 
 ---
 

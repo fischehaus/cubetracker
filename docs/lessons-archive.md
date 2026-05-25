@@ -9,6 +9,39 @@ Konsequenz (was wurde im Setup geändert).
 
 ---
 
+## 2026-05-22 — Hetzner-Cutover: DNS-TTL, Coolify-Fallen, /api-Pfad
+
+**Event:** Migration von Render auf Hetzner/Coolify. Mehrere teuer gelernte
+Stolperfallen beim Cutover:
+- **DNS-TTL nicht vorab gesenkt** → die erste Let's-Encrypt-ACME-Challenge traf
+  noch die alte Render-IP (gecachte CNAME, TTL 3600) → 1 Fehlversuch. Sobald DNS
+  global propagiert war, triggerte ein Frontend-Container-Restart den
+  erfolgreichen ACME-Retry → Cert ausgestellt.
+- **Coolify: Container-Name ≠ App-UUID.** Die UUID in der Browser-URL
+  (`coolify.resourceName`) ist eine andere als der Container-Name-Prefix
+  (`coolify.name`). App immer über die Resources-Liste/URL finden.
+- **Domain leeren reicht nicht** — generierte Traefik-Labels bleiben kleben.
+  Fix: Configuration → Labels → „Reset Labels to Defaults" (mit App-URL `/`
+  bestätigen) → Redeploy.
+- **nginx cached die Backend-IP beim Start** → 502 nach jedem Backend-Redeploy,
+  bis das Frontend neu startet. Dauerlösung: `resolver 127.0.0.11 valid=10s` +
+  Variable in `proxy_pass` (erzwingt Laufzeit-DNS).
+- **/api-Doppelprefix:** Frontend-`api.get`-Pfade NIE mit `/api` prefixen — die
+  axios-`baseURL` ist schon `/api` (sonst `/api/api/...` → 404).
+- **PG18 → PG16:** `pg_dump` muss ≥ Quell-Version sein; `SET transaction_timeout`
+  (PG17+) aus dem Dump filtern; `--clean --if-exists --no-owner`,
+  `ON_ERROR_STOP`, danach `VACUUM ANALYZE`. Beim Restore-`docker run`
+  `--network coolify` nicht vergessen (sonst „could not translate host name").
+
+**Konsequenz:**
+- **Vor jedem DNS-Cutover die TTL 24-48h vorher senken** (z.B. auf 300s).
+- Coolify-Eigenheiten (UUID, Reset-Labels, nginx-Resolver) im Runbook
+  `docs/hetzner-migration-runbook.md` (Execution-Post-Mortem) festgehalten.
+- Monorepo-Auto-Deploy: nur EIN GitHub-Webhook pro Repo (zwei → Coolify
+  dedupliziert den Commit → nur eine App deployt, zufällig welche).
+
+---
+
 ## 2026-05-16 — Browser-Polyfill bei NPM-Packages mit Native-Node-Globals
 
 **Event:** `cstimer_module@0.1.5`-Einbau hat cubetracker.de gekillt obwohl

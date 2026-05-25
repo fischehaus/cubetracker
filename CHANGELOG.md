@@ -1,9 +1,46 @@
 # Changelog
 
 Notable changes only. Single-Dev-Projekt, kein striktes SemVer — wir nutzen
-`v2.0.0-alpha.W.X` waehrend der Multi-User-Web-Phase. v2.0.0 = stable
-release sobald Hetzner-Migration durch + Feature-Set fuer Friends/Public
-Profile komplett.
+`v2.0.0-alpha.W.X` waehrend der Multi-User-Web-Phase. v2.0.0 = stable release
+sobald das Feature-Set fuer Friends/Public-Profile komplett ist (die
+Hetzner-Migration ist seit 2026-05-22 durch).
+
+> **Single-Source-Hinweis:** Die maßgeblichen Per-Release-Patch-Notes liegen in
+> `webapp/changelog/data.py` (in der App sichtbar). Dieser CHANGELOG erfasst die
+> großen Meilensteine. Die Feature-Wellen zwischen W.10 und heute (Voice-Alert,
+> Penalty-Quick-Buttons, Custom-Scramble, Roadmap-Modal, Scramble-Bild-2D-Net,
+> GPL-Migration, csTimer-Vendor-Port, Admin-Workflow, Umlaut-Migration,
+> PB-History) sind dort dokumentiert.
+
+## Infra: Post-Migration-Cleanup + Auto-Deploy (2026-05-25)
+
+**Commits**: `d2806b3`, `4d8872b` (Branch `feature/W-api-prefix`)
+
+- Alle Render-Bezüge aus UI + Code-Kommentaren entfernt (Login-„Render-Free-
+  schläft"-Tipp weg, Roadmap-Phase „Eigene Infrastruktur" auf erledigt/grün —
+  neuer `done`-PhaseStatus).
+- **Frontend-Auto-Deploy** via EINEM GitHub-Webhook: Push auf
+  `feature/W-api-prefix` → Coolify deployt das Frontend. Backend-only-Änderungen
+  weiterhin manueller „Redeploy" (Monorepo-Dedup: zwei Webhooks würden sich
+  gegenseitig schlucken).
+- Tägliche DB-Backups via Coolify aktiv; Hetzner-Server-Backup gebucht.
+
+## Infra: Hetzner-Migration — LIVE (2026-05-22)
+
+cubetracker.de läuft jetzt auf **Hetzner Cloud (CPX22) + Coolify v4** statt
+Render. Auslöser: Render-Free-Postgres-90-Tage-Cutoff (~2026-08-08).
+
+- Alle **13.590 Solves** + 13 Tabellen 1:1 migriert (`pg_dump` PG18 →
+  `pg_restore` PG16, `transaction_timeout`-SET rausgefiltert), HTTPS via
+  Let's-Encrypt/Traefik, am Handy verifiziert.
+- **One-Domain-Architektur**: Frontend-nginx liefert die SPA + proxyt `/api`
+  intern ans (private) Backend — kein CORS, Backend nicht öffentlich.
+- Branch `feature/W-api-prefix` (live, nicht gemergt). Commits u.a. `8f69642`
+  (/api-Prefix), `94cd1d5`/`fa956e4` (Dockerfiles + nginx-Proxy), `1abf8a2`
+  (changelog-Doppelprefix-Fix + Regr.-Test), `3902c2f` (nginx-Resolver),
+  `672d313` (health/changelog-Pfad-Fix).
+- Render bleibt Rollback bis Phase 6 (~2026-06-05). Runbook + Execution-Post-
+  Mortem: `docs/hetzner-migration-runbook.md`.
 
 ## v2.0.0-alpha.W.10 — Leaderboards (2026-05-13)
 
