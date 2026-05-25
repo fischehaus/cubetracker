@@ -8,8 +8,9 @@
 //   "planned"   — kommt als nächstes
 //   "future"    — schon geplant aber später
 //   "ongoing"   — läuft kontinuierlich (Workflow / Polish)
+//   "done"      — abgeschlossen
 
-export type PhaseStatus = "active" | "planned" | "future" | "ongoing";
+export type PhaseStatus = "active" | "planned" | "future" | "ongoing" | "done";
 
 export interface RoadmapItem {
   title: string;
@@ -54,16 +55,16 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
   },
   {
     id: "P2",
-    status: "planned",
-    title: "Hetzner-Migration",
-    timeframe: "Mitte Juli 2026",
+    status: "done",
+    title: "Eigene Infrastruktur (Hetzner Cloud)",
+    timeframe: "Mai 2026 — erledigt",
     summary:
-      "Pflicht: Render-Free-Postgres läuft nach 90 Tagen aus (~2026-08-08). Coolify-basiertes Setup auf Hetzner Cloud.",
+      "Erledigt: Umzug auf eine eigene Hetzner-Cloud mit Coolify — eigene Domain, HTTPS, tägliche Backups, alle Daten übernommen. Die App läuft jetzt auf eigener Infrastruktur.",
     items: [
-      { title: "Coolify-Server aufsetzen", effort: "1-2 Tage" },
-      { title: "Daten-Migration via JSON-Backup-Endpoint", effort: "1 Tag" },
-      { title: "DNS-Switch + Let's-Encrypt-SSL", effort: "1 Tag" },
-      { title: "Live-Verifikation + Render-Abbau", effort: "1 Tag" },
+      { title: "Server + Coolify aufsetzen", done: true, effort: "1-2 Tage" },
+      { title: "Daten-Migration (pg_dump/restore)", done: true, effort: "1 Tag" },
+      { title: "DNS-Switch + Let's-Encrypt-SSL", done: true, effort: "1 Tag" },
+      { title: "Live-Verifikation + tägliche Backups", done: true, effort: "1 Tag" },
     ],
   },
   {

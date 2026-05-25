@@ -172,11 +172,6 @@ export function LoginPage() {
             </button>
           )}
         </div>
-
-          <p className="text-xs text-gray-500 mt-6 text-center">
-            Tipp: Render-Free schlaeft nach 15 Min Idle. Erste Anmeldung kann
-            ~50s dauern.
-          </p>
         </div>
 
         {/* Rechte Spalte: Was-ist-das + Feature-Liste für Besucher

@@ -129,4 +129,8 @@ const STATUS_COLORS: Record<
     border: "border-blue-500/30",
     badge: "bg-blue-600/40 text-blue-100",
   },
+  done: {
+    border: "border-emerald-500/30",
+    badge: "bg-emerald-600/50 text-emerald-100",
+  },
 };
