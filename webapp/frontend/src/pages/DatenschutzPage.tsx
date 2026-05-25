@@ -340,7 +340,8 @@ export function DatenschutzPage() {
           dauerhaft. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (effektive
           Bearbeitung von Anfragen). Mit dem Anbieter besteht, soweit erforderlich,
           ein Vertrag zur Auftragsverarbeitung; soweit eine Übermittlung in die USA
-          erfolgt, geschieht dies auf Grundlage geeigneter Garantien.
+          erfolgt, geschieht dies auf Grundlage der EU-Standardvertragsklauseln
+          (Art. 46 Abs. 2 lit. c DSGVO).
         </p>
 
         <Sub>Kontaktformular / Feedback</Sub>

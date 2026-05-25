@@ -53,7 +53,9 @@ jobs:
           if echo "$CHANGED" | grep -q '^webapp/frontend/'; then
             echo "frontend=true" >> "$GITHUB_OUTPUT"
           fi
-          if echo "$CHANGED" | grep '^webapp/' | grep -qv '^webapp/frontend/'; then
+          # Backend nur bei echten Backend-Code-Aenderungen unter webapp/
+          # (nicht frontend/, nicht .md-Docs) -> keine unnoetigen Backend-Deploys.
+          if echo "$CHANGED" | grep -E '^webapp/' | grep -qvE '^webapp/frontend/|\.md$'; then
             echo "backend=true" >> "$GITHUB_OUTPUT"
           fi
 

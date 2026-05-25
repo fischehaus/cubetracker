@@ -14,7 +14,8 @@ export function MeineDatenCard() {
     setError(null);
     try {
       await downloadFullBackup();
-    } catch {
+    } catch (e) {
+      console.error("downloadFullBackup fehlgeschlagen:", e);
       setError("Backup konnte nicht erstellt werden. Bitte nochmal versuchen.");
     } finally {
       setBusy(false);

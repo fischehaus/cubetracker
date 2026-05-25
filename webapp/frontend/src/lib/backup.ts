@@ -3,8 +3,13 @@
 // Datei-Download im Browser an. Wirft bei Fehlern (Caller behandelt).
 import { api } from "./api";
 
+interface BackupExport {
+  user_email?: string;
+  [key: string]: unknown;
+}
+
 export async function downloadFullBackup(): Promise<void> {
-  const r = await api.get("/backup/json");
+  const r = await api.get<BackupExport>("/backup/json");
   const data = r.data;
   const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 15);
   const userPart = (data.user_email || "user").split("@")[0];
