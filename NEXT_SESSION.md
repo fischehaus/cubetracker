@@ -27,16 +27,20 @@ Commits sind.
 ## ⭐⭐⭐ LETZTER STAND (2026-05-25, Abend) — #1+#6 LIVE · Auto-Deploy rund · Prozess-Härtung
 
 > ### 🚨 ALLERERSTES BEIM START (sonst läuft die halbe Automatik nicht!)
-> **Claude Code MUSS aus dem cubetracker-Repo gestartet werden:**
-> ```
-> cd D:\Projekte\cubetracker
-> claude
-> ```
-> Läuft Claude aus `D:\Claude-Projekte` (Multi-Chat-Ordner), wird cubetrackers
-> `.claude/` (Hooks + settings) **nicht geladen** → ntfy-Ping weg, kein Patch-Notes-/
-> Commit-Reminder, Dev-Server-Guard inaktiv, kein Session-Start-Kontext. Genau das ist
-> am 2026-05-25 passiert. **Start-Selbsttest:** kommt ein Session-Start-Kontext? Kommt am
-> Turn-Ende ein ntfy-Ping (Topic `jjY2OjY`)? Wenn nein → falsches Verzeichnis.
+> **Wir arbeiten in der Claude-DESKTOP-App (Cowork/Code), nicht im Terminal-CLI.**
+> Die App lädt `.claude/` (Hooks, Skills, Sub-Agents, CLAUDE.md) **nur aus der
+> PROJEKT-WURZEL** — und **„Ordner hinzufügen" reicht NICHT** (das gibt nur Datei-Zugriff,
+> lädt KEINE Config). Die Projekt-/Session-Wurzel MUSS daher **`D:\Projekte\cubetracker`**
+> sein (den Repo-Ordner als Projekt öffnen — NICHT als Unterordner unter `D:\Claude-Projekte`
+> „hinzufügen").
+>
+> **Konkret:** in der Claude-App eine **neue Session/Projekt mit Wurzel
+> `D:\Projekte\cubetracker`** öffnen. Läuft die Session aus `D:\Claude-Projekte`, schlafen
+> ALLE Hooks (ntfy weg, kein Patch-Notes-/Commit-Reminder, kein Dev-Guard, kein
+> Session-Start-Kontext) — genau das war am 2026-05-25 der Fall.
+>
+> **Start-Selbsttest:** kommt ein Session-Start-Kontext? Kommt am Turn-Ende ein ntfy-Ping
+> (Topic `jjY2OjY`)? Wenn nein → Repo ist nicht die Projekt-Wurzel.
 
 **Live-Stand:** cubetracker.de läuft auf Hetzner. **Live-Branch = `feature/W-api-prefix`**
 (= einzige Wahrheit für Code UND Doku). Versions-Badge: `W.meine-daten`. **Auto-Deploy

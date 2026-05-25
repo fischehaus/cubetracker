@@ -20,9 +20,14 @@ in der falschen (nicht-aktiven) Projekt-Wurzel. Erklärte auf einen Schlag: „n
 „Patch-Notes wurden vergessen".
 
 **Konsequenz:**
-- Claude Code für cubetracker IMMER aus `D:\Projekte\cubetracker` starten.
+- Wir arbeiten in der Claude-DESKTOP-App (Cowork/Code), nicht im CLI. Die App lädt
+  `.claude/` (Hooks/Skills/Sub-Agents/CLAUDE.md) NUR aus der **Projekt-Wurzel**. Die
+  Session-Wurzel muss daher `D:\Projekte\cubetracker` sein (Repo als Projekt öffnen).
+- **„Ordner hinzufügen" reicht NICHT** — das gibt nur Datei-Zugriff, lädt KEINE Config.
+  Es braucht ein eigenes Projekt mit dem Repo als Wurzel. (Bestätigt via claude-code-guide,
+  2026-05-25; Quelle: code.claude.com/docs settings + claude-directory.)
 - Start-Selbsttest: kommt der Session-Start-Kontext? Kommt am Turn-Ende ein ntfy-Ping
-  (Topic `jjY2OjY`)? Wenn nein → falsches Verzeichnis, Hooks schlafen.
+  (Topic `jjY2OjY`)? Wenn nein → Repo ist nicht die Projekt-Wurzel, Hooks schlafen.
 - Als 🚨-Block ganz oben in NEXT_SESSION.md verankert.
 
 ---
