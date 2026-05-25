@@ -330,6 +330,19 @@ export function DatenschutzPage() {
           Auftragsverarbeitung.
         </p>
 
+        <Sub>E-Mail-Empfang (Forward Email)</Sub>
+        <p>
+          Für den Empfang von E-Mails an unsere Kontaktadresse nutzen wir den
+          Weiterleitungsdienst Forward Email (Forward Email LLC, USA). Eingehende
+          Nachrichten werden an das Postfach des Verantwortlichen weitergeleitet;
+          dabei werden die Absenderadresse und der Nachrichteninhalt verarbeitet.
+          Forward Email ist quelloffen und speichert weitergeleitete E-Mails nicht
+          dauerhaft. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (effektive
+          Bearbeitung von Anfragen). Mit dem Anbieter besteht, soweit erforderlich,
+          ein Vertrag zur Auftragsverarbeitung; soweit eine Übermittlung in die USA
+          erfolgt, geschieht dies auf Grundlage geeigneter Garantien.
+        </p>
+
         <Sub>Kontaktformular / Feedback</Sub>
         <p>
           Wenn Sie uns über das Feedback-Formular eine Nachricht zukommen lassen,
