@@ -175,6 +175,11 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         note: "Template aus ivyScramble.ts.",
       },
       { title: "News-Quellen erweitern (HTML-Scraping)", effort: "1-2 Tage" },
+      {
+        title: "Cookieless-Analytics (Besucherzahlen ohne Cookie-Banner)",
+        effort: "~1-2 Tage",
+        note: "z.B. self-hosted Umami auf Coolify oder Plausible. Keine Tracking-Cookies, kein Consent-Banner, DSGVO-freundlich. Google Analytics bewusst NICHT (würde ein Cookie-Banner erzwingen).",
+      },
     ],
   },
   {

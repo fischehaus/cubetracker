@@ -13,6 +13,8 @@ import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
+import { ImpressumPage } from "./pages/ImpressumPage";
+import { DatenschutzPage } from "./pages/DatenschutzPage";
 import { api } from "./lib/api";
 import { AchievementsMiniCard } from "./components/AchievementsMiniCard";
 import { AchievementToaster } from "./components/AchievementToaster";
@@ -617,6 +619,20 @@ function MainLayout() {
             💬 Feedback
           </button>
           <span aria-hidden="true">·</span>
+          <a
+            href="/impressum"
+            className="text-gray-500 hover:text-gray-200 underline"
+          >
+            Impressum
+          </a>
+          <span aria-hidden="true">·</span>
+          <a
+            href="/datenschutz"
+            className="text-gray-500 hover:text-gray-200 underline"
+          >
+            Datenschutz
+          </a>
+          <span aria-hidden="true">·</span>
           <span>Mehr Optionen oben rechts im User-Menu</span>
         </footer>
       </div>
@@ -675,6 +691,13 @@ function AuthGuard() {
   }
   if (pathname === "/verify-email") {
     return <VerifyEmailPage />;
+  }
+  // Rechtsseiten — müssen OHNE Login erreichbar sein (gesetzliche Pflicht).
+  if (pathname === "/impressum") {
+    return <ImpressumPage />;
+  }
+  if (pathname === "/datenschutz") {
+    return <DatenschutzPage />;
   }
 
   if (isLoading) {
