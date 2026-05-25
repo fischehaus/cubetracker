@@ -24,7 +24,35 @@ Commits sind.
 
 ---
 
-## ⭐⭐⭐ LETZTER STAND (2026-05-25, Abend) — #1+#6 LIVE · Auto-Deploy rund · Prozess-Härtung
+## ⭐⭐⭐ NÄCHSTE SESSION ZUERST (2026-05-26) — Methodik-System verinnerlichen
+
+> **Diese Session (2026-05-26) war eine reine Meta-/Lese-Session** — KEIN Code,
+> KEINE Commits, KEINE Repo-Änderung am Produkt. Thema: das eigene Methodik-System
+> inventarisiert (welche .md-Files + welche Hooks, und wann greift was). `/abschluss`
+> lief sauber durch — alle Checks grün außer den 3 bekannten, schon dokumentierten
+> Altlasten (Tags meine-daten/legal/hetzner fehlen · `features-data.ts` für #1/#6
+> nicht ergänzt · `MAINTENANCE.md` noch nie gelaufen).
+>
+> ### 🔜 ALS ERSTES in der nächsten Session (User-Festlegung 2026-05-26)
+> Das Methodik-System EINMAL im **Volltext** lesen, damit Claude verifiziert danach
+> arbeitet statt nur aus Beschreibungen — und dabei Lücken/Inkonsistenzen im System
+> benennen. Konkret lesen:
+> - die **10 Hook-Skripte** unter `.claude/hooks/*.sh` (was prüft/blockt jeder genau)
+> - `.claude/rules/discipline.md`
+> - `.claude/commands/abschluss.md` + `.claude/commands/audit.md`
+> - `.claude/agents/qa-reviewer.md` + `.claude/agents/patch-notes-writer.md`
+> - `MAINTENANCE.md` (+ die restlichen NEXT_SESSION-Blöcke)
+>
+> **Ziel-Ergebnis:** ein präzises „wann greift welcher Hook / wann muss ich welche
+> .md wie lesen + updaten"-Bild, plus eine ehrliche Liste, wo das System Lücken hat.
+>
+> **🚨 Start-Selbsttest (Projekt-Wurzel / Hooks):** siehe Box direkt im Block darunter.
+> **Produkt-Stand unverändert** — gültig bleibt der „AKTUELLER PRODUKT-STAND"-Block
+> direkt darunter (#1+#6 live · Backlog #5 → #2 → #3 · offene Härtung #43/Tags).
+
+---
+
+## ⭐⭐⭐ AKTUELLER PRODUKT-STAND (2026-05-25, Abend) — #1+#6 LIVE · Auto-Deploy rund · Prozess-Härtung
 
 > ### 🚨 ALLERERSTES BEIM START (sonst läuft die halbe Automatik nicht!)
 > **Wir arbeiten in der Claude-DESKTOP-App (Cowork/Code), nicht im Terminal-CLI.**
