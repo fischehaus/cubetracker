@@ -43,6 +43,13 @@ Commits sind.
   Doku-Konsistenz, Backups, Security, Build, Kosten). Ergänzt `/abschluss` (Session-Ende)
   + `/audit` (Setup). Empfehlung: ~monatlich + vor/nach großen Änderungen durchlaufen.
   Später evtl. als `/maintenance`-Command.
+- **🚀 AUTO-DEPLOY LIVE + verifiziert** (`.github/workflows/deploy.yml`): Push auf
+  `feature/W-api-prefix` → GitHub-Action deployt gezielt die geänderte App (Frontend
+  `uuid=pcixgncs671tifdx9e3rxr7h` / Backend `uuid=w3dw05zc8nv2izxa3v2qi911`) via
+  Coolify-per-App-API (GH-Secret `COOLIFY_TOKEN`). End-to-End getestet (Marker
+  rein→live ~20s→raus). **„push = live"** — Backend braucht KEINEN manuellen Redeploy
+  mehr. **OFFEN:** alten generischen Coolify-Webhook (GitHub → Settings → Webhooks,
+  id 630590452) löschen, sonst Doppel-Deploys.
 
 **Nächster echter Schritt:** Roadmap-Backlog #1 = **Impressum + Datenschutz** (`/impressum`
 + `/datenschutz` als SPA-Routen + Footer, KEIN Cookie-Banner). User liefert echte

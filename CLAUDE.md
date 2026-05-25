@@ -89,9 +89,11 @@ Wesentliche Welle-Reviews:
 > **EINE Wahrheit** für Code *und* Doku (Code, Roadmap, NEXT_SESSION, alle .md).
 > **`feature/W-multi-user-web` ist EINGEFROREN** — nur noch Render-Rollback bis
 > Phase 6, dort **NICHT mehr committen/pushen** (jeder Push würde Render neu
-> deployen). Coolify deployt das **Frontend** automatisch bei Push auf
-> `feature/W-api-prefix`; reine Backend-Änderungen brauchen einen manuellen
-> „Redeploy"-Klick. Branch-Endspiel (→ `main`, alten Branch löschen, Render
+> deployen). **Auto-Deploy ist live** via GitHub-Action (`.github/workflows/deploy.yml`):
+> ein Push auf `feature/W-api-prefix` deployt gezielt die geänderte App über Coolifys
+> per-App-Deploy-API — Frontend `uuid=pcixgncs671tifdx9e3rxr7h`, Backend
+> `uuid=w3dw05zc8nv2izxa3v2qi911` (Token = GH-Secret `COOLIFY_TOKEN`). Kein manueller
+> Redeploy mehr nötig. Branch-Endspiel (→ `main`, alten Branch löschen, Render
 > abbauen) in Phase 6 (~2026-06-05). Das generische Modell unten gilt erst
 > nach der Konsolidierung.
 
