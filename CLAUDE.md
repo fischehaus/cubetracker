@@ -2,11 +2,15 @@
 
 ## Was ist das?
 
-Web-App fuer Speedcubing-Solve-Tracking. Single-User, lokal
-laufend, mit Browser-Frontend. Importiert/exportiert CSV (csTimer-
-Format), kann WCA-Profile lesen, generiert Statistiken inkl.
-Multi-Cube-Performance-Vergleich, Verbesserungs-Tracking,
-Trainings-Reminder und Hardware-Performance-Analyse.
+App fuer Speedcubing-Solve-Tracking. **Zwei Varianten im selben Repo:**
+- **`webapp/`** — Multi-User-Web-Variante, **LIVE auf cubetracker.de**
+  (Hetzner Cloud + Coolify). Das ist die aktive Produktarbeit.
+- **`backend/` + `frontend/`** — ältere Single-User-Desktop-Variante (SQLite,
+  PyInstaller-Installer), parallel intakt, aber nicht mehr aktiv erweitert.
+
+Features: csTimer-Import/Export, WCA-Profil-Lookup, Statistiken inkl.
+Multi-Cube-Performance-Vergleich, PB-Tracking, Trainer (PLL/OLL),
+Achievements, Friends/Leaderboard, Hardware-Analyse.
 
 ## Tech-Stack
 
@@ -79,6 +83,17 @@ Wesentliche Welle-Reviews:
 - W.cstimer-more-puzzles (2026-05-17): 1 KRITISCH + 5 SOLLTE gefixt
 
 ## Branching-Strategie
+
+> ⚠️ **Ist-Zustand (Web-Variante, Stand 2026-05-25):**
+> **`feature/W-api-prefix`** ist der live-deployte Branch UND ab jetzt die
+> **EINE Wahrheit** für Code *und* Doku (Code, Roadmap, NEXT_SESSION, alle .md).
+> **`feature/W-multi-user-web` ist EINGEFROREN** — nur noch Render-Rollback bis
+> Phase 6, dort **NICHT mehr committen/pushen** (jeder Push würde Render neu
+> deployen). Coolify deployt das **Frontend** automatisch bei Push auf
+> `feature/W-api-prefix`; reine Backend-Änderungen brauchen einen manuellen
+> „Redeploy"-Klick. Branch-Endspiel (→ `main`, alten Branch löschen, Render
+> abbauen) in Phase 6 (~2026-06-05). Das generische Modell unten gilt erst
+> nach der Konsolidierung.
 
 - `main`: immer deployable, nur gemergte Features
 - `feature/<name>`: pro Feature ein eigener Branch

@@ -1,5 +1,17 @@
 # ROADMAP — cubetracker
 
+> **⚠️ Stand 2026-05-25 — dieses File ist überwiegend historisch.**
+> Die **aktuelle, gepflegte Roadmap** (Phasen P1–P6 der Web-Variante) liegt in
+> **`webapp/frontend/src/lib/roadmap-data.ts`** (= Single-Source, im
+> Roadmap-Modal der App sichtbar). Dieses ROADMAP.md dokumentiert die frühen
+> Desktop-Phasen (v0.1–v1.0) + Phasen-Historie und wird nicht mehr fortlaufend
+> gepflegt.
+>
+> **Großer Meilenstein seit diesem File:** die Multi-User-Web-Variante
+> (`webapp/`) ist live auf cubetracker.de, und die **Hetzner-Migration ist seit
+> 2026-05-22 abgeschlossen** (Render abgelöst). Aktueller Backlog: siehe
+> `roadmap-data.ts` + `NEXT_SESSION.md`.
+
 ## Phase 1 — MVP (5 Features, Tag `v0.1`)
 
 Ziel: App lauffaehig auf localhost, manuelle Solve-Erfassung +

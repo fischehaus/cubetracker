@@ -61,9 +61,13 @@ Drei Wege:
 - Vitest für Tests
 
 ### Hosting (Web-Variante)
-- **Render.com** Free-Tier (Backend + Frontend Static-Site + PostgreSQL)
-- **Domain** via INWX, SSL via Let's-Encrypt
-- Hetzner-Migration geplant Mitte 2026 (vor Render-Postgres-90d-Limit)
+- **Hetzner Cloud** (CPX22, Falkenstein) mit **Coolify** v4 — Backend +
+  Frontend + PostgreSQL als Docker-Container hinter Traefik-Reverse-Proxy
+- **Domain** via INWX, SSL via Let's-Encrypt (Auto-Renew über Traefik)
+- One-Domain-Architektur: nginx liefert die SPA und proxyt `/api` intern
+  ans Backend (kein CORS, Backend nicht öffentlich exponiert)
+- Migration Render → Hetzner **abgeschlossen 2026-05-22** (Render-Free-Postgres
+  lief auf ein 90-Tage-Limit zu). Tägliche DB-Backups via Coolify.
 
 ## Projekt-Struktur
 
