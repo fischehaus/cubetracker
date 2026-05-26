@@ -76,6 +76,14 @@ Bei Zweifel: **public** (Default). User-Vertrauen kostet weniger als ein zu
 geschwätziger Changelog — falls es doch zu technisch ist, kann man später
 nachträglich auf internal flaggen.
 
+**Konvention zur Reihenfolge** (seit W.patchnotes-intern-qa): Neue Einträge
+kommen wie gehabt OBEN in `PATCH_NOTES` (chronologisch neueste = `PATCH_NOTES[0]`),
+egal ob `internal=True` oder `False`. Die App-Version (`__version__`,
+`/api/health`) zieht über `current_version()` automatisch den **ersten public-
+Eintrag**, springt also über internal-Einträge an Position 0 hinweg. Damit
+leakt nie ein interner Wellen-Name öffentlich, auch wenn der oberste Eintrag
+internal ist.
+
 ## Exakt-Format
 
 ```python

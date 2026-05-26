@@ -44,7 +44,7 @@ def get_changelog(
             "version": pn.version,
             "released": pn.released.isoformat(),
             "title": pn.title,
-            "highlights": list(pn.highlights),
+            "highlights": pn.highlights,
             "commit": pn.commit,
         }
         if is_admin:

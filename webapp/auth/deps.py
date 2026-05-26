@@ -11,6 +11,8 @@ Auth-Check (statisch erkennbar im Code-Review).
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
@@ -20,6 +22,8 @@ from db.database import get_db
 from db.models import User
 
 from .jwt import extract_user_id_and_version
+
+logger = logging.getLogger(__name__)
 
 # OAuth2-Scheme — FastAPI nutzt das für Swagger-UI-Auth-Button.
 # tokenUrl muss zu unserem login-endpoint passen.
@@ -82,7 +86,10 @@ def get_current_user_optional(
         return None
     try:
         user_id, token_ver = extract_user_id_and_version(token, expected_type="access")
-    except JWTError:
+    except JWTError as exc:
+        # Defense-in-Depth: manipulierte / kaputte Tokens im Audit-Log
+        # sichtbar machen. Nur Exception-Klassen-Name, kein Token-Inhalt.
+        logger.warning("optional-auth JWT rejected: %s", type(exc).__name__)
         return None
     user = db.get(User, user_id)
     if user is None or not user.is_active:

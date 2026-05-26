@@ -40,7 +40,30 @@ class PatchNote:
 
 
 # Neue Einträge OBEN einfügen — PATCH_NOTES[0] = neueste Version.
+# Hinweis: bei internal=True-Eintraegen oben springt current_version()
+# zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
+    PatchNote(
+        version="2.0.0-alpha.W.patchnotes-intern-qa",
+        released=date(2026, 5, 26),
+        title="QA-Hotfix nach Patch-Notes-Intern-Welle",
+        highlights=[
+            "Sub-Agent-Review der Patch-Notes-Intern-Welle hat 3 SOLLTE + "
+            "2 NICE gefunden, alle sofort gefixt.",
+            "current_version() (Source-of-Truth fuer __version__ + /api/health) "
+            "skippt jetzt internal-Eintraege automatisch — kein Leak mehr, "
+            "falls ein interner Eintrag mal an Position 0 landet.",
+            "get_current_user_optional protokolliert kaputte/manipulierte "
+            "Tokens jetzt mit logger.warning (nur Exception-Klassen-Name, "
+            "kein Token-Inhalt) — Defense-in-Depth fuer den Audit-Log.",
+            "Duplikat-Check-Assert am data.py-Ende faengt versehentliche "
+            "doppelte version-Strings beim FastAPI-Import.",
+            "Hygiene: list(pn.highlights) raus (Dataclass ist frozen, "
+            "defensive copy unnoetig). Doku in patch-notes-writer.md "
+            "ergaenzt um die current_version()-Konvention.",
+        ],
+        internal=True,
+    ),
     PatchNote(
         version="2.0.0-alpha.W.patchnotes-intern",
         released=date(2026, 5, 26),
@@ -1673,5 +1696,25 @@ PATCH_NOTES: list[PatchNote] = [
 
 
 def current_version() -> str:
-    """Neuester Eintrag = aktuelle App-Version. Wird von main.py importiert."""
-    return PATCH_NOTES[0].version
+    """Neuester *public* Eintrag = aktuelle App-Version. Wird von main.py
+    importiert und ueber /api/health oeffentlich gezeigt. Defensiv:
+    internal=True-Eintraege werden uebersprungen, damit kein interner
+    Wellen-Name oeffentlich leakt (Fix aus W.patchnotes-intern-qa).
+
+    Konvention: PATCH_NOTES[0] ist konventionell der chronologisch
+    neueste Eintrag (egal ob public/internal). Falls dieser internal
+    ist, faellt current_version() defensiv auf den ersten public-
+    Eintrag zurueck — App-Version bleibt damit immer public.
+    """
+    return next(
+        (pn.version for pn in PATCH_NOTES if not pn.internal),
+        PATCH_NOTES[0].version,  # Fallback wenn alle internal (sollte nie passieren)
+    )
+
+
+# Defensive Konsistenz-Pruefung: jeder Versions-String muss unique sein,
+# sonst koennten der __version__-Mechanismus oder der Tag-Workflow stille
+# Duplikate uebersehen. Greift beim Import (FastAPI-Startup).
+assert len({pn.version for pn in PATCH_NOTES}) == len(PATCH_NOTES), (
+    "Duplikat-Version in PATCH_NOTES — jeder version-String muss unique sein"
+)
