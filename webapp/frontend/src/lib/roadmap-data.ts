@@ -59,23 +59,32 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       },
       {
         title: "Meine Daten — Gefahren-Bereich: 3 abgestufte Lösch-Aktionen",
+        done: true,
         effort: "~1.5-2 Tage gesamt",
-        note: "Eine eigene Danger-Zone-Sektion unter Meine Daten mit drei roten Buttons (jeweils 2-Klick-Bestätigung + Hinweis auf Backup-Download). Reihenfolge sanft → radikal. Backend: zwei neue Endpoints (Solves-Reset + Tracking-Reset), Account-Löschung gibt's schon. Layout-Impact: neue Sub-Sektion im Meine-Daten-Tab.",
+        note: "Eigene Danger-Zone-Sektion unter Meine Daten mit drei roten Buttons (jeweils 2-Klick-Bestätigung + Backup-Hinweis). Reihenfolge sanft → radikal.",
       },
       {
         title: "  └ Solves zurücksetzen",
+        done: true,
         effort: "~0.5 Tag",
         note: "Bulk-Delete aller Solves (cube-übergreifend). Sessions, Hardware, Achievements, Account bleiben. Use-Case: Test-Daten weg, mit eigenem Hardware-Setup neu anfangen.",
       },
       {
         title: "  └ Tracking-Daten zurücksetzen (Reset to factory)",
+        done: true,
         effort: "~1 Tag",
         note: "Bulk-Delete von Solves + Sessions + Achievements + Daily-Challenges-Historie. Account und Hardware-Inventar bleiben (dein Setup). Use-Case: kompletter Neustart, aber Cube-Sammlung behalten.",
       },
       {
         title: "  └ Account komplett löschen (zusätzlich hier sichtbar)",
+        done: true,
         effort: "~2h",
-        note: "Endpoint existiert schon unter Einstellungen — hier nur Frontend-Wrap als roter Button in der Danger-Zone (gehört thematisch zur Datenhoheit). DSGVO-konform: alle Daten weg inkl. Login.",
+        note: "Endpoint existiert schon unter Einstellungen — hier zusätzlich als roter Button in der Danger-Zone (gehört thematisch zur Datenhoheit). DSGVO-konform.",
+      },
+      {
+        title: "Roadmap & Features-Liste: intern/extern trennen (Admin vs User)",
+        effort: "~1-2h",
+        note: "Analog zu Patch-Notes-intern: ein internal-Flag pro Roadmap- und Features-Item, Frontend filtert anhand des Admin-Status. Damit sehen normale User nur User-relevante Items (z.B. nicht Backend-Test-Suite / Alembic-Refactor / Bundle-Splitting). Aus Issue #1.",
       },
       {
         title: "Patch-Notes aufgeräumt (nur das Wesentliche)",
@@ -85,13 +94,19 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       },
       {
         title: "Average-Rekorde in der Solve-Liste markieren",
+        done: true,
         effort: "~0.5 Tag",
-        note: "Kleiner farbiger Punkt an deinen besten ao5/ao12 in der Solve-Liste.",
+        note: "Kleine farbige Punkte an ao5/ao12-Bestzeiten in der Solve-Liste (cyan für ao5, emerald für ao12). Gold ★ bleibt für Single-PBs.",
       },
       {
         title: "Dashboard: Letzte Rekorde auf einen Blick",
         effort: "~1 Tag",
         note: "Kompakte Liste deiner jüngsten Bestzeiten mit Verbesserung — Klick führt zum PB-Verlauf.",
+      },
+      {
+        title: "Roadmap intern/extern trennen (Admin vs. User-Sicht)",
+        effort: "~1-2h",
+        note: "Analog zum Patch-Notes-intern-Pattern: Roadmap-Items bekommen ein internal-Flag. User sehen nur User-relevante Features, Admin sieht alles inkl. Dev-Schuld-Items (Backend-Test-Suite, Alembic). Frontend filtert client-seitig basierend auf user.is_admin — kein Backend-Endpoint nötig (Roadmap ist kein echtes Secret). Issue #1.",
       },
       {
         title: "Scramble-Bild 2D-Net pro Scramble",

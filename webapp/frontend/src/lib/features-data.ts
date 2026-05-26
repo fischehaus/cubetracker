@@ -37,6 +37,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
       "Detail-Modal pro Solve: vollstaendiger Scramble + Notiz + Kontext via ℹ-Button",
       "Charts: Trends über Zeit, Distribution-Verteilung, tägliche Aktivität",
       "PB-Verlauf: alle persönlichen Bestzeiten bleiben als PB markiert (auch alte/überbotene), plus ein Verlaufs-Chart der Single-/AO5-/AO12-Rekorde über die Zeit",
+      "Average-PB-Marker in der Solve-Liste: kleiner farbiger Punkt an jeder ao5/ao12-Zahl, die zum Zeitpunkt ihres Setzens ein Best-Avg war (cyan für ao5, emerald für ao12, gold ★ für Single-PB)",
       "Hardware-Performance-Vergleich: welcher Cube ist schneller für welchen Type",
     ],
   },
@@ -84,6 +85,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     icon: "📥",
     bullets: [
       "Verwaltung → Meine Daten: Ein-Klick-Voll-Backup deiner Solves, Sessions, Hardware und Achievements als offenes JSON — du behältst die volle Datenhoheit, jederzeit exportieren oder importieren",
+      "Gefahren-Bereich unter Meine Daten: drei abgestufte Lösch-Aktionen (Solves zurücksetzen / Tracking-Daten zurücksetzen / Account komplett löschen) — jede mit 2-Klick-Bestätigung und prominentem Backup-Hinweis",
       "csTimer-Import: dein bestehender Bestand wird komplett übernommen (Sessions + Solves + Scrambles + Notizen)",
       "csTimer-kompatibler Export: wechselbare Datenhoheit jederzeit",
       "Voll-Backup als JSON inkl. Achievements + Daily-Challenges-Historie",
