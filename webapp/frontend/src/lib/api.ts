@@ -346,6 +346,10 @@ export interface StatsResponse {
   best_ao100_at: string | null;
   /** W.pb-history: IDs aller Solves die ein Single-PB waren (Listen-Marker) */
   pb_solve_ids: number[];
+  /** W.avg-pb-dots: Anker-Solve-IDs aller ao5-PBs (chronologische Progression) */
+  ao5_pb_solve_ids: number[];
+  /** W.avg-pb-dots: Anker-Solve-IDs aller ao12-PBs */
+  ao12_pb_solve_ids: number[];
   filter: { cube_type: string | null; session_id: number | null };
 }
 
@@ -376,6 +380,8 @@ const EMPTY_STATS: StatsResponse = {
   best_ao12_at: null,
   best_ao100_at: null,
   pb_solve_ids: [],
+  ao5_pb_solve_ids: [],
+  ao12_pb_solve_ids: [],
   filter: { cube_type: null, session_id: null },
 };
 

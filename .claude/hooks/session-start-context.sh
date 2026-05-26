@@ -38,10 +38,11 @@ esac
 branch="$(git branch --show-current 2>/dev/null || echo 'unknown')"
 remote_url="$(git config --get remote.origin.url 2>/dev/null || echo 'no-remote')"
 
-# Patch-Notes-Aktuell-Version (erster echter version=… im data.py = neueste).
-# Skip "2.0.0-alpha.W.X" — das ist nur ein Beispiel im Doc-Block oben.
-current_version="$(sed -n 's/.*version="\([^"]*\)".*/\1/p' webapp/changelog/data.py 2>/dev/null \
-  | grep -v '^2\.0\.0-alpha\.W\.X$' | head -1 || echo 'unknown')"
+# Patch-Notes-Aktuell-Version: ruft Python-current_version() auf — skippt
+# internal-Eintraege (siehe W.patchnotes-intern-qa: PATCH_NOTES[0] kann internal
+# sein, App-Version ist immer der erste public-Eintrag). Konsistent mit
+# /api/health, das die selbe Funktion nutzt.
+current_version="$( (cd webapp 2>/dev/null && python -c 'from changelog.data import current_version; print(current_version())' 2>/dev/null) || echo 'unknown')"
 
 # Unpushed commits zaehlen.
 upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"

@@ -88,6 +88,8 @@ def get_stats(
         "best_ao12_at": _ts(result.best_ao12_solve_id),
         "best_ao100_at": _ts(result.best_ao100_solve_id),
         "pb_solve_ids": result.pb_solve_ids,
+        "ao5_pb_solve_ids": result.ao5_pb_solve_ids,
+        "ao12_pb_solve_ids": result.ao12_pb_solve_ids,
         "filter": {"cube_type": cube_type, "session_id": session_id},
     }
 

@@ -95,6 +95,18 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
     () => new Set<number>(stats?.pb_solve_ids ?? []),
     [stats],
   );
+  // W.avg-pb-dots: Anker-IDs aller ao5/ao12-PBs (current best + alte).
+  // Anker = letzter Solve im jeweiligen Best-Window (siehe calc.py).
+  const ao5PbSolveIds = useMemo(
+    () => new Set<number>(stats?.ao5_pb_solve_ids ?? []),
+    [stats],
+  );
+  const ao12PbSolveIds = useMemo(
+    () => new Set<number>(stats?.ao12_pb_solve_ids ?? []),
+    [stats],
+  );
+  const bestAo5SolveId = stats?.best_ao5_solve_id ?? null;
+  const bestAo12SolveId = stats?.best_ao12_solve_id ?? null;
 
   const del = useDeleteSolve();
   const update = useUpdateSolve();
@@ -405,11 +417,59 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                   <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top">
                     {row.mo3 !== null ? formatTime(row.mo3) : "–"}
                   </td>
-                  <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top">
-                    {row.ao5 !== null ? formatTime(row.ao5) : "–"}
+                  <td className="py-2 pr-3 font-mono text-sm align-top">
+                    {row.ao5 !== null ? (
+                      <span
+                        className={
+                          ao5PbSolveIds.has(s.id)
+                            ? "text-cyan-300"
+                            : "text-gray-500"
+                        }
+                      >
+                        {ao5PbSolveIds.has(s.id) && (
+                          <span
+                            className="text-cyan-400 mr-1"
+                            title={
+                              s.id === bestAo5SolveId
+                                ? "Aktueller ao5-PB"
+                                : "War ao5-PB"
+                            }
+                          >
+                            ●
+                          </span>
+                        )}
+                        {formatTime(row.ao5)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">–</span>
+                    )}
                   </td>
-                  <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top hidden md:table-cell">
-                    {row.ao12 !== null ? formatTime(row.ao12) : "–"}
+                  <td className="py-2 pr-3 font-mono text-sm align-top hidden md:table-cell">
+                    {row.ao12 !== null ? (
+                      <span
+                        className={
+                          ao12PbSolveIds.has(s.id)
+                            ? "text-emerald-300"
+                            : "text-gray-500"
+                        }
+                      >
+                        {ao12PbSolveIds.has(s.id) && (
+                          <span
+                            className="text-emerald-400 mr-1"
+                            title={
+                              s.id === bestAo12SolveId
+                                ? "Aktueller ao12-PB"
+                                : "War ao12-PB"
+                            }
+                          >
+                            ●
+                          </span>
+                        )}
+                        {formatTime(row.ao12)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">–</span>
+                    )}
                   </td>
                   <td className="py-2 pr-3 font-mono text-sm text-gray-500 align-top hidden md:table-cell">
                     {row.ao100 !== null ? formatTime(row.ao100) : "–"}

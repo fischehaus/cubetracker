@@ -185,6 +185,12 @@ class StatsResult:
     # Single-PB waren (chronologische Progression). Fuer Listen-Marker.
     pb_solve_ids: list[int]
 
+    # W.avg-pb-dots: IDs aller Anker-Solves, die zum Zeitpunkt ihres Setzens
+    # einen ao5- bzw. ao12-PB anker-ten (= letzter Solve im Best-Window).
+    # Fuer Punkt-Marker in der Solve-Liste (analog pb_solve_ids fuer Single).
+    ao5_pb_solve_ids: list[int]
+    ao12_pb_solve_ids: list[int]
+
 
 def compute_stats(solves: list[SolvePoint]) -> StatsResult:
     """Vollstaendige Statistik aus einer Solve-Liste.
@@ -213,6 +219,8 @@ def compute_stats(solves: list[SolvePoint]) -> StatsResult:
             best_ao12_solve_id=None,
             best_ao100_solve_id=None,
             pb_solve_ids=[],
+            ao5_pb_solve_ids=[],
+            ao12_pb_solve_ids=[],
         )
 
     valid = [s for s in solves if not s.dnf]
@@ -258,6 +266,8 @@ def compute_stats(solves: list[SolvePoint]) -> StatsResult:
         best_ao12_solve_id=ao12_anchor[1] if ao12_anchor else None,
         best_ao100_solve_id=ao100_anchor[1] if ao100_anchor else None,
         pb_solve_ids=[sid for sid, _ in single_pb_progression(solves)],
+        ao5_pb_solve_ids=[sid for sid, _ in avg_pb_progression(solves, 5)] if n >= 5 else [],
+        ao12_pb_solve_ids=[sid for sid, _ in avg_pb_progression(solves, 12)] if n >= 12 else [],
     )
 
 

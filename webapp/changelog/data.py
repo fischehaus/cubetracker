@@ -44,6 +44,23 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.avg-pb-dots",
+        released=date(2026, 5, 27),
+        title="ao5- und ao12-Bestzeiten in der Solve-Liste markiert",
+        highlights=[
+            "Neuer farbiger Punkt an jeder ao5/ao12-Zahl, die zum Zeitpunkt "
+            "ihres Setzens ein Best-Avg war: cyan ● bei ao5-PB-Ankern, "
+            "emerald ● bei ao12-PB-Ankern. Aktueller best Avg + alle "
+            "frueheren (inzwischen ueberbotenen) sind markiert.",
+            "Single-PB-Marker (gold ★ aktuell / ☆ alt) bleibt unveraendert. "
+            "Damit hat jede der drei wichtigen Solve-Metriken eine eigene "
+            "visuelle Markierung in der Solve-Liste.",
+            "Tooltip beim Hover zeigt, ob es der aktuelle oder ein "
+            "historischer Best-Avg war. Anker = letzter Solve im "
+            "Best-Window (= der Solve, mit dem dieser Avg erzielt wurde).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.patchnotes-intern-qa",
         released=date(2026, 5, 26),
         title="QA-Hotfix nach Patch-Notes-Intern-Welle",
