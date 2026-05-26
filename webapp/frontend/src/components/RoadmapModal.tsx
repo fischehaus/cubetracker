@@ -3,19 +3,26 @@
 // Zeigt die Roadmap aus lib/roadmap-data.ts an. Vorwaerts-Sicht analog
 // zu PatchNotesModal (Rueckwaerts-Sicht). Triggerbar aus Footer-Link +
 // UserMenu.
+//
+// W.roadmap-intern: items mit `internal=true` werden für Non-Admins
+// rausgefiltert (Dev-Schuld / Bundle-Split / Test-Coverage etc.).
+// Admins sehen alles inkl. amber „intern"-Badge.
 
 import {
   ROADMAP_INTRO,
   ROADMAP_PHASES,
   type PhaseStatus,
   type RoadmapPhase,
+  type RoadmapItem,
 } from "../lib/roadmap-data";
 
 interface Props {
   onClose: () => void;
+  /** Wenn true: zeigt auch internal-Items + amber „intern"-Badge. */
+  isAdmin?: boolean;
 }
 
-export function RoadmapModal({ onClose }: Props) {
+export function RoadmapModal({ onClose, isAdmin = false }: Props) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
@@ -48,7 +55,7 @@ export function RoadmapModal({ onClose }: Props) {
 
         <ol className="space-y-5">
           {ROADMAP_PHASES.map((phase) => (
-            <PhaseCard key={phase.id} phase={phase} />
+            <PhaseCard key={phase.id} phase={phase} isAdmin={isAdmin} />
           ))}
         </ol>
       </div>
@@ -56,8 +63,21 @@ export function RoadmapModal({ onClose }: Props) {
   );
 }
 
-function PhaseCard({ phase }: { phase: RoadmapPhase }) {
+function PhaseCard({
+  phase,
+  isAdmin,
+}: {
+  phase: RoadmapPhase;
+  isAdmin: boolean;
+}) {
   const colors = STATUS_COLORS[phase.status];
+  const visibleItems = isAdmin
+    ? phase.items
+    : phase.items.filter((it) => !it.internal);
+  // Phasen mit ausschliesslich internen Items komplett ausblenden — sonst
+  // sähen User eine leere Sektion. Mit aktuellem Datenstand betrifft das
+  // nichts, aber zukunftssicher.
+  if (visibleItems.length === 0) return null;
   return (
     <li
       className={`rounded-lg border ${colors.border} bg-gray-900/50 p-4 space-y-3`}
@@ -79,32 +99,45 @@ function PhaseCard({ phase }: { phase: RoadmapPhase }) {
       <p className="text-sm text-gray-400">{phase.summary}</p>
 
       <ul className="space-y-1.5 text-sm">
-        {phase.items.map((item, i) => (
-          <li
-            key={i}
-            className={`flex items-start gap-2 ${
-              item.done ? "text-gray-500 line-through decoration-gray-700" : "text-gray-200"
-            }`}
-          >
-            <span className="mt-0.5">
-              {item.done ? "✓" : "•"}
-            </span>
-            <span className="flex-1">
-              {item.title}
-              {item.effort && (
-                <span className="ml-2 text-xs text-gray-500 italic">
-                  ({item.effort})
-                </span>
-              )}
-              {item.note && (
-                <span className="block text-xs text-gray-500 mt-0.5">
-                  {item.note}
-                </span>
-              )}
-            </span>
-          </li>
+        {visibleItems.map((item, i) => (
+          <ItemRow key={i} item={item} />
         ))}
       </ul>
+    </li>
+  );
+}
+
+function ItemRow({ item }: { item: RoadmapItem }) {
+  return (
+    <li
+      className={`flex items-start gap-2 ${
+        item.done ? "text-gray-500 line-through decoration-gray-700" : "text-gray-200"
+      }`}
+    >
+      <span className="mt-0.5">
+        {item.done ? "✓" : "•"}
+      </span>
+      <span className="flex-1">
+        {item.title}
+        {item.internal && (
+          <span
+            className="ml-2 rounded px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-200 border border-amber-500/40 no-underline"
+            title="Nur für Admin sichtbar — Dev-/Tech-Schuld-Thema, User sehen das nicht"
+          >
+            intern
+          </span>
+        )}
+        {item.effort && (
+          <span className="ml-2 text-xs text-gray-500 italic">
+            ({item.effort})
+          </span>
+        )}
+        {item.note && (
+          <span className="block text-xs text-gray-500 mt-0.5">
+            {item.note}
+          </span>
+        )}
+      </span>
     </li>
   );
 }

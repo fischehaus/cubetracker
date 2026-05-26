@@ -658,7 +658,12 @@ function MainLayout() {
       {showFeedback && (
         <FeedbackModal onClose={() => setShowFeedback(false)} />
       )}
-      {showRoadmap && <RoadmapModal onClose={() => setShowRoadmap(false)} />}
+      {showRoadmap && (
+        <RoadmapModal
+          isAdmin={user?.is_admin ?? false}
+          onClose={() => setShowRoadmap(false)}
+        />
+      )}
     </div>
   );
 }

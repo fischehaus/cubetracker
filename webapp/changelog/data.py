@@ -44,6 +44,28 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-intern",
+        released=date(2026, 5, 27),
+        title="Roadmap aufgeräumt: nur noch User-relevante Items",
+        highlights=[
+            "Das Roadmap-Modal zeigt jetzt nur User-relevante Features. "
+            "Reine Entwickler-/Tech-Schuld-Themen (Backend-Test-Suite "
+            "einführen, Alembic statt Inline-Migrations, csTimer-Bundle "
+            "dynamic-importen, Random-Move-Fallback) sind aus deiner "
+            "Sicht ausgeblendet — sie tauchen nur noch im Admin-View "
+            "mit amber intern-Badge auf.",
+            "Aufräum-Bonus: das Duplikat in P1 ist weg, und das gestern "
+            "gebaute Dashboard-Letzte-Rekorde-Item ist endlich auch in "
+            "der Roadmap als erledigt markiert.",
+            "Features-Liste wurde unangetastet gelassen — die Bullets "
+            "dort sind sowieso reine Marketing-Texte, kein Tech-Kram "
+            "zwischendrin.",
+            "Kein neuer Backend-Endpoint nötig: der Filter passiert "
+            "client-seitig anhand deines Admin-Status. Roadmap ist kein "
+            "Secret, sondern eine Sichtbarkeits-Kuration.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.recent-pbs-qa",
         released=date(2026, 5, 27),
         title="QA-Hotfix nach Recent-PBs (3 SOLLTE + 1 NICE)",

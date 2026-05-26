@@ -17,6 +17,10 @@ export interface RoadmapItem {
   done?: boolean; // bereits erledigt innerhalb dieser Phase
   effort?: string; // grobe Schätzung, optional
   note?: string; // 1-Satz Begründung / Detail, optional
+  // W.roadmap-intern: Items mit internal=true sind reine Entwickler-/
+  // Tech-Schuld-Themen (Backend-Test-Suite, Alembic, Bundle-Split, ...).
+  // Non-Admins sehen sie nicht — Admins sehen sie mit amber „intern"-Badge.
+  internal?: boolean;
 }
 
 export interface RoadmapPhase {
@@ -82,9 +86,11 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         note: "Endpoint existiert schon unter Einstellungen — hier zusätzlich als roter Button in der Danger-Zone (gehört thematisch zur Datenhoheit). DSGVO-konform.",
       },
       {
-        title: "Roadmap & Features-Liste: intern/extern trennen (Admin vs User)",
+        title: "Roadmap intern/extern trennen (Admin vs User-Sicht)",
+        done: true,
+        internal: true,
         effort: "~1-2h",
-        note: "Analog zu Patch-Notes-intern: ein internal-Flag pro Roadmap- und Features-Item, Frontend filtert anhand des Admin-Status. Damit sehen normale User nur User-relevante Items (z.B. nicht Backend-Test-Suite / Alembic-Refactor / Bundle-Splitting). Aus Issue #1.",
+        note: "Roadmap-Items haben ein internal-Flag. User sehen nur User-relevante Features, Admin sieht alles inkl. Dev-Schuld-Items (Backend-Test-Suite, Alembic, Bundle-Split, Random-Move-Fallback). Features-Liste blieb unangetastet — dort sind alle Bullets User-Marketing. Aus Issue #1.",
       },
       {
         title: "Patch-Notes aufgeräumt (nur das Wesentliche)",
@@ -100,13 +106,9 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       },
       {
         title: "Dashboard: Letzte Rekorde auf einen Blick",
+        done: true,
         effort: "~1 Tag",
         note: "Kompakte Liste deiner jüngsten Bestzeiten mit Verbesserung — Klick führt zum PB-Verlauf.",
-      },
-      {
-        title: "Roadmap intern/extern trennen (Admin vs. User-Sicht)",
-        effort: "~1-2h",
-        note: "Analog zum Patch-Notes-intern-Pattern: Roadmap-Items bekommen ein internal-Flag. User sehen nur User-relevante Features, Admin sieht alles inkl. Dev-Schuld-Items (Backend-Test-Suite, Alembic). Frontend filtert client-seitig basierend auf user.is_admin — kein Backend-Endpoint nötig (Roadmap ist kein echtes Secret). Issue #1.",
       },
       {
         title: "Scramble-Bild 2D-Net pro Scramble",
@@ -230,16 +232,19 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
     items: [
       {
         title: "csTimer-Vendor dynamic-importen (Bundle-Split)",
+        internal: true,
         effort: "~1 Tag",
         note: "Aktuell wird csTimer-Vendor (~50KB raw / ~16KB gz) statisch geladen, auch für User die nie inoffizielle Cubes nutzen. Async-Refactor: generateScramble wird Promise-basiert, csTimer-Vendor wird beim ersten Bedarf via dynamic import() geholt. QA-Befund SOLLTE #4 vom 2026-05-17.",
       },
       {
         title: "Backend-Test-Suite (pytest unter webapp/tests/) einfuehren",
+        internal: true,
         effort: "~1-2 Tage initial",
         note: "Aktuell 0% Test-Coverage auf den Backend-Endpoints (kein webapp/tests/ Folder). pyproject.toml verweist auf testpaths=['tests'] das nicht existiert. Mindestens Smoke-Tests pro Endpoint-Cluster (auth, solves, sessions, admin, live-tests, etc.). QA-Befund 2026-05-17 abends.",
       },
       {
         title: "Alembic statt Inline-Mini-Migrations in main.py",
+        internal: true,
         effort: "~1 Tag",
         note: "Aktuelle `ALTER TABLE IF NOT EXISTS`-Liste in main.py:lifespan ist Postgres-only-Syntax + Fehler werden silently als WARN geloggt. Alembic löst beide Probleme. Niedrige Prio solange wir nur Postgres-Prod nutzen, aber wenn SQLite-Tests dazukommen muss es kommen. QA-Befund 2026-05-17 abends.",
       },
@@ -250,6 +255,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       },
       {
         title: "Random-Move-Fallback-Specs für Dino/Floppy/Tower (csTimer-Cubes)",
+        internal: true,
         effort: "1-2h",
         note: "Wenn csTimer-Init crashen sollte, returnt generateScramble für die 3 verbleibenden csTimer-Cubes (Dino/Floppy/Tower) leerstring. Kurze Random-Move-Specs (analog ivy/gear/redi-Specs) wären ein robusterer Fallback. QA-Befund SOLLTE #3 vom 2026-05-17.",
       },
