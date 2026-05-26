@@ -1850,13 +1850,17 @@ export function useResetSolves(): UseMutationResult<void, Error, void> {
       });
     },
     onSuccess: () => {
-      // Alle solve-/stats-bezogenen Queries refetchen.
+      // Alle solve-/stats-/sessions-bezogenen Queries refetchen.
+      // QA-Fix W.danger-zone-qa: sessions + achievements zeigen sonst
+      // veraltete Counts/Badges nach dem Reset bis zum Hard-Reload.
       qc.invalidateQueries({ queryKey: ["solves"] });
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["pb-history"] });
       qc.invalidateQueries({ queryKey: ["activity"] });
       qc.invalidateQueries({ queryKey: ["temporal"] });
       qc.invalidateQueries({ queryKey: ["by-cube"] });
+      qc.invalidateQueries({ queryKey: ["sessions"] });
+      qc.invalidateQueries({ queryKey: ["achievements"] });
     },
   });
 }
@@ -1881,8 +1885,11 @@ export function useDeleteAccount(): UseMutationResult<void, Error, void> {
     mutationFn: async () => {
       await api.delete("/auth/me");
       // Token rauswerfen + App neu laden, damit Auth-Check zur Login-Seite redirected.
+      // QA-Fix W.danger-zone-qa: window.location.replace statt href —
+      // History-Eintrag wird ersetzt, der User kann nicht via Back-Button
+      // zur Old-Account-Seite zurueck.
       localStorage.removeItem("cubetracker_access_token");
-      window.location.href = "/";
+      window.location.replace("/");
     },
   });
 }

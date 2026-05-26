@@ -44,6 +44,27 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.danger-zone-qa",
+        released=date(2026, 5, 27),
+        title="QA-Hotfix nach Danger-Zone-Welle",
+        highlights=[
+            "Sub-Agent-Review fand 3 SOLLTE + 2 NICE — alle gefixt, kein KRITISCH.",
+            "Sessions + Achievements-Cache wird nach 'Solves zuruecksetzen' "
+            "jetzt invalidiert (vorher zeigten Sessions veraltete Solve-Counts "
+            "bis zum Hard-Reload).",
+            "Rate-Limit (5/Minute) auf reset-solves + reset-tracking-Endpoints "
+            "— verhindert, dass ein kompromittiertes Token in einer Schleife "
+            "DELETE-Batches abfeuert.",
+            "DangerZoneCard: andere Buttons sind gesperrt waehrend ein Button "
+            "armed ist (kein Doppel-Armen moeglich); Backup-Fehler werden jetzt "
+            "sichtbar gemeldet; useDeleteAccount nutzt window.location.replace "
+            "statt href (kein History-Eintrag fuer den geloeschten Account).",
+            "Docstring-Hinweis im reset-tracking-Endpoint zur Hardware-FK-"
+            "Semantik (SET NULL, kein separater DELETE noetig).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.danger-zone",
         released=date(2026, 5, 27),
         title="Meine Daten: Gefahren-Bereich für volle Datenhoheit",

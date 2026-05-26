@@ -404,7 +404,9 @@ def delete_me(
 
 
 @router.post("/me/reset-solves", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("5/minute")
 def reset_solves(
+    request: Request,
     confirm: str = Query(
         ..., description="Muss exakt 'RESET_SOLVES' sein (Versehen-Schutz)."
     ),
@@ -426,7 +428,9 @@ def reset_solves(
 
 
 @router.post("/me/reset-tracking", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("5/minute")
 def reset_tracking(
+    request: Request,
     confirm: str = Query(
         ..., description="Muss exakt 'RESET_TRACKING' sein (Versehen-Schutz)."
     ),
@@ -441,6 +445,9 @@ def reset_tracking(
 
     Reihenfolge: Solves zuerst (referenzieren Session/Hardware), dann Sessions,
     dann Achievements + Challenges (keine inter-Constraints).
+    Hinweis: `Solve.session_id` + `Solve.hardware_id` sind FK mit `ondelete=
+    SET NULL` — die Reihenfolge ist also auch ohne explizite Sortierung safe.
+    Hardware wird hier bewusst NICHT geloescht (= Setup, kein Tracking-Data).
     """
     if confirm != "RESET_TRACKING":
         raise HTTPException(

@@ -20,6 +20,10 @@ export function DangerZoneCard() {
   const [armed, setArmed] = useState<Armed>(null);
   const [doneMsg, setDoneMsg] = useState<string | null>(null);
   const [backupBusy, setBackupBusy] = useState(false);
+  // QA-Fix W.danger-zone-qa: Backup-Fehler dem User sichtbar machen,
+  // damit niemand destruktive Aktionen anfaesst, ohne dass das Backup
+  // wirklich durchgelaufen ist.
+  const [backupError, setBackupError] = useState<string | null>(null);
 
   const resetSolves = useResetSolves();
   const resetTracking = useResetTracking();
@@ -35,10 +39,14 @@ export function DangerZoneCard() {
 
   async function onBackup() {
     setBackupBusy(true);
+    setBackupError(null);
     try {
       await downloadFullBackup();
     } catch (e) {
       console.error("downloadFullBackup fehlgeschlagen:", e);
+      setBackupError(
+        "Backup konnte nicht erstellt werden. Bitte nochmal versuchen, BEVOR du eine destruktive Aktion ausführst.",
+      );
     } finally {
       setBackupBusy(false);
     }
@@ -101,6 +109,9 @@ export function DangerZoneCard() {
         >
           {backupBusy ? "Wird vorbereitet…" : "Backup jetzt herunterladen"}
         </button>
+        {backupError && (
+          <div className="mt-2 text-red-300">{backupError}</div>
+        )}
       </div>
 
       {doneMsg && (
@@ -120,6 +131,7 @@ export function DangerZoneCard() {
         useCase="Use-Case: Test-Daten weg, mit eigenem Hardware-Setup neu anfangen."
         buttonLabel="Alle Solves löschen"
         armed={armed === "solves"}
+        otherArmed={armed !== null && armed !== "solves"}
         busy={resetSolves.isPending}
         onClick={() => handleExecute("solves")}
       />
@@ -130,6 +142,7 @@ export function DangerZoneCard() {
         useCase="Use-Case: Kompletter Neustart, aber Cube-Sammlung behalten."
         buttonLabel="Tracking-Daten zurücksetzen"
         armed={armed === "tracking"}
+        otherArmed={armed !== null && armed !== "tracking"}
         busy={resetTracking.isPending}
         onClick={() => handleExecute("tracking")}
       />
@@ -140,6 +153,7 @@ export function DangerZoneCard() {
         useCase="Use-Case: Vollständiger Rückzug von cubetracker."
         buttonLabel="Account löschen"
         armed={armed === "account"}
+        otherArmed={armed !== null && armed !== "account"}
         busy={deleteAccount.isPending}
         onClick={() => handleExecute("account")}
       />
@@ -153,11 +167,16 @@ interface DangerActionProps {
   useCase: string;
   buttonLabel: string;
   armed: boolean;
+  /** True wenn ein ANDERER Button gerade armed ist — dann ist dieser hier
+   * gesperrt, damit der User nicht zwei destruktive Aktionen gleichzeitig
+   * armen kann (QA-Fix W.danger-zone-qa). */
+  otherArmed: boolean;
   busy: boolean;
   onClick: () => void;
 }
 
 function DangerAction(props: DangerActionProps) {
+  const disabled = props.busy || props.otherArmed;
   return (
     <div className="rounded border border-gray-700 bg-gray-900/40 p-4 space-y-2">
       <h3 className="text-base font-semibold text-gray-100">{props.title}</h3>
@@ -165,7 +184,7 @@ function DangerAction(props: DangerActionProps) {
       <p className="text-xs text-gray-500 italic">{props.useCase}</p>
       <button
         onClick={props.onClick}
-        disabled={props.busy}
+        disabled={disabled}
         className={
           props.armed
             ? "rounded-lg bg-red-600 px-4 py-2 text-white font-medium hover:bg-red-700 animate-pulse disabled:opacity-50"
@@ -174,7 +193,9 @@ function DangerAction(props: DangerActionProps) {
         title={
           props.armed
             ? "Innerhalb 5 Sekunden bestätigen, sonst wird abgebrochen"
-            : "Erster Klick aktiviert, zweiter Klick (innerhalb 5s) führt aus"
+            : props.otherArmed
+              ? "Andere Aktion ist gerade scharfgeschaltet — erst die abbrechen"
+              : "Erster Klick aktiviert, zweiter Klick (innerhalb 5s) führt aus"
         }
       >
         {props.busy
