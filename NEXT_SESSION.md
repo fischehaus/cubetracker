@@ -24,11 +24,16 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint: #2 + Danger-Zone + ntfy + Issue#1 + #3 + Roadmap-intern
+## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint + Turnier-Sprint Start
 
-**12 Commits + 8 Tags heute, alles live.** Live-Version: `W.roadmap-intern` (public).
+**13 Commits + 9 Tags heute, alles live.** Live-Version: `W.i18n-setup` (public).
 Vier Roadmap-Items abgehakt (Average-PB, Danger-Zone, Letzte Rekorde, Roadmap-intern)
-+ drei QA-Hotfixe + GitHub-Issue #1 vollständig adressiert (alle 3 Punkte).
++ drei QA-Hotfixe + GitHub-Issue #1 vollständig adressiert + **Turnier-Sprint
+Welle 1** (i18n-Infra + erste Übersetzungen + KI-Impressum-Hinweis).
+
+🎯 **Aktiver Sprint:** Englisch-Variante + WCA-Profil-Light bis Sa 30.05. morgens
+für privates Demo beim WCA-Turnier in Meppel. Plan siehe „Restplan Turnier-Sprint"
+unten.
 
 ### Welle 1 — #2 Average-PB-Punkte + Hook-Drift
 
@@ -105,18 +110,65 @@ Vier Roadmap-Items abgehakt (Average-PB, Danger-Zone, Letzte Rekorde, Roadmap-in
 >
 > Commit: `0e409d8` (Tag `W.roadmap-intern`).
 
-### 🔜 Backlog jetzt (in Reihenfolge)
+### Welle 7 — Turnier-Sprint Start: i18n-Setup + KI-Impressum
 
-1. **#43 Coolify-HTTPS** — Howto liegt in `docs/coolify-https-howto.md`,
+> **Trigger:** privates Demo am WCA-Turnier in Meppel am Samstag 30.05.2026.
+> Erste Welle des 3-Tage-Sprints für Englisch-Variante + Power-Demo-Feature.
+> Option A gewählt (i18n breit + WCA-Profil-Light, Activity-Feed vertagt).
+>
+> - `react-i18next` + `i18next-browser-languagedetector` installiert,
+>   Setup unter `src/i18n/` mit `de.json` + `en.json` als nested namespaces
+>   (common/tabs/userMenu).
+> - **TabBar + UserMenu komplett übersetzt** inkl. ARIA-Labels und
+>   Tab-Descriptions. Sprach-Switcher (DE/EN) liegt im UserMenu vor
+>   Logout.
+> - Browser-Auto-Detect mit localStorage-Override (`cubetracker_language`).
+> - **KI-Transparenz-Hinweis im Impressum**: explizit dokumentiert dass
+>   App mit KI entwickelt wurde (Hilfsmittel im Sinne Art. 50 EU-KI-VO,
+>   anwendbar ab 2.8.2026) — alle App-Inhalte rein regelbasiert, keine
+>   echte Kennzeichnungspflicht. Set-End-Feedback grep-verifiziert:
+>   regelbasiert (`SessionPlanCard.tsx:307-322`), kein LLM-Call irgendwo.
+>
+> Roadmap-Item „Turnier-Sprint Meppel" mit 4 Sub-Items in P1 (2 done).
+>
+> Commit: `3550e6c` (Tag `W.i18n-setup`).
+
+### 🔜 Restplan Turnier-Sprint (bis Sa 30.05. morgens)
+
+**Mi-Abend (heute, erledigt):** i18n-Setup + KI-Impressum ✓
+
+**Do 28.05.:** Top-Strings übersetzen
+- Solve-Flow (BigTimerInput, Penalty-Quick-Buttons, ScrambleCard)
+- Stats-Labels (Dashboard-Karten, AnalyseTab-Charts-Labels)
+- Auth-Flow (LoginPage, Register, EmailVerify, PasswordReset)
+- HealthBadge / Footer
+
+**Fr 29.05. Vormittag:** Rest-Strings (Trainer, Hardware-Inventar,
+Verwaltung, Achievements-Titel, Toaster).
+
+**Fr 29.05. Nachmittag:** WCA-Profil-Light
+- `users.wca_id`-Spalte via main.py:lifespan-Migration
+- Backend-Endpoint `/users/me/wca-profile` → ruft `api.worldcubeassociation.org/persons/{id}` ab
+- AccountSettings: WCA-ID-Eingabe + Validierung
+- Dashboard-Card: offizielle WCA-PRs + Wettkampf-Historie neben Cubetracker-Stats
+- Backup-JSON muss `wca_id` mit-exportieren
+
+**Sa 30.05. Vormittag:** Demo-Probe + Last-Polish.
+
+### 🔜 Backlog NACH Turnier (in Reihenfolge)
+
+1. **Activity-Feed** (P3, ~3 Tage) — Multi-User-USP demonstrieren.
+   War für Turnier vorgesehen, vertagt zugunsten i18n-Vollausbau.
+2. **#43 Coolify-HTTPS** — Howto liegt in `docs/coolify-https-howto.md`,
    👤 Server-Arbeit (~1h: DNS + Cert + GitHub-Action-URL + Token-Rotation).
-2. **Phase 6 (~05.06.2026)** — apex `cubetracker.de` → Hetzner + Render
+3. **Phase 6 (~05.06.2026)** — apex `cubetracker.de` → Hetzner + Render
    abbauen + `feature/W-api-prefix` → `main` konsolidieren + GitHub-Default
    auf `main`.
-3. **Backend-Test-Suite einführen** (P6, intern) — 0% Coverage; mind. Smoke pro
+4. **Backend-Test-Suite einführen** (P6, intern) — 0% Coverage; mind. Smoke pro
    Endpoint-Cluster.
-4. **Alembic statt Inline-Migrations** (P6, intern) — Postgres-only-Syntax,
+5. **Alembic statt Inline-Migrations** (P6, intern) — Postgres-only-Syntax,
    bricht auf SQLite.
-5. **csTimer-Vendor dynamic-importen** (P6, intern, ~1 Tag) — Bundle-Split,
+6. **csTimer-Vendor dynamic-importen** (P6, intern, ~1 Tag) — Bundle-Split,
    schaltet ~16KB gz aus dem initialen Bundle aus.
 
 **🚨 Start-Selbsttest (Projekt-Wurzel / Hooks):** siehe Box direkt im

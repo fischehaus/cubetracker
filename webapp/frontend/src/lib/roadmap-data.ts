@@ -116,6 +116,33 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         note: "Visuelle Verifikation — Standard-Erwartung an Speedcubing-Timer.",
       },
       { title: "PWA-Setup (Phone-Homescreen-Install)", effort: "1 Tag" },
+      {
+        title: "Turnier-Sprint Meppel: Englisch-Variante + WCA-Profil",
+        effort: "~3-4 Tage gesamt",
+        note: "Vorbereitung auf das private Demo am 30.05.2026 beim WCA-Turnier in Meppel: App-Sprache umschaltbar machen (DE/EN) und ein Killer-Feature für Speedcuber-Publikum (WCA-Profil-Verknüpfung). Activity-Feed bewusst zurückgestellt — kommt in P3.",
+      },
+      {
+        title: "  └ i18n-Setup: react-i18next + Sprach-Switcher",
+        done: true,
+        effort: "~0.5 Tag",
+        note: "Browser-Auto-Detect mit localStorage-Override, Switcher im User-Menu. TabBar (Labels + Beschreibungen) und User-Menu komplett übersetzt.",
+      },
+      {
+        title: "  └ KI-Transparenz-Hinweis im Impressum",
+        done: true,
+        effort: "~10 Min",
+        note: "Vorbereitung auf Art. 50 EU-KI-VO (anwendbar ab 2.8.2026). Hinweis: App mit KI-Unterstützung entwickelt, alle App-Inhalte aber rein regelbasiert — keine Pflicht-Kennzeichnung nötig.",
+      },
+      {
+        title: "  └ Restliche UI-Strings übersetzen (Solve-Flow, Stats, Trainer, Verwaltung)",
+        effort: "~2 Tage",
+        note: "Alle Strings die ein User in der ersten Stunde sieht. Patch-Notes-Historie + Achievement-Long-Descs + Trainer-Tutorial-Texte später.",
+      },
+      {
+        title: "  └ WCA-Profil-Light (offizielle WCA-PRs + Wettkampf-Liste)",
+        effort: "~1 Tag",
+        note: "User gibt seine WCA-ID ein → die App zeigt offizielle Bestzeiten + Wettkampf-Historie aus der WCA-API neben den eigenen Cubetracker-Stats. Read-only, kein Auth nötig.",
+      },
     ],
   },
   {
