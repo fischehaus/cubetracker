@@ -24,24 +24,66 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-26 — Methodik-System-Audit + Drift-Fix
+## ✅ ERLEDIGT 2026-05-26 — Volltag: Methodik-Drift-Fix + Roadmap #5 + Backlog-Pflege
 
-> **Was passierte:** Volltext-Read aller 10 Hook-Skripte + `discipline.md` +
-> 2 Commands + 2 Sub-Agents + `MAINTENANCE.md`. Danach Aufräum-Welle:
+**9 Commits + 5 Tags heute, alles live.** Stand der Live-App: Version
+`W.patchnotes-intern` (public), Bundle enthält die neuen Danger-Zone-Roadmap-Items.
+
+### Welle 1 (Vormittag) — Methodik-System-Audit + Drift-Fix
+
+> Volltext-Read aller 10 Hook-Skripte + `discipline.md` + 2 Commands + 2 Sub-
+> Agents + `MAINTENANCE.md`. Danach Aufräum-Welle:
 > - 8 Render→Coolify-Drift-Stellen in `.claude/*` + `webapp/auth+emailing/` gefixt
 >   (der Hook gegen Mental-Model-Drift war selbst Drift)
 > - `stop-mini-check.sh` ignoriert jetzt untracked-Files (kein `scripts/`-false-positive)
-> - `abschluss.md` Check 8 in Sub-Shell (verhindert CWD-Leak — heute live aufgetreten)
+> - `abschluss.md` Check 8 in Sub-Shell (verhindert CWD-Leak — live aufgetreten)
 > - **Erster MAINTENANCE-Voll-Durchlauf** protokolliert (Lauf-Protokoll war leer)
 > - **Neue Lesson** in `docs/lessons-archive.md`: Auto-Mode-Classifier unterscheidet
 >   Doku-Drift vs. funktionale Hook-Änderung (präzisiert Self-Modification-Befund
 >   aus `docs/audit-2026-05-20.md`)
 >
 > Commits: `f7e581a` · `0a81d2f` · `2b9c24f` · `e995678`.
+
+### Welle 2 (Mittag/Nachmittag) — #5 Patch Notes intern/öffentlich live
+
+> User-Changelog zeigt jetzt **57 statt 82 Einträge** (25 internal-Wellen
+> ausgeblendet) — wieder eine lesbare Feature-Geschichte statt Build-Log.
+> - Schema: `PatchNote.internal: bool = False` + 25 bestehende Einträge geflaggt
+>   (QA-Wellen, Admin-only, Backend-Vorbereitungen, Logo-/Hotfix-Iterationen).
+> - Backend: neue `get_current_user_optional`-Dependency, serverseitiger Filter
+>   (Anonyme + Non-Admins → nur public; Admins → alles inkl. amber „intern"-Badge).
+> - **QA-Sub-Agent-Review** durch (3 SOLLTE + 2 NICE, kein KRITISCH). Alle Befunde
+>   sofort gefixt im Hotfix `W.patchnotes-intern-qa`: `current_version()` skippt
+>   internal-Einträge (kein Leak via `/api/health`), JWT-Errors werden geloggt
+>   (Defense-in-Depth), Duplikat-Assert, Code-Hygiene.
+> - **Hygiene-Streifzüge:** features-data.ts um #1/#6-Bullets ergänzt; 3 alte Tags
+>   nachgezogen (`W.meine-daten` / `W.legal` / `W.hetzner`); 2 neue Tags gesetzt
+>   (`W.patchnotes-intern` / `W.patchnotes-intern-qa`).
+> - **Roadmap-Pflege:** „Patch-Notes aufgeräumt" als done markiert; 3 neue
+>   P1-Items unter „Meine Daten" als strukturierte „Gefahren-Bereich"-Sektion
+>   (Solves zurücksetzen ~0.5d → Tracking-Daten zurücksetzen / Reset to factory
+>   ~1d → Account-Löschung auch hier ~2h).
 >
-> **🚨 Start-Selbsttest (Projekt-Wurzel / Hooks):** siehe Box direkt im Block darunter.
-> **Produkt-Stand unverändert** — gültig bleibt der „AKTUELLER PRODUKT-STAND"-Block
-> direkt darunter (#1+#6 live · Backlog #5 → #2 → #3 · offene Härtung #43).
+> Commits: `a2f19fb` · `5119677` · `fbae115` · `8626263` · `7fd0012`.
+
+### 🔜 Backlog jetzt (in Reihenfolge)
+
+1. **#2 Average-PBs** — kleiner farbiger Punkt an ao5/ao12-Rekorden in der
+   Solve-Liste (~30 Min, Backend-Logik `avg_pb_progression` existiert schon).
+2. **#3 Dashboard „Letzte Rekorde"** — kompakte Liste der letzten ~5 PB-Ereignisse
+   mit Δ-Verbesserung, Klick führt zum PB-Verlauf-Chart.
+3. **Danger-Zone „Meine Daten"** — die 3 Lösch-Aktionen (~1.5-2 Tage gesamt,
+   inkl. 2 neue Backend-Endpoints + Frontend-Sektion).
+4. **#43 Coolify-HTTPS** — Howto schreiben (~10 Min Doku), eigentliche
+   Server-Arbeit ist 👤.
+5. **Phase 6 (~05.06.2026)** — apex `cubetracker.de` → Hetzner + Render abbauen
+   (3 Services) + `feature/W-api-prefix` → `main` konsolidieren + GitHub-Default
+   auf `main` (aktuell zeigt's auf den eingefrorenen `feature/W-multi-user-web`!).
+
+**🚨 Start-Selbsttest (Projekt-Wurzel / Hooks):** siehe Box direkt im Block darunter.
+**Live-Setup-Details** (Coolify-UUIDs, ntfy-Topic, etc.): siehe „AKTUELLER
+PRODUKT-STAND"-Block darunter — Inhalt unverändert gültig, nur sein Backlog
+ist überholt (#5 ist erledigt, neuer Backlog steht hier oben).
 
 ---
 
