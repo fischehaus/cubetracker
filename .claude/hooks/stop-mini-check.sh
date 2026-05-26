@@ -20,7 +20,7 @@ git rev-parse --git-dir >/dev/null 2>&1 || exit 0
 notes=""
 
 # Check 1: uncommitted changes
-uncommitted_count="$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')"
+uncommitted_count="$(git status --porcelain --untracked-files=no 2>/dev/null | wc -l | tr -d ' ')"
 if [[ "${uncommitted_count:-0}" -gt 0 ]]; then
   notes+="📝 ${uncommitted_count} uncommitted Datei(en) im Working-Tree. "
 fi
