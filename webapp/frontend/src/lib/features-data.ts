@@ -83,6 +83,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     title: "Daten",
     icon: "📥",
     bullets: [
+      "Verwaltung → Meine Daten: Ein-Klick-Voll-Backup deiner Solves, Sessions, Hardware und Achievements als offenes JSON — du behältst die volle Datenhoheit, jederzeit exportieren oder importieren",
       "csTimer-Import: dein bestehender Bestand wird komplett übernommen (Sessions + Solves + Scrambles + Notizen)",
       "csTimer-kompatibler Export: wechselbare Datenhoheit jederzeit",
       "Voll-Backup als JSON inkl. Achievements + Daily-Challenges-Historie",
@@ -93,6 +94,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     title: "Account + Sicherheit",
     icon: "🔒",
     bullets: [
+      "Datenschutzerklärung + Impressum öffentlich erreichbar (Footer-Links, auch ohne Login) — kein Cookie-Banner nötig, kein Tracking, kein Drittanbieter-Analytics",
       "Email-Verifikation + Password-Reset per Mail",
       "Display-Name + Email-Change-Flow mit Re-Verifikation",
       "Postleitzahl + Land im Profil (optional) — speist die WCA-Turniere-Suche im Dashboard. Wird ausschließlich für Distanz-Berechnung genutzt, nie weitergegeben",
