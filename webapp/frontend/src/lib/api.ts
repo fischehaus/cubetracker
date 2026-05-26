@@ -1542,6 +1542,10 @@ export interface PatchNote {
   title: string;
   highlights: string[];
   commit: string | null;
+  // Nur fuer Admins gesetzt — Backend liefert das Feld nicht fuer Non-Admins.
+  // True = rein technischer Eintrag (QA/Methodik/Tooling), wird im UI als
+  // "intern"-Badge dargestellt.
+  internal?: boolean;
 }
 
 interface ChangelogResponse {

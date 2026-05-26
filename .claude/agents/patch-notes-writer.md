@@ -48,6 +48,34 @@ Eine der folgenden Formen (frag nach, wenn unklar):
 7. **Verifizieren:** `python -c "import ast; ast.parse(open('webapp/changelog/data.py', encoding='utf-8').read())"`
    → fängt Syntax-Crashes ab BEVOR sie das Backend killen.
 
+## Public oder intern? (seit W.patchnotes-intern)
+
+Jeder PatchNote hat ein `internal: bool = False`. Der Endpoint filtert
+serverseitig: Anonyme + Non-Admins sehen nur `internal=False`, Admins sehen
+alles inkl. „intern"-Badge. Damit der User-Changelog lesbar bleibt.
+
+**internal=True** wenn der Eintrag:
+- Reine QA-/Bugfix-Welle nach Sub-Agent-Review (Suffix `*-qa`, Sammel-PatchNote
+  ohne neue User-Features)
+- Admin-only-Feature (Admin-Panels, Admin-Tools, Live-Tests, …)
+- Backend-Vorbereitung ohne Frontend-Sichtbarkeit (`*-backend` Commit ohne
+  begleitenden Frontend-Commit — User merkt's erst beim Frontend-Eintrag)
+- Hotfix-Postmortem (Deploy-Fix, Revert, Build-Repair)
+- Reine Methodik/Tooling-Arbeit (`*-skill`, `setup-audit*`, Hook-Drift-Fix)
+- Mehrere Iterations-Patches auf derselben Sache (z.B. logo / logo-bigger /
+  logo-kor hintereinander — eine bleibt public, der Rest internal)
+
+**internal=False (Default)** wenn der Eintrag:
+- Neues User-merkbares Feature, UI-Refactor, neuer Endpoint mit Frontend
+- Bug-Fix mit erkennbarem User-Impact
+- Infra-Wechsel mit User-Konsequenz (z.B. neue URL / neuer Anbieter)
+- Lizenz-/Privacy-/Rechts-Änderung
+- Marketing-/Onboarding-Update (Features-Liste, App-Beschreibung)
+
+Bei Zweifel: **public** (Default). User-Vertrauen kostet weniger als ein zu
+geschwätziger Changelog — falls es doch zu technisch ist, kann man später
+nachträglich auf internal flaggen.
+
 ## Exakt-Format
 
 ```python
@@ -61,6 +89,7 @@ Eine der folgenden Formen (frag nach, wenn unklar):
             "Zweiter Punkt.",
         ],
         commit="abc1234",
+        internal=False,  # bei rein technischen QA/Methodik/Tooling-Wellen True
     ),
 ```
 

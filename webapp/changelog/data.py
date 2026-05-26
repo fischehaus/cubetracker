@@ -33,10 +33,35 @@ class PatchNote:
     title: str
     highlights: list[str]
     commit: str | None = None
+    # internal=True: rein technischer Eintrag (QA-Fixes, Methodik-/Tooling-
+    # Refactors, Drift-Korrekturen) — fuer Nicht-Admins ausgeblendet,
+    # damit der User-Changelog lesbar bleibt. Default ist public (False).
+    internal: bool = False
 
 
 # Neue Einträge OBEN einfügen — PATCH_NOTES[0] = neueste Version.
 PATCH_NOTES: list[PatchNote] = [
+    PatchNote(
+        version="2.0.0-alpha.W.patchnotes-intern",
+        released=date(2026, 5, 26),
+        title="Patch Notes aufgeräumt: nur noch User-relevante Einträge",
+        highlights=[
+            "Die Patch-Notes-Seite zeigt jetzt nur noch Einträge, die die "
+            "App-Erfahrung sichtbar verändern — neue Features, UI-Refactors, "
+            "Bug-Fixes mit User-Impact. Rein technische QA-/Methodik-/"
+            "Tooling-Wellen sind ausgeblendet, damit der Changelog wieder "
+            "wie eine Feature-Geschichte liest und nicht wie ein Build-Log.",
+            "25 bestehende Einträge wurden als „intern\" markiert: QA-Wellen "
+            "(umlauts-qa, mobile-qa, wca-news-qa, …), Admin-only-Features "
+            "(live-tests, admin-toggle, admin-1/-2), Backend-Vorbereitungen "
+            "ohne sichtbares Frontend (news-backend, wca-comps-backend) "
+            "und Hotfix-Postmortems (deploy-fix, revert-cstimer). Admins "
+            "sehen weiterhin alle Einträge inkl. „intern\"-Badge.",
+            "Unter der Haube: neues internal-Flag im PatchNote-Schema plus "
+            "ein optional-auth-Endpoint, der die Filterung serverseitig "
+            "macht (Anonyme sehen nur public-Einträge, Admins alle inkl. Flag).",
+        ],
+    ),
     PatchNote(
         version="2.0.0-alpha.W.meine-daten",
         released=date(2026, 5, 25),
@@ -95,6 +120,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.umlauts-qa",
+        internal=True,
         released=date(2026, 5, 19),
         title="Umlaut-Nachzieher (Bestätigung, Lädt, zwölf, …)",
         highlights=[
@@ -144,6 +170,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.admin-workflow-qa",
+        internal=True,
         released=date(2026, 5, 17),
         title="QA-Fixes auf Admin-Workflow (2 KRITISCH + 4 SOLLTE + 2 NICE)",
         highlights=[
@@ -180,6 +207,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.live-tests-github",
+        internal=True,
         released=date(2026, 5, 17),
         title="Live-Test-FAIL → automatisches GitHub-Issue (Phase 3 von 3)",
         highlights=[
@@ -213,6 +241,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.live-tests",
+        internal=True,
         released=date(2026, 5, 17),
         title="Live-Test-Liste im Admin-Bereich (Phase 2 von 3)",
         highlights=[
@@ -246,6 +275,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.admin-toggle",
+        internal=True,
         released=date(2026, 5, 17),
         title="Admin-Status via UI toggeln (statt nur ADMIN_EMAILS-Env-Var)",
         highlights=[
@@ -270,6 +300,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.cstimer-more-puzzles-qa",
+        internal=True,
         released=date(2026, 5, 17),
         title="QA-Fixes auf csTimer-Erweiterung (8 Befunde behoben)",
         highlights=[
@@ -343,6 +374,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.cstimer-ivy-switch",
+        internal=True,
         released=date(2026, 5, 17),
         title="Ivy-Cube: Scrambler von Eigenbau auf csTimer umgestellt",
         highlights=[
@@ -466,6 +498,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.qa-fixes-p1",
+        internal=True,
         released=date(2026, 5, 17),
         title="QA-Fixes zu Voice-Alert / Penalty-Buttons / Quick-Aktionen",
         highlights=[
@@ -637,6 +670,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.revert-cstimer",
+        internal=True,
         released=date(2026, 5, 17),
         title="HOTFIX-REVERT: cstimer_module wegen Browser-Crash zurueckgerollt",
         highlights=[
@@ -706,6 +740,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.abschluss-skill",
+        internal=True,
         released=date(2026, 5, 16),
         title="Session-Ende-Check: /abschluss-Slash-Command + Stop-Hook-Backstop",
         highlights=[
@@ -750,6 +785,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.country-qa",
+        internal=True,
         released=date(2026, 5, 16),
         title="QA-Fixes nach Country-Feld-Welle",
         highlights=[
@@ -831,6 +867,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.deploy-fix",
+        internal=True,
         released=date(2026, 5, 16),
         title="Hotfix: SyntaxError-Quotes in Patch-Notes — alle Render-Deploys grün",
         highlights=[
@@ -853,6 +890,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.wca-news-qa",
+        internal=True,
         released=date(2026, 5, 16),
         title="QA-Fixes nach WCA/News-Sprint",
         highlights=[
@@ -920,6 +958,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.news-backend",
+        internal=True,
         released=date(2026, 5, 16),
         title="Backend für „Speedcubing-News\” gebaut",
         highlights=[
@@ -959,6 +998,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.wca-comps-backend",
+        internal=True,
         released=date(2026, 5, 16),
         title="Backend für „WCA-Turniere in der Nähe\” gebaut",
         highlights=[
@@ -1024,6 +1064,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.welle2-3-qa",
+        internal=True,
         released=date(2026, 5, 16),
         title="QA-Fixes nach Welle 2 + 3",
         highlights=[
@@ -1124,6 +1165,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.mobile-qa",
+        internal=True,
         released=date(2026, 5, 14),
         title="Mobile-Refactor QA-Fixes",
         highlights=[
@@ -1142,6 +1184,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.mobile-fixes",
+        internal=True,
         released=date(2026, 5, 14),
         title="Mobile-Fixes nach Phone-Test",
         highlights=[
@@ -1295,6 +1338,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.logo-kor",
+        internal=True,
         released=date(2026, 5, 14),
         title="Korrigiertes Logo eingespielt",
         highlights=[
@@ -1308,6 +1352,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.logo-bigger",
+        internal=True,
         released=date(2026, 5, 14),
         title="Logo größer (Header 2.5× / Login 1.5×)",
         highlights=[
@@ -1319,6 +1364,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.logo-info",
+        internal=True,
         released=date(2026, 5, 14),
         title="Logo prominenter + Info-Buttons in Karten",
         highlights=[
@@ -1383,6 +1429,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.ux-quickwins",
+        internal=True,
         released=date(2026, 5, 14),
         title="UX-Quick-Wins nach Audit",
         highlights=[
@@ -1440,6 +1487,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.hardware-seed-fix",
+        internal=True,
         released=date(2026, 5, 13),
         title="Bug-Fix: Hardware-Seed-Endpoint im Web-Backend nachgeruestet",
         highlights=[
@@ -1507,6 +1555,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.admin-2",
+        internal=True,
         released=date(2026, 5, 13),
         title="Admin User-Management + Ad-hoc-Mail + Bulk-Announcement",
         highlights=[
@@ -1520,6 +1569,7 @@ PATCH_NOTES: list[PatchNote] = [
     ),
     PatchNote(
         version="2.0.0-alpha.W.admin-1",
+        internal=True,
         released=date(2026, 5, 13),
         title="Admin-Statistik-Panel + Cache-Leak-Fix",
         highlights=[

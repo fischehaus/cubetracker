@@ -102,6 +102,14 @@ function PatchNoteCard({
           >
             v{note.version}
           </code>
+          {note.internal && (
+            <code
+              className="rounded bg-amber-500/20 px-1.5 py-0.5 text-xs font-medium text-amber-300"
+              title="Interner Eintrag — fuer Non-Admins ausgeblendet"
+            >
+              intern
+            </code>
+          )}
           <h3 className="text-base font-semibold text-gray-100">
             {note.title}
           </h3>

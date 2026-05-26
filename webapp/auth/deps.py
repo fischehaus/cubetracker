@@ -56,3 +56,37 @@ def get_current_user(
         # Token revoked (Logout, Password-Change, o.ae.)
         raise credentials_error
     return user
+
+
+# ============================================================
+# Optional-Auth — fuer Endpoints, die anonym lesbar sind, aber
+# Admin-Differenzierung brauchen (z.B. /changelog mit internal-Filter).
+# auto_error=False -> kein 401 wenn Token fehlt/invalid, sondern None.
+# ============================================================
+
+oauth2_scheme_optional = OAuth2PasswordBearer(
+    tokenUrl="/auth/login", auto_error=False
+)
+
+
+def get_current_user_optional(
+    token: str | None = Depends(oauth2_scheme_optional),
+    db: OrmSession = Depends(get_db),
+) -> User | None:
+    """Wie get_current_user, aber gibt None zurueck statt 401 wenn
+    Token fehlt/invalid/expired/revoked oder der User inaktiv ist.
+    Endpoints koennen damit fuer Anonyme + Eingeloggte funktionieren
+    und gleichzeitig Admin-Differenzierung machen.
+    """
+    if token is None:
+        return None
+    try:
+        user_id, token_ver = extract_user_id_and_version(token, expected_type="access")
+    except JWTError:
+        return None
+    user = db.get(User, user_id)
+    if user is None or not user.is_active:
+        return None
+    if user.token_version != token_ver:
+        return None
+    return user
