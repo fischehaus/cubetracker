@@ -44,6 +44,7 @@ import { FeedbackModal } from "./components/FeedbackModal";
 import { RoadmapModal } from "./components/RoadmapModal";
 import { OnboardingBanner } from "./components/OnboardingBanner";
 import { PatchNotesPanel } from "./components/PatchNotesPanel";
+import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { UserMenu } from "./components/UserMenu";
 import { ReminderCard } from "./components/ReminderCard";
 import { SolveList } from "./components/SolveList";
@@ -531,6 +532,7 @@ function MainLayout() {
             />
           </button>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <HealthBadge onClick={() => setShowPatches(true)} />
             {user && (
               <UserMenu

@@ -44,6 +44,28 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-flags",
+        released=date(2026, 5, 27),
+        title="Flaggen-Sprach-Switcher im Header + ChatGPT-Logo-Hinweis",
+        highlights=[
+            "Sprach-Switcher mit Flaggen (🇩🇪 DE · 🇬🇧 EN) im Header — "
+            "auf jeder Seite oben sichtbar, 1-Klick zwischen Deutsch und "
+            "Englisch. Auch auf der Login-Seite oben rechts in der "
+            "Anmelde-Karte, damit englischsprachige Speedcuber den "
+            "Switcher schon vor dem Login finden.",
+            "Der bisherige Switcher im User-Menu bleibt als zweite "
+            "Option erhalten — sichtbar im Header, diskret im Menu.",
+            "Hinweis: auf Windows-Chrome werden die Emoji-Flaggen als "
+            "Buchstaben-Boxen gerendert (Browser-Eigenheit). Daneben "
+            "stehen DE/EN als Text-Kürzel, also bleibt die Bedienung "
+            "auch dort eindeutig.",
+            "Ergänzung im Impressum: das App-Logo wurde mit "
+            "ChatGPT/DALL·E erstellt — Transparenz analog zum bereits "
+            "dokumentierten KI-unterstützten Code, auch für visuelle "
+            "Marken-Assets.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-loginpage",
         released=date(2026, 5, 27),
         title="LoginPage + globaler Footer auf Englisch verfügbar",

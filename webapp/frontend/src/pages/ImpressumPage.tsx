@@ -48,6 +48,12 @@ export function ImpressumPage() {
           Zukunft KI-generierte Inhalte hinzukommen, werden diese als
           solche gekennzeichnet.
         </p>
+        <p>
+          Visuelle Marken-Assets: das App-Logo wurde mit Unterstützung
+          eines KI-Bild-Generators (ChatGPT/DALL·E von OpenAI) entworfen
+          und anschließend manuell ausgewählt und für den App-Einsatz
+          eingebunden.
+        </p>
       </section>
 
       <p className="text-xs text-gray-500 pt-2">

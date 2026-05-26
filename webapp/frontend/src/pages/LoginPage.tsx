@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
 import { FeatureListPanel } from "../components/FeatureListPanel";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { APP_TAGLINE, HERO_HIGHLIGHTS } from "../lib/features-data";
 
 type Mode = "login" | "register" | "forgot";
@@ -49,6 +50,11 @@ export function LoginPage() {
         {/* Linke Spalte: Logo + Login-Form. Card-Breite 1.5× erhöht
             damit das Logo entsprechend größer wirkt (User-Wunsch). */}
         <div className="w-full max-w-[600px] mx-auto lg:max-w-none bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
+          {/* Sprach-Switcher rechts oben in der Card — englische Speedcuber
+              sehen ihn vor dem Login. */}
+          <div className="flex justify-end mb-2">
+            <LanguageSwitcher size="sm" />
+          </div>
           {/* Logo prominent — wie eine Marken-Visitenkarte. Volle Card-
               Innenbreite (Card ist max-w-md = 448px, Padding p-6 = 24px,
               also ~400px Innenraum). */}
