@@ -58,7 +58,18 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         note: "Dein vollständiges Backup jederzeit herunter- und wieder hochladen, direkt in den Konto-Einstellungen.",
       },
       {
+        title: "Meine Daten — Alle Solves löschen",
+        effort: "~0.5 Tag",
+        note: "Bulk-Löschen aller Solves direkt im Meine-Daten-Tab. Sessions bleiben, nur die Solves weg. Mit 2-Klick-Bestätigung gegen Versehen.",
+      },
+      {
+        title: "Meine Daten — Account-Löschung auch hier",
+        effort: "~2h",
+        note: "Account-Löschung gibt's bisher nur unter Einstellungen — zusätzlich auch in der Meine-Daten-Sektion (gehört thematisch zur Datenhoheit).",
+      },
+      {
         title: "Patch-Notes aufgeräumt (nur das Wesentliche)",
+        done: true,
         effort: "~0.5-1 Tag",
         note: "Übersichtlichere Änderungs-Hinweise — ohne internen Technik-Kram.",
       },
