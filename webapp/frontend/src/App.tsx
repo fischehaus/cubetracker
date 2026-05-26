@@ -8,6 +8,7 @@
 // Header zeigt nur noch Title + Backend-Badge.
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
@@ -500,6 +501,7 @@ function MainLayout() {
   }, [tab]);
 
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
 
   return (
     // Container-Padding mobile-first: p-3 auf Phone (24px waren zu viel
@@ -603,14 +605,16 @@ function MainLayout() {
         )}
 
         <footer className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
-          <span>cubetracker — Speedcubing-Tracker</span>
+          <span>
+            {t("footer.appName")} — {t("footer.tagline")}
+          </span>
           <span aria-hidden="true">·</span>
           <button
             type="button"
             onClick={() => setShowFeatures(true)}
             className="text-gray-500 hover:text-gray-200 underline"
           >
-            Was kann diese App?
+            {t("footer.featuresLink")}
           </button>
           <span aria-hidden="true">·</span>
           <button
@@ -618,7 +622,7 @@ function MainLayout() {
             onClick={() => setShowRoadmap(true)}
             className="text-gray-500 hover:text-gray-200 underline"
           >
-            🗺 Roadmap
+            {t("footer.roadmapLink")}
           </button>
           <span aria-hidden="true">·</span>
           <button
@@ -626,24 +630,24 @@ function MainLayout() {
             onClick={() => setShowFeedback(true)}
             className="text-gray-500 hover:text-gray-200 underline"
           >
-            💬 Feedback
+            {t("footer.feedbackLink")}
           </button>
           <span aria-hidden="true">·</span>
           <a
             href="/impressum"
             className="text-gray-500 hover:text-gray-200 underline"
           >
-            Impressum
+            {t("footer.imprint")}
           </a>
           <span aria-hidden="true">·</span>
           <a
             href="/datenschutz"
             className="text-gray-500 hover:text-gray-200 underline"
           >
-            Datenschutz
+            {t("footer.privacy")}
           </a>
           <span aria-hidden="true">·</span>
-          <span>Mehr Optionen oben rechts im User-Menu</span>
+          <span>{t("footer.moreOptionsHint")}</span>
         </footer>
       </div>
 

@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-loginpage",
+        released=date(2026, 5, 27),
+        title="LoginPage + globaler Footer auf Englisch verfügbar",
+        highlights=[
+            "Die Anmelde-/Registrierungs-/Passwort-vergessen-Seite ist "
+            "jetzt komplett durchschaltbar (DE/EN): Formular-Labels, "
+            "Buttons, Tab-Switcher (Login/Registrieren), Forgot-Password-"
+            "Hinweis, Logo-Alt-Text — alles durch t().",
+            "Auch der globale Footer im eingeloggten Zustand ist "
+            "übersetzt: 'Was kann diese App?' / 'Roadmap' / 'Feedback' / "
+            "'Impressum' / 'Datenschutz' / 'Mehr Optionen oben rechts im "
+            "User-Menu'.",
+            "Marketing-Tagline + Hero-Highlights auf der rechten Seite "
+            "der Login-Page bleiben in dieser Welle noch deutsch — werden "
+            "in einer separaten Welle aus features-data.ts gehoben.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-setup",
         released=date(2026, 5, 27),
         title="Erste Englisch-Variante + Sprach-Switcher + KI-Transparenz",

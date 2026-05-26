@@ -3,6 +3,7 @@
  * Dunkles Theme passend zur App.
  */
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
 import { FeatureListPanel } from "../components/FeatureListPanel";
@@ -12,6 +13,7 @@ type Mode = "login" | "register" | "forgot";
 
 export function LoginPage() {
   const { login, register } = useAuth();
+  const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,9 +34,7 @@ export function LoginPage() {
       } else {
         // forgot
         await api.post("/auth/forgot-password", { email });
-        setInfo(
-          "Wenn die Email-Adresse registriert ist, ist eine Mail mit Reset-Link unterwegs. Prüfe auch Spam-Ordner.",
-        );
+        setInfo(t("auth.forgotInfo"));
       }
     } catch (err: unknown) {
       setError(extractErrorMessage(err));
@@ -54,27 +54,27 @@ export function LoginPage() {
               also ~400px Innenraum). */}
           <img
             src="/cubetracker-logo.png"
-            alt="cubetracker — Speedcubing Solve-Tracking"
+            alt={t("auth.logoAlt")}
             className="w-full mx-auto mb-4"
           />
           <p className="text-base text-gray-400 mb-6 text-center">
             {mode === "login"
-              ? "Willkommen zurück."
+              ? t("auth.welcomeBack")
               : mode === "register"
-                ? "Account erstellen."
-                : "Passwort vergessen."}
+                ? t("auth.createAccount")
+                : t("auth.forgotPassword")}
           </p>
 
         {mode !== "forgot" && (
           <div className="flex gap-2 mb-4">
             <TabButton active={mode === "login"} onClick={() => setMode("login")}>
-              Login
+              {t("auth.tabLogin")}
             </TabButton>
             <TabButton
               active={mode === "register"}
               onClick={() => setMode("register")}
             >
-              Registrieren
+              {t("auth.tabRegister")}
             </TabButton>
           </div>
         )}
@@ -82,7 +82,7 @@ export function LoginPage() {
         <form onSubmit={onSubmit} className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">
-              Email
+              {t("auth.email")}
             </label>
             <input
               type="email"
@@ -97,7 +97,7 @@ export function LoginPage() {
           {mode !== "forgot" && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                Passwort
+                {t("auth.password")}
               </label>
               <input
                 type="password"
@@ -112,7 +112,7 @@ export function LoginPage() {
               />
               {mode === "register" && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Mindestens 8 Zeichen.
+                  {t("auth.passwordHint")}
                 </p>
               )}
             </div>
@@ -135,12 +135,12 @@ export function LoginPage() {
             className="w-full rounded-lg bg-purple-600 text-white font-medium py-2 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {busy
-              ? "Bitte warten…"
+              ? t("auth.submitting")
               : mode === "login"
-                ? "Anmelden"
+                ? t("auth.submitLogin")
                 : mode === "register"
-                  ? "Registrieren"
-                  : "Reset-Link senden"}
+                  ? t("auth.submitRegister")
+                  : t("auth.submitForgot")}
           </button>
         </form>
 
@@ -155,7 +155,7 @@ export function LoginPage() {
               }}
               className="text-purple-400 hover:text-purple-300 underline"
             >
-              Passwort vergessen?
+              {t("auth.forgotLink")}
             </button>
           )}
           {mode === "forgot" && (
@@ -168,7 +168,7 @@ export function LoginPage() {
               }}
               className="text-purple-400 hover:text-purple-300 underline"
             >
-              ← zurück zum Login
+              {t("auth.backToLogin")}
             </button>
           )}
         </div>
@@ -198,20 +198,20 @@ export function LoginPage() {
       </div>
 
       <footer className="mx-auto max-w-6xl mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
-        <span>cubetracker</span>
+        <span>{t("footer.appName")}</span>
         <span aria-hidden="true">·</span>
         <a
           href="/impressum"
           className="text-gray-500 hover:text-gray-200 underline"
         >
-          Impressum
+          {t("footer.imprint")}
         </a>
         <span aria-hidden="true">·</span>
         <a
           href="/datenschutz"
           className="text-gray-500 hover:text-gray-200 underline"
         >
-          Datenschutz
+          {t("footer.privacy")}
         </a>
       </footer>
     </div>

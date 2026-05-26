@@ -36,5 +36,33 @@
     "adminBadge": "ADMIN",
     "noDisplayName": "Kein Display-Name",
     "language": "Sprache"
+  },
+  "auth": {
+    "welcomeBack": "Willkommen zurück.",
+    "createAccount": "Account erstellen.",
+    "forgotPassword": "Passwort vergessen.",
+    "tabLogin": "Login",
+    "tabRegister": "Registrieren",
+    "email": "Email",
+    "password": "Passwort",
+    "passwordHint": "Mindestens 8 Zeichen.",
+    "submitting": "Bitte warten…",
+    "submitLogin": "Anmelden",
+    "submitRegister": "Registrieren",
+    "submitForgot": "Reset-Link senden",
+    "forgotLink": "Passwort vergessen?",
+    "backToLogin": "← zurück zum Login",
+    "forgotInfo": "Wenn die Email-Adresse registriert ist, ist eine Mail mit Reset-Link unterwegs. Prüfe auch Spam-Ordner.",
+    "logoAlt": "cubetracker — Speedcubing Solve-Tracking"
+  },
+  "footer": {
+    "appName": "cubetracker",
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "featuresLink": "Was kann diese App?",
+    "roadmapLink": "🗺 Roadmap",
+    "feedbackLink": "💬 Feedback",
+    "moreOptionsHint": "Mehr Optionen oben rechts im User-Menu",
+    "tagline": "Speedcubing-Tracker"
   }
 }
