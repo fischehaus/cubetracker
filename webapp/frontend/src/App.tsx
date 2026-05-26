@@ -36,6 +36,7 @@ import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HistogramChart } from "./components/HistogramChart";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
 import { MultiCompareCard } from "./components/MultiCompareCard";
+import { RecentRecordsCard } from "./components/RecentRecordsCard";
 import { NewsCard } from "./components/NewsCard";
 import { FeatureListPanel } from "./components/FeatureListPanel";
 import { FeedbackModal } from "./components/FeedbackModal";
@@ -285,10 +286,14 @@ function DashboardTab({
   sessionId,
   setSessionId,
   onSwitchTab,
+  onSwitchToAnalyseCube,
 }: {
   sessionId: number | null;
   setSessionId: (id: number | null) => void;
   onSwitchTab: (tab: AppTab) => void;
+  /** Klick auf einen "Letzten Rekord"-Eintrag: setze Cube-Filter im
+   * Analyse-Tab und wechsle dort hin. */
+  onSwitchToAnalyseCube: (cubeType: string) => void;
 }) {
   // DASHBOARD = Live-Sicht. Optionaler Session-Filter (default 'alle').
   // Cube-Filter bewusst NICHT — Dashboard vergleicht cube-übergreifend.
@@ -320,6 +325,7 @@ function DashboardTab({
 
       <DashboardSection title="Deine Performance" id="dash-performance">
         <div className="space-y-4">
+          <RecentRecordsCard onClickCube={onSwitchToAnalyseCube} />
           <MultiCompareCard sessionId={sessionId} />
           <StatsCard cubeType={undefined} sessionId={sessionId} />
         </div>
@@ -576,6 +582,10 @@ function MainLayout() {
             sessionId={dashboardSessionId}
             setSessionId={setDashboardSessionId}
             onSwitchTab={setTab}
+            onSwitchToAnalyseCube={(cube) => {
+              setAnalyseCubeFilter(cube);
+              setTab("analyse");
+            }}
           />
         )}
         {tab === "analyse" && (

@@ -44,6 +44,27 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.recent-pbs",
+        released=date(2026, 5, 27),
+        title="Dashboard: Letzte Rekorde auf einen Blick",
+        highlights=[
+            "Neue Karte Letzte Rekorde oben in der Deine-Performance-Sektion "
+            "des Dashboards. Zeigt deine 5 jüngsten persönlichen Bestzeiten "
+            "über alle Cubes hinweg — Single, ao5 und ao12 in einem Strang, "
+            "chronologisch absteigend.",
+            "Pro Eintrag: Metrik-Badge (gold ★ Single, cyan ● ao5, emerald "
+            "● ao12), Cube-Type, Zeit, Δ-Verbesserung gegenüber deinem "
+            "vorigen PB derselben Metrik, plus Alter (heute / gestern / "
+            "vor X Tagen).",
+            "Klick auf einen Eintrag wechselt zum Analyse-Tab mit gesetztem "
+            "Cube-Filter — dort siehst du den vollen PB-Verlauf-Chart für "
+            "diesen Cube.",
+            "Unter der Haube: neuer Backend-Endpoint /stats/recent-pbs, der "
+            "pro Cube-Type die PB-Progression berechnet und die N jüngsten "
+            "Ereignisse chronologisch zusammenführt.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.danger-zone-qa",
         released=date(2026, 5, 27),
         title="QA-Hotfix nach Danger-Zone-Welle",

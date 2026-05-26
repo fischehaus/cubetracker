@@ -143,6 +143,78 @@ def get_pb_history(
     }
 
 
+@router.get("/recent-pbs")
+def get_recent_pbs(
+    limit: int = Query(5, ge=1, le=50, description="Max. Anzahl der zurueckgegebenen PB-Events."),
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Letzte N PB-Ereignisse (Single + ao5 + ao12) ueber ALLE Cube-Types
+    des Users, chronologisch absteigend nach Setzdatum (W.recent-pbs).
+
+    Pro Event: kind ("single"|"ao5"|"ao12"), cube_type, solve_id, ms,
+    at (ISO-timestamp), delta_ms_vs_prev (None beim ersten PB der Metrik).
+
+    Berechnung: pro Cube-Type wird die volle pb_history (alle 3 Metriken)
+    erzeugt, alle Events werden zusammengefuehrt und nach `at` DESC sortiert.
+    Top-N wird zurueckgegeben.
+    """
+    stmt = (
+        select(Solve)
+        .where(Solve.user_id == current_user.id)
+        .order_by(Solve.timestamp.asc())
+    )
+    rows = list(db.scalars(stmt).all())
+
+    by_id = {s.id: s for s in rows}
+
+    def _ts(sid: int) -> str | None:
+        s = by_id.get(sid)
+        if s is None or s.timestamp is None:
+            return None
+        ts = s.timestamp
+        ts_aware = ts.replace(tzinfo=UTC) if ts.tzinfo is None else ts
+        return ts_aware.isoformat()
+
+    by_cube: dict[str, list[Solve]] = {}
+    for s in rows:
+        by_cube.setdefault(s.cube_type, []).append(s)
+
+    events: list[dict[str, Any]] = []
+    for cube_type, group in by_cube.items():
+        points = [
+            SolvePoint(time_ms=s.time_ms, dnf=s.dnf, plus_two=s.plus_two, solve_id=s.id)
+            for s in group
+        ]
+        hist = pb_history(points)
+
+        for kind, series in (
+            ("single", hist.single),
+            ("ao5", hist.ao5),
+            ("ao12", hist.ao12),
+        ):
+            prev_ms: int | None = None
+            for sid, ms in series:
+                delta = None if prev_ms is None else (prev_ms - ms)
+                events.append(
+                    {
+                        "kind": kind,
+                        "cube_type": cube_type,
+                        "solve_id": sid,
+                        "ms": int(ms),
+                        "at": _ts(sid),
+                        "delta_ms_vs_prev": delta,
+                    }
+                )
+                prev_ms = ms
+
+    # Nach Datum absteigend; Events ohne Timestamp landen hinten.
+    events.sort(key=lambda e: e["at"] or "", reverse=True)
+    events = events[:limit]
+
+    return {"events": events, "count": len(events), "limit": limit}
+
+
 @router.get("/by-cube")
 def get_stats_by_cube(
     session_id: int | None = Query(default=None),

@@ -435,6 +435,44 @@ export function usePbHistory(
 }
 
 // ============================================================
+// Recent PBs (W.recent-pbs) — letzte PB-Ereignisse fuer Dashboard
+// ============================================================
+
+export type RecentPbKind = "single" | "ao5" | "ao12";
+
+export interface RecentPbEvent {
+  kind: RecentPbKind;
+  cube_type: string;
+  solve_id: number;
+  ms: number;
+  at: string | null;
+  /** Verbesserung gegenueber dem vorherigen PB derselben Metrik+Cube
+   * (in ms). Null beim ersten PB einer Metrik. */
+  delta_ms_vs_prev: number | null;
+}
+
+export interface RecentPbsResponse {
+  events: RecentPbEvent[];
+  count: number;
+  limit: number;
+}
+
+const EMPTY_RECENT_PBS: RecentPbsResponse = { events: [], count: 0, limit: 5 };
+
+export function useRecentPbs(limit: number = 5): UseQueryResult<RecentPbsResponse> {
+  return useQuery({
+    queryKey: ["recent-pbs", limit],
+    queryFn: () =>
+      withStub(
+        async () =>
+          (await api.get<RecentPbsResponse>("/stats/recent-pbs", { params: { limit } })).data,
+        EMPTY_RECENT_PBS,
+      ),
+    staleTime: 60_000,
+  });
+}
+
+// ============================================================
 // Stats by Cube (F11 — Multi-Cube-Vergleich)
 // ============================================================
 
