@@ -6,6 +6,7 @@
 // versteckt die zugehoerigen Aktionen.
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   email: string;
@@ -32,6 +33,8 @@ export function UserMenu({
 }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.resolvedLanguage ?? "de";
 
   // Outside-Click + Esc schliesst
   useEffect(() => {
@@ -96,42 +99,91 @@ export function UserMenu({
           {/* Header: Display-Name + Email */}
           <div className="px-4 py-3 border-b border-gray-700 bg-gray-800/40">
             <div className="text-sm font-semibold text-gray-100 truncate">
-              {displayName || "Kein Display-Name"}
+              {displayName || t("userMenu.noDisplayName")}
             </div>
             <div className="text-xs text-gray-400 truncate" title={email}>
               {email}
             </div>
             {isAdmin && (
               <div className="mt-1 inline-block rounded bg-purple-500/30 px-1.5 py-0.5 text-[10px] font-medium text-purple-200">
-                ADMIN
+                {t("userMenu.adminBadge")}
               </div>
             )}
           </div>
 
           {/* Menu-Items */}
           <MenuItem onClick={() => run(onOpenSettings)} icon="⚙">
-            Mein Account &amp; Einstellungen
+            {t("userMenu.settings")}
           </MenuItem>
           <MenuItem onClick={() => run(onOpenPatchNotes)} icon="📋">
-            Patch Notes
+            {t("userMenu.patchNotes")}
           </MenuItem>
           <MenuItem onClick={() => run(onOpenRoadmap)} icon="🗺">
-            Roadmap (was kommt als nächstes?)
+            {t("userMenu.roadmap")}
           </MenuItem>
           <MenuItem onClick={() => run(onOpenFeatures)} icon="ℹ">
-            Was kann diese App?
+            {t("userMenu.features")}
           </MenuItem>
           <MenuItem onClick={() => run(onOpenFeedback)} icon="💬">
-            Feedback geben
+            {t("userMenu.feedback")}
           </MenuItem>
+
+          {/* Sprach-Switcher (W.i18n-setup, 2026-05-27) */}
+          <div className="border-t border-gray-700" />
+          <div className="px-4 py-2.5 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-gray-400">{t("userMenu.language")}</span>
+              <div className="flex gap-1">
+                <LangButton
+                  active={currentLang === "de"}
+                  onClick={() => void i18n.changeLanguage("de")}
+                  label="DE"
+                  title={t("common.languageDe")}
+                />
+                <LangButton
+                  active={currentLang === "en"}
+                  onClick={() => void i18n.changeLanguage("en")}
+                  label="EN"
+                  title={t("common.languageEn")}
+                />
+              </div>
+            </div>
+          </div>
 
           <div className="border-t border-gray-700" />
           <MenuItem onClick={() => run(onLogout)} icon="🚪" danger>
-            Logout
+            {t("userMenu.logout")}
           </MenuItem>
         </div>
       )}
     </div>
+  );
+}
+
+function LangButton({
+  active,
+  onClick,
+  label,
+  title,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  title: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`rounded px-2 py-0.5 text-[11px] font-semibold transition-colors ${
+        active
+          ? "bg-purple-600/40 text-purple-100 border border-purple-500/50"
+          : "bg-gray-800/60 text-gray-400 hover:text-gray-200 hover:bg-gray-700/80 border border-gray-700"
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 

@@ -31,6 +31,25 @@ export function ImpressumPage() {
         </p>
       </section>
 
+      <section className="space-y-1">
+        <LegalHeading>Hinweis zur Entwicklung mit KI-Unterstützung</LegalHeading>
+        <p>
+          Diese App wurde unter Mitarbeit von KI-Werkzeugen
+          (insbesondere Claude von Anthropic) entwickelt. Sämtlicher
+          Code wurde vom Betreiber inhaltlich überprüft und manuell
+          freigegeben — die KI dient ausschließlich als Hilfsmittel
+          im Sinne der Transparenzpflichten nach Art. 50 der KI-Verordnung
+          (EU 2024/1689).
+        </p>
+        <p>
+          Innerhalb der App selbst werden keine Inhalte durch KI generiert:
+          Scrambles, Statistiken, Achievements und das Coaching-Feedback
+          am Ende von Trainings-Sets sind rein regelbasiert. Sollten in
+          Zukunft KI-generierte Inhalte hinzukommen, werden diese als
+          solche gekennzeichnet.
+        </p>
+      </section>
+
       <p className="text-xs text-gray-500 pt-2">
         Quelle:{" "}
         <a

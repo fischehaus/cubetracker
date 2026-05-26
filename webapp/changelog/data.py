@@ -44,6 +44,37 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-setup",
+        released=date(2026, 5, 27),
+        title="Erste Englisch-Variante + Sprach-Switcher + KI-Transparenz",
+        highlights=[
+            "Sprach-Switcher im User-Menu (DE/EN) — Vorbereitung auf das "
+            "WCA-Turnier-Demo in Meppel am Wochenende. Erster Teil der "
+            "Englisch-Variante: TabBar (Labels + Beschreibungen + ARIA) "
+            "und das komplette User-Menu sind durchgängig übersetzt.",
+            "Browser-Sprach-Auto-Detect: wenn dein Browser auf Englisch "
+            "steht, startet die App jetzt auf Englisch — ansonsten Deutsch. "
+            "Deine Wahl wird im localStorage persistiert (Key: "
+            "cubetracker_language).",
+            "Weitere Übersetzungen (Solve-Flow, Stats-Labels, Trainer, "
+            "Verwaltung, Achievements-Titel) folgen in den nächsten "
+            "Tagen. Patch-Notes-Historie bleibt deutsch — neue Notes "
+            "ab dem englischen Release ggf. bilingual.",
+            "KI-Transparenz-Hinweis im Impressum: explizit dokumentiert, "
+            "dass die App mit KI-Unterstützung (Claude/Anthropic) "
+            "entwickelt wurde, sämtlicher Code aber vom Betreiber "
+            "manuell freigegeben wird. Innerhalb der App werden keine "
+            "Inhalte durch KI generiert — alles regelbasiert. "
+            "Vorbereitung auf Art. 50 EU-KI-Verordnung (anwendbar ab "
+            "2. August 2026).",
+            "Unter der Haube: react-i18next + i18next-browser-"
+            "languagedetector, nested namespaces in locales/de.json + "
+            "en.json. Resource-Datei wächst mit jedem Übersetzungs-"
+            "Pass — Live-Add ohne Neu-Deploy nicht möglich, dafür "
+            "bundle-statisch (schneller).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-intern",
         released=date(2026, 5, 27),
         title="Roadmap aufgeräumt: nur noch User-relevante Items",

@@ -1,0 +1,40 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "loading": "Lädt …",
+    "error": "Fehler",
+    "language": "Sprache",
+    "languageDe": "Deutsch",
+    "languageEn": "Englisch"
+  },
+  "tabs": {
+    "dashboard": "Dashboard",
+    "timer": "Timer",
+    "analyse": "Analyse",
+    "trainer": "Trainer",
+    "community": "Community",
+    "verwaltung": "Verwaltung",
+    "dashboardDesc": "Tagesform + Stats im Blick",
+    "timerDesc": "Solves eintragen",
+    "analyseDesc": "Charts + Solveliste",
+    "verwaltungDesc": "Sessions, Hardware, Import, Outliers",
+    "trainerDesc": "Erfolge + Daily Challenges",
+    "communityDesc": "Freunde + Bestenliste",
+    "mainNavAria": "Hauptnavigation"
+  },
+  "userMenu": {
+    "settings": "Mein Account & Einstellungen",
+    "patchNotes": "Patch Notes",
+    "roadmap": "Roadmap (was kommt als nächstes?)",
+    "features": "Was kann diese App?",
+    "feedback": "Feedback geben",
+    "logout": "Logout",
+    "adminBadge": "ADMIN",
+    "noDisplayName": "Kein Display-Name",
+    "language": "Sprache"
+  }
+}
