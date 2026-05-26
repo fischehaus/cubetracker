@@ -24,12 +24,13 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint + Turnier-Sprint Start
+## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint + Turnier-Sprint Start (Wellen 1-9)
 
-**13 Commits + 9 Tags heute, alles live.** Live-Version: `W.i18n-setup` (public).
+**15 Commits + 11 Tags heute, alles live.** Live-Version: `W.i18n-flags` (public).
 Vier Roadmap-Items abgehakt (Average-PB, Danger-Zone, Letzte Rekorde, Roadmap-intern)
 + drei QA-Hotfixe + GitHub-Issue #1 vollständig adressiert + **Turnier-Sprint
-Welle 1** (i18n-Infra + erste Übersetzungen + KI-Impressum-Hinweis).
+Wellen 1-3** (i18n-Infra + LoginPage/Footer übersetzt + Flaggen-Switcher im
+Header inkl. ChatGPT-Logo-Hinweis).
 
 🎯 **Aktiver Sprint:** Englisch-Variante + WCA-Profil-Light bis Sa 30.05. morgens
 für privates Demo beim WCA-Turnier in Meppel. Plan siehe „Restplan Turnier-Sprint"
@@ -133,9 +134,43 @@ unten.
 >
 > Commit: `3550e6c` (Tag `W.i18n-setup`).
 
+### Welle 8 — i18n LoginPage + globaler Footer
+
+> Die Anmelde-/Registrierungs-/Forgot-Password-Seite ist jetzt komplett
+> durchschaltbar (DE/EN): Formular-Labels, Buttons, Tab-Switcher,
+> Forgot-Info-Banner, Logo-Alt-Text. Auch der globale Footer im
+> eingeloggten Zustand ist übersetzt (Was-kann / Roadmap / Feedback /
+> Impressum / Datenschutz / Mehr-Optionen-Hinweis).
+>
+> Marketing-Tagline + Hero-Highlights aus `features-data.ts` bewusst
+> nicht in dieser Welle — `features-data.ts` ist Single-Source-Liste
+> mit anderem Pattern, separate Welle.
+>
+> Commit: `e191907` (Tag `W.i18n-loginpage`).
+
+### Welle 9 — Flaggen-Sprach-Switcher im Header + ChatGPT-Logo-Hinweis
+
+> User-Feedback: „eine deutsche und englische Flagge im Header an
+> geeigneter Stelle". Umgesetzt: neue Komponente `LanguageSwitcher`
+> mit Flaggen-Emoji + Buchstaben-Kürzel (🇩🇪 DE · 🇬🇧 EN). Eingebaut:
+> (a) App-Header vor `HealthBadge`, (b) LoginPage-Auth-Card oben rechts,
+> (c) UserMenu-Switcher bleibt als Backup.
+>
+> Windows-Eigenheit: Chrome rendert Emoji-Flaggen als Buchstaben-Boxen
+> (Regional-Indicator). Daneben stehende DE/EN-Kürzel bleiben lesbar,
+> kein Funktions-Verlust.
+>
+> User-Hinweis: Logo wurde mit ChatGPT/DALL·E erstellt. KI-Hinweis im
+> Impressum entsprechend erweitert um Logo-Generierung — analog zum
+> bereits dokumentierten Code-Hinweis.
+>
+> Commit: `2c37351` (Tag `W.i18n-flags`).
+
 ### 🔜 Restplan Turnier-Sprint (bis Sa 30.05. morgens)
 
-**Mi-Abend (heute, erledigt):** i18n-Setup + KI-Impressum ✓
+**Mi-Abend (heute, erledigt):** i18n-Setup + KI-Impressum + LoginPage/Footer +
+Flaggen-Switcher im Header + ChatGPT-Logo-Hinweis ✓ (Wellen 7-9, 4 Commits +
+3 Tags)
 
 **Do 28.05.:** Top-Strings übersetzen
 - Solve-Flow (BigTimerInput, Penalty-Quick-Buttons, ScrambleCard)
