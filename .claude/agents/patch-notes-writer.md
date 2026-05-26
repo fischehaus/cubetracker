@@ -74,7 +74,7 @@ Eine der folgenden Formen (frag nach, wenn unklar):
   String-Delimiter sind ASCII `"`. Im Text NIEMALS ein unescaptes ASCII-`"`,
   das den String vorzeitig schliesst. Für Zitate im Text deutsche „…" oder
   einfache 'Anführung' nutzen. Niemals per Bash-Heredoc in die Datei schreiben
-  — ausschliesslich das Edit-Tool (Heredoc-Quote-Mischung hat schon Render-
+  — ausschliesslich das Edit-Tool (Heredoc-Quote-Mischung hat schon Live-
   Deploys gekillt).
 - **Konkret statt Marketing:** "Penalty-Buttons (+2/DNF/Löschen) erscheinen
   jetzt direkt unter dem Timer" statt "Verbessertes Penalty-Erlebnis".

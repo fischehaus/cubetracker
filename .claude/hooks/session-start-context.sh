@@ -4,7 +4,7 @@
 # Zweck: gegen Mental-Model-Drift. Beim Start einer neuen Claude-Code-
 # Session druckt der Hook einen kompakten Repo-Stand, damit Claude sofort
 # weiss:
-#   1. Cubetracker laeuft live auf cubetracker.de via Render-autoDeploy
+#   1. Cubetracker laeuft live auf cubetracker.de via Coolify (Hetzner) — Auto-Deploy per GitHub-Action bei git push
 #   2. Welcher Branch + welche Commits sind im Spiel
 #   3. Welche Doku zuerst zu lesen ist
 #   4. Ob ungepushte Commits rumlagen (Render sieht die nicht)
@@ -59,7 +59,7 @@ recent="$(git log --oneline -5 2>/dev/null || echo '(kein log)')"
 cat <<EOF
 === Cubetracker — Repo-Stand beim Session-Start ===
 
-Live-App: https://cubetracker.de (Render.com auto-deploy bei git push)
+Live-App: https://cubetracker.de (Hetzner/Coolify, Auto-Deploy via GitHub-Action bei git push)
 Branch: $branch
 Remote: $remote_url
 Patch-Notes-Version (aktuell): $current_version$unpushed_msg
@@ -68,7 +68,7 @@ Letzte 5 Commits:
 $recent
 
 📖 Bevor du loslegst, kurz lesen wenn du den aktuellen Stand brauchst:
-   - webapp/README.md         (Multi-User-Web-Variante, Deploy via Render)
+   - webapp/README.md         (Multi-User-Web-Variante, live auf Hetzner)
    - ROADMAP.md               (Phasen-Historie + offene Items)
    - NEXT_SESSION.md          (Wiederaufnahme-Punkte)
    - webapp/changelog/data.py (alle Patch-Notes seit v1.0.1)
@@ -78,7 +78,7 @@ $recent
      CUBETRACKER_ALLOW_LOCAL_DEV=1 wenn du wirklich lokal debuggen willst.
    - Nach Patch-Notes-Eintrag in changelog/data.py: Git-Tag setzen
      (Konvention: v<version-string>) und mit push origin <tag> hochladen.
-   - Nach Commits: nicht vergessen zu pushen — autoDeploy auf Render
+   - Nach Commits: nicht vergessen zu pushen — Auto-Deploy (GitHub-Action → Coolify)
      triggert nur bei Push, nicht bei Commit.
 EOF
 

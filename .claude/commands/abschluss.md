@@ -107,13 +107,13 @@ Nutze das `TodoWrite`-Tool oder lies aus dem aktuellen Kontext den Stand der Tod
 Damit Deploy-Fails (z.B. Syntax-/Quote-Bugs) BEVOR dem Push gefangen werden — der Coolify-Build bricht sonst ab.
 
 ```bash
-cd webapp && python -c "import ast; ast.parse(open('changelog/data.py', encoding='utf-8').read()); print('Parse OK')"
+(cd webapp && python -c "import ast; ast.parse(open('changelog/data.py', encoding='utf-8').read()); print('Parse OK')")
 ```
 
 Wenn ein venv mit allen Deps existiert (`webapp/.venv/Scripts/python.exe`):
 
 ```bash
-.venv/Scripts/python.exe -c "
+(cd webapp && .venv/Scripts/python.exe -c "
 import sys, os
 sys.path.insert(0, '.')
 os.environ.setdefault('JWT_SECRET', 'test'*16)
@@ -123,8 +123,7 @@ from db.database import Base, engine
 import db.models
 Base.metadata.create_all(engine)
 print('Backend startet sauber')
-" 2>&1 | tail -5
-rm -f test-abschluss.db 2>/dev/null
+" 2>&1 | tail -5; rm -f test-abschluss.db 2>/dev/null)
 ```
 
 - **Beides grün:** ✓.

@@ -10,7 +10,7 @@ sollen automatisch aufgefangen werden:
 | # | Schmerzpunkt | Hook |
 |---|---|---|
 | 1 | Lokale Dev-Server starten, obwohl Cubetracker live auf cubetracker.de deployed ist | `pre-bash-dev-server.sh` (PreToolUse-Block) — siehe Klarstellung unten |
-| 2 | Commit vergessen zu pushen → Render-autoDeploy triggert nicht | `post-git-commit.sh` Teil A (PostToolUse-Notice) |
+| 2 | Commit vergessen zu pushen → Auto-Deploy (Coolify) triggert nicht | `post-git-commit.sh` Teil A (PostToolUse-Notice) |
 | 3 | Neuen Patch-Notes-Eintrag in `webapp/changelog/data.py` nicht getaggt | `post-git-commit.sh` Teil B (PostToolUse-Notice) |
 | 4 | Session-Start ohne Repo-Context → Mental-Model-Drift | `session-start-context.sh` (SessionStart-Notice) |
 | 5 | Hartkodiertes `localhost:` in TS/TSX-Files (v1.0.1-Klassiker-Bug) | `post-edit-hardcoded-url.sh` (PostToolUse-Notice) |
