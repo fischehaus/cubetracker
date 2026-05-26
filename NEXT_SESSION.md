@@ -24,6 +24,91 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint: #2 + Danger-Zone + ntfy + Issue#1 + #3
+
+**11 Commits + 7 Tags heute, alles live.** Live-Version: `W.recent-pbs` (public).
+Drei Roadmap-Items abgehakt + drei QA-Hotfixe + GitHub-Issue #1 adressiert.
+
+### Welle 1 — #2 Average-PB-Punkte + Hook-Drift
+
+> Backend: `StatsResult.ao5_pb_solve_ids` + `ao12_pb_solve_ids` ergänzt
+> (Anker-IDs aus `avg_pb_progression`). Frontend: cyan ● vor ao5-PB-Zahlen,
+> emerald ● vor ao12-PB-Zahlen in der Solve-Liste (gold ★ Single bleibt).
+> Bonus: `session-start-context.sh` skippt internal-Einträge via Python-
+> `current_version()` (konsistent mit /api/health).
+>
+> Commit: `cab748d` (Tag `W.avg-pb-dots`).
+
+### Welle 2 — Danger-Zone „Meine Daten" + QA-Hotfix
+
+> Neue Sektion unter Verwaltung→Meine Daten: 3 abgestufte Lösch-Aktionen
+> (Solves zurücksetzen / Tracking-Daten zurücksetzen / Account löschen),
+> 2-Klick-Bestätigung mit 5s Auto-Reset, Backup-Hinweis-Banner. 2 neue
+> Backend-Endpoints (`/auth/me/reset-solves` + `/auth/me/reset-tracking`)
+> mit confirm-Query-Schutz. Account-Löschung existierte schon.
+>
+> QA-Sub-Agent: 3 SOLLTE + 2 NICE, kein KRITISCH. Alles gefixt: Sessions/
+> Achievements-Cache, Rate-Limit 5/min, `window.location.replace`, Other-
+> Buttons disabled wenn armed, Backup-Error sichtbar.
+>
+> Commits: `079a876` (Tag `W.danger-zone`) + `26dc492` (Tag `W.danger-zone-qa`).
+
+### Welle 3 — ntfy-Format zurück zu informativ
+
+> `stop-ntfy-notify.sh` umgestellt: nutzt `.tmp/last-ntfy-message.txt` +
+> `.tmp/last-ntfy-title.txt` als Override (Claude schreibt vor Turn-Ende),
+> Fallback ist mechanisch aus git-State (HEAD-subject + Branch + unpushed).
+> Format-Drift vom alten informativen zum generischen Format ist zurückgenommen.
+>
+> Commit: `00be68d` (kein Tag, chore-Methodik).
+
+### Welle 4 — Block A: Doku-Pflege + Issue #1 adressiert
+
+> - `roadmap-data.ts`: Erledigte Items als `done` markiert; neues P1-Item
+>   „Roadmap & Features intern/extern trennen" (= Issue #1 Punkt 3).
+> - `features-data.ts`: 2 neue Bullets (ao5/ao12-PB-Marker + Gefahren-Bereich).
+> - `docs/coolify-https-howto.md` (NEU): Anleitung für Backlog #43 (Coolify-
+>   HTTPS-Setup), 1-Klick-Howto mit Schritten, Rollback und Token-Rotation.
+> - **GitHub-Issue #1 (geschlossen mit Kommentar)** — Punkt 1 (Aktualität)
+>   ist mit diesem Commit erledigt, Punkt 3 (intern/extern-Filter) ist
+>   als neues Roadmap-Item aufgenommen.
+>
+> Commit: `d909d46` (kein Tag, docs).
+
+### Welle 5 — #3 Dashboard „Letzte Rekorde" + QA-Hotfix
+
+> Neue Karte oben in „Deine Performance" im Dashboard: zeigt die 5 jüngsten
+> PB-Ereignisse (Single/ao5/ao12) über ALLE Cubes, chronologisch absteigend.
+> Pro Eintrag: Metrik-Badge (gold ★/cyan ●/emerald ●), Cube, Zeit, Δ-Verbesserung,
+> Age-Label. Klick → Analyse-Tab mit Cube-Filter (zeigt dort PB-Chart).
+> Neuer Backend-Endpoint `/stats/recent-pbs?limit=N`.
+>
+> QA-Sub-Agent: 3 SOLLTE + 2 NICE, kein KRITISCH. Alle relevanten gefixt:
+> `load_only` für Memory, Keyboard-Accessibility (role+tabIndex+Enter),
+> Timezone-Guard im Age-Label, `emptyRecentPbs(limit)`-Funktion statt
+> hartkodiertem Stub-Limit.
+>
+> Commits: `8722a5d` (Tag `W.recent-pbs`) + `e9deea5` (Tag `W.recent-pbs-qa`).
+
+### 🔜 Backlog jetzt (in Reihenfolge)
+
+1. **Roadmap & Features-Liste intern/extern trennen** (NEU, ~1-2h, aus Issue #1)
+   — analog Patch-Notes-intern, Frontend-Filter via `internal`-Flag.
+2. **#43 Coolify-HTTPS** — Howto liegt in `docs/coolify-https-howto.md`,
+   👤 Server-Arbeit (~1h: DNS + Cert + GitHub-Action-URL + Token-Rotation).
+3. **Phase 6 (~05.06.2026)** — apex `cubetracker.de` → Hetzner + Render
+   abbauen + `feature/W-api-prefix` → `main` konsolidieren + GitHub-Default
+   auf `main`.
+4. **Backend-Test-Suite einführen** (P6) — 0% Coverage; mind. Smoke pro
+   Endpoint-Cluster.
+5. **Alembic statt Inline-Migrations** (P6) — Postgres-only-Syntax,
+   bricht auf SQLite.
+
+**🚨 Start-Selbsttest (Projekt-Wurzel / Hooks):** siehe Box direkt im
+„AKTUELLER PRODUKT-STAND"-Block weiter unten.
+
+---
+
 ## ✅ ERLEDIGT 2026-05-26 — Volltag: Methodik-Drift-Fix + Roadmap #5 + Backlog-Pflege
 
 **9 Commits + 5 Tags heute, alles live.** Stand der Live-App: Version
