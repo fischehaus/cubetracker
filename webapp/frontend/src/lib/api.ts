@@ -457,7 +457,12 @@ export interface RecentPbsResponse {
   limit: number;
 }
 
-const EMPTY_RECENT_PBS: RecentPbsResponse = { events: [], count: 0, limit: 5 };
+// QA-Fix W.recent-pbs-qa: Stub haengt am tatsaechlichen limit (vorher hartkodiert 5).
+const emptyRecentPbs = (limit: number): RecentPbsResponse => ({
+  events: [],
+  count: 0,
+  limit,
+});
 
 export function useRecentPbs(limit: number = 5): UseQueryResult<RecentPbsResponse> {
   return useQuery({
@@ -466,7 +471,7 @@ export function useRecentPbs(limit: number = 5): UseQueryResult<RecentPbsRespons
       withStub(
         async () =>
           (await api.get<RecentPbsResponse>("/stats/recent-pbs", { params: { limit } })).data,
-        EMPTY_RECENT_PBS,
+        emptyRecentPbs(limit),
       ),
     staleTime: 60_000,
   });

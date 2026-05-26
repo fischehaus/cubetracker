@@ -19,6 +19,8 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session as OrmSession
 
+from sqlalchemy.orm import load_only
+
 from auth.deps import get_current_user
 from db.database import get_db
 from db.models import Hardware, Session as DbSession, Solve, User
@@ -158,10 +160,24 @@ def get_recent_pbs(
     Berechnung: pro Cube-Type wird die volle pb_history (alle 3 Metriken)
     erzeugt, alle Events werden zusammengefuehrt und nach `at` DESC sortiert.
     Top-N wird zurueckgegeben.
+
+    QA-Fix W.recent-pbs-qa: `load_only` reduziert den Speicher-Overhead pro
+    ORM-Objekt — wir brauchen nur 6 Spalten, nicht das volle Solve-Modell
+    mit Scramble/Notes/etc.
     """
     stmt = (
         select(Solve)
         .where(Solve.user_id == current_user.id)
+        .options(
+            load_only(
+                Solve.id,
+                Solve.time_ms,
+                Solve.dnf,
+                Solve.plus_two,
+                Solve.timestamp,
+                Solve.cube_type,
+            )
+        )
         .order_by(Solve.timestamp.asc())
     )
     rows = list(db.scalars(stmt).all())

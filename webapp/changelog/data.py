@@ -44,6 +44,29 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.recent-pbs-qa",
+        released=date(2026, 5, 27),
+        title="QA-Hotfix nach Recent-PBs (3 SOLLTE + 1 NICE)",
+        highlights=[
+            "Sub-Agent-Review fand 3 SOLLTE + 2 NICE, kein KRITISCH. "
+            "Cross-User-Filter ist lueckenlos (POSITIV).",
+            "Memory-Footprint: load_only(...) auf das Solve-Select in "
+            "/stats/recent-pbs — laedt nur die 6 noetigen Spalten statt "
+            "voller ORM-Objekte (Zeitbombe-Pattern bei aktiven Usern mit "
+            "50k+ Solves).",
+            "Keyboard-Accessibility in RecentRecordsCard: clickable li-"
+            "Elemente haben jetzt role=button + tabIndex + Enter/Space-"
+            "Handler + focus-ring. Tab-Navigation funktioniert.",
+            "Timezone-Guard im Frontend: defensive Z-Suffix-Ergaenzung "
+            "beim Age-Label, falls Backend mal naive ISO-Strings liefert "
+            "(kein Drift mehr durch Browser-Lokalzeit-Interpretation).",
+            "EMPTY_RECENT_PBS-Stub: limit wird jetzt aus dem Hook-Param "
+            "uebernommen statt hartkodiert 5 — Stub-Response stimmt mit "
+            "Request ueberein.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.recent-pbs",
         released=date(2026, 5, 27),
         title="Dashboard: Letzte Rekorde auf einen Blick",

@@ -5,6 +5,7 @@
 // Klick auf einen Eintrag wechselt zum Analyse-Tab mit gesetztem Cube-Filter
 // (zeigt dort den PB-Verlauf-Chart). Optionaler Handler vom Parent.
 
+import * as React from "react";
 import {
   useRecentPbs,
   type RecentPbEvent,
@@ -87,8 +88,16 @@ function RecentPbRow({
   event: RecentPbEvent;
   onClick?: (cubeType: string) => void;
 }) {
-  const daysAgo = event.at
-    ? Math.floor((Date.now() - new Date(event.at).getTime()) / 86_400_000)
+  // QA-Fix W.recent-pbs-qa: Backend liefert ISO mit `+00:00`-Suffix, aber
+  // defensiv ein `Z` ergaenzen falls jemand mal naive ISO-Strings produziert
+  // (Browser interpretiert die sonst als lokale Zeit -> Offset-Drift).
+  const atIso = event.at
+    ? /[Z+]|[-]\d{2}:?\d{2}$/.test(event.at)
+      ? event.at
+      : event.at + "Z"
+    : null;
+  const daysAgo = atIso
+    ? Math.floor((Date.now() - new Date(atIso).getTime()) / 86_400_000)
     : null;
   const ageLabel =
     daysAgo === null
@@ -105,11 +114,27 @@ function RecentPbRow({
 
   const clickable = !!onClick;
 
+  // QA-Fix W.recent-pbs-qa: Keyboard-Accessibility — tabIndex + Enter/Space
+  // damit Tab-Navigation den Eintrag aktivieren kann.
+  const handleKey = clickable
+    ? (e: React.KeyboardEvent<HTMLLIElement>) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick!(event.cube_type);
+        }
+      }
+    : undefined;
+
   return (
     <li
       onClick={clickable ? () => onClick!(event.cube_type) : undefined}
+      onKeyDown={handleKey}
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : undefined}
       className={`flex items-center justify-between gap-3 rounded border border-gray-700/60 bg-gray-800/40 px-3 py-2 ${
-        clickable ? "cursor-pointer hover:bg-gray-800/70" : ""
+        clickable
+          ? "cursor-pointer hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+          : ""
       }`}
       title={
         clickable ? "Klick zeigt den PB-Verlauf im Analyse-Tab" : undefined
