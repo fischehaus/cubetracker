@@ -84,9 +84,11 @@ Wesentliche Welle-Reviews:
 
 ## Branching-Strategie
 
-> ⚠️ **Ist-Zustand (Web-Variante, Stand 2026-05-25):**
-> **`feature/W-api-prefix`** ist der live-deployte Branch UND ab jetzt die
+> ⚠️ **Ist-Zustand (Web-Variante, Stand 2026-05-27):**
+> **`feature/W-api-prefix`** ist der live-deployte Branch UND die
 > **EINE Wahrheit** für Code *und* Doku (Code, Roadmap, NEXT_SESSION, alle .md).
+> **GitHub-Default-Branch zeigt seit 2026-05-27 auch hierhin** (vorher
+> noch auf den eingefrorenen `feature/W-multi-user-web`).
 > **`feature/W-multi-user-web` ist EINGEFROREN** — nur noch Render-Rollback bis
 > Phase 6, dort **NICHT mehr committen/pushen** (jeder Push würde Render neu
 > deployen). **Auto-Deploy ist live** via GitHub-Action (`.github/workflows/deploy.yml`):
@@ -94,8 +96,8 @@ Wesentliche Welle-Reviews:
 > per-App-Deploy-API — Frontend `uuid=pcixgncs671tifdx9e3rxr7h`, Backend
 > `uuid=w3dw05zc8nv2izxa3v2qi911` (Token = GH-Secret `COOLIFY_TOKEN`). Kein manueller
 > Redeploy mehr nötig. Branch-Endspiel (→ `main`, alten Branch löschen, Render
-> abbauen) in Phase 6 (~2026-06-05). Das generische Modell unten gilt erst
-> nach der Konsolidierung.
+> abbauen, GitHub-Default auf `main`) in Phase 6 (~2026-06-05). Das generische
+> Modell unten gilt erst nach der Konsolidierung.
 
 - `main`: immer deployable, nur gemergte Features
 - `feature/<name>`: pro Feature ein eigener Branch

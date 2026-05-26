@@ -265,7 +265,8 @@ Verwaltung, Achievements-Titel, Toaster).
    Server-Arbeit ist 👤.
 5. **Phase 6 (~05.06.2026)** — apex `cubetracker.de` → Hetzner + Render abbauen
    (3 Services) + `feature/W-api-prefix` → `main` konsolidieren + GitHub-Default
-   auf `main` (aktuell zeigt's auf den eingefrorenen `feature/W-multi-user-web`!).
+   auf `main` (zwischenzeitlich am 2026-05-27 von `feature/W-multi-user-web` auf
+   `feature/W-api-prefix` zwischen-korrigiert; in Phase 6 dann auf `main`).
 
 **🚨 Start-Selbsttest (Projekt-Wurzel / Hooks):** siehe Box direkt im Block darunter.
 **Live-Setup-Details** (Coolify-UUIDs, ntfy-Topic, etc.): siehe „AKTUELLER
