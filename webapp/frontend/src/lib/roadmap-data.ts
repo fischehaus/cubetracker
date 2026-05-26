@@ -58,14 +58,24 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
         note: "Dein vollständiges Backup jederzeit herunter- und wieder hochladen, direkt in den Konto-Einstellungen.",
       },
       {
-        title: "Meine Daten — Alle Solves löschen",
-        effort: "~0.5 Tag",
-        note: "Bulk-Löschen aller Solves direkt im Meine-Daten-Tab. Sessions bleiben, nur die Solves weg. Mit 2-Klick-Bestätigung gegen Versehen.",
+        title: "Meine Daten — Gefahren-Bereich: 3 abgestufte Lösch-Aktionen",
+        effort: "~1.5-2 Tage gesamt",
+        note: "Eine eigene Danger-Zone-Sektion unter Meine Daten mit drei roten Buttons (jeweils 2-Klick-Bestätigung + Hinweis auf Backup-Download). Reihenfolge sanft → radikal. Backend: zwei neue Endpoints (Solves-Reset + Tracking-Reset), Account-Löschung gibt's schon. Layout-Impact: neue Sub-Sektion im Meine-Daten-Tab.",
       },
       {
-        title: "Meine Daten — Account-Löschung auch hier",
+        title: "  └ Solves zurücksetzen",
+        effort: "~0.5 Tag",
+        note: "Bulk-Delete aller Solves (cube-übergreifend). Sessions, Hardware, Achievements, Account bleiben. Use-Case: Test-Daten weg, mit eigenem Hardware-Setup neu anfangen.",
+      },
+      {
+        title: "  └ Tracking-Daten zurücksetzen (Reset to factory)",
+        effort: "~1 Tag",
+        note: "Bulk-Delete von Solves + Sessions + Achievements + Daily-Challenges-Historie. Account und Hardware-Inventar bleiben (dein Setup). Use-Case: kompletter Neustart, aber Cube-Sammlung behalten.",
+      },
+      {
+        title: "  └ Account komplett löschen (zusätzlich hier sichtbar)",
         effort: "~2h",
-        note: "Account-Löschung gibt's bisher nur unter Einstellungen — zusätzlich auch in der Meine-Daten-Sektion (gehört thematisch zur Datenhoheit).",
+        note: "Endpoint existiert schon unter Einstellungen — hier nur Frontend-Wrap als roter Button in der Danger-Zone (gehört thematisch zur Datenhoheit). DSGVO-konform: alle Daten weg inkl. Login.",
       },
       {
         title: "Patch-Notes aufgeräumt (nur das Wesentliche)",
