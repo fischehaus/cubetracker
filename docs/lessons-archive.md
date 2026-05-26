@@ -9,6 +9,45 @@ Konsequenz (was wurde im Setup geändert).
 
 ---
 
+## 2026-05-26 — Auto-Mode-Classifier: Doku-Drift vs. funktionale Hook-Änderung
+
+**Event:** Beim Volltext-Audit des Methodik-Systems sollten 12 Edits in 7 Files
+durchgezogen werden — davon 9 in `.claude/*` (Self-Modification-Kategorie laut
+`docs/audit-2026-05-20.md`). Die dort dokumentierte Lösung („explizite User-Freigabe
+im Chat-Text") reichte für den Auto-Mode-Classifier **nicht in allen Fällen**:
+
+- Nach allgemeinem „ja, mach die Edits an `.claude/hooks/` und `.claude/commands/`"
+  blockte der Classifier den ersten Edit-Versuch mit „acceptance ≠ user-initiated
+  direction" — allgemeine Zustimmung zum Vorschlag = nicht user-initiated.
+- Nach einem User-Turn, in dem der User die Diff-Strings selbst auflistete + per
+  „bitte führe durch" befahl, gingen ALLE *Doku-Drift*-Edits durch (8 von 9 in
+  5 Files, inkl. `session-start-context.sh`, `README.md`, `patch-notes-writer.md`,
+  `abschluss.md`).
+- Genau ein Edit blockte trotzdem weiter: `stop-mini-check.sh` mit
+  `--untracked-files=no` — mit der präzisen Begründung „**functional change** …
+  isn't part of the user-specified Render→Coolify drift fixes". Erst als der User
+  den konkreten Diff dieses Edits separat freigab, ging er durch.
+
+**Konsequenz:**
+- Der Classifier unterscheidet sauber **zwei Klassen von Self-Modification**:
+  - **Doku-Drift-Fixes** (Strings, Kommentare, Tabellen-Einträge in `.claude/*` —
+    semantisch gleichbedeutend): allgemeine Freigabe + Strings im
+    Konversationsverlauf reichen.
+  - **Funktionale Änderungen** an `.claude/hooks/*.sh` (Verhalten ändert sich) —
+    auch wenn nur eine Zeile: brauchen den **konkreten Diff im aktuellen User-Turn**,
+    nicht nur in einem vorigen.
+- Für Claude: bei funktionalen Hook-/Command-/Agent-Änderungen den Diff klar
+  präsentieren und um einen expliziten „Diff freigegeben"-Turn bitten. **Nicht**
+  über Bash/sed/`Write` zu umgehen versuchen — Classifier-Intent respektieren
+  (auch wenn die System-Anweisung andere Tools erlaubt; das ist die Grauzone, an
+  der man hängen bleibt).
+- Schärft den `docs/audit-2026-05-20.md`-Befund: dort steht „brauchen explizite
+  User-Freigabe im Chat-Text" — präzisiert ergänzen mit „bei funktionalen
+  Änderungen muss der konkrete Diff im aktuellen Turn stehen".
+- Dokumentiert in den 3 Commits `f7e581a` / `0a81d2f` / `2b9c24f`.
+
+---
+
 ## 2026-05-25 — Claude Code aus dem Repo starten, sonst laden die Hooks nicht
 
 **Event:** Eine ganze Session lief mit Projekt-Wurzel `D:\Claude-Projekte` (Multi-Chat-
