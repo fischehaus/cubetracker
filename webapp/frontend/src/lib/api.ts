@@ -1835,3 +1835,54 @@ export function useAdminDeleteLiveTest(): UseMutationResult<
     },
   });
 }
+
+// ============================================================
+// Danger-Zone (W.danger-zone) — abgestufte Reset-Aktionen unter
+// "Meine Daten". Account-Loeschung ist auch hier sichtbar.
+// ============================================================
+
+export function useResetSolves(): UseMutationResult<void, Error, void> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      await api.post("/auth/me/reset-solves", null, {
+        params: { confirm: "RESET_SOLVES" },
+      });
+    },
+    onSuccess: () => {
+      // Alle solve-/stats-bezogenen Queries refetchen.
+      qc.invalidateQueries({ queryKey: ["solves"] });
+      qc.invalidateQueries({ queryKey: ["stats"] });
+      qc.invalidateQueries({ queryKey: ["pb-history"] });
+      qc.invalidateQueries({ queryKey: ["activity"] });
+      qc.invalidateQueries({ queryKey: ["temporal"] });
+      qc.invalidateQueries({ queryKey: ["by-cube"] });
+    },
+  });
+}
+
+export function useResetTracking(): UseMutationResult<void, Error, void> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      await api.post("/auth/me/reset-tracking", null, {
+        params: { confirm: "RESET_TRACKING" },
+      });
+    },
+    onSuccess: () => {
+      // Total-Reset: alle Queries dropen, frische Welt.
+      qc.invalidateQueries();
+    },
+  });
+}
+
+export function useDeleteAccount(): UseMutationResult<void, Error, void> {
+  return useMutation({
+    mutationFn: async () => {
+      await api.delete("/auth/me");
+      // Token rauswerfen + App neu laden, damit Auth-Check zur Login-Seite redirected.
+      localStorage.removeItem("cubetracker_access_token");
+      window.location.href = "/";
+    },
+  });
+}

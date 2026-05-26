@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { AdminPanel } from "./AdminPanel";
 import { BackupPanel } from "./BackupPanel";
+import { DangerZoneCard } from "./DangerZoneCard";
 import { MeineDatenCard } from "./MeineDatenCard";
 import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
@@ -125,6 +126,10 @@ export function VerwaltungTab() {
           <BackupPanel />
           <ImportPanel />
           <CsTimerExportPanel />
+          {/* W.danger-zone: drei abgestufte Lösch-Aktionen ganz unten —
+              bewusst nach Backup/Import-Tools, damit der User erst das
+              Konstruktive sieht, dann das Destruktive. */}
+          <DangerZoneCard />
         </div>
       )}
       {section === "outliers" && <OutlierCard />}

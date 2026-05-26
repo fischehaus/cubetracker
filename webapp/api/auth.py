@@ -23,12 +23,13 @@ from fastapi import (
     Cookie,
     Depends,
     HTTPException,
+    Query,
     Request,
     Response,
     status,
 )
 from jose import JWTError
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as OrmSession
 
@@ -43,7 +44,15 @@ from auth.jwt import create_token, decode_token
 from auth.password import hash_password, verify_password
 from auth.rate_limit import LOGIN_LIMIT, REFRESH_LIMIT, REGISTER_LIMIT, limiter
 from db.database import get_db
-from db.models import EmailVerificationToken, PasswordResetToken, User
+from db.models import (
+    Achievement,
+    Challenge,
+    EmailVerificationToken,
+    PasswordResetToken,
+    Session as DbSession,
+    Solve,
+    User,
+)
 from db.schemas import (
     AccessTokenOnly,
     EmailChangeRequest,
@@ -386,6 +395,63 @@ def delete_me(
     db.delete(current_user)
     db.commit()
     _clear_refresh_cookie(response)
+
+
+# ============================================================
+# Danger-Zone (W.danger-zone) — abgestufte Reset-Aktionen unter
+# "Meine Daten". Account-Loeschung ist `delete_me` oben.
+# ============================================================
+
+
+@router.post("/me/reset-solves", status_code=status.HTTP_204_NO_CONTENT)
+def reset_solves(
+    confirm: str = Query(
+        ..., description="Muss exakt 'RESET_SOLVES' sein (Versehen-Schutz)."
+    ),
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> None:
+    """Loescht ALLE Solves des aktuellen Users. Sessions, Hardware,
+    Achievements, Daily-Challenges und Account bleiben unberuehrt.
+
+    Use-Case: Test-Daten weg, mit eigenem Hardware-Setup neu anfangen.
+    """
+    if confirm != "RESET_SOLVES":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="confirm muss 'RESET_SOLVES' sein",
+        )
+    db.execute(delete(Solve).where(Solve.user_id == current_user.id))
+    db.commit()
+
+
+@router.post("/me/reset-tracking", status_code=status.HTTP_204_NO_CONTENT)
+def reset_tracking(
+    confirm: str = Query(
+        ..., description="Muss exakt 'RESET_TRACKING' sein (Versehen-Schutz)."
+    ),
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> None:
+    """Loescht ALLE Tracking-Daten des aktuellen Users (Solves + Sessions +
+    Achievements + Daily-Challenges). Account und Hardware-Inventar bleiben
+    (= das Setup). Reset to factory.
+
+    Use-Case: kompletter Neustart, aber Cube-Sammlung behalten.
+
+    Reihenfolge: Solves zuerst (referenzieren Session/Hardware), dann Sessions,
+    dann Achievements + Challenges (keine inter-Constraints).
+    """
+    if confirm != "RESET_TRACKING":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="confirm muss 'RESET_TRACKING' sein",
+        )
+    db.execute(delete(Solve).where(Solve.user_id == current_user.id))
+    db.execute(delete(DbSession).where(DbSession.user_id == current_user.id))
+    db.execute(delete(Achievement).where(Achievement.user_id == current_user.id))
+    db.execute(delete(Challenge).where(Challenge.user_id == current_user.id))
+    db.commit()
 
 
 # ============================================================

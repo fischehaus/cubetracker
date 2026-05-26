@@ -44,6 +44,28 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.danger-zone",
+        released=date(2026, 5, 27),
+        title="Meine Daten: Gefahren-Bereich für volle Datenhoheit",
+        highlights=[
+            "Neue Sektion am Ende des Meine-Daten-Tabs: drei abgestufte "
+            "Lösch-Aktionen, jede mit 2-Klick-Bestätigung und prominentem "
+            "Backup-Hinweis (5 Sekunden Auto-Reset des armed-Buttons, "
+            "falls du den ersten Klick aus Versehen machst).",
+            "Solves zurücksetzen — alle deine Solves weg, Sessions, "
+            "Hardware und Achievements bleiben. Ideal um nach Test-Imports "
+            "mit deinem realen Hardware-Setup neu anzufangen.",
+            "Tracking-Daten zurücksetzen (Reset to factory) — Solves + "
+            "Sessions + Achievements + Daily-Challenges-Historie weg, "
+            "Account und Cube-Sammlung bleiben. Für den kompletten "
+            "Neustart mit behaltenem Setup.",
+            "Account komplett löschen — DSGVO-konform alle Daten inkl. "
+            "Login weg. Funktion gab es bisher nur in den Account-"
+            "Einstellungen, jetzt zusätzlich auch hier sichtbar (gehört "
+            "thematisch zur Datenhoheit).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.avg-pb-dots",
         released=date(2026, 5, 27),
         title="ao5- und ao12-Bestzeiten in der Solve-Liste markiert",
