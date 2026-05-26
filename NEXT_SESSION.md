@@ -24,10 +24,11 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint: #2 + Danger-Zone + ntfy + Issue#1 + #3
+## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint: #2 + Danger-Zone + ntfy + Issue#1 + #3 + Roadmap-intern
 
-**11 Commits + 7 Tags heute, alles live.** Live-Version: `W.recent-pbs` (public).
-Drei Roadmap-Items abgehakt + drei QA-Hotfixe + GitHub-Issue #1 adressiert.
+**12 Commits + 8 Tags heute, alles live.** Live-Version: `W.roadmap-intern` (public).
+Vier Roadmap-Items abgehakt (Average-PB, Danger-Zone, Letzte Rekorde, Roadmap-intern)
++ drei QA-Hotfixe + GitHub-Issue #1 vollständig adressiert (alle 3 Punkte).
 
 ### Welle 1 — #2 Average-PB-Punkte + Hook-Drift
 
@@ -90,19 +91,33 @@ Drei Roadmap-Items abgehakt + drei QA-Hotfixe + GitHub-Issue #1 adressiert.
 >
 > Commits: `8722a5d` (Tag `W.recent-pbs`) + `e9deea5` (Tag `W.recent-pbs-qa`).
 
+### Welle 6 — Roadmap intern/extern + Aufräum-Beifang
+
+> Roadmap-Modal filtert für Non-Admins die Dev-Schuld-Items raus
+> (Backend-Test-Suite, Alembic, Bundle-Split, Random-Move-Fallback +
+> das Meta-Item selbst). Admin sieht alles inkl. amber intern-Badge.
+> Aufräum-Beifang: P1-Duplikat entfernt + Dashboard-Letzte-Rekorde
+> nachträglich als done markiert. `features-data.ts` bewusst unangetastet
+> (alle Bullets sind User-Marketing — Filter wäre toter Code).
+>
+> Damit ist **Issue #1 Punkt 3** vollständig erledigt → Issue #1 ist
+> komplett abgearbeitet (Punkt 1 in Welle 4, Punkt 3 hier).
+>
+> Commit: `0e409d8` (Tag `W.roadmap-intern`).
+
 ### 🔜 Backlog jetzt (in Reihenfolge)
 
-1. **Roadmap & Features-Liste intern/extern trennen** (NEU, ~1-2h, aus Issue #1)
-   — analog Patch-Notes-intern, Frontend-Filter via `internal`-Flag.
-2. **#43 Coolify-HTTPS** — Howto liegt in `docs/coolify-https-howto.md`,
+1. **#43 Coolify-HTTPS** — Howto liegt in `docs/coolify-https-howto.md`,
    👤 Server-Arbeit (~1h: DNS + Cert + GitHub-Action-URL + Token-Rotation).
-3. **Phase 6 (~05.06.2026)** — apex `cubetracker.de` → Hetzner + Render
+2. **Phase 6 (~05.06.2026)** — apex `cubetracker.de` → Hetzner + Render
    abbauen + `feature/W-api-prefix` → `main` konsolidieren + GitHub-Default
    auf `main`.
-4. **Backend-Test-Suite einführen** (P6) — 0% Coverage; mind. Smoke pro
+3. **Backend-Test-Suite einführen** (P6, intern) — 0% Coverage; mind. Smoke pro
    Endpoint-Cluster.
-5. **Alembic statt Inline-Migrations** (P6) — Postgres-only-Syntax,
+4. **Alembic statt Inline-Migrations** (P6, intern) — Postgres-only-Syntax,
    bricht auf SQLite.
+5. **csTimer-Vendor dynamic-importen** (P6, intern, ~1 Tag) — Bundle-Split,
+   schaltet ~16KB gz aus dem initialen Bundle aus.
 
 **🚨 Start-Selbsttest (Projekt-Wurzel / Hooks):** siehe Box direkt im
 „AKTUELLER PRODUKT-STAND"-Block weiter unten.
