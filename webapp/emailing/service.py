@@ -3,7 +3,7 @@
 Resend ist ein modernes Email-Sending-API (https://resend.com).
 3000 Mails/Monat im Free-Tier — ausreichend für Friends-Phase.
 
-API-Key: aus Env RESEND_API_KEY (Render-Env-Var, NIE im Repo!).
+API-Key: aus Env RESEND_API_KEY (Coolify-Env-Var, NIE im Repo!).
 From-Adresse: aus Env RESEND_FROM, Default `noreply@cubetracker.de`.
 
 Drei Email-Typen:

@@ -1,6 +1,6 @@
 """Auth-Konfig (Phase W) — Settings aus Environment-Variables.
 
-In Production: Render setzt JWT_SECRET als secret env var.
+In Production: Coolify (Hetzner) setzt JWT_SECRET als secret env var.
 Lokal: kann via .env-File oder Default-Wert (NUR für Tests) genutzt werden.
 """
 
