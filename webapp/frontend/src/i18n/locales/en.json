@@ -514,6 +514,32 @@
     "colAo5": "AO5",
     "colAo12": "AO12"
   },
+  "importPanel": {
+    "title": "csTimer import",
+    "subtitle": "(migration from csTimer)",
+    "infoBody": "Upload your csTimer export file (.txt or .json) and cubetracker takes over your complete inventory: sessions, solves, scrambles, notes, +2/DNF penalties, timestamps. Re-import detects duplicates (timestamp + time_ms) automatically — nothing is added twice. Dry-run option shows what would happen first.",
+    "description": "Upload a csTimer export file (.txt or .json). Re-import detects duplicates automatically — nothing is added twice.",
+    "warning": "⚠ Do not upload the Cubetracker backup JSON here — that belongs under \"Backup & restore\" above. csTimer export files are typically named cstimer_YYYYMMDD_HHMMSS.txt.",
+    "busy": "Import running … (can take 10-30 seconds for large files)",
+    "unknownError": "Unknown import error",
+    "doneTitle": "Import of \"{{filename}}\" complete.",
+    "newSolves": "{{count}} new solves",
+    "duplicates": "{{count}} skipped as duplicates (re-import)",
+    "newSessions": "{{count}} new sessions",
+    "updatedSessions": "{{count}} sessions updated",
+    "invalid": "⚠ {{count}} solves skipped as invalid"
+  },
+  "csTimerExport": {
+    "title": "csTimer export",
+    "infoBody": "Exports your solves + sessions in csTimer JSON format. You can import the file into csTimer (there: Settings → Backup → Import) — e.g. to continue using cubetracker data on a csTimer mobile app, or as an additional backup variant. Data sovereignty stays with you.",
+    "description": "Exports your solves + sessions in csTimer JSON format. You can import the file into csTimer (Settings → Backup → Import) and continue using cubetracker data there.",
+    "busy": "Preparing …",
+    "button": "📤 Download csTimer file",
+    "downloadFailed": "Export failed",
+    "doneMessage": "File \"{{filename}}\" downloaded.",
+    "notInExportStrong": "Not in the export",
+    "notInExportRest": ": hardware assignment (csTimer doesn't know the concept) and cubetracker achievements/challenges. For a full backup please use the backup panel above. Solves without a session assignment land in a pseudo-session \"No session\"."
+  },
   "verwaltung": {
     "ariaSubTabs": "Settings sections",
     "sessions": "Sessions",

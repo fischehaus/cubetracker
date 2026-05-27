@@ -514,6 +514,32 @@
     "colAo5": "AO5",
     "colAo12": "AO12"
   },
+  "importPanel": {
+    "title": "csTimer-Import",
+    "subtitle": "(Migration aus csTimer)",
+    "infoBody": "Lade deine csTimer-Export-Datei (.txt oder .json) hoch und cubetracker übernimmt deinen kompletten Bestand: Sessions, Solves, Scrambles, Notizen, +2/DNF-Penalties, Timestamps. Re-Import erkennt Duplikate (timestamp + time_ms) automatisch — nichts wird doppelt angelegt. Dry-Run-Option zeigt vorher was passieren würde.",
+    "description": "Lade eine csTimer-Export-Datei hoch (.txt oder .json). Re-Import erkennt Duplikate automatisch — nichts wird doppelt angelegt.",
+    "warning": "⚠ Nicht das Cubetracker-Backup-JSON hier hochladen — das gehört zu „Backup & Wiederherstellung\" oben. csTimer-Export-Dateien heissen typischerweise cstimer_YYYYMMDD_HHMMSS.txt.",
+    "busy": "Import läuft … (kann bei großen Dateien 10-30 Sekunden dauern)",
+    "unknownError": "Unbekannter Fehler beim Import",
+    "doneTitle": "Import von „{{filename}}\" abgeschlossen.",
+    "newSolves": "{{count}} neue Solves",
+    "duplicates": "{{count}} als Duplikat übersprungen (Re-Import)",
+    "newSessions": "{{count}} neue Sessions",
+    "updatedSessions": "{{count}} Sessions aktualisiert",
+    "invalid": "⚠ {{count}} Solves als ungültig übersprungen"
+  },
+  "csTimerExport": {
+    "title": "csTimer-Export",
+    "infoBody": "Exportiert deine Solves + Sessions im csTimer-JSON-Format. Du kannst die Datei in csTimer importieren (dort: Settings → Backup → Import) — z.B. um Cubetracker-Daten auf einer csTimer-Mobile-App weiterzunutzen, oder als zusätzliche Backup-Variante. Datenhoheit bleibt bei dir.",
+    "description": "Exportiert deine Solves + Sessions im csTimer-JSON-Format. Du kannst die Datei in csTimer importieren (Settings → Backup → Import) und so cubetracker-Daten dort weiternutzen.",
+    "busy": "Wird vorbereitet …",
+    "button": "📤 csTimer-Datei herunterladen",
+    "downloadFailed": "Export fehlgeschlagen",
+    "doneMessage": "Datei „{{filename}}\" heruntergeladen.",
+    "notInExportStrong": "Nicht im Export",
+    "notInExportRest": ": Hardware-Zuordnung (csTimer kennt das Konzept nicht) und cubetracker-Achievements/Challenges. Für Voll-Backup bitte das BackupPanel oben verwenden. Solves ohne Session-Zuordnung landen in einer Pseudo-Session „Ohne Session\"."
+  },
   "verwaltung": {
     "ariaSubTabs": "Verwaltungs-Bereiche",
     "sessions": "Sessions",

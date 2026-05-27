@@ -9,10 +9,12 @@
 // Wer Voll-Backup will: BackupPanel (sqlite/json) eine Sektion drüber.
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { InfoButton } from "./InfoButton";
 
 export function CsTimerExportPanel() {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFilename, setLastFilename] = useState<string | null>(null);
@@ -38,7 +40,7 @@ export function CsTimerExportPanel() {
       window.URL.revokeObjectURL(url);
       setLastFilename(filename);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Export fehlgeschlagen");
+      setError(e instanceof Error ? e.message : t("csTimerExport.downloadFailed"));
     } finally {
       setBusy(false);
     }
@@ -47,31 +49,23 @@ export function CsTimerExportPanel() {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 space-y-3">
       <div className="flex items-center gap-2">
-        <h2 className="text-2xl font-semibold text-gray-100">csTimer-Export</h2>
+        <h2 className="text-2xl font-semibold text-gray-100">
+          {t("csTimerExport.title")}
+        </h2>
         <InfoButton>
-          <p className="font-medium mb-1">csTimer-Export</p>
-          <p>
-            Exportiert deine Solves + Sessions im csTimer-JSON-Format. Du
-            kannst die Datei in csTimer importieren (dort: Settings →
-            Backup → Import) — z.B. um Cubetracker-Daten auf einer
-            csTimer-Mobile-App weiterzunutzen, oder als zusätzliche
-            Backup-Variante. Datenhoheit bleibt bei dir.
-          </p>
+          <p className="font-medium mb-1">{t("csTimerExport.title")}</p>
+          <p>{t("csTimerExport.infoBody")}</p>
         </InfoButton>
       </div>
 
-      <p className="text-base text-gray-400">
-        Exportiert deine Solves + Sessions im csTimer-JSON-Format. Du
-        kannst die Datei in csTimer importieren (Settings → Backup →
-        Import) und so cubetracker-Daten dort weiternutzen.
-      </p>
+      <p className="text-base text-gray-400">{t("csTimerExport.description")}</p>
 
       <button
         onClick={downloadExport}
         disabled={busy}
         className="text-base rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
       >
-        {busy ? "Wird vorbereitet …" : "📤 csTimer-Datei herunterladen"}
+        {busy ? t("csTimerExport.busy") : t("csTimerExport.button")}
       </button>
 
       {error && (
@@ -82,16 +76,13 @@ export function CsTimerExportPanel() {
 
       {lastFilename && (
         <div className="rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-          Datei „{lastFilename}" heruntergeladen.
+          {t("csTimerExport.doneMessage", { filename: lastFilename })}
         </div>
       )}
 
       <p className="text-xs text-gray-500">
-        <strong>Nicht im Export</strong>: Hardware-Zuordnung (csTimer
-        kennt das Konzept nicht) und cubetracker-Achievements/Challenges.
-        Für Voll-Backup bitte das BackupPanel oben verwenden.
-        Solves ohne Session-Zuordnung landen in einer Pseudo-Session
-        „Ohne Session".
+        <strong>{t("csTimerExport.notInExportStrong")}</strong>
+        {t("csTimerExport.notInExportRest")}
       </p>
     </div>
   );

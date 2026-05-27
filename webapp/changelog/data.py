@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-import-export",
+        released=date(2026, 5, 27),
+        title="csTimer-Import + csTimer-Export DE/EN",
+        highlights=[
+            "ImportPanel: Header + InfoButton + Description + Warning + "
+            "File-Input-Busy-Hint + Error + Done-Liste (5 Counter-"
+            "Zeilen mit Plural).",
+            "CsTimerExportPanel: Header + InfoButton + Description + "
+            "Button-States (busy/idle) + Done-Message + Footer-Hint.",
+            "Locales-Namespaces neu: importPanel / csTimerExport.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-charts",
         released=date(2026, 5, 27),
         title="Analyse-Tab Charts (5 Karten) in Englisch",

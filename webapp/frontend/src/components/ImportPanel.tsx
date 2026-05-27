@@ -2,6 +2,7 @@
 // Zeigt nach Import die Statistik-Zusammenfassung.
 
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { InfoButton } from "./InfoButton";
@@ -16,6 +17,7 @@ interface ImportResult {
 }
 
 export function ImportPanel() {
+  const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -43,7 +45,7 @@ export function ImportPanel() {
       qc.invalidateQueries({ queryKey: ["sessions"] });
     } catch (e) {
       const msg =
-        e instanceof Error ? e.message : "Unbekannter Fehler beim Import";
+        e instanceof Error ? e.message : t("importPanel.unknownError");
       setError(msg);
     } finally {
       setBusy(false);
@@ -54,31 +56,22 @@ export function ImportPanel() {
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 space-y-4">
       <div className="flex items-center gap-2">
         <h2 className="text-2xl font-semibold text-gray-100">
-          csTimer-Import <span className="text-sm text-gray-500">(Migration aus csTimer)</span>
+          {t("importPanel.title")}{" "}
+          <span className="text-sm text-gray-500">
+            {t("importPanel.subtitle")}
+          </span>
         </h2>
         <InfoButton>
-          <p className="font-medium mb-1">csTimer-Import</p>
-          <p>
-            Lade deine csTimer-Export-Datei (.txt oder .json) hoch und
-            cubetracker übernimmt deinen kompletten Bestand: Sessions,
-            Solves, Scrambles, Notizen, +2/DNF-Penalties, Timestamps.
-            Re-Import erkennt Duplikate (timestamp + time_ms) automatisch —
-            nichts wird doppelt angelegt. Dry-Run-Option zeigt vorher was
-            passieren würde.
-          </p>
+          <p className="font-medium mb-1">{t("importPanel.title")}</p>
+          <p>{t("importPanel.infoBody")}</p>
         </InfoButton>
       </div>
 
       <p className="text-base text-gray-400">
-        Lade eine <strong>csTimer-Export-Datei</strong> hoch (.txt oder .json).
-        Re-Import erkennt Duplikate automatisch — nichts wird doppelt angelegt.
+        {t("importPanel.description")}
       </p>
 
-      <p className="text-xs text-gray-500">
-        ⚠ Nicht das Cubetracker-Backup-JSON hier hochladen — das gehört
-        zu „Backup &amp; Wiederherstellung" oben. csTimer-Export-Dateien
-        heissen typischerweise <code>cstimer_YYYYMMDD_HHMMSS.txt</code>.
-      </p>
+      <p className="text-xs text-gray-500">{t("importPanel.warning")}</p>
 
       <div>
         <input
@@ -95,9 +88,7 @@ export function ImportPanel() {
       </div>
 
       {busy && (
-        <div className="text-base text-purple-300">
-          Import läuft … (kann bei großen Dateien 10-30 Sekunden dauern)
-        </div>
+        <div className="text-base text-purple-300">{t("importPanel.busy")}</div>
       )}
 
       {error && (
@@ -109,33 +100,36 @@ export function ImportPanel() {
       {result && (
         <div className="rounded border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-base text-emerald-200 space-y-1">
           <div className="font-medium">
-            Import von „{result.filename}" abgeschlossen.
+            {t("importPanel.doneTitle", { filename: result.filename })}
           </div>
           <ul className="text-sm space-y-0.5 text-emerald-300/90">
-            <li>
-              <strong>{result.solves_created}</strong> neue Solves
-            </li>
+            <li>{t("importPanel.newSolves", { count: result.solves_created })}</li>
             {result.solves_skipped_duplicate > 0 && (
               <li>
-                <strong>{result.solves_skipped_duplicate}</strong> als
-                Duplikat übersprungen (Re-Import)
+                {t("importPanel.duplicates", {
+                  count: result.solves_skipped_duplicate,
+                })}
               </li>
             )}
             {result.sessions_created > 0 && (
               <li>
-                <strong>{result.sessions_created}</strong> neue Sessions
+                {t("importPanel.newSessions", {
+                  count: result.sessions_created,
+                })}
               </li>
             )}
             {result.sessions_updated > 0 && (
               <li>
-                <strong>{result.sessions_updated}</strong> Sessions
-                aktualisiert
+                {t("importPanel.updatedSessions", {
+                  count: result.sessions_updated,
+                })}
               </li>
             )}
             {result.solves_skipped_invalid > 0 && (
               <li className="text-yellow-300">
-                ⚠ {result.solves_skipped_invalid} Solves als ungültig
-                übersprungen
+                {t("importPanel.invalid", {
+                  count: result.solves_skipped_invalid,
+                })}
               </li>
             )}
           </ul>
