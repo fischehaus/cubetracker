@@ -5,6 +5,7 @@
 // Bei unbekannten/fehlenden Cases zeigt der Component dezent „kein
 // Diagramm verfügbar".
 
+import { useTranslation } from "react-i18next";
 import { getOllImage } from "../lib/oll-images";
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function CubeStateView({ caseId, size = "small", alt }: Props) {
+  const { t } = useTranslation();
   // Aktuell nur OLL — PLL gibt null zurück und wir zeigen Placeholder.
   const url = caseId.startsWith("OLL-") ? getOllImage(caseId) : null;
 
@@ -29,7 +31,7 @@ export function CubeStateView({ caseId, size = "small", alt }: Props) {
     return (
       <div
         className={`${dims} rounded border border-dashed border-gray-700 bg-gray-900/30 flex items-center justify-center text-gray-600 text-xs`}
-        title={`Kein Diagramm verfügbar für ${caseId}`}
+        title={t("algTrainer.noImage", { case: caseId })}
       >
         ∅
       </div>
@@ -39,7 +41,7 @@ export function CubeStateView({ caseId, size = "small", alt }: Props) {
   return (
     <img
       src={url}
-      alt={alt ?? `Cube-State-Diagramm für ${caseId}`}
+      alt={alt ?? t("algTrainer.diagramAlt", { case: caseId })}
       className={`${dims} rounded object-contain bg-gray-900/40`}
       loading="lazy"
     />

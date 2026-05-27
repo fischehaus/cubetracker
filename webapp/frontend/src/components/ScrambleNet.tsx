@@ -13,6 +13,7 @@
 //     sonst „img" ohne Beschreibung.
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { renderScrambleSvg } from "../lib/cube-net";
 
 interface Props {
@@ -41,6 +42,7 @@ export function isScrambleNetSupported(cubeType: string): boolean {
 }
 
 export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
+  const { t } = useTranslation();
   const svgString = useMemo(() => {
     if (!SUPPORTED_TYPES.has(cubeType)) return null;
     try {
@@ -57,7 +59,9 @@ export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
   return (
     <div
       className="mt-3 flex justify-center"
-      aria-label={`2D-Cube-Net nach Scramble: ${scramble || "gelöst"}`}
+      aria-label={t("scramble.netAriaLabel", {
+        scramble: scramble || t("scramble.netSolvedFallback"),
+      })}
     >
       <div
         // dangerouslySetInnerHTML: der String ist von cube-net.ts generiert,

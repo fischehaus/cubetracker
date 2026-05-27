@@ -222,7 +222,9 @@
     "editNoValidation": "Eingabe wird nicht validiert — prüfe selbst dass die Notation zum Cube-Type passt.",
     "notAvailable": "Scramble nicht verfügbar für diesen Typ.",
     "customBadge": "✏ eigene Eingabe",
-    "randomMoveWarning": "Hinweis: Random-Move-Sequenz mit korrekter Notation, kein Random-State-Solver. Gut fürs Training, nicht 100% Wettkampf-vergleichbar. Random-State folgt schrittweise."
+    "randomMoveWarning": "Hinweis: Random-Move-Sequenz mit korrekter Notation, kein Random-State-Solver. Gut fürs Training, nicht 100% Wettkampf-vergleichbar. Random-State folgt schrittweise.",
+    "netAriaLabel": "2D-Cube-Net nach Scramble: {{scramble}}",
+    "netSolvedFallback": "gelöst"
   },
   "filters": {
     "label": "Filter",
@@ -834,7 +836,9 @@
     "infoBody": "Drill-Modus für PLL- + OLL-Algorithmen. Sub-Sets wählbar (z.B. „nur Edge-Permutationen\"), Scrambles werden zufällig generiert mit der Inversion des gewünschten Algorithmus. Löse den Scramble + speichere die Zeit pro Algorithm — hilft Schwachstellen zu identifizieren.",
     "caseNeverPracticed": "noch nie geübt",
     "emptyState": "Klicke einen Case links, um ihn zu drillen.",
-    "footer": "Sortierung: schwächster aktueller ao5 zuerst — wo du zuerst trainieren solltest. Cases ohne Daten am Ende. Jeder Drill-Solve wird automatisch mit `alg_case` getaggt (Cube-Type bleibt 3x3)."
+    "footer": "Sortierung: schwächster aktueller ao5 zuerst — wo du zuerst trainieren solltest. Cases ohne Daten am Ende. Jeder Drill-Solve wird automatisch mit `alg_case` getaggt (Cube-Type bleibt 3x3).",
+    "noImage": "Kein Diagramm verfügbar für {{case}}",
+    "diagramAlt": "Cube-State-Diagramm für {{case}}"
   },
   "drillCard": {
     "label": "Drill",

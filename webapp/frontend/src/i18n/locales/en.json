@@ -222,7 +222,9 @@
     "editNoValidation": "Input is not validated — make sure the notation matches the cube type yourself.",
     "notAvailable": "Scramble not available for this type.",
     "customBadge": "✏ custom input",
-    "randomMoveWarning": "Note: random-move sequence with correct notation, not a random-state solver. Fine for training, not 100% comparable to competition. Random-state is being added step by step."
+    "randomMoveWarning": "Note: random-move sequence with correct notation, not a random-state solver. Fine for training, not 100% comparable to competition. Random-state is being added step by step.",
+    "netAriaLabel": "2D cube net for scramble: {{scramble}}",
+    "netSolvedFallback": "solved"
   },
   "filters": {
     "label": "Filter",
@@ -834,7 +836,9 @@
     "infoBody": "Drill mode for PLL + OLL algorithms. Sub-sets selectable (e.g. \"edge permutations only\"), scrambles are randomly generated as the inverse of the desired algorithm. Solve the scramble + save the time per algorithm — helps identify weak spots.",
     "caseNeverPracticed": "never practiced",
     "emptyState": "Click a case on the left to drill it.",
-    "footer": "Sort: weakest current ao5 first — where you should train first. Cases without data at the end. Each drill solve is automatically tagged with `alg_case` (cube type stays 3x3)."
+    "footer": "Sort: weakest current ao5 first — where you should train first. Cases without data at the end. Each drill solve is automatically tagged with `alg_case` (cube type stays 3x3).",
+    "noImage": "No diagram available for {{case}}",
+    "diagramAlt": "Cube state diagram for {{case}}"
   },
   "drillCard": {
     "label": "Drill",
