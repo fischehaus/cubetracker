@@ -1041,7 +1041,30 @@
     "feedbackHintSuffix": "or directly on GitHub.",
     "internalBadge": "internal",
     "internalBadgeTitle": "Admin-only — dev/tech-debt item, users don't see this",
-    "germanOnlyNotice": "🇩🇪 Roadmap content is currently only available in German. English translation will follow after the Meppel demo (end of May 2026)."
+    "intro": "Cubetracker is under active development — no feature freeze. This list shows what's coming next + why. Ordering is based on user value vs. effort vs. strategic differentiation from csTimer.",
+    "loading": "Loading roadmap…",
+    "errorGeneric": "Roadmap could not be loaded.",
+    "doneStrike": "done",
+    "phases": {
+      "p1Title": "Polish & casual onboarding",
+      "p1Summary": "Quick wins that bring Cubetracker up to csTimer level — visible value, low effort per item.",
+      "p1Timeframe": "May - June 2026",
+      "p2Title": "Own infrastructure (Hetzner Cloud)",
+      "p2Summary": "Done: moved to our own Hetzner Cloud server with Coolify — own domain, HTTPS, daily backups, all data migrated. The app now runs on our own infrastructure.",
+      "p2Timeframe": "May 2026 — done",
+      "p3Title": "Lean into the multi-user USP",
+      "p3Summary": "Cubetracker's strategic bet: the social cubing app. csTimer has NONE of this — this phase makes us unique.",
+      "p3Timeframe": "August 2026",
+      "p4Title": "Catch up on power-user features",
+      "p4Summary": "Catch up with csTimer on power-user features. Highest effort, but indispensable if Cubetracker is to be taken seriously.",
+      "p4Timeframe": "September - November 2026",
+      "p5Title": "Reach & international users",
+      "p5Summary": "Scaling — opening up the market + remaining custom scrambles.",
+      "p5Timeframe": "Q4 2026",
+      "p6Title": "Niche / power users (on request)",
+      "p6Summary": "Features for deep-user requests — built when someone specifically asks. Ordering depends on demand.",
+      "p6Timeframe": "open"
+    }
   },
   "backupPanel": {
     "title": "Backup & restore",

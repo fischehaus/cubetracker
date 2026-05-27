@@ -1,35 +1,51 @@
-// RoadmapModal (Phase W.roadmap-frontend, 2026-05-17).
+// RoadmapModal (Phase W.roadmap-modal-api, 2026-05-28).
 //
-// Zeigt die Roadmap aus lib/roadmap-data.ts an. Vorwaerts-Sicht analog
-// zu PatchNotesModal (Rueckwaerts-Sicht). Triggerbar aus Footer-Link +
-// UserMenu.
+// Vollständig API-gestützt: Items kommen aus dem Backend (useRoadmap),
+// Phase-Meta (Titel/Summary/Timeframe/Farben) bleibt clientseitig
+// als Konstante in lib/roadmap-phases.ts.
 //
-// W.roadmap-intern: items mit `internal=true` werden für Non-Admins
-// rausgefiltert (Dev-Schuld / Bundle-Split / Test-Coverage etc.).
-// Admins sehen alles inkl. amber „intern"-Badge.
+// Render-Logik:
+// - i18n.resolvedLanguage entscheidet ob title_de/title_en + note_de/
+//   note_en gerendert wird.
+// - status="done"-Items bekommen ✓ + Strike-Through (analog der
+//   früheren item.done-Logik).
+// - internal=True-Items kommen nur für Admins zurück (Backend-Filter)
+//   und werden mit einem amber „intern"-Badge gezeigt.
+// - Phasen ohne sichtbare Items werden NICHT gerendert.
+//
+// Trigger: Footer-Link + UserMenu (unverändert).
 
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useRoadmap, type RoadmapItem } from "../lib/api";
 import {
-  ROADMAP_INTRO,
-  ROADMAP_PHASES,
-  type PhaseStatus,
-  type RoadmapPhase,
-  type RoadmapItem,
-} from "../lib/roadmap-data";
+  PHASE_STATUS_COLORS,
+  ROADMAP_PHASES_META,
+  type RoadmapPhaseMeta,
+} from "../lib/roadmap-phases";
 
 interface Props {
   onClose: () => void;
-  /** Wenn true: zeigt auch internal-Items + amber „intern"-Badge. */
-  isAdmin?: boolean;
 }
 
-export function RoadmapModal({ onClose, isAdmin = false }: Props) {
+export function RoadmapModal({ onClose }: Props) {
   const { t, i18n } = useTranslation();
-  // Roadmap-Daten (Phase-Titel, Item-Titel, Notes) sind in lib/roadmap-data.ts
-  // hartkodiert deutsch. Bei nicht-deutscher UI-Sprache zeigen wir oben einen
-  // Hinweis-Banner — Modal bleibt nutzbar (Trust-Signal: aktive Entwicklung),
-  // volle EN-Übersetzung kommt post-Meppel-Demo.
-  const showGermanOnlyNotice = i18n.resolvedLanguage !== "de";
+  const { data, isLoading, error } = useRoadmap();
+
+  // Items nach phase_id gruppieren — pro Phase sortiert nach sort_order
+  // (kommt schon sortiert vom Backend, aber defensive nochmal hier).
+  const itemsByPhase = useMemo(() => {
+    const out: Record<string, RoadmapItem[]> = {};
+    for (const item of data?.items ?? []) {
+      if (!out[item.phase_id]) out[item.phase_id] = [];
+      out[item.phase_id].push(item);
+    }
+    for (const phaseId of Object.keys(out)) {
+      out[phaseId].sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
+    }
+    return out;
+  }, [data?.items]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
@@ -44,7 +60,7 @@ export function RoadmapModal({ onClose, isAdmin = false }: Props) {
             <h2 className="text-2xl font-semibold text-gray-100">
               {t("roadmap.title")}
             </h2>
-            <p className="mt-1 text-sm text-gray-400">{ROADMAP_INTRO}</p>
+            <p className="mt-1 text-sm text-gray-400">{t("roadmap.intro")}</p>
           </div>
           <button
             onClick={onClose}
@@ -61,17 +77,29 @@ export function RoadmapModal({ onClose, isAdmin = false }: Props) {
           {t("roadmap.feedbackHintSuffix")}
         </p>
 
-        {showGermanOnlyNotice && (
-          <div className="mb-5 rounded border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
-            {t("roadmap.germanOnlyNotice")}
-          </div>
+        {isLoading && (
+          <p className="text-sm text-gray-400">{t("roadmap.loading")}</p>
+        )}
+        {error && (
+          <p className="text-sm text-amber-300">{t("roadmap.errorGeneric")}</p>
         )}
 
-        <ol className="space-y-5">
-          {ROADMAP_PHASES.map((phase) => (
-            <PhaseCard key={phase.id} phase={phase} isAdmin={isAdmin} />
-          ))}
-        </ol>
+        {data && (
+          <ol className="space-y-5">
+            {ROADMAP_PHASES_META.map((phase) => {
+              const items = itemsByPhase[phase.id] ?? [];
+              if (items.length === 0) return null;
+              return (
+                <PhaseCard
+                  key={phase.id}
+                  phase={phase}
+                  items={items}
+                  lang={i18n.resolvedLanguage ?? "de"}
+                />
+              );
+            })}
+          </ol>
+        )}
       </div>
     </div>
   );
@@ -79,19 +107,15 @@ export function RoadmapModal({ onClose, isAdmin = false }: Props) {
 
 function PhaseCard({
   phase,
-  isAdmin,
+  items,
+  lang,
 }: {
-  phase: RoadmapPhase;
-  isAdmin: boolean;
+  phase: RoadmapPhaseMeta;
+  items: RoadmapItem[];
+  lang: string;
 }) {
-  const colors = STATUS_COLORS[phase.status];
-  const visibleItems = isAdmin
-    ? phase.items
-    : phase.items.filter((it) => !it.internal);
-  // Phasen mit ausschliesslich internen Items komplett ausblenden — sonst
-  // sähen User eine leere Sektion. Mit aktuellem Datenstand betrifft das
-  // nichts, aber zukunftssicher.
-  if (visibleItems.length === 0) return null;
+  const { t } = useTranslation();
+  const colors = PHASE_STATUS_COLORS[phase.status];
   return (
     <li
       className={`rounded-lg border ${colors.border} bg-gray-900/50 p-4 space-y-3`}
@@ -104,36 +128,39 @@ function PhaseCard({
             {phase.id}
           </span>
           <h3 className="text-lg font-semibold text-gray-100">
-            {phase.title}
+            {t(phase.titleKey)}
           </h3>
         </div>
-        <span className="text-xs text-gray-500">{phase.timeframe}</span>
+        <span className="text-xs text-gray-500">{t(phase.timeframeKey)}</span>
       </div>
 
-      <p className="text-sm text-gray-400">{phase.summary}</p>
+      <p className="text-sm text-gray-400">{t(phase.summaryKey)}</p>
 
       <ul className="space-y-1.5 text-sm">
-        {visibleItems.map((item, i) => (
-          <ItemRow key={i} item={item} />
+        {items.map((item) => (
+          <ItemRow key={item.id} item={item} lang={lang} />
         ))}
       </ul>
     </li>
   );
 }
 
-function ItemRow({ item }: { item: RoadmapItem }) {
+function ItemRow({ item, lang }: { item: RoadmapItem; lang: string }) {
   const { t } = useTranslation();
+  const isDone = item.status === "done";
+  const title = lang.startsWith("en") ? item.title_en : item.title_de;
+  const note = lang.startsWith("en") ? item.note_en : item.note_de;
   return (
     <li
       className={`flex items-start gap-2 ${
-        item.done ? "text-gray-500 line-through decoration-gray-700" : "text-gray-200"
+        isDone
+          ? "text-gray-500 line-through decoration-gray-700"
+          : "text-gray-200"
       }`}
     >
-      <span className="mt-0.5">
-        {item.done ? "✓" : "•"}
-      </span>
+      <span className="mt-0.5">{isDone ? "✓" : "•"}</span>
       <span className="flex-1">
-        {item.title}
+        {title}
         {item.internal && (
           <span
             className="ml-2 rounded px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-200 border border-amber-500/40 no-underline"
@@ -147,38 +174,10 @@ function ItemRow({ item }: { item: RoadmapItem }) {
             ({item.effort})
           </span>
         )}
-        {item.note && (
-          <span className="block text-xs text-gray-500 mt-0.5">
-            {item.note}
-          </span>
+        {note && (
+          <span className="block text-xs text-gray-500 mt-0.5">{note}</span>
         )}
       </span>
     </li>
   );
 }
-
-const STATUS_COLORS: Record<
-  PhaseStatus,
-  { border: string; badge: string }
-> = {
-  active: {
-    border: "border-purple-500/40",
-    badge: "bg-purple-600 text-white",
-  },
-  planned: {
-    border: "border-amber-500/30",
-    badge: "bg-amber-600/40 text-amber-100",
-  },
-  future: {
-    border: "border-gray-700",
-    badge: "bg-gray-700 text-gray-300",
-  },
-  ongoing: {
-    border: "border-blue-500/30",
-    badge: "bg-blue-600/40 text-blue-100",
-  },
-  done: {
-    border: "border-emerald-500/30",
-    badge: "bg-emerald-600/50 text-emerald-100",
-  },
-};

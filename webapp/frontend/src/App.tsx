@@ -673,10 +673,7 @@ function MainLayout() {
         <FeedbackModal onClose={() => setShowFeedback(false)} />
       )}
       {showRoadmap && (
-        <RoadmapModal
-          isAdmin={user?.is_admin ?? false}
-          onClose={() => setShowRoadmap(false)}
-        />
+        <RoadmapModal onClose={() => setShowRoadmap(false)} />
       )}
     </div>
   );

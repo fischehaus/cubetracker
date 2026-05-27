@@ -44,6 +44,33 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-modal-api",
+        released=date(2026, 5, 28),
+        title="🌍 Roadmap-Modal komplett DE/EN — liest jetzt aus DB",
+        highlights=[
+            "Das Roadmap-Modal (Footer-Link „Roadmap\") ist jetzt "
+            "vollständig zweisprachig — jeder Item-Titel + jede Notiz "
+            "rendert in der gewählten UI-Sprache. Der temporäre amber "
+            "„Roadmap content is currently only available in German\"-"
+            "Hinweis aus W.i18n-roadmap-notice ist Geschichte.",
+            "Unter der Haube: Modal liest die Items jetzt aus dem "
+            "neuen /api/roadmap-Endpoint statt aus einer statischen "
+            "TypeScript-Konstante. Phase-Meta (Titel/Summary/Timeframe "
+            "der 6 Phasen) bleibt clientseitig + via i18n-Keys "
+            "übersetzt — Phasen ändern sich selten, Items häufig.",
+            "Status-Logik: Items mit status='done' bekommen weiterhin "
+            "den ✓ + Strike-Through. Phasen ohne sichtbare Items "
+            "werden komplett ausgeblendet (kein „leeres P1\" mehr).",
+            "Sichtbarkeits-Filter passiert serverseitig (Backend "
+            "filtert internal=True-Items für Non-Admins) — der "
+            "isAdmin-Prop am Modal ist weg, kein Mass-Assignment-"
+            "Risiko mehr.",
+            "Cleanup: alte lib/roadmap-data.ts gelöscht (~300 Zeilen "
+            "veralteter Roadmap-Stand). Phase-Meta liegt jetzt in "
+            "lib/roadmap-phases.ts (~80 Zeilen, nur Phase-Struktur).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-db",
         released=date(2026, 5, 28),
         title="Roadmap in DB — Schema + Seed + Endpoints (Backend)",

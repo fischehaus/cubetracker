@@ -1041,7 +1041,30 @@
     "feedbackHintSuffix": "oder direkt auf GitHub.",
     "internalBadge": "intern",
     "internalBadgeTitle": "Nur für Admin sichtbar — Dev-/Tech-Schuld-Thema, User sehen das nicht",
-    "germanOnlyNotice": "🇩🇪 Roadmap-Inhalte sind derzeit nur auf Deutsch verfügbar. Englische Übersetzung folgt nach dem Meppel-Demo (Ende Mai 2026)."
+    "intro": "Cubetracker ist in aktiver Entwicklung — kein Feature-Freeze. Diese Liste zeigt was als Nächstes kommt + warum. Reihenfolge orientiert sich an User-Wert vs Aufwand vs strategischer Differenzierung von csTimer.",
+    "loading": "Lade Roadmap…",
+    "errorGeneric": "Roadmap konnte nicht geladen werden.",
+    "doneStrike": "erledigt",
+    "phases": {
+      "p1Title": "Polish & Casual-Onboarding",
+      "p1Summary": "Quick-Wins die Cubetracker auf csTimer-Niveau heben — sichtbare Mehrwerte, niedriger Aufwand pro Item.",
+      "p1Timeframe": "Mai - Juni 2026",
+      "p2Title": "Eigene Infrastruktur (Hetzner Cloud)",
+      "p2Summary": "Erledigt: Umzug auf eine eigene Hetzner-Cloud mit Coolify — eigene Domain, HTTPS, tägliche Backups, alle Daten übernommen. Die App läuft jetzt auf eigener Infrastruktur.",
+      "p2Timeframe": "Mai 2026 — erledigt",
+      "p3Title": "Multi-User-USP ausspielen",
+      "p3Summary": "Cubetrackers strategische Wette: die soziale Cubing-App. csTimer hat das alles NICHT — diese Phase macht uns einzigartig.",
+      "p3Timeframe": "August 2026",
+      "p4Title": "Power-User-Anschluss",
+      "p4Summary": "Bei den Power-User-Features auf csTimer aufholen. Höchster Aufwand, aber unverzichtbar wenn Cubetracker ernst genommen werden soll.",
+      "p4Timeframe": "September - November 2026",
+      "p5Title": "Reichweite & internationale User",
+      "p5Summary": "Skalierung — Markt-Öffnung + restliche Custom-Scrambles.",
+      "p5Timeframe": "Q4 2026",
+      "p6Title": "Nische / Spezial-User (auf Anfrage)",
+      "p6Summary": "Features für Tiefen-User die wir bauen wenn jemand konkret danach fragt. Reihenfolge je nach Bedarf.",
+      "p6Timeframe": "offen"
+    }
   },
   "backupPanel": {
     "title": "Backup & Wiederherstellung",

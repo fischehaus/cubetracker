@@ -1845,6 +1845,119 @@ export function useUpcomingCompetitions(
 }
 
 // ============================================================
+// Roadmap (Phase W.roadmap-db, 2026-05-28)
+// ============================================================
+
+export type RoadmapStatus = "active" | "done";
+
+export interface RoadmapItem {
+  id: number;
+  phase_id: string;
+  sort_order: number;
+  title_de: string;
+  title_en: string;
+  note_de: string | null;
+  note_en: string | null;
+  effort: string | null;
+  status: RoadmapStatus;
+  internal: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RoadmapResponse {
+  items: RoadmapItem[];
+  count: number;
+  is_admin: boolean;
+}
+
+export interface RoadmapItemCreateInput {
+  phase_id: string;
+  title_de: string;
+  title_en: string;
+  note_de?: string | null;
+  note_en?: string | null;
+  effort?: string | null;
+  status?: RoadmapStatus;
+  internal?: boolean;
+  sort_order?: number | null;
+}
+
+export interface RoadmapItemUpdateInput {
+  phase_id?: string;
+  title_de?: string;
+  title_en?: string;
+  note_de?: string | null;
+  note_en?: string | null;
+  effort?: string | null;
+  status?: RoadmapStatus;
+  internal?: boolean;
+  sort_order?: number;
+}
+
+export function useRoadmap(enabled: boolean = true): UseQueryResult<RoadmapResponse> {
+  return useQuery({
+    queryKey: ["roadmap"],
+    queryFn: async () => {
+      const r = await api.get<RoadmapResponse>("/roadmap");
+      return r.data;
+    },
+    enabled,
+    staleTime: 60_000, // 1min — Admin sieht Updates auch im Modal
+  });
+}
+
+export function useAdminCreateRoadmapItem(): UseMutationResult<
+  RoadmapItem,
+  Error,
+  RoadmapItemCreateInput
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input) => {
+      const r = await api.post<RoadmapItem>("/admin/roadmap/items", input);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["roadmap"] });
+    },
+  });
+}
+
+export function useAdminUpdateRoadmapItem(): UseMutationResult<
+  RoadmapItem,
+  Error,
+  { id: number; patch: RoadmapItemUpdateInput }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }) => {
+      const r = await api.patch<RoadmapItem>(`/admin/roadmap/items/${id}`, patch);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["roadmap"] });
+    },
+  });
+}
+
+export function useAdminDeleteRoadmapItem(): UseMutationResult<
+  void,
+  Error,
+  { id: number }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }) => {
+      await api.delete(`/admin/roadmap/items/${id}`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["roadmap"] });
+    },
+  });
+}
+
+// ============================================================
 // Admin: Live-Tests (Phase W.live-tests, 2026-05-17)
 // ============================================================
 
