@@ -44,6 +44,28 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-charts",
+        released=date(2026, 5, 27),
+        title="Analyse-Tab Charts (5 Karten) in Englisch",
+        highlights=[
+            "TrendsChart: Header, InfoButton, Singles-Toggle, Window-"
+            "Picker, Y-Achsen-Auto-Range + manuelle Override-Inputs + "
+            "Reset, Tooltip-Labels, Line-Namen (Single/ao5/ao12/ao100).",
+            "PbProgressionCard: Header mit Plural-Count (Rekord/Rekorde), "
+            "InfoButton, Empty-State, Tooltip-Labels, Line-Name.",
+            "HistogramChart: Header mit Valid-Count, InfoButton, "
+            "Empty-State, Bin-/Count-Tooltips.",
+            "ActivityChart: Header, InfoButton, Granularity- + Range-"
+            "Picker (Tag/Woche/Monat/30Tage/3Monate/etc.), Summary-Zeile "
+            "mit Total/Average/Peak, Tooltip-Labels (Periode/valide/DNF), "
+            "Bar-Namen (Valide/DNF), Footer-Hint.",
+            "HardwareCompareCard: Header, InfoButton, No-Cube-Filter-"
+            "Hint, 8 Spalten-Header (Hardware/PB/Mean/ao5/Best-ao5/ao12/"
+            "Best-ao12/Solves), Sort-Indicator, Footer.",
+            "Locales-Namespace neu: charts (~80 Strings).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-multi-compare",
         released=date(2026, 5, 27),
         title="Vergleichs-Karte (Cube/Session) in Englisch",

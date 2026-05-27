@@ -11,6 +11,7 @@
 // über alle Cubes hinweg wäre bedeutungslos (verschiedene Skalen).
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useStatsByHardware, type HardwareCubeStats } from "../lib/api";
 import { formatTime } from "../lib/format";
 import { InfoButton } from "./InfoButton";
@@ -33,21 +34,22 @@ type SortKey =
 
 interface ColumnDef {
   key: SortKey;
-  label: string;
+  labelKey: string;
   align: "left" | "right";
   /** Default-Sortier-Richtung beim ersten Klick auf diese Spalte */
   defaultDir: "asc" | "desc";
 }
 
+// Spalten-Definitionen: labelKey = i18n-Key, wird zur Render-Zeit aufgeloest.
 const COLUMNS: ColumnDef[] = [
-  { key: "hardware_name", label: "Hardware", align: "left", defaultDir: "asc" },
-  { key: "best_ms", label: "PB", align: "right", defaultDir: "asc" },
-  { key: "mean_ms", label: "Schnitt", align: "right", defaultDir: "asc" },
-  { key: "current_ao5", label: "ao5", align: "right", defaultDir: "asc" },
-  { key: "best_ao5", label: "Best ao5", align: "right", defaultDir: "asc" },
-  { key: "current_ao12", label: "ao12", align: "right", defaultDir: "asc" },
-  { key: "best_ao12", label: "Best ao12", align: "right", defaultDir: "asc" },
-  { key: "count", label: "Solves", align: "right", defaultDir: "desc" },
+  { key: "hardware_name", labelKey: "charts.hwColHardware", align: "left", defaultDir: "asc" },
+  { key: "best_ms", labelKey: "charts.hwColPb", align: "right", defaultDir: "asc" },
+  { key: "mean_ms", labelKey: "charts.hwColMean", align: "right", defaultDir: "asc" },
+  { key: "current_ao5", labelKey: "charts.hwColAo5", align: "right", defaultDir: "asc" },
+  { key: "best_ao5", labelKey: "charts.hwColBestAo5", align: "right", defaultDir: "asc" },
+  { key: "current_ao12", labelKey: "charts.hwColAo12", align: "right", defaultDir: "asc" },
+  { key: "best_ao12", labelKey: "charts.hwColBestAo12", align: "right", defaultDir: "asc" },
+  { key: "count", labelKey: "charts.hwColSolves", align: "right", defaultDir: "desc" },
 ];
 
 /**
@@ -81,6 +83,7 @@ function compareValues(
 }
 
 export function HardwareCompareCard({ cubeType, sessionId }: Props) {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useStatsByHardware(cubeType, sessionId);
   // Sort-State: default = best_ms asc (PB zuerst, wie vorher)
   const [sortKey, setSortKey] = useState<SortKey>("best_ms");
@@ -108,11 +111,10 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
         <h2 className="text-2xl font-semibold text-gray-100 mb-2">
-          Hardware-Vergleich
+          {t("charts.hwTitle")}
         </h2>
         <p className="text-base text-gray-500">
-          Setze oben einen Cube-Filter, um zu sehen, mit welchem Würfel du
-          schneller bist.
+          {t("charts.hwNoCubeFilter")}
         </p>
       </div>
     );
@@ -121,14 +123,14 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-base text-gray-400">
-        Hardware-Vergleich wird geladen …
+        {t("charts.hwLoading")}
       </div>
     );
   }
   if (error) {
     return (
       <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
-        Fehler: {error.message}
+        {t("charts.hwErrorPrefix", { message: error.message })}
       </div>
     );
   }
@@ -136,39 +138,37 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
         <h2 className="text-2xl font-semibold text-gray-100 mb-2">
-          Hardware-Vergleich ({cubeType})
+          {t("charts.hwTitleWithCube", { cube: cubeType })}
         </h2>
-        <p className="text-base text-gray-500">
-          Noch keine Daten für diesen Cube.
-        </p>
+        <p className="text-base text-gray-500">{t("charts.hwEmpty")}</p>
       </div>
     );
   }
 
   // Bester PB-Wert für optisches Highlight (★)
   const bestEver = data.hardware.find((h) => h.best_ms !== null)?.best_ms ?? null;
-  const sortLabel = COLUMNS.find((c) => c.key === sortKey)?.label ?? "";
+  const sortLabel = t(
+    COLUMNS.find((c) => c.key === sortKey)?.labelKey ?? "charts.hwColPb",
+  );
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-2">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-semibold text-gray-100">
-            Hardware-Vergleich{" "}
+            {t("charts.hwTitle")}{" "}
             <span className="text-base text-gray-400">({cubeType})</span>
           </h2>
           <InfoButton>
-            <p className="font-medium mb-1">Hardware-Vergleich</p>
-            <p>
-              Vergleicht deine Stats pro Cube (Hardware-Eintrag) für den
-              ausgewählten Cube-Type. Hilft zu sehen ob ein bestimmter
-              Speedcube wirklich schneller ist oder nur gefühlt. Klick
-              auf Spaltenkopf zum Sortieren.
-            </p>
+            <p className="font-medium mb-1">{t("charts.hwTitle")}</p>
+            <p>{t("charts.hwInfoBody")}</p>
           </InfoButton>
         </div>
         <span className="text-sm text-gray-500">
-          sortiert nach {sortLabel} {sortDir === "asc" ? "↑" : "↓"}
+          {t("charts.hwSortedBy", {
+            label: sortLabel,
+            dir: sortDir === "asc" ? "↑" : "↓",
+          })}
         </span>
       </div>
 
@@ -185,9 +185,9 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
                     className={`py-2 pr-3 font-medium cursor-pointer select-none hover:text-gray-200 transition ${
                       col.align === "right" ? "text-right" : "text-left"
                     } ${active ? "text-purple-300" : ""}`}
-                    title="Click zum Sortieren"
+                    title={t("charts.hwColSortTitle")}
                   >
-                    {col.label}
+                    {t(col.labelKey)}
                     <span className="ml-1 text-xs">
                       {active ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
                     </span>
@@ -260,12 +260,7 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-gray-500">
-        ★ = Cube mit dem besten Single-PB. Click auf eine Spalten-Ueberschrift
-        sortiert nach dieser Spalte (Click erneut = Richtung wechseln).
-        „Ohne Hardware" enthält csTimer-Importe und Solves ohne explizite
-        Hardware-Zuordnung.
-      </p>
+      <p className="mt-3 text-xs text-gray-500">{t("charts.hwFooter")}</p>
     </div>
   );
 }

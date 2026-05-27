@@ -9,6 +9,7 @@
 // n-ten Tick anzeigen, sonst wird die Achse unleserlich.
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Bar,
   BarChart,
@@ -27,23 +28,21 @@ interface Props {
   sessionId: number | null;
 }
 
-interface RangeOption {
-  value: number; // Tage
-  label: string;
-}
-const RANGE_OPTIONS: RangeOption[] = [
-  { value: 30, label: "30 Tage" },
-  { value: 90, label: "3 Monate" },
-  { value: 180, label: "6 Monate" },
-  { value: 365, label: "1 Jahr" },
-  { value: 1095, label: "3 Jahre" },
-  { value: 10000, label: "Alle" },
+// Range + Granularity-Optionen: nur Werte, Labels werden zur Render-Zeit
+// via t() lokalisiert (siehe Component-Body).
+const RANGE_VALUES: { value: number; key: string }[] = [
+  { value: 30, key: "charts.actRange30Days" },
+  { value: 90, key: "charts.actRange3Months" },
+  { value: 180, key: "charts.actRange6Months" },
+  { value: 365, key: "charts.actRange1Year" },
+  { value: 1095, key: "charts.actRange3Years" },
+  { value: 10000, key: "charts.actRangeAll" },
 ];
 
-const GRANULARITY_OPTIONS: { value: ActivityGranularity; label: string }[] = [
-  { value: "day", label: "Tag" },
-  { value: "week", label: "Woche" },
-  { value: "month", label: "Monat" },
+const GRANULARITY_VALUES: { value: ActivityGranularity; key: string }[] = [
+  { value: "day", key: "charts.actGranPerDay" },
+  { value: "week", key: "charts.actGranPerWeek" },
+  { value: "month", key: "charts.actGranPerMonth" },
 ];
 
 /**
@@ -80,6 +79,7 @@ function formatTick(period: string, gran: ActivityGranularity): string {
 }
 
 export function ActivityChart({ cubeType, sessionId }: Props) {
+  const { t } = useTranslation();
   const [granularity, setGranularity] = useState<ActivityGranularity>("day");
   const [days, setDays] = useState<number>(30);
 
@@ -111,36 +111,45 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
-        Aktivität wird geladen …
+        {t("charts.actLoading")}
       </div>
     );
   }
   if (error) {
     return (
       <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
-        Fehler: {error.message}
+        {t("charts.actErrorPrefix", { message: error.message })}
       </div>
     );
   }
   if (!data) return null;
+
+  const granDayLabel =
+    granularity === "day"
+      ? t("charts.actGranDay")
+      : granularity === "week"
+        ? t("charts.actGranWeek")
+        : t("charts.actGranMonth");
+  const granPluralLabel =
+    granularity === "day"
+      ? t("charts.actDaysWord")
+      : granularity === "week"
+        ? t("charts.actWeeksWord")
+        : t("charts.actMonthsWord");
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <h3 className="text-2xl font-semibold text-gray-100">
-            Aktivität{" "}
+            {t("charts.actTitle")}{" "}
             <span className="text-base text-gray-400">
-              ({data.total_count} Solves)
+              {t("charts.actSolvesCount", { count: data.total_count })}
             </span>
           </h3>
           <InfoButton>
-            <p className="font-medium mb-1">Aktivitäts-Chart</p>
-            <p>
-              Wie viele Solves du pro Tag / Woche / Monat gemacht hast.
-              Granularität über den Selector rechts. Hilft Trainings-
-              Konsistenz zu sehen — lange Pausen vs Streaks.
-            </p>
+            <p className="font-medium mb-1">{t("charts.actInfoTitle")}</p>
+            <p>{t("charts.actInfoBody")}</p>
           </InfoButton>
         </div>
         <div className="flex gap-2 items-center text-sm">
@@ -148,11 +157,11 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
             value={granularity}
             onChange={(e) => setGranularity(e.target.value as ActivityGranularity)}
             className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
-            title="Aggregations-Granularität"
+            title={t("charts.actGranTitle")}
           >
-            {GRANULARITY_OPTIONS.map((o) => (
+            {GRANULARITY_VALUES.map((o) => (
               <option key={o.value} value={o.value}>
-                pro {o.label}
+                {t(o.key)}
               </option>
             ))}
           </select>
@@ -160,11 +169,11 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
             value={days}
             onChange={(e) => setDays(parseInt(e.target.value, 10))}
             className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
-            title="Zeitraum"
+            title={t("charts.actRangeTitle")}
           >
-            {RANGE_OPTIONS.map((o) => (
+            {RANGE_VALUES.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label}
+                {t(o.key)}
               </option>
             ))}
           </select>
@@ -175,22 +184,22 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
       {summary && summary.total > 0 && (
         <div className="mb-3 flex gap-4 flex-wrap text-sm text-gray-400">
           <span>
-            <span className="text-gray-200 font-semibold">{summary.total}</span> Solves
-            insgesamt
+            <span className="text-gray-200 font-semibold">{summary.total}</span>{" "}
+            {t("charts.actTotalCount")}
           </span>
           <span>
             ⌀{" "}
             <span className="text-gray-200 font-semibold">
               {summary.avgPerActive}
             </span>
-            /{granularity === "day" ? "Tag" : granularity === "week" ? "Woche" : "Monat"}{" "}
-            (an aktiven {summary.activeBuckets} {granularity === "day" ? "Tagen" : granularity === "week" ? "Wochen" : "Monaten"})
+            /{granDayLabel} ({t("charts.actAvgPrefix")} {summary.activeBuckets}{" "}
+            {granPluralLabel})
           </span>
           {summary.maxPeriod && (
             <span>
-              Spitze:{" "}
+              {t("charts.actPeakLabel")}{" "}
               <span className="text-gray-200 font-semibold">{summary.maxCount}</span>{" "}
-              am {summary.maxPeriod}
+              {t("charts.actPeakOn")} {summary.maxPeriod}
             </span>
           )}
         </div>
@@ -219,21 +228,32 @@ export function ActivityChart({ cubeType, sessionId }: Props) {
             }}
             labelStyle={{ color: "#9ca3af" }}
             formatter={(v, name) => [
-              `${v} ${name === "count_valid" ? "valide" : "DNF"}`,
+              name === "count_valid"
+                ? t("charts.actTooltipValid", { count: v })
+                : t("charts.actTooltipDnf", { count: v }),
               "",
             ]}
-            labelFormatter={(label) => `Periode ${label}`}
+            labelFormatter={(label) =>
+              t("charts.actTooltipPeriod", { label })
+            }
           />
           <Legend wrapperStyle={{ fontSize: "0.875rem" }} />
-          <Bar dataKey="count_valid" stackId="x" fill="#a855f7" name="Valide" />
-          <Bar dataKey="count_dnf" stackId="x" fill="#ef4444" name="DNF" />
+          <Bar
+            dataKey="count_valid"
+            stackId="x"
+            fill="#a855f7"
+            name={t("charts.actBarValid")}
+          />
+          <Bar
+            dataKey="count_dnf"
+            stackId="x"
+            fill="#ef4444"
+            name={t("charts.actBarDnf")}
+          />
         </BarChart>
       </ResponsiveContainer>
 
-      <p className="mt-3 text-xs text-gray-500">
-        Leere Tage/Wochen/Monate werden mit 0 angezeigt. Filter (Cube, Session)
-        wirken auch hier.
-      </p>
+      <p className="mt-3 text-xs text-gray-500">{t("charts.actFooter")}</p>
     </div>
   );
 }

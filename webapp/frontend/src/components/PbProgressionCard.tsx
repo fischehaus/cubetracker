@@ -6,6 +6,7 @@
 // damit auch alte Rekorde korrekt erscheinen.
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
   Line,
@@ -41,6 +42,7 @@ const METRIC_COLOR: Record<Metric, string> = {
 const METRICS: Metric[] = ["single", "ao5", "ao12"];
 
 export function PbProgressionCard({ cubeType, sessionId }: Props) {
+  const { t } = useTranslation();
   const [metric, setMetric] = useState<Metric>("single");
 
   const params: { cube_type?: string; session_id?: number } = {};
@@ -87,22 +89,21 @@ export function PbProgressionCard({ cubeType, sessionId }: Props) {
     </div>
   );
 
+  const countLabel =
+    series.length === 1
+      ? t("charts.pbProgRecordSingular", { count: series.length })
+      : t("charts.pbProgRecordPlural", { count: series.length });
+
   const header = (
     <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
       <div className="flex items-center gap-2">
         <h3 className="text-2xl font-semibold text-gray-100">
-          PB-Verlauf{" "}
-          <span className="text-base text-gray-400">
-            ({series.length} {series.length === 1 ? "Rekord" : "Rekorde"})
-          </span>
+          {t("charts.pbProgTitle")}{" "}
+          <span className="text-base text-gray-400">({countLabel})</span>
         </h3>
         <InfoButton>
-          <p className="font-medium mb-1">PB-Verlauf</p>
-          <p>
-            Jeder Punkt = ein neuer persoenlicher Rekord (PB) zum Zeitpunkt, als
-            er gesetzt wurde. Die Treppe geht nur runter — so siehst du deine
-            Verbesserung ueber die Zeit. Umschaltbar: Single / ao5 / ao12.
-          </p>
+          <p className="font-medium mb-1">{t("charts.pbProgTitle")}</p>
+          <p>{t("charts.pbProgInfoBody")}</p>
         </InfoButton>
       </div>
       {toggle}
@@ -112,14 +113,14 @@ export function PbProgressionCard({ cubeType, sessionId }: Props) {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
-        PB-Verlauf wird geladen …
+        {t("charts.pbProgLoading")}
       </div>
     );
   }
   if (error) {
     return (
       <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
-        Fehler beim Laden: {error.message}
+        {t("stats.errorPrefix", { message: error.message })}
       </div>
     );
   }
@@ -129,7 +130,7 @@ export function PbProgressionCard({ cubeType, sessionId }: Props) {
       {header}
       {chartData.length === 0 ? (
         <p className="text-base text-gray-500">
-          Noch keine {METRIC_LABEL[metric]}-PBs im aktuellen Filter.
+          {t("charts.pbProgEmpty", { metric: METRIC_LABEL[metric] })}
         </p>
       ) : (
         <ResponsiveContainer width="100%" height={320}>
@@ -166,7 +167,7 @@ export function PbProgressionCard({ cubeType, sessionId }: Props) {
               labelFormatter={(x) =>
                 allHaveAt
                   ? formatDate(new Date(Number(x)).toISOString())
-                  : `Rekord #${x}`
+                  : t("charts.pbProgRecordTooltip", { x })
               }
             />
             <Line
@@ -176,7 +177,7 @@ export function PbProgressionCard({ cubeType, sessionId }: Props) {
               strokeWidth={2}
               dot={{ r: 3, fill: METRIC_COLOR[metric] }}
               activeDot={{ r: 5 }}
-              name={`${METRIC_LABEL[metric]}-PB`}
+              name={t("charts.pbProgLineName", { metric: METRIC_LABEL[metric] })}
               isAnimationActive={false}
             />
           </LineChart>

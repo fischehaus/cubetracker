@@ -3,6 +3,7 @@
 // Form-Konsistenz (schmaler Peak) vs. Streuung (breite Verteilung).
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Bar,
   BarChart,
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function HistogramChart({ cubeType, sessionId }: Props) {
+  const { t } = useTranslation();
   // Histogramm braucht möglichst viele Daten für aussagekraeftige
   // Verteilung. Default: alle (mit hartem Cap auf 100k zur Sicherheit).
   const params: SolveListParams = { limit: 100_000 };
@@ -43,24 +45,24 @@ export function HistogramChart({ cubeType, sessionId }: Props) {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
-        Histogramm wird geladen …
+        {t("charts.histLoading")}
       </div>
     );
   }
   if (error) {
     return (
       <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
-        Fehler beim Laden: {error.message}
+        {t("stats.errorPrefix", { message: error.message })}
       </div>
     );
   }
   if (!solves || solves.length === 0 || data.length === 0) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h3 className="text-2xl font-semibold text-gray-100 mb-2">Verteilung</h3>
-        <p className="text-base text-gray-500">
-          Keine validen Solves im aktuellen Filter.
-        </p>
+        <h3 className="text-2xl font-semibold text-gray-100 mb-2">
+          {t("charts.histTitle")}
+        </h3>
+        <p className="text-base text-gray-500">{t("charts.histEmpty")}</p>
       </div>
     );
   }
@@ -72,19 +74,14 @@ export function HistogramChart({ cubeType, sessionId }: Props) {
       <div className="flex items-center justify-between mb-4 gap-2">
         <div className="flex items-center gap-2">
           <h3 className="text-2xl font-semibold text-gray-100">
-            Verteilung{" "}
+            {t("charts.histTitle")}{" "}
             <span className="text-base text-gray-400">
-              ({totalValid} valide Solves)
+              {t("charts.histValidCount", { count: totalValid })}
             </span>
           </h3>
           <InfoButton>
-            <p className="font-medium mb-1">Verteilungs-Histogramm</p>
-            <p>
-              Wie oft welche Zeit vorkam — gruppiert in Zeit-Bins.
-              Schoene Glocken-Form = konsistente Performance. Lange
-              Schwaenze rechts = Outlier (z.B. Mistake-Solves). DNFs
-              fliegen raus (Achse wäre sonst unendlich).
-            </p>
+            <p className="font-medium mb-1">{t("charts.histInfoTitle")}</p>
+            <p>{t("charts.histInfoBody")}</p>
           </InfoButton>
         </div>
       </div>
@@ -107,8 +104,10 @@ export function HistogramChart({ cubeType, sessionId }: Props) {
               fontSize: "0.875rem",
             }}
             labelStyle={{ color: "#9ca3af" }}
-            formatter={(v) => [`${v} Solves`, ""]}
-            labelFormatter={(label) => `Bin ${label}s`}
+            formatter={(v) => [t("charts.histCountTooltip", { count: v }), ""]}
+            labelFormatter={(label) =>
+              t("charts.histBinTooltip", { label })
+            }
           />
           <Bar dataKey="count" fill="#a855f7" />
         </BarChart>
