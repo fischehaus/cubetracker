@@ -4,6 +4,14 @@
 // (LoginPage + FeaturesModal). Konvention bei neuem Feature: hier
 // einen Bullet ergänzen statt nur Patch-Notes — Patch-Notes sind
 // History, Features-Liste ist Marketing/Onboarding.
+//
+// Seit W.i18n-features (2026-05-27): Sprache wird via react-i18next
+// resolved. Die Liste hier ist nur die Struktur (titles + bullet-keys
+// als i18n-Schlüssel), die echten Strings liegen in den Locales unter
+// dem Namespace `features.*`.
+
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 export interface FeatureCategory {
   title: string;
@@ -11,109 +19,140 @@ export interface FeatureCategory {
   bullets: string[];
 }
 
-export const FEATURE_CATEGORIES: FeatureCategory[] = [
+// Struktur: pro Category ein title-Key + bullet-Keys (1..N).
+// Keys werden via t() resolved.
+interface CategoryDef {
+  titleKey: string;
+  icon: string;
+  bulletKeys: string[];
+}
+
+const CATEGORY_DEFS: CategoryDef[] = [
   {
-    title: "Solving",
+    titleKey: "features.solvingTitle",
     icon: "⏱",
-    bullets: [
-      "WCA-konformer Timer mit Spacebar-Modus + Inspection (15s Countdown, +2/DNF-Penalty automatisch)",
-      "Drei Timer-Modi direkt im Timer-Tab wählbar: Text-Eingabe / Spacebar-WCA / Spacebar-Pragmatisch",
-      "Touch-Timer für Phone: Tippen + Halten ersetzt die Space-Taste",
-      "Scramble-Generator für alle WCA-Cubes (2x2 bis 7x7, Pyraminx, Skewb, Square-1, Megaminx, Clock) PLUS Inoffizielle (Ivy, Gear, Redi, Master Pyraminx, Master Skewb, FTO) — Picker direkt in der Scramble-Karte",
-      "2D-Cube-Net-Vorschau direkt unter dem 3x3-Scramble: siehst auf einen Blick wie der Cube nach Anwendung aussehen muss — ideal zum Verifizieren ob du den Scramble korrekt ausgeführt hast (in den Einstellungen abschaltbar)",
-      "Trainings-Sets: 5/12/25/50/100 Solves planen, am Ende Set-Statistik + Coaching-Feedback",
-      "Auto-Preselect: am häufigsten genutzte Hardware für den aktuellen Cube wird vorgeschlagen",
-      "Sessions strukturieren das Training (z.B. OH, PLL-Drills, Cold-Solves)",
+    bulletKeys: [
+      "features.solvingBullet1",
+      "features.solvingBullet2",
+      "features.solvingBullet3",
+      "features.solvingBullet4",
+      "features.solvingBullet5",
+      "features.solvingBullet6",
+      "features.solvingBullet7",
+      "features.solvingBullet8",
     ],
   },
   {
-    title: "Analyse",
+    titleKey: "features.analysisTitle",
     icon: "📈",
-    bullets: [
-      "Best Times: Single, Mo3, AO5, AO12, AO100 — alle WCA-konform berechnet (+2 + DNF-Trim)",
-      "Best-Avg-Timestamps: zu jedem Best-AO siehst du das Datum an dem es erreicht wurde",
-      "Aktuelle Form-Anzeige: Live-AO5/AO12 vs Mittel der letzten 100/500/alle",
-      "Sortierbare Solve-Liste mit Solvenummern, Mo3/AO5/AO12/AO100 als Spalten, Hardware-Zuordnung",
-      "Detail-Modal pro Solve: vollstaendiger Scramble + Notiz + Kontext via ℹ-Button",
-      "Charts: Trends über Zeit, Distribution-Verteilung, tägliche Aktivität",
-      "PB-Verlauf: alle persönlichen Bestzeiten bleiben als PB markiert (auch alte/überbotene), plus ein Verlaufs-Chart der Single-/AO5-/AO12-Rekorde über die Zeit",
-      "Average-PB-Marker in der Solve-Liste: kleiner farbiger Punkt an jeder ao5/ao12-Zahl, die zum Zeitpunkt ihres Setzens ein Best-Avg war (cyan für ao5, emerald für ao12, gold ★ für Single-PB)",
-      "Hardware-Performance-Vergleich: welcher Cube ist schneller für welchen Type",
+    bulletKeys: [
+      "features.analysisBullet1",
+      "features.analysisBullet2",
+      "features.analysisBullet3",
+      "features.analysisBullet4",
+      "features.analysisBullet5",
+      "features.analysisBullet6",
+      "features.analysisBullet7",
+      "features.analysisBullet8",
+      "features.analysisBullet9",
     ],
   },
   {
-    title: "Trainer",
+    titleKey: "features.trainerTitle",
     icon: "🏆",
-    bullets: [
-      "Achievements: 30+ Erfolge die du nebenbei freischaltest",
-      "Daily Challenges: jeden Tag eine neue kleine Aufgabe",
-      "Algs-Trainer für PLL + OLL mit Selbst-Test-Modus — OLL mit allen 57 Visualisierungen (PLL-Bilder folgen)",
+    bulletKeys: [
+      "features.trainerBullet1",
+      "features.trainerBullet2",
+      "features.trainerBullet3",
     ],
   },
   {
-    title: "Community",
+    titleKey: "features.communityTitle",
     icon: "🤝",
-    bullets: [
-      "Freunde-System: User per Display-Name oder Email finden, Anfragen schicken/annehmen",
-      "Privacy-Opt-In: nur wer „Auffindbar\" aktiviert ist per Display-Name findbar",
-      "Bestenliste: vergleich deine Best Single / AO5 / AO12 mit deinen Freunden",
+    bulletKeys: [
+      "features.communityBullet1",
+      "features.communityBullet2",
+      "features.communityBullet3",
     ],
   },
   {
-    title: "Hardware-Inventar",
+    titleKey: "features.hardwareTitle",
     icon: "🧊",
-    bullets: [
-      "Standard-Liste mit 30 verbreiteten Cubes wird automatisch angelegt (default inaktiv)",
-      "Du markierst die Cubes die du wirklich besitzt + bekommst Statistik nach Hardware",
-      "Bulk-Aktionen pro Cube-Type (aktivieren / deaktivieren / löschen)",
-      "Eigene Cubes anlegen + frei umbenennen",
+    bulletKeys: [
+      "features.hardwareBullet1",
+      "features.hardwareBullet2",
+      "features.hardwareBullet3",
+      "features.hardwareBullet4",
     ],
   },
   {
-    title: "Speedcubing-Welt",
+    titleKey: "features.worldTitle",
     icon: "🌍",
-    bullets: [
-      "WCA-Turniere in deiner Nähe: Liste der nächsten offiziellen Wettkaempfe mit Distanz-Berechnung (Luftlinie) basierend auf deiner Postleitzahl + Land aus dem Profil",
-      "DACH-Bonus: User in DE/AT/CH sehen automatisch auch Turniere aus den direkten Nachbarlaendern (DE-User z.B. AT, CH, NL, BE, LU, FR, DK, PL, CZ)",
-      "Speedcubing-News aus drei kuratierten Quellen: WCA-Announcements (offizielle Mitteilungen), SpeedCubing.org (World Records + Coverage), r/Cubers (Community)",
-      "Auto-Refresh: bei jeder Anmeldung prüfen wir im Hintergrund ob neue News verfügbar sind — beim ersten Dashboard-Aufruf sind sie da, ohne Wartezeit",
-      "Datenquellen sind die offizielle WCA-API + OpenStreetMap-Geocoding (keine Tracker, keine Drittanbieter-Cookies)",
+    bulletKeys: [
+      "features.worldBullet1",
+      "features.worldBullet2",
+      "features.worldBullet3",
+      "features.worldBullet4",
+      "features.worldBullet5",
     ],
   },
   {
-    title: "Daten",
+    titleKey: "features.dataTitle",
     icon: "📥",
-    bullets: [
-      "Verwaltung → Meine Daten: Ein-Klick-Voll-Backup deiner Solves, Sessions, Hardware und Achievements als offenes JSON — du behältst die volle Datenhoheit, jederzeit exportieren oder importieren",
-      "Gefahren-Bereich unter Meine Daten: drei abgestufte Lösch-Aktionen (Solves zurücksetzen / Tracking-Daten zurücksetzen / Account komplett löschen) — jede mit 2-Klick-Bestätigung und prominentem Backup-Hinweis",
-      "csTimer-Import: dein bestehender Bestand wird komplett übernommen (Sessions + Solves + Scrambles + Notizen)",
-      "csTimer-kompatibler Export: wechselbare Datenhoheit jederzeit",
-      "Voll-Backup als JSON inkl. Achievements + Daily-Challenges-Historie",
-      "Automatische Snapshots vor größeren Änderungen (Restore/Bulk-Import)",
+    bulletKeys: [
+      "features.dataBullet1",
+      "features.dataBullet2",
+      "features.dataBullet3",
+      "features.dataBullet4",
+      "features.dataBullet5",
+      "features.dataBullet6",
     ],
   },
   {
-    title: "Account + Sicherheit",
+    titleKey: "features.accountTitle",
     icon: "🔒",
-    bullets: [
-      "Datenschutzerklärung + Impressum öffentlich erreichbar (Footer-Links, auch ohne Login) — kein Cookie-Banner nötig, kein Tracking, kein Drittanbieter-Analytics",
-      "Email-Verifikation + Password-Reset per Mail",
-      "Display-Name + Email-Change-Flow mit Re-Verifikation",
-      "Postleitzahl + Land im Profil (optional) — speist die WCA-Turniere-Suche im Dashboard. Wird ausschließlich für Distanz-Berechnung genutzt, nie weitergegeben",
-      "Account-Löschung (DSGVO-konform, alle Daten weg)",
-      "Multi-User-Isolation: deine Daten sind technisch von anderen getrennt",
+    bulletKeys: [
+      "features.accountBullet1",
+      "features.accountBullet2",
+      "features.accountBullet3",
+      "features.accountBullet4",
+      "features.accountBullet5",
+      "features.accountBullet6",
     ],
   },
 ];
 
-/** Kurz-Tagline für Anmeldeseite — etwas marketinglastig aber ehrlich. */
-export const APP_TAGLINE =
-  "Speedcubing-Tracking neu gedacht. Solves messen, Form analysieren, mit Freunden vergleichen.";
-
-/** 3-4 Headline-Features für Hero-Zeile auf Anmeldeseite. */
-export const HERO_HIGHLIGHTS: string[] = [
-  "WCA-konformer Timer mit Spacebar + Touch-Modus",
-  "csTimer-Import — kompletter Bestand übernommen",
-  "WCA-Turniere in deiner Nähe + Speedcubing-News auf dem Dashboard",
-  "Bestenliste-Vergleich mit Freunden",
+const HERO_KEYS: string[] = [
+  "features.heroHighlight1",
+  "features.heroHighlight2",
+  "features.heroHighlight3",
+  "features.heroHighlight4",
 ];
+
+/**
+ * Hook: liefert die Feature-Liste in der aktuellen UI-Sprache.
+ *
+ * Returns:
+ *   - categories: Feature-Categories mit aufgelösten Strings (title + bullets)
+ *   - tagline: Kurz-Marketing-Zeile für Anmeldeseite
+ *   - heroHighlights: 4 Headline-Bullets für Hero-Zeile auf Anmeldeseite
+ */
+export function useFeatures(): {
+  categories: FeatureCategory[];
+  tagline: string;
+  heroHighlights: string[];
+} {
+  const { t } = useTranslation();
+  return useMemo(
+    () => ({
+      categories: CATEGORY_DEFS.map((def) => ({
+        title: t(def.titleKey),
+        icon: def.icon,
+        bullets: def.bulletKeys.map((k) => t(k)),
+      })),
+      tagline: t("features.tagline"),
+      heroHighlights: HERO_KEYS.map((k) => t(k)),
+    }),
+    [t],
+  );
+}

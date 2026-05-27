@@ -8,13 +8,14 @@ import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
 import { FeatureListPanel } from "../components/FeatureListPanel";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
-import { APP_TAGLINE, HERO_HIGHLIGHTS } from "../lib/features-data";
+import { useFeatures } from "../lib/features-data";
 
 type Mode = "login" | "register" | "forgot";
 
 export function LoginPage() {
   const { login, register } = useAuth();
   const { t } = useTranslation();
+  const { tagline, heroHighlights } = useFeatures();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -185,10 +186,10 @@ export function LoginPage() {
         <aside className="space-y-4 max-w-2xl mx-auto lg:mx-0">
           <div className="rounded-2xl border border-purple-500/30 bg-purple-500/5 p-5">
             <p className="text-base text-gray-200 leading-relaxed">
-              {APP_TAGLINE}
+              {tagline}
             </p>
             <ul className="mt-3 space-y-1 text-sm text-purple-200">
-              {HERO_HIGHLIGHTS.map((h, i) => (
+              {heroHighlights.map((h, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span aria-hidden="true" className="text-purple-400">
                     ✓

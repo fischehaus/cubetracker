@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-features",
+        released=date(2026, 5, 27),
+        title="Marketing/Features-Texte DE/EN",
+        highlights=[
+            "features-data.ts auf react-i18next-Hook umgebaut: aus drei "
+            "Konstanten-Exports (FEATURE_CATEGORIES + APP_TAGLINE + "
+            "HERO_HIGHLIGHTS) wird ein `useFeatures()`-Hook der "
+            "lokalisierte Daten liefert.",
+            "Strukturelle Trennung: Category-Definitionen (titleKey + "
+            "icon + bulletKeys) im File; eigentliche Texte in Locales "
+            "unter Namespace `features.*`.",
+            "8 Categories (Solving + Analyse + Trainer + Community + "
+            "Hardware + Welt + Daten + Account) mit insgesamt ~50 Bullets "
+            "übersetzt, plus Tagline + 4 Hero-Highlights für LoginPage.",
+            "FeatureListPanel migriert: useFeatures()-Hook, plus Modal-"
+            "Heading/Subheading/Footer aus Locale.",
+            "LoginPage migriert: useFeatures() für Tagline + Hero-"
+            "Highlights, behält alles dynamisch lokalisiert.",
+            "Locales-Namespace neu: features (~60 Strings inkl. 50 "
+            "Bullets, 8 Section-Titles, 1 Tagline, 4 Hero, 3 Modal-Meta).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-account-settings",
         released=date(2026, 5, 27),
         title="Account-Settings DE/EN",

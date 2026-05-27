@@ -7,7 +7,8 @@
 // Source-of-Truth: lib/features-data.ts. Wenn neue Features
 // dazukommen → dort einen Bullet adden, beide Stellen zeigen's.
 
-import { FEATURE_CATEGORIES } from "../lib/features-data";
+import { useTranslation } from "react-i18next";
+import { useFeatures } from "../lib/features-data";
 
 interface Props {
   /** Header anzeigen (in Modal: ja; embedded auf LoginPage: optional). */
@@ -20,6 +21,8 @@ export function FeatureListPanel({
   showHeader = true,
   compact = false,
 }: Props) {
+  const { t } = useTranslation();
+  const { categories } = useFeatures();
   return (
     <div className={compact ? "space-y-3" : "space-y-4"}>
       {showHeader && (
@@ -29,16 +32,16 @@ export function FeatureListPanel({
               compact ? "text-xl" : "text-2xl"
             }`}
           >
-            Was kann cubetracker?
+            {t("features.modalHeading")}
           </h2>
           <p className={`mt-1 text-gray-400 ${compact ? "text-xs" : "text-sm"}`}>
-            Multi-User-Web-App zum Tracken + Analysieren von Speedcubing-Solves.
+            {t("features.modalSubheading")}
           </p>
         </header>
       )}
 
       <ul className={compact ? "space-y-3" : "space-y-4"}>
-        {FEATURE_CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <li
             key={cat.title}
             className={`rounded-lg border border-gray-700 bg-gray-900/50 ${
@@ -71,8 +74,7 @@ export function FeatureListPanel({
       </ul>
 
       <p className={`text-gray-500 ${compact ? "text-[10px]" : "text-xs"}`}>
-        Multi-User-Web-Variante, aktiv im Aufbau. Daten leben in einer
-        Postgres-DB, kein Tracking, kein Werbe-Code.
+        {t("features.modalFooter")}
       </p>
     </div>
   );
