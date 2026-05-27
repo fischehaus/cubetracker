@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-hardware-list",
+        released=date(2026, 5, 27),
+        title="Hardware-Inventar DE/EN",
+        highlights=[
+            "HardwareList komplett übersetzt: Header + InfoButton + "
+            "Active/Total-Count + Add-New-Form (Name + Cube-Type + Create).",
+            "Empty-State + Footer + Gruppen-Header mit pro-Cube-Active-"
+            "Count im neuen Locale.",
+            "Bulk-Aktionen pro Gruppe: aktivieren / deaktivieren / "
+            "löschen-mit-Confirm-Dialog (interpolierter Count).",
+            "Pro Row: Select-Aria, Rename-Inline-Edit + Notes-Inline-Edit "
+            "+ Rename-Button + Active/Inactive-Toggle (mit Tooltips) + "
+            "Delete-Confirm-Dialog (interpolierter Hardware-Name).",
+            "Locales-Namespace neu: hardwareList (~30 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-session-list",
         released=date(2026, 5, 27),
         title="Session-Verwaltung DE/EN",

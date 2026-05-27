@@ -12,6 +12,7 @@
 //   "Umbenennen"-Button — beide Wege führen ins gleiche Edit-Feld)
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useBulkDeleteHardware,
   useBulkUpdateHardware,
@@ -25,6 +26,7 @@ import type { Hardware } from "../lib/types";
 import { InfoButton } from "./InfoButton";
 
 export function HardwareList() {
+  const { t } = useTranslation();
   const { data: hardware, isLoading } = useHardware();
   const create = useCreateHardware();
   const update = useUpdateHardware();
@@ -121,10 +123,7 @@ export function HardwareList() {
     const ids = items.filter((h) => selected.has(h.id)).map((h) => h.id);
     if (ids.length === 0) return;
     if (
-      !window.confirm(
-        `${ids.length} markierte Hardware-Einträge wirklich löschen?\n` +
-          `Betroffene Solves verlieren ihre Hardware-Zuordnung, bleiben aber erhalten.`,
-      )
+      !window.confirm(t("hardwareList.bulkDeleteConfirm", { count: ids.length }))
     )
       return;
     bulkDelete.mutate(
@@ -144,7 +143,7 @@ export function HardwareList() {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-base text-gray-400">
-        Inventar wird geladen …
+        {t("hardwareList.loading")}
       </div>
     );
   }
@@ -157,34 +156,33 @@ export function HardwareList() {
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-semibold text-gray-100">
-            Hardware-Inventar{" "}
+            {t("hardwareList.title")}{" "}
             <span className="text-base text-gray-400">
-              ({activeCount} aktiv von {totalCount})
+              {t("hardwareList.countSummary", {
+                active: activeCount,
+                total: totalCount,
+              })}
             </span>
           </h2>
           <InfoButton>
-            <p className="font-medium mb-1">Hardware-Inventar</p>
-            <p>
-              Deine Cube-Sammlung. Jeder neue User bekommt automatisch 30
-              Standard-Cubes (alle inaktiv) — markier die ab die du wirklich
-              besitzt + Bulk-Aktiviere sie. Aktive Cubes erscheinen im
-              Timer-Hardware-Selector + im Hardware-Vergleich. Solves
-              behalten ihre Hardware-Zuordnung auch nach Löschen.
-            </p>
+            <p className="font-medium mb-1">{t("hardwareList.title")}</p>
+            <p>{t("hardwareList.infoBody")}</p>
           </InfoButton>
         </div>
         <button
           onClick={() => setShowAddForm((v) => !v)}
           className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"
         >
-          {showAddForm ? "Abbrechen" : "+ Neuer Cube"}
+          {showAddForm
+            ? t("hardwareList.cancel")
+            : t("hardwareList.addButton")}
         </button>
       </div>
 
       {showAddForm && (
         <div className="mb-4 rounded border border-gray-700 bg-gray-800/40 p-4 flex gap-2 flex-wrap items-end">
           <label className="flex flex-col text-sm text-gray-400">
-            Name
+            {t("hardwareList.nameLabel")}
             <input
               type="text"
               value={newName}
@@ -194,12 +192,12 @@ export function HardwareList() {
                 if (e.key === "Escape") setShowAddForm(false);
               }}
               autoFocus
-              placeholder="z.B. Weilong v11"
+              placeholder={t("hardwareList.namePlaceholder")}
               className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none w-56"
             />
           </label>
           <label className="flex flex-col text-sm text-gray-400">
-            Cube-Type
+            {t("hardwareList.cubeTypeLabel")}
             <select
               value={newCube}
               onChange={(e) => setNewCube(e.target.value)}
@@ -217,7 +215,7 @@ export function HardwareList() {
             disabled={create.isPending || !newName.trim()}
             className="text-base rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
           >
-            Anlegen
+            {t("hardwareList.createSubmit")}
           </button>
         </div>
       )}
@@ -226,8 +224,7 @@ export function HardwareList() {
           Auto-Seed-Backfill — User hat ALLES gelöscht). */}
       {totalCount === 0 && (
         <div className="rounded border border-gray-700 bg-gray-800/30 p-4 mb-4 text-sm text-gray-400">
-          Inventar ist leer. Lege oben einen neuen Cube an, oder logge dich
-          ab + wieder ein damit die Standard-Liste neu geseedet wird.
+          {t("hardwareList.emptyState")}
         </div>
       )}
 
@@ -256,8 +253,10 @@ export function HardwareList() {
                   <h3 className="text-base font-semibold text-gray-300">
                     {cube}{" "}
                     <span className="text-sm text-gray-500 font-normal">
-                      ({items.filter((h) => h.is_active).length} aktiv /{" "}
-                      {items.length})
+                      {t("hardwareList.groupCountSummary", {
+                        active: items.filter((h) => h.is_active).length,
+                        total: items.length,
+                      })}
                     </span>
                   </h3>
                 </label>
@@ -265,28 +264,30 @@ export function HardwareList() {
                 {someSelected && (
                   <div className="flex items-center gap-1.5 ml-auto text-xs">
                     <span className="text-gray-500">
-                      {selectedInGroup.length} ausgewählt:
+                      {t("hardwareList.selectedSummary", {
+                        count: selectedInGroup.length,
+                      })}
                     </span>
                     <button
                       onClick={() => bulkActivate(items, true)}
                       disabled={bulkUpdate.isPending}
                       className="rounded bg-emerald-700/40 px-2 py-1 text-emerald-200 hover:bg-emerald-700/60 disabled:opacity-50"
                     >
-                      ▶ aktivieren
+                      {t("hardwareList.bulkActivate")}
                     </button>
                     <button
                       onClick={() => bulkActivate(items, false)}
                       disabled={bulkUpdate.isPending}
                       className="rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-600 disabled:opacity-50"
                     >
-                      ⏸ deaktivieren
+                      {t("hardwareList.bulkDeactivate")}
                     </button>
                     <button
                       onClick={() => bulkDeleteGroup(items)}
                       disabled={bulkDelete.isPending}
                       className="rounded bg-red-700/40 px-2 py-1 text-red-200 hover:bg-red-700/60 disabled:opacity-50"
                     >
-                      🗑 löschen
+                      {t("hardwareList.bulkDelete")}
                     </button>
                   </div>
                 )}
@@ -311,13 +312,7 @@ export function HardwareList() {
         })}
       </div>
 
-      <p className="mt-4 text-xs text-gray-500">
-        Auto-Seed: jeder neue User bekommt 30 Standard-Cubes mit
-        is_active=false. Du markierst selbst was du wirklich besitzt
-        (Checkbox + ▶ aktivieren). „Umbenennen"-Button oder Klick auf
-        den Namen zum Editieren — Enter speichert, Esc bricht ab.
-        Löschen entfernt nur den Hardware-Eintrag, alte Solves bleiben.
-      </p>
+      <p className="mt-4 text-xs text-gray-500">{t("hardwareList.footer")}</p>
     </div>
   );
 }
@@ -346,6 +341,7 @@ function HardwareRow({
   update: ReturnType<typeof useUpdateHardware>;
   del: ReturnType<typeof useDeleteHardware>;
 }) {
+  const { t } = useTranslation();
   const isEditingName = editing?.id === h.id && editing.field === "name";
   const isEditingNotes = editing?.id === h.id && editing.field === "notes";
 
@@ -366,7 +362,7 @@ function HardwareRow({
         checked={selected}
         onChange={onToggleSelected}
         className="accent-purple-500 w-4 h-4"
-        aria-label={`${h.name} auswählen`}
+        aria-label={t("hardwareList.rowSelectAria", { name: h.name })}
       />
 
       {/* Name (click-to-edit) */}
@@ -393,7 +389,7 @@ function HardwareRow({
         <span
           className="text-base text-gray-100 font-medium min-w-[12rem] cursor-pointer hover:text-purple-300"
           onClick={startRename}
-          title="Klick zum Umbenennen"
+          title={t("hardwareList.renameTitle")}
         >
           {h.name}
         </span>
@@ -430,9 +426,13 @@ function HardwareRow({
               value: h.notes ?? "",
             })
           }
-          title="Klick zum Bearbeiten"
+          title={t("hardwareList.notesEditTitle")}
         >
-          {h.notes ?? <span className="text-gray-600 italic">+ Notiz</span>}
+          {h.notes ?? (
+            <span className="text-gray-600 italic">
+              {t("hardwareList.addNote")}
+            </span>
+          )}
         </span>
       )}
 
@@ -441,9 +441,9 @@ function HardwareRow({
         onClick={startRename}
         disabled={isEditingName}
         className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-purple-700/40 hover:text-purple-100 disabled:opacity-50"
-        title="Umbenennen — alternativer Weg zum Klick auf den Namen"
+        title={t("hardwareList.renameButtonTitle")}
       >
-        ✎ umbenennen
+        {t("hardwareList.renameButton")}
       </button>
       <button
         onClick={() =>
@@ -457,21 +457,21 @@ function HardwareRow({
             ? "bg-emerald-700/40 text-emerald-200 hover:bg-emerald-700/60"
             : "bg-gray-700 text-gray-400 hover:bg-gray-600"
         }`}
-        title={h.is_active ? "Aktiv (Klick zum Deaktivieren)" : "Inaktiv (Klick zum Aktivieren)"}
+        title={
+          h.is_active
+            ? t("hardwareList.activeTitle")
+            : t("hardwareList.inactiveTitle")
+        }
       >
-        {h.is_active ? "aktiv" : "inaktiv"}
+        {h.is_active ? t("hardwareList.active") : t("hardwareList.inactive")}
       </button>
       <button
         onClick={() => {
-          if (
-            window.confirm(
-              `Hardware „${h.name}" wirklich löschen?\n\nBetroffene Solves bleiben erhalten, verlieren aber ihre Hardware-Zuordnung.`,
-            )
-          )
+          if (window.confirm(t("hardwareList.deleteConfirm", { name: h.name })))
             del.mutate(h.id);
         }}
         className="text-sm rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-        title="Löschen — Solves bleiben, hardware_id wird NULL"
+        title={t("hardwareList.deleteButtonTitle")}
       >
         🗑
       </button>
