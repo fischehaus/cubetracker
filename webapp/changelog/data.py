@@ -44,6 +44,23 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-multi-compare",
+        released=date(2026, 5, 27),
+        title="Vergleichs-Karte (Cube/Session) in Englisch",
+        highlights=[
+            "Multi-Compare-Karte (im Dashboard unter „Deine Performance\"): "
+            "Header, InfoButton, Mode-Toggle (Cube-/Session-Vergleich), "
+            "Loading- und Empty-States, Best-Today-Banner — alle Strings "
+            "via t().",
+            "Drilldown-Sektionen (Hardware pro Cube, Cubes pro Session): "
+            "Header + Loading + Empty + PB/Mean-Labels durchgängig "
+            "DE/EN.",
+            "Form-Factor-Helper (formatFactorText) und Footer-Hint mit "
+            "▼/▲-Erklärung übersetzt.",
+            "Locales-Namespace neu: multiCompare (~26 Strings).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-dashboard-sections",
         released=date(2026, 5, 27),
         title="Dashboard-Sektion-Überschriften in Englisch",
