@@ -44,6 +44,28 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-outlier-card",
+        released=date(2026, 5, 27),
+        title="Outlier-Detection DE/EN",
+        highlights=[
+            "OutlierCard komplett übersetzt: Header mit Plural-aware "
+            "Count („1 Solve\" / „N Solves\"), InfoButton + 2-Mode-Toggle "
+            "(Median pro Cube / pro Session) mit Tooltips.",
+            "Session-Filter-Selector + Empty-States (separate Strings für "
+            "„keine Session-Auswahl\" vs „eine Session gewählt\") + Intro-"
+            "Texte (zwei Varianten).",
+            "Pro Group: Label-Fallback („Ohne Session\" / „Session #N\") + "
+            "Median-Summary mit interpolierten Time + Count, pro Outlier "
+            "Tooltip mit Faktor („Xx Median\" oder „N% des Medians\") + "
+            "Label („verdächtig schnell/langsam\").",
+            "Quick-Actions: DNF-Button mit Tooltip, Delete-Button mit "
+            "interpoliertem Confirm-Dialog (ID + Zeit).",
+            "Cleanup: alter Typo „Verdaechtige\" auf „Verdächtige\" korrigiert.",
+            "Locales-Namespace neu: outlierCard (~25 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-hardware-list",
         released=date(2026, 5, 27),
         title="Hardware-Inventar DE/EN",

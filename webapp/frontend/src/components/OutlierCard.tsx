@@ -6,6 +6,7 @@
 // keinen globalen Header-Filter mehr.
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useDeleteSolve,
   useSessions,
@@ -24,6 +25,7 @@ import {
 type GroupMode = "cube" | "session";
 
 export function OutlierCard() {
+  const { t } = useTranslation();
   // Eigener session-filter (default 'alle')
   const [sessionId, setSessionId] = useState<number | null>(null);
   // Phase 8.1: Toggle Median-Berechnung pro Cube vs pro Session
@@ -63,7 +65,7 @@ export function OutlierCard() {
   if (isLoading)
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-base text-gray-400">
-        Outliers werden geladen …
+        {t("outlierCard.loading")}
       </div>
     );
 
@@ -82,22 +84,21 @@ export function OutlierCard() {
               ? "text-2xl font-semibold text-gray-100"
               : "text-2xl font-semibold text-amber-200"
           }>
-            Verdaechtige Zeiten
+            {t("outlierCard.title")}
             {groups.length > 0 && (
               <span className="ml-2 text-sm text-amber-300/70 font-normal">
-                ({totalOutliers} {totalOutliers === 1 ? "Solve" : "Solves"})
+                {t(
+                  totalOutliers === 1
+                    ? "outlierCard.countSingular"
+                    : "outlierCard.countPlural",
+                  { count: totalOutliers },
+                )}
               </span>
             )}
           </h2>
           <InfoButton>
-            <p className="font-medium mb-1">Outlier-Detection</p>
-            <p>
-              Listet Solves die deutlich vom Median deines Cube-Typs
-              abweichen (z.B. 3x mehr als der Median). Typische Ursachen:
-              vertippte Zeit, csTimer-Import mit falscher Skalierung,
-              Misclicks. Du kannst sie direkt löschen oder DNF/+2 nachpflegen.
-              Per-Session oder per-Cube-Median wählbar.
-            </p>
+            <p className="font-medium mb-1">{t("outlierCard.infoTitle")}</p>
+            <p>{t("outlierCard.infoBody")}</p>
           </InfoButton>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -113,9 +114,9 @@ export function OutlierCard() {
                   ? "bg-purple-600 text-white"
                   : "text-gray-300 hover:bg-gray-700"
               }`}
-              title="Median pro Cube-Type"
+              title={t("outlierCard.modePerCubeTitle")}
             >
-              pro Cube
+              {t("outlierCard.modePerCubeLabel")}
             </button>
             <button
               onClick={() => setGroupMode("session")}
@@ -124,13 +125,13 @@ export function OutlierCard() {
                   ? "bg-purple-600 text-white"
                   : "text-gray-300 hover:bg-gray-700"
               }`}
-              title="Median pro Session"
+              title={t("outlierCard.modePerSessionTitle")}
             >
-              pro Session
+              {t("outlierCard.modePerSessionLabel")}
             </button>
           </div>
           <label className="flex items-center gap-2 text-sm text-gray-400">
-            Session:
+            {t("outlierCard.sessionFilter")}
             <select
               value={sessionId === null ? "__all__" : String(sessionId)}
               onChange={(e) =>
@@ -140,7 +141,7 @@ export function OutlierCard() {
               }
               className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
             >
-              <option value="__all__">Alle Sessions</option>
+              <option value="__all__">{t("outlierCard.allSessions")}</option>
               {sessions?.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -153,14 +154,19 @@ export function OutlierCard() {
 
       {groups.length === 0 ? (
         <p className="text-base text-gray-400">
-          Keine verdaechtigen Zeiten in
-          {sessionId !== null ? " der gewählten Session" : " den Daten"}. ✅
+          {t(
+            sessionId !== null
+              ? "outlierCard.emptySession"
+              : "outlierCard.emptyAll",
+          )}
         </p>
       ) : (
         <p className="text-sm text-gray-400 mb-4">
-          Solves, die deutlich vom typischen Tempo dieses Cubes abweichen
-          (vermutlich Timer-Fehler oder vergessene Solves).
-          {sessionId !== null && " Nur die aktive Session."}
+          {t(
+            sessionId !== null
+              ? "outlierCard.introSession"
+              : "outlierCard.introAll",
+          )}
         </p>
       )}
 
@@ -172,14 +178,18 @@ export function OutlierCard() {
             groupMode === "cube"
               ? g.cube_type
               : g.session_id == null
-              ? "Ohne Session"
-              : sessionNameById.get(g.session_id) ?? `Session #${g.session_id}`;
+              ? t("outlierCard.withoutSession")
+              : sessionNameById.get(g.session_id) ??
+                t("outlierCard.sessionFallback", { id: g.session_id });
           return (
           <div key={g.group_key}>
             <div className="text-sm text-gray-400 mb-2">
               <span className="text-gray-200 font-medium">{label}</span>
               <span className="ml-2">
-                Median {formatTime(g.median_ms)} über {g.count_total} Solves
+                {t("outlierCard.medianSummary", {
+                  time: formatTime(g.median_ms),
+                  count: g.count_total,
+                })}
               </span>
             </div>
             <ul className="space-y-1.5">
@@ -197,31 +207,44 @@ export function OutlierCard() {
                       }
                       title={
                         o.reason === "too_fast"
-                          ? `${(o.factor * 100).toFixed(0)}% des Medians`
-                          : `${o.factor.toFixed(1)}x Median`
+                          ? t("outlierCard.factorTooFastTitle", {
+                              percent: (o.factor * 100).toFixed(0),
+                            })
+                          : t("outlierCard.factorTooSlowTitle", {
+                              factor: o.factor.toFixed(1),
+                            })
                       }
                     >
                       {formatTime(o.effective_ms)}
                     </span>
                     <span className="text-gray-500 truncate text-xs">
-                      {o.reason === "too_fast" ? "verdächtig schnell" : "verdächtig langsam"}
+                      {o.reason === "too_fast"
+                        ? t("outlierCard.tooFast")
+                        : t("outlierCard.tooSlow")}
                     </span>
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <button
                       onClick={() => update.mutate({ id: o.id, payload: { dnf: true } })}
                       className="text-xs rounded bg-red-700/40 px-2 py-1 text-red-200 hover:bg-red-700/60"
-                      title="Als DNF markieren — bleibt erhalten, fliegt aber aus den Stats"
+                      title={t("outlierCard.dnfButtonTitle")}
                     >
-                      DNF
+                      {t("outlierCard.dnfButton")}
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm(`Solve #${o.id} (${formatTime(o.effective_ms)}) wirklich löschen?`))
+                        if (
+                          confirm(
+                            t("outlierCard.deleteConfirm", {
+                              id: o.id,
+                              time: formatTime(o.effective_ms),
+                            }),
+                          )
+                        )
                           del.mutate(o.id);
                       }}
                       className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-                      title="Solve löschen"
+                      title={t("outlierCard.deleteButtonTitle")}
                     >
                       🗑
                     </button>
