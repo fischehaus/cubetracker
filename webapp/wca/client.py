@@ -215,13 +215,21 @@ async def fetch_person(wca_id: str) -> dict[str, Any] | None:
     if not isinstance(raw, dict):
         raise WcaApiError(f"WCA-API-Response unerwartet (kein Object): {type(raw)}")
 
-    # Strukturieren auf Slim-Dict. WCA-API liefert ein paar verschachtelte
-    # Strukturen — wir extrahieren genau die Felder die unsere UI nutzt.
+    # WCA-API-Quirks (post-deploy verifiziert 2026-05-28):
+    #  - Top-level Feld heißt `competition_count` (Singular!), nicht plural
+    #  - `competitions` ist NICHT im /persons/{id} drin — separater Endpoint
+    #  - records-Keys: world/continental/national (lowercase), nicht WR/CR/NR
+    #  - PR rank-Keys: continent_rank/country_rank (nicht continental_rank/national_rank)
     person = raw.get("person") or {}
-    competitions = raw.get("competitions") or []
     medals = raw.get("medals") or {}
     records = raw.get("records") or {}
     personal_records = raw.get("personal_records") or {}
+
+    # Separater Call für Recent-Comps: /persons/{wca_id}/competitions liefert
+    # die volle Wettkampf-Historie als Array, sortiert nach start_date asc.
+    # Wir nehmen die letzten 5 (neueste zuerst). Defensiv: bei Fehler einfach
+    # leere Liste — der Rest der Card funktioniert weiterhin.
+    recent_comps = await _fetch_person_competitions(wca_id)
 
     slim = {
         "wca_id": person.get("wca_id") or wca_id,
@@ -232,7 +240,7 @@ async def fetch_person(wca_id: str) -> dict[str, Any] | None:
         "url": person.get("url"),
         "avatar_url": (person.get("avatar") or {}).get("url"),
         "avatar_thumb_url": (person.get("avatar") or {}).get("thumb_url"),
-        "competitions_count": len(competitions),
+        "competitions_count": raw.get("competition_count") or 0,
         "medals": {
             "gold": medals.get("gold", 0),
             "silver": medals.get("silver", 0),
@@ -240,20 +248,69 @@ async def fetch_person(wca_id: str) -> dict[str, Any] | None:
             "total": medals.get("total", 0),
         },
         "records": {
-            "world": records.get("WR", 0),
-            "continental": records.get("CR", 0),
-            "national": records.get("NR", 0),
+            "world": records.get("world", 0),
+            "continental": records.get("continental", 0),
+            "national": records.get("national", 0),
             "total": records.get("total", 0),
         },
         # personal_records: dict keyed by event_id, jeder Wert hat "single" + "average".
         # Wir konvertieren zu Array of {event, single, average} für stable Frontend-Render.
         "personal_records": _slim_personal_records(personal_records),
-        # Recent competitions (last 5, neueste zuerst) — sortiert nach start_date desc.
-        "recent_competitions": _slim_competitions_for_person(competitions),
+        "recent_competitions": _slim_competitions_for_person(recent_comps),
     }
 
     _person_cache[cache_key] = (time.time(), slim, False)
     return slim
+
+
+async def _fetch_person_competitions(wca_id: str) -> list[dict[str, Any]]:
+    """Holt die volle Wettkampf-Historie für eine WCA-ID.
+
+    Endpoint: GET /persons/{wca_id}/competitions. Returnt Liste sortiert
+    nach start_date asc — wir behalten alles und sortieren später im
+    _slim_competitions_for_person desc.
+
+    Defensiv: bei API-Fehler returnen wir [] (Recent-Comps-Sektion bleibt
+    leer, aber der Rest der Card lebt). Cache: eigener Slot, gleicher
+    TTL wie fetch_person (6h positive / 30min negative).
+    """
+    cache_key = f"person_comps:{wca_id}"
+    entry = _person_cache.get(cache_key)
+    if entry is not None:
+        ts, data, is_negative = entry
+        ttl = PERSON_CACHE_TTL_NEGATIVE_S if is_negative else PERSON_CACHE_TTL_S
+        if time.time() - ts <= ttl:
+            return data if isinstance(data, list) else []
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=WCA_TIMEOUT_S,
+            headers={
+                "User-Agent": "cubetracker.de/2.0 (https://cubetracker.de)",
+                "Accept": "application/json",
+            },
+        ) as client:
+            resp = await client.get(
+                f"{WCA_API_BASE}/persons/{wca_id}/competitions"
+            )
+            if resp.status_code == 404:
+                _person_cache[cache_key] = (time.time(), [], True)
+                return []
+            resp.raise_for_status()
+            raw = resp.json()
+    except httpx.HTTPError as e:
+        logger.warning("WCA person comps fetch failed for %s: %s", wca_id, e)
+        # Negative-cache mit kurzer TTL, damit ein temporärer Fehler nicht
+        # 6h lang den Recent-Comps-Block tot hält.
+        _person_cache[cache_key] = (time.time(), [], True)
+        return []
+
+    if not isinstance(raw, list):
+        _person_cache[cache_key] = (time.time(), [], True)
+        return []
+
+    _person_cache[cache_key] = (time.time(), raw, False)
+    return raw
 
 
 def _slim_personal_records(prs: dict[str, Any]) -> list[dict[str, Any]]:
@@ -268,11 +325,15 @@ def _slim_personal_records(prs: dict[str, Any]) -> list[dict[str, Any]]:
     def _slim_one(entry: dict[str, Any] | None) -> dict[str, Any] | None:
         if not isinstance(entry, dict):
             return None
+        # WCA-API-Quirk (post-deploy verifiziert): die rank-Felder heißen
+        # `continent_rank` / `country_rank` (nicht continental_rank /
+        # national_rank). Wir mappen das hier auf unsere Output-Naming-
+        # Konvention damit das Frontend stabil bleibt.
         return {
             "best": entry.get("best"),
             "world_rank": entry.get("world_rank"),
-            "continental_rank": entry.get("continental_rank"),
-            "national_rank": entry.get("national_rank"),
+            "continental_rank": entry.get("continent_rank"),
+            "national_rank": entry.get("country_rank"),
         }
 
     out: list[dict[str, Any]] = []

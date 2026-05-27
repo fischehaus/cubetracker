@@ -44,6 +44,36 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-profile-bugfix",
+        released=date(2026, 5, 28),
+        title="WCA-Profil: Wettkampf-Count + Medaillen + Ränge zeigten 0",
+        highlights=[
+            "User-Befund (live nach Deploy): WCA-Profil-Karte funktionierte "
+            "soweit, aber Wettkampf-Count + Medaillen-Counter + Rekord-"
+            "Counter + Recent-Comps zeigten überall 0 oder waren leer.",
+            "Ursache: 4 Mismatches zwischen unserem Code und der echten "
+            "WCA-API-v0-Response (post-deploy verifiziert gegen "
+            "2009ZEMD01-Live-Daten):",
+            "1) Top-Level-Feld heißt `competition_count` (Singular!), "
+            "nicht `competitions_count` — daher 0.",
+            "2) `/persons/{id}` enthält gar KEIN `competitions`-Feld — "
+            "die Wettkampf-Historie kommt aus dem separaten Endpoint "
+            "`/persons/{id}/competitions`. Wird jetzt parallel "
+            "abgerufen + 6h gecached.",
+            "3) Records-Keys: WCA liefert `world` / `continental` / "
+            "`national` / `total` (lowercase) — wir hatten WR / CR / NR "
+            "erwartet.",
+            "4) PR-Rank-Keys: WCA liefert `continent_rank` / "
+            "`country_rank` — wir hatten `continental_rank` / "
+            "`national_rank` erwartet. Backend mappt das jetzt auf "
+            "unsere stabilen Output-Keys (Frontend unverändert).",
+            "Lesson: API-Quirks IMMER mit echter Live-Response gegen-"
+            "checken bevor man Slim-Mappers baut. Smoke-Test gegen "
+            "Zemdegs jetzt im /abschluss-Workflow.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.qa-polish",
         released=date(2026, 5, 28),
         title="QA-Polish: getIntlLocale-Utility extrahiert",
