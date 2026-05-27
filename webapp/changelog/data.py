@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-list",
+        released=date(2026, 5, 27),
+        title="Solve-Liste + Filter-Bars in Englisch verfügbar",
+        highlights=[
+            "SolveList komplett übersetzt — Spalten-Header (#/Zeit/Mo3/"
+            "AO5/AO12/AO100/Cube/Hardware/Aktionen), alle Tooltips "
+            "(PB-Stern, Old-PB, ao5/ao12-Marker, Inline-Edit-Hint), "
+            "Action-Buttons (Details/+2/DNF/Löschen) inkl. Confirm-"
+            "Dialog, Limit-Picker und Footer-Tipp.",
+            "Filter-Bars im Analyse-Tab und im Dashboard durchgängig "
+            "DE/EN: Filter-Label, Cube/Session-Selektoren, „Alle\"-"
+            "Options, Reset-Buttons.",
+            "Locales-Namespaces neu: solveList.* (35 Strings) + "
+            "filters.* (7 Strings, geteilt zwischen Analyse- und "
+            "Dashboard-Filter-Bar).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-stats",
         released=date(2026, 5, 27),
         title="Dashboard-Statistik-Karten in Englisch verfügbar",

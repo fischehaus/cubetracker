@@ -8,6 +8,7 @@
 // read-only (Änderungen seltener; ggf. später via Edit-Dialog).
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useDeleteSolve,
   useHardware,
@@ -45,13 +46,16 @@ interface Props {
 }
 
 // Auswahl-Optionen für den Limit-Selector. -1 steht für „alles".
-const LIMIT_OPTIONS: { value: number; label: string }[] = [
+// W.i18n-list: das "Alle"-Label wird zur Render-Zeit übersetzt
+// (siehe useLimitOptions); die numerischen Labels bleiben sprach-
+// unabhängig.
+const LIMIT_VALUES: { value: number; label: string | null }[] = [
   { value: 50, label: "50" },
   { value: 100, label: "100" },
   { value: 200, label: "200" },
   { value: 500, label: "500" },
   { value: 1000, label: "1000" },
-  { value: -1, label: "Alle" },
+  { value: -1, label: null }, // „Alle" / „All" — i18n-gerendert
 ];
 
 // Notes-Edit raus aus der Tabelle — wird nur noch im Detail-Modal angezeigt.
@@ -59,6 +63,7 @@ const LIMIT_OPTIONS: { value: number; label: string }[] = [
 type EditingState = { solveId: number; field: "time" } | null;
 
 export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) {
+  const { t } = useTranslation();
   const [limit, setLimit] = useState<number>(100);
   const [editing, setEditing] = useState<EditingState>(null);
   const [draftValue, setDraftValue] = useState<string>("");
@@ -191,7 +196,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
     if (!editing) return;
     const ms = parseTimeInput(draftValue);
     if (ms === null) {
-      setEditError("Ungueltiges Zeit-Format");
+      setEditError(t("solveList.editError"));
       return;
     }
     update.mutate(
@@ -203,32 +208,34 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
-        Solves werden geladen …
+        {t("solveList.loading")}
       </div>
     );
   }
   if (error) {
     return (
       <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
-        Fehler beim Laden: {error.message}
+        {t("solveList.errorPrefix", { message: error.message })}
       </div>
     );
   }
   if (!solves || solves.length === 0) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-2">Solves</h2>
+        <h2 className="text-2xl font-semibold text-gray-100 mb-2">
+          {t("solveList.title")}
+        </h2>
         <p className="text-base text-gray-400">
           {cubeFilter
-            ? `Keine Solves für "${cubeFilter}" vorhanden.`
-            : "Noch keine Solves. Trag oben einen ein oder importier deine csTimer-Daten."}
+            ? t("solveList.emptyWithFilter", { cube: cubeFilter })
+            : t("solveList.emptyNoFilter")}
         </p>
         {cubeFilter && (
           <button
             onClick={() => onCubeFilterChange("")}
             className="mt-3 text-base text-purple-400 hover:text-purple-300"
           >
-            Filter zurücksetzen
+            {t("solveList.resetFilter")}
           </button>
         )}
       </div>
@@ -240,20 +247,15 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-semibold text-gray-100">
-            Solves{" "}
+            {t("solveList.title")}{" "}
             <span className="text-base text-gray-400">
               ({solves.length}
               {cubeFilter && ` · ${cubeFilter}`})
             </span>
           </h2>
           <InfoButton>
-            <p className="font-medium mb-1">Solve-Liste</p>
-            <p>
-              Alle deine Solves chronologisch (neueste oben). Klick auf
-              Spaltenkopf #/Zeit/AO5/AO12 zum Sortieren. Klick auf Zeit
-              oder Notiz bearbeitet inline. ℹ-Button pro Zeile zeigt
-              Scramble + Hardware + Session-Details.
-            </p>
+            <p className="font-medium mb-1">{t("solveList.infoTitle")}</p>
+            <p>{t("solveList.infoBody")}</p>
           </InfoButton>
         </div>
         {/* Limit-Selektor bleibt list-spezifisch. Cube-Filter sitzt in
@@ -262,11 +264,11 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
           value={limit}
           onChange={(e) => setLimit(parseInt(e.target.value, 10))}
           className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
-          title="Maximale Anzahl angezeigter Solves"
+          title={t("solveList.limitTitle")}
         >
-          {LIMIT_OPTIONS.map((o) => (
+          {LIMIT_VALUES.map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {o.label ?? t("solveList.limitAll")}
             </option>
           ))}
         </select>
@@ -287,35 +289,35 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
           <thead>
             <tr className="border-b border-gray-700 text-left text-gray-400 text-sm">
               <SortableTh
-                label="#"
+                label={t("solveList.colNumber")}
                 sortKey="num"
                 activeKey={sortKey}
                 dir={sortDir}
                 onClick={handleSort}
               />
               <SortableTh
-                label="Zeit"
+                label={t("solveList.colTime")}
                 sortKey="time"
                 activeKey={sortKey}
                 dir={sortDir}
                 onClick={handleSort}
               />
               <SortableTh
-                label="Mo3"
+                label={t("solveList.colMo3")}
                 sortKey="mo3"
                 activeKey={sortKey}
                 dir={sortDir}
                 onClick={handleSort}
               />
               <SortableTh
-                label="AO5"
+                label={t("solveList.colAo5")}
                 sortKey="ao5"
                 activeKey={sortKey}
                 dir={sortDir}
                 onClick={handleSort}
               />
               <SortableTh
-                label="AO12"
+                label={t("solveList.colAo12")}
                 sortKey="ao12"
                 activeKey={sortKey}
                 dir={sortDir}
@@ -323,7 +325,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                 hideOnMobile
               />
               <SortableTh
-                label="AO100"
+                label={t("solveList.colAo100")}
                 sortKey="ao100"
                 activeKey={sortKey}
                 dir={sortDir}
@@ -331,12 +333,14 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                 hideOnMobile
               />
               <th className="py-2.5 pr-3 font-medium hidden md:table-cell">
-                Cube
+                {t("solveList.colCube")}
               </th>
               <th className="py-2.5 pr-3 font-medium hidden md:table-cell">
-                Hardware
+                {t("solveList.colHardware")}
               </th>
-              <th className="py-2.5 pr-3 font-medium text-right">Aktionen</th>
+              <th className="py-2.5 pr-3 font-medium text-right">
+                {t("solveList.colActions")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -378,7 +382,9 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                       />
                     ) : (
                       <div
-                        title={`${formatDate(s.timestamp)} — Klick zum Bearbeiten`}
+                        title={t("solveList.timeEditTitle", {
+                          date: formatDate(s.timestamp),
+                        })}
                         className="cursor-pointer"
                         onClick={() =>
                           startEdit(s.id, formatTime(s.time_ms))
@@ -387,7 +393,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                         {isBest && (
                           <span
                             className="inline-block mr-1.5 text-xs text-yellow-300"
-                            title="Aktuelle persoenliche Bestzeit (PB)"
+                            title={t("solveList.pbStarTitle")}
                           >
                             ★
                           </span>
@@ -395,7 +401,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                         {isOldPb && (
                           <span
                             className="inline-block mr-1.5 text-xs text-yellow-600/80"
-                            title="War PB (inzwischen ueberboten)"
+                            title={t("solveList.pbOldTitle")}
                           >
                             ☆
                           </span>
@@ -431,8 +437,8 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                             className="text-cyan-400 mr-1"
                             title={
                               s.id === bestAo5SolveId
-                                ? "Aktueller ao5-PB"
-                                : "War ao5-PB"
+                                ? t("solveList.ao5PbCurrentTitle")
+                                : t("solveList.ao5PbOldTitle")
                             }
                           >
                             ●
@@ -458,8 +464,8 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                             className="text-emerald-400 mr-1"
                             title={
                               s.id === bestAo12SolveId
-                                ? "Aktueller ao12-PB"
-                                : "War ao12-PB"
+                                ? t("solveList.ao12PbCurrentTitle")
+                                : t("solveList.ao12PbOldTitle")
                             }
                           >
                             ●
@@ -479,7 +485,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                   </td>
                   <td
                     className="py-2 pr-3 text-sm text-gray-400 align-top hidden md:table-cell"
-                    title={hardwareName ?? "Keine Hardware zugeordnet"}
+                    title={hardwareName ?? t("solveList.noHardwareTitle")}
                   >
                     {hardwareName ?? (
                       <span className="text-gray-600 italic">—</span>
@@ -489,7 +495,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                     <button
                       onClick={() => setDetailSolve(s)}
                       className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-purple-700/40 hover:text-purple-100"
-                      title="Details anzeigen (Scramble, Notiz, Hardware, Session)"
+                      title={t("solveList.detailsTitle")}
                     >
                       ℹ
                     </button>
@@ -506,7 +512,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                             ? "bg-yellow-600/30 text-yellow-300 hover:bg-yellow-600/50"
                             : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                         }`}
-                        title="+2-Strafe togglen"
+                        title={t("solveList.plusTwoToggleTitle")}
                       >
                         +2
                       </button>
@@ -520,16 +526,16 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                           ? "bg-red-600/30 text-red-300 hover:bg-red-600/50"
                           : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                       }`}
-                      title="DNF togglen"
+                      title={t("solveList.dnfToggleTitle")}
                     >
                       DNF
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm("Solve löschen?")) del.mutate(s.id);
+                        if (confirm(t("solveList.deleteConfirm"))) del.mutate(s.id);
                       }}
                       className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-                      title="Löschen"
+                      title={t("solveList.deleteTitle")}
                     >
                       🗑
                     </button>
@@ -541,11 +547,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-gray-500">
-        Tipp: Klick auf Spaltenkopf (#, Zeit, AO5, AO12) zum Sortieren ·
-        Klick auf Zeit zum Bearbeiten · ℹ für Detail (Scramble, Notiz,
-        Hardware, Session). Enter speichert, Esc bricht ab.
-      </p>
+      <p className="mt-3 text-xs text-gray-500">{t("solveList.tipFooter")}</p>
 
       {detailSolve && (
         <SolveDetailModal

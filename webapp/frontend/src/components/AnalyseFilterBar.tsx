@@ -6,6 +6,7 @@
 // Damit ist der Filter klar lokal — was hier gewählt ist, gilt nur für
 // ANALYSE; DASHBOARD/VERWALTUNG haben eigene Filter.
 
+import { useTranslation } from "react-i18next";
 import { useSessions } from "../lib/api";
 import { COMMON_CUBE_TYPES } from "../lib/format";
 
@@ -22,21 +23,24 @@ export function AnalyseFilterBar({
   sessionId,
   onSessionIdChange,
 }: Props) {
+  const { t } = useTranslation();
   const { data: sessions } = useSessions();
   const hasFilter = !!cubeFilter || sessionId !== null;
 
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 flex items-center gap-4 flex-wrap">
-      <span className="text-base font-semibold text-gray-300">Filter</span>
+      <span className="text-base font-semibold text-gray-300">
+        {t("filters.label")}
+      </span>
 
       <label className="flex items-center gap-2 text-base">
-        <span className="text-gray-400">Cube</span>
+        <span className="text-gray-400">{t("filters.cube")}</span>
         <select
           value={cubeFilter}
           onChange={(e) => onCubeFilterChange(e.target.value)}
           className="rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
         >
-          <option value="">Alle</option>
+          <option value="">{t("filters.allCubes")}</option>
           {COMMON_CUBE_TYPES.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -46,7 +50,7 @@ export function AnalyseFilterBar({
       </label>
 
       <label className="flex items-center gap-2 text-base">
-        <span className="text-gray-400">Session</span>
+        <span className="text-gray-400">{t("filters.session")}</span>
         <select
           value={sessionId === null ? "__all__" : String(sessionId)}
           onChange={(e) =>
@@ -56,7 +60,7 @@ export function AnalyseFilterBar({
           }
           className="rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
         >
-          <option value="__all__">Alle Sessions</option>
+          <option value="__all__">{t("filters.allSessions")}</option>
           {sessions?.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name}
@@ -73,7 +77,7 @@ export function AnalyseFilterBar({
           }}
           className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-300 hover:bg-gray-600"
         >
-          Alle Filter zurücksetzen
+          {t("filters.resetAll")}
         </button>
       )}
     </div>
