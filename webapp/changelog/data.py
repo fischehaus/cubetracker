@@ -44,6 +44,37 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-restore-clarify",
+        released=date(2026, 5, 28),
+        title="Korrektur: W.roadmap-restore war Fehldiagnose, kein Datenverlust",
+        highlights=[
+            "Audit-Trail-Korrektur zu W.roadmap-restore (Commit "
+            "`e79ab6d`): die behauptete Volume-Issue-Hypothese stimmt "
+            "nicht. Tatsaechlich hatte der Admin (User) die ~28 "
+            "Roadmap-Items via Admin-UI bewusst auf `internal=True` "
+            "umgestellt — Items waren weiterhin in der DB, nur fuer "
+            "Non-Admins per Filter unsichtbar.",
+            "Nachvollzogen: `count: 3` an der Public-API ist KORREKT "
+            "(28 internal-geflaggte alte + 3 neue public UX-Polish + "
+            "2 neue internal UX-Polish = 33 in der DB, 3 davon public).",
+            "Der `bootstrap_roadmap`-Refactor von count-check auf per-"
+            "Item-Idempotenz (title_de-Match) bleibt trotzdem im Code "
+            "— defensiver gegen ECHTEN zukuenftigen Datenverlust "
+            "(z.B. Postgres-Volume-Reset). War in dieser Situation "
+            "nicht noetig, schadet aber nicht.",
+            "Docstring von `bootstrap_roadmap` geschaerft: der saubere "
+            "Weg, Items aus der User-Sicht zu entfernen, ist `internal"
+            "=True` via Admin-UI (NICHT Delete — der bringt das Item "
+            "beim naechsten Container-Restart wieder zurueck, weil die "
+            "title_de-Idempotenz dann denkt es fehlt).",
+            "Lesson: Live-Verify nach Coolify-Deploys muss die "
+            "API-Antwort gegen DEN ERWARTETEN BUSINESS-State pruefen "
+            "(„welche Items sollten public sein?\"), nicht gegen "
+            "Historie-Doku-Behauptungen.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ux-demo-polish-qa",
         released=date(2026, 5, 28),
         title="QA-Hotfix nach UX-Demo-Polish (0 KRITISCH + 3 SOLLTE)",

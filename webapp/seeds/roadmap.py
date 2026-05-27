@@ -587,25 +587,34 @@ def bootstrap_roadmap(db: OrmSession) -> int:
 
     **Geändert in W.roadmap-restore (2026-05-28):** von count-check
     (`if existing > 0: return 0`) auf **per-Item-Idempotenz**
-    umgestellt. Grund: am 28.05. trat ein Datenverlust auf (25 von
-    28 Items waren in der Live-DB verschwunden, vermutlich Postgres-
-    Volume-Issue bei einem Coolify-Deploy). Mit per-Item-Check kommen
-    fehlende Items beim nächsten Boot automatisch zurück.
+    umgestellt. Defensiver gegen einen möglichen Postgres-Volume-
+    Reset bei einem Coolify-Deploy. **W.roadmap-restore-clarify-Note:**
+    der ursprüngliche Anlass (vermuteter Datenverlust am 28.05. mit
+    3/28 sichtbaren Items) war eine FEHLDIAGNOSE — der Admin hatte
+    die Items bewusst auf `internal=True` umgestellt. Code-Änderung
+    ist trotzdem sinnvoll (Defense-in-Depth), wird aber bisher nie
+    aktiv (alle Seed-Items existieren mit ihren title_de in der DB).
 
     Idempotenz pro Item: title_de-Match. Wenn ein Item mit demselben
     title_de schon existiert (egal in welcher Phase, mit welchem
-    Status), wird es NICHT überschrieben — nur fehlende Items werden
-    neu angelegt.
+    Status, internal/public-egal), wird es NICHT überschrieben —
+    nur fehlende Items werden neu angelegt.
 
     `sort_order` für neu angelegte Items: ans Ende der jeweiligen
     Phase (max(sort_order) + 10). So bleiben User-eigene sort_order-
     Anpassungen via Admin-UI erhalten.
 
-    **Trade-off:** wenn der Admin ein Item aus ROADMAP_SEED via
-    Admin-UI bewusst löscht, kommt es beim nächsten Container-
-    Neustart zurück. Mitigation: Item aus ROADMAP_SEED rauseditieren
-    (= permanent entfernt) ODER `internal=True` via Admin-UI setzen
-    (=für User unsichtbar, aber im Audit-Trail erhalten).
+    **WICHTIG für Admins — Items aus User-Sicht entfernen:**
+
+    Die SAUBERE Methode ist `internal=True` setzen (Quick-Toggle im
+    AdminRoadmapPanel). Items bleiben in der DB + im Audit-Trail,
+    sind aber für Non-Admins durch den /api/roadmap-Filter
+    unsichtbar.
+
+    Delete via Admin-UI ist NICHT empfohlen für Items aus ROADMAP_
+    SEED — sie kommen beim nächsten Container-Restart zurück, weil
+    title_de wieder als fehlend erkannt wird. Wenn ein Item
+    permanent weg soll: aus ROADMAP_SEED rauseditieren + Code-Push.
 
     Returns: Anzahl neu angelegter Items.
     """
