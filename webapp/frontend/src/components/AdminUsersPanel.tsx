@@ -192,6 +192,14 @@ function UserRow({
       userId: user.id,
       patch: { is_admin: !user.is_admin },
     });
+  // Phase W.tester-tab-ui (2026-05-28): is_tester toggle. Keine
+  // Safeguard wie bei Admin nötig — Tester ist additive Rolle,
+  // beim Wegnehmen wird niemand ausgesperrt.
+  const toggleTester = () =>
+    patch.mutate({
+      userId: user.id,
+      patch: { is_tester: !user.is_tester },
+    });
 
   return (
     <tr className="border-b border-gray-800 last:border-0 hover:bg-gray-800/30">
@@ -204,6 +212,14 @@ function UserRow({
               title="Admin (via DB-Spalte users.is_admin)"
             >
               ADMIN
+            </span>
+          )}
+          {user.is_tester && !user.is_admin && (
+            <span
+              className="ml-2 rounded bg-blue-500/30 px-1.5 py-0.5 text-[10px] font-medium text-blue-200"
+              title="Tester (Live-Tests + Roadmap-Pflege, kein Admin-Vollzugriff)"
+            >
+              TESTER
             </span>
           )}
           {isMe && (
@@ -283,6 +299,24 @@ function UserRow({
               }
             >
               {user.is_admin ? "★ Admin abnehmen" : "☆ Admin machen"}
+            </button>
+          )}
+          {!isMe && (
+            <button
+              onClick={toggleTester}
+              disabled={patch.isPending}
+              className={`rounded px-2 py-1 disabled:opacity-50 ${
+                user.is_tester
+                  ? "bg-blue-600/30 text-blue-200 hover:bg-blue-600/50"
+                  : "bg-gray-700/40 text-gray-300 hover:bg-blue-600/30 hover:text-blue-200"
+              }`}
+              title={
+                user.is_tester
+                  ? "Tester-Status entziehen"
+                  : "Zum Tester machen (Live-Tests + Roadmap-Pflege ohne Admin-Vollzugriff)"
+              }
+            >
+              {user.is_tester ? "🧪 Tester abnehmen" : "🧪 Tester machen"}
             </button>
           )}
           {!isMe && (

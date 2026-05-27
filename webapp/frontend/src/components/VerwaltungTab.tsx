@@ -19,16 +19,20 @@ import { OutlierCard } from "./OutlierCard";
 import { ScrollableTabBar } from "./ScrollableTabBar";
 import { SessionList } from "./SessionList";
 import { SettingsPanel } from "./SettingsPanel";
+import { TesterPanel } from "./TesterPanel";
 
 // UX-Refactor 2026-05-14: Patches-Sub-Tab raus — Patch Notes leben jetzt
 // am Versions-Badge (Header rechts oben) als Modal. Natuerlicherer Ort.
+// W.tester-tab-ui (2026-05-28): „tester" als alternativer letzter Tab
+// fuer User mit is_tester && !is_admin.
 type VerwaltungSection =
   | "sessions"
   | "hardware"
   | "daten"
   | "outliers"
   | "settings"
-  | "admin";
+  | "admin"
+  | "tester";
 
 interface SubTab {
   id: VerwaltungSection;
@@ -44,6 +48,7 @@ const SUB_TAB_ICONS: Record<VerwaltungSection, string> = {
   outliers: "⚠",
   settings: "⚙",
   admin: "🛡",
+  tester: "🧪",
 };
 
 const SUB_TAB_ORDER: VerwaltungSection[] = [
@@ -58,6 +63,11 @@ export function VerwaltungTab() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.is_admin ?? false;
+  // Tester-Rolle (W.tester-tab-ui): User mit is_tester && !is_admin
+  // bekommen einen eigenen "Tester"-Sub-Tab mit Live-Tests + Roadmap-
+  // Pflege. Admin > Tester: Admin sieht den Admin-Tab (der die Tester-
+  // Funktionen mitenthält), kein Tester-Tab zusätzlich.
+  const isTesterOnly = !isAdmin && (user?.is_tester ?? false);
   const baseTabs: SubTab[] = SUB_TAB_ORDER.map((id) => ({
     id,
     label: t(`verwaltung.${id}`),
@@ -68,7 +78,16 @@ export function VerwaltungTab() {
     label: t("verwaltung.admin"),
     icon: SUB_TAB_ICONS.admin,
   };
-  const tabs = isAdmin ? [...baseTabs, adminTab] : baseTabs;
+  const testerTab: SubTab = {
+    id: "tester",
+    label: t("verwaltung.tester"),
+    icon: SUB_TAB_ICONS.tester,
+  };
+  const tabs = isAdmin
+    ? [...baseTabs, adminTab]
+    : isTesterOnly
+      ? [...baseTabs, testerTab]
+      : baseTabs;
 
   const [section, setSection] = useState<VerwaltungSection>("sessions");
 
@@ -88,6 +107,7 @@ export function VerwaltungTab() {
         "outliers",
         "settings",
         "admin",
+        "tester",
       ];
       if ((valid as string[]).includes(target)) {
         setSection(target as VerwaltungSection);
@@ -146,6 +166,7 @@ export function VerwaltungTab() {
       {section === "outliers" && <OutlierCard />}
       {section === "settings" && <SettingsPanel />}
       {section === "admin" && isAdmin && <AdminPanel />}
+      {section === "tester" && isTesterOnly && <TesterPanel />}
     </div>
   );
 }

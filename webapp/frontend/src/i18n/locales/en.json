@@ -1150,6 +1150,7 @@
     "outliers": "Outliers",
     "settings": "Preferences",
     "admin": "Admin",
+    "tester": "Tester",
     "formatHintTitle": "Which format do you have?",
     "formatHintBackup": "Cubetracker backup (filename e.g. cubetracker_…_….json): upload under \"Backup & restore\".",
     "formatHintCstimer": "csTimer export (filename e.g. cstimer_20260513_….txt or .json): upload under \"csTimer import\"."

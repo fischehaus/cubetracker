@@ -1255,6 +1255,8 @@ export interface AdminUserPatch {
   /** Phase W.admin-toggle (2026-05-17): is_admin toggle via Admin-UI.
    *  Backend safeguard "letzter Admin" -> 400. */
   is_admin?: boolean;
+  /** Phase W.tester-tab-ui (2026-05-28): is_tester toggle via Admin-UI. */
+  is_tester?: boolean;
 }
 
 export function useAdminPatchUser(): UseMutationResult<

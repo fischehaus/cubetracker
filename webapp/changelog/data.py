@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.tester-tab-ui",
+        released=date(2026, 5, 28),
+        title="Tester-Tab in Verwaltung + Admin-Toggle „🧪 Tester machen\"",
+        highlights=[
+            "Phase 4 (Frontend) der Tester+Feedback-Welle: User mit "
+            "is_tester=true && !is_admin sehen jetzt einen eigenen "
+            "Tester-Tab (🧪) in der Verwaltung statt des Admin-Tabs.",
+            "Neue Komponente TesterPanel rendert die existierenden "
+            "AdminLiveTestsPanel + AdminRoadmapPanel 1:1 — gleiche UI, "
+            "gleiche Hooks. Berechtigung ist Backend-seitig durch "
+            "require_admin_or_tester garantiert (W.tester-role-db).",
+            "AdminUsersPanel: neuer 🧪 Tester-Toggle pro User-Zeile "
+            "(analog dem ★ Admin-Toggle). Promotion + Demotion ohne "
+            "Safeguard (Tester ist additive Rolle, niemand wird "
+            "ausgesperrt). Plus TESTER-Badge (blau) wenn is_tester && "
+            "!is_admin.",
+            "AdminUserPatch um is_tester erweitert — useAdminPatchUser "
+            "kann beides senden.",
+            "Locale-Keys: verwaltung.tester (DE+EN). 1259/1259 "
+            "symmetrisch.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feedback-inbox-ui",
         released=date(2026, 5, 28),
         title="Admin-Feedback-Inbox-UI mit Filter + Antwort-Workflow",
