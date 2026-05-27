@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-session-list",
+        released=date(2026, 5, 27),
+        title="Session-Verwaltung DE/EN",
+        highlights=[
+            "SessionList komplett übersetzt: Header + InfoButton + "
+            "Add-New-Form (Name + Placeholder + Create-Button) + "
+            "Empty-State.",
+            "Pro Session-Eintrag: Rename-Inline-Edit + Notes-Inline-Edit "
+            "+ csTimer-ID-Tooltip + Merge-/Delete-Buttons mit Titles.",
+            "Delete-Modal mit Solve-Migrations-Wahl (orphan vs move to "
+            "other session) inkl. Confirm-Buttons.",
+            "Merge-Modal mit Target-Picker, „nicht umkehrbar\"-Hinweis, "
+            "Cancel-/Submit-Buttons.",
+            "Locales-Namespace neu: sessionList (~35 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-backup-panel",
         released=date(2026, 5, 27),
         title="Backup-/Restore-/Snapshot-Panel DE/EN",

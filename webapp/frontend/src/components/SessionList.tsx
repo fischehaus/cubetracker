@@ -10,6 +10,7 @@
 // - Mergen mit Modal: Ziel-Session auswählen, Solves wandern + Notes appended
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useCreateSession,
   useDeleteSession,
@@ -27,6 +28,7 @@ type ModalState =
   | null;
 
 export function SessionList() {
+  const { t } = useTranslation();
   const { data: sessions, isLoading } = useSessions();
   const create = useCreateSession();
   const update = useUpdateSession();
@@ -91,7 +93,7 @@ export function SessionList() {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-base text-gray-400">
-        Sessions werden geladen …
+        {t("sessionList.loading")}
       </div>
     );
   }
@@ -101,33 +103,30 @@ export function SessionList() {
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-semibold text-gray-100">
-            Sessions{" "}
+            {t("sessionList.title")}{" "}
             <span className="text-base text-gray-400">
               ({sessions?.length ?? 0})
             </span>
           </h2>
           <InfoButton>
-            <p className="font-medium mb-1">Sessions</p>
-            <p>
-              Sessions strukturieren dein Training (z.B. „OH", „PLL-Drill",
-              „Cold-Solves"). Solves werden einer Session zugeordnet, Stats
-              können pro Session gefiltert werden. „Merge"-Funktion kombiniert
-              Sessions, „Migrate" verschiebt Solves vor dem Löschen.
-            </p>
+            <p className="font-medium mb-1">{t("sessionList.title")}</p>
+            <p>{t("sessionList.infoBody")}</p>
           </InfoButton>
         </div>
         <button
           onClick={() => setShowAddForm((v) => !v)}
           className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"
         >
-          {showAddForm ? "Abbrechen" : "+ Neue Session"}
+          {showAddForm
+            ? t("sessionList.cancel")
+            : t("sessionList.addButton")}
         </button>
       </div>
 
       {showAddForm && (
         <div className="mb-4 rounded border border-gray-700 bg-gray-800/40 p-4 flex gap-2 items-end flex-wrap">
           <label className="flex flex-col text-sm text-gray-400 flex-1 min-w-[14rem]">
-            Name
+            {t("sessionList.nameLabel")}
             <input
               type="text"
               value={newName}
@@ -137,7 +136,7 @@ export function SessionList() {
                 if (e.key === "Escape") setShowAddForm(false);
               }}
               autoFocus
-              placeholder="z.B. „3x3 Speed Training"
+              placeholder={t("sessionList.namePlaceholder")}
               className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
             />
           </label>
@@ -146,16 +145,13 @@ export function SessionList() {
             disabled={create.isPending || !newName.trim()}
             className="text-base rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
           >
-            Anlegen
+            {t("sessionList.createSubmit")}
           </button>
         </div>
       )}
 
       {!sessions || sessions.length === 0 ? (
-        <p className="text-base text-gray-500">
-          Noch keine Sessions. Kommen automatisch beim csTimer-Import oder
-          beim ersten Solve mit „+ Neue Session" im TIMER.
-        </p>
+        <p className="text-base text-gray-500">{t("sessionList.empty")}</p>
       ) : (
         <ul className="space-y-2">
           {sessions.map((s) => {
@@ -188,7 +184,7 @@ export function SessionList() {
                     <span
                       className="text-lg text-gray-100 font-medium cursor-pointer hover:text-purple-300"
                       onClick={() => startEdit(s, "name")}
-                      title="Click zum Umbenennen"
+                      title={t("sessionList.renameTitle")}
                     >
                       {s.name}
                     </span>
@@ -201,7 +197,9 @@ export function SessionList() {
                   {s.cstimer_session_id !== null && (
                     <span
                       className="text-xs text-gray-500"
-                      title={`csTimer-ID ${s.cstimer_session_id}`}
+                      title={t("sessionList.cstimerIdTitle", {
+                        id: s.cstimer_session_id,
+                      })}
                     >
                       cs#{s.cstimer_session_id}
                     </span>
@@ -213,19 +211,19 @@ export function SessionList() {
                         setModal({ kind: "merge", source: s, targetId: null })
                       }
                       className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-purple-700/50 hover:text-purple-100"
-                      title="In andere Session mergen — Solves wandern, Notizen werden angehaengt"
+                      title={t("sessionList.mergeButtonTitle")}
                       disabled={!sessions || sessions.length < 2}
                     >
-                      ⇆ Mergen
+                      {t("sessionList.mergeButton")}
                     </button>
                     <button
                       onClick={() =>
                         setModal({ kind: "delete", session: s, targetId: null })
                       }
                       className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
-                      title="Löschen — mit optionaler Solve-Migration"
+                      title={t("sessionList.deleteButtonTitle")}
                     >
-                      🗑 Löschen
+                      {t("sessionList.deleteButton")}
                     </button>
                   </div>
                 </div>
@@ -243,17 +241,19 @@ export function SessionList() {
                         if (e.key === "Escape") setEditing(null);
                       }}
                       autoFocus
-                      placeholder="Notizen zur Session …"
+                      placeholder={t("sessionList.notesPlaceholder")}
                       className="w-full rounded border border-purple-500 bg-gray-800 px-2 py-1 text-sm text-gray-100 focus:outline-none"
                     />
                   ) : (
                     <div
                       className="text-sm text-gray-400 cursor-pointer min-h-[1em] whitespace-pre-wrap"
                       onClick={() => startEdit(s, "notes")}
-                      title="Click zum Bearbeiten"
+                      title={t("sessionList.notesEditTitle")}
                     >
                       {s.notes ?? (
-                        <span className="text-gray-600 italic">+ Notiz</span>
+                        <span className="text-gray-600 italic">
+                          {t("sessionList.addNote")}
+                        </span>
                       )}
                     </div>
                   )}
@@ -264,11 +264,7 @@ export function SessionList() {
         </ul>
       )}
 
-      <p className="mt-4 text-xs text-gray-500">
-        Click auf Name oder Notiz zum Bearbeiten. Mergen verschiebt alle
-        Solves in eine andere Session, löschen kann optional Solves
-        umlegen statt sie verwaisen zu lassen.
-      </p>
+      <p className="mt-4 text-xs text-gray-500">{t("sessionList.footer")}</p>
 
       {/* ============================================================
           Modal: Löschen — mit optionaler Migration
@@ -276,10 +272,10 @@ export function SessionList() {
       {modal?.kind === "delete" && (
         <ModalOverlay onClose={() => setModal(null)}>
           <h3 className="text-xl font-semibold text-gray-100 mb-2">
-            Session „{modal.session.name}" löschen?
+            {t("sessionList.deleteModalTitle", { name: modal.session.name })}
           </h3>
           <p className="text-sm text-gray-400 mb-4">
-            Was soll mit den Solves dieser Session passieren?
+            {t("sessionList.deleteModalQuestion")}
           </p>
           <div className="space-y-3 mb-5">
             <label className="flex items-start gap-2 cursor-pointer">
@@ -293,11 +289,10 @@ export function SessionList() {
               />
               <div>
                 <div className="text-base text-gray-100">
-                  Solves verwaisen lassen
+                  {t("sessionList.deleteOptionOrphan")}
                 </div>
                 <div className="text-xs text-gray-500">
-                  session_id wird NULL — Solves bleiben in der Liste, ohne
-                  Session-Zuordnung.
+                  {t("sessionList.deleteOptionOrphanDesc")}
                 </div>
               </div>
             </label>
@@ -314,7 +309,7 @@ export function SessionList() {
               />
               <div className="flex-1">
                 <div className="text-base text-gray-100 mb-1">
-                  Solves in andere Session verschieben
+                  {t("sessionList.deleteOptionMove")}
                 </div>
                 <select
                   value={modal.targetId ?? ""}
@@ -343,14 +338,16 @@ export function SessionList() {
               onClick={() => setModal(null)}
               className="text-sm rounded bg-gray-700 px-4 py-2 text-gray-200 hover:bg-gray-600"
             >
-              Abbrechen
+              {t("sessionList.cancel")}
             </button>
             <button
               onClick={executeDelete}
               disabled={del.isPending}
               className="text-sm rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
             >
-              {del.isPending ? "Lösche …" : "Endgültig löschen"}
+              {del.isPending
+                ? t("sessionList.deleteSubmitBusy")
+                : t("sessionList.deleteSubmit")}
             </button>
           </div>
         </ModalOverlay>
@@ -362,15 +359,15 @@ export function SessionList() {
       {modal?.kind === "merge" && (
         <ModalOverlay onClose={() => setModal(null)}>
           <h3 className="text-xl font-semibold text-gray-100 mb-2">
-            „{modal.source.name}" mergen
+            {t("sessionList.mergeModalTitle", { name: modal.source.name })}
           </h3>
           <p className="text-sm text-gray-400 mb-4">
-            Alle Solves dieser Session wandern in die Ziel-Session. Notizen
-            werden in der Ziel-Session angehaengt. Diese Session wird danach
-            gelöscht. Aktion ist <strong>nicht umkehrbar</strong>.
+            {t("sessionList.mergeModalDescPrefix")}{" "}
+            <strong>{t("sessionList.mergeModalDescStrong")}</strong>
+            {t("sessionList.mergeModalDescSuffix")}
           </p>
           <label className="flex flex-col text-sm text-gray-400 mb-5">
-            Ziel-Session
+            {t("sessionList.mergeModalTargetLabel")}
             <select
               value={modal.targetId ?? ""}
               onChange={(e) =>
@@ -381,7 +378,7 @@ export function SessionList() {
               }
               className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
             >
-              <option value="">— bitte wählen —</option>
+              <option value="">{t("sessionList.mergeModalTargetPlaceholder")}</option>
               {sessions
                 ?.filter((x) => x.id !== modal.source.id)
                 .map((x) => (
@@ -396,14 +393,16 @@ export function SessionList() {
               onClick={() => setModal(null)}
               className="text-sm rounded bg-gray-700 px-4 py-2 text-gray-200 hover:bg-gray-600"
             >
-              Abbrechen
+              {t("sessionList.cancel")}
             </button>
             <button
               onClick={executeMerge}
               disabled={merge.isPending || modal.targetId === null}
               className="text-sm rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
             >
-              {merge.isPending ? "Merge …" : "Mergen"}
+              {merge.isPending
+                ? t("sessionList.mergeSubmitBusy")
+                : t("sessionList.mergeSubmit")}
             </button>
           </div>
         </ModalOverlay>
