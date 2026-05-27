@@ -66,6 +66,15 @@ class User(Base):
     # damit User weltweit korrekt geocoded + die richtigen WCA-Comps
     # angezeigt bekommen.
     country_iso2: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    # Phase W.wca-profile-light (2026-05-28): offizielle WCA-ID des Users
+    # (Format „2024SMIT01" — 4 Ziffern Jahr + 4 Großbuchstaben + 2 Ziffern).
+    # Optional. Wenn gesetzt: App ruft offizielle WCA-PRs + Wettkampf-Historie
+    # via /api/v0/persons/{wca_id} ab und zeigt sie neben den Cubetracker-
+    # Stats im Dashboard an. Read-only WCA-Daten, kein Auth nötig.
+    # Bewusst KEIN unique constraint — selten aber theoretisch möglich dass
+    # zwei App-User dieselbe WCA-ID claimen wollen (Backup-Restore in
+    # Test-Account etc.). Validierung passiert Client- + Endpoint-seitig.
+    wca_id: Mapped[str | None] = mapped_column(String(10), nullable=True, index=True)
     # Phase W.9: Friend-System.
     # Opt-In: User muss aktiv is_discoverable=true setzen damit er per
     # display_name in der User-Suche auftaucht. Default False = maximaler

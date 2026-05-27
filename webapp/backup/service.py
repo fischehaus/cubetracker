@@ -115,6 +115,10 @@ def export_user_data(db: OrmSession, user: User) -> dict[str, Any]:
         "schema_version": SCHEMA_VERSION,
         "exported_at": datetime.now(UTC).isoformat(),
         "user_email": user.email,  # Info für User, nicht für Restore
+        # Phase W.wca-profile-light (2026-05-28): WCA-ID mit-exportieren —
+        # auch nur Info-Feld (Restore importiert es nicht; User tippt es
+        # ggf. wieder manuell in den Account-Settings ein).
+        "user_wca_id": user.wca_id,
         "counts": {
             "solves": len(solves),
             "sessions": len(sessions),

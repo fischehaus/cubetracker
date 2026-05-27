@@ -97,6 +97,12 @@ async def lifespan(app: FastAPI):
                 # Erlaubt UI-Toggle von Admin-Status. Default FALSE; existing
                 # Admins werden im Bootstrap-Step unten auf TRUE gesetzt.
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE",
+                # Phase W.wca-profile-light (2026-05-28): offizielle WCA-ID
+                # des Users (Format „2024SMIT01"). Optional, kein unique
+                # constraint (selten Doppel-Claims möglich, Validierung
+                # client+server-seitig).
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS wca_id VARCHAR(10)",
+                "CREATE INDEX IF NOT EXISTS ix_users_wca_id ON users (wca_id)",
             ]
             with engine.begin() as conn:
                 for sql in migrations:

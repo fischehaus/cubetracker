@@ -367,12 +367,21 @@ def update_me(
     # (Phase W.future-tournaments) + country_iso2 (Phase W.country-feld).
     # Email/Password bleiben aussen vor — die haben ihre eigenen
     # sicherheits-relevanten Flows.
-    _ALLOWED_FIELDS = {"display_name", "is_discoverable", "postal_code", "country_iso2"}
+    _ALLOWED_FIELDS = {
+        "display_name",
+        "is_discoverable",
+        "postal_code",
+        "country_iso2",
+        "wca_id",
+    }
     data = payload.model_dump(exclude_unset=True)
     for key, value in data.items():
         if key in _ALLOWED_FIELDS:
             # Phase W.country-feld: ISO-Codes uppercase normalisieren.
             if key == "country_iso2" and isinstance(value, str):
+                value = value.strip().upper() or None
+            # Phase W.wca-profile-light: WCA-IDs uppercase, leer → null.
+            elif key == "wca_id" and isinstance(value, str):
                 value = value.strip().upper() or None
             setattr(current_user, key, value)
     db.commit()

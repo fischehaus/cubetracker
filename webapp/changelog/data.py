@@ -44,6 +44,39 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-profile-backend",
+        released=date(2026, 5, 28),
+        title="WCA-Profil-Light: Backend (Schema + API)",
+        highlights=[
+            "Phase 1 (Backend) für das WCA-Profil-Light-Feature: User "
+            "kann seine offizielle WCA-ID hinterlegen und die App ruft "
+            "darüber offizielle WCA-PRs + Wettkampf-Historie ab.",
+            "Schema: users.wca_id-Spalte (VARCHAR(10), nullable, mit "
+            "Index für Friend-Lookup-Vorbereitung). Mini-Migration via "
+            "ALTER TABLE IF NOT EXISTS in main.py:lifespan.",
+            "UserRead + UserUpdate erweitert: wca_id mit Pattern-Regex "
+            "^([12][0-9]{3}[A-Za-z]{4}[0-9]{2})?$ (WCA-Format „2024SMIT01\" "
+            "oder leer = unsetzen). Endpoint update_me whitelist-erweitert "
+            "+ Normalisierung (uppercase + trim).",
+            "WCA-Client (wca/client.py): neue fetch_person()-Funktion "
+            "ruft /api/v0/persons/{wca_id} ab, mit eigenem Cache-Slot "
+            "(TTL 6h — PRs ändern sich selten). 404 → negative-cached. "
+            "Slim-Response mit person-meta, medals, records, "
+            "personal_records (sortiert nach WCA-Event-Reihenfolge mit "
+            "world/continental/national rank pro single+average), "
+            "recent_competitions (letzte 5).",
+            "Neuer Endpoint GET /wca/me/profile mit Rate-Limit 30/min, "
+            "422 wenn keine WCA-ID gesetzt, 404 wenn unbekannte ID, "
+            "503 bei WCA-Outage.",
+            "Backup-Export erweitert: user_wca_id mit-exportiert "
+            "(Info-Feld analog user_email; kein Auto-Restore — User "
+            "tippt es manuell wieder ein).",
+            "Frontend-Welle folgt direkt — Backend-Endpoint alleine "
+            "noch nicht nutzbar.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-roadmap-notice",
         released=date(2026, 5, 28),
         title="Roadmap-Modal: DE-Only-Hinweis bei EN-UI",

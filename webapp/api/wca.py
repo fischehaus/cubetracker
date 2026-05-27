@@ -28,6 +28,7 @@ from db.database import get_db
 from db.models import User
 from wca.client import (
     WcaApiError,
+    fetch_person,
     fetch_upcoming_competitions,
     fetch_upcoming_competitions_multi,
 )
@@ -171,3 +172,49 @@ async def upcoming_competitions(
         "competitions": enriched[:limit],
         "total_found": len(enriched),
     }
+
+
+@router.get("/me/profile")
+@limiter.limit("30/minute")
+async def my_wca_profile(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Liefert das offizielle WCA-Profil des Users (Phase W.wca-profile-light).
+
+    Voraussetzung: User.wca_id ist gesetzt (über AccountSettings).
+    Sonst 422 mit Hint.
+
+    Response: slim-dict aus wca/client.fetch_person — enthält Person-Meta,
+    Medal-Counts, Record-Counts, alle Event-PBs (single + average mit
+    World/Continental/National-Rank), letzte 5 Wettkämpfe.
+
+    Bei unbekannter WCA-ID (404 von WCA): 404. Bei WCA-API-Ausfall: 503.
+    Cache: 6h im Backend pro WCA-ID.
+    """
+    wca_id = (current_user.wca_id or "").strip().upper()
+    if not wca_id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                "Keine WCA-ID im Profil hinterlegt. "
+                "Setze sie unter Verwaltung -> Einstellungen -> Account."
+            ),
+        )
+    try:
+        profile = await fetch_person(wca_id)
+    except WcaApiError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"WCA-API nicht erreichbar: {e}",
+        ) from e
+    if profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=(
+                f"WCA-ID '{wca_id}' wurde nicht gefunden. "
+                "Bitte Schreibweise prüfen — Format: 4 Ziffern Jahr + "
+                "4 Großbuchstaben + 2 Ziffern (z.B. '2024SMIT01')."
+            ),
+        )
+    return profile

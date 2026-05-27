@@ -53,6 +53,8 @@ class UserRead(BaseModel):
     postal_code: str | None = None
     # Phase W.country-feld (2026-05-16): ISO-3166-1-alpha-2-Land.
     country_iso2: str | None = None
+    # Phase W.wca-profile-light (2026-05-28): offizielle WCA-ID.
+    wca_id: str | None = None
 
 
 class UserUpdate(BaseModel):
@@ -72,6 +74,12 @@ class UserUpdate(BaseModel):
     # (2 chars, alphanumerisch).
     country_iso2: str | None = Field(
         default=None, min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$"
+    )
+    # Phase W.wca-profile-light (2026-05-28): WCA-ID-Format „2024SMIT01" —
+    # 4 Ziffern Jahr + 4 Großbuchstaben + 2 Ziffern. Leer-String → null
+    # (Frontend kann unsetzen). Wir uppercasen + trimmen im Endpoint.
+    wca_id: str | None = Field(
+        default=None, max_length=10, pattern=r"^([12][0-9]{3}[A-Za-z]{4}[0-9]{2})?$"
     )
 
 
