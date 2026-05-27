@@ -15,6 +15,7 @@
 // Auf Desktop (pointer: fine): rendert null. User benutzt echte
 // Tastatur, der zusätzliche Button wäre nur visueller Lärm.
 
+import { useTranslation } from "react-i18next";
 import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
 
 function dispatchSpace(type: "keydown" | "keyup") {
@@ -28,6 +29,7 @@ function dispatchSpace(type: "keydown" | "keyup") {
 }
 
 export function TouchTimerPad() {
+  const { t } = useTranslation();
   const isTouchDevice = useIsTouchDevice();
   if (!isTouchDevice) return null;
 
@@ -60,9 +62,9 @@ export function TouchTimerPad() {
       }}
       onContextMenu={(e) => e.preventDefault()}
       className="w-full rounded-lg border-2 border-purple-500/60 bg-purple-600/20 py-8 text-lg font-semibold text-purple-100 select-none touch-none transition-colors active:bg-purple-600/50"
-      aria-label="Touch-Timer-Pad: tippen und halten ersetzt die Space-Taste"
+      aria-label={t("touchTimer.aria")}
     >
-      👆 Tippen &amp; halten — wie Space
+      {t("touchTimer.label")}
     </button>
   );
 }

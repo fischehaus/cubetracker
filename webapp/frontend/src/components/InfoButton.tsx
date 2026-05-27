@@ -9,6 +9,7 @@
 // stylebar ungemuetlich (eigenes Disclosure-Widget passt besser zum Theme).
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   /** Erklaerungs-Inhalt — Text oder kleine Markup-Struktur. */
@@ -16,15 +17,17 @@ interface Props {
   /** Position relativ zum Button. Default "right" — Popover öffnet sich
    *  rechts neben dem Icon. Bei "left" links davon. */
   align?: "left" | "right";
-  /** Optional: aria-Label für Screenreader (Default "Mehr Info"). */
+  /** Optional: aria-Label fuer Screenreader. Default: i18n-key info.label. */
   label?: string;
 }
 
 export function InfoButton({
   children,
   align = "right",
-  label = "Mehr Info",
+  label,
 }: Props) {
+  const { t } = useTranslation();
+  const effectiveLabel = label ?? t("info.label");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -60,7 +63,7 @@ export function InfoButton({
           e.stopPropagation();
           setOpen((v) => !v);
         }}
-        aria-label={label}
+        aria-label={effectiveLabel}
         aria-expanded={open}
         className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-700/60 text-gray-300 text-[11px] font-bold hover:bg-purple-600/40 hover:text-purple-100 transition-colors"
       >
@@ -85,7 +88,7 @@ export function InfoButton({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            aria-label="Info schliessen"
+            aria-label={t("info.closeAria")}
             className="sm:hidden absolute top-1 right-2 text-gray-400 hover:text-gray-100 text-lg leading-none"
           >
             ×

@@ -15,6 +15,7 @@
 //   - End-Feedback-Modal: Stats der Set-Solves berechnen (mean/best/ao5/ao12)
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSolves } from "../lib/api";
 import { formatTime } from "../lib/format";
 import type { Solve } from "../lib/types";
@@ -37,6 +38,7 @@ interface ActiveSet {
 const PLAN_PRESETS = [5, 12, 25, 50, 100];
 
 export function SessionPlanCard({ cubeType, sessionId }: Props) {
+  const { t } = useTranslation();
   const [activeSet, setActiveSet] = useState<ActiveSet | null>(null);
   const [showEndFeedback, setShowEndFeedback] = useState<Solve[] | null>(null);
   const [planInput, setPlanInput] = useState<number | null>(12);
@@ -90,26 +92,21 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm uppercase tracking-wide text-gray-500">
-                Trainings-Set
+                {t("trainingSet.headerLabel")}
               </span>
               <InfoButton>
-                <p className="font-medium mb-1">Trainings-Set</p>
-                <p>
-                  Setze dir eine feste Anzahl Solves als Ziel (z.B. 12 oder
-                  50). Während du solvest, zählt das Set runter und zeigt
-                  Live-Stats. Am Ende kriegst du eine Zusammenfassung: Best,
-                  Worst, AO5, AO12, AO100, plus DNF/+2-Statistik. Praktisch
-                  für fokussiertes Training mit klarem Stoppzeitpunkt.
-                </p>
+                <p className="font-medium mb-1">{t("trainingSet.infoTitle")}</p>
+                <p>{t("trainingSet.infoBody")}</p>
               </InfoButton>
             </div>
             <div className="text-base text-gray-300 mt-0.5">
-              Plane eine feste Anzahl Solves und bekomme am Ende eine
-              Zusammenfassung.
+              {t("trainingSet.intro")}
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-gray-400">Plan:</span>
+            <span className="text-sm text-gray-400">
+              {t("trainingSet.planLabel")}
+            </span>
             <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1">
               {PLAN_PRESETS.map((n) => (
                 <button
@@ -131,7 +128,7 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
                     ? "bg-purple-600 text-white"
                     : "text-gray-300 hover:bg-gray-700"
                 }`}
-                title="Open-end: kein Plan, du beendest manuell"
+                title={t("trainingSet.openEndedTitle")}
               >
                 ∞
               </button>
@@ -140,7 +137,7 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
               onClick={startSet}
               className="rounded bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
             >
-              ▶ Set starten
+              {t("trainingSet.startButton")}
             </button>
           </div>
         </div>
@@ -164,7 +161,7 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <span className="text-sm uppercase tracking-wide text-purple-300">
-            Set läuft
+            {t("trainingSet.runningLabel")}
           </span>
           <span
             className={`text-2xl font-mono font-bold ${
@@ -177,7 +174,9 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
             )}
           </span>
           {isComplete && (
-            <span className="text-emerald-300 font-medium">✓ erfüllt</span>
+            <span className="text-emerald-300 font-medium">
+              {t("trainingSet.fulfilled")}
+            </span>
           )}
         </div>
         <button
@@ -188,7 +187,9 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
               : "bg-gray-700 text-gray-200 hover:bg-gray-600"
           }`}
         >
-          {isComplete ? "🏁 Auswertung anzeigen" : "Set beenden"}
+          {isComplete
+            ? t("trainingSet.showResults")
+            : t("trainingSet.endSet")}
         </button>
       </div>
 
@@ -217,33 +218,52 @@ function SessionEndFeedback({
   solves: Solve[];
   onClose: () => void;
 }) {
-  const stats = useMemo(() => computeSetStats(solves), [solves]);
+  const { t } = useTranslation();
+  const stats = useMemo(() => computeSetStats(solves, t), [solves, t]);
 
   return (
     <div className="rounded-lg border-2 border-emerald-500 bg-emerald-500/10 p-6">
       <div className="flex items-center justify-between mb-4 gap-3">
         <h2 className="text-2xl font-bold text-emerald-100">
-          🏁 Set abgeschlossen
+          {t("trainingSet.completedTitle")}
         </h2>
         <button
           onClick={onClose}
           className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-200 hover:bg-gray-600"
         >
-          Schliessen
+          {t("trainingSet.close")}
         </button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <StatBlock label="Solves" value={stats.count} />
-        <StatBlock label="Valid / DNF" value={`${stats.countValid} / ${stats.countDnf}`} />
-        <StatBlock label="Best" value={stats.best === null ? "–" : formatTime(stats.best)} />
-        <StatBlock label="Mean" value={stats.mean === null ? "–" : formatTime(stats.mean)} />
+        <StatBlock label={t("trainingSet.statSolves")} value={stats.count} />
+        <StatBlock
+          label={t("trainingSet.statValidDnf")}
+          value={`${stats.countValid} / ${stats.countDnf}`}
+        />
+        <StatBlock
+          label={t("trainingSet.statBest")}
+          value={stats.best === null ? "–" : formatTime(stats.best)}
+        />
+        <StatBlock
+          label={t("trainingSet.statMean")}
+          value={stats.mean === null ? "–" : formatTime(stats.mean)}
+        />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-        <StatBlock label="Set-Ao5" value={stats.ao5 === null ? "–" : formatTime(stats.ao5)} />
-        <StatBlock label="Set-Ao12" value={stats.ao12 === null ? "–" : formatTime(stats.ao12)} />
-        <StatBlock label="Worst" value={stats.worst === null ? "–" : formatTime(stats.worst)} />
+        <StatBlock
+          label={t("trainingSet.statSetAo5")}
+          value={stats.ao5 === null ? "–" : formatTime(stats.ao5)}
+        />
+        <StatBlock
+          label={t("trainingSet.statSetAo12")}
+          value={stats.ao12 === null ? "–" : formatTime(stats.ao12)}
+        />
+        <StatBlock
+          label={t("trainingSet.statWorst")}
+          value={stats.worst === null ? "–" : formatTime(stats.worst)}
+        />
       </div>
 
       <div className="text-sm text-emerald-200">
@@ -278,7 +298,10 @@ interface SetStats {
   feedback: string;
 }
 
-function computeSetStats(solves: Solve[]): SetStats {
+function computeSetStats(
+  solves: Solve[],
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): SetStats {
   // SolveList ist neueste-zuerst — wir wollen die in chronologischer Order
   const chrono = [...solves].reverse();
   const valid = chrono.filter((s) => !s.dnf);
@@ -294,11 +317,11 @@ function computeSetStats(solves: Solve[]): SetStats {
   function trimmedAvg(times: number[], window: number): number | null {
     if (times.length < window) return null;
     const sub = times.slice(-window);
-    if (sub.some((t) => t === Infinity)) return null;
+    if (sub.some((tt) => tt === Infinity)) return null;
     const sorted = [...sub].sort((a, b) => a - b);
     const trim = window <= 12 ? 1 : Math.max(1, Math.floor(window * 0.05));
     const middle = sorted.slice(trim, sorted.length - trim);
-    return Math.round(middle.reduce((acc, t) => acc + t, 0) / middle.length);
+    return Math.round(middle.reduce((acc, tt) => acc + tt, 0) / middle.length);
   }
   const allTimes = chrono.map((s) => (s.dnf ? Infinity : eff(s)));
   const ao5 = trimmedAvg(allTimes, 5);
@@ -307,19 +330,21 @@ function computeSetStats(solves: Solve[]): SetStats {
   // Sehr einfaches Feedback nach Best/Mean-Verhältnis und DNF-Quote
   let feedback = "";
   if (chrono.length === 0) {
-    feedback = "Keine Solves im Set — beim nächsten Mal mehr durchziehen!";
+    feedback = t("trainingSet.feedbackEmpty");
   } else if (chrono.length < 5) {
-    feedback = `Kurzes Set mit ${chrono.length} Solves — für Stats wären mind. 5 sinnvoll.`;
+    feedback = t("trainingSet.feedbackShort", { count: chrono.length });
   } else {
     const dnfRate = solves.length > 0 ? (chrono.length - valid.length) / chrono.length : 0;
     if (dnfRate > 0.2) {
-      feedback = `Hohe DNF-Quote (${Math.round(dnfRate * 100)}%) — vielleicht zu schnell? Konzentration vor Speed.`;
+      feedback = t("trainingSet.feedbackHighDnf", {
+        pct: Math.round(dnfRate * 100),
+      });
     } else if (best !== null && mean !== null && mean > best * 1.4) {
-      feedback = "Inkonsistente Zeiten — Range zwischen Best und Mean ist groß. Fokus auf Konsistenz.";
+      feedback = t("trainingSet.feedbackInconsistent");
     } else if (best !== null && mean !== null && mean < best * 1.15) {
-      feedback = "Sehr konsistentes Set — saubere Arbeit!";
+      feedback = t("trainingSet.feedbackConsistent");
     } else {
-      feedback = "Solides Set. Weiter so!";
+      feedback = t("trainingSet.feedbackSolid");
     }
   }
 

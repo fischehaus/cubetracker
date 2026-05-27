@@ -333,6 +333,53 @@
     "patchNotesTitle": "Show patch notes",
     "closeAria": "Close"
   },
+  "info": {
+    "label": "More info",
+    "closeAria": "Close info"
+  },
+  "touchTimer": {
+    "aria": "Touch timer pad: tap and hold replaces the space key",
+    "label": "👆 Tap & hold — like space"
+  },
+  "spacebarTimer": {
+    "phase": "Phase {{current}} / {{total}}",
+    "penaltyTitle": "Inspection time exceeded",
+    "hintIdleNoInsp": "Hold space and release to start",
+    "hintIdleWithInsp": "Press space for inspection",
+    "hintInspectionWca": "Press space: solve into hold mode · penalty +2 from 15s, DNF from 17s",
+    "hintInspectionPragmatic": "Space = start solve · double-tap = restart inspection · 0 = DNF",
+    "hintReady": "Release when ready",
+    "hintRunning": "Press space to stop",
+    "hintStopped": "Solve saved · space for the next one"
+  },
+  "trainingSet": {
+    "headerLabel": "Training set",
+    "infoTitle": "Training set",
+    "infoBody": "Set yourself a fixed number of solves as a target (e.g. 12 or 50). As you solve, the set counts down and shows live stats. At the end you get a summary: best, worst, AO5, AO12, AO100, plus DNF/+2 stats. Useful for focused training with a clear stopping point.",
+    "intro": "Plan a fixed number of solves and get a summary at the end.",
+    "planLabel": "Plan:",
+    "openEndedTitle": "Open-end: no plan, you end manually",
+    "startButton": "▶ Start set",
+    "runningLabel": "Set running",
+    "fulfilled": "✓ done",
+    "showResults": "🏁 Show results",
+    "endSet": "End set",
+    "completedTitle": "🏁 Set complete",
+    "close": "Close",
+    "statSolves": "Solves",
+    "statValidDnf": "Valid / DNF",
+    "statBest": "Best",
+    "statMean": "Mean",
+    "statSetAo5": "Set Ao5",
+    "statSetAo12": "Set Ao12",
+    "statWorst": "Worst",
+    "feedbackEmpty": "No solves in the set — push through more next time!",
+    "feedbackShort": "Short set with {{count}} solves — at least 5 would be meaningful for stats.",
+    "feedbackHighDnf": "High DNF rate ({{pct}}%) — going too fast? Focus before speed.",
+    "feedbackInconsistent": "Inconsistent times — range between best and mean is large. Focus on consistency.",
+    "feedbackConsistent": "Very consistent set — clean work!",
+    "feedbackSolid": "Solid set. Keep it up!"
+  },
   "timer": {
     "errorInvalidTime": "Invalid time (or leave field empty for DNF)",
     "errorInvalidFormat": "Invalid time. Format: \"12.34\", \"1:23.45\" or \"1234\"",

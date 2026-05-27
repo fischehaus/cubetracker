@@ -333,6 +333,53 @@
     "patchNotesTitle": "Patch Notes anzeigen",
     "closeAria": "Schließen"
   },
+  "info": {
+    "label": "Mehr Info",
+    "closeAria": "Info schließen"
+  },
+  "touchTimer": {
+    "aria": "Touch-Timer-Pad: tippen und halten ersetzt die Space-Taste",
+    "label": "👆 Tippen & halten — wie Space"
+  },
+  "spacebarTimer": {
+    "phase": "Phase {{current}} / {{total}}",
+    "penaltyTitle": "Inspection überschritten",
+    "hintIdleNoInsp": "Space halten und loslassen zum Starten",
+    "hintIdleWithInsp": "Space drücken für Inspektion",
+    "hintInspectionWca": "Space drücken: Solve in Halten-Modus · Penalty +2 ab 15s, DNF ab 17s",
+    "hintInspectionPragmatic": "Space = Solve starten · Double-Tap = Inspektion neu · 0 = DNF",
+    "hintReady": "Loslassen wenn bereit",
+    "hintRunning": "Space drücken zum Stoppen",
+    "hintStopped": "Solve gespeichert · Space für nächsten"
+  },
+  "trainingSet": {
+    "headerLabel": "Trainings-Set",
+    "infoTitle": "Trainings-Set",
+    "infoBody": "Setze dir eine feste Anzahl Solves als Ziel (z.B. 12 oder 50). Während du solvest, zählt das Set runter und zeigt Live-Stats. Am Ende kriegst du eine Zusammenfassung: Best, Worst, AO5, AO12, AO100, plus DNF/+2-Statistik. Praktisch für fokussiertes Training mit klarem Stoppzeitpunkt.",
+    "intro": "Plane eine feste Anzahl Solves und bekomme am Ende eine Zusammenfassung.",
+    "planLabel": "Plan:",
+    "openEndedTitle": "Open-end: kein Plan, du beendest manuell",
+    "startButton": "▶ Set starten",
+    "runningLabel": "Set läuft",
+    "fulfilled": "✓ erfüllt",
+    "showResults": "🏁 Auswertung anzeigen",
+    "endSet": "Set beenden",
+    "completedTitle": "🏁 Set abgeschlossen",
+    "close": "Schließen",
+    "statSolves": "Solves",
+    "statValidDnf": "Valid / DNF",
+    "statBest": "Best",
+    "statMean": "Mean",
+    "statSetAo5": "Set-Ao5",
+    "statSetAo12": "Set-Ao12",
+    "statWorst": "Worst",
+    "feedbackEmpty": "Keine Solves im Set — beim nächsten Mal mehr durchziehen!",
+    "feedbackShort": "Kurzes Set mit {{count}} Solves — für Stats wären mind. 5 sinnvoll.",
+    "feedbackHighDnf": "Hohe DNF-Quote ({{pct}}%) — vielleicht zu schnell? Konzentration vor Speed.",
+    "feedbackInconsistent": "Inkonsistente Zeiten — Range zwischen Best und Mean ist groß. Fokus auf Konsistenz.",
+    "feedbackConsistent": "Sehr konsistentes Set — saubere Arbeit!",
+    "feedbackSolid": "Solides Set. Weiter so!"
+  },
   "timer": {
     "errorInvalidTime": "Zeit ungültig (oder Feld leer lassen für DNF)",
     "errorInvalidFormat": "Ungültige Zeit. Format: „12.34\", „1:23.45\" oder „1234\"",

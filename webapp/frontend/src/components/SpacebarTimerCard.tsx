@@ -12,6 +12,7 @@
 // Layout: zentrierter Karten-Block mit großem Timer und farb-Status.
 
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { formatTime } from "../lib/format";
 import {
   TIMER_FONT_SCALE,
@@ -60,6 +61,7 @@ export function SpacebarTimerCard({
   resetSeed,
   fontSizeOverride,
 }: Props) {
+  const { t } = useTranslation();
   const effectiveFontSize = fontSizeOverride ?? settings.timer_font_size;
   const timer = useSpacebarTimer({
     enabled,
@@ -82,11 +84,19 @@ export function SpacebarTimerCard({
       {/* Top: state-Hint + ggf. phase indicator */}
       <div className="flex items-center justify-between mb-2 gap-2 text-sm">
         <div className={hintClass(timer.state)}>
-          {hintLabel(timer.state, settings.inspection_enabled, settings.inspection_mode)}
+          {hintLabel(
+            timer.state,
+            settings.inspection_enabled,
+            settings.inspection_mode,
+            t,
+          )}
         </div>
         {settings.splits_enabled && timer.state === "running" && totalPhases > 1 && (
           <div className="text-purple-200 font-medium">
-            Phase {timer.phaseIndex + 1} / {totalPhases}
+            {t("spacebarTimer.phase", {
+              current: timer.phaseIndex + 1,
+              total: totalPhases,
+            })}
             {phaseNames[timer.phaseIndex] && (
               <span className="ml-2 text-purple-100">{phaseNames[timer.phaseIndex]}</span>
             )}
@@ -99,7 +109,7 @@ export function SpacebarTimerCard({
                 ? "bg-red-600 text-white"
                 : "bg-amber-600 text-white"
             }`}
-            title="Inspection überschritten"
+            title={t("spacebarTimer.penaltyTitle")}
           >
             {timer.penalty}
           </span>
@@ -206,22 +216,23 @@ function hintLabel(
   state: TimerState,
   inspectionEnabled: boolean,
   inspectionMode: "wca" | "pragmatic",
+  t: (key: string) => string,
 ): string {
   switch (state) {
     case "idle":
       return inspectionEnabled
-        ? "Space drücken für Inspektion"
-        : "Space halten und loslassen zum Starten";
+        ? t("spacebarTimer.hintIdleWithInsp")
+        : t("spacebarTimer.hintIdleNoInsp");
     case "inspection":
       return inspectionMode === "wca"
-        ? "Space drücken: Solve in Halten-Modus · Penalty +2 ab 15s, DNF ab 17s"
-        : "Space = Solve starten · Double-Tap = Inspektion neu · 0 = DNF";
+        ? t("spacebarTimer.hintInspectionWca")
+        : t("spacebarTimer.hintInspectionPragmatic");
     case "ready":
-      return "Loslassen wenn bereit";
+      return t("spacebarTimer.hintReady");
     case "running":
-      return "Space drücken zum Stoppen";
+      return t("spacebarTimer.hintRunning");
     case "stopped":
-      return "Solve gespeichert · Space für nächsten";
+      return t("spacebarTimer.hintStopped");
     default:
       return "";
   }

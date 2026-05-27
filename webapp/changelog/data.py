@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-timer-complete",
+        released=date(2026, 5, 27),
+        title="Timer-Tab wirklich komplett DE/EN (Spacebar/Touch/Set + Info-Popups)",
+        highlights=[
+            "Spacebar-Timer-Card komplett übersetzt: alle Hint-Labels "
+            "für Idle/Inspection/Ready/Running/Stopped (jeweils mit "
+            "WCA- und Pragmatisch-Variante), die „Phase X/Y\"-Anzeige "
+            "bei Splits-Mode und der „Inspection überschritten\"-Title.",
+            "Touch-Timer-Pad (Phone-Eingabe „Tippen & halten — wie "
+            "Space\"): Label und ARIA jetzt sprachabhängig.",
+            "Session-Plan-Card („Trainings-Set\"): Header + InfoButton-"
+            "Text + Plan-Picker + Start-/End-Buttons + Progress-Anzeige "
+            "+ End-Feedback-Modal mit allen Stat-Labels und allen "
+            "Coaching-Texten (von „Solides Set\" bis „Hohe DNF-Quote — "
+            "Konzentration vor Speed\").",
+            "InfoButton-Komponente: Default-ARIA-Label „Mehr Info\" + "
+            "Mobile-Close-ARIA folgen jetzt der UI-Sprache (vorher hart "
+            "deutsch — die Popup-Inhalte waren je nach Card schon "
+            "übersetzt, aber Trigger + Close-Button nicht).",
+            "Locales-Namespaces neu: info / touchTimer / spacebarTimer "
+            "/ trainingSet (44 neue Strings gesamt).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-jsonfix-qa",
         released=date(2026, 5, 27),
         title="QA-Hotfix: i18n-Locales-JSON parsbar machen",
