@@ -1,18 +1,24 @@
-// FeedbackModal (Phase W.feedback, 2026-05-17).
+// FeedbackModal (Phase W.feedback, 2026-05-17; umgebaut W.feedback-modal-rebuild 2026-05-28).
 //
-// Zwei Wege parallel anbieten:
-//   1. GitHub-Issue-Form (öffnet in neuem Tab) — Profi-User mit
-//      GitHub-Account, alle anderen sehen den Issue später mit.
-//   2. App-internes Email-Form — für Casual-User. Backend schickt
-//      Email an den Admin via Resend.
+// Zwei Wege:
+//   1. GitHub-Issue-Form (öffnet in neuem Tab) — immer verfügbar, auch
+//      anonym (Login-Seite-Footer).
+//   2. „Per App"-Mode — eingeloggte User schreiben direkt in die
+//      Admin-Inbox (DB-persistent statt früher per E-Mail). Admin
+//      antwortet im Inbox-UI, User sieht die Antwort im „Mein
+//      Feedback"-Bereich beim nächsten Login.
 //
-// Layout: Tab-Toggle GitHub / Email mit kurzer Erklärung warum man
-// welchen wählen sollte.
+// Anonyme User (kein eingeloggter User, z.B. Login-Seite-Footer)
+// sehen NUR den GitHub-Mode — die App-Inbox ist user-gebunden.
 
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { useSubmitFeedback, type FeedbackType } from "../lib/api";
 import { AxiosError } from "axios";
+import { useAuth } from "../auth/AuthContext";
+import {
+  useCreateFeedbackMessage,
+  type FeedbackCategory,
+} from "../lib/api";
 
 interface Props {
   onClose: () => void;
@@ -22,7 +28,13 @@ const GITHUB_REPO_URL = "https://github.com/fischehaus/cubetracker";
 
 export function FeedbackModal({ onClose }: Props) {
   const { t } = useTranslation();
-  const [mode, setMode] = useState<"github" | "email">("github");
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+  // Anonyme User können nur GitHub — App-Mode braucht eingeloggten User
+  // (Feedback wird mit user_id verknüpft + User soll Antwort sehen können).
+  const [mode, setMode] = useState<"github" | "app">(
+    isLoggedIn ? "app" : "github",
+  );
 
   return (
     <div
@@ -48,43 +60,50 @@ export function FeedbackModal({ onClose }: Props) {
 
         <p className="text-sm text-gray-400 mb-4">{t("feedback.intro")}</p>
 
-        {/* Mode-Tabs */}
-        <div className="flex gap-2 mb-5 border-b border-gray-700">
-          <button
-            type="button"
-            onClick={() => setMode("github")}
-            className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
-              mode === "github"
-                ? "border-purple-500 text-purple-200"
-                : "border-transparent text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            {t("feedback.modeGithub")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("email")}
-            className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
-              mode === "email"
-                ? "border-purple-500 text-purple-200"
-                : "border-transparent text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            {t("feedback.modeEmail")}
-          </button>
-        </div>
+        {/* Mode-Tabs nur wenn eingeloggt — anonym ist GitHub die einzige
+            Option, kein Switcher nötig. */}
+        {isLoggedIn ? (
+          <div className="flex gap-2 mb-5 border-b border-gray-700">
+            <button
+              type="button"
+              onClick={() => setMode("app")}
+              className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
+                mode === "app"
+                  ? "border-purple-500 text-purple-200"
+                  : "border-transparent text-gray-500 hover:text-gray-300"
+              }`}
+            >
+              {t("feedback.modeApp")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("github")}
+              className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
+                mode === "github"
+                  ? "border-purple-500 text-purple-200"
+                  : "border-transparent text-gray-500 hover:text-gray-300"
+              }`}
+            >
+              {t("feedback.modeGithub")}
+            </button>
+          </div>
+        ) : (
+          <p className="text-xs text-gray-500 mb-4">
+            {t("feedback.anonHint")}
+          </p>
+        )}
 
-        {mode === "github" ? <GitHubMode onClose={onClose} /> : <EmailMode onClose={onClose} />}
+        {mode === "github" ? <GitHubMode /> : <AppMode onClose={onClose} />}
       </div>
     </div>
   );
 }
 
 // ============================================================
-// GitHub-Issue-Mode
+// GitHub-Issue-Mode (für Reporter mit GitHub-Account, auch anonym)
 // ============================================================
 
-function GitHubMode({ onClose: _onClose }: { onClose: () => void }) {
+function GitHubMode() {
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
@@ -119,36 +138,35 @@ function GitHubMode({ onClose: _onClose }: { onClose: () => void }) {
 }
 
 // ============================================================
-// Email-Mode
+// Per App-Mode (eingeloggte User → DB-Inbox, Admin antwortet)
 // ============================================================
 
-function EmailMode({ onClose }: { onClose: () => void }) {
+function AppMode({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
-  const [feedbackType, setFeedbackType] = useState<FeedbackType>("other");
+  const [category, setCategory] = useState<FeedbackCategory>("general");
   const [message, setMessage] = useState("");
-  const submit = useSubmitFeedback();
+  const submit = useCreateFeedbackMessage();
 
   const trimmed = message.trim();
-  const tooShort = trimmed.length < 10;
+  const tooShort = trimmed.length < 3;
   const tooLong = trimmed.length > 4000;
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (tooShort || tooLong) return;
     submit.mutate(
-      { feedback_type: feedbackType, message: trimmed },
+      { category, message: trimmed },
       {
         onSuccess: () => {
           setMessage("");
           // Modal kurz offen lassen damit User Bestätigung sieht,
-          // dann nach 2s auto-close
+          // dann nach 2s auto-close.
           setTimeout(onClose, 2000);
         },
       },
     );
   }
 
-  // 503 / Rate-Limit / sonstige Errors aus Axios extrahieren
   const errMsg = (() => {
     const e = submit.error as AxiosError<{ detail?: string }> | null;
     if (!e) return null;
@@ -157,18 +175,19 @@ function EmailMode({ onClose }: { onClose: () => void }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
-      <p className="text-sm text-gray-300">{t("feedback.emailIntro")}</p>
+      <p className="text-sm text-gray-300">{t("feedback.appIntro")}</p>
 
       <label className="block">
         <span className="text-sm font-medium text-gray-300">
-          {t("feedback.emailTypeLabel")}
+          {t("feedback.categoryLabel")}
         </span>
         <select
-          value={feedbackType}
-          onChange={(e) => setFeedbackType(e.target.value as FeedbackType)}
+          value={category}
+          onChange={(e) => setCategory(e.target.value as FeedbackCategory)}
           disabled={submit.isPending}
           className="mt-1 w-full max-w-xs rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
         >
+          <option value="general">{t("feedback.typeGeneral")}</option>
           <option value="bug">{t("feedback.typeBug")}</option>
           <option value="feature">{t("feedback.typeFeature")}</option>
           <option value="other">{t("feedback.typeOther")}</option>
@@ -195,7 +214,7 @@ function EmailMode({ onClose }: { onClose: () => void }) {
 
       {submit.isSuccess && (
         <div className="rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">
-          {t("feedback.successMessage")}
+          {t("feedback.appSuccessMessage")}
         </div>
       )}
 

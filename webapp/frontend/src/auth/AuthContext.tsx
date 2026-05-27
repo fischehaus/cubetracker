@@ -28,6 +28,10 @@ export interface UserRead {
   /** Computed from ADMIN_EMAILS-Env-Var im Backend. Steuert ob die
    *  Admin-Card im VerwaltungTab sichtbar ist. */
   is_admin: boolean;
+  /** Phase W.tester-role-db: Tester-Rolle mit Zugriff auf Live-Tests
+   *  + Roadmap-Pflege. Wenn is_tester && !is_admin: Frontend zeigt
+   *  einen Tester-Tab statt Admin-Tab in der VerwaltungTab. */
+  is_tester: boolean;
   /** Phase W.9: Opt-In für User-Suche per display_name. */
   is_discoverable: boolean;
   /** Phase W.future-tournaments: Postleitzahl für "Turniere in der

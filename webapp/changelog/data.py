@@ -44,6 +44,36 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feedback-modal-rebuild",
+        released=date(2026, 5, 28),
+        title="Feedback-Modal: „Per Email\"-Mode raus, „Per App\"-Mode rein",
+        highlights=[
+            "Phase 2 (Frontend) der Tester+Feedback-Welle: das "
+            "FeedbackModal nutzt jetzt den neuen DB-Inbox-Endpoint "
+            "statt Resend-E-Mail-Versand.",
+            "Eingeloggte User: Tab-Toggle zwischen „Direkt in der App\" "
+            "(Default — schreibt in die Admin-Inbox) und „GitHub-Issue\". "
+            "4 Kategorien jetzt: Allgemein / Bug / Feature-Wunsch / "
+            "Sonstiges (vorher 3).",
+            "Anonyme User (Login-Seite-Footer): KEIN Tab-Toggle, nur "
+            "GitHub-Mode. Hint-Text erklärt warum („Logge dich ein, um "
+            "direkt in der App zu schreiben — Antwort kommt zurück in "
+            "dein Konto\").",
+            "Frontend-API: useCreateFeedbackMessage / useMyFeedback / "
+            "useMyFeedbackUnreadCount / useMarkFeedbackResponseSeen + "
+            "Admin-Hooks (useAdminFeedbackMessages, useAdminFeedbackStats, "
+            "useAdminUpdateFeedback, useAdminDeleteFeedback). Cache-"
+            "Invalidation umfassend.",
+            "AuthContext.UserRead + AdminUser-Type um is_tester ergänzt "
+            "(für die Tester-Tab-Anzeige + Admin-Toggle-UI in den "
+            "Folge-Wellen).",
+            "Locales DE/EN angepasst (1213/1213 symmetrisch): modeEmail/"
+            "emailIntro/successMessage durch modeApp/appIntro/"
+            "appSuccessMessage ersetzt, anonHint neu, typeGeneral neu.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.tester-role-db",
         released=date(2026, 5, 28),
         title="Tester-Rolle + Feedback-Inbox-Backend (DB-persistent)",

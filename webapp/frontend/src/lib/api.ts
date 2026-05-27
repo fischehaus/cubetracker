@@ -1225,6 +1225,8 @@ export interface AdminUser {
   is_active: boolean;
   email_verified: boolean;
   is_admin: boolean;
+  // Phase W.tester-role-db: Tester-Rolle.
+  is_tester: boolean;
   created_at: string | null;
   solve_count: number;
   last_solve_at: string | null;
@@ -1602,35 +1604,197 @@ interface ChangelogResponse {
 }
 
 // ============================================================
-// Feedback (Phase W.feedback, 2026-05-17)
+// Feedback (Phase W.feedback, 2026-05-17; umgebaut W.tester-role-db 2026-05-28)
 // ============================================================
+// Mail-Versand ist Geschichte. Feedback landet jetzt in der DB-
+// Inbox (admin-sichtbar), Admin antwortet via Inbox-UI, User sieht
+// die Antwort im „Mein Feedback"-Bereich.
 
-export type FeedbackType = "bug" | "feature" | "other";
+export type FeedbackCategory = "general" | "bug" | "feature" | "other";
+export type FeedbackStatus = "new" | "in_progress" | "done" | "archived";
 
-export interface FeedbackPayload {
-  feedback_type: FeedbackType;
+export interface FeedbackMessage {
+  id: number;
+  user_id: number | null;
+  category: FeedbackCategory;
+  message: string;
+  created_at: string;
+  status: FeedbackStatus;
+  admin_response: string | null;
+  admin_response_at: string | null;
+  admin_response_by_user_id: number | null;
+  user_seen_response_at: string | null;
+}
+
+export interface FeedbackMessagesResponse {
+  messages: FeedbackMessage[];
+  count: number;
+}
+
+export interface FeedbackCreateInput {
+  category: FeedbackCategory;
   message: string;
 }
 
-export interface FeedbackResponse {
-  success: boolean;
-  message_id: string | null;
+/**
+ * User schickt Feedback → landet als FeedbackMessage in der Admin-
+ * Inbox. Hartes Rate-Limit (3/h pro User) gegen Spam. Auth pflicht.
+ * Invalidiert auf success die eigene Liste (Mein-Feedback-Bereich).
+ */
+export function useCreateFeedbackMessage(): UseMutationResult<
+  FeedbackMessage,
+  Error,
+  FeedbackCreateInput
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input) => {
+      const r = await api.post<FeedbackMessage>("/feedback/messages", input);
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-feedback"] });
+      qc.invalidateQueries({ queryKey: ["my-feedback-unread"] });
+    },
+  });
 }
 
-/**
- * Schickt User-Feedback an den Admin via Backend-Resend-Email.
- * Hartes Rate-Limit (3/h pro IP) — kein Spam-Schutz im Frontend nötig.
- * 503 wenn Resend nicht erreichbar (z.B. ADMIN_EMAILS nicht gesetzt).
- */
-export function useSubmitFeedback(): UseMutationResult<
-  FeedbackResponse,
-  Error,
-  FeedbackPayload
-> {
-  return useMutation({
-    mutationFn: async (payload: FeedbackPayload) => {
-      const r = await api.post<FeedbackResponse>("/feedback", payload);
+/** Eigene Feedback-Items des Users — für „Mein Feedback"-Bereich. */
+export function useMyFeedback(
+  enabled: boolean = true,
+): UseQueryResult<FeedbackMessagesResponse> {
+  return useQuery({
+    queryKey: ["my-feedback"],
+    queryFn: async () => {
+      const r = await api.get<FeedbackMessagesResponse>("/feedback/me/messages");
       return r.data;
+    },
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+/** Anzahl ungelesener Admin-Antworten — Toast-Trigger beim Login. */
+export function useMyFeedbackUnreadCount(
+  enabled: boolean = true,
+): UseQueryResult<{ unread_count: number }> {
+  return useQuery({
+    queryKey: ["my-feedback-unread"],
+    queryFn: async () => {
+      const r = await api.get<{ unread_count: number }>(
+        "/feedback/me/unread-count",
+      );
+      return r.data;
+    },
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+/** User markiert eine Antwort als gelesen. */
+export function useMarkFeedbackResponseSeen(): UseMutationResult<
+  void,
+  Error,
+  { id: number }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }) => {
+      await api.post(`/feedback/me/messages/${id}/seen`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-feedback"] });
+      qc.invalidateQueries({ queryKey: ["my-feedback-unread"] });
+    },
+  });
+}
+
+// ============================================================
+// Admin: Feedback-Inbox (Phase W.tester-role-db, 2026-05-28)
+// ============================================================
+
+export interface FeedbackInboxStats {
+  by_status: Record<string, number>;
+  open_by_category: Record<string, number>;
+  total_open: number;
+}
+
+export interface AdminFeedbackUpdateInput {
+  status?: FeedbackStatus;
+  admin_response?: string | null;
+}
+
+export function useAdminFeedbackMessages(
+  enabled: boolean,
+  filters?: { status?: FeedbackStatus | "all"; category?: FeedbackCategory | "all" },
+): UseQueryResult<FeedbackMessagesResponse> {
+  const status = filters?.status;
+  const category = filters?.category;
+  return useQuery({
+    queryKey: ["admin-feedback", status ?? "all", category ?? "all"],
+    queryFn: async () => {
+      const params: Record<string, string> = {};
+      if (status && status !== "all") params.status = status;
+      if (category && category !== "all") params.category = category;
+      const r = await api.get<FeedbackMessagesResponse>(
+        "/admin/feedback/messages",
+        { params },
+      );
+      return r.data;
+    },
+    enabled,
+    staleTime: 10_000,
+  });
+}
+
+export function useAdminFeedbackStats(
+  enabled: boolean,
+): UseQueryResult<FeedbackInboxStats> {
+  return useQuery({
+    queryKey: ["admin-feedback-stats"],
+    queryFn: async () => {
+      const r = await api.get<FeedbackInboxStats>("/admin/feedback/stats");
+      return r.data;
+    },
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminUpdateFeedback(): UseMutationResult<
+  FeedbackMessage,
+  Error,
+  { id: number; patch: AdminFeedbackUpdateInput }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }) => {
+      const r = await api.patch<FeedbackMessage>(
+        `/admin/feedback/messages/${id}`,
+        patch,
+      );
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-feedback"] });
+      qc.invalidateQueries({ queryKey: ["admin-feedback-stats"] });
+    },
+  });
+}
+
+export function useAdminDeleteFeedback(): UseMutationResult<
+  void,
+  Error,
+  { id: number }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }) => {
+      await api.delete(`/admin/feedback/messages/${id}`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-feedback"] });
+      qc.invalidateQueries({ queryKey: ["admin-feedback-stats"] });
     },
   });
 }
