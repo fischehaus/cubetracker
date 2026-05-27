@@ -84,7 +84,15 @@ export function RoadmapModal({ onClose }: Props) {
           <p className="text-sm text-amber-300">{t("roadmap.errorGeneric")}</p>
         )}
 
-        {data && (
+        {data && data.items.length === 0 && (
+          // QA-Fix W.roadmap-admin-qa: nach Admin-Bulk-Delete oder vor
+          // erstem Seed-Bootstrap liefert die API items=[] — vorher
+          // sah man nur den Intro-Text + nichts, wirkte wie ein Render-Bug.
+          <p className="text-sm text-gray-500 italic">
+            {t("roadmap.emptyState")}
+          </p>
+        )}
+        {data && data.items.length > 0 && (
           <ol className="space-y-5">
             {ROADMAP_PHASES_META.map((phase) => {
               const items = itemsByPhase[phase.id] ?? [];

@@ -423,6 +423,14 @@ def bootstrap_roadmap(db: OrmSession) -> int:
     Admin-UI). Bei leerer Tabelle (Cold-Start, frische DB): alle Items
     aus ROADMAP_SEED werden mit sort_order in 10er-Schritten angelegt.
 
+    **Bewusstes Verhalten (W.roadmap-admin-qa QA-SOLLTE):** wenn der
+    Admin _alle_ Items via Admin-UI löscht UND der Container danach
+    neu startet, kommen die Seed-Items zurück (Count fällt auf 0). Für
+    eine Single-Admin-Installation ist das tolerierbar (Admin merkt es
+    + kann sie wieder löschen). Falls das stört: per-Admin-Marker
+    (z.B. eine `roadmap_seeded`-Row in einer kv-Tabelle) wäre der
+    richtige Fix — aktuell zurückgestellt, kein Production-Bug.
+
     Returns: Anzahl angelegter Items (0 wenn schon vorhanden).
     """
     from db.models import RoadmapItem

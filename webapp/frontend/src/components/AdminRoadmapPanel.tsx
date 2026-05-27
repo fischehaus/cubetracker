@@ -45,6 +45,10 @@ export function AdminRoadmapPanel() {
   const [visFilter, setVisFilter] = useState<VisibilityFilter>("all");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  // QA-Fix W.roadmap-admin-qa: per-Row disable beim Delete statt
+  // globalem deleteMut.isPending — sonst sind alle Delete-Buttons
+  // gleichzeitig disabled wenn der Admin einen löscht.
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const items = data?.items ?? [];
 
@@ -184,7 +188,13 @@ export function AdminRoadmapPanel() {
                 <ul className="space-y-1.5">
                   {phaseItems.map((item) => (
                     <ItemRow
-                      key={item.id}
+                      // QA-Fix W.roadmap-admin-qa: key wechselt bei
+                      // Edit/View — zwingt React den ItemRow neu zu
+                      // mounten + Form-State mit aktuellem Item-Stand
+                      // zu re-initialisieren (verhindert stale-form
+                      // nach Cancel + Re-Open mit zwischenzeitlichem
+                      // Server-Update).
+                      key={`${item.id}-${editingId === item.id ? "edit" : "view"}`}
                       item={item}
                       isEditing={editingId === item.id}
                       onStartEdit={() => setEditingId(item.id)}
@@ -203,11 +213,15 @@ export function AdminRoadmapPanel() {
                             }),
                           )
                         ) {
-                          deleteMut.mutate({ id: item.id });
+                          setDeletingId(item.id);
+                          deleteMut.mutate(
+                            { id: item.id },
+                            { onSettled: () => setDeletingId(null) },
+                          );
                         }
                       }}
-                      saveBusy={updateMut.isPending}
-                      deleteBusy={deleteMut.isPending}
+                      saveBusy={updateMut.isPending && editingId === item.id}
+                      deleteBusy={deleteMut.isPending && deletingId === item.id}
                     />
                   ))}
                 </ul>

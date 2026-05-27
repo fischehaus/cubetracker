@@ -1044,6 +1044,7 @@
     "intro": "Cubetracker ist in aktiver Entwicklung — kein Feature-Freeze. Diese Liste zeigt was als Nächstes kommt + warum. Reihenfolge orientiert sich an User-Wert vs Aufwand vs strategischer Differenzierung von csTimer.",
     "loading": "Lade Roadmap…",
     "errorGeneric": "Roadmap konnte nicht geladen werden.",
+    "emptyState": "Aktuell sind keine Roadmap-Items hinterlegt. Schau später wieder rein!",
     "doneStrike": "erledigt",
     "phases": {
       "p1Title": "Polish & Casual-Onboarding",

@@ -44,6 +44,36 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-admin-qa",
+        released=date(2026, 5, 28),
+        title="QA-Hotfix nach Roadmap-Admin-UI (3 SOLLTE)",
+        highlights=[
+            "QA-Sub-Agent fand 0 echte KRITISCH (Security/Datenverlust-"
+            "Kette komplett sauber: require_admin, extra=forbid, Cache-"
+            "Invalidation, Anonymous-Filter alle POSITIV), 3 SOLLTE + "
+            "2 NICE. Alle 3 SOLLTE sofort gefixt:",
+            "(1) AdminRoadmapPanel deleteMut/updateMut wurden global "
+            "geteilt → alle Delete-/Save-Buttons gleichzeitig disabled "
+            "wenn einer pending war. Jetzt: deletingId-State und "
+            "editingId-Check, nur die betroffene Zeile ist disabled.",
+            "(2) ItemRow Form-State stale nach Cancel+Reopen behoben: "
+            "key={item.id}-{view|edit} zwingt React beim Modus-Wechsel "
+            "den ItemRow neu zu mounten und den Form-State mit dem "
+            "aktuellen Server-Stand zu re-initialisieren.",
+            "(3) RoadmapModal hatte keinen Empty-State wenn API "
+            "items=[] zurückgibt (z.B. nach Admin-Bulk-Delete oder vor "
+            "Seed-Bootstrap). Vorher: nur Intro-Text + leere ol. Jetzt: "
+            "neuer Locale-Key roadmap.emptyState mit freundlichem "
+            "Hinweis.",
+            "(4) Seed-Re-Run-Verhalten dokumentiert: wenn Admin alle "
+            "Items löscht + Container neu startet, kommen die 28 Seed-"
+            "Items zurück. Kein Bug, aber bewusst dokumentiert im "
+            "bootstrap_roadmap-Docstring für späteren Lookup.",
+            "Locale-Symmetrie nach den Fixes: 1203/1203 DE/EN.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-admin-ui",
         released=date(2026, 5, 28),
         title="Admin-Roadmap-CRUD: Items anlegen / bearbeiten / löschen",
