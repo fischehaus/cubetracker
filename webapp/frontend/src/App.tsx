@@ -299,6 +299,7 @@ function DashboardTab({
    * Analyse-Tab und wechsle dort hin. */
   onSwitchToAnalyseCube: (cubeType: string) => void;
 }) {
+  const { t } = useTranslation();
   // DASHBOARD = Live-Sicht. Optionaler Session-Filter (default 'alle').
   // Cube-Filter bewusst NICHT — Dashboard vergleicht cube-übergreifend.
   //
@@ -319,7 +320,7 @@ function DashboardTab({
         onSessionIdChange={setSessionId}
       />
 
-      <DashboardSection title="Heute" id="dash-heute">
+      <DashboardSection title={t("dashboard.sectionToday")} id="dash-heute">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <ActivityCard sessionId={sessionId} slice="today" />
           <ActivityCard sessionId={sessionId} slice="week" />
@@ -327,7 +328,7 @@ function DashboardTab({
         </div>
       </DashboardSection>
 
-      <DashboardSection title="Deine Performance" id="dash-performance">
+      <DashboardSection title={t("dashboard.sectionPerformance")} id="dash-performance">
         <div className="space-y-4">
           <RecentRecordsCard onClickCube={onSwitchToAnalyseCube} />
           <MultiCompareCard sessionId={sessionId} />
@@ -335,14 +336,14 @@ function DashboardTab({
         </div>
       </DashboardSection>
 
-      <DashboardSection title="Trainings-Antrieb" id="dash-antrieb">
+      <DashboardSection title={t("dashboard.sectionTraining")} id="dash-antrieb">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ChallengesMiniCard onSwitchTab={onSwitchTab} />
           <AchievementsMiniCard onSwitchTab={onSwitchTab} />
         </div>
       </DashboardSection>
 
-      <DashboardSection title="Speedcubing-Welt" id="dash-welt">
+      <DashboardSection title={t("dashboard.sectionWorld")} id="dash-welt">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <WcaUpcomingCard />
           <NewsCard />

@@ -333,6 +333,12 @@
     "patchNotesTitle": "Patch Notes anzeigen",
     "closeAria": "Schließen"
   },
+  "dashboard": {
+    "sectionToday": "Heute",
+    "sectionPerformance": "Deine Performance",
+    "sectionTraining": "Trainings-Antrieb",
+    "sectionWorld": "Speedcubing-Welt"
+  },
   "dangerZone": {
     "title": "⚠ Gefahren-Bereich",
     "introPrefix": "Diese Aktionen können",

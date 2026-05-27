@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-dashboard-sections",
+        released=date(2026, 5, 27),
+        title="Dashboard-Sektion-Überschriften in Englisch",
+        highlights=[
+            "User-Befund: „HEUTE\" und „DEINE PERFORMANCE\" "
+            "(uppercase-Sektion-Header im Dashboard) waren noch deutsch.",
+            "Vier Dashboard-Sektion-Titel (Heute / Deine Performance / "
+            "Trainings-Antrieb / Speedcubing-Welt) standen hartkodiert "
+            "in App.tsx — jetzt via dashboard.section*-Keys übersetzt.",
+            "Damit ist das Dashboard auch beim Scan über die Sektion-"
+            "Header durchgehend DE/EN-konsistent.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-danger-zone",
         released=date(2026, 5, 27),
         title="Gefahren-Bereich-Karte in Englisch",

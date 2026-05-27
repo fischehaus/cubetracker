@@ -333,6 +333,12 @@
     "patchNotesTitle": "Show patch notes",
     "closeAria": "Close"
   },
+  "dashboard": {
+    "sectionToday": "Today",
+    "sectionPerformance": "Your performance",
+    "sectionTraining": "Training drive",
+    "sectionWorld": "Speedcubing world"
+  },
   "dangerZone": {
     "title": "⚠ Danger zone",
     "introPrefix": "These actions",
