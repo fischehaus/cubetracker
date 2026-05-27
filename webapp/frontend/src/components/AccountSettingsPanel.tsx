@@ -11,6 +11,7 @@
  */
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
 import { COUNTRIES } from "../lib/countries";
@@ -211,6 +212,7 @@ function ProfileSection() {
 function WcaIdSection() {
   const { t } = useTranslation();
   const { user, refreshMe } = useAuth();
+  const qc = useQueryClient();
   const [wcaId, setWcaId] = useState(user?.wca_id ?? "");
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
@@ -233,6 +235,10 @@ function WcaIdSection() {
     try {
       await api.patch("/auth/me", { wca_id: trimmed || null });
       await refreshMe();
+      // QA-Fix W.wca-profile-qa: ohne diese Invalidation zeigt das
+      // Dashboard noch bis zu 6h (staleTime) das alte WCA-Profil.
+      // Live-Demo: User trägt ID ein → Karte erscheint sofort.
+      qc.invalidateQueries({ queryKey: ["wca-me-profile"] });
       setInfo(
         trimmed
           ? t("accountSettings.okWcaIdSaved")

@@ -1724,7 +1724,9 @@ export interface WcaPersonRecentComp {
   country_iso2: string | null;
   start_date: string;
   end_date: string;
-  url: string;
+  // WCA-API liefert in seltenen Fällen (manuell angelegte Comps) keine URL —
+  // defensive nullable + Frontend-Guard beim Render. QA-Fix W.wca-profile-qa.
+  url: string | null;
 }
 
 export interface WcaPersonProfile {

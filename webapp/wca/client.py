@@ -159,8 +159,14 @@ def clear_cache() -> None:
 
 # Person-Cache eigener Slot — andere TTL als Competitions (PRs ändern sich
 # nur bei tatsächlicher Wettkampf-Teilnahme, also seltener).
-_person_cache: dict[str, tuple[float, dict[str, Any] | None]] = {}
+# Tuple: (timestamp, slim-dict | None, is_negative)
+_person_cache: dict[str, tuple[float, dict[str, Any] | None, bool]] = {}
 PERSON_CACHE_TTL_S = 6 * 3600  # 6h — PBs ändern sich sehr selten
+# QA-Fix W.wca-profile-qa: Negative-Cache (= 404 von WCA) deutlich kürzer.
+# Sonst sperrt ein Tippfehler bei der Eingabe den User 6h aus (gleiche ID
+# nach Korrektur landet wieder im 404-Slot). 30min reicht als Schutz gegen
+# Typo-Hammering, ohne den User dauerhaft zu blockieren.
+PERSON_CACHE_TTL_NEGATIVE_S = 30 * 60  # 30min
 
 
 async def fetch_person(wca_id: str) -> dict[str, Any] | None:
@@ -180,8 +186,9 @@ async def fetch_person(wca_id: str) -> dict[str, Any] | None:
     cache_key = f"person:{wca_id}"
     entry = _person_cache.get(cache_key)
     if entry is not None:
-        ts, data = entry
-        if time.time() - ts <= PERSON_CACHE_TTL_S:
+        ts, data, is_negative = entry
+        ttl = PERSON_CACHE_TTL_NEGATIVE_S if is_negative else PERSON_CACHE_TTL_S
+        if time.time() - ts <= ttl:
             return data
 
     try:
@@ -195,8 +202,9 @@ async def fetch_person(wca_id: str) -> dict[str, Any] | None:
             resp = await client.get(f"{WCA_API_BASE}/persons/{wca_id}")
             if resp.status_code == 404:
                 # Cache the negative answer so repeated lookups for a typo
-                # don't hammer the WCA-API.
-                _person_cache[cache_key] = (time.time(), None)
+                # don't hammer the WCA-API. Kurze TTL (30min) — siehe
+                # PERSON_CACHE_TTL_NEGATIVE_S-Kommentar oben.
+                _person_cache[cache_key] = (time.time(), None, True)
                 return None
             resp.raise_for_status()
             raw = resp.json()
@@ -244,7 +252,7 @@ async def fetch_person(wca_id: str) -> dict[str, Any] | None:
         "recent_competitions": _slim_competitions_for_person(competitions),
     }
 
-    _person_cache[cache_key] = (time.time(), slim)
+    _person_cache[cache_key] = (time.time(), slim, False)
     return slim
 
 

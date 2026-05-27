@@ -70,42 +70,31 @@ function formatWcaResult(
 function bestRankBadge(
   single: WcaPersonalRecord["single"],
   average: WcaPersonalRecord["average"],
-): { label: string; color: string } | null {
-  // Best-Rank über Single + Average: bevorzuge die kleinere (= bessere) Zahl.
-  const ranks: Array<[string, number | null | undefined]> = [
-    ["world_rank", single?.world_rank],
-    ["world_rank", average?.world_rank],
-    ["continental_rank", single?.continental_rank],
-    ["continental_rank", average?.continental_rank],
-    ["national_rank", single?.national_rank],
-    ["national_rank", average?.national_rank],
-  ];
-  let best: { label: string; color: string } | null = null;
-  for (const [kind, r] of ranks) {
-    if (r == null) continue;
-    const tier =
-      kind === "world_rank"
-        ? { label: `WR #${r}`, color: "bg-amber-500/20 text-amber-200 border-amber-500/40" }
-        : kind === "continental_rank"
-        ? { label: `CR #${r}`, color: "bg-purple-500/20 text-purple-200 border-purple-500/40" }
-        : { label: `NR #${r}`, color: "bg-blue-500/20 text-blue-200 border-blue-500/40" };
-    // Nur überschreiben wenn besserer Tier ODER gleicher Tier mit niedrigerer Zahl
-    if (!best) {
-      best = tier;
-      continue;
-    }
-    // Tier-Hierarchie: WR > CR > NR. Wenn das neue ein höheres Tier ist, überspringen.
-    const tierOrder = ["national_rank", "continental_rank", "world_rank"];
-    const bestTier = best.label.startsWith("WR")
-      ? "world_rank"
-      : best.label.startsWith("CR")
-      ? "continental_rank"
-      : "national_rank";
-    if (tierOrder.indexOf(kind) > tierOrder.indexOf(bestTier)) {
-      best = tier;
-    }
+): { label: string; color: string; tier: number; rank: number } | null {
+  // Best-Rank über Single + Average: bevorzuge höheren Tier (WR > CR > NR)
+  // ODER bei selbem Tier: niedrigere Rank-Zahl (= bessere Platzierung).
+  // QA-Fix W.wca-profile-qa: vorher wurde bei selbem Tier nie überschrieben,
+  // also zeigte NR-Single #10 statt NR-Average #2.
+  // Tier-Numerierung: 3 = WR, 2 = CR, 1 = NR (höhere Zahl = besserer Tier).
+  const candidates: Array<{ tier: number; rank: number; label: string; color: string }> = [];
+  const pushCandidate = (
+    rank: number | null | undefined,
+    tier: number,
+    prefix: "WR" | "CR" | "NR",
+    color: string,
+  ) => {
+    if (rank == null) return;
+    candidates.push({ tier, rank, label: `${prefix} #${rank}`, color });
+  };
+  for (const slot of [single, average]) {
+    pushCandidate(slot?.world_rank, 3, "WR", "bg-amber-500/20 text-amber-200 border-amber-500/40");
+    pushCandidate(slot?.continental_rank, 2, "CR", "bg-purple-500/20 text-purple-200 border-purple-500/40");
+    pushCandidate(slot?.national_rank, 1, "NR", "bg-blue-500/20 text-blue-200 border-blue-500/40");
   }
-  return best;
+  if (candidates.length === 0) return null;
+  // Sortierung: höchster Tier zuerst, bei Gleichstand niedrigste Rank-Zahl.
+  candidates.sort((a, b) => (b.tier - a.tier) || (a.rank - b.rank));
+  return candidates[0];
 }
 
 export function WcaProfileCard() {
@@ -178,7 +167,11 @@ export function WcaProfileCard() {
         <div className="text-sm text-amber-300">
           <p>{t("wcaProfile.errorGeneric")}</p>
           {backendDetail && (
-            <p className="text-xs text-gray-500 mt-1">{backendDetail}</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {/* QA-Fix W.wca-profile-qa: cappen — httpx-Exceptions können
+                  lange Stack-traces / interne URLs enthalten. */}
+              {backendDetail.slice(0, 200)}
+            </p>
           )}
         </div>
       )}
@@ -325,14 +318,18 @@ export function WcaProfileCard() {
                     key={c.id}
                     className="flex flex-wrap items-baseline gap-x-2"
                   >
-                    <a
-                      href={c.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-gray-200 hover:text-purple-300 underline-offset-2 hover:underline"
-                    >
-                      {c.name}
-                    </a>
+                    {c.url ? (
+                      <a
+                        href={c.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-gray-200 hover:text-purple-300 underline-offset-2 hover:underline"
+                      >
+                        {c.name}
+                      </a>
+                    ) : (
+                      <span className="text-gray-200">{c.name}</span>
+                    )}
                     {c.city && (
                       <span className="text-xs text-gray-500">
                         · {c.city}

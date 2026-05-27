@@ -349,7 +349,8 @@ function DashboardTab({
           <WcaProfileCard />
           <WcaUpcomingCard />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        {/* QA-Fix W.wca-profile-qa: NewsCard volle Breite statt halb-leerer Zeile. */}
+        <div className="mt-4">
           <NewsCard />
         </div>
       </DashboardSection>

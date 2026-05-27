@@ -44,6 +44,37 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-profile-qa",
+        released=date(2026, 5, 28),
+        title="QA-Hotfix nach WCA-Profil-Light (4 SOLLTE + 1 NICE)",
+        highlights=[
+            "QA-Sub-Agent fand 4 SOLLTE + 3 NICE + 4 POSITIV, kein "
+            "KRITISCH (Cross-User-Sicherheit + Defense-in-Depth via "
+            "Whitelist+Pydantic-extra-forbid + Backup-Restore-Verhalten "
+            "alle sauber).",
+            "Demo-relevant gefixt: Cache-Invalidation in AccountSettings."
+            "WcaIdSection — ohne den Fix zeigte das Dashboard 6h das alte "
+            "Profil nachdem User die WCA-ID geändert hatte. Jetzt: ID "
+            "speichern → Karte aktualisiert sofort.",
+            "bestRankBadge-Logik in WcaProfileCard repariert: bei selbem "
+            "Tier (z.B. zwei NR-Ränge) wird jetzt korrekt der niedrigere "
+            "(= bessere) Rang gezeigt. Vorher konnte NR-Single #10 statt "
+            "NR-Average #2 erscheinen.",
+            "Negative-Cache für 404-WCA-IDs von 6h auf 30min reduziert. "
+            "Tippfehler bei der Live-Eingabe sperrt den User nicht mehr "
+            "stundenlang aus.",
+            "backendDetail-String in WcaProfileCard wird vor Render auf "
+            "200 chars gekappt — verhindert dass httpx-Stack-traces / "
+            "interne URLs im DOM landen (defensive).",
+            "WcaPersonRecentComp.url: nullable Type + Null-Guard im "
+            "Frontend — WCA-API liefert in seltenen Fällen Comps ohne "
+            "URL, der Link wird dann nicht gerendert.",
+            "Dashboard-Layout-Polish: NewsCard nimmt volle Breite statt "
+            "halb-leerer Zeile zu rechten Seite.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-profile-light",
         released=date(2026, 5, 28),
         title="🌍 WCA-Profil: deine offiziellen Bestzeiten + letzten Wettkämpfe",
