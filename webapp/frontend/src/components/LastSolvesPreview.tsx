@@ -12,6 +12,7 @@
 // die volle bearbeitbare Liste lebt im ANALYSE-Tab.
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useDeleteSolve,
   useSolves,
@@ -43,14 +44,12 @@ interface Props {
 // War vorher 11 für AO12; jetzt 99 weil AO100 das größte Window ist.
 const AO_LOOKBACK = 99;
 
-interface WindowOption {
-  value: number;
-  label: string;
-}
-const WINDOW_OPTIONS: WindowOption[] = [
-  { value: 100, label: "letzte 100" },
-  { value: 500, label: "letzte 500" },
-  { value: 100_000, label: "alle" },
+// Window-Optionen: Label-Keys statt fester Labels — werden zur Render-
+// Zeit via t() lokalisiert (siehe useWindowOptions im Component).
+const WINDOW_VALUES: { value: number; key: string }[] = [
+  { value: 100, key: "lastSolvesPreview.windowLast100" },
+  { value: 500, key: "lastSolvesPreview.windowLast500" },
+  { value: 100_000, key: "lastSolvesPreview.windowAll" },
 ];
 
 // X-Picker für die Letzte-Solves-Tabelle
@@ -62,6 +61,7 @@ const TABLE_SIZE_OPTIONS: { value: number; label: string }[] = [
 ];
 
 export function LastSolvesPreview({ cubeType, sessionId }: Props) {
+  const { t } = useTranslation();
   // Window für Form-Vergleich (default 100, persistiert lokal pro session)
   const [windowSize, setWindowSize] = useState<number>(100);
 
@@ -184,24 +184,21 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base uppercase tracking-wide text-gray-500">
-            Live ({cubeType})
+            {t("lastSolvesPreview.liveTitle", { cube: cubeType })}
           </h3>
           <InfoButton align="right">
-            <p className="font-medium mb-1">Live-Karte</p>
-            <p>
-              Zeigt deinen <strong>letzten Solve</strong> + die vier aktuellen
-              Averages: <strong>Mo3</strong> (arithmetisches Mittel der letzten
-              3), <strong>AO5/AO12/AO100</strong> (WCA-konformer trimmed mean
-              der letzten 5/12/100). „Form vs" vergleicht dein aktuelles
-              Niveau mit dem Mittel eines wählbaren Fensters (letzte
-              100/500/alle). Grün = besser als Schnitt, rot = schlechter.
+            <p className="font-medium mb-1">
+              {t("lastSolvesPreview.liveInfoTitle")}
             </p>
+            <p>{t("lastSolvesPreview.liveInfoBody")}</p>
           </InfoButton>
         </div>
 
         <div className="space-y-4">
           <div>
-            <div className="text-sm text-gray-500">Letzter Solve</div>
+            <div className="text-sm text-gray-500">
+              {t("lastSolvesPreview.lastSolve")}
+            </div>
             <div className="flex items-baseline gap-3 mt-1">
               {lastSolve ? (
                 <>
@@ -214,7 +211,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                   </span>
                   {isLastPb && (
                     <span className="text-yellow-300 text-base font-semibold">
-                      ★ neue PB!
+                      {t("lastSolvesPreview.newPb")}
                     </span>
                   )}
                 </>
@@ -262,21 +259,25 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           <div className="pt-3 border-t border-gray-800">
             <div className="flex items-center justify-between gap-2 text-sm text-gray-500 mb-2">
               <div className="flex items-center gap-2">
-                Form vs.
+                {t("lastSolvesPreview.formVs")}
                 <select
                   value={windowSize}
                   onChange={(e) => setWindowSize(parseInt(e.target.value, 10))}
                   className="rounded border border-gray-700 bg-gray-800 px-2 py-1 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
                 >
-                  {WINDOW_OPTIONS.map((o) => (
+                  {WINDOW_VALUES.map((o) => (
                     <option key={o.value} value={o.value}>
-                      {o.label}
+                      {t(o.key)}
                     </option>
                   ))}
                 </select>
               </div>
               <span className="text-gray-600">
-                Mittel {windowMean != null ? formatTime(windowMean) : "–"}
+                {windowMean != null
+                  ? t("lastSolvesPreview.meanLabel", {
+                      mean: formatTime(windowMean),
+                    })
+                  : t("lastSolvesPreview.meanDash")}
               </span>
             </div>
             <div className="space-y-1.5">
@@ -302,7 +303,9 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
         {/* Quick-Actions auf den letzten Solve */}
         {lastSolve && (
           <div className="mt-4 pt-3 border-t border-gray-800 flex gap-2 flex-wrap items-center">
-            <span className="text-sm text-gray-500">Letzten:</span>
+            <span className="text-sm text-gray-500">
+              {t("lastSolvesPreview.lastActions")}
+            </span>
             {!lastSolve.dnf && (
               <button
                 onClick={() =>
@@ -337,7 +340,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
             </button>
             <button
               onClick={() => {
-                if (confirm("Letzten Solve löschen?")) del.mutate(lastSolve.id);
+                if (confirm(t("lastSolvesPreview.deleteLastConfirm"))) del.mutate(lastSolve.id);
               }}
               className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
             >
@@ -352,20 +355,17 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
         <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <div className="flex items-center gap-2">
             <h3 className="text-base uppercase tracking-wide text-gray-500">
-              Letzte Solves ({cubeType})
+              {t("lastSolvesPreview.tableTitle", { cube: cubeType })}
             </h3>
             <InfoButton>
-              <p className="font-medium mb-1">Letzte Solves</p>
-              <p>
-                Die zuletzt eingetragenen Solves dieses Cube-Typs. Anzahl
-                über den Selector wählbar (10/20/50/100). Klick auf
-                Spaltenkopf sortiert (Solvenummer, Zeit, AO5, AO12). DNF
-                und leere Averages landen beim Sortieren am Ende.
+              <p className="font-medium mb-1">
+                {t("lastSolvesPreview.tableInfoTitle")}
               </p>
+              <p>{t("lastSolvesPreview.tableInfoBody")}</p>
             </InfoButton>
           </div>
           <label className="flex items-center gap-1.5 text-xs text-gray-500">
-            Anzahl
+            {t("lastSolvesPreview.countLabel")}
             <select
               value={tableSize}
               onChange={(e) => setTableSize(parseInt(e.target.value, 10))}
@@ -391,35 +391,35 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
               <thead>
                 <tr className="border-b border-gray-700 text-left text-xs text-gray-500">
                   <SortableHeader
-                    label="#"
+                    label={t("lastSolvesPreview.colNumber")}
                     sortKey="num"
                     activeKey={sortKey}
                     dir={sortDir}
                     onClick={handleSort}
                   />
                   <SortableHeader
-                    label="Zeit"
+                    label={t("lastSolvesPreview.colTime")}
                     sortKey="time"
                     activeKey={sortKey}
                     dir={sortDir}
                     onClick={handleSort}
                   />
                   <SortableHeader
-                    label="Mo3"
+                    label={t("lastSolvesPreview.colMo3")}
                     sortKey="mo3"
                     activeKey={sortKey}
                     dir={sortDir}
                     onClick={handleSort}
                   />
                   <SortableHeader
-                    label="AO5"
+                    label={t("lastSolvesPreview.colAo5")}
                     sortKey="ao5"
                     activeKey={sortKey}
                     dir={sortDir}
                     onClick={handleSort}
                   />
                   <SortableHeader
-                    label="AO12"
+                    label={t("lastSolvesPreview.colAo12")}
                     sortKey="ao12"
                     activeKey={sortKey}
                     dir={sortDir}
@@ -458,13 +458,15 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                           onClick={() => {
                             if (
                               confirm(
-                                `Solve ${formatSolveTime(row.solve)} löschen?`,
+                                t("lastSolvesPreview.deleteRowConfirm", {
+                                  time: formatSolveTime(row.solve),
+                                }),
                               )
                             )
                               del.mutate(row.solve.id);
                           }}
                           className="text-xs rounded bg-gray-800 px-1.5 py-0.5 text-gray-500 hover:bg-red-700/40 hover:text-red-200"
-                          title="Solve löschen"
+                          title={t("lastSolvesPreview.deleteRowTitle")}
                         >
                           🗑
                         </button>
@@ -477,11 +479,11 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           </div>
         ) : (
           <p className="text-base text-gray-500">
-            Noch keine Solves für {cubeType}. Tipp eine Zeit rechts ein.
+            {t("lastSolvesPreview.noSolves", { cube: cubeType })}
           </p>
         )}
         <p className="mt-2 text-[10px] text-gray-600">
-          Klick auf Spaltenkopf zum Sortieren.
+          {t("lastSolvesPreview.sortHint")}
         </p>
       </div>
     </div>

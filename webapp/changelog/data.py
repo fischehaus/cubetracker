@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-live-card",
+        released=date(2026, 5, 27),
+        title="Timer-Tab Live-Karte + Letzte-Solves-Tabelle in Englisch",
+        highlights=[
+            "User-Befund: „Live\" und „Letzte Solves\" Karten waren noch "
+            "deutsch. Korrekt — die LastSolvesPreview-Komponente war "
+            "bisher nicht übersetzt.",
+            "Live-Karte (zeigt letzten Solve + Mo3/AO5/AO12/AO100 + Form-"
+            "Vergleich vs. Mittel des Fensters): Header inkl. Cube-Type, "
+            "InfoButton, Solve-Label, neue-PB-Badge, Window-Picker (letzte "
+            "100/500/alle), Mittel-Anzeige und Quick-Action-Label — alles "
+            "via t().",
+            "Letzte-Solves-Tabelle: Header, InfoButton, Count-Selector, "
+            "Spalten-Header (#/Zeit/Mo3/AO5/AO12), Empty-State, Sort-Hint, "
+            "Delete-Confirm und Delete-Title.",
+            "Locales-Namespace neu: lastSolvesPreview (~25 Strings).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-verwaltung-1",
         released=date(2026, 5, 27),
         title="Verwaltung-Tab Header + Meine-Daten-Card in Englisch",
