@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-alg-trainer",
+        released=date(2026, 5, 27),
+        title="Algorithm-Trainer DE/EN",
+        highlights=[
+            "AlgTrainerPanel komplett übersetzt: Header + InfoButton, "
+            "Case-Liste mit Never-Practiced-Hint, Empty-State (keine "
+            "Case-Auswahl), Footer.",
+            "DrillCard: Drill-Label + Scramble-Header + Show/Hide-"
+            "Algorithmus-Toggle, Skip-Button mit Tooltip, Save-Button mit "
+            "Busy-State, Error-Messages (Ungültige Zeit + Backend-Fehler-"
+            "Prefix).",
+            "DrillSolveList: Empty-State, Last-N-Header (interpoliert), "
+            "+2/DNF/Delete-Tooltips, Delete-Confirm mit interpolierter ID.",
+            "Locales-Namespaces neu: algTrainer + drillCard + drillSolves "
+            "(~22 Strings total).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-trainer-sub",
         released=date(2026, 5, 27),
         title="Trainer-Sub-Panels DE/EN",

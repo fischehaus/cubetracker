@@ -11,6 +11,7 @@
 // hochzählen → ScrambleCard regeneriert (klassisches Drill-Verhalten).
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useCreateSolve,
   useDeleteSolve,
@@ -38,6 +39,7 @@ const SUBSETS: { id: AlgSubsetId; label: string }[] = [
 ];
 
 export function AlgTrainerPanel() {
+  const { t } = useTranslation();
   const [subset, setSubset] = useState<AlgSubsetId>("pll");
   const [activeCaseId, setActiveCaseId] = useState<string | null>(null);
 
@@ -65,17 +67,11 @@ export function AlgTrainerPanel() {
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-semibold text-gray-100">
-            Algorithm-Trainer
+            {t("algTrainer.title")}
           </h2>
           <InfoButton>
-            <p className="font-medium mb-1">Algorithm-Trainer</p>
-            <p>
-              Drill-Modus für PLL- + OLL-Algorithmen. Sub-Sets wählbar
-              (z.B. „nur Edge-Permutationen"), Scrambles werden zufaellig
-              generiert mit der Inversion des gewuenschten Algorithmus.
-              Löse den Scramble + speichere die Zeit pro Algorithm —
-              hilft Schwachstellen zu identifizieren.
-            </p>
+            <p className="font-medium mb-1">{t("algTrainer.title")}</p>
+            <p>{t("algTrainer.infoBody")}</p>
           </InfoButton>
         </div>
         <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1">
@@ -143,7 +139,7 @@ export function AlgTrainerPanel() {
                     </div>
                   ) : (
                     <div className="text-xs text-gray-600 mt-0.5">
-                      noch nie geübt
+                      {t("algTrainer.caseNeverPracticed")}
                     </div>
                   )}
                   </div>
@@ -162,18 +158,13 @@ export function AlgTrainerPanel() {
             />
           ) : (
             <div className="rounded-lg border border-dashed border-gray-700 bg-gray-900/20 p-6 text-center text-gray-500 text-sm">
-              Klicke einen Case links, um ihn zu drillen.
+              {t("algTrainer.emptyState")}
             </div>
           )}
         </aside>
       </div>
 
-      <p className="mt-4 text-xs text-gray-500">
-        Sortierung: schwaechster aktueller ao5 zuerst — wo du zuerst
-        trainieren solltest. Cases ohne Daten am Ende.
-        Jeder Drill-Solve wird automatisch mit `alg_case` getaggt
-        (Cube-Type bleibt 3x3).
-      </p>
+      <p className="mt-4 text-xs text-gray-500">{t("algTrainer.footer")}</p>
     </div>
   );
 }
@@ -189,6 +180,7 @@ function DrillCard({
   caseDef: AlgCase;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
   const [scrambleSeed, setScrambleSeed] = useState(0);
   const [showAlg, setShowAlg] = useState(false);
   const [timeStr, setTimeStr] = useState("");
@@ -221,7 +213,7 @@ function DrillCard({
           setScrambleSeed((s) => s + 1);
           onSaved();
         },
-        onError: (e) => setError(`Fehler: ${e.message}`),
+        onError: (e) => setError(`${t("drillCard.errorPrefix")}${e.message}`),
       },
     );
   }
@@ -239,7 +231,7 @@ function DrillCard({
     setError(null);
     const time_ms = parseTimeInput(timeStr);
     if (time_ms === null) {
-      setError("Ungültige Zeit");
+      setError(t("drillCard.errorInvalid"));
       return;
     }
     create.mutate(
@@ -255,7 +247,7 @@ function DrillCard({
           setScrambleSeed((s) => s + 1);
           onSaved();
         },
-        onError: (e) => setError(`Fehler: ${e.message}`),
+        onError: (e) => setError(`${t("drillCard.errorPrefix")}${e.message}`),
       }
     );
   }
@@ -263,7 +255,7 @@ function DrillCard({
   return (
     <div className="rounded-lg border border-purple-500/40 bg-purple-500/5 p-5">
       <div className="text-xs text-purple-300 uppercase tracking-wide mb-1">
-        Drill
+        {t("drillCard.label")}
       </div>
       <div className="flex items-center gap-3 mb-3">
         <CubeStateView caseId={caseDef.id} size="large" />
@@ -274,7 +266,7 @@ function DrillCard({
 
       <div className="rounded border border-gray-700 bg-gray-900/50 p-3 mb-3">
         <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-          Scramble
+          {t("drillCard.scrambleLabel")}
         </div>
         <div
           className="font-mono text-gray-100 break-words leading-relaxed select-all"
@@ -288,7 +280,7 @@ function DrillCard({
         onClick={() => setShowAlg((v) => !v)}
         className="text-xs text-gray-400 hover:text-gray-200 mb-3"
       >
-        {showAlg ? "▼ Algorithmus verbergen" : "▶ Algorithmus zeigen"}
+        {showAlg ? t("drillCard.hideAlg") : t("drillCard.showAlg")}
       </button>
       {showAlg && (
         <div
@@ -337,16 +329,18 @@ function DrillCard({
         <button
           onClick={() => setScrambleSeed((s) => s + 1)}
           className="flex-1 text-sm rounded border border-gray-700 px-3 py-2 text-gray-300 hover:bg-gray-800"
-          title="Neuen Scramble für denselben Case generieren"
+          title={t("drillCard.skipButtonTitle")}
         >
-          ⏭ Skip
+          {t("drillCard.skipButton")}
         </button>
         <button
           onClick={save}
           disabled={create.isPending}
           className="flex-1 text-sm rounded bg-purple-600 px-3 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
         >
-          {create.isPending ? "…" : "Speichern (Enter)"}
+          {create.isPending
+            ? t("drillCard.saveBusy")
+            : t("drillCard.saveButton")}
         </button>
       </div>
 
@@ -367,6 +361,7 @@ function DrillCard({
 // ============================================================
 
 function DrillSolveList({ caseId }: { caseId: string }) {
+  const { t } = useTranslation();
   const { data: solves, isLoading } = useSolves({ alg_case: caseId, limit: 20 });
   const update = useUpdateSolve();
   const del = useDeleteSolve();
@@ -375,7 +370,7 @@ function DrillSolveList({ caseId }: { caseId: string }) {
   if (!solves || solves.length === 0) {
     return (
       <div className="mt-4 text-xs text-gray-500 text-center">
-        Noch keine Drill-Solves für diesen Case.
+        {t("drillSolves.empty")}
       </div>
     );
   }
@@ -387,13 +382,13 @@ function DrillSolveList({ caseId }: { caseId: string }) {
     update.mutate({ id: s.id, payload: { dnf: !s.dnf } });
   }
   function remove(id: number) {
-    if (confirm(`Solve #${id} wirklich löschen?`)) del.mutate(id);
+    if (confirm(t("drillSolves.deleteConfirm", { id }))) del.mutate(id);
   }
 
   return (
     <div className="mt-4">
       <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">
-        Letzte {solves.length} Solves
+        {t("drillSolves.lastN", { count: solves.length })}
       </div>
       <ul className="space-y-1 max-h-72 overflow-y-auto">
         {solves.map((s) => (
@@ -418,7 +413,7 @@ function DrillSolveList({ caseId }: { caseId: string }) {
                   : "bg-gray-700 text-gray-400 hover:text-gray-200"
               }`}
               disabled={s.dnf}
-              title="+2 Strafe togglen"
+              title={t("drillSolves.plusTwoTitle")}
             >
               +2
             </button>
@@ -429,14 +424,14 @@ function DrillSolveList({ caseId }: { caseId: string }) {
                   ? "bg-red-600 text-white"
                   : "bg-gray-700 text-gray-400 hover:text-gray-200"
               }`}
-              title="DNF togglen"
+              title={t("drillSolves.dnfTitle")}
             >
               DNF
             </button>
             <button
               onClick={() => remove(s.id)}
               className="rounded px-1.5 py-0.5 text-[10px] text-gray-400 hover:bg-red-700/50 hover:text-red-200"
-              title="Solve löschen"
+              title={t("drillSolves.deleteTitle")}
             >
               🗑
             </button>

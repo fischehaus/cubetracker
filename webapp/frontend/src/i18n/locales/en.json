@@ -829,6 +829,33 @@
     "tileLocked": "Not unlocked yet",
     "tileUnlocked": "Unlocked: {{date}}"
   },
+  "algTrainer": {
+    "title": "Algorithm trainer",
+    "infoBody": "Drill mode for PLL + OLL algorithms. Sub-sets selectable (e.g. \"edge permutations only\"), scrambles are randomly generated as the inverse of the desired algorithm. Solve the scramble + save the time per algorithm — helps identify weak spots.",
+    "caseNeverPracticed": "never practiced",
+    "emptyState": "Click a case on the left to drill it.",
+    "footer": "Sort: weakest current ao5 first — where you should train first. Cases without data at the end. Each drill solve is automatically tagged with `alg_case` (cube type stays 3x3)."
+  },
+  "drillCard": {
+    "label": "Drill",
+    "scrambleLabel": "Scramble",
+    "showAlg": "▶ Show algorithm",
+    "hideAlg": "▼ Hide algorithm",
+    "skipButton": "⏭ Skip",
+    "skipButtonTitle": "Generate new scramble for the same case",
+    "saveBusy": "…",
+    "saveButton": "Save (Enter)",
+    "errorInvalid": "Invalid time",
+    "errorPrefix": "Error: "
+  },
+  "drillSolves": {
+    "empty": "No drill solves for this case yet.",
+    "lastN": "Last {{count}} solves",
+    "deleteConfirm": "Really delete solve #{{id}}?",
+    "plusTwoTitle": "Toggle +2 penalty",
+    "dnfTitle": "Toggle DNF",
+    "deleteTitle": "Delete solve"
+  },
   "backupPanel": {
     "title": "Backup & restore",
     "infoBody": "Full export of your data (solves, sessions, hardware, achievements) as a JSON file. Restore from your own backup using merge mode (nothing is overwritten) or replace mode (everything is rewritten, with a confirm string). Snapshots = restore points, max 2 per user — created automatically before larger operations (restore, bulk import).",
