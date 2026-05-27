@@ -1286,6 +1286,31 @@
     "recentHeading": "Recent competitions",
     "footer": "Data from worldcubeassociation.org. Click a name / competition to open the official WCA profile."
   },
+  "myFeedback": {
+    "title": "💬 My feedback",
+    "infoBody": "Your own feedback messages to the operator, including replies. When a new reply arrives, you get a small notification at login — the item is marked with a green dot here. When you expand it, the reply is automatically marked as seen.",
+    "loading": "Loading your feedback…",
+    "errorGeneric": "Couldn't load your feedback.",
+    "emptyState": "You haven't sent any feedback yet. Use the footer link \"💬 Give feedback\" anytime.",
+    "expand": "Show full text + reply",
+    "collapse": "Collapse",
+    "categoryGeneral": "General",
+    "categoryBug": "Bug",
+    "categoryFeature": "Feature wish",
+    "categoryOther": "Other",
+    "statusNew": "New",
+    "statusInProgress": "In progress",
+    "statusDone": "Done",
+    "statusArchived": "Archived",
+    "newResponseBadge": "💬 New reply",
+    "adminReplyLabel": "💬 Reply from the operator:"
+  },
+  "feedbackToaster": {
+    "titleSingle": "💬 You have a new reply to your feedback",
+    "titleMulti": "💬 You have {{count}} new replies to your feedback",
+    "hint": "Click me → jumps to \"Manage → My data → My feedback\".",
+    "dismissAria": "Dismiss"
+  },
   "adminFeedback": {
     "title": "Feedback inbox",
     "infoBody": "User messages from the \"Directly in the app\" mode of the feedback modal. Instead of being emailed they now land here — sorted \"newest first\", with a blue dot for unread. You can toggle status (in progress / done / archived), write a reply (the user sees it at next login in \"My feedback\"), and delete spam.",

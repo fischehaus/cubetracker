@@ -1286,6 +1286,31 @@
     "recentHeading": "Letzte Wettkämpfe",
     "footer": "Daten von worldcubeassociation.org. Klick auf Namen / Wettkampf öffnet das offizielle WCA-Profil."
   },
+  "myFeedback": {
+    "title": "💬 Mein Feedback",
+    "infoBody": "Deine eigenen Feedback-Nachrichten an den Betreiber, inklusive Antworten. Wenn eine neue Antwort vorliegt, bekommst du beim Login einen kleinen Hinweis — das Item ist hier mit einem grünen Dot markiert. Beim Aufklappen wird die Antwort automatisch als gelesen markiert.",
+    "loading": "Lade dein Feedback…",
+    "errorGeneric": "Konnte dein Feedback nicht laden.",
+    "emptyState": "Du hast noch kein Feedback geschickt. Per Footer-Link „💬 Feedback geben\" kannst du jederzeit schreiben.",
+    "expand": "Vollen Text + Antwort anzeigen",
+    "collapse": "Einklappen",
+    "categoryGeneral": "Allgemein",
+    "categoryBug": "Bug",
+    "categoryFeature": "Feature-Wunsch",
+    "categoryOther": "Sonstiges",
+    "statusNew": "Neu",
+    "statusInProgress": "In Bearbeitung",
+    "statusDone": "Erledigt",
+    "statusArchived": "Archiviert",
+    "newResponseBadge": "💬 Neue Antwort",
+    "adminReplyLabel": "💬 Antwort vom Betreiber:"
+  },
+  "feedbackToaster": {
+    "titleSingle": "💬 Du hast eine neue Antwort auf dein Feedback",
+    "titleMulti": "💬 Du hast {{count}} neue Antworten auf dein Feedback",
+    "hint": "Klick mich → springt zu „Verwaltung → Meine Daten → Mein Feedback\".",
+    "dismissAria": "Schließen"
+  },
   "adminFeedback": {
     "title": "Feedback-Inbox",
     "infoBody": "User-Nachrichten aus dem „Per App\"-Modus des Feedback-Modals. Statt früher per Email landen sie jetzt hier — sortiert nach „neu zuerst\", mit blauem Dot bei ungelesen. Du kannst Status togglen (in Bearbeitung / erledigt / archiviert), eine Antwort schreiben (User sieht sie beim nächsten Login im „Mein Feedback\"-Bereich) und Spam löschen.",

@@ -24,6 +24,7 @@ import { ActivityChart } from "./components/ActivityChart";
 import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
 import { BigTimerInput } from "./components/BigTimerInput";
 import { ChallengeCompletionToaster } from "./components/ChallengeCompletionToaster";
+import { FeedbackUnreadToaster } from "./components/FeedbackUnreadToaster";
 import { ChallengesMiniCard } from "./components/ChallengesMiniCard";
 import { DashboardFilterBar } from "./components/DashboardFilterBar";
 import { PbConfettiOverlay } from "./components/PbConfettiOverlay";
@@ -665,6 +666,7 @@ function MainLayout() {
       <AchievementToaster />
       <ChallengeCompletionToaster />
       <PbConfettiOverlay />
+      <FeedbackUnreadToaster />
       {showPatches && <PatchNotesModal onClose={() => setShowPatches(false)} />}
       {showFeatures && (
         <FeaturesModal onClose={() => setShowFeatures(false)} />

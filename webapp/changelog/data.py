@@ -44,6 +44,37 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feedback-user-view",
+        released=date(2026, 5, 28),
+        title="💬 Mein-Feedback-Bereich + Login-Toast bei neuer Antwort",
+        highlights=[
+            "Phase 5 (Frontend) der Tester+Feedback-Welle: User-Sicht "
+            "der Feedback-Inbox. Nach dem Senden einer Nachricht "
+            "verschwindet sie nicht mehr ins Leere — der User sieht "
+            "Status + Admin-Antwort in einem eigenen Bereich.",
+            "Neuer Block „Mein Feedback\" in Verwaltung → Meine Daten "
+            "(direkt nach der Ownership-Card). Liste aller eigenen "
+            "Items chronologisch absteigend mit Kategorie-Icon + "
+            "Status-Badge + Datum. Truncated nach 200 Zeichen, klick "
+            "zum Expandieren.",
+            "Items mit ungelesener Admin-Antwort: grüne Border + grüner "
+            "Dot + „💬 Neue Antwort\"-Badge. Beim Aufklappen wird die "
+            "Antwort automatisch als gelesen markiert (POST /feedback/"
+            "me/messages/{id}/seen).",
+            "FeedbackUnreadToaster (App.tsx): beim Login + bei jedem "
+            "Reload prüft der Toaster /feedback/me/unread-count. Wenn "
+            "> 0: kleiner grüner Toast oben rechts, 6s sichtbar. Klick "
+            "springt direkt zum „Meine Daten\"-Sub-Tab via Custom-"
+            "Event-Pattern (cubetracker:goto-verwaltung-section).",
+            "Toast erscheint nur 1× pro Mount (useState-Flag) damit er "
+            "nicht bei jedem Page-Refresh nervt — Re-Trigger erst bei "
+            "neuem Login oder Browser-Refresh.",
+            "21 neue Locale-Keys (myFeedback.* + feedbackToaster.*), "
+            "1280/1280 symmetrisch.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.tester-tab-ui",
         released=date(2026, 5, 28),
         title="Tester-Tab in Verwaltung + Admin-Toggle „🧪 Tester machen\"",

@@ -12,6 +12,7 @@ import { AdminPanel } from "./AdminPanel";
 import { BackupPanel } from "./BackupPanel";
 import { DangerZoneCard } from "./DangerZoneCard";
 import { MeineDatenCard } from "./MeineDatenCard";
+import { MyFeedbackPanel } from "./MyFeedbackPanel";
 import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { HardwareList } from "./HardwareList";
 import { ImportPanel } from "./ImportPanel";
@@ -137,6 +138,10 @@ export function VerwaltungTab() {
         <div className="space-y-4">
           {/* Roadmap #6: Ownership-Botschaft + prominenter Backup-Download oben */}
           <MeineDatenCard />
+          {/* W.feedback-user-view: eigene Feedback-Items + Admin-Antworten.
+              Direkt nach Ownership-Card weil thematisch ähnlich („was passiert
+              mit meinen Daten / Anfragen?"). */}
+          <MyFeedbackPanel />
           {/* Orientierungs-Hilfe: zwei verschiedene JSON-Formate
               im Spiel (Cubetracker-Backup vs csTimer-Export).
               User-Verwirrung-Potenzial hoch -> klarer Aufmacher. */}
