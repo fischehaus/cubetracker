@@ -4,6 +4,7 @@
 // AchievementToaster, nur in grüner Farbgebung und mit Challenge-Lookup.
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { onChallengeCompleted, useChallengesToday } from "../lib/api";
 import {
   CHALLENGE_ICONS,
@@ -23,6 +24,7 @@ const AUTO_DISMISS_MS = 5000;
 const MAX_VISIBLE = 5;
 
 export function ChallengeCompletionToaster() {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [extraCount, setExtraCount] = useState(0);
   // Wir brauchen die Definitionen, um beim toast den text + icon zu zeigen.
@@ -76,22 +78,22 @@ export function ChallengeCompletionToaster() {
 
   return (
     <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 max-w-xs">
-      {toasts.map((t) => (
+      {toasts.map((toast) => (
         <div
-          key={t.id}
+          key={toast.id}
           className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 backdrop-blur p-4 shadow-lg flex items-start gap-3"
         >
-          <span className="text-2xl shrink-0">{t.icon}</span>
+          <span className="text-2xl shrink-0">{toast.icon}</span>
           <div className="flex-1 min-w-0">
             <div className="text-sm text-emerald-200/80 uppercase tracking-wide">
-              🎯 Challenge erfüllt — {t.label}
+              {t("toasterChallenge.completedLabel", { label: toast.label })}
             </div>
-            <div className="text-sm text-emerald-100 mt-0.5">{t.text}</div>
+            <div className="text-sm text-emerald-100 mt-0.5">{toast.text}</div>
           </div>
           <button
-            onClick={() => dismiss(t.id)}
+            onClick={() => dismiss(toast.id)}
             className="text-xl text-emerald-300/60 hover:text-emerald-200 leading-none -mt-1"
-            aria-label="Toast schliessen"
+            aria-label={t("toasterChallenge.closeAria")}
           >
             ×
           </button>
@@ -99,12 +101,12 @@ export function ChallengeCompletionToaster() {
       ))}
       {extraCount > 0 && (
         <div className="rounded border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200 flex items-center gap-2">
-          <span>+ {extraCount} weitere Challenges erfüllt!</span>
+          <span>{t("toasterChallenge.moreCount", { count: extraCount })}</span>
           <button
             onClick={dismissAll}
             className="ml-auto text-xs underline hover:text-emerald-100"
           >
-            alle schliessen
+            {t("toasterChallenge.dismissAll")}
           </button>
         </div>
       )}

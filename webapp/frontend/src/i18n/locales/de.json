@@ -333,6 +333,23 @@
     "patchNotesTitle": "Patch Notes anzeigen",
     "closeAria": "Schließen"
   },
+  "toasterAchievement": {
+    "unlockedLabel": "🏆 Erfolg freigeschaltet",
+    "closeAria": "Toast schließen",
+    "moreCount": "+ {{count}} weitere Erfolge!",
+    "dismissAll": "alle schließen"
+  },
+  "toasterChallenge": {
+    "completedLabel": "🎯 Challenge erfüllt — {{label}}",
+    "closeAria": "Toast schließen",
+    "moreCount": "+ {{count}} weitere Challenges erfüllt!",
+    "dismissAll": "alle schließen"
+  },
+  "toasterPb": {
+    "header": "🏆 Personal Best",
+    "perfectStorm": "Perfect Storm — alle drei PBs!",
+    "pbSuffix": "{{kinds}}-PB"
+  },
   "info": {
     "label": "Mehr Info",
     "closeAria": "Info schließen"

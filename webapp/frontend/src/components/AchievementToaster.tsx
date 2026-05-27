@@ -8,6 +8,7 @@
 // summen-toast „+N weitere".
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { onAchievementUnlocked, useAchievements } from "../lib/api";
 
 interface Toast {
@@ -22,6 +23,7 @@ const AUTO_DISMISS_MS = 5000;
 const MAX_VISIBLE = 5;
 
 export function AchievementToaster() {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [extraCount, setExtraCount] = useState(0);
   // Wir brauchen die Definitionen, um beim toast den name + icon zu zeigen.
@@ -76,27 +78,27 @@ export function AchievementToaster() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-xs">
-      {toasts.map((t) => (
+      {toasts.map((toast) => (
         <div
-          key={t.id}
+          key={toast.id}
           className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 backdrop-blur p-4 shadow-lg flex items-start gap-3"
         >
-          <span className="text-2xl shrink-0">{t.icon}</span>
+          <span className="text-2xl shrink-0">{toast.icon}</span>
           <div className="flex-1 min-w-0">
             <div className="text-sm text-yellow-200/80 uppercase tracking-wide">
-              🏆 Erfolg freigeschaltet
+              {t("toasterAchievement.unlockedLabel")}
             </div>
             <div className="text-base text-yellow-100 font-semibold mt-0.5">
-              {t.name}
+              {toast.name}
             </div>
             <div className="text-sm text-yellow-200/80 mt-0.5">
-              {t.description}
+              {toast.description}
             </div>
           </div>
           <button
-            onClick={() => dismiss(t.id)}
+            onClick={() => dismiss(toast.id)}
             className="text-xl text-yellow-300/60 hover:text-yellow-200 leading-none -mt-1"
-            aria-label="Toast schliessen"
+            aria-label={t("toasterAchievement.closeAria")}
           >
             ×
           </button>
@@ -104,12 +106,12 @@ export function AchievementToaster() {
       ))}
       {extraCount > 0 && (
         <div className="rounded border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-200 flex items-center gap-2">
-          <span>+ {extraCount} weitere Erfolge!</span>
+          <span>{t("toasterAchievement.moreCount", { count: extraCount })}</span>
           <button
             onClick={dismissAll}
             className="ml-auto text-xs underline hover:text-yellow-100"
           >
-            alle schliessen
+            {t("toasterAchievement.dismissAll")}
           </button>
         </div>
       )}

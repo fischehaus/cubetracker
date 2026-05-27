@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-toaster",
+        released=date(2026, 5, 27),
+        title="Achievement-/Challenge-/PB-Toaster in Englisch",
+        highlights=[
+            "Achievement-Toaster (gelb unten rechts bei Solve-Save): "
+            "Header, Close-ARIA und Bulk-Counter (+N weitere Erfolge) "
+            "folgen jetzt der UI-Sprache. Achievement-Namen und "
+            "Beschreibungen kommen weiterhin vom Backend.",
+            "Challenge-Completion-Toaster (grün unten links): Header "
+            "mit Challenge-Label, Close-ARIA und Bulk-Counter.",
+            "PB-Confetti-Overlay (Mitte oben bei Personal-Best): "
+            "Header und Perfect-Storm-Label plus die „Single + Ao5 + "
+            "Ao12 PB\"-Zusammensetzung folgen der Sprache.",
+            "Locales-Namespaces neu: toasterAchievement / "
+            "toasterChallenge / toasterPb (10 neue Strings).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-timer-complete",
         released=date(2026, 5, 27),
         title="Timer-Tab wirklich komplett DE/EN (Spacebar/Touch/Set + Info-Popups)",

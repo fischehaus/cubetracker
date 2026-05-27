@@ -6,6 +6,7 @@
 // "perfect storm"). Wir spielen dann ein dichteres Konfetti-Pattern.
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import confetti from "canvas-confetti";
 import { onPbAchieved, type PbKind } from "../lib/api";
 
@@ -23,6 +24,7 @@ const PB_LABELS: Record<PbKind, string> = {
 };
 
 export function PbConfettiOverlay() {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<PbToast[]>([]);
 
   useEffect(() => {
@@ -46,18 +48,20 @@ export function PbConfettiOverlay() {
 
   return (
     <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none">
-      {toasts.map((t) => (
+      {toasts.map((toast) => (
         <div
-          key={t.id}
+          key={toast.id}
           className="rounded-lg border border-yellow-400/60 bg-yellow-500/15 backdrop-blur px-5 py-3 shadow-2xl text-center"
         >
           <div className="text-sm uppercase tracking-wider text-yellow-200/80">
-            🏆 Personal Best
+            {t("toasterPb.header")}
           </div>
           <div className="text-lg font-bold text-yellow-100">
-            {t.kinds.length === 3
-              ? "Perfect Storm — alle drei PBs!"
-              : t.kinds.map((k) => PB_LABELS[k]).join(" + ") + "-PB"}
+            {toast.kinds.length === 3
+              ? t("toasterPb.perfectStorm")
+              : t("toasterPb.pbSuffix", {
+                  kinds: toast.kinds.map((k) => PB_LABELS[k]).join(" + "),
+                })}
           </div>
         </div>
       ))}

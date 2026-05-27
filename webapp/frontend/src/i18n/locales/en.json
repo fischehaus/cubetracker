@@ -333,6 +333,23 @@
     "patchNotesTitle": "Show patch notes",
     "closeAria": "Close"
   },
+  "toasterAchievement": {
+    "unlockedLabel": "🏆 Achievement unlocked",
+    "closeAria": "Close toast",
+    "moreCount": "+ {{count}} more achievements!",
+    "dismissAll": "dismiss all"
+  },
+  "toasterChallenge": {
+    "completedLabel": "🎯 Challenge complete — {{label}}",
+    "closeAria": "Close toast",
+    "moreCount": "+ {{count}} more challenges complete!",
+    "dismissAll": "dismiss all"
+  },
+  "toasterPb": {
+    "header": "🏆 Personal Best",
+    "perfectStorm": "Perfect Storm — all three PBs!",
+    "pbSuffix": "{{kinds}} PB"
+  },
   "info": {
     "label": "More info",
     "closeAria": "Close info"
