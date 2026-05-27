@@ -7,6 +7,7 @@
 //   3. Snapshots (max 2/User) — anlegen, wiederherstellen, löschen
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { downloadFullBackup } from "../lib/backup";
@@ -40,6 +41,7 @@ interface SnapshotsResponse {
 const REPLACE_MAGIC = "DELETE_ALL_MY_DATA";
 
 export function BackupPanel() {
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
 
   // ====== Voll-Export ======
@@ -52,7 +54,7 @@ export function BackupPanel() {
     try {
       await downloadFullBackup();
     } catch (e: unknown) {
-      setExportError(extractErrorMessage(e));
+      setExportError(extractErrorMessage(e, t("backupPanel.unknownError")));
     } finally {
       setExportBusy(false);
     }
@@ -84,7 +86,7 @@ export function BackupPanel() {
       if (restoreMode === "replace" && !dryRun) {
         if (confirmText !== REPLACE_MAGIC) {
           setRestoreError(
-            `Tippe "${REPLACE_MAGIC}" exakt in das Confirm-Feld, um den destruktiven Restore zu bestätigen.`,
+            t("backupPanel.replaceConfirmError", { magic: REPLACE_MAGIC }),
           );
           setRestoreBusy(null);
           return;
@@ -108,7 +110,7 @@ export function BackupPanel() {
         qc.invalidateQueries();
       }
     } catch (e: unknown) {
-      setRestoreError(extractErrorMessage(e));
+      setRestoreError(extractErrorMessage(e, t("backupPanel.unknownError")));
     } finally {
       setRestoreBusy(null);
     }
@@ -138,24 +140,14 @@ export function BackupPanel() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <h2 className="text-2xl font-semibold text-gray-100">
-            Backup &amp; Wiederherstellung
+            {t("backupPanel.title")}
           </h2>
           <InfoButton>
-            <p className="font-medium mb-1">Backup &amp; Wiederherstellung</p>
-            <p>
-              Voll-Export deiner Daten (Solves, Sessions, Hardware,
-              Achievements) als JSON-Datei. Wiederherstellen aus eigenem
-              Backup mit Merge-Modus (nichts wird überschrieben) oder
-              Replace-Modus (alles wird neu geschrieben, mit Confirm-String).
-              Snapshots = Wiederherstellungspunkte, max 2 pro User —
-              automatisch vor größeren Operationen (Restore, Bulk-Import).
-            </p>
+            <p className="font-medium mb-1">{t("backupPanel.title")}</p>
+            <p>{t("backupPanel.infoBody")}</p>
           </InfoButton>
         </div>
-        <p className="text-sm text-gray-400">
-          Voll-Export deiner Daten (JSON), Wiederherstellen aus Datei,
-          Snapshots als Wiederherstellungspunkte (max 2 pro User).
-        </p>
+        <p className="text-sm text-gray-400">{t("backupPanel.subtitle")}</p>
       </div>
 
       {/* ============================================================
@@ -163,19 +155,19 @@ export function BackupPanel() {
           ============================================================ */}
       <section className="rounded border border-gray-700 bg-gray-800/40 p-4">
         <h3 className="text-lg font-semibold text-gray-100 mb-1">
-          1. Voll-Export (.json)
+          {t("backupPanel.section1Title")}
         </h3>
         <p className="text-sm text-gray-400 mb-3">
-          Lesbarer JSON-Export aller deiner Daten — Solves, Sessions,
-          Hardware, Achievements, Challenges. Empfohlen vor größeren
-          Änderungen + als Backup gegen das 90-Tage-Postgres-Limit.
+          {t("backupPanel.section1Desc")}
         </p>
         <button
           onClick={downloadJson}
           disabled={exportBusy}
           className="rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
         >
-          {exportBusy ? "Wird vorbereitet…" : "📥 JSON herunterladen"}
+          {exportBusy
+            ? t("backupPanel.exportBusy")
+            : t("backupPanel.exportButton")}
         </button>
         {exportError && (
           <div className="mt-2 rounded border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm text-red-300">
@@ -189,14 +181,14 @@ export function BackupPanel() {
           ============================================================ */}
       <section className="rounded border border-amber-500/40 bg-amber-500/5 p-4 space-y-3">
         <h3 className="text-lg font-semibold text-amber-200">
-          2. Aus Backup-Datei wiederherstellen
+          {t("backupPanel.section2Title")}
         </h3>
         <p className="text-sm text-amber-200/80">
-          Lade ein Cubetracker-Backup-JSON hoch. <strong>Merge</strong> ist
-          sicher und Default — bestehende Daten bleiben, neue werden mit
-          Dedup hinzugefügt. <strong>Replace</strong> ist destruktiv —
-          braucht zusätzliche Bestätigung + erzeugt automatisch einen
-          Snapshot vorher.
+          {t("backupPanel.section2DescPrefix")}{" "}
+          <strong>{t("backupPanel.section2DescMergeBold")}</strong>{" "}
+          {t("backupPanel.section2DescMergeRest")}{" "}
+          <strong>{t("backupPanel.section2DescReplaceBold")}</strong>{" "}
+          {t("backupPanel.section2DescReplaceRest")}
         </p>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -221,8 +213,8 @@ export function BackupPanel() {
             }}
             className="rounded border border-gray-600 bg-gray-900 text-gray-100 text-sm px-2 py-1.5"
           >
-            <option value="merge">merge (sicher, Default)</option>
-            <option value="replace">replace (DESTRUKTIV)</option>
+            <option value="merge">{t("backupPanel.modeMerge")}</option>
+            <option value="replace">{t("backupPanel.modeReplace")}</option>
           </select>
         </div>
 
@@ -232,12 +224,16 @@ export function BackupPanel() {
             disabled={!restoreFile || restoreBusy !== null}
             className="text-sm rounded border border-gray-600 px-3 py-1.5 text-gray-200 hover:bg-gray-800 disabled:opacity-50"
           >
-            {restoreBusy === "dry" ? "Prüfe…" : "1. Preview (Dry-Run)"}
+            {restoreBusy === "dry"
+              ? t("backupPanel.previewBusy")
+              : t("backupPanel.previewButton")}
           </button>
           {restoreMode === "replace" && (
             <input
               type="text"
-              placeholder={`Tippe "${REPLACE_MAGIC}" ein`}
+              placeholder={t("backupPanel.replaceConfirmPlaceholder", {
+                magic: REPLACE_MAGIC,
+              })}
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               className="rounded border border-red-500/50 bg-red-500/5 px-3 py-1.5 text-sm text-red-200 placeholder-red-400/50 font-mono w-72"
@@ -257,10 +253,10 @@ export function BackupPanel() {
             }`}
           >
             {restoreBusy === "real"
-              ? "Wiederherstelle…"
+              ? t("backupPanel.restoreBusy")
               : restoreMode === "replace"
-                ? "2. ⚠ REPLACE ausführen"
-                : "2. Merge ausführen"}
+                ? t("backupPanel.restoreButtonReplace")
+                : t("backupPanel.restoreButtonMerge")}
           </button>
         </div>
 
@@ -280,11 +276,12 @@ export function BackupPanel() {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h3 className="text-lg font-semibold text-gray-100 mb-0">
-              3. Snapshots (Wiederherstellungspunkte)
+              {t("backupPanel.section3Title")}
             </h3>
             <p className="text-xs text-gray-500">
-              Max {snapshotsQ.data?.max_per_user ?? 2} pro User —
-              älteste wird beim Anlegen verworfen.
+              {t("backupPanel.section3Subtitle", {
+                count: snapshotsQ.data?.max_per_user ?? 2,
+              })}
             </p>
           </div>
           <button
@@ -292,16 +289,20 @@ export function BackupPanel() {
             disabled={createSnapshotMut.isPending}
             className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700 disabled:opacity-50"
           >
-            {createSnapshotMut.isPending ? "…" : "📸 Snapshot anlegen"}
+            {createSnapshotMut.isPending
+              ? t("backupPanel.snapshotCreateBusy")
+              : t("backupPanel.snapshotCreateButton")}
           </button>
         </div>
 
         {snapshotsQ.isLoading && (
-          <p className="text-sm text-gray-500">Lädt…</p>
+          <p className="text-sm text-gray-500">
+            {t("backupPanel.snapshotsLoading")}
+          </p>
         )}
         {snapshotsQ.data && snapshotsQ.data.snapshots.length === 0 && (
           <p className="text-sm text-gray-500">
-            Keine Snapshots. Lege einen an, bevor du Daten groß veraenderst.
+            {t("backupPanel.snapshotsEmpty")}
           </p>
         )}
         {snapshotsQ.data && snapshotsQ.data.snapshots.length > 0 && (
@@ -313,14 +314,17 @@ export function BackupPanel() {
               >
                 <div className="text-sm text-gray-300">
                   <span className="font-medium text-gray-100">
-                    Snapshot #{s.id}
+                    {t("backupPanel.snapshotId", { id: s.id })}
                   </span>
                   <span className="text-gray-500 ml-2">
-                    {formatDate(s.created_at)} ·{" "}
+                    {formatDate(s.created_at, i18n.resolvedLanguage ?? "de")} ·{" "}
                     <span className="italic">{s.reason}</span>
                   </span>
                   <span className="text-gray-400 ml-2">
-                    {s.counts.solves} Solves · {s.counts.sessions} Sessions
+                    {t("backupPanel.snapshotCounts", {
+                      solves: s.counts.solves,
+                      sessions: s.counts.sessions,
+                    })}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -328,7 +332,13 @@ export function BackupPanel() {
                     onClick={() => {
                       if (
                         window.confirm(
-                          `Snapshot #${s.id} wiederherstellen?\n\nALLE aktuellen Daten werden ersetzt durch den Stand vom ${formatDate(s.created_at)}.\n\nWirklich fortfahren?`,
+                          t("backupPanel.snapshotRestoreConfirm", {
+                            id: s.id,
+                            date: formatDate(
+                              s.created_at,
+                              i18n.resolvedLanguage ?? "de",
+                            ),
+                          }),
                         )
                       ) {
                         restoreSnapshotMut.mutate(s.id);
@@ -337,12 +347,14 @@ export function BackupPanel() {
                     disabled={restoreSnapshotMut.isPending}
                     className="text-xs rounded bg-amber-600 px-2 py-1 text-white hover:bg-amber-700 disabled:opacity-50"
                   >
-                    Wiederherstellen
+                    {t("backupPanel.snapshotRestoreButton")}
                   </button>
                   <button
                     onClick={() => {
                       if (
-                        window.confirm(`Snapshot #${s.id} löschen?`)
+                        window.confirm(
+                          t("backupPanel.snapshotDeleteConfirm", { id: s.id }),
+                        )
                       ) {
                         deleteSnapshotMut.mutate(s.id);
                       }
@@ -350,7 +362,7 @@ export function BackupPanel() {
                     disabled={deleteSnapshotMut.isPending}
                     className="text-xs rounded border border-gray-600 px-2 py-1 text-gray-300 hover:bg-gray-800 disabled:opacity-50"
                   >
-                    Löschen
+                    {t("backupPanel.snapshotDeleteButton")}
                   </button>
                 </div>
               </li>
@@ -369,52 +381,65 @@ function RestoreResultBox({
   r: RestoreResult;
   kind: "dry" | "done";
 }) {
+  const { t } = useTranslation();
   const color =
     kind === "dry"
       ? "border-blue-500/30 bg-blue-500/10 text-blue-200"
       : "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
+
+  function categoryLine(label: string, imported: number, dup: number) {
+    return (
+      <li>
+        {label}: <strong>{imported}</strong> {t("backupPanel.rrImportedSuffix")}
+        {dup > 0 && (
+          <span>
+            {" "}
+            · {dup} {t("backupPanel.rrDuplicateSuffix")}
+          </span>
+        )}
+      </li>
+    );
+  }
+
   return (
     <div className={`rounded border ${color} px-3 py-2 text-sm space-y-1`}>
       <div className="font-medium">
         {kind === "dry"
-          ? `Preview (mode=${r.mode}) — würde importieren:`
-          : `✅ Restore abgeschlossen (mode=${r.mode}):`}
+          ? t("backupPanel.restorePreviewTitle", { mode: r.mode })
+          : t("backupPanel.restoreDoneTitle", { mode: r.mode })}
       </div>
       <ul className="text-xs space-y-0.5 opacity-90">
-        <li>
-          Solves: <strong>{r.solves.imported}</strong> neu
-          {r.solves.skipped_duplicate > 0 && (
-            <span> · {r.solves.skipped_duplicate} Duplikat</span>
-          )}
-        </li>
-        <li>
-          Sessions: <strong>{r.sessions.imported}</strong> neu
-          {r.sessions.skipped_duplicate > 0 && (
-            <span> · {r.sessions.skipped_duplicate} Duplikat</span>
-          )}
-        </li>
-        <li>
-          Hardware: <strong>{r.hardware.imported}</strong> neu
-          {r.hardware.skipped_duplicate > 0 && (
-            <span> · {r.hardware.skipped_duplicate} Duplikat</span>
-          )}
-        </li>
-        <li>
-          Achievements: <strong>{r.achievements.imported}</strong> neu
-          {r.achievements.skipped_duplicate > 0 && (
-            <span> · {r.achievements.skipped_duplicate} Duplikat</span>
-          )}
-        </li>
+        {categoryLine(
+          t("backupPanel.rrCategorySolves"),
+          r.solves.imported,
+          r.solves.skipped_duplicate,
+        )}
+        {categoryLine(
+          t("backupPanel.rrCategorySessions"),
+          r.sessions.imported,
+          r.sessions.skipped_duplicate,
+        )}
+        {categoryLine(
+          t("backupPanel.rrCategoryHardware"),
+          r.hardware.imported,
+          r.hardware.skipped_duplicate,
+        )}
+        {categoryLine(
+          t("backupPanel.rrCategoryAchievements"),
+          r.achievements.imported,
+          r.achievements.skipped_duplicate,
+        )}
         {r.snapshot_created !== null && (
           <li>
-            🔒 Auto-Snapshot vorher angelegt: #{r.snapshot_created}
+            {t("backupPanel.rrSnapshot", { id: r.snapshot_created })}
           </li>
         )}
         {r.newly_unlocked_achievements &&
           r.newly_unlocked_achievements.length > 0 && (
             <li>
-              🏆 Neu unlocked:{" "}
-              {r.newly_unlocked_achievements.join(", ")}
+              {t("backupPanel.rrNewlyUnlocked", {
+                list: r.newly_unlocked_achievements.join(", "),
+              })}
             </li>
           )}
       </ul>
@@ -422,10 +447,10 @@ function RestoreResultBox({
   );
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, locale: string): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleString("de-DE", {
+    return d.toLocaleString(locale === "en" ? "en-GB" : "de-DE", {
       day: "2-digit",
       month: "2-digit",
       year: "2-digit",
@@ -437,7 +462,7 @@ function formatDate(iso: string): string {
   }
 }
 
-function extractErrorMessage(err: unknown): string {
+function extractErrorMessage(err: unknown, fallback: string): string {
   if (typeof err === "object" && err !== null) {
     const maybe = err as {
       response?: { data?: { detail?: string } };
@@ -446,7 +471,7 @@ function extractErrorMessage(err: unknown): string {
     if (maybe.response?.data?.detail) return maybe.response.data.detail;
     if (maybe.message) return maybe.message;
   }
-  return "Unbekannter Fehler.";
+  return fallback;
 }
 
 // (Download-Helper ausgelagert nach lib/backup.ts -> downloadFullBackup)

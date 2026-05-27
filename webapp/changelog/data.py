@@ -44,6 +44,27 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-backup-panel",
+        released=date(2026, 5, 27),
+        title="Backup-/Restore-/Snapshot-Panel DE/EN",
+        highlights=[
+            "BackupPanel komplett übersetzt: Header + InfoButton + "
+            "3 Sektionen (Voll-Export / Restore aus Datei / Snapshots).",
+            "Restore-Sektion: Mode-Picker (merge/replace), Confirm-"
+            "Magic-String-Validation, Preview-vs-Apply-Buttons, "
+            "Replace-Confirm-Placeholder mit interpoliertem Magic-String.",
+            "Snapshots-Sektion: Max-Counter, Create-Button-State, "
+            "Empty/Loading-States, Confirm-Dialogs für Restore + Delete.",
+            "RestoreResultBox: Preview-/Done-Header, 4 Category-Lines "
+            "(Solves/Sessions/Hardware/Achievements) mit Plural-aware "
+            "Duplicate-Suffix, Auto-Snapshot-Notice + Newly-Unlocked-Liste.",
+            "Date-Formatter folgt der UI-Sprache, extractErrorMessage "
+            "nimmt fallback-Param.",
+            "Locales-Namespace neu: backupPanel (~40 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-import-export",
         released=date(2026, 5, 27),
         title="csTimer-Import + csTimer-Export DE/EN",
