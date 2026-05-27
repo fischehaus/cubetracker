@@ -44,6 +44,26 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-roadmap-notice",
+        released=date(2026, 5, 28),
+        title="Roadmap-Modal: DE-Only-Hinweis bei EN-UI",
+        highlights=[
+            "QA-Befund SOLLTE: Roadmap-Inhalte (Phase-Titel, Item-Titel, "
+            "Notes, INTRO) sind in lib/roadmap-data.ts hartkodiert "
+            "deutsch — EN-User sah beim Footer-Klick ein komplett "
+            "deutsches Modal.",
+            "Demo-pragmatische Lösung: bei i18n.resolvedLanguage !== 'de' "
+            "zeigt das Modal oben einen amber Hinweis-Banner („Roadmap "
+            "content is currently only available in German…\"). Modal "
+            "bleibt nutzbar — der Trust-Signal („App ist in aktiver "
+            "Entwicklung\") bleibt erhalten.",
+            "Volle Roadmap-Übersetzung (~50 items + 30 notes + 6 phases) "
+            "ist post-Demo-Item — würde im Sprint zu viel Zeit kosten.",
+            "Neuer Key roadmap.germanOnlyNotice in beiden Locales.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-qa",
         released=date(2026, 5, 28),
         title="QA-Hotfix nach i18n-en-release (2 KRITISCH)",

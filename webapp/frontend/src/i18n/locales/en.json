@@ -1030,7 +1030,8 @@
     "feedbackHintLink": "Feedback",
     "feedbackHintSuffix": "or directly on GitHub.",
     "internalBadge": "internal",
-    "internalBadgeTitle": "Admin-only — dev/tech-debt item, users don't see this"
+    "internalBadgeTitle": "Admin-only — dev/tech-debt item, users don't see this",
+    "germanOnlyNotice": "🇩🇪 Roadmap content is currently only available in German. English translation will follow after the Meppel demo (end of May 2026)."
   },
   "backupPanel": {
     "title": "Backup & restore",

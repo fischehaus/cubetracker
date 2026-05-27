@@ -24,7 +24,12 @@ interface Props {
 }
 
 export function RoadmapModal({ onClose, isAdmin = false }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // Roadmap-Daten (Phase-Titel, Item-Titel, Notes) sind in lib/roadmap-data.ts
+  // hartkodiert deutsch. Bei nicht-deutscher UI-Sprache zeigen wir oben einen
+  // Hinweis-Banner — Modal bleibt nutzbar (Trust-Signal: aktive Entwicklung),
+  // volle EN-Übersetzung kommt post-Meppel-Demo.
+  const showGermanOnlyNotice = i18n.resolvedLanguage !== "de";
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
@@ -55,6 +60,12 @@ export function RoadmapModal({ onClose, isAdmin = false }: Props) {
           <strong>„{t("roadmap.feedbackHintLink")}"</strong>{" "}
           {t("roadmap.feedbackHintSuffix")}
         </p>
+
+        {showGermanOnlyNotice && (
+          <div className="mb-5 rounded border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+            {t("roadmap.germanOnlyNotice")}
+          </div>
+        )}
 
         <ol className="space-y-5">
           {ROADMAP_PHASES.map((phase) => (

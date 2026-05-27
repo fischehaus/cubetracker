@@ -1030,7 +1030,8 @@
     "feedbackHintLink": "Feedback",
     "feedbackHintSuffix": "oder direkt auf GitHub.",
     "internalBadge": "intern",
-    "internalBadgeTitle": "Nur für Admin sichtbar — Dev-/Tech-Schuld-Thema, User sehen das nicht"
+    "internalBadgeTitle": "Nur für Admin sichtbar — Dev-/Tech-Schuld-Thema, User sehen das nicht",
+    "germanOnlyNotice": "🇩🇪 Roadmap-Inhalte sind derzeit nur auf Deutsch verfügbar. Englische Übersetzung folgt nach dem Meppel-Demo (Ende Mai 2026)."
   },
   "backupPanel": {
     "title": "Backup & Wiederherstellung",
