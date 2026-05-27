@@ -45,6 +45,10 @@ class UserRead(BaseModel):
     # Frontend nutzt das um den Admin-Sub-Tab im VerwaltungTab nur für
     # Admins zu rendern. Default False für Tests die UserRead manuell bauen.
     is_admin: bool = False
+    # Phase W.tester-role-db (2026-05-28): Tester-Rolle für Live-Tests +
+    # Roadmap-Pflege ohne Admin-Vollzugriff. Frontend zeigt Tester-Tab
+    # in der VerwaltungTab wenn is_tester && !is_admin.
+    is_tester: bool = False
     # Phase W.9: Opt-In für User-Suche per display_name. Frontend zeigt
     # einen Toggle in den Einstellungen.
     is_discoverable: bool = False
@@ -314,6 +318,60 @@ class LiveTestRead(BaseModel):
 # übereinstimmen. Bei Erweiterung beide Stellen anpassen.
 RoadmapPhaseIdLiteral = Literal["P1", "P2", "P3", "P4", "P5", "P6"]
 RoadmapStatusLiteral = Literal["active", "done"]
+
+
+# ============================================================
+# Feedback-Schemas (Phase W.tester-role-db, 2026-05-28)
+# ============================================================
+
+FeedbackCategoryLiteral = Literal["general", "bug", "feature", "other"]
+FeedbackStatusLiteral = Literal["new", "in_progress", "done", "archived"]
+
+
+class FeedbackMessageCreate(BaseModel):
+    """User-Payload zum Anlegen einer neuen Feedback-Nachricht.
+
+    category + message sind Pflicht. status startet immer auf "new" —
+    nicht vom User setzbar.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    category: FeedbackCategoryLiteral
+    message: str = Field(min_length=3, max_length=4000)
+
+
+class FeedbackMessageAdminUpdate(BaseModel):
+    """Admin-Patch: Status setzen und/oder Antwort schreiben.
+
+    Beide optional damit der Admin z.B. nur den Status auf „archived"
+    setzen kann ohne Antwort. admin_response_at wird serverseitig
+    gesetzt sobald admin_response geschrieben wird.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    status: FeedbackStatusLiteral | None = None
+    admin_response: str | None = Field(default=None, max_length=4000)
+
+
+class FeedbackMessageRead(BaseModel):
+    """Read-Schema für Admin-Inbox + User-eigene Liste.
+
+    Frontend rendert je nach Kontext unterschiedlich (Admin sieht alles
+    inkl. user_id; User sieht nur seine eigenen).
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    user_id: int | None
+    category: str
+    message: str
+    created_at: datetime
+    status: str
+    admin_response: str | None
+    admin_response_at: datetime | None
+    admin_response_by_user_id: int | None
+    user_seen_response_at: datetime | None
 
 
 class RoadmapItemRead(BaseModel):

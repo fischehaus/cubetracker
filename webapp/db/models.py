@@ -92,6 +92,16 @@ class User(Base):
     is_admin: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="false"
     )
+    # Phase W.tester-role-db (2026-05-28): zusätzliche Rolle "Tester".
+    # Hierarchie: Admin > Tester > Normal. Tester sieht den Tester-Tab
+    # (statt Admin-Tab) mit Live-Tests + Roadmap-Pflege. Admin sieht
+    # alles (Admin-Tab inkludiert Tester-Funktionen).
+    # Promotion ausschließlich via Admin-UI (PATCH /admin/users/{id}),
+    # KEIN Env-Var-Bootstrap (anders als is_admin/ADMIN_EMAILS) — Tester-
+    # Liste lebt rein in der DB, kein Container-Restart nötig.
+    is_tester: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
@@ -471,6 +481,78 @@ class NewsItem(Base):
     __table_args__ = (
         # Sort-Index für "neueste zuerst"-Query (published_at DESC).
         Index("ix_news_published", "published_at"),
+    )
+
+
+class FeedbackMessage(Base):
+    """Feedback-Nachricht (Phase W.tester-role-db, 2026-05-28).
+
+    Ersetzt den früheren E-Mail-Versand der FeedbackModal-„Per Email"-
+    Variante: User-Nachrichten landen ab jetzt in dieser Tabelle und
+    werden im Admin-Tab (Feedback-Inbox) sortiert/bearbeitet.
+
+    Workflow:
+        1. User schreibt Feedback im FeedbackModal („Per App"-Mode)
+           → POST /feedback/messages, status="new"
+        2. Admin/Tester sieht im Admin-Inbox-UI (sortiert nach Kategorie
+           + Status, neueste zuerst, ungelesene oben mit blauem Dot)
+        3. Admin antwortet via Textarea → admin_response gesetzt,
+           admin_response_at=now(), status springt auf „in_progress"
+        4. User loggt sich beim nächsten Mal ein → Toast + Unread-Dot
+           im UserMenu, „Mein Feedback"-Bereich in Meine-Daten zeigt
+           die Antwort
+        5. User öffnet die Antwort → user_seen_response_at=now()
+        6. Admin kann später status auf „done" oder „archived" setzen
+
+    Schema-Entscheidungen:
+    - user_id: ON DELETE SET NULL — Feedback bleibt nach User-Delete
+      erhalten (anonymisiert), Admin sieht weiterhin die Historie.
+    - admin_response_by_user_id: ON DELETE SET NULL — analog, der
+      Antwortende wird anonymisiert wenn er gelöscht wird.
+    - category: String statt Enum für einfache Erweiterung ohne
+      Migration (z.B. später „question"-Kategorie ergänzen).
+    """
+
+    __tablename__ = "feedback_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # SET NULL statt CASCADE: Admin will Feedback-Historie behalten auch
+    # wenn der User später seinen Account löscht.
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    # Kategorie: "general" | "bug" | "feature" | "other". String damit
+    # Erweiterung ohne Migration möglich.
+    category: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        index=True,
+    )
+    # Status: "new" | "in_progress" | "done" | "archived". String + Default.
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="new", server_default="new", index=True
+    )
+    # Admin-Antwort. Beide Felder werden zusammen gesetzt (response + at).
+    admin_response: Mapped[str | None] = mapped_column(Text, nullable=True)
+    admin_response_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    admin_response_by_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    # Wann hat der User die Antwort gelesen? NULL = noch ungelesen.
+    user_seen_response_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    __table_args__ = (
+        # Index für Standard-Sort (neueste zuerst pro Status).
+        Index("ix_feedback_status_created", "status", "created_at"),
+        # Index für „eigene Feedback-Items"-Query.
+        Index("ix_feedback_user_created", "user_id", "created_at"),
     )
 
 

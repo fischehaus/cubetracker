@@ -44,6 +44,41 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.tester-role-db",
+        released=date(2026, 5, 28),
+        title="Tester-Rolle + Feedback-Inbox-Backend (DB-persistent)",
+        highlights=[
+            "Phase 1 (Backend) für 2 zusammenhängende Features:",
+            "**Tester-Rolle**: neue users.is_tester-Spalte (default false). "
+            "Tester sehen + bearbeiten Live-Tests + Roadmap-Items "
+            "(neue require_admin_or_tester-Dep an 7 Endpoints) — NICHT "
+            "aber User-Management, Stats, Feedback-Inbox oder "
+            "Announcements (bleiben hinter require_admin). Promotion "
+            "via Admin-UI (PATCH /admin/users/{id} mit is_tester=true), "
+            "kein Env-Var-Bootstrap nötig. Public /api/roadmap zeigt "
+            "Tester die internal-Items (UI-Filter, kein Auth-Bypass).",
+            "**Feedback-Inbox**: neue feedback_messages-Tabelle ersetzt "
+            "den bisherigen Email-Versand. Schema: user_id (FK SET NULL "
+            "— anonymisiert bei User-Delete) + category + message + "
+            "status (new/in_progress/done/archived) + admin_response + "
+            "admin_response_at + admin_response_by + "
+            "user_seen_response_at.",
+            "User-Endpoints: POST /feedback/messages (3/h Rate-Limit) "
+            "ersetzt den alten Email-Versand. GET /feedback/me/messages "
+            "(eigene Liste). GET /feedback/me/unread-count (Toast-"
+            "Trigger). POST /feedback/me/messages/{id}/seen (markiert "
+            "Antwort als gelesen).",
+            "Admin-Endpoints: GET /admin/feedback/messages (Filter "
+            "category/status, ungelesene oben). GET /admin/feedback/"
+            "stats (Counts pro Status + offene-Categories). PATCH /"
+            "admin/feedback/messages/{id} (Status + Antwort). DELETE "
+            "/admin/feedback/messages/{id}.",
+            "Frontend folgt in W.feedback-modal-rebuild + W.feedback-"
+            "inbox-ui + W.tester-tab-ui + W.feedback-user-view.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-admin-quickactions",
         released=date(2026, 5, 28),
         title="Admin-Roadmap: Quick-Toggle für Intern/Öffentlich + Aktiv/Erledigt",

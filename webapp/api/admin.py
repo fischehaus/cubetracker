@@ -37,6 +37,7 @@ from db.database import SessionLocal, get_db
 from db.models import (
     Achievement,
     Hardware,
+    FeedbackMessage,
     LiveTest,
     RoadmapItem,
     Session as DbSession,
@@ -45,6 +46,8 @@ from db.models import (
     User,
 )
 from db.schemas import (
+    FeedbackMessageAdminUpdate,
+    FeedbackMessageRead,
     LiveTestCreate,
     LiveTestRead,
     LiveTestUpdate,
@@ -93,6 +96,27 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
     existiert. Fail-closed.
     """
     if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not found.",
+        )
+    return current_user
+
+
+def require_admin_or_tester(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """FastAPI-Dependency für Endpoints, die Admin ODER Tester sehen
+    dürfen (Live-Tests + Roadmap-Pflege, Phase W.tester-role-db).
+
+    Admin > Tester > Normal. Tester sind „lite-Admins" mit Zugriff auf
+    Live-Tests + Roadmap-Items, NICHT aber auf User-Management, Stats,
+    Feedback-Inbox oder Announcements — die bleiben hinter require_admin.
+
+    Fail-closed wie require_admin: generischer 404 statt 403, kein
+    Endpoint-Probing möglich.
+    """
+    if not (current_user.is_admin or current_user.is_tester):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Not found.",
@@ -220,6 +244,8 @@ class AdminUserPatch(BaseModel):
     is_active: bool | None = None
     email_verified: bool | None = None
     is_admin: bool | None = None
+    # Phase W.tester-role-db (2026-05-28): Tester-Rolle patch-bar.
+    is_tester: bool | None = None
 
 
 class AdminEmailPayload(BaseModel):
@@ -249,6 +275,7 @@ def _user_summary_row(
         "is_active": user.is_active,
         "email_verified": user.email_verified,
         "is_admin": user.is_admin,
+        "is_tester": user.is_tester,
         "created_at": user.created_at.isoformat() if user.created_at else None,
         "solve_count": solve_count,
         "last_solve_at": last_solve_at.isoformat() if last_solve_at else None,
@@ -366,6 +393,8 @@ def update_user(
         user.email_verified = bool(updates["email_verified"])
     if "is_admin" in updates:
         user.is_admin = bool(updates["is_admin"])
+    if "is_tester" in updates:
+        user.is_tester = bool(updates["is_tester"])
 
     db.commit()
     db.refresh(user)
@@ -553,7 +582,7 @@ def list_live_tests(
         alias="status",
         description="Optional Filter: open | pass | fail | skip. Default: alle.",
     ),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(require_admin_or_tester),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Liste aller Live-Tests, neueste zuerst.
@@ -580,7 +609,7 @@ def list_live_tests(
 def create_live_test(
     request: Request,
     payload: LiveTestCreate,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin_or_tester),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Neuer Live-Test (Admin-Eintrag via UI).
@@ -702,7 +731,7 @@ def update_live_test(
     test_id: int,
     payload: LiveTestUpdate,
     background_tasks: BackgroundTasks,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin_or_tester),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Setzt status und/oder user_response.
@@ -774,7 +803,7 @@ def update_live_test(
 def delete_live_test(
     request: Request,
     test_id: int,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin_or_tester),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Löscht einen Live-Test. Kein Confirm nötig — Test-Einträge sind
@@ -803,7 +832,7 @@ def delete_live_test(
 def create_roadmap_item(
     request: Request,
     payload: RoadmapItemCreate,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin_or_tester),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Neues Roadmap-Item anlegen. Wenn sort_order nicht gesetzt: ans
@@ -849,7 +878,7 @@ def update_roadmap_item(
     request: Request,
     item_id: int,
     payload: RoadmapItemUpdate,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin_or_tester),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Patch: einzelne Felder ändern. Mindestens 1 Feld muss gesetzt sein."""
@@ -889,7 +918,7 @@ def update_roadmap_item(
 def delete_roadmap_item(
     request: Request,
     item_id: int,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin_or_tester),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Löscht ein Roadmap-Item permanent."""
@@ -902,3 +931,181 @@ def delete_roadmap_item(
     db.delete(item)
     db.commit()
     logger.info("[ADMIN] %s deleted roadmap-item %s", admin.email, item_id)
+
+
+# ============================================================
+# Feedback-Inbox (Phase W.tester-role-db, 2026-05-28)
+# ============================================================
+# Admin sieht alle Feedback-Items + kann Status/Antwort setzen. Tester
+# NICHT — Feedback-Inbox bleibt admin-only (sensible User-Nachrichten,
+# ggf. mit User-Identität). User-Endpoints (eigene Items, mark-seen)
+# liegen in api/feedback.py.
+
+
+@router.get("/feedback/messages")
+@limiter.limit(ADMIN_LIMIT)
+def admin_list_feedback(
+    request: Request,
+    status_filter: str | None = Query(
+        default=None,
+        alias="status",
+        description="Optional Filter: new | in_progress | done | archived.",
+    ),
+    category: str | None = Query(
+        default=None,
+        description="Optional Filter: general | bug | feature | other.",
+    ),
+    _admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Alle Feedback-Items in der Admin-Inbox, neueste zuerst.
+
+    Filter via ?status= und/oder ?category=. Ohne Filter: alle.
+    Sortierung: ungelesene (status=new, kein admin_response) oben,
+    dann nach created_at descending.
+    """
+    if status_filter and status_filter not in ("new", "in_progress", "done", "archived"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="status muss new|in_progress|done|archived sein.",
+        )
+    if category and category not in ("general", "bug", "feature", "other"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="category muss general|bug|feature|other sein.",
+        )
+    stmt = select(FeedbackMessage).order_by(
+        # status='new' zuerst (1), Rest danach (0), dann neueste oben
+        (FeedbackMessage.status == "new").desc(),
+        FeedbackMessage.created_at.desc(),
+    )
+    if status_filter:
+        stmt = stmt.where(FeedbackMessage.status == status_filter)
+    if category:
+        stmt = stmt.where(FeedbackMessage.category == category)
+    rows = db.execute(stmt).scalars().all()
+    return {
+        "messages": [
+            FeedbackMessageRead.model_validate(r).model_dump(mode="json") for r in rows
+        ],
+        "count": len(rows),
+    }
+
+
+@router.get("/feedback/stats")
+@limiter.limit(ADMIN_LIMIT)
+def admin_feedback_stats(
+    request: Request,
+    _admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Counts pro Status + pro Kategorie — für die session-start-context-
+    Scanner-Erweiterung (zeigt am Session-Start an wie viele offene
+    Bugs/Feedbacks vorliegen).
+    """
+    by_status = dict(
+        db.execute(
+            select(FeedbackMessage.status, func.count(FeedbackMessage.id))
+            .group_by(FeedbackMessage.status)
+        ).all()
+    )
+    by_category = dict(
+        db.execute(
+            select(FeedbackMessage.category, func.count(FeedbackMessage.id))
+            .where(FeedbackMessage.status.in_(("new", "in_progress")))
+            .group_by(FeedbackMessage.category)
+        ).all()
+    )
+    return {
+        "by_status": {k: int(v) for k, v in by_status.items()},
+        "open_by_category": {k: int(v) for k, v in by_category.items()},
+        "total_open": int(
+            sum(int(v) for k, v in by_status.items() if k in ("new", "in_progress"))
+        ),
+    }
+
+
+@router.patch("/feedback/messages/{message_id}")
+@limiter.limit(ADMIN_LIMIT)
+def admin_update_feedback(
+    request: Request,
+    message_id: int,
+    payload: FeedbackMessageAdminUpdate,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Status setzen und/oder Antwort schreiben.
+
+    Wenn admin_response geschrieben wird, wird admin_response_at + by
+    automatisch gesetzt. Status springt nicht automatisch — Admin
+    entscheidet ob es schon „done" oder noch „in_progress" ist.
+    """
+    msg = db.get(FeedbackMessage, message_id)
+    if msg is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Feedback-Item nicht gefunden.",
+        )
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mindestens ein Feld (status oder admin_response) muss gesetzt sein.",
+        )
+    if "status" in updates:
+        msg.status = updates["status"]
+    if "admin_response" in updates:
+        new_response = updates["admin_response"]
+        if isinstance(new_response, str):
+            new_response = new_response.strip() or None
+        msg.admin_response = new_response
+        if new_response is not None:
+            msg.admin_response_at = datetime.now(UTC)
+            msg.admin_response_by_user_id = admin.id
+            # Wenn der Admin antwortet, dann user_seen_response_at
+            # NICHT zurücksetzen — User soll die Antwort erst als
+            # ungelesen sehen wenn es eine NEUE Antwort ist. Aktuelles
+            # Verhalten: neue Antwort → seen_at bleibt null bei
+            # Erst-Antwort, bei Re-Edit aber alt = user hat sie schon
+            # gesehen. Pragmatisch tolerabel — Admin-Updates an einer
+            # bereits gesehenen Antwort sind selten.
+    db.commit()
+    db.refresh(msg)
+    logger.info(
+        "[ADMIN] %s patched feedback %s -> %s",
+        admin.email,
+        msg.id,
+        list(updates.keys()),
+    )
+    return FeedbackMessageRead.model_validate(msg).model_dump(mode="json")
+
+
+@router.delete("/feedback/messages/{message_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(ADMIN_LIMIT)
+def admin_delete_feedback(
+    request: Request,
+    message_id: int,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> None:
+    """Hard-Delete eines Feedback-Items (für Spam o.ä.).
+
+    Auch User-eigene „Mein Feedback"-Sicht verliert das Item dann —
+    der User sieht es nicht mehr. Bewusst so: Spam-Schutz > Audit-Trail
+    auf User-Seite. Server-Logs (logger.warning) bleiben.
+    """
+    msg = db.get(FeedbackMessage, message_id)
+    if msg is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Feedback-Item nicht gefunden.",
+        )
+    logger.warning(
+        "[ADMIN] %s deleted feedback %s (category=%s, was status=%s)",
+        admin.email,
+        msg.id,
+        msg.category,
+        msg.status,
+    )
+    db.delete(msg)
+    db.commit()

@@ -104,6 +104,14 @@ async def lifespan(app: FastAPI):
                 # client+server-seitig).
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS wca_id VARCHAR(10)",
                 "CREATE INDEX IF NOT EXISTS ix_users_wca_id ON users (wca_id)",
+                # Phase W.tester-role-db (2026-05-28): zusätzliche Rolle
+                # „Tester" für Live-Tests + Roadmap-Pflege ohne Admin-
+                # Vollzugriff. Default FALSE, Promotion via Admin-UI.
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_tester BOOLEAN NOT NULL DEFAULT FALSE",
+                # feedback_messages-Tabelle: create_all() oben legt sie
+                # bereits an, hier defensive Idempotenz-Checks für die Indexe.
+                "CREATE INDEX IF NOT EXISTS ix_feedback_status_created ON feedback_messages (status, created_at)",
+                "CREATE INDEX IF NOT EXISTS ix_feedback_user_created ON feedback_messages (user_id, created_at)",
                 # Phase W.roadmap-db (2026-05-28): persistente Roadmap-Items.
                 # Schema kommt aus db.models.RoadmapItem (create_all() oben
                 # hat sie schon angelegt — diese Statements sind defensive

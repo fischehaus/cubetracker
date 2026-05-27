@@ -42,15 +42,25 @@ def list_roadmap(
     Non-Admins bekommen `internal=True`-Items NICHT geliefert. Damit
     bleibt die User-Sicht aufgeräumt (keine Dev-/Tech-Schuld-Themen).
     """
-    is_admin = bool(current_user and current_user.is_admin)
+    # Phase W.tester-role-db (2026-05-28): Tester werden für die internal-
+    # Visibility wie Admins behandelt (sehen alle Items inkl. Tech-Schuld).
+    # Reine UI-Filter-Frage, keine Auth-Bypass — Schreibrechte sind im
+    # require_admin_or_tester-Dep geregelt.
+    is_admin_or_tester = bool(
+        current_user and (current_user.is_admin or current_user.is_tester)
+    )
     stmt = select(RoadmapItem).order_by(
         RoadmapItem.phase_id, RoadmapItem.sort_order, RoadmapItem.id
     )
-    if not is_admin:
+    if not is_admin_or_tester:
         stmt = stmt.where(RoadmapItem.internal.is_(False))
     rows = db.execute(stmt).scalars().all()
     return {
         "items": [RoadmapItemRead.model_validate(r).model_dump(mode="json") for r in rows],
         "count": len(rows),
-        "is_admin": is_admin,
+        # Frontend nutzt das Flag um den intern-Toggle / Edit-Button im
+        # User-Modal zu blenden. is_admin und is_tester separat ausgegeben
+        # falls Frontend später differenzieren will.
+        "is_admin": bool(current_user and current_user.is_admin),
+        "is_tester": bool(current_user and current_user.is_tester),
     }
