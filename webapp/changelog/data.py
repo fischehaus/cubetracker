@@ -44,6 +44,29 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-timer",
+        released=date(2026, 5, 27),
+        title="Timer-Tab komplett auf Englisch verfügbar",
+        highlights=[
+            "Der gesamte Solve-Flow ist jetzt durchschaltbar (DE/EN): "
+            "Timer-Eingabe (Text-Mode + Spacebar-Mode-Hinweise), Save-/"
+            "Penalty-Buttons, Letzter-Solve-Quick-Actions, alle Fehler-"
+            "Meldungen.",
+            "Scramble-Karte komplett übersetzt: Titel, Skip-Button, "
+            "WCA/Inoffiziell-Toggle, Type-Picker, Eigene-Scramble-Eingabe "
+            "inklusive Apply/Cancel + Validierungs-Hinweis, Random-Move-"
+            "Warnhinweis. Lange Info-Texte ebenfalls.",
+            "Timer-Controls (Cube/Session/Hardware-Selektor + Inline-"
+            "Session-anlegen + Timer-Modus-Picker mit allen drei Info-"
+            "Texten) durchgängig in beiden Sprachen.",
+            "Health-Badge + die zwei Close-Buttons in den Modals "
+            "(Patch-Notes + Features) jetzt ebenfalls i18n-fähig.",
+            "Locales-Namespaces neu: timer.*, scramble.*, timerControls.*, "
+            "health.* — jede Komponente hat ihren eigenen Block, damit "
+            "die JSON-Files lesbar bleiben.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-flags",
         released=date(2026, 5, 27),
         title="Flaggen-Sprach-Switcher im Header + ChatGPT-Logo-Hinweis",

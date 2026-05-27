@@ -18,6 +18,7 @@
 // ist (z.B. solve-counter erhöhen → re-gen).
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   cubeTypeToScrambowType,
   defaultScrambleTypeForCube,
@@ -82,6 +83,7 @@ export function ScrambleCard({
   regenerationSeed,
   onScrambleGenerated,
 }: Props) {
+  const { t } = useTranslation();
   const [scramble, setScramble] = useState<string>("");
   const [skipCounter, setSkipCounter] = useState(0);
   const [settings, setSettings] = useAppSettings();
@@ -200,25 +202,17 @@ export function ScrambleCard({
       <div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500 uppercase tracking-wide">
-            Scramble{" "}
+            {t("scramble.title")}{" "}
             <span className="text-gray-600 normal-case tracking-normal">
               ({labelFor(effectiveType)})
             </span>
           </span>
           <InfoButton>
-            <p className="font-medium mb-1">Scramble</p>
-            <p className="mb-2">
-              Zufaellige Verdrehungs-Sequenz nach WCA-Notation. Buchstaben =
-              Seite (R, L, U, D, F, B), Strich („L'") = gegen den Uhrzeiger,
-              Zahl 2 = doppelte Drehung. Wende den Scramble auf einen
-              gelösten Cube an — dann sind alle Lösungen unter denselben
-              Bedingungen vergleichbar. „Skip" wirft einen neuen.
-            </p>
+            <p className="font-medium mb-1">{t("scramble.infoTitle")}</p>
+            <p className="mb-2">{t("scramble.infoBody1")}</p>
             <p>
-              <strong>Picker:</strong> Standard ist der passende Scramble zum
-              gewählten Cube-Type. Toggle „WCA" ↔ „Inoffiziell" + Dropdown
-              wählt einen anderen Typ. Wechsel des Cube-Types setzt den
-              Override automatisch zurück.
+              <strong>{t("scramble.infoPickerLabel")}</strong>{" "}
+              {t("scramble.infoBody2")}
             </p>
           </InfoButton>
         </div>
@@ -227,9 +221,9 @@ export function ScrambleCard({
             <button
               onClick={startEdit}
               className="text-sm rounded border border-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-800 hover:text-gray-100"
-              title="Eigenen Scramble eintippen (z.B. aus einer anderen App / Wettkampf)"
+              title={t("scramble.customButtonTitle")}
             >
-              ✏ Eigene
+              {t("scramble.customButton")}
             </button>
           )}
           {/* 2D-Net-Toggle (Phase W.scramble-image-toggle): nur sichtbar wenn
@@ -251,12 +245,14 @@ export function ScrambleCard({
               }`}
               title={
                 settings.show_scramble_image
-                  ? "2D-Net-Vorschau ausblenden"
-                  : "2D-Net-Vorschau anzeigen"
+                  ? t("scramble.imageHide")
+                  : t("scramble.imageShow")
               }
               aria-pressed={settings.show_scramble_image}
             >
-              {settings.show_scramble_image ? "👁 Bild an" : "👁 Bild aus"}
+              {settings.show_scramble_image
+                ? t("scramble.imageOn")
+                : t("scramble.imageOff")}
             </button>
           )}
           <button
@@ -265,9 +261,9 @@ export function ScrambleCard({
               setSkipCounter((c) => c + 1);
             }}
             className="text-sm rounded border border-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-800 hover:text-gray-100"
-            title="Diesen Scramble überspringen, neuen generieren"
+            title={t("scramble.skipTitle")}
           >
-            ⏭ Skip
+            {t("scramble.skipButton")}
           </button>
         </div>
       </div>
@@ -278,19 +274,19 @@ export function ScrambleCard({
         <div
           className="inline-flex rounded border border-gray-700 overflow-hidden text-xs"
           role="radiogroup"
-          aria-label="Scramble-Kategorie"
+          aria-label={t("scramble.categoryAriaLabel")}
         >
           <CategoryButton
             active={effectiveCategory === "wca"}
             onClick={() => setCategory("wca")}
           >
-            WCA
+            {t("scramble.categoryWca")}
           </CategoryButton>
           <CategoryButton
             active={effectiveCategory === "unofficial"}
             onClick={() => setCategory("unofficial")}
           >
-            Inoffiziell
+            {t("scramble.categoryUnofficial")}
           </CategoryButton>
         </div>
         {effectiveCategory !== null ? (
@@ -299,7 +295,7 @@ export function ScrambleCard({
               className="text-xs text-gray-500 sr-only"
               htmlFor="scramble-type-picker"
             >
-              Scramble-Typ
+              {t("scramble.typePickerLabel")}
             </label>
             <select
               id="scramble-type-picker"
@@ -307,9 +303,9 @@ export function ScrambleCard({
               onChange={(e) => setUserPickedType(e.target.value)}
               className="rounded border border-gray-700 bg-gray-800 px-2 py-1 text-xs text-gray-200 focus:border-purple-500 focus:outline-none"
             >
-              {typesInCategory.map((t) => (
-                <option key={t.code} value={t.code}>
-                  {t.label}
+              {typesInCategory.map((tt) => (
+                <option key={tt.code} value={tt.code}>
+                  {tt.label}
                 </option>
               ))}
             </select>
@@ -321,8 +317,9 @@ export function ScrambleCard({
           // un-highlighted, ein Klick auf einen Toggle wechselt in die
           // jeweilige Kategorie. „↺ auto" stellt den Cube-Default wieder her.
           <span className="text-xs text-gray-500 italic">
-            Aus Session-Vorgabe: „{labelFor(effectiveType)}" — Toggle
-            wählen um zu ändern
+            {t("scramble.fromSessionOverride", {
+              label: labelFor(effectiveType),
+            })}
           </span>
         )}
         {isOverridden && (
@@ -330,9 +327,9 @@ export function ScrambleCard({
             type="button"
             onClick={() => setUserPickedType(null)}
             className="text-xs rounded border border-gray-700 px-2 py-1 text-gray-400 hover:bg-gray-800 hover:text-gray-200"
-            title={`Zurück zum Default für ${cubeType}`}
+            title={t("scramble.backToDefaultTitle", { cube: cubeType })}
           >
-            ↺ auto
+            {t("scramble.backToDefault")}
           </button>
         )}
       </div>
@@ -356,7 +353,7 @@ export function ScrambleCard({
             }}
             autoFocus
             rows={3}
-            placeholder="z.B. R U R' U' R' F R2 U' R' U' R U R' F'"
+            placeholder={t("scramble.editPlaceholder")}
             className="w-full font-mono rounded border border-purple-500/40 bg-gray-800 text-gray-100 px-3 py-2 focus:border-purple-500 focus:outline-none resize-y"
             style={{ fontSize: fontPx }}
           />
@@ -366,18 +363,17 @@ export function ScrambleCard({
               onClick={applyCustomScramble}
               className="rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"
             >
-              ✓ Übernehmen (Enter)
+              {t("scramble.editApply")}
             </button>
             <button
               type="button"
               onClick={cancelEdit}
               className="rounded border border-gray-700 px-3 py-1.5 text-gray-300 hover:bg-gray-800"
             >
-              Abbrechen (Esc)
+              {t("scramble.editCancel")}
             </button>
             <span className="text-xs text-gray-500">
-              Eingabe wird nicht validiert — prüfe selbst dass die
-              Notation zum Cube-Type passt.
+              {t("scramble.editNoValidation")}
             </span>
           </div>
         </div>
@@ -390,12 +386,12 @@ export function ScrambleCard({
           >
             {scramble || (
               <span className="text-gray-500 text-base">
-                Scramble nicht verfügbar für diesen Typ.
+                {t("scramble.notAvailable")}
               </span>
             )}
             {isCustom && (
               <span className="ml-3 align-middle text-[11px] uppercase tracking-wide text-purple-300/80 border border-purple-500/40 rounded px-1.5 py-0.5">
-                ✏ eigene Eingabe
+                {t("scramble.customBadge")}
               </span>
             )}
           </div>
@@ -417,9 +413,7 @@ export function ScrambleCard({
         !isWcaQualityCustomPuzzle(effectiveType) &&
         effectiveType !== "fto" && (
           <p className="mt-3 text-[11px] text-amber-300/70">
-            Hinweis: Random-Move-Sequenz mit korrekter Notation, kein
-            Random-State-Solver. Gut fürs Training, nicht 100% Wettkampf-
-            vergleichbar. Random-State folgt schrittweise.
+            {t("scramble.randomMoveWarning")}
           </p>
         )}
     </div>

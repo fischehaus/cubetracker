@@ -15,6 +15,7 @@
 //   - showNewSessionForm / newSessionName → lokal (Inline-Anlegen).
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useCreateSession,
   useHardware,
@@ -44,6 +45,7 @@ export function TimerControlsCard({
   hardwareId,
   onHardwareIdChange,
 }: Props) {
+  const { t } = useTranslation();
   const [settings, setSettings] = useAppSettings();
   const isTouchDevice = useIsTouchDevice();
   const spacebarMode = settings.spacebar_enabled;
@@ -137,7 +139,7 @@ export function TimerControlsCard({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Cube-Type */}
         <label className="flex flex-col text-sm text-gray-400">
-          Cube-Type
+          {t("timerControls.cubeType")}
           <select
             value={cubeType}
             onChange={(e) => onCubeTypeChange(e.target.value)}
@@ -154,13 +156,13 @@ export function TimerControlsCard({
         {/* Session */}
         <label className="flex flex-col text-sm text-gray-400">
           <span className="flex items-center justify-between">
-            Session
+            {t("timerControls.session")}
             {sessionSuggestion?.session_id !== null && !userPickedSession && (
               <span
                 className="text-[10px] text-emerald-400"
-                title={`Vorgeschlagen: meiste Solves für ${cubeType}`}
+                title={t("timerControls.sessionAutoTitle", { cube: cubeType })}
               >
-                ★ auto
+                {t("timerControls.autoBadge")}
               </span>
             )}
           </span>
@@ -169,17 +171,21 @@ export function TimerControlsCard({
             onChange={(e) => handleSessionChange(e.target.value)}
             className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-lg text-gray-100 focus:border-purple-500 focus:outline-none"
           >
-            <option value="__none__">— ohne Session —</option>
+            <option value="__none__">{t("timerControls.sessionNone")}</option>
             {sessions?.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
               </option>
             ))}
-            <option value="__new__">+ Neue Session anlegen …</option>
+            <option value="__new__">{t("timerControls.sessionNew")}</option>
           </select>
           {suggestedSessionLabel && !userPickedSession && (
             <span className="mt-1 text-[11px] text-emerald-400/80 truncate">
-              → „{suggestedSessionLabel}" ({sessionSuggestion?.count} {cubeType}-Solves)
+              {t("timerControls.sessionSuggestion", {
+                name: suggestedSessionLabel,
+                count: sessionSuggestion?.count ?? 0,
+                cube: cubeType,
+              })}
             </span>
           )}
         </label>
@@ -187,17 +193,17 @@ export function TimerControlsCard({
         {/* Hardware */}
         <label className="flex flex-col text-sm text-gray-400">
           <span className="flex items-center justify-between">
-            Hardware
+            {t("timerControls.hardware")}
             {hardwareSuggestion?.hardware_id !== null && !userPickedHardware && (
               <span
                 className="text-[10px] text-emerald-400"
                 title={
                   hardwareSuggestion?.reason === "most_used"
-                    ? `Vorgeschlagen: am häufigsten für ${cubeType} verwendet`
-                    : `Vorgeschlagen: erste aktive ${cubeType}-Hardware`
+                    ? t("timerControls.hwAutoTitleMostUsed", { cube: cubeType })
+                    : t("timerControls.hwAutoTitleFirstActive", { cube: cubeType })
                 }
               >
-                ★ auto
+                {t("timerControls.autoBadge")}
               </span>
             )}
           </span>
@@ -210,7 +216,7 @@ export function TimerControlsCard({
             }}
             className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-lg text-gray-100 focus:border-purple-500 focus:outline-none"
           >
-            <option value="__none__">— ohne Hardware —</option>
+            <option value="__none__">{t("timerControls.hwNone")}</option>
             {hardware?.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
@@ -219,14 +225,19 @@ export function TimerControlsCard({
           </select>
           {hardware && hardware.length === 0 && (
             <span className="mt-1 text-[11px] text-gray-500">
-              Kein {cubeType}-Cube im Inventar
+              {t("timerControls.hwNoneForCube", { cube: cubeType })}
             </span>
           )}
           {suggestedHardwareLabel && !userPickedHardware && (
             <span className="mt-1 text-[11px] text-emerald-400/80 truncate">
-              → „{suggestedHardwareLabel}"
-              {hardwareSuggestion?.reason === "most_used" &&
-                ` (${hardwareSuggestion.count}×)`}
+              {hardwareSuggestion?.reason === "most_used"
+                ? t("timerControls.hwSuggestionMostUsed", {
+                    name: suggestedHardwareLabel,
+                    count: hardwareSuggestion.count,
+                  })
+                : t("timerControls.hwSuggestionOther", {
+                    name: suggestedHardwareLabel,
+                  })}
             </span>
           )}
         </label>
@@ -236,7 +247,7 @@ export function TimerControlsCard({
       {showNewSessionForm && (
         <div className="mt-4 rounded border border-purple-500/40 bg-purple-500/5 p-3 flex gap-2 items-end flex-wrap">
           <label className="flex flex-col text-sm text-gray-300 flex-1 min-w-[12rem]">
-            Name der neuen Session
+            {t("timerControls.newSessionName")}
             <input
               type="text"
               value={newSessionName}
@@ -249,7 +260,7 @@ export function TimerControlsCard({
                 }
               }}
               autoFocus
-              placeholder={`z.B. „${cubeType} Training"`}
+              placeholder={t("timerControls.newSessionPlaceholder", { cube: cubeType })}
               className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
             />
           </label>
@@ -258,7 +269,7 @@ export function TimerControlsCard({
             disabled={createSession.isPending || !newSessionName.trim()}
             className="text-base rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
           >
-            Anlegen + auswählen
+            {t("timerControls.newSessionCreate")}
           </button>
           <button
             onClick={() => {
@@ -267,7 +278,7 @@ export function TimerControlsCard({
             }}
             className="text-base rounded bg-gray-700 px-3 py-2 text-gray-300 hover:bg-gray-600"
           >
-            Abbrechen
+            {t("timerControls.newSessionCancel")}
           </button>
         </div>
       )}
@@ -279,25 +290,24 @@ export function TimerControlsCard({
           wir disablen den Button mit Hint. */}
       <div className="mt-4 rounded-lg border border-gray-700 bg-gray-800/30 p-3">
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-sm font-medium text-gray-300">Timer-Modus</span>
+          <span className="text-sm font-medium text-gray-300">
+            {t("timerControls.timerMode")}
+          </span>
           <InfoButton align="left">
-            <p className="font-medium mb-1">Drei Timer-Modi</p>
-            <p className="mb-2">
-              <strong>Text-Eingabe:</strong> Du tippst die Zeit nach dem Solve
-              ins Feld + Enter. Klassisch, gut wenn du eine Stoppuhr separat
-              nutzt.
+            <p className="font-medium mb-1">
+              {t("timerControls.modeInfoTitle")}
             </p>
             <p className="mb-2">
-              <strong>Spacebar — WCA:</strong> Wettkampf-Standard. Space
-              drücken startet Inspection (15s), Space drücken + halten +
-              loslassen startet Solve. Space drücken stoppt. Penalty
-              automatisch (+2 ab 15s, DNF ab 17s).
+              <strong>{t("timerControls.modeInfoTextLabel")}</strong>{" "}
+              {t("timerControls.modeInfoTextBody")}
+            </p>
+            <p className="mb-2">
+              <strong>{t("timerControls.modeInfoWcaLabel")}</strong>{" "}
+              {t("timerControls.modeInfoWcaBody")}
             </p>
             <p>
-              <strong>Spacebar — Pragmatisch:</strong> User-Training. Single
-              Tap während Inspection startet Solve, Double-Tap startet
-              Inspection neu. Auto-DNF bei Countdown 0. Etwas entspannter als
-              WCA.
+              <strong>{t("timerControls.modeInfoPragmaticLabel")}</strong>{" "}
+              {t("timerControls.modeInfoPragmaticBody")}
             </p>
           </InfoButton>
         </div>
@@ -308,7 +318,7 @@ export function TimerControlsCard({
               setSettings({ ...settings, spacebar_enabled: false })
             }
           >
-            ⌨ Text-Eingabe
+            {t("timerControls.modeText")}
           </ModeButton>
           <ModeButton
             active={spacebarMode && settings.inspection_mode === "wca"}
@@ -320,7 +330,7 @@ export function TimerControlsCard({
               })
             }
           >
-            🏁 Spacebar — WCA
+            {t("timerControls.modeWca")}
           </ModeButton>
           <ModeButton
             active={spacebarMode && settings.inspection_mode === "pragmatic"}
@@ -332,15 +342,15 @@ export function TimerControlsCard({
               })
             }
           >
-            🏃 Spacebar — Pragmatisch
+            {t("timerControls.modePragmatic")}
           </ModeButton>
         </div>
         {!spacebarMode && (
           <p className="mt-2 text-xs text-gray-500">
-            💡 Tipp:{" "}
+            {t("timerControls.tipPrefix")}{" "}
             {isTouchDevice
-              ? "auf dem Phone ist Text-Eingabe über die Soft-Tastatur etwas mühsam — Spacebar-Tap ist meist schneller."
-              : "Probier den Spacebar-Timer — viel fluessigeres Training, inkl. Inspection-Countdown. Klick einfach auf einen der Spacebar-Modi oben."}
+              ? t("timerControls.tipTouch")
+              : t("timerControls.tipDesktop")}
           </p>
         )}
       </div>

@@ -112,6 +112,7 @@ interface Health {
 function HealthBadge({ onClick }: { onClick: () => void }) {
   // Version-Badge — Klick öffnet Patch-Notes-Modal (State lebt im
   // MainLayout, damit auch das UserMenu denselben Modal nutzen kann).
+  const { t } = useTranslation();
   const { data, error } = useQuery<Health>({
     queryKey: ["health"],
     queryFn: async () => {
@@ -127,7 +128,7 @@ function HealthBadge({ onClick }: { onClick: () => void }) {
   if (error) {
     return (
       <span className="text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded px-3 py-1.5">
-        Backend offline
+        {t("health.backendOffline")}
       </span>
     );
   }
@@ -144,7 +145,7 @@ function HealthBadge({ onClick }: { onClick: () => void }) {
           ? "text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-3 py-1.5 hover:bg-emerald-500/20 cursor-pointer transition-colors"
           : "text-sm text-purple-300 bg-purple-500/10 border border-purple-500/30 rounded px-3 py-1.5 hover:bg-purple-500/20 cursor-pointer transition-colors"
       }
-      title="Patch Notes anzeigen"
+      title={t("health.patchNotesTitle")}
     >
       v{data.version}
       {data.mode && (
@@ -155,6 +156,7 @@ function HealthBadge({ onClick }: { onClick: () => void }) {
 }
 
 function PatchNotesModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
@@ -168,7 +170,7 @@ function PatchNotesModal({ onClose }: { onClose: () => void }) {
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-100 text-2xl leading-none"
-            aria-label="Schliessen"
+            aria-label={t("health.closeAria")}
           >
             ×
           </button>
@@ -675,6 +677,7 @@ function MainLayout() {
 }
 
 function FeaturesModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
@@ -688,7 +691,7 @@ function FeaturesModal({ onClose }: { onClose: () => void }) {
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-100 text-2xl leading-none"
-            aria-label="Schliessen"
+            aria-label={t("health.closeAria")}
           >
             ×
           </button>

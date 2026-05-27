@@ -13,6 +13,7 @@
 // die Selektoren in TimerControlsCard live mit dem Save synchron sind).
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useCreateSolve, useDeleteSolve, useUpdateSolve } from "../lib/api";
 import type { Solve } from "../lib/types";
 import { parseTimeInput } from "../lib/format";
@@ -46,6 +47,7 @@ export function BigTimerInput({
   scramble,
   onSolveSaved,
 }: Props) {
+  const { t } = useTranslation();
   const [timeStr, setTimeStr] = useState("");
   const [plusTwo, setPlusTwo] = useState(false);
   const [dnf, setDnf] = useState(false);
@@ -108,7 +110,7 @@ export function BigTimerInput({
     if (dnf) {
       const time_ms = timeStr.trim() ? parseTimeInput(timeStr) : 0;
       if (time_ms === null) {
-        setError("Zeit ungültig (oder Feld leer lassen für DNF)");
+        setError(t("timer.errorInvalidTime"));
         return;
       }
       doCreate(time_ms);
@@ -116,7 +118,7 @@ export function BigTimerInput({
     }
     const time_ms = parseTimeInput(timeStr);
     if (time_ms === null) {
-      setError('Ungültige Zeit. Format: "12.34", "1:23.45" oder "1234"');
+      setError(t("timer.errorInvalidFormat"));
       return;
     }
     doCreate(time_ms);
@@ -142,7 +144,7 @@ export function BigTimerInput({
           requestAnimationFrame(() => inputRef.current?.focus());
           onSolveSaved?.();
         },
-        onError: (e) => setError(`Fehler: ${e.message}`),
+        onError: (e) => setError(t("timer.errorPrefix", { message: e.message })),
       },
     );
   }
@@ -175,7 +177,7 @@ export function BigTimerInput({
           setLastSavedSolve(savedSolve);
           onSolveSaved?.();
         },
-        onError: (e) => setError(`Fehler: ${e.message}`),
+        onError: (e) => setError(t("timer.errorPrefix", { message: e.message })),
       },
     );
   }
@@ -255,7 +257,7 @@ export function BigTimerInput({
               }
             }}
             placeholder="0.00"
-            aria-label="Solve-Zeit"
+            aria-label={t("timer.ariaTime")}
             className="w-full text-center font-mono bg-transparent border-0 border-b-4 border-gray-700 focus:border-purple-500 focus:outline-none text-gray-100 py-4"
             style={{
               fontSize: TIMER_FONT_SCALE[settings.timer_font_size].timer,
@@ -263,7 +265,7 @@ export function BigTimerInput({
             }}
           />
           <p className="mt-3 text-center text-sm text-gray-500">
-            „1234" = 12.34s · „15102" = 1:51.02 · oder klassisch „12.34" / „1:23.45"
+            {t("timer.formatHint")}
           </p>
         </div>
       )}
@@ -280,7 +282,7 @@ export function BigTimerInput({
               className="accent-purple-500 w-4 h-4"
               disabled={dnf}
             />
-            +2 Strafe
+            {t("timer.plusTwoLabel")}
           </label>
           <label className="flex items-center gap-2 rounded border border-gray-700 bg-gray-800/50 px-4 py-2 text-base text-gray-200 cursor-pointer hover:bg-gray-800">
             <input
@@ -292,14 +294,14 @@ export function BigTimerInput({
               }}
               className="accent-purple-500 w-4 h-4"
             />
-            DNF
+            {t("timer.dnfLabel")}
           </label>
           <button
             onClick={save}
             disabled={create.isPending}
             className="rounded bg-purple-600 px-6 py-3 text-base font-medium text-white hover:bg-purple-700 disabled:opacity-50"
           >
-            {create.isPending ? "Speichere …" : "Speichern (Enter)"}
+            {create.isPending ? t("timer.saving") : t("timer.save")}
           </button>
         </div>
       )}
@@ -315,7 +317,7 @@ export function BigTimerInput({
           {/* QA-Fix H#2: cube_type ins Label, damit User auch über
               Cube-Wechsel hinweg weiss, welcher Solve gerade bearbeitet wird. */}
           <span className="text-gray-500">
-            Letzter Solve ({lastSavedSolve.cube_type}):
+            {t("timer.lastSolve", { cube: lastSavedSolve.cube_type })}
           </span>
           <button
             type="button"
@@ -328,10 +330,10 @@ export function BigTimerInput({
             } disabled:opacity-40 disabled:cursor-not-allowed`}
             title={
               lastSavedSolve.plus_two
-                ? "+2 entfernen"
+                ? t("timer.plusTwoRemove")
                 : lastSavedSolve.dnf
-                ? "Nicht möglich auf DNF-Solve (zuerst DNF entfernen)"
-                : "+2 Strafe markieren"
+                ? t("timer.plusTwoNotPossibleOnDnf")
+                : t("timer.plusTwoMark")
             }
           >
             {lastSavedSolve.plus_two ? "✓ +2" : "+2"}
@@ -347,10 +349,10 @@ export function BigTimerInput({
             } disabled:opacity-40 disabled:cursor-not-allowed`}
             title={
               lastSavedSolve.dnf
-                ? "DNF entfernen"
+                ? t("timer.dnfRemove")
                 : lastSavedSolve.plus_two
-                ? "Als DNF markieren — vorhandenes +2 wird automatisch entfernt (WCA: nicht kombinierbar)"
-                : "Als DNF markieren"
+                ? t("timer.dnfMarkRemovesPlusTwo")
+                : t("timer.dnfMark")
             }
           >
             {lastSavedSolve.dnf ? "✓ DNF" : "DNF"}
@@ -366,17 +368,17 @@ export function BigTimerInput({
             } disabled:opacity-40`}
             title={
               deleteConfirm
-                ? "Erneut klicken zum endgültigen Löschen"
-                : "Letzten Solve löschen"
+                ? t("timer.deleteSecondClick")
+                : t("timer.deleteLast")
             }
           >
-            {deleteConfirm ? "Wirklich löschen?" : "🗑 Löschen"}
+            {deleteConfirm ? t("timer.deleteConfirm") : t("timer.deleteIcon")}
           </button>
           <button
             type="button"
             onClick={() => setLastSavedSolve(null)}
             className="rounded px-2 py-1.5 text-xs text-gray-500 hover:text-gray-300"
-            title="Quick-Buttons ausblenden"
+            title={t("timer.hideQuickButtons")}
           >
             ↺
           </button>
