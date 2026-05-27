@@ -24,14 +24,15 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-27 — Turnier-Sprint VOLL DURCH + Roadmap-DB + Demo-Probe-Seed
+## ✅ ERLEDIGT 2026-05-27/28 — Turnier-Sprint + Roadmap-DB + Tester-Rolle + Feedback-Inbox
 
-**~62 Commits + ~42 Tags an einem Tag, alles live.** Live-public-Version:
-`W.roadmap-modal-api` (= letzte public-Welle; danach 4 internal: demo-probe-
-seed, roadmap-db, roadmap-admin-ui, roadmap-admin-qa). Backend skippt
-internal-Einträge in `current_version()`, also sieht der User im Changelog
-sauber drei Top-Wellen: `W.roadmap-modal-api`, `W.wca-profile-light`,
-`W.i18n-en-release` — nicht den ganzen Audit-Trail dahinter.
+**~70 Commits + ~49 Tags in 1,5 Tagen, alles live.** Live-public-Version:
+`W.roadmap-modal-api` (= letzte public-Welle; danach diverse internal-Wellen
+für Roadmap-DB, Demo-Probe-Seed, Roadmap-Admin-UI, Quick-Actions, Tester-
+Rolle, Feedback-Inbox). Backend skippt internal-Einträge in `current_version()`,
+also sieht der User im Changelog sauber drei Top-Wellen: `W.roadmap-modal-api`,
+`W.wca-profile-light`, `W.i18n-en-release` — nicht den ganzen Audit-Trail
+dahinter.
 
 **Bilanz Mi-spät / Do-Voll im Detail:**
 - Mi-Vormittag/Mittag: Backlog-Sprint (Average-PB, Danger-Zone, Letzte
@@ -201,7 +202,65 @@ einem Commit `ea6d9a9`. Reproduzierbar dokumentiert.
 > Mass-Assignment via extra=forbid blockiert, Cache invalidiert
 > bei jeder Mutation.
 
-### 🔜 Restplan Turnier-Sprint (Fr Abend + Sa Vormittag)
+### Welle 36 (Do-spät) — Roadmap-Admin-Quick-Actions
+
+> Vor den Tester+Feedback-Wellen noch ein User-Vorschlag umgesetzt:
+> Im AdminRoadmapPanel sind „intern↔öffentlich" und „aktiv↔erledigt"
+> jetzt Quick-Toggle-Buttons in der View-Mode-Row neben Bearbeiten/
+> Löschen. 1-Klick, kein Confirm (Rückgängig per 2. Klick). Per-Row-
+> Busy-Disable.
+>
+> `W.roadmap-admin-quickactions` (internal) — Commit `549e624`.
+> 8 neue Locale-Keys (1211/1211 symmetrisch).
+
+### Wellen 37-43 (Fr-Nacht, 27.→28.05.) — Tester-Rolle + Feedback-Inbox
+
+> **Strategischer Refactor:** der „per Email"-Versand für Feedback ist
+> Geschichte. Stattdessen DB-Inbox mit Admin-Antwort-Workflow + neue
+> Tester-Rolle für QA-Workflow ohne Admin-Vollzugriff.
+>
+> - `W.tester-role-db` (internal) — Schema (users.is_tester +
+>   feedback_messages-Tabelle), neue require_admin_or_tester-Dep an 7
+>   Live-Tests- + Roadmap-Endpoints, Public/Admin-Endpoints für
+>   Feedback-CRUD (3/h Rate-Limit pro User). Commit `e0e4de0`.
+> - `W.feedback-modal-rebuild` (internal) — FeedbackModal: Mail-Mode
+>   raus, „Per App"-Mode rein (schreibt in DB-Inbox). Anonyme User
+>   (Login-Seite-Footer) sehen nur GitHub-Mode. 4 Kategorien jetzt
+>   (general/bug/feature/other, +1). Commit `8f18a2d`.
+> - `W.feedback-inbox-ui` (internal) — AdminFeedbackInboxPanel im
+>   Admin-Tab: Stats-Badges (offene Bugs rot, Features lila, Allgemein
+>   blau), Filter (Status + Kategorie), pro Item Status-Quick-Toggles
+>   + Antwort-Editor + Delete. Sortierung: ungelesene oben mit blauem
+>   Dot. Commit `fa8bbb6`.
+> - `W.tester-tab-ui` (internal) — VerwaltungTab: neuer Tester-Tab
+>   (🧪) für is_tester && !is_admin (rendert Live-Tests + Roadmap-
+>   Panels). AdminUsersPanel: neuer 🧪 Tester-Toggle pro User-Zeile +
+>   TESTER-Badge. Commit `a23eab1`.
+> - `W.feedback-user-view` (internal) — User-Sicht: neuer „💬 Mein
+>   Feedback"-Block in Verwaltung → Meine Daten (eigene Items + Admin-
+>   Antworten, auto-mark-as-seen beim Aufklappen). FeedbackUnreadToaster
+>   beim Login (6s Auto-Hide, Klick springt zur Sektion). Commit
+>   `3e0c505`.
+> - `W.session-scan-feedback` (internal) — session-start-context.sh +
+>   /abschluss erweitert: gh issue list (Top 5) + Reminder zur
+>   Admin-Inbox-URL beim Session-Start + neuer /abschluss-Check 11
+>   („Offene Bugs / Feedback vor Session-Ende?"). Commit `1579702`.
+> - `W.tester-feedback-qa` (internal) — QA-Sub-Agent fand 2 KRITISCH +
+>   5 SOLLTE + 1 NICE + 4 POSITIV. Sofort gefixt: (1) admin_response
+>   ohne min_length=1 → leerer String löschte still die Antwort
+>   (Datenverlust), (2) InboxRow.responseDraft stale nach Refetch
+>   (analog roadmap-admin-qa) → useEffect-Sync, (3) Privacy: User-
+>   Endpoint /feedback/me/* nutzt jetzt FeedbackMessageUserRead ohne
+>   user_id/admin_response_by_user_id, (4) delete_live_test wieder
+>   require_admin (Tester kann nicht Test-Historie löschen), (5)
+>   markSeen-Deps reduziert (kein 60s-Refetch-Replay), (6) Toaster-
+>   Timer-Variable umbenannt (kein t-Shadowing). Commit `9fc1f40`.
+>
+> POSITIV-Verifikation: alle 4 /admin/feedback/* hinter require_admin
+> (Tester sieht Inbox NICHT), kein User-ID-Spoofing möglich,
+> mark_response_seen IDOR-frei, is_tester-Migration idempotent.
+
+### 🔜 Restplan (nur noch Sa Vormittag)
 
 **Du-Aktion (Fr Abend oder Sa Vormittag, ~30 Min):** Phone-Demo-Probe
 über die **12 Admin-Live-Tests** (Verwaltung → Admin → Live-Tests).
@@ -214,27 +273,38 @@ Checkliste-Highlights:
 3. Dashboard EN: alle 11 Karten ohne DE-Reste
 4. Timer-Tab EN: Solve eintippen + Penalty + Live-Karte
 5. Analyse-Tab EN: Charts + Solve-Liste + Solve-Detail-Modal
-6. Verwaltung-Tab EN: alle 6 Sub-Tabs
+6. Verwaltung-Tab EN: alle 6 Sub-Tabs (+ Admin- oder Tester-Tab)
 7. Trainer + Community EN
-8. WCA-ID setzen → Karte erscheint sofort (Cache-Invalidation-Test)
+8. WCA-ID setzen → Karte erscheint sofort
 9. WCA-Profil: echte Zahlen (Wettkampf-Count + Medaillen + PRs + Comps)
 10. Backup-Download EN → JSON enthält user_wca_id
-11. Roadmap-Modal EN: zeigt jetzt vollständig EN (kein DE-Banner mehr —
-    seit W.roadmap-modal-api), Items kommen aus DB
+11. Roadmap-Modal EN: vollständig EN, Items aus DB
 12. Sprach-Persistenz nach Reload + Logout
 
+**Bonus-Smoke-Test für die neue Tester+Feedback-Welle (~10 min):**
+- Feedback-Modal: Per-App-Mode schreiben → in Admin-Inbox prüfen
+- Admin-Antwort schreiben → in „Mein Feedback" + Toaster beim Login
+- 🧪 Tester-Toggle setzen + abloggen + neu einloggen → Tester-Tab erscheint
+- Tester sieht NUR Live-Tests + Roadmap-Pflege (keine Inbox/Users/Stats)
+
 **Optionale Post-Demo-Items (Backlog, NICHT Sprint-blocker):**
+- **AdminFeedbackInbox user-email/display_name anzeigen** (QA-SOLLTE-
+  Backlog) — aktuell nur `Von User #42`, UX-Friction für Support-Cases.
+  FeedbackMessageRead um user_email-Feld erweitern oder Link zur
+  User-Liste setzen.
 - AdminStatsPanel + AdminUsersPanel hartkodiert `"de-DE"` — Admin-only,
   Demo-irrelevant, getIntlLocale-Migration für Vollständigkeit.
-- Activity-Feed (P3-USP, ~3 Tage) — war ursprünglich für Turnier
-  vorgesehen, vertagt zugunsten i18n + WCA + Roadmap. Multi-User-
-  Differenzierung gegen csTimer.
+- Activity-Feed (P3-USP, ~3 Tage) — Multi-User-Differenzierung gegen
+  csTimer.
 - PWA-Setup (P1, ~1 Tag) — letztes P1-Item, Phone-Homescreen-Install.
 - Phase 6 (~05.06.) — apex `cubetracker.de` → Hetzner + Render abbauen
   + Branch `feature/W-api-prefix` → `main`.
 - Backend-Test-Suite (P6, internal) — 0% Coverage.
-- ConfirmDialog-Komponente statt native confirm() im Admin-Roadmap
-  (QA-NICE-Befund vom W.roadmap-admin-qa-Pass).
+- ConfirmDialog-Komponente statt native confirm() im Admin-Roadmap +
+  Admin-Feedback.
+- Cleanup: `emailing/service.py:send_feedback_email` ist tot (wird
+  nirgendwo mehr aufgerufen seit W.feedback-modal-rebuild) — kann
+  in einer späteren Tooling-Welle raus.
 
 ### Welle 1 — #2 Average-PB-Punkte + Hook-Drift
 
