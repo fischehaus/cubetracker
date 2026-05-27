@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-community",
+        released=date(2026, 5, 27),
+        title="Community-Tab + Bestenliste DE/EN",
+        highlights=[
+            "CommunityTab: Sub-Tab-Bar lokalisiert (Freunde/Bestenliste) "
+            "+ aria-label, useTranslation()-Hook ersetzt statischen "
+            "SUB_TABS-Konstanten-Array.",
+            "LeaderboardTab: Header + InfoButton + Cube-Type-Picker + "
+            "No-Friends-Hinweis (multipart mit strong-Tag) + Error-Box "
+            "(„Fehler/Error\" + Fallback-„Unbekannt/Unknown\") + Loading-"
+            "State + Footer.",
+            "Tabelle: leerer Zustand mit interpoliertem Cube + 8 Column-"
+            "Headers (Rang/User/Best Single/Best AO5/Best AO12/Akt. AO5/"
+            "Solves 30d/Zuletzt), Self-Badge („du/you\").",
+            "fmtRelative(iso, t) nimmt jetzt t-Param: 6 lokalisierte "
+            "Strings (heute, gestern, vor Xd/w/mo/y).",
+            "Number-Formatter `toLocaleString(numberLocale)` mit "
+            "dynamischer Auswahl (`en-GB` vs `de-DE`).",
+            "Locales-Namespaces neu: communityTab + leaderboard "
+            "(~30 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-alg-trainer",
         released=date(2026, 5, 27),
         title="Algorithm-Trainer DE/EN",

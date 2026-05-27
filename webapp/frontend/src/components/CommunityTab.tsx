@@ -8,22 +8,12 @@
 // (#friends → community/friends, #leaderboard → community/leaderboard).
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FriendsTab } from "./FriendsTab";
 import { LeaderboardTab } from "./LeaderboardTab";
 import { ScrollableTabBar } from "./ScrollableTabBar";
 
 export type CommunitySection = "friends" | "leaderboard";
-
-interface SubTab {
-  id: CommunitySection;
-  label: string;
-  icon: string;
-}
-
-const SUB_TABS: SubTab[] = [
-  { id: "friends", label: "Freunde", icon: "🤝" },
-  { id: "leaderboard", label: "Bestenliste", icon: "🏁" },
-];
 
 interface Props {
   /** Initial-Sub-Tab — für URL-Hash-Backward-Compat (#friends, #leaderboard). */
@@ -31,15 +21,25 @@ interface Props {
 }
 
 export function CommunityTab({ initialSection = "friends" }: Props) {
+  const { t } = useTranslation();
   const [section, setSection] = useState<CommunitySection>(initialSection);
+
+  const subTabs = [
+    { id: "friends", label: t("communityTab.subTabFriends"), icon: "🤝" },
+    {
+      id: "leaderboard",
+      label: t("communityTab.subTabLeaderboard"),
+      icon: "🏁",
+    },
+  ];
 
   return (
     <div className="space-y-4">
       <ScrollableTabBar
-        tabs={SUB_TABS}
+        tabs={subTabs}
         current={section}
         onChange={(id) => setSection(id as CommunitySection)}
-        ariaLabel="Community-Bereiche"
+        ariaLabel={t("communityTab.ariaLabel")}
         size="md"
       />
 

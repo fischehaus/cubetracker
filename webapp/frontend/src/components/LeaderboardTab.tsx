@@ -11,6 +11,7 @@
 // Friends-Tab.
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { COMMON_CUBE_TYPES, formatTime } from "../lib/format";
 import { InfoButton } from "./InfoButton";
@@ -31,23 +32,29 @@ function fmt(ms: number | null): string {
   return ms === null ? "—" : formatTime(ms);
 }
 
-function fmtRelative(iso: string | null): string {
+function fmtRelative(
+  iso: string | null,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
   if (!iso) return "—";
   try {
     const d = new Date(iso);
     const days = Math.floor((Date.now() - d.getTime()) / 1000 / 86400);
-    if (days === 0) return "heute";
-    if (days === 1) return "gestern";
-    if (days < 7) return `vor ${days}d`;
-    if (days < 30) return `vor ${Math.floor(days / 7)}w`;
-    if (days < 365) return `vor ${Math.floor(days / 30)}mo`;
-    return `vor ${Math.floor(days / 365)}y`;
+    if (days === 0) return t("leaderboard.relativeToday");
+    if (days === 1) return t("leaderboard.relativeYesterday");
+    if (days < 7) return t("leaderboard.relativeDays", { n: days });
+    if (days < 30)
+      return t("leaderboard.relativeWeeks", { n: Math.floor(days / 7) });
+    if (days < 365)
+      return t("leaderboard.relativeMonths", { n: Math.floor(days / 30) });
+    return t("leaderboard.relativeYears", { n: Math.floor(days / 365) });
   } catch {
     return iso;
   }
 }
 
 export function LeaderboardTab() {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const { data: friendsData } = useFriendsList(isAuthenticated);
   // QA-Fix L6: friendsCount nur dann betrachten wenn die Liste schon geladen
@@ -84,24 +91,18 @@ export function LeaderboardTab() {
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-semibold text-gray-100">
-            Bestenliste{" "}
+            {t("leaderboard.title")}{" "}
             <span className="text-sm text-gray-500">
-              (du + deine {friendsCount} Freunde)
+              {t("leaderboard.countSummary", { count: friendsCount })}
             </span>
           </h2>
           <InfoButton>
-            <p className="font-medium mb-1">Bestenliste</p>
-            <p>
-              Vergleicht dich + accepted-Freunde für den ausgewählten
-              Cube-Type. Spalten: Best Single, Best AO5, Best AO12,
-              Aktuelle AO5, Solves (30d), Last Active. Du bist immer oben
-              hervorgehoben, Freunde sortiert nach Best Single (Top-3 mit
-              Medaillen). Nur accepted-Friends, keine Emails im Output.
-            </p>
+            <p className="font-medium mb-1">{t("leaderboard.title")}</p>
+            <p>{t("leaderboard.infoBody")}</p>
           </InfoButton>
         </div>
         <label className="flex items-baseline gap-2 text-sm text-gray-400">
-          Cube-Type
+          {t("leaderboard.cubeTypeLabel")}
           <select
             value={cubeType ?? ""}
             onChange={(e) => setCubeType(e.target.value)}
@@ -118,25 +119,25 @@ export function LeaderboardTab() {
 
       {friendsLoaded && friendsCount === 0 && (
         <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-4 text-sm text-blue-100">
-          <p className="font-medium">Noch keine Freunde gefunden.</p>
+          <p className="font-medium">{t("leaderboard.noFriendsTitle")}</p>
           <p className="mt-1 text-blue-200/80">
-            Geh in den Tab <strong>🤝 Freunde</strong>, such jemanden per
-            Display-Name oder Email und schick eine Anfrage. Sobald die
-            angenommen ist, taucht der hier auf.
+            {t("leaderboard.noFriendsBodyPrefix")}{" "}
+            <strong>{t("leaderboard.noFriendsBodyTab")}</strong>
+            {t("leaderboard.noFriendsBodySuffix")}
           </p>
         </div>
       )}
 
       {error && (
         <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-300">
-          Fehler:{" "}
-          {error instanceof Error ? error.message : "Unbekannt"}
+          {t("leaderboard.errorPrefix")}
+          {error instanceof Error ? error.message : t("leaderboard.errorUnknown")}
         </div>
       )}
 
       {isLoading && (
         <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-          <p className="text-gray-400">Lade Bestenliste …</p>
+          <p className="text-gray-400">{t("leaderboard.loading")}</p>
         </div>
       )}
 
@@ -144,11 +145,7 @@ export function LeaderboardTab() {
         <LeaderboardTable rows={data.rows} cubeType={data.cube_type} />
       )}
 
-      <p className="text-xs text-gray-500">
-        Best-Times werden mit WCA-Konvention berechnet: +2 zählt als
-        Zeit+2.0s, DNF zählt als „unendlich" / wird beim Average getrimmt.
-        AO5 = trimmed mean of 5 Solves (best+worst raus, Mittel von 3).
-      </p>
+      <p className="text-xs text-gray-500">{t("leaderboard.footer")}</p>
     </div>
   );
 }
@@ -164,10 +161,11 @@ function LeaderboardTable({
   rows: LeaderboardEntry[];
   cubeType: string;
 }) {
+  const { t } = useTranslation();
   if (rows.length === 0) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-center text-sm text-gray-400">
-        Niemand hat bisher {cubeType}-Solves. Sei der Erste!
+        {t("leaderboard.tableEmpty", { cube: cubeType })}
       </div>
     );
   }
@@ -183,14 +181,22 @@ function LeaderboardTable({
           {/* Mobile-First: auf <md nur Rang/User/Best Single/Best AO5 —
               die weniger wichtigen Spalten ab md sichtbar. */}
           <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-700">
-            <th className="py-2 pr-3">Rang</th>
-            <th className="py-2 pr-3">User</th>
-            <th className="py-2 pr-3">Best Single</th>
-            <th className="py-2 pr-3">Best AO5</th>
-            <th className="py-2 pr-3 hidden md:table-cell">Best AO12</th>
-            <th className="py-2 pr-3 hidden md:table-cell">Akt. AO5</th>
-            <th className="py-2 pr-3 hidden md:table-cell">Solves (30d)</th>
-            <th className="py-2 pr-3 hidden md:table-cell">Zuletzt</th>
+            <th className="py-2 pr-3">{t("leaderboard.colRang")}</th>
+            <th className="py-2 pr-3">{t("leaderboard.colUser")}</th>
+            <th className="py-2 pr-3">{t("leaderboard.colBestSingle")}</th>
+            <th className="py-2 pr-3">{t("leaderboard.colBestAo5")}</th>
+            <th className="py-2 pr-3 hidden md:table-cell">
+              {t("leaderboard.colBestAo12")}
+            </th>
+            <th className="py-2 pr-3 hidden md:table-cell">
+              {t("leaderboard.colCurrentAo5")}
+            </th>
+            <th className="py-2 pr-3 hidden md:table-cell">
+              {t("leaderboard.colSolves30d")}
+            </th>
+            <th className="py-2 pr-3 hidden md:table-cell">
+              {t("leaderboard.colLastActive")}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -210,6 +216,8 @@ function LeaderboardRow({
   row: LeaderboardEntry;
   rank: number;
 }) {
+  const { t, i18n } = useTranslation();
+  const numberLocale = i18n.resolvedLanguage === "en" ? "en-GB" : "de-DE";
   // Self optisch hervorheben
   const rowClass = row.is_me
     ? "border-b border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10"
@@ -243,7 +251,7 @@ function LeaderboardRow({
           {row.display_name}
           {row.is_me && (
             <span className="ml-2 text-[10px] uppercase text-purple-400">
-              du
+              {t("leaderboard.selfBadge")}
             </span>
           )}
         </span>
@@ -257,17 +265,17 @@ function LeaderboardRow({
         {fmt(row.current_ao5)}
       </td>
       <td className="py-2 pr-3 text-gray-400 hidden md:table-cell">
-        {row.solve_count_30d.toLocaleString("de-DE")}
+        {row.solve_count_30d.toLocaleString(numberLocale)}
         <span className="text-xs text-gray-600">
           {" / "}
-          {row.solve_count_total.toLocaleString("de-DE")}
+          {row.solve_count_total.toLocaleString(numberLocale)}
         </span>
       </td>
       <td
         className="py-2 pr-3 text-gray-500 hidden md:table-cell"
         title={row.last_solve_at ?? ""}
       >
-        {fmtRelative(row.last_solve_at)}
+        {fmtRelative(row.last_solve_at, t)}
       </td>
     </tr>
   );
