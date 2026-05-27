@@ -44,6 +44,29 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-settings-panel",
+        released=date(2026, 5, 27),
+        title="Settings-Panel DE/EN",
+        highlights=[
+            "SettingsPanel komplett übersetzt: 6 Sektionen (Spacebar-"
+            "Timer / Inspection / Multi-Phase-Splits / Schrift-Größe "
+            "Timer / Scramble-Bild / Schrift-Größe Drill).",
+            "Spacebar-Section: InfoButton, Enable-Toggle, Hold-Time-"
+            "NumberField.",
+            "Inspection-Section: Enable-Toggle, Mode-Heading + zweiteilige "
+            "Beschreibung (WCA-Empfehlung/Pragmatisch mit strong-Headern) "
+            "+ Hinweis, 2-Mode-Buttons, Dauer-Field, Sound-Toggle, Audio-"
+            "Mode-Selector mit 4 Optionen (Beep/DE/EN/Off) + TTS-Hinweis.",
+            "Splits-Section: Enable-Toggle + Phasen-Count + Hint mit "
+            "interpoliertem Max-Wert.",
+            "Font-Sektionen: Beschreibungstexte + Section-Titel.",
+            "Scramble-Bild-Section: Toggle mit langem Hint.",
+            "Reset-Button mit Confirm-Dialog.",
+            "Locales-Namespace neu: settingsPanel (~40 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-outlier-card",
         released=date(2026, 5, 27),
         title="Outlier-Detection DE/EN",

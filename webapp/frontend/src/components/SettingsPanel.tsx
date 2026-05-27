@@ -2,6 +2,7 @@
 // W.8: AccountSettingsPanel oben drüber gerendert (Profil + Passwort +
 // Email + Account-Löschen). Drunter dann die App-/Timer-/Drill-Settings.
 
+import { useTranslation } from "react-i18next";
 import { AccountSettingsPanel } from "./AccountSettingsPanel";
 import { InfoButton } from "./InfoButton";
 import {
@@ -14,6 +15,7 @@ import {
 const MAX_PHASES = 8;
 
 export function SettingsPanel() {
+  const { t } = useTranslation();
   const [settings, setSettings] = useAppSettings();
 
   function updatePhaseCount(n: number) {
@@ -40,7 +42,7 @@ export function SettingsPanel() {
   }
 
   function reset() {
-    if (confirm("Alle Einstellungen auf Standard zurücksetzen?")) {
+    if (confirm(t("settingsPanel.resetConfirm"))) {
       setSettings(SETTINGS_DEFAULTS);
     }
   }
@@ -52,28 +54,25 @@ export function SettingsPanel() {
 
       {/* App-Settings (Spacebar, Drills, Font-Size) — Geräte-spezifisch */}
       <Section
-        title="Spacebar-Timer"
+        title={t("settingsPanel.spacebarTitle")}
         info={
           <>
-            <p className="font-medium mb-1">Spacebar-Timer-Settings</p>
-            <p>
-              Tiefere Einstellungen für den Spacebar-Timer. Mode (WCA vs
-              Pragmatisch) kann auch direkt im Timer-Tab gewählt werden.
-              Inspection-Dauer, Hold-Time, Sound-Signale, Phase-Splits sind
-              hier konfigurierbar.
+            <p className="font-medium mb-1">
+              {t("settingsPanel.spacebarInfoTitle")}
             </p>
+            <p>{t("settingsPanel.spacebarInfoBody")}</p>
           </>
         }
       >
         <Toggle
-          label="Spacebar-Modus aktivieren"
-          hint="WCA-Standard-Flow: Space halten → loslassen startet, Space drücken stoppt. Klassischer Text-Input bleibt parallel verfügbar."
+          label={t("settingsPanel.spacebarEnableLabel")}
+          hint={t("settingsPanel.spacebarEnableHint")}
           value={settings.spacebar_enabled}
           onChange={(v) => setSettings({ ...settings, spacebar_enabled: v })}
         />
         <NumberField
-          label="Hold-Time bevor 'go' (ms)"
-          hint="Wie lange Space gehalten werden muss, bis er grün wird. WCA-Empfehlung 550ms."
+          label={t("settingsPanel.spacebarHoldTimeLabel")}
+          hint={t("settingsPanel.spacebarHoldTimeHint")}
           value={settings.hold_time_ms}
           min={100}
           max={2000}
@@ -84,10 +83,10 @@ export function SettingsPanel() {
       </Section>
 
       {/* Inspection */}
-      <Section title="Inspection">
+      <Section title={t("settingsPanel.inspectionTitle")}>
         <Toggle
-          label="Inspection-Phase aktivieren"
-          hint="Vor dem Solve läuft ein Countdown."
+          label={t("settingsPanel.inspectionEnableLabel")}
+          hint={t("settingsPanel.inspectionEnableHint")}
           value={settings.inspection_enabled}
           onChange={(v) => setSettings({ ...settings, inspection_enabled: v })}
           disabled={!settings.spacebar_enabled}
@@ -95,15 +94,22 @@ export function SettingsPanel() {
 
         {/* Inspection-Mode-Toggle */}
         <div className={!settings.spacebar_enabled || !settings.inspection_enabled ? "opacity-50" : ""}>
-          <div className="text-base text-gray-100 mb-1">Inspection-Verhalten</div>
+          <div className="text-base text-gray-100 mb-1">
+            {t("settingsPanel.inspectionModeHeading")}
+          </div>
           <div className="text-xs text-gray-500 mb-2">
-            <strong className="text-gray-300">WCA-Empfehlung:</strong> Single Space → Solve in „Halten"
-            (loslassen startet); +2 ab 15s, DNF ab 17s.<br />
-            <strong className="text-gray-300">Pragmatisch:</strong> Single Space (250ms Latenz) startet
-            Solve direkt; Double-Tap = Reset; Auto-DNF bei 0.
+            <strong className="text-gray-300">
+              {t("settingsPanel.inspectionModeWcaIntro")}
+            </strong>{" "}
+            {t("settingsPanel.inspectionModeWcaDesc")}
+            <br />
+            <strong className="text-gray-300">
+              {t("settingsPanel.inspectionModePragmaticIntro")}
+            </strong>{" "}
+            {t("settingsPanel.inspectionModePragmaticDesc")}
             <br />
             <span className="text-gray-500">
-              Hinweis: dein Cube muss nicht gleichzeitig auf der Tastatur liegen — Pause ist OK.
+              {t("settingsPanel.inspectionModeNote")}
             </span>
           </div>
           <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 inline-flex">
@@ -116,7 +122,7 @@ export function SettingsPanel() {
                   : "text-gray-300 hover:bg-gray-700"
               }`}
             >
-              WCA-Empfehlung
+              {t("settingsPanel.inspectionModeWcaBtn")}
             </button>
             <button
               onClick={() => setSettings({ ...settings, inspection_mode: "pragmatic" })}
@@ -127,14 +133,14 @@ export function SettingsPanel() {
                   : "text-gray-300 hover:bg-gray-700"
               }`}
             >
-              Pragmatisch
+              {t("settingsPanel.inspectionModePragmaticBtn")}
             </button>
           </div>
         </div>
 
         <NumberField
-          label="Inspection-Dauer (Sekunden)"
-          hint="WCA-Standard 15s."
+          label={t("settingsPanel.inspectionDurationLabel")}
+          hint={t("settingsPanel.inspectionDurationHint")}
           value={settings.inspection_seconds}
           min={5}
           max={60}
@@ -143,14 +149,16 @@ export function SettingsPanel() {
           disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
         />
         <Toggle
-          label="Sound-Signale (8s + 12s Warnung)"
-          hint="Audio-Signal bei 8s + dringendes Doppel-Signal bei 12s. Modus unten wählbar."
+          label={t("settingsPanel.inspectionSoundLabel")}
+          hint={t("settingsPanel.inspectionSoundHint")}
           value={settings.sound_enabled}
           onChange={(v) => setSettings({ ...settings, sound_enabled: v })}
           disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
         />
         <label className="flex flex-col gap-1 text-sm">
-          <span className="text-gray-300">Audio-Modus für Inspection-Warnings</span>
+          <span className="text-gray-300">
+            {t("settingsPanel.inspectionAudioModeLabel")}
+          </span>
           <select
             value={settings.inspection_audio_mode ?? "beep"}
             onChange={(e) =>
@@ -170,30 +178,29 @@ export function SettingsPanel() {
             }
             className="rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none disabled:opacity-50 max-w-xs"
           >
-            <option value="beep">🔔 Sinus-Beep (default)</option>
-            <option value="de">🇩🇪 Stimme: Deutsch ("acht", "zwölf")</option>
-            <option value="en">🇬🇧 Voice: English ("eight", "twelve")</option>
-            <option value="off">🔇 Aus (kein Audio für 8s/12s)</option>
+            <option value="beep">{t("settingsPanel.inspectionAudioModeBeep")}</option>
+            <option value="de">{t("settingsPanel.inspectionAudioModeDe")}</option>
+            <option value="en">{t("settingsPanel.inspectionAudioModeEn")}</option>
+            <option value="off">{t("settingsPanel.inspectionAudioModeOff")}</option>
           </select>
           <span className="text-xs text-gray-500">
-            Voice-Modi nutzen das Browser-TTS — funktioniert offline +
-            ohne Asset, Stimme abhängig von Browser/OS.
+            {t("settingsPanel.inspectionAudioModeNote")}
           </span>
         </label>
       </Section>
 
       {/* Multi-Phase-Splits */}
-      <Section title="Multi-Phase-Splits">
+      <Section title={t("settingsPanel.splitsTitle")}>
         <Toggle
-          label="Splits aktivieren"
-          hint="Mehrere Spacebar-Presses pro Solve, jeder Press registriert eine Zwischenzeit. Klassische CFOP-Aufteilung: Cross / F2L / OLL / PLL."
+          label={t("settingsPanel.splitsEnableLabel")}
+          hint={t("settingsPanel.splitsEnableHint")}
           value={settings.splits_enabled}
           onChange={(v) => setSettings({ ...settings, splits_enabled: v })}
           disabled={!settings.spacebar_enabled}
         />
         <NumberField
-          label="Anzahl Phasen"
-          hint={`1-${MAX_PHASES} Phasen. 1 = klassischer Solve ohne Splits.`}
+          label={t("settingsPanel.splitsPhaseCountLabel")}
+          hint={t("settingsPanel.splitsPhaseCountHint", { max: MAX_PHASES })}
           value={settings.phase_names.length}
           min={1}
           max={MAX_PHASES}
@@ -202,7 +209,9 @@ export function SettingsPanel() {
           disabled={!settings.spacebar_enabled || !settings.splits_enabled}
         />
         <div>
-          <div className="text-sm text-gray-300 mb-2">Phasen-Namen</div>
+          <div className="text-sm text-gray-300 mb-2">
+            {t("settingsPanel.splitsPhaseNamesHeading")}
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {settings.phase_names.map((name, i) => (
               <input
@@ -220,10 +229,10 @@ export function SettingsPanel() {
       </Section>
 
       {/* Schrift-Größe Timer + Scramble */}
-      <Section title="Schrift-Größe — Timer & Scramble">
+      <Section title={t("settingsPanel.timerFontTitle")}>
         <div>
           <div className="text-sm text-gray-300 mb-2">
-            Wirkt auf das Eingabefeld im /timer und auf die Scramble-Anzeige.
+            {t("settingsPanel.timerFontDesc")}
           </div>
           <FontSizeToggle
             value={settings.timer_font_size}
@@ -233,21 +242,20 @@ export function SettingsPanel() {
       </Section>
 
       {/* Scramble-Bild (Phase W.scramble-image, 2026-05-17) */}
-      <Section title="Scramble-Bild (2D-Net)">
+      <Section title={t("settingsPanel.scrambleImageTitle")}>
         <Toggle
-          label="2D-Net unter dem Scramble anzeigen"
-          hint={`Cube-Vorschau (Cross-Layout) direkt unter der Notation. Hilft beim Verifizieren ob du den Scramble korrekt ausgeführt hast. Aktuell nur für 3x3 — andere Cube-Types zeigen kein Bild. Auch direkt im /timer-Tab toggle-bar (Knopf "Bild an/aus" neben "Eigene" / "Skip").`}
+          label={t("settingsPanel.scrambleImageEnableLabel")}
+          hint={t("settingsPanel.scrambleImageEnableHint")}
           value={settings.show_scramble_image}
           onChange={(v) => setSettings({ ...settings, show_scramble_image: v })}
         />
       </Section>
 
       {/* Schrift-Größe Drill-Fenster (User-Wunsch) */}
-      <Section title="Schrift-Größe — Drill-Fenster">
+      <Section title={t("settingsPanel.drillFontTitle")}>
         <div>
           <div className="text-sm text-gray-300 mb-2">
-            Gilt für ALLE Drill-Fenster im Trainer (aktuell: PLL/OLL-Drill).
-            Separat einstellbar von der Timer-Größe.
+            {t("settingsPanel.drillFontDesc")}
           </div>
           <FontSizeToggle
             value={settings.drill_font_size}
@@ -261,7 +269,7 @@ export function SettingsPanel() {
           onClick={reset}
           className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-200 hover:bg-gray-600"
         >
-          Auf Standard zurücksetzen
+          {t("settingsPanel.resetButton")}
         </button>
       </div>
     </div>
