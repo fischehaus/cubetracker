@@ -44,6 +44,32 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-account-settings",
+        released=date(2026, 5, 27),
+        title="Account-Settings DE/EN",
+        highlights=[
+            "AccountSettingsPanel komplett übersetzt: 4 Sektionen "
+            "(Profil + Passwort + Email + Account-Löschen) plus "
+            "Discoverability-Sub-Section.",
+            "Profil: Email-Status-Badges (verifiziert / nicht verifiziert), "
+            "Resend-Verify-Button, Anzeige-Name + PLZ + Land-Selector, "
+            "WCA-Turnier-Geo-Hinweis (multipart: Intro + Body + Strong + "
+            "Tail + Privacy), Speichern-Button.",
+            "Discoverability: Heading + multi-em Beschreibung "
+            "(Display-Name/Email em-tags) + Toggle-Label + No-Name-Warning "
+            "+ 2 Info-Messages (active/inactive).",
+            "Passwort/Email-Forms: Card-Titel, Placeholders, Submit-Buttons "
+            "mit Busy-State, success-Messages (Password-Changed-Logout-Hint "
+            "+ Email-Verify-Sent mit interpoliertem Empfänger).",
+            "Danger-Section: Card-Titel + GDPR-Beschreibung + Multiline-"
+            "Confirm-Dialog + Submit-Button.",
+            "Helper-Refactor: extractErrorMessage(err, t) nimmt jetzt "
+            "t-Param für Fallback („Unbekannter Fehler\").",
+            "Locales-Namespace neu: accountSettings (~50 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-settings-panel",
         released=date(2026, 5, 27),
         title="Settings-Panel DE/EN",
