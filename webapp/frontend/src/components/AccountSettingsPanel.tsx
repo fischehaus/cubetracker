@@ -201,7 +201,104 @@ function ProfileSection() {
 
       {/* Phase W.9: Discoverability-Toggle */}
       <DiscoverabilitySection />
+
+      {/* Phase W.wca-profile-light: WCA-ID-Eingabe */}
+      <WcaIdSection />
     </Card>
+  );
+}
+
+function WcaIdSection() {
+  const { t } = useTranslation();
+  const { user, refreshMe } = useAuth();
+  const [wcaId, setWcaId] = useState(user?.wca_id ?? "");
+  const [busy, setBusy] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!user) return null;
+
+  // WCA-Format „2024SMIT01" — 4 Ziffern Jahr + 4 Großbuchstaben + 2 Ziffern.
+  // Leer ist auch ok (= unsetzen).
+  const trimmed = wcaId.trim().toUpperCase();
+  const isValid = trimmed === "" || /^[12][0-9]{3}[A-Z]{4}[0-9]{2}$/.test(trimmed);
+  const hasChanged = trimmed !== (user.wca_id ?? "");
+
+  async function onSave(e: FormEvent) {
+    e.preventDefault();
+    if (!isValid) return;
+    setBusy(true);
+    setInfo(null);
+    setError(null);
+    try {
+      await api.patch("/auth/me", { wca_id: trimmed || null });
+      await refreshMe();
+      setInfo(
+        trimmed
+          ? t("accountSettings.okWcaIdSaved")
+          : t("accountSettings.okWcaIdCleared"),
+      );
+    } catch (err) {
+      setError(extractErrorMessage(err, t));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 border-t border-gray-700 pt-3 space-y-2">
+      <div className="text-sm font-medium text-gray-300">
+        {t("accountSettings.wcaIdHeading")}
+      </div>
+      <p className="text-xs text-gray-400">
+        {t("accountSettings.wcaIdDescPrefix")}{" "}
+        <a
+          href="https://www.worldcubeassociation.org/persons"
+          target="_blank"
+          rel="noreferrer"
+          className="text-purple-400 hover:text-purple-300 underline"
+        >
+          {t("accountSettings.wcaIdDescLink")}
+        </a>{" "}
+        {t("accountSettings.wcaIdDescSuffix")}
+      </p>
+      <form onSubmit={onSave} className="flex flex-wrap items-start gap-2">
+        <input
+          type="text"
+          maxLength={10}
+          value={wcaId}
+          onChange={(e) => setWcaId(e.target.value.toUpperCase())}
+          placeholder={t("accountSettings.wcaIdPlaceholder")}
+          className="w-44 rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          aria-invalid={!isValid}
+        />
+        <button
+          type="submit"
+          disabled={busy || !isValid || !hasChanged}
+          className="rounded-lg bg-purple-600 text-white text-sm font-medium px-4 py-2 hover:bg-purple-700 disabled:opacity-50"
+        >
+          {busy ? t("accountSettings.saveBusy") : t("accountSettings.saveButton")}
+        </button>
+      </form>
+      {!isValid && (
+        <p className="text-xs text-red-400">{t("accountSettings.wcaIdInvalid")}</p>
+      )}
+      {user.wca_id && (
+        <p className="text-xs text-gray-500">
+          {t("accountSettings.wcaIdCurrent")}{" "}
+          <a
+            href={`https://www.worldcubeassociation.org/persons/${user.wca_id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-purple-400 hover:text-purple-300 underline font-mono"
+          >
+            {user.wca_id}
+          </a>
+        </p>
+      )}
+      {info && <FeedbackOk text={info} />}
+      {error && <FeedbackErr text={error} />}
+    </div>
   );
 }
 

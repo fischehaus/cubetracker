@@ -94,6 +94,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
       "features.worldBullet3",
       "features.worldBullet4",
       "features.worldBullet5",
+      "features.worldBullet6",
     ],
   },
   {

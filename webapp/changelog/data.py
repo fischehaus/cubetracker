@@ -44,6 +44,34 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-profile-light",
+        released=date(2026, 5, 28),
+        title="🌍 WCA-Profil: deine offiziellen Bestzeiten + letzten Wettkämpfe",
+        highlights=[
+            "Neues Demo-Feature für den Turnier-Sprint: Hinterlege deine "
+            "offizielle WCA-ID in den Account-Einstellungen — die App "
+            "holt dann deine offiziellen WCA-PRs (Single + Average pro "
+            "Disziplin), Medaillen-Count, Rekord-Count und letzte 5 "
+            "Wettkämpfe direkt aus der World-Cube-Association-API und "
+            "zeigt sie als neue Karte „WCA-Profil\" im Dashboard.",
+            "WCA-Karte zeigt pro Event: Single + Average mit echten "
+            "Wettkampf-Zeiten und besten World/Continental/National-Rank "
+            "als farbiges Badge. Klick auf den Namen / einen Wettkampf "
+            "öffnet das offizielle WCA-Profil.",
+            "Komplett optional: ohne WCA-ID bleibt die Karte mit einem "
+            "freundlichen Empty-State + Link zu den Account-Einstellungen "
+            "sichtbar. ID-Format wird sowohl im Frontend (Eingabe-"
+            "Validierung) als auch im Backend (Pydantic-Regex) geprüft.",
+            "Daten-Quelle: api.worldcubeassociation.org (Read-only, "
+            "kein Login). Backend cached pro WCA-ID 6 Stunden — die "
+            "WCA-API wird damit nicht unnötig belastet. Bei Ausfall "
+            "der WCA-API zeigt die Karte einen klaren Hinweis statt zu "
+            "crashen.",
+            "Voll DE/EN — alle 32 neuen Strings in beiden Sprachen "
+            "(symmetrische 1137/1137 Keys).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-profile-backend",
         released=date(2026, 5, 28),
         title="WCA-Profil-Light: Backend (Schema + API)",

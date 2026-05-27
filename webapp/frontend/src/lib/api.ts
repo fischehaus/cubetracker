@@ -1696,6 +1696,77 @@ export interface UpcomingCompetitionsResponse {
  * Cache 30min (Liste ändert sich selten — WCA published Turniere
  * Wochen vorher).
  */
+
+// ============================================================
+// WCA-Profil-Light (Phase W.wca-profile-light, 2026-05-28)
+// ============================================================
+
+export interface WcaPersonalRecord {
+  event: string;
+  single: {
+    best: number | null;
+    world_rank: number | null;
+    continental_rank: number | null;
+    national_rank: number | null;
+  } | null;
+  average: {
+    best: number | null;
+    world_rank: number | null;
+    continental_rank: number | null;
+    national_rank: number | null;
+  } | null;
+}
+
+export interface WcaPersonRecentComp {
+  id: string;
+  name: string;
+  city: string | null;
+  country_iso2: string | null;
+  start_date: string;
+  end_date: string;
+  url: string;
+}
+
+export interface WcaPersonProfile {
+  wca_id: string;
+  name: string | null;
+  country_iso2: string | null;
+  gender: string | null;
+  delegate_status: string | null;
+  url: string | null;
+  avatar_url: string | null;
+  avatar_thumb_url: string | null;
+  competitions_count: number;
+  medals: { gold: number; silver: number; bronze: number; total: number };
+  records: { world: number; continental: number; national: number; total: number };
+  personal_records: WcaPersonalRecord[];
+  recent_competitions: WcaPersonRecentComp[];
+}
+
+/**
+ * Holt das offizielle WCA-Profil des eingeloggten Users. Voraussetzung:
+ * User.wca_id ist gesetzt. Bei 422 (keine WCA-ID) gibt React-Query den
+ * Error zurück — Aufrufer prüft das selbst und rendert den entsprechenden
+ * Empty-State.
+ *
+ * Cache 6h client-seitig (matched backend-side cache, der die WCA-API
+ * sowieso entlastet).
+ */
+export function useMyWcaProfile(
+  enabled: boolean = true,
+): UseQueryResult<WcaPersonProfile> {
+  return useQuery({
+    queryKey: ["wca-me-profile"],
+    queryFn: async () => {
+      const r = await api.get<WcaPersonProfile>("/wca/me/profile");
+      return r.data;
+    },
+    enabled,
+    staleTime: 6 * 60 * 60_000, // 6h
+    retry: false, // 422/404 sollen sofort sichtbar werden
+  });
+}
+
 // ============================================================
 // Speedcubing-News (Phase W.news)
 // ============================================================

@@ -35,6 +35,8 @@ export interface UserRead {
   postal_code: string | null;
   /** Phase W.country-feld: ISO-3166-1-alpha-2-Code (DE, AT, US, …). */
   country_iso2: string | null;
+  /** Phase W.wca-profile-light: offizielle WCA-ID (Format „2024SMIT01"). */
+  wca_id: string | null;
 }
 
 export interface AuthState {

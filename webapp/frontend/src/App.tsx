@@ -56,6 +56,7 @@ import { TrendsChart } from "./components/TrendsChart";
 import { PbProgressionCard } from "./components/PbProgressionCard";
 import { VerwaltungTab } from "./components/VerwaltungTab";
 import { WcaUpcomingCard } from "./components/WcaUpcomingCard";
+import { WcaProfileCard } from "./components/WcaProfileCard";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -345,7 +346,10 @@ function DashboardTab({
 
       <DashboardSection title={t("dashboard.sectionWorld")} id="dash-welt">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <WcaProfileCard />
           <WcaUpcomingCard />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
           <NewsCard />
         </div>
       </DashboardSection>
