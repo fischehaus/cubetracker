@@ -44,6 +44,46 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ux-demo-polish",
+        released=date(2026, 5, 28),
+        title="📱 Mobile-Polish + Kontrast-Schub für die Phone-Demo",
+        highlights=[
+            "Vorbereitung für die Demo am WCA-Turnier Meppel (Sa 30.05.): "
+            "schneller UX-Audit (4 parallele Sub-Agents, 10 Kategorien) "
+            "hat 9 KRITISCH-Befunde gebracht. Die 4 mit hohem Phone-Impact "
+            "+ niedrigem Refactor-Risiko sind jetzt live, die 5 größeren "
+            "Refactors landen als P1-Roadmap-Items.",
+            "**Solve-Liste auf dem Phone**: jetzt als Card-Stack statt "
+            "7-Spalten-Tabelle. Zeit + PB-Marker (★/☆) prominent, ao5/"
+            "ao12 mit Farb-Punkten, Cube-Type rechts, +2/DNF/🗑 als "
+            "Tap-große Buttons darunter. Tap auf die Card öffnet das "
+            "Detail-Modal (inkl. Inline-Edit). Tabelle bleibt unverändert "
+            "ab md-Breakpoint.",
+            "**Header auf dem Phone aufgeräumt**: Sprach-Switcher + "
+            "Versions-Badge sind unter md ausgeblendet. Backup-Zugriff "
+            "liegt im UserMenu (Sprach-Switcher ist dort schon, Patch-"
+            "Notes via „Was ist neu?\"-Eintrag). Mehr Platz fürs Logo.",
+            "**Alle Modals auf dem Phone schmaler**: Padding p-6 → "
+            "p-4 md:p-6 in PatchNotes / Features / Roadmap / Feedback / "
+            "SolveDetail. Auf 375px-Screens sind das ~30px mehr Content-"
+            "Breite pro Modal.",
+            "**Footer + Sprach-Switcher Kontrast WCAG-AA-konform**: "
+            "text-gray-500 → text-gray-300 (Footer-Links), text-gray-"
+            "600 → text-gray-400 (Footer-Container), inactive-Sprach-"
+            "Button text-gray-400 → text-gray-300. Vorher knapp 2.8:1 "
+            "Kontrast-Ratio, jetzt 6.8:1.",
+            "**5 neue P1-Items in der Roadmap** als ehrliche Mängelliste "
+            "aus dem UX-Audit: 503-Banner für WCA-Profil, Toast-Manager "
+            "mit Severity-Stacking, Solve-Liste virtualisieren (1000+ "
+            "Solves), Recharts lazy-loaden (Bundle ~70kb kleiner), "
+            "Cache-Invalidation refactoren (Query-Key-Prefix). Drei "
+            "davon public sichtbar im Roadmap-Modal, zwei internal "
+            "(reine Tech-Debt). Werden via additive Migration in "
+            "main.py:lifespan auch in die Live-DB nachgereicht.",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.tester-feedback-qa",
         released=date(2026, 5, 28),
         title="QA-Hotfix nach Tester+Feedback (2 KRITISCH + 4 SOLLTE)",

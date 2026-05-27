@@ -52,7 +52,7 @@ export function RoadmapModal({ onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-6 mt-8 mb-8"
+        className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-2 gap-3">

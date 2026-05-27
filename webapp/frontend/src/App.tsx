@@ -165,7 +165,7 @@ function PatchNotesModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-6 mt-8 mb-8"
+        className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-end mb-2">
@@ -541,8 +541,13 @@ function MainLayout() {
             />
           </button>
           <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            <HealthBadge onClick={() => setShowPatches(true)} />
+            {/* W.ux-demo-polish: LanguageSwitcher + HealthBadge auf Phone
+                ausblenden. Backups: LanguageSwitcher liegt im UserMenu,
+                PatchNotes erreichbar via UserMenu → "PatchNotes". */}
+            <div className="hidden md:flex items-center gap-3">
+              <LanguageSwitcher />
+              <HealthBadge onClick={() => setShowPatches(true)} />
+            </div>
             {user && (
               <UserMenu
                 email={user.email}
@@ -615,7 +620,7 @@ function MainLayout() {
           <CommunityTab initialSection={communityInitial} />
         )}
 
-        <footer className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
+        <footer className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-400">
           <span>
             {t("footer.appName")} — {t("footer.tagline")}
           </span>
@@ -623,7 +628,7 @@ function MainLayout() {
           <button
             type="button"
             onClick={() => setShowFeatures(true)}
-            className="text-gray-500 hover:text-gray-200 underline"
+            className="text-gray-300 hover:text-gray-100 underline"
           >
             {t("footer.featuresLink")}
           </button>
@@ -631,7 +636,7 @@ function MainLayout() {
           <button
             type="button"
             onClick={() => setShowRoadmap(true)}
-            className="text-gray-500 hover:text-gray-200 underline"
+            className="text-gray-300 hover:text-gray-100 underline"
           >
             {t("footer.roadmapLink")}
           </button>
@@ -639,21 +644,21 @@ function MainLayout() {
           <button
             type="button"
             onClick={() => setShowFeedback(true)}
-            className="text-gray-500 hover:text-gray-200 underline"
+            className="text-gray-300 hover:text-gray-100 underline"
           >
             {t("footer.feedbackLink")}
           </button>
           <span aria-hidden="true">·</span>
           <a
             href="/impressum"
-            className="text-gray-500 hover:text-gray-200 underline"
+            className="text-gray-300 hover:text-gray-100 underline"
           >
             {t("footer.imprint")}
           </a>
           <span aria-hidden="true">·</span>
           <a
             href="/datenschutz"
-            className="text-gray-500 hover:text-gray-200 underline"
+            className="text-gray-300 hover:text-gray-100 underline"
           >
             {t("footer.privacy")}
           </a>
@@ -689,7 +694,7 @@ function FeaturesModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-6 mt-8 mb-8"
+        className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-end mb-2">

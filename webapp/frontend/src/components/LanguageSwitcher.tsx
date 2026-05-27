@@ -84,7 +84,7 @@ function FlagButton({
       className={`inline-flex items-center gap-1 rounded ${padding} ${textSize} font-semibold transition-colors ${
         active
           ? "bg-purple-600/40 text-purple-100 border border-purple-500/50"
-          : "bg-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-700/60 border border-transparent"
+          : "bg-transparent text-gray-300 hover:text-gray-100 hover:bg-gray-700/60 border border-transparent"
       }`}
     >
       <span aria-hidden="true" className="text-base leading-none">

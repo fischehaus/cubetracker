@@ -415,6 +415,168 @@ ROADMAP_SEED: list[dict[str, Any]] = [
 ]
 
 
+# ============================================================
+# Additive Migrations — Items nachträglich in eine schon befüllte DB
+# einspielen. Idempotent pro Item via title_de-Match. Wird in
+# main.py:lifespan NACH bootstrap_roadmap aufgerufen.
+# ============================================================
+
+# W.ux-demo-polish (2026-05-28): 5 Items aus dem UX-Audit-Schnell-Scan
+# als „echte Mängelliste, die wir nach der Meppel-Demo angehen".
+UX_POLISH_ITEMS: list[dict[str, Any]] = [
+    {
+        "phase_id": "P1",
+        "title_de": "503-Banner für WCA-Profil (globale Fail-Anzeige)",
+        "title_en": "503 banner for WCA profile (global fail indicator)",
+        "note_de": (
+            "Wenn die WCA-API down ist, zeigt die WcaProfileCard aktuell "
+            "nur einen inline-Fehler. Besser: globales Banner oben in der "
+            "App ('WCA-Service derzeit nicht erreichbar'), damit der User "
+            "weiß dass das Stats-Bild unvollständig sein kann. Analog "
+            "zum bestehenden 401-Logout-Pattern."
+        ),
+        "note_en": (
+            "When the WCA API is down, WcaProfileCard currently only "
+            "shows an inline error. Better: a global banner at the top "
+            "(\"WCA service is currently unavailable\") so the user knows "
+            "the stats picture may be incomplete. Analogous to the "
+            "existing 401-logout pattern."
+        ),
+        "effort": "~1h",
+        "internal": False,
+    },
+    {
+        "phase_id": "P1",
+        "title_de": "Toast-Manager (Severity-Stacking + dedizierte Engine)",
+        "title_en": "Toast manager (severity stacking + dedicated engine)",
+        "note_de": (
+            "Aktuell drei unabhängige Toaster (Achievement / Challenge / "
+            "Feedback-Unread) ohne Konkurrenz-Logik. Bei mehreren "
+            "gleichzeitigen Events kann die UI überladen wirken. Ein "
+            "zentraler Toast-Manager mit Severity (error > warning > "
+            "success) und max-N-Cap würde das ordnen."
+        ),
+        "note_en": (
+            "Currently three independent toasters (Achievement / "
+            "Challenge / Feedback unread) without competition logic. "
+            "When multiple events fire simultaneously, the UI can feel "
+            "overloaded. A central toast manager with severity (error > "
+            "warning > success) and a max-N cap would fix this."
+        ),
+        "effort": "~4h",
+        "internal": False,
+    },
+    {
+        "phase_id": "P1",
+        "title_de": "Solve-Liste: Virtualisierung für 1000+ Solves",
+        "title_en": "Solve list: virtualization for 1000+ solves",
+        "note_de": (
+            "Die SolveList rendert aktuell alle Zeilen gleichzeitig — "
+            "bei Limit=1000 oder 'Alle' merkt man das auf älteren "
+            "Phones als Scroll-Ruckler. react-window oder ähnliches "
+            "rendert nur den sichtbaren Viewport."
+        ),
+        "note_en": (
+            "The SolveList currently renders all rows at once — at "
+            "limit=1000 or \"All\" this is noticeable as scroll lag on "
+            "older phones. react-window or similar renders only the "
+            "visible viewport."
+        ),
+        "effort": "~3h",
+        "internal": False,
+    },
+    {
+        "phase_id": "P1",
+        "title_de": "Recharts Code-Splitting (Bundle-Optimierung)",
+        "title_en": "Recharts code splitting (bundle optimization)",
+        "note_de": (
+            "Recharts ist ~80kb gzipped und wird aktuell statisch "
+            "geladen, auch für User die nie den Analyse-Tab öffnen. "
+            "React.lazy() pro Chart-Komponente würde das initiale "
+            "Bundle ~70kb kleiner machen."
+        ),
+        "note_en": (
+            "Recharts is ~80kb gzipped and currently loaded statically, "
+            "even for users who never open the analysis tab. React."
+            "lazy() per chart component would shrink the initial bundle "
+            "by ~70kb."
+        ),
+        "effort": "~2h",
+        "internal": True,
+    },
+    {
+        "phase_id": "P1",
+        "title_de": "Cache-Invalidation refactoren (Query-Key-Prefix)",
+        "title_en": "Refactor cache invalidation (query-key prefix)",
+        "note_de": (
+            "useCreateSolve invalidiert aktuell 15 separate React-Query-"
+            "Keys (stats, stats-by-cube, stats-by-session, ...). Mit "
+            "einem Prefix-Pattern wäre das ein einzelnes invalidate"
+            "Queries(['stats']) — weniger Code, weniger Bug-Potenzial "
+            "bei neuen Stats-Endpoints."
+        ),
+        "note_en": (
+            "useCreateSolve currently invalidates 15 separate React "
+            "Query keys (stats, stats-by-cube, stats-by-session, …). "
+            "With a prefix pattern this would be a single "
+            "invalidateQueries(['stats']) — less code, fewer bugs when "
+            "adding new stats endpoints."
+        ),
+        "effort": "~3h",
+        "internal": True,
+    },
+]
+
+
+def bootstrap_ux_polish_items(db: OrmSession) -> int:
+    """Additive Migration für die 5 UX-Polish-Items (W.ux-demo-polish).
+
+    Anders als `bootstrap_roadmap` arbeitet diese Funktion per-Item:
+    nur Items mit unbekanntem `title_de` werden angelegt. So können wir
+    auch in eine bereits gefüllte Live-DB neue Items nachreichen ohne
+    den Count-Check zu durchbrechen.
+
+    `sort_order` wird ans Ende der jeweiligen Phase angehängt
+    (max(sort_order) + 10).
+
+    Returns: Anzahl neu angelegter Items.
+    """
+    from db.models import RoadmapItem
+
+    created = 0
+    for entry in UX_POLISH_ITEMS:
+        existing = db.execute(
+            select(RoadmapItem).where(RoadmapItem.title_de == entry["title_de"])
+        ).scalar_one_or_none()
+        if existing is not None:
+            continue
+        max_sort = (
+            db.execute(
+                select(func.max(RoadmapItem.sort_order)).where(
+                    RoadmapItem.phase_id == entry["phase_id"]
+                )
+            ).scalar()
+            or 0
+        )
+        db.add(
+            RoadmapItem(
+                phase_id=entry["phase_id"],
+                sort_order=max_sort + 10,
+                title_de=entry["title_de"],
+                title_en=entry["title_en"],
+                note_de=entry.get("note_de"),
+                note_en=entry.get("note_en"),
+                effort=entry.get("effort"),
+                status=entry.get("status", "active"),
+                internal=entry.get("internal", False),
+            )
+        )
+        created += 1
+    if created > 0:
+        db.commit()
+    return created
+
+
 def bootstrap_roadmap(db: OrmSession) -> int:
     """Idempotenter Seeder für die Roadmap-Items.
 

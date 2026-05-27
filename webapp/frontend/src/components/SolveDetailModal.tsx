@@ -60,7 +60,7 @@ export function SolveDetailModal({ solve, ao5, ao12, isPb, onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="rounded-lg border border-gray-700 bg-gray-900 p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
+        className="rounded-lg border border-gray-700 bg-gray-900 p-4 md:p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header: Zeit groß + Aktionen */}

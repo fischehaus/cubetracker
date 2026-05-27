@@ -197,7 +197,10 @@ async def lifespan(app: FastAPI):
             # in roadmap_items existieren, wird nichts angelegt. Ab dann
             # pflegt der Admin via /admin/roadmap-Endpoints + Admin-UI.
             try:
-                from seeds.roadmap import bootstrap_roadmap
+                from seeds.roadmap import (
+                    bootstrap_roadmap,
+                    bootstrap_ux_polish_items,
+                )
                 from db.database import SessionLocal
 
                 with SessionLocal() as rm_db:
@@ -205,6 +208,15 @@ async def lifespan(app: FastAPI):
                     if created > 0:
                         print(
                             f"INFO: roadmap bootstrap -> {created} Items angelegt"
+                        )
+                    # W.ux-demo-polish (2026-05-28): additive Migration —
+                    # 5 UX-Audit-Findings als P1-Items nachreichen. Pro
+                    # Item title_de-Match, also kann in voller DB laufen.
+                    polish_created = bootstrap_ux_polish_items(rm_db)
+                    if polish_created > 0:
+                        print(
+                            f"INFO: ux-polish items migration -> "
+                            f"{polish_created} Items angelegt"
                         )
             except Exception as rm_e:  # noqa: BLE001
                 print(f"WARN: roadmap bootstrap failed: {rm_e}")
