@@ -24,6 +24,114 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-28 (Abend) — UX-Audit + Mobile-Polish + Roadmap-Restore-Diagnose
+
+**4 Wellen + 4 Tags an einem Abend, alles live.** Letzte public-Welle:
+`W.ux-demo-polish`. Backend skippt die drei nachfolgenden internal-Wellen
+in `current_version()`, also bleibt das Versions-Badge sauber bei der
+Mobile-Polish-Welle.
+
+### Welle 1 — `W.ux-demo-polish` (public, `e86dfd1`)
+
+UX-Audit-Schnell-Scan via 4 parallele `Explore`-Sub-Agents (10 Kategorien
+× je Score 1-10) lieferte 9 KRITISCH-Befunde. 4 davon mit hohem Phone-
+Demo-Impact + niedrigem Refactor-Risiko sofort gefixt, 5 größere
+Refactors als P1-Roadmap-Items für nach der Demo:
+
+**4 Mobile-/A11y-Fixes live:**
+- **SolveList Mobile-Card-View** (`SolveList.tsx`) — neuer Card-Stack
+  für `<md` mit Zeit + PB-Marker (★/☆) + ao5/ao12 + Cube + Aktionen
+  als Tap-große Buttons. Card-Tap öffnet Detail-Modal (kein Inline-
+  Edit auf Phone — der lebt im Modal). Tabelle bleibt ab `md+`
+  unverändert via `hidden md:block`.
+- **Header-Mobile-Hide** (`App.tsx`) — `LanguageSwitcher` + `HealthBadge`
+  in `hidden md:flex` gewrapped. Backup-Zugriff: LanguageSwitcher liegt
+  im UserMenu (zweiter Switcher, bewusst redundant gehalten), Patch-
+  Notes via UserMenu→"Was ist neu?".
+- **Modal-Padding** (`p-6` → `p-4 md:p-6`) in 5 Modals: PatchNotesModal
+  + FeaturesModal (App.tsx inline) + RoadmapModal + FeedbackModal +
+  SolveDetailModal. ~30px mehr Content-Breite auf 375px-Phones.
+- **Kontrast WCAG-AA** — Footer + LanguageSwitcher inactive-State:
+  `text-gray-500/600` → `text-gray-300/400`. Ratio von ~2.8:1 (Fail)
+  auf ~6.8:1 (Pass) gezogen.
+
+**5 Post-Demo-Items via additive Migration in der Live-Roadmap-DB:**
+- `bootstrap_ux_polish_items()` in `seeds/roadmap.py` mit per-Item-
+  Idempotenz (title_de-Match), nicht count-check.
+- 3 public sichtbar: 503-Banner für WCA, Toast-Manager mit Severity-
+  Stacking, Solve-Liste virtualisieren (1000+ Solves).
+- 2 internal Tech-Debt: Recharts code-splitting (~70kb Bundle),
+  Cache-Invalidation-Refactor (Query-Key-Prefix).
+
+### Welle 2 — `W.roadmap-restore` (internal, `e79ab6d`) → später als Fehldiagnose markiert
+
+Initial-Verify nach Welle 1 zeigte nur 3 Items in der Live-`/api/roadmap`
+statt der erwarteten ~27. Reflex-Hypothese: Postgres-Volume-Issue +
+Datenverlust. **Code-Fix:** `bootstrap_roadmap()` von count-check
+(`if existing > 0: return 0`) auf per-Item-Idempotenz (title_de-Match,
+analog zu UX-Polish-Bootstrap) umgestellt. Theorie: fehlende Items
+kommen beim nächsten Boot zurück.
+
+Push lief glatt — Bootstrap hat aber NICHTS hinzugefügt (Items waren
+alle schon da, nur internal-gefiltert). Siehe Welle 4.
+
+### Welle 3 — `W.ux-demo-polish-qa` (internal, `74fc2d6`)
+
+QA-Sub-Agent-Review der ersten zwei Wellen: **0 KRITISCH, 3 SOLLTE,
+2 NICE, 4 POSITIV.** Alle 3 SOLLTE sofort gefixt:
+
+- **SOLLTE 1 (Data-Quality):** `bootstrap_roadmap` +
+  `bootstrap_ux_polish_items` berechneten `max(sort_order)` im Loop
+  ohne `db.flush()` — bei mehreren neuen P1-Items im selben Boot
+  hätten alle dieselbe `sort_order` bekommen. Fix: explizites
+  `db.flush()` vor `max()`.
+- **SOLLTE 2 (WCAG 2.1.1):** SolveList-Mobile-Card hatte `role="button"`
+  + `tabIndex=0` ohne `onKeyDown` — fokussierbar aber nicht
+  aktivierbar. Fix: `onKeyDown` für Enter+Space.
+- **SOLLTE 3 (Event-Bubbling):** Aktions-Container in der Mobile-Card
+  stoppte nur `onClick`, nicht `onKeyDown` — nach SOLLTE-2-Fix hätte
+  Enter auf einem Aktions-Button doppelt-getriggert (Aktion + Detail-
+  Modal). Fix: `onKeyDown={(e) => e.stopPropagation()}`.
+
+**NICE-Backlog:** PatchNotesPanel-Loading-States haben hartes `p-6`
+(Doppel-Padding auf Mobile). UNIQUE-Constraint auf `roadmap_items.
+title_de` wäre defensiv gegen Parallel-Boot-Race. Beide deferred.
+
+### Welle 4 — `W.roadmap-restore-clarify` (internal, `2fdb3a7`)
+
+User-Befund nach Welle 2-Verify: **„NUr zur info: ich hatte manuell in
+der app die Roadmap-Einträge auf intern umgestellt"** → kein Datenverlust,
+sondern bewusste Admin-UI-Aktion. Items waren weiterhin in der DB, nur
+für Non-Admins per `/api/roadmap`-Filter unsichtbar. Das `count: 3` ist
+also korrekt: 28 internal-geflaggte alte + 3 neue public UX-Polish +
+2 neue internal UX-Polish = 33 in der DB, 3 davon public.
+
+Korrektur:
+- Neuer Patch-Note `W.roadmap-restore-clarify` (internal=True) der
+  den Audit-Trail richtigstellt.
+- Docstring von `bootstrap_roadmap` geschärft: **„Items aus User-Sicht
+  entfernen → `internal=True`-Toggle via Admin-UI (Quick-Action im
+  AdminRoadmapPanel), NICHT Delete — der bringt sie beim nächsten
+  Container-Restart zurück."**
+- Code-Verhalten bleibt: per-Item-Idempotenz ist defensiver gegen
+  ECHTEN zukünftigen Volume-Reset, schadet in der aktuellen Situation
+  nicht.
+
+### 🔜 Restplan (unverändert: Sa Vormittag)
+
+Sprint ist durch. Demo-Probe am Sa über die 12 Admin-Live-Tests
+(Verwaltung → Admin → Live-Tests) + Bonus-Smoke für Tester+Feedback-
+Wellen aus dem Mi-Fr-Block. Backlog (Post-Demo) jetzt offiziell in
+der Live-Roadmap-DB einsehbar — 5 P1-Items aus dem UX-Audit
+hinzugekommen.
+
+**Lesson für die nächste Session:** Live-Verify nach Coolify-Deploy
+muss DB-Inhalt gegen den ERWARTETEN BUSINESS-State prüfen („welche
+Items _sollten_ jetzt public sein?"), nicht gegen abstrakte Historie-
+Doku-Zahlen. Sonst landet man bei einer Fehldiagnose wie heute.
+
+---
+
 ## ✅ ERLEDIGT 2026-05-27/28 — Turnier-Sprint + Roadmap-DB + Tester-Rolle + Feedback-Inbox
 
 **~70 Commits + ~49 Tags in 1,5 Tagen, alles live.** Live-public-Version:
