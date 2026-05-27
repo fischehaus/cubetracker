@@ -44,6 +44,31 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-qa",
+        released=date(2026, 5, 28),
+        title="QA-Hotfix nach i18n-en-release (2 KRITISCH)",
+        highlights=[
+            "QA-Sub-Agent-Review nach der Konsolidierungs-Welle fand 2 "
+            "KRITISCH + 1 SOLLTE + 2 NICE. KRITISCH-Findings sofort "
+            "gefixt.",
+            "CubeStateView (Alg-Trainer Cube-Placeholder + Bild-alt-Text): "
+            "title und alt waren hartkodiert deutsch („Kein Diagramm "
+            "verfügbar für PLL-T\" + „Cube-State-Diagramm für ...\"). "
+            "EN-User sah deutschen Tooltip auf jeder PLL-Case-Kachel. "
+            "Neue Keys algTrainer.noImage + diagramAlt.",
+            "ScrambleNet (2D-Cube-Net unter dem Scramble): aria-label "
+            "„2D-Cube-Net nach Scramble: gelöst\" wurde von Screen-"
+            "Readern auf EN deutsch vorgelesen. Neue Keys scramble."
+            "netAriaLabel + scramble.netSolvedFallback.",
+            "POSITIV-Findings: JSON-Validität sauber (Mi-Bug nicht "
+            "zurück), Interpolations-Konsistenz 0 Mismatches über alle "
+            "1100 Keys, Bundle live + vollständig, 153 identische "
+            "DE=EN-Werte alle legit (Cubing/Tech/Symbol/Eigennamen) — "
+            "keine Übersetzungs-Lücke in den Locales.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-en-release",
         released=date(2026, 5, 28),
         title="🇬🇧 Englische Version verfügbar — App komplett zweisprachig",
