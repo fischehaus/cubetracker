@@ -9,6 +9,7 @@
 
 import { useTranslation } from "react-i18next";
 import { useLatestNews, type NewsItem } from "../lib/api";
+import { getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
 
 export function NewsCard() {
@@ -128,7 +129,7 @@ function formatRelativeDate(
     if (diffMin < 60) return t("news.ageMinutes", { count: diffMin });
     if (diffH < 24) return t("news.ageHours", { count: diffH });
     if (diffDay < 7) return t("news.ageDays", { count: diffDay });
-    return date.toLocaleDateString(locale === "en" ? "en-GB" : "de-DE", {
+    return date.toLocaleDateString(getIntlLocale(locale), {
       day: "2-digit",
       month: "2-digit",
       year: "2-digit",

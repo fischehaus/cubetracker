@@ -6,6 +6,7 @@
 
 import { useTranslation } from "react-i18next";
 import { usePatchNotes, type PatchNote } from "../lib/api";
+import { getIntlLocale } from "../lib/format";
 
 function fmtDate(iso: string, locale: string): string {
   try {
@@ -21,7 +22,7 @@ function fmtDate(iso: string, locale: string): string {
 
 export function PatchNotesPanel() {
   const { t, i18n } = useTranslation();
-  const dateLocale = i18n.resolvedLanguage === "en" ? "en-GB" : "de-DE";
+  const dateLocale = getIntlLocale(i18n.resolvedLanguage);
   const { data, isLoading, error } = usePatchNotes();
 
   if (isLoading) {

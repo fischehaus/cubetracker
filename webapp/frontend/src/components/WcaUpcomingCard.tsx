@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AxiosError } from "axios";
 import { useUpcomingCompetitions, type WcaCompetition } from "../lib/api";
+import { getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
 
 // Aufsteigende Distanz-Toggles für "Distanz erweitern" — User kann mit
@@ -212,7 +213,7 @@ function formatDateRange(
   locale: string,
 ): string {
   try {
-    const intlLocale = locale === "en" ? "en-GB" : "de-DE";
+    const intlLocale = getIntlLocale(locale);
     const s = new Date(startIso);
     const e = new Date(endIso);
     const sDay = s.getDate();

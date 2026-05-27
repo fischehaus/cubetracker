@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { downloadFullBackup } from "../lib/backup";
+import { getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
 
 type RestoreMode = "merge" | "replace";
@@ -450,7 +451,7 @@ function RestoreResultBox({
 function formatDate(iso: string, locale: string): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleString(locale === "en" ? "en-GB" : "de-DE", {
+    return d.toLocaleString(getIntlLocale(locale), {
       day: "2-digit",
       month: "2-digit",
       year: "2-digit",

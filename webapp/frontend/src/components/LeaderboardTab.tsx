@@ -13,7 +13,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
-import { COMMON_CUBE_TYPES, formatTime } from "../lib/format";
+import { COMMON_CUBE_TYPES, formatTime, getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
 import {
   useFriendsList,
@@ -217,7 +217,7 @@ function LeaderboardRow({
   rank: number;
 }) {
   const { t, i18n } = useTranslation();
-  const numberLocale = i18n.resolvedLanguage === "en" ? "en-GB" : "de-DE";
+  const numberLocale = getIntlLocale(i18n.resolvedLanguage);
   // Self optisch hervorheben
   const rowClass = row.is_me
     ? "border-b border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10"

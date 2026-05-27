@@ -27,6 +27,27 @@ export function formatSolveTime(s: Solve): string {
 }
 
 /**
+ * Mappt eine i18next-Sprach-ID auf einen Intl-/toLocale*-Locale-String
+ * (Phase W.wca-profile-qa, QA-NICE-Befund).
+ *
+ * Vor diesem Helper hatten BackupPanel/NewsCard/WcaProfileCard/etc.
+ * jeweils ein hartkodiertes `locale === "en" ? "en-GB" : "de-DE"` —
+ * sechsfach kopiert, fehleranfällig wenn eine dritte Sprache dazukommt.
+ *
+ * @param resolvedLanguage  i18n.resolvedLanguage (z.B. "de", "en", "en-US")
+ * @returns Intl-Locale-String — aktuell "en-GB" für englisch, sonst "de-DE".
+ *
+ * Warum "en-GB" und nicht "en-US"? GB = europäisches Datumsformat
+ * (28 May 2026, dd/mm/yyyy bei Kurz-Modus) — näher an dem was deutsche
+ * User erwarten + WCA ist europazentriert.
+ */
+export function getIntlLocale(resolvedLanguage: string | undefined): string {
+  const lang = (resolvedLanguage ?? "").toLowerCase();
+  if (lang.startsWith("en")) return "en-GB";
+  return "de-DE";
+}
+
+/**
  * Parst einen User-Input-String zu Millisekunden.
  *
  * Akzeptierte Formate:

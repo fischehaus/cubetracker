@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.qa-polish",
+        released=date(2026, 5, 28),
+        title="QA-Polish: getIntlLocale-Utility extrahiert",
+        highlights=[
+            "QA-Nachbearbeitung: 6 Konsumenten hatten jeweils ein "
+            "hartkodiertes `locale === 'en' ? 'en-GB' : 'de-DE'` — "
+            "fehleranfällig wenn eine dritte Sprache dazukommt.",
+            "Neue Funktion getIntlLocale(resolvedLanguage) in "
+            "lib/format.ts mit prefix-Match (case-insensitive). "
+            "Migriert: BackupPanel, NewsCard, WcaProfileCard, "
+            "LeaderboardTab, PatchNotesPanel, WcaUpcomingCard.",
+            "Helper bewusst nur in user-facing Komponenten gezogen — "
+            "AdminStatsPanel + AdminUsersPanel sind admin-only (hart-"
+            "kodiertes „de-DE\" Demo-irrelevant). timer-sound.ts nutzt "
+            "absichtlich „en-US\" statt „en-GB\" (Web-Speech-Voices "
+            "brauchen US-English).",
+            "Ein weiterer QA-Befund („inspectionAudioModeDe\"-Quote-"
+            "Kosmetik) war false-positive — DE „acht\" + EN \"acht\" "
+            "sind die korrekten typografischen Anführungszeichen pro "
+            "Sprache, kein Bug.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-profile-qa",
         released=date(2026, 5, 28),
         title="QA-Hotfix nach WCA-Profil-Light (4 SOLLTE + 1 NICE)",

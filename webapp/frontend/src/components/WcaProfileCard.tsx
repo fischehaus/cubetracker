@@ -16,6 +16,7 @@ import {
   type WcaPersonalRecord,
   type WcaPersonRecentComp,
 } from "../lib/api";
+import { getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
 
 // WCA-Event-IDs → User-sichtbarer Label. Cubing-Standard-Notation
@@ -110,7 +111,7 @@ export function WcaProfileCard() {
   const httpStatus = axiosErr?.response?.status;
   const backendDetail = axiosErr?.response?.data?.detail ?? "";
 
-  const dateLocale = i18n.resolvedLanguage === "en" ? "en-GB" : "de-DE";
+  const dateLocale = getIntlLocale(i18n.resolvedLanguage);
   const fmtDate = (iso: string) => {
     try {
       return new Date(iso).toLocaleDateString(dateLocale, {
