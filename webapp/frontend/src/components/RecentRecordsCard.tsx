@@ -6,6 +6,7 @@
 // (zeigt dort den PB-Verlauf-Chart). Optionaler Handler vom Parent.
 
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import {
   useRecentPbs,
   type RecentPbEvent,
@@ -20,19 +21,20 @@ interface Props {
 }
 
 export function RecentRecordsCard({ onClickCube }: Props) {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useRecentPbs(5);
 
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-sm text-gray-400">
-        Lade letzte Rekorde …
+        {t("recentPbs.loading")}
       </div>
     );
   }
   if (error) {
     return (
       <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-sm text-red-300">
-        Fehler beim Laden: {error.message}
+        {t("recentPbs.errorPrefix", { message: error.message })}
       </div>
     );
   }
@@ -40,13 +42,9 @@ export function RecentRecordsCard({ onClickCube }: Props) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
         <h3 className="text-xl font-semibold text-gray-100 mb-2 flex items-center gap-2">
-          🏆 Letzte Rekorde
+          {t("recentPbs.title")}
         </h3>
-        <p className="text-sm text-gray-400">
-          Noch keine Bestzeiten — sobald du Solves speicherst, erscheinen
-          hier deine letzten persönlichen Rekorde (Single, ao5, ao12) mit
-          Verbesserung gegenüber dem vorigen PB.
-        </p>
+        <p className="text-sm text-gray-400">{t("recentPbs.emptyText")}</p>
       </div>
     );
   }
@@ -55,17 +53,11 @@ export function RecentRecordsCard({ onClickCube }: Props) {
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
       <div className="flex items-center gap-2 mb-3">
         <h3 className="text-xl font-semibold text-gray-100">
-          🏆 Letzte Rekorde
+          {t("recentPbs.title")}
         </h3>
         <InfoButton>
-          <p className="font-medium mb-1">Letzte Rekorde</p>
-          <p>
-            Deine jüngsten persönlichen Bestzeiten über alle Cubes hinweg.
-            Gold ★ = Single-PB, cyan ● = ao5-PB, emerald ● = ao12-PB.
-            Die Δ-Zahl zeigt, um wie viel du den vorigen PB unterboten
-            hast. Klick auf einen Eintrag öffnet den PB-Verlauf im
-            Analyse-Tab.
-          </p>
+          <p className="font-medium mb-1">{t("recentPbs.infoTitle")}</p>
+          <p>{t("recentPbs.infoBody")}</p>
         </InfoButton>
       </div>
       <ul className="space-y-2">
@@ -88,6 +80,7 @@ function RecentPbRow({
   event: RecentPbEvent;
   onClick?: (cubeType: string) => void;
 }) {
+  const { t } = useTranslation();
   // QA-Fix W.recent-pbs-qa: Backend liefert ISO mit `+00:00`-Suffix, aber
   // defensiv ein `Z` ergaenzen falls jemand mal naive ISO-Strings produziert
   // (Browser interpretiert die sonst als lokale Zeit -> Offset-Drift).
@@ -101,12 +94,12 @@ function RecentPbRow({
     : null;
   const ageLabel =
     daysAgo === null
-      ? "—"
+      ? t("recentPbs.ageMissing")
       : daysAgo <= 0
-        ? "heute"
+        ? t("recentPbs.ageToday")
         : daysAgo === 1
-          ? "gestern"
-          : `vor ${daysAgo} Tagen`;
+          ? t("recentPbs.ageYesterday")
+          : t("recentPbs.ageDaysAgo", { days: daysAgo });
   const deltaLabel =
     event.delta_ms_vs_prev !== null && event.delta_ms_vs_prev > 0
       ? `−${formatTime(event.delta_ms_vs_prev)}`
@@ -136,9 +129,7 @@ function RecentPbRow({
           ? "cursor-pointer hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
           : ""
       }`}
-      title={
-        clickable ? "Klick zeigt den PB-Verlauf im Analyse-Tab" : undefined
-      }
+      title={clickable ? t("recentPbs.clickHint") : undefined}
     >
       <div className="flex items-center gap-3 min-w-0 flex-wrap">
         <KindBadge kind={event.kind} />
@@ -149,7 +140,7 @@ function RecentPbRow({
         {deltaLabel && (
           <span
             className="text-xs text-emerald-300 font-medium"
-            title="Verbesserung gegenüber dem vorigen PB derselben Metrik"
+            title={t("recentPbs.deltaTitle")}
           >
             {deltaLabel}
           </span>
@@ -163,13 +154,14 @@ function RecentPbRow({
 }
 
 function KindBadge({ kind }: { kind: RecentPbKind }) {
+  const { t } = useTranslation();
   if (kind === "single") {
     return (
       <span
         className="text-yellow-300 font-bold text-sm flex-shrink-0"
-        title="Single-PB"
+        title={t("recentPbs.kindSingleTitle")}
       >
-        ★ Single
+        {t("recentPbs.kindSingleBadge")}
       </span>
     );
   }
@@ -177,18 +169,18 @@ function KindBadge({ kind }: { kind: RecentPbKind }) {
     return (
       <span
         className="text-cyan-300 font-medium text-sm flex-shrink-0"
-        title="ao5-PB"
+        title={t("recentPbs.kindAo5Title")}
       >
-        ● ao5
+        {t("recentPbs.kindAo5Badge")}
       </span>
     );
   }
   return (
     <span
       className="text-emerald-300 font-medium text-sm flex-shrink-0"
-      title="ao12-PB"
+      title={t("recentPbs.kindAo12Title")}
     >
-      ● ao12
+      {t("recentPbs.kindAo12Badge")}
     </span>
   );
 }

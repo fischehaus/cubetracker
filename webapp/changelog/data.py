@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-stats",
+        released=date(2026, 5, 27),
+        title="Dashboard-Statistik-Karten in Englisch verfügbar",
+        highlights=[
+            "Statistiken-Karte (Best/Worst/Mean + alle aktuellen + "
+            "besten Averages inkl. Datums-Suffix bei Best-AOs) komplett "
+            "übersetzt. Filter-Label (Cube/Session/Alle Solves) passt "
+            "sich der Sprache an.",
+            "Letzte-Rekorde-Karte: alle Strings durchgeschaltet inkl. "
+            "Empty-State-Erklärung, InfoButton-Text, Age-Label (heute/"
+            "gestern/vor X Tagen) und Kind-Badges (Single/ao5/ao12).",
+            "Reminders-Karte (Cubes-länger-nicht-trainiert): alle "
+            "Strings + die Tage/Wochen/Monate/Jahre-Formatierung in "
+            "der jeweiligen Sprache. Plural-Form für Cube-Counter.",
+            "Locales-Namespaces neu: stats.*, recentPbs.*, reminders.*.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-timer",
         released=date(2026, 5, 27),
         title="Timer-Tab komplett auf Englisch verfügbar",

@@ -6,6 +6,7 @@
 //   - emptyMode='visible': rendert leere Card mit „alles frisch"-Hinweis
 //                          (Dashboard-Top-Row, damit Layout stabil bleibt)
 
+import { useTranslation } from "react-i18next";
 import { useStatsByCube, type CubeStats } from "../lib/api";
 import { InfoButton } from "./InfoButton";
 
@@ -17,14 +18,21 @@ interface Props {
   emptyMode?: "hide" | "visible";
 }
 
-function formatDays(days: number): string {
-  if (days < 14) return `${days} Tage`;
-  if (days < 60) return `${Math.round(days / 7)} Wochen`;
-  if (days < 365) return `${Math.round(days / 30)} Monate`;
-  return `${Math.round(days / 365)} Jahre`;
+function useFormatDays(): (days: number) => string {
+  const { t } = useTranslation();
+  return (days: number) => {
+    if (days < 14) return t("reminders.ageDays", { count: days });
+    if (days < 60)
+      return t("reminders.ageWeeks", { count: Math.round(days / 7) });
+    if (days < 365)
+      return t("reminders.ageMonths", { count: Math.round(days / 30) });
+    return t("reminders.ageYears", { count: Math.round(days / 365) });
+  };
 }
 
 export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
+  const { t } = useTranslation();
+  const formatDays = useFormatDays();
   const { data, isLoading } = useStatsByCube(sessionId);
 
   if (isLoading || !data) return null;
@@ -42,19 +50,15 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
         <div className="flex items-center gap-2 mb-2">
           <h3 className="text-sm uppercase tracking-wide text-gray-500">
-            Reminders
+            {t("reminders.title")}
           </h3>
           <InfoButton>
-            <p className="font-medium mb-1">Reminders</p>
-            <p>
-              Listet Cubes die du länger als {REMINDER_DAYS} Tage nicht
-              mehr angefasst hast. Sortiert: vergessenste oben. Bezieht
-              sich auf alle aktiven Hardware-Cubes (Verwaltung → Hardware).
-            </p>
+            <p className="font-medium mb-1">{t("reminders.title")}</p>
+            <p>{t("reminders.infoEmpty", { days: REMINDER_DAYS })}</p>
           </InfoButton>
         </div>
         <div className="text-base text-gray-400">
-          Alle Cubes innerhalb der letzten {REMINDER_DAYS} Tage trainiert. ✅
+          {t("reminders.allFresh", { days: REMINDER_DAYS })}
         </div>
       </div>
     );
@@ -62,25 +66,23 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
 
   const visible = neglected.slice(0, MAX_VISIBLE);
   const hidden = neglected.length - visible.length;
+  const countKey =
+    neglected.length === 1 ? "reminders.cubeCountOne" : "reminders.cubeCountMany";
 
   return (
     <div className="rounded-lg border border-blue-500/40 bg-blue-500/5 p-6">
       <div className="flex items-center justify-between mb-3 gap-2">
         <div className="flex items-center gap-2">
           <h3 className="text-sm uppercase tracking-wide text-blue-200">
-            Reminders
+            {t("reminders.title")}
           </h3>
           <InfoButton>
-            <p className="font-medium mb-1">Reminders</p>
-            <p>
-              Cubes die du länger als {REMINDER_DAYS} Tage nicht mehr
-              angefasst hast. Klick auf einen Eintrag setzt deinen
-              Timer-Cube-Filter auf den Cube — direkter Sprung ins Training.
-            </p>
+            <p className="font-medium mb-1">{t("reminders.title")}</p>
+            <p>{t("reminders.infoActive", { days: REMINDER_DAYS })}</p>
           </InfoButton>
         </div>
         <span className="text-xs text-blue-300/70">
-          {neglected.length} {neglected.length === 1 ? "Cube" : "Cubes"}
+          {t(countKey, { count: neglected.length })}
         </span>
       </div>
       <ul className="space-y-2">
@@ -98,7 +100,7 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
       </ul>
       {hidden > 0 && (
         <div className="mt-2 text-xs text-blue-300/60">
-          + {hidden} weitere
+          {t("reminders.moreCount", { count: hidden })}
         </div>
       )}
     </div>
