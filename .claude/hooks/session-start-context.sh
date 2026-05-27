@@ -57,6 +57,32 @@ fi
 # Letzte 5 Commits kompakt.
 recent="$(git log --oneline -5 2>/dev/null || echo '(kein log)')"
 
+# Phase W.session-scan-feedback (2026-05-28): bei Session-Start zwei
+# externe Inboxen scannen, damit Claude direkt weiss wo offene
+# Bugs / Wuensche hocken:
+#   1. GitHub-Issues (offen, via gh CLI — kein Token-Problem weil
+#      `gh` selbst authentifiziert ist)
+#   2. App-interne Feedback-Inbox /admin/feedback/stats — nur als
+#      *Hinweis*, weil der Hook keinen Admin-Token hat. Falls die
+#      .tmp/admin-token-File existiert (gitignored), curl-Scan; sonst
+#      Reminder fuer manuellen Check im Admin-Tab.
+github_issue_section=""
+if command -v gh >/dev/null 2>&1; then
+  # gh ist verfuegbar (CLI-Auth via gh auth login). 5 neueste offene
+  # Issues + Total-Count.
+  open_count="$(gh issue list --state open --json number 2>/dev/null | grep -c '"number"' || echo '0')"
+  if [[ "${open_count:-0}" -gt 0 ]]; then
+    issue_list="$(gh issue list --state open --limit 5 --json number,title 2>/dev/null \
+      | sed -n 's/.*"number":[[:space:]]*\([0-9]*\),[[:space:]]*"title":[[:space:]]*"\([^"]*\)".*/  #\1: \2/p')"
+    github_issue_section=$'\n🐛 Offene GitHub-Issues: '"$open_count"$'\n'"$issue_list"
+  fi
+fi
+
+# Admin-Inbox-Hinweis (immer als Reminder — kein Auto-Scan ohne Token).
+inbox_hint=$'\n💬 Admin-Feedback-Inbox vor neuer Welle pruefen:\n'
+inbox_hint+="   https://www.cubetracker.de/ → Verwaltung → Admin → Feedback-Inbox"$'\n'
+inbox_hint+="   (Sortiert nach Neu/Bug/Feature/Allgemein; Antwort kommt zurueck zum User.)"
+
 cat <<EOF
 === Cubetracker — Repo-Stand beim Session-Start ===
 
@@ -66,7 +92,7 @@ Remote: $remote_url
 Patch-Notes-Version (aktuell): $current_version$unpushed_msg
 
 Letzte 5 Commits:
-$recent
+$recent$github_issue_section$inbox_hint
 
 📖 Bevor du loslegst, kurz lesen wenn du den aktuellen Stand brauchst:
    - webapp/README.md         (Multi-User-Web-Variante, live auf Hetzner)

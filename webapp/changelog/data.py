@@ -44,6 +44,32 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.session-scan-feedback",
+        released=date(2026, 5, 28),
+        title="Session-Start-Context + /abschluss scannen Bugs + Feedback",
+        highlights=[
+            "Phase 6 (Tooling) der Tester+Feedback-Welle: damit Bugs "
+            "+ Feedback nicht zwischen Sessions verloren gehen, scannt "
+            "Claude jetzt automatisch beim Session-Start beide Quellen.",
+            "session-start-context.sh erweitert: zusätzlich zu Git-"
+            "Stand + Branch + Patch-Notes-Version jetzt auch (a) offene "
+            "GitHub-Issues via gh CLI (Anzahl + Top 5), (b) Hinweis "
+            "auf Admin-Feedback-Inbox-URL mit Reminder zum manuellen "
+            "Check.",
+            "Backend-Stats-Endpoint (/admin/feedback/stats) bewusst "
+            "NICHT auto-gescannt — Hook hat keinen Admin-Token, das "
+            "wäre Security-Risk. Manueller Check via Browser ist der "
+            "saubere Weg.",
+            "/abschluss-Skill: neuer Check 11 „Offene Bugs / Feedback-"
+            "Items vor Session-Ende?\" listet gh issue list + erinnert "
+            "an Inbox-Browse. Nicht erzwingend — falls Items offen, "
+            "wird gefragt ob aktuelle Welle oder „nächste Session\".",
+            "Zusammenfassungs-Tabelle in /abschluss um Zeile 11 "
+            "erweitert.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feedback-user-view",
         released=date(2026, 5, 28),
         title="💬 Mein-Feedback-Bereich + Login-Toast bei neuer Antwort",

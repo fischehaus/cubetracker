@@ -182,6 +182,29 @@ curl -s "https://www.cubetracker.de/$b" | grep -c "HIER_EINEN_NEUEN_STRING_AUS_D
   - **Treffer = 0:** ⚠ Push ist NICHT deployt → in Coolify die **Frontend-App
     manuell „Redeploy"** + Build-Log prüfen. Dauerlösung: Task #37 (per-App-Webhook).
 
+### 11. Offene Bugs / Feedback-Items vor Session-Ende?
+
+Damit User-Bugs nicht zwischen Sessions verloren gehen. Zwei Quellen:
+
+```bash
+# 1. GitHub-Issues (offen) — Anzahl + Top-5
+if command -v gh >/dev/null 2>&1; then
+  echo "Offene GitHub-Issues:"
+  gh issue list --state open --limit 5 --json number,title,labels 2>&1 || echo "(gh nicht authentifiziert)"
+fi
+
+# 2. App-interne Feedback-Inbox: prüfen ob Admin-User in der App vor
+#    Session-Ende reingeschaut hat. Kein Auto-Scan möglich (kein Admin-
+#    Token im Hook-Kontext). Stattdessen: Reminder + Link.
+echo "Admin-Feedback-Inbox manuell prüfen:"
+echo "  https://www.cubetracker.de/ → Verwaltung → Admin → Feedback-Inbox"
+```
+
+- **Keine offenen Issues + Inbox sauber:** ✓.
+- **Offene Bug-Issues / neue Inbox-Items:** ⚠ — kurz auflisten, fragen
+  ob die in der aktuellen Welle/Sprint adressiert werden sollen oder
+  als „nächste Session" markiert bleiben. NICHT erzwingen.
+
 ### 10. MAINTENANCE-Lauf fällig?
 
 `MAINTENANCE.md` ist der periodische Tiefen-Check (~monatlich). Hier NUR die
@@ -214,6 +237,7 @@ Tabellarisch:
 | 8 | Backend-Smoke | … |
 | 9 | Live-Deploy | … |
 | 10 | MAINTENANCE faellig | … |
+| 11 | Offene Bugs / Feedback | … |
 
 **Wenn alles grün:** „Session kann sauber beendet werden."
 **Wenn ⚠:** „Ich empfehle folgendes vor Session-Ende zu fixen: [Liste]. Soll ich?"
