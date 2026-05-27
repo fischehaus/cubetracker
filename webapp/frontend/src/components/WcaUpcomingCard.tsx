@@ -9,6 +9,7 @@
 // offizielle API v0 (1h-Cache).
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AxiosError } from "axios";
 import { useUpcomingCompetitions, type WcaCompetition } from "../lib/api";
 import { InfoButton } from "./InfoButton";
@@ -19,6 +20,7 @@ import { InfoButton } from "./InfoButton";
 const DISTANCE_OPTIONS = [100, 300, 500, 1000, 5000] as const;
 
 export function WcaUpcomingCard() {
+  const { t, i18n } = useTranslation();
   const [maxDistanceKm, setMaxDistanceKm] = useState<number>(300);
   const { data, isLoading, error, isFetching } = useUpcomingCompetitions({
     maxDistanceKm,
@@ -47,27 +49,21 @@ export function WcaUpcomingCard() {
         <span aria-hidden="true" className="text-lg">
           🏆
         </span>
-        <h3 className="text-lg font-semibold text-purple-300">WCA-Turniere</h3>
+        <h3 className="text-lg font-semibold text-purple-300">
+          {t("wca.title")}
+        </h3>
         <InfoButton>
-          <p className="font-medium mb-1">WCA-Turniere</p>
-          <p className="mb-2">
-            Liste der nächsten offiziellen WCA-Wettkaempfe in deiner Nähe,
-            sortiert nach Datum. Distanz wird basierend auf deiner Profil-PLZ
-            (Verwaltung → Account) berechnet (Luftlinie).
-          </p>
-          <p>
-            Daten kommen direkt von der offiziellen World Cube Association
-            API. Click auf den Turnier-Namen öffnet die WCA-Detailseite mit
-            Anmelde-Status, Events, Venue.
-          </p>
+          <p className="font-medium mb-1">{t("wca.infoTitle")}</p>
+          <p className="mb-2">{t("wca.infoBody1")}</p>
+          <p>{t("wca.infoBody2")}</p>
         </InfoButton>
         <div className="ml-auto flex items-center gap-2 text-xs text-gray-400">
-          <span>max</span>
+          <span>{t("wca.maxLabel")}</span>
           <select
             value={maxDistanceKm}
             onChange={(e) => setMaxDistanceKm(parseInt(e.target.value, 10))}
             className="rounded border border-gray-700 bg-gray-800 px-2 py-0.5 text-gray-200 focus:border-purple-500 focus:outline-none"
-            aria-label="Maximale Distanz"
+            aria-label={t("wca.maxDistanceAria")}
             disabled={isLoading || isProfileIncomplete}
           >
             {DISTANCE_OPTIONS.map((km) => (
@@ -81,28 +77,24 @@ export function WcaUpcomingCard() {
       </div>
 
       {isLoading && (
-        <p className="text-sm text-gray-500">Lade Turniere von der WCA-API …</p>
+        <p className="text-sm text-gray-500">{t("wca.loading")}</p>
       )}
 
       {isProfileIncomplete && (
         <div className="rounded border border-amber-500/40 bg-amber-500/5 p-3 text-sm text-amber-200">
-          <p className="font-medium">Profil unvollstaendig</p>
+          <p className="font-medium">{t("wca.profileIncompleteTitle")}</p>
           <p className="mt-1 text-amber-300/80">
-            Damit „Turniere in deiner Nähe" funktioniert, setze{" "}
-            <strong>Postleitzahl und Land</strong> unter{" "}
-            <strong>Verwaltung → Einstellungen → Account → Profil</strong>.
-            Die Distanz wird per Luftlinie berechnet, deine genaue Adresse
-            bleibt privat.
+            {t("wca.profileIncompleteBody")}
           </p>
           <p className="mt-1 text-amber-300/60">
-            Genaue Backend-Meldung: {errMsg}
+            {t("wca.profileIncompleteBackend", { message: errMsg })}
           </p>
         </div>
       )}
 
       {error && !isProfileIncomplete && (
         <div className="rounded border border-red-500/40 bg-red-500/5 p-3 text-sm text-red-200">
-          <p className="font-medium">Konnte WCA-Turniere nicht laden</p>
+          <p className="font-medium">{t("wca.errorTitle")}</p>
           <p className="mt-1 text-red-300/80">{errMsg}</p>
         </div>
       )}
@@ -111,44 +103,55 @@ export function WcaUpcomingCard() {
         <>
           {data.competitions.length === 0 ? (
             <p className="text-sm text-gray-500">
-              Keine WCA-Turniere innerhalb {maxDistanceKm} km in den
-              nächsten {Math.round(data.filter.days_ahead / 30)} Monaten.{" "}
+              {t("wca.noCompetitions", {
+                km: maxDistanceKm,
+                months: Math.round(data.filter.days_ahead / 30),
+              })}{" "}
               {maxDistanceKm < 5000 && (
                 <button
                   type="button"
                   onClick={() => setMaxDistanceKm(5000)}
                   className="underline text-purple-300 hover:text-purple-100"
                 >
-                  Weltweit suchen
+                  {t("wca.searchWorldwide")}
                 </button>
               )}
             </p>
           ) : (
             <ul className="space-y-2">
               {data.competitions.map((c) => (
-                <CompetitionItem key={c.id} comp={c} />
+                <CompetitionItem
+                  key={c.id}
+                  comp={c}
+                  locale={i18n.resolvedLanguage ?? "de"}
+                />
               ))}
             </ul>
           )}
           <p className="mt-3 text-[11px] text-gray-500">
-            Standort: {data.user_location.postal_code}
-            {data.user_location.country_iso2
-              ? ` (${data.user_location.country_iso2})`
-              : ""}
+            {t("wca.locationLabel", {
+              postal: data.user_location.postal_code,
+              country: data.user_location.country_iso2
+                ? ` (${data.user_location.country_iso2})`
+                : "",
+            })}
             {" — "}
-            {data.total_found} Turniere im Filter, {data.competitions.length}{" "}
-            angezeigt.
+            {t("wca.totalsLabel", {
+              total: data.total_found,
+              shown: data.competitions.length,
+            })}
             {data.filter.countries_queried &&
               data.filter.countries_queried.length > 1 && (
                 <>
-                  {" Länder: "}
+                  {" "}
+                  {t("wca.countriesLabel")}:{" "}
                   <span className="text-gray-400">
                     {data.filter.countries_queried.join(", ")}
                   </span>
                   .
                 </>
               )}{" "}
-            Daten via offizielle WCA-API.
+            {t("wca.dataSource")}
           </p>
         </>
       )}
@@ -156,8 +159,15 @@ export function WcaUpcomingCard() {
   );
 }
 
-function CompetitionItem({ comp }: { comp: WcaCompetition }) {
-  const dateLabel = formatDateRange(comp.start_date, comp.end_date);
+function CompetitionItem({
+  comp,
+  locale,
+}: {
+  comp: WcaCompetition;
+  locale: string;
+}) {
+  const { t } = useTranslation();
+  const dateLabel = formatDateRange(comp.start_date, comp.end_date, locale);
   const distLabel =
     comp.distance_km !== null ? `${comp.distance_km.toFixed(0)} km` : "—";
   return (
@@ -186,7 +196,9 @@ function CompetitionItem({ comp }: { comp: WcaCompetition }) {
         {comp.events_count > 0 && (
           <span title={comp.event_ids.join(", ")}>
             🧊 {comp.events_count}{" "}
-            {comp.events_count === 1 ? "Event" : "Events"}
+            {comp.events_count === 1
+              ? t("wca.eventSingular")
+              : t("wca.eventPlural")}
           </span>
         )}
       </div>
@@ -194,18 +206,23 @@ function CompetitionItem({ comp }: { comp: WcaCompetition }) {
   );
 }
 
-function formatDateRange(startIso: string, endIso: string): string {
+function formatDateRange(
+  startIso: string,
+  endIso: string,
+  locale: string,
+): string {
   try {
+    const intlLocale = locale === "en" ? "en-GB" : "de-DE";
     const s = new Date(startIso);
     const e = new Date(endIso);
     const sDay = s.getDate();
-    const sMon = s.toLocaleString("de-DE", { month: "short" });
+    const sMon = s.toLocaleString(intlLocale, { month: "short" });
     const sYear = s.getFullYear();
     if (startIso === endIso) {
       return `${sDay}. ${sMon} ${sYear}`;
     }
     const eDay = e.getDate();
-    const eMon = e.toLocaleString("de-DE", { month: "short" });
+    const eMon = e.toLocaleString(intlLocale, { month: "short" });
     const eYear = e.getFullYear();
     if (sYear === eYear && sMon === eMon) {
       return `${sDay}.–${eDay}. ${sMon} ${sYear}`;

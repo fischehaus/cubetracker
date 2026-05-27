@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-dashboard",
+        released=date(2026, 5, 27),
+        title="Restliche Dashboard-Karten DE/EN — Dashboard komplett",
+        highlights=[
+            "ActivityCard (Heute + Diese Woche) inkl. Cube-Top-3-Liste, "
+            "Mean/ao5-Labels und „+N weitere\"-Counter mit Plural-Form.",
+            "NewsCard: Header + InfoButton + Loading/Empty/Error-States, "
+            "plus die relative Datums-Anzeige (jetzt / vor Xm / vor Xh / "
+            "vor Xd) folgt jetzt der UI-Sprache statt hartkodiert „de-DE\".",
+            "WcaUpcomingCard: Header + InfoButton + Distanz-Picker-ARIA, "
+            "Profile-Incomplete-Hint, Empty-Worldwide-Hint, Standort/"
+            "Total/Länder-Label und Event-Plural — alles übersetzt. "
+            "Monatsnamen im DateRange folgen jetzt der gewählten Sprache.",
+            "AchievementsMiniCard + ChallengesMiniCard (Trainer-Quick-"
+            "Looks im Dashboard): Empty-States, InfoTexte, „Alle ansehen"
+            "\"-Links — alle Strings i18n.",
+            "Damit ist die Dashboard-First-Look-Sicht (Onboarding + "
+            "Stats + Recent-Records + Reminders + Activity + News + WCA "
+            "+ Achievements + Challenges) komplett DE/EN-konsistent.",
+            "Locales-Namespaces neu: activity / news / wca / "
+            "achievementsMini / challengesMini.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-auth-pages",
         released=date(2026, 5, 27),
         title="Auth-Folge-Seiten + Onboarding-Banner in Englisch",

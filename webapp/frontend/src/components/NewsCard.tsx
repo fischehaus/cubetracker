@@ -7,10 +7,12 @@
 // Announcements) + r/Cubers (Reddit-Community). Erweiterung erfolgt
 // im Backend (`webapp/news/sources.py`), kein Frontend-Update nötig.
 
+import { useTranslation } from "react-i18next";
 import { useLatestNews, type NewsItem } from "../lib/api";
 import { InfoButton } from "./InfoButton";
 
 export function NewsCard() {
+  const { t, i18n } = useTranslation();
   const { data, isLoading, error } = useLatestNews(10);
 
   return (
@@ -20,47 +22,38 @@ export function NewsCard() {
           📰
         </span>
         <h3 className="text-lg font-semibold text-purple-300">
-          Speedcubing-News
+          {t("news.title")}
         </h3>
         <InfoButton>
-          <p className="font-medium mb-1">Speedcubing-News</p>
-          <p className="mb-2">
-            Kuratierte News aus der Cuber-Szene: WCA-Announcements
-            (offizielle Mitteilungen der World Cube Association) +
-            r/Cubers (Reddit-Community).
-          </p>
-          <p>
-            Aktualisierung 1x pro Stunde im Hintergrund. Klick auf den
-            Titel öffnet das Original.
-          </p>
+          <p className="font-medium mb-1">{t("news.infoTitle")}</p>
+          <p className="mb-2">{t("news.infoBody1")}</p>
+          <p>{t("news.infoBody2")}</p>
         </InfoButton>
       </div>
 
-      {isLoading && (
-        <p className="text-sm text-gray-500">Lade aktuelle News …</p>
-      )}
+      {isLoading && <p className="text-sm text-gray-500">{t("news.loading")}</p>}
 
       {error && (
         <div className="rounded border border-red-500/40 bg-red-500/5 p-3 text-sm text-red-200">
-          <p className="font-medium">Konnte News nicht laden</p>
+          <p className="font-medium">{t("news.errorTitle")}</p>
           <p className="mt-1 text-red-300/80">
-            {error instanceof Error ? error.message : "Unbekannter Fehler"}
+            {error instanceof Error ? error.message : t("news.errorUnknown")}
           </p>
         </div>
       )}
 
       {data && data.items.length === 0 && (
-        <p className="text-sm text-gray-500">
-          Aktuell keine News verfügbar. Das passiert beim ersten Aufruf —
-          Lade die Seite in einer Minute erneut, dann sollten die News
-          da sein.
-        </p>
+        <p className="text-sm text-gray-500">{t("news.emptyText")}</p>
       )}
 
       {data && data.items.length > 0 && (
         <ul className="space-y-2">
           {data.items.map((item) => (
-            <NewsItemRow key={item.id} item={item} />
+            <NewsItemRow
+              key={item.id}
+              item={item}
+              locale={i18n.resolvedLanguage ?? "de"}
+            />
           ))}
         </ul>
       )}
@@ -68,8 +61,13 @@ export function NewsCard() {
   );
 }
 
-function NewsItemRow({ item }: { item: NewsItem }) {
-  const dateLabel = formatRelativeDate(item.published_at || item.fetched_at);
+function NewsItemRow({ item, locale }: { item: NewsItem; locale: string }) {
+  const { t } = useTranslation();
+  const dateLabel = formatRelativeDate(
+    item.published_at || item.fetched_at,
+    locale,
+    t,
+  );
   return (
     <li className="rounded border border-gray-700 bg-gray-800/40 p-3 hover:border-purple-500/40 transition-colors">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -112,7 +110,11 @@ function SourceBadge({ source, label }: { source: string; label: string }) {
   );
 }
 
-function formatRelativeDate(iso: string | null): string {
+function formatRelativeDate(
+  iso: string | null,
+  locale: string,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string {
   if (!iso) return "";
   try {
     const date = new Date(iso);
@@ -122,11 +124,11 @@ function formatRelativeDate(iso: string | null): string {
     const diffH = Math.floor(diffMs / (60 * 60 * 1000));
     const diffDay = Math.floor(diffMs / (24 * 60 * 60 * 1000));
 
-    if (diffMin < 1) return "jetzt";
-    if (diffMin < 60) return `vor ${diffMin}m`;
-    if (diffH < 24) return `vor ${diffH}h`;
-    if (diffDay < 7) return `vor ${diffDay}d`;
-    return date.toLocaleDateString("de-DE", {
+    if (diffMin < 1) return t("news.ageNow");
+    if (diffMin < 60) return t("news.ageMinutes", { count: diffMin });
+    if (diffH < 24) return t("news.ageHours", { count: diffH });
+    if (diffDay < 7) return t("news.ageDays", { count: diffDay });
+    return date.toLocaleDateString(locale === "en" ? "en-GB" : "de-DE", {
       day: "2-digit",
       month: "2-digit",
       year: "2-digit",

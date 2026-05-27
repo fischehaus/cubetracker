@@ -8,6 +8,7 @@
 // Bewusst klein gehalten — für das Dashboard-Top-Row.
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useAchievements } from "../lib/api";
 import { InfoButton } from "./InfoButton";
 import type { AppTab } from "./TabBar";
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function AchievementsMiniCard({ onSwitchTab }: Props) {
+  const { t } = useTranslation();
   const { data, isLoading } = useAchievements();
 
   const summary = useMemo(() => {
@@ -38,7 +40,7 @@ export function AchievementsMiniCard({ onSwitchTab }: Props) {
   if (isLoading || !summary) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 text-base text-gray-500">
-        Erfolge werden geladen …
+        {t("achievementsMini.loading")}
       </div>
     );
   }
@@ -47,15 +49,14 @@ export function AchievementsMiniCard({ onSwitchTab }: Props) {
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
       <div className="flex items-center justify-between mb-3 gap-2">
         <div className="flex items-center gap-2">
-          <h3 className="text-base font-semibold text-gray-200">Erfolge</h3>
+          <h3 className="text-base font-semibold text-gray-200">
+            {t("achievementsMini.title")}
+          </h3>
           <InfoButton>
-            <p className="font-medium mb-1">Erfolge (Achievements)</p>
-            <p>
-              30+ Personal-Trainer-Ziele die du nebenbei freischaltest
-              (z.B. „erstes Sub-20-Solve", „100 Solves an einem Tag",
-              „PB-Streak"). Klick auf die Card öffnet den Trainer-Tab
-              mit allen Erfolgen + Fortschritts-Anzeige.
+            <p className="font-medium mb-1">
+              {t("achievementsMini.infoTitle")}
             </p>
+            <p>{t("achievementsMini.infoBody")}</p>
           </InfoButton>
         </div>
         <span className="text-sm text-gray-500">
@@ -65,7 +66,7 @@ export function AchievementsMiniCard({ onSwitchTab }: Props) {
 
       {summary.recent.length === 0 ? (
         <p className="text-sm text-gray-500">
-          Noch keine Erfolge freigeschaltet. Trainiere weiter!
+          {t("achievementsMini.emptyText")}
         </p>
       ) : (
         <ul className="space-y-1.5">
@@ -82,7 +83,7 @@ export function AchievementsMiniCard({ onSwitchTab }: Props) {
         onClick={() => onSwitchTab("trainer")}
         className="mt-3 text-sm text-purple-400 hover:text-purple-300"
       >
-        Alle Erfolge ansehen →
+        {t("achievementsMini.viewAll")}
       </button>
     </div>
   );

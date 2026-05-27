@@ -4,6 +4,7 @@
 // + Mini-Bar je Eintrag. Klick führt zum Trainer-Tab (Sub „Heute").
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useChallengesToday } from "../lib/api";
 import { InfoButton } from "./InfoButton";
 import {
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function ChallengesMiniCard({ onSwitchTab }: Props) {
+  const { t } = useTranslation();
   const { data, isLoading } = useChallengesToday();
 
   const visible = useMemo(
@@ -33,7 +35,7 @@ export function ChallengesMiniCard({ onSwitchTab }: Props) {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 text-base text-gray-500">
-        Challenges werden geladen …
+        {t("challengesMini.loading")}
       </div>
     );
   }
@@ -43,16 +45,11 @@ export function ChallengesMiniCard({ onSwitchTab }: Props) {
       <div className="flex items-center justify-between mb-3 gap-2">
         <div className="flex items-center gap-2">
           <h3 className="text-base font-semibold text-gray-200">
-            Tages-Challenges
+            {t("challengesMini.title")}
           </h3>
           <InfoButton>
-            <p className="font-medium mb-1">Tages-Challenges</p>
-            <p>
-              Drei kleine tägliche Aufgaben, jeden Tag neu (Mitternacht
-              UTC). Klick auf die Card öffnet den Trainer-Tab mit der
-              ausfuehrlichen Liste + Fortschritts-Anzeige. Erfolgreich
-              abgeschlossene Challenges tragen langfristig zu Achievements bei.
-            </p>
+            <p className="font-medium mb-1">{t("challengesMini.infoTitle")}</p>
+            <p>{t("challengesMini.infoBody")}</p>
           </InfoButton>
         </div>
         <span className="text-sm text-gray-500">
@@ -61,9 +58,7 @@ export function ChallengesMiniCard({ onSwitchTab }: Props) {
       </div>
 
       {visible.length === 0 ? (
-        <p className="text-sm text-gray-500">
-          Noch keine Challenges für heute.
-        </p>
+        <p className="text-sm text-gray-500">{t("challengesMini.emptyText")}</p>
       ) : (
         <ul className="space-y-2">
           {visible.map((c) => {
@@ -101,7 +96,7 @@ export function ChallengesMiniCard({ onSwitchTab }: Props) {
         onClick={() => onSwitchTab("trainer")}
         className="mt-3 text-sm text-purple-400 hover:text-purple-300"
       >
-        Alle Challenges ansehen →
+        {t("challengesMini.viewAll")}
       </button>
     </div>
   );
