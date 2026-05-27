@@ -580,38 +580,51 @@ def bootstrap_ux_polish_items(db: OrmSession) -> int:
 def bootstrap_roadmap(db: OrmSession) -> int:
     """Idempotenter Seeder für die Roadmap-Items.
 
-    Idempotenz: prüft Count von `roadmap_items`. Wenn > 0, wird nichts
-    angelegt — der Admin pflegt ab dann selbst (add/edit/delete via
-    Admin-UI). Bei leerer Tabelle (Cold-Start, frische DB): alle Items
-    aus ROADMAP_SEED werden mit sort_order in 10er-Schritten angelegt.
+    **Geändert in W.roadmap-restore (2026-05-28):** von count-check
+    (`if existing > 0: return 0`) auf **per-Item-Idempotenz**
+    umgestellt. Grund: am 28.05. trat ein Datenverlust auf (25 von
+    28 Items waren in der Live-DB verschwunden, vermutlich Postgres-
+    Volume-Issue bei einem Coolify-Deploy). Mit per-Item-Check kommen
+    fehlende Items beim nächsten Boot automatisch zurück.
 
-    **Bewusstes Verhalten (W.roadmap-admin-qa QA-SOLLTE):** wenn der
-    Admin _alle_ Items via Admin-UI löscht UND der Container danach
-    neu startet, kommen die Seed-Items zurück (Count fällt auf 0). Für
-    eine Single-Admin-Installation ist das tolerierbar (Admin merkt es
-    + kann sie wieder löschen). Falls das stört: per-Admin-Marker
-    (z.B. eine `roadmap_seeded`-Row in einer kv-Tabelle) wäre der
-    richtige Fix — aktuell zurückgestellt, kein Production-Bug.
+    Idempotenz pro Item: title_de-Match. Wenn ein Item mit demselben
+    title_de schon existiert (egal in welcher Phase, mit welchem
+    Status), wird es NICHT überschrieben — nur fehlende Items werden
+    neu angelegt.
 
-    Returns: Anzahl angelegter Items (0 wenn schon vorhanden).
+    `sort_order` für neu angelegte Items: ans Ende der jeweiligen
+    Phase (max(sort_order) + 10). So bleiben User-eigene sort_order-
+    Anpassungen via Admin-UI erhalten.
+
+    **Trade-off:** wenn der Admin ein Item aus ROADMAP_SEED via
+    Admin-UI bewusst löscht, kommt es beim nächsten Container-
+    Neustart zurück. Mitigation: Item aus ROADMAP_SEED rauseditieren
+    (= permanent entfernt) ODER `internal=True` via Admin-UI setzen
+    (=für User unsichtbar, aber im Audit-Trail erhalten).
+
+    Returns: Anzahl neu angelegter Items.
     """
     from db.models import RoadmapItem
 
-    existing = int(db.execute(select(func.count(RoadmapItem.id))).scalar() or 0)
-    if existing > 0:
-        return 0
-
-    # sort_order pro Phase getrennt — startet bei 10 + 10er-Schritte.
-    sort_per_phase: dict[str, int] = {}
     created = 0
     for entry in ROADMAP_SEED:
-        phase = entry["phase_id"]
-        sort_per_phase.setdefault(phase, 0)
-        sort_per_phase[phase] += 10
+        existing = db.execute(
+            select(RoadmapItem).where(RoadmapItem.title_de == entry["title_de"])
+        ).scalar_one_or_none()
+        if existing is not None:
+            continue
+        max_sort = (
+            db.execute(
+                select(func.max(RoadmapItem.sort_order)).where(
+                    RoadmapItem.phase_id == entry["phase_id"]
+                )
+            ).scalar()
+            or 0
+        )
         db.add(
             RoadmapItem(
-                phase_id=phase,
-                sort_order=sort_per_phase[phase],
+                phase_id=entry["phase_id"],
+                sort_order=max_sort + 10,
                 title_de=entry["title_de"],
                 title_en=entry["title_en"],
                 note_de=entry.get("note_de"),
@@ -622,5 +635,6 @@ def bootstrap_roadmap(db: OrmSession) -> int:
             )
         )
         created += 1
-    db.commit()
+    if created > 0:
+        db.commit()
     return created

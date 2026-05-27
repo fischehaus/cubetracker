@@ -44,6 +44,35 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-restore",
+        released=date(2026, 5, 28),
+        title="Roadmap-DB-Restore (25 fehlende Items nachgereicht)",
+        highlights=[
+            "Live-Verify nach dem W.ux-demo-polish-Push hat einen "
+            "Datenverlust in der Live-Postgres-DB aufgedeckt: von den "
+            "28 Items aus W.roadmap-db waren nur noch 3 sichtbar (die "
+            "neuen UX-Polish-Items). Vermutete Ursache: Postgres-"
+            "Volume-Issue bei einem früheren Coolify-Deploy zwischen "
+            "Do-Nacht und heute, NICHT durch den Sprint verursacht.",
+            "Fix: bootstrap_roadmap() in seeds/roadmap.py umgestellt "
+            "von count-check (`if existing > 0: return 0`) auf per-"
+            "Item-Idempotenz (title_de-Match, analog zu bootstrap_"
+            "ux_polish_items). Beim nächsten Container-Boot werden "
+            "fehlende Items aus ROADMAP_SEED automatisch nachgereicht.",
+            "Trade-off bewusst geändert: Items aus ROADMAP_SEED können "
+            "nicht mehr permanent via Admin-UI-Delete entfernt werden "
+            "(kommen beim Restart zurück). Wer ein Item endgültig "
+            "loswerden will: aus seeds/roadmap.py rauseditieren — ODER "
+            "internal=True via Admin-UI setzen (= für User unsichtbar, "
+            "aber Audit-Trail bleibt).",
+            "Lesson archiviert in docs/lessons-archive.md: Live-Verify "
+            "nach Coolify-Deploys muss DB-Stand explizit prüfen (nicht "
+            "nur Health-Endpoint + Bundle-Marker), sonst übersieht man "
+            "Volume-Verlust.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ux-demo-polish",
         released=date(2026, 5, 28),
         title="📱 Mobile-Polish + Kontrast-Schub für die Phone-Demo",
