@@ -6,6 +6,7 @@
 
 import { AdminAnnouncePanel } from "./AdminAnnouncePanel";
 import { AdminLiveTestsPanel } from "./AdminLiveTestsPanel";
+import { AdminRoadmapPanel } from "./AdminRoadmapPanel";
 import { AdminStatsPanel } from "./AdminStatsPanel";
 import { AdminUsersPanel } from "./AdminUsersPanel";
 
@@ -14,6 +15,7 @@ export function AdminPanel() {
     <div className="space-y-6">
       <AdminStatsPanel />
       <AdminLiveTestsPanel />
+      <AdminRoadmapPanel />
       <AdminUsersPanel />
       <AdminAnnouncePanel />
     </div>

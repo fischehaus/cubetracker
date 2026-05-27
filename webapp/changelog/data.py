@@ -44,6 +44,38 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-admin-ui",
+        released=date(2026, 5, 28),
+        title="Admin-Roadmap-CRUD: Items anlegen / bearbeiten / löschen",
+        highlights=[
+            "Komplettiert die Roadmap-Migration (W.roadmap-db + W.roadmap-"
+            "modal-api → diese Welle): Admins bekommen im Verwaltung-→-"
+            "Admin-Tab einen neuen Block „Roadmap-Pflege\" mit voller "
+            "CRUD-UI.",
+            "Liste alle Items gruppiert nach Phase (P1..P6, je mit "
+            "Counter). Pro Zeile: DE-Titel + EN-Titel + Notes (DE+EN) "
+            "+ effort + Public/Internal-Badge + Done-Badge. Inline-Edit "
+            "alle Felder + Save/Cancel.",
+            "Filter-Bar: Phase (P1-P6 oder alle), Status (active/done/"
+            "alle), Sichtbarkeit (public/internal/alle). Filter sind "
+            "kombinierbar, leerer Filter-Treffer zeigt freundlichen "
+            "Hinweis.",
+            "„+ Neues Item\"-Form: Phase-Picker, Effort, beide Titel-"
+            "Sprachen, beide Note-Sprachen, Status-Picker, Internal-"
+            "Toggle. sort_order wird vom Backend automatisch vergeben "
+            "(max(existing)+10 pro Phase) wenn nicht explizit gesetzt.",
+            "Delete per Zeile mit nativem confirm-Dialog (interpoliert "
+            "den Item-Titel). Mutations invalidieren ['roadmap']-"
+            "QueryKey → User-Modal aktualisiert sich beim nächsten "
+            "Öffnen ohne Reload.",
+            "Cross-Admin: alle Admins sehen + bearbeiten alle Items, "
+            "kein per-User-Filter (Backend-seitig schon in W.roadmap-db "
+            "garantiert). 43 neue Locale-Keys DE/EN symmetrisch "
+            "(1202/1202).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-modal-api",
         released=date(2026, 5, 28),
         title="🌍 Roadmap-Modal komplett DE/EN — liest jetzt aus DB",
