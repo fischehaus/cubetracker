@@ -7,9 +7,11 @@
  * Routing).
  */
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 
 export function ResetPasswordPage() {
+  const { t } = useTranslation();
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token") ?? "";
 
@@ -29,7 +31,7 @@ export function ResetPasswordPage() {
       });
       setDone(true);
     } catch (err: unknown) {
-      setError(extractErrorMessage(err));
+      setError(extractErrorMessage(err, t("authPages.unknownError")));
     } finally {
       setBusy(false);
     }
@@ -40,15 +42,15 @@ export function ResetPasswordPage() {
       <Center>
         <Card>
           <h1 className="text-2xl font-bold text-gray-100 mb-2">
-            Reset-Link ungültig
+            {t("authPages.tokenMissingTitle")}
           </h1>
           <p className="text-sm text-gray-400">
-            Der Link enthält keinen Token. Probier es nochmal über{" "}
+            {t("authPages.tokenMissingBody")}
             <a
               href="/"
               className="text-purple-400 underline hover:text-purple-300"
             >
-              Login → Passwort vergessen
+              {t("authPages.tokenMissingLink")}
             </a>
             .
           </p>
@@ -62,16 +64,16 @@ export function ResetPasswordPage() {
       <Center>
         <Card>
           <h1 className="text-2xl font-bold text-gray-100 mb-2">
-            ✅ Passwort gesetzt
+            {t("authPages.doneTitle")}
           </h1>
           <p className="text-sm text-gray-400 mb-4">
-            Du kannst dich jetzt mit dem neuen Passwort einloggen.
+            {t("authPages.doneBody")}
           </p>
           <a
             href="/"
             className="inline-block rounded-lg bg-purple-600 text-white font-medium px-4 py-2 hover:bg-purple-700"
           >
-            Zum Login
+            {t("authPages.doneToLogin")}
           </a>
         </Card>
       </Center>
@@ -82,10 +84,10 @@ export function ResetPasswordPage() {
     <Center>
       <Card>
         <h1 className="text-2xl font-bold text-gray-100 mb-1">
-          Neues Passwort setzen
+          {t("authPages.setNewTitle")}
         </h1>
         <p className="text-sm text-gray-400 mb-4">
-          Waehle dein neues Passwort (mindestens 8 Zeichen).
+          {t("authPages.setNewHint")}
         </p>
         <form onSubmit={onSubmit} className="space-y-3">
           <input
@@ -94,7 +96,7 @@ export function ResetPasswordPage() {
             minLength={8}
             autoFocus
             autoComplete="new-password"
-            placeholder="Neues Passwort"
+            placeholder={t("authPages.newPasswordPlaceholder")}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             className="w-full rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -109,7 +111,7 @@ export function ResetPasswordPage() {
             disabled={busy}
             className="w-full rounded-lg bg-purple-600 text-white font-medium py-2 hover:bg-purple-700 disabled:opacity-50"
           >
-            {busy ? "Setze…" : "Passwort setzen"}
+            {busy ? t("authPages.setting") : t("authPages.submitSet")}
           </button>
         </form>
       </Card>
@@ -133,7 +135,7 @@ function Card({ children }: { children: React.ReactNode }) {
   );
 }
 
-function extractErrorMessage(err: unknown): string {
+function extractErrorMessage(err: unknown, fallback: string): string {
   if (typeof err === "object" && err !== null) {
     const maybe = err as {
       response?: { data?: { detail?: string } };
@@ -142,5 +144,5 @@ function extractErrorMessage(err: unknown): string {
     if (maybe.response?.data?.detail) return maybe.response.data.detail;
     if (maybe.message) return maybe.message;
   }
-  return "Unbekannter Fehler.";
+  return fallback;
 }

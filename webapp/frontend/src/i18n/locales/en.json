@@ -37,6 +37,37 @@
     "noDisplayName": "No display name",
     "language": "Language"
   },
+  "onboarding": {
+    "welcome": "Welcome to cubetracker",
+    "intro": "Your database is still empty. Three ways in:",
+    "actionImport": "📥 Import csTimer file",
+    "actionFirstSolve": "⏱ Enter your first solve",
+    "actionHardware": "🧊 Load hardware inventory",
+    "importTip": "Tip: csTimer import detects duplicates — you can load the same file multiple times without getting duplicate entries.",
+    "dismissAria": "Hide banner",
+    "dismissTitle": "Hide banner permanently"
+  },
+  "authPages": {
+    "tokenMissingTitle": "Reset link invalid",
+    "tokenMissingBody": "The link doesn't contain a token. Try again via ",
+    "tokenMissingLink": "Login → Forgot password",
+    "doneTitle": "✅ Password set",
+    "doneBody": "You can now sign in with your new password.",
+    "doneToLogin": "To sign-in",
+    "setNewTitle": "Set new password",
+    "setNewHint": "Choose your new password (at least 8 characters).",
+    "newPasswordPlaceholder": "New password",
+    "setting": "Setting…",
+    "submitSet": "Set password",
+    "unknownError": "Unknown error.",
+    "verifyTitle": "Email verification",
+    "verifyRunning": "Verifying…",
+    "verifyOk": "✅ Email verified successfully.",
+    "verifyNext": "Continue to the app",
+    "verifyFailFallback": "Verification link is invalid or expired.",
+    "verifyFailHint": "Try again: sign in and click \"Resend verification email\" in your settings.",
+    "verifyToApp": "To the app"
+  },
   "auth": {
     "welcomeBack": "Welcome back.",
     "createAccount": "Create your account.",

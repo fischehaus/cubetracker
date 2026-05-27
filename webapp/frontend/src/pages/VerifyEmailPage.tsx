@@ -6,12 +6,14 @@
  * eingeloggt: refreshMe damit email_verified-Status in der UI aktuell wird.
  */
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 
 type State = "running" | "ok" | "fail";
 
 export function VerifyEmailPage() {
+  const { t } = useTranslation();
   const { isAuthenticated, refreshMe } = useAuth();
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token") ?? "";
@@ -42,7 +44,7 @@ export function VerifyEmailPage() {
         }
       } catch (err: unknown) {
         if (cancelled) return;
-        setError(extractErrorMessage(err));
+        setError(extractErrorMessage(err, t("authPages.unknownError")));
         setState("fail");
       }
     }
@@ -60,23 +62,25 @@ export function VerifyEmailPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
         <h1 className="text-2xl font-bold text-gray-100 mb-2">
-          Email-Verifizierung
+          {t("authPages.verifyTitle")}
         </h1>
 
         {state === "running" && (
-          <p className="text-sm text-gray-400">Wird überprüft…</p>
+          <p className="text-sm text-gray-400">
+            {t("authPages.verifyRunning")}
+          </p>
         )}
 
         {state === "ok" && (
           <>
             <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm px-3 py-2 mb-4">
-              ✅ Email erfolgreich bestätigt.
+              {t("authPages.verifyOk")}
             </div>
             <a
               href="/"
               className="inline-block rounded-lg bg-purple-600 text-white font-medium px-4 py-2 hover:bg-purple-700"
             >
-              Weiter zur App
+              {t("authPages.verifyNext")}
             </a>
           </>
         )}
@@ -84,17 +88,16 @@ export function VerifyEmailPage() {
         {state === "fail" && (
           <>
             <div className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm px-3 py-2 mb-4">
-              {error ?? "Verifikations-Link ist ungültig oder abgelaufen."}
+              {error ?? t("authPages.verifyFailFallback")}
             </div>
             <p className="text-sm text-gray-400 mb-2">
-              Probier es nochmal: log dich ein und klick "Verify-Mail erneut
-              senden" in den Einstellungen.
+              {t("authPages.verifyFailHint")}
             </p>
             <a
               href="/"
               className="inline-block rounded-lg bg-purple-600 text-white font-medium px-4 py-2 hover:bg-purple-700"
             >
-              Zur App
+              {t("authPages.verifyToApp")}
             </a>
           </>
         )}
@@ -103,7 +106,7 @@ export function VerifyEmailPage() {
   );
 }
 
-function extractErrorMessage(err: unknown): string {
+function extractErrorMessage(err: unknown, fallback: string): string {
   if (typeof err === "object" && err !== null) {
     const maybe = err as {
       response?: { data?: { detail?: string } };
@@ -112,5 +115,5 @@ function extractErrorMessage(err: unknown): string {
     if (maybe.response?.data?.detail) return maybe.response.data.detail;
     if (maybe.message) return maybe.message;
   }
-  return "Unbekannter Fehler.";
+  return fallback;
 }

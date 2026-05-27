@@ -37,6 +37,37 @@
     "noDisplayName": "Kein Display-Name",
     "language": "Sprache"
   },
+  "onboarding": {
+    "welcome": "Willkommen bei cubetracker",
+    "intro": "Deine Datenbank ist noch leer. Drei Wege rein:",
+    "actionImport": "📥 csTimer-Datei importieren",
+    "actionFirstSolve": "⏱ Ersten Solve eintragen",
+    "actionHardware": "🧊 Hardware-Inventar laden",
+    "importTip": "Tipp: csTimer-Import erkennt Duplikate — du kannst die selbe Datei mehrfach laden, ohne doppelte Einträge zu bekommen.",
+    "dismissAria": "Banner ausblenden",
+    "dismissTitle": "Banner dauerhaft ausblenden"
+  },
+  "authPages": {
+    "tokenMissingTitle": "Reset-Link ungültig",
+    "tokenMissingBody": "Der Link enthält keinen Token. Probier es nochmal über ",
+    "tokenMissingLink": "Login → Passwort vergessen",
+    "doneTitle": "✅ Passwort gesetzt",
+    "doneBody": "Du kannst dich jetzt mit dem neuen Passwort einloggen.",
+    "doneToLogin": "Zum Login",
+    "setNewTitle": "Neues Passwort setzen",
+    "setNewHint": "Wähle dein neues Passwort (mindestens 8 Zeichen).",
+    "newPasswordPlaceholder": "Neues Passwort",
+    "setting": "Setze…",
+    "submitSet": "Passwort setzen",
+    "unknownError": "Unbekannter Fehler.",
+    "verifyTitle": "Email-Verifizierung",
+    "verifyRunning": "Wird überprüft…",
+    "verifyOk": "✅ Email erfolgreich bestätigt.",
+    "verifyNext": "Weiter zur App",
+    "verifyFailFallback": "Verifikations-Link ist ungültig oder abgelaufen.",
+    "verifyFailHint": "Probier es nochmal: log dich ein und klick „Verify-Mail erneut senden\" in den Einstellungen.",
+    "verifyToApp": "Zur App"
+  },
   "auth": {
     "welcomeBack": "Willkommen zurück.",
     "createAccount": "Account erstellen.",

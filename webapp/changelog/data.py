@@ -44,6 +44,22 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-auth-pages",
+        released=date(2026, 5, 27),
+        title="Auth-Folge-Seiten + Onboarding-Banner in Englisch",
+        highlights=[
+            "Reset-Password-Seite (Landing nach „Passwort vergessen\"-"
+            "Mail) komplett übersetzt: Fehlende-Token-Hinweis, Done-"
+            "State, Form-Labels + Buttons.",
+            "Email-Verify-Seite (Landing nach „Bestätige deine Email\"-"
+            "Mail) inkl. Running-/OK-/Fail-States + Retry-Hint.",
+            "Onboarding-Banner (zeigt sich bei leerer Datenbank): "
+            "Willkommens-Titel, drei Quick-Action-Buttons, csTimer-"
+            "Import-Tipp, Dismiss-Aria-Label.",
+            "Locales-Namespaces neu: authPages.* + onboarding.*.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-list",
         released=date(2026, 5, 27),
         title="Solve-Liste + Filter-Bars in Englisch verfügbar",
