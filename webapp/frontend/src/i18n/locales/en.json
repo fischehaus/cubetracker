@@ -948,6 +948,36 @@
     "unfriendFallback": "this user",
     "unfriendButton": "Unfriend"
   },
+  "sessionSwitcher": {
+    "loading": "Loading sessions …",
+    "label": "Session",
+    "allSessions": "All sessions ({{count}})"
+  },
+  "solveDetail": {
+    "solveNumber": "Solve #{{id}}",
+    "pbBadge": "★ PB",
+    "closeAria": "Close",
+    "ao5AtTime": "ao5 at this time",
+    "ao12AtTime": "ao12 at this time",
+    "cubeTypeLabel": "Cube type",
+    "hardwareLabel": "Hardware",
+    "sessionLabel": "Session",
+    "plusTwoLabel": "+2 penalty",
+    "plusTwoYes": "yes (+2.00s)",
+    "plusTwoNo": "no",
+    "dnfLabel": "DNF",
+    "dnfYes": "yes",
+    "dnfNo": "no",
+    "scrambleLabel": "Scramble",
+    "notesLabel": "Note",
+    "plusTwoRemove": "Remove +2",
+    "plusTwoSet": "Set +2",
+    "dnfRemove": "Remove DNF",
+    "dnfSet": "Set DNF",
+    "deleteButton": "🗑 Delete",
+    "deleteConfirm": "Really delete solve {{time}}?",
+    "closeButton": "Close"
+  },
   "backupPanel": {
     "title": "Backup & restore",
     "infoBody": "Full export of your data (solves, sessions, hardware, achievements) as a JSON file. Restore from your own backup using merge mode (nothing is overwritten) or replace mode (everything is rewritten, with a confirm string). Snapshots = restore points, max 2 per user — created automatically before larger operations (restore, bulk import).",

@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-solve-detail",
+        released=date(2026, 5, 27),
+        title="Solve-Detail + Session-Switcher DE/EN",
+        highlights=[
+            "SessionSwitcher: Loading-State, Label + All-Sessions-Option "
+            "mit interpoliertem Count.",
+            "SolveDetailModal: Header mit interpolierter Solve-ID + PB-"
+            "Badge + Close-Aria, 2 Rolling-Average-Boxen (ao5/ao12 at "
+            "time), 5 Meta-Rows (Cube-Type/Hardware/Session/+2/DNF) mit "
+            "Ja/Nein/Yes/No-Werten + interpoliertem +2-Wert, Scramble + "
+            "Notes-Labels, 5 Action-Buttons (+2 toggle / DNF toggle / "
+            "delete with interpoliertem Time-Confirm / close).",
+            "Locales-Namespaces neu: sessionSwitcher + solveDetail "
+            "(~27 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-friends",
         released=date(2026, 5, 27),
         title="Friends-Tab DE/EN",
