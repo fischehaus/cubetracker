@@ -24,40 +24,44 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint + Turnier-Sprint i18n-Massenwelle
+## ✅ ERLEDIGT 2026-05-27 — Turnier-Sprint VOLL DURCH (i18n + WCA-Profil + QA)
 
-**~32 Commits + ~22 Tags an einem Tag, alles live.** Live-public-Version:
-`W.i18n-charts` (letzter public Tag; danach 3 internal-Wellen für die
-Verwaltung-Sub-Panels). Backend skippt internal-Einträge in
-`current_version()`, also sieht User nichts vom Internal-Spam.
+**~56 Commits + ~37 Tags an einem Tag, alles live.** Live-public-Version:
+`W.wca-profile-light` (= aktuelles public-Demo-Feature). Backend skippt
+internal-Einträge in `current_version()`, also sieht der User nur die
+beiden Top-Wellen `W.i18n-en-release` + `W.wca-profile-light` im Changelog,
+nicht den ganzen Audit-Trail dahinter.
 
-**Bilanz nach Mi-Spät + Do-Voll:**
-- Vormittag/Mittag: Backlog-Sprint (Average-PB, Danger-Zone, Letzte Rekorde,
-  Roadmap-intern) + 3 QA-Hotfixe + GitHub-Issue #1 vollständig adressiert
-- Mi-Spät: Turnier-Sprint Wellen 1-3 (i18n-Infra + LoginPage/Footer + Flaggen-
-  Switcher + ChatGPT-Logo-Hinweis im Impressum)
-- Do: **Turnier-Sprint Massen-i18n (Wellen 10-23)** — 17 weitere i18n-Wellen
-  (siehe Block direkt unten)
+**Bilanz Mi/Do im Detail:**
+- Mi-Vormittag/Mittag: Backlog-Sprint (Average-PB, Danger-Zone, Letzte
+  Rekorde, Roadmap-intern) + 3 QA-Hotfixe + GitHub-Issue #1 vollständig
+  adressiert.
+- Mi-Spät: Turnier-Sprint Wellen 1-3 (i18n-Infra + LoginPage/Footer +
+  Flaggen-Switcher + ChatGPT-Logo-Hinweis im Impressum).
+- Do-Vormittag/Mittag: Massen-i18n Wellen 10-23 (Solve-Flow, Dashboard,
+  Analyse-Tab, Charts, Toaster, Verwaltung-Sub-Panels, Trainer, Community,
+  Friends).
+- Do-Nachmittag: Konsolidierung + 2 QA-Wellen (CubeStateView/ScrambleNet
+  Hardcoded-DE-Strings + Roadmap-Modal DE-only-Hinweis bei EN).
+- Do-Spät: **WCA-Profil-Light komplett gebaut** — Schema + Endpoint +
+  AccountSettings + Dashboard-Card + QA-Hotfix + 4-Bug-Fix gegen echte
+  WCA-API-Quirks.
 
-🎯 **Aktiver Sprint:** Englisch-Variante + WCA-Profil-Light bis Sa 30.05. morgens
-für privates Demo beim WCA-Turnier in Meppel. **Plan siehe „Restplan Turnier-
-Sprint" unten.**
+🎯 **Turnier-Sprint:** Englisch-Variante + WCA-Profil-Light für privates
+Demo beim WCA-Turnier in Meppel **Sa 30.05.** — beide Demo-Features sind
+**am Mi/Do live geworden**, ein Tag früher als geplant. **Restplan:** nur
+noch Sa-Vormittag Demo-Probe (siehe unten).
 
-### 📌 WICHTIG für nächste Session — Patch-Notes-Konsolidierung-Plan
+### ✅ Patch-Notes-Konsolidierung erledigt
 
-**Vereinbarung mit User (am Do, mid-sprint):** Am Ende des Turnier-Sprints
-werden ALLE 20+ einzelnen `W.i18n-*`-Patch-Notes auf `internal=True` geflaggt
-(analog gestern-Welle „Patch-Notes-intern"). Ein einziger public Patch-Note
-`W.i18n-en-release` ersetzt sie im User-Changelog — User sieht dort dann
-einen einzelnen sauberen „🇬🇧 Englische Version verfügbar!"-Eintrag statt
-20 fast-identische Einträge. Git-Tags + Audit-Trail bleiben unangetastet
-(Admin sieht alles weiterhin). Die ab `W.i18n-import-export` neuen Wellen
-sind schon mit `internal=True` direkt geschrieben — spart Refactor-Arbeit.
+Welle `W.i18n-en-release` (public, am Do gepusht): ALLE 30 i18n-Einzel-
+wellen sind im Changelog auf `internal=True` versteckt, ein sauberer
+public Sammeleintrag „🇬🇧 Englische Version verfügbar" ersetzt sie für den
+User. Audit-Trail bleibt für Admin komplett einsehbar.
 
-→ **TODO am Sprint-Ende:** alle public `W.i18n-*`-Einträge in
-`webapp/changelog/data.py` von `internal` flag aktuell `False` (oder
-fehlend = Default `False`) auf `internal=True` umstellen, und neuen
-public `W.i18n-en-release` ganz oben einfügen.
+Mechanik: Python-Regex-Pass über `webapp/changelog/data.py` flippte 16
+public-Einträge auf internal, plus neuer Sammeleintrag oben — alles in
+einem Commit `ea6d9a9`. Reproduzierbar dokumentiert.
 
 ### Wellen 10-23 (Do, 27.05.) — Turnier-Sprint Massen-i18n
 
@@ -94,26 +98,78 @@ public `W.i18n-en-release` ganz oben einfügen.
 > Filter) + Verwaltung-Tab teilweise (Header + Meine Daten + DangerZone +
 > Sessions + Backup + Import/Export).
 
-### 🔜 Restplan Turnier-Sprint (Fr + Sa-Vormittag)
+### Wellen 24-30 (Do-Spät, 27.05.) — Konsolidierung + WCA-Profil + QA
 
-**Was noch offen:**
-- `HardwareList` (480 Zeilen — die Cube-Inventar-Liste)
-- `OutlierCard` (238 Zeilen)
-- `SettingsPanel` (383 Zeilen)
-- `AccountSettingsPanel` (501 Zeilen — Profile + Email-Change + Password-Change + Account-Delete)
-- `AdminPanel` (21 Zeilen Wrapper — die 4 Sub-Panels nur Admin-only, Demo nicht relevant)
-- `TrainerTab` (65 Zeilen Wrapper + Sub-Components: AlgTrainerPanel etc.)
-- `CommunityTab` (50 Zeilen Wrapper + Sub-Components)
-- `features-data.ts` (Marketing-Texte für Login-Page + FeaturesModal — anderes Pattern, separate Welle)
-- **WCA-Profil-Light** (P9 — DB-Spalte + Backend-Endpoint + Frontend-Card)
-- **W.i18n-en-release Konsolidierungs-Welle** (siehe oben)
+> **Konsolidierung + i18n-QA-Polish:**
+> - `W.i18n-en-release` (public Sammeleintrag) — 16 public i18n-Wellen
+>   auf `internal=True` geflaggt + neuer Top-Eintrag „🇬🇧 Englische Version
+>   verfügbar". Reproduzierbarer Python-Regex-Pass. Commit `ea6d9a9`.
+> - `W.i18n-qa` (internal) — 2 KRITISCH-Findings nach Konsolidierungs-QA
+>   gefixt: `CubeStateView.tsx:32` hartkodiertes `title="Kein Diagramm…"`
+>   + `ScrambleNet.tsx:60` hartkodiertes `aria-label="2D-Cube-Net…
+>   gelöst"`. Neue Keys `algTrainer.noImage`/`diagramAlt` + `scramble.
+>   netAriaLabel`/`netSolvedFallback`. Commit `34a93f2`.
+> - `W.i18n-roadmap-notice` (internal) — Roadmap-Modal zeigt bei EN einen
+>   amber Hinweis-Banner „Roadmap content is currently only available in
+>   German" statt komplett-DE-Modal. Volle Roadmap-Übersetzung wäre ~1h
+>   für ~50 Items + 30 Notes + 6 Phases — post-Demo. Commit `cb71b6e`.
+>
+> **WCA-Profil-Light (P9-Feature komplett):**
+> - `W.wca-profile-backend` (internal) — `users.wca_id`-Spalte +
+>   `GET /wca/me/profile`-Endpoint (Rate-Limit 30/min, 422/404/503
+>   differenziert) + `fetch_person()` mit 6h-Cache + 404-negative-cache.
+>   Backup-Export erweitert um `user_wca_id`. Commit `8e3bfe7`.
+> - `W.wca-profile-light` (**public**) — UI: AccountSettings WcaIdSection
+>   mit Pattern-Validation + Direkt-Link, neue `WcaProfileCard` mit
+>   Avatar/Name/Country/Delegate-Badge + Stats-Grid (Comps/Medals/
+>   Records/Events) + PB-Tabelle (Single+Average mit bestem WR/CR/NR-
+>   Badge in Gold/Lila/Blau) + Recent-Comps-Liste. Dashboard-Integration
+>   in „Speedcubing-Welt"-Sektion. 32 neue Locale-Keys DE/EN. Plus
+>   `features-data.ts` worldBullet6. Commit `7876add`.
+> - `W.wca-profile-qa` (internal) — QA-Sub-Agent fand 4 SOLLTE + 3 NICE +
+>   4 POSITIV. Demo-relevante Fixes: useQueryClient + invalidateQueries
+>   nach wca_id-Change (sonst 6h staleTime-Lock), bestRankBadge bei
+>   selbem Tier (vorher: NR-Single #10 vs NR-Average #2 → falsch #10),
+>   404-negative-cache TTL 6h→30min, backendDetail-cap 200 chars,
+>   url-nullable mit Render-Guard, NewsCard volle Breite. Commit
+>   `17e6818`.
+> - `W.qa-polish` (internal) — getIntlLocale(resolvedLanguage)-Helper in
+>   lib/format.ts. 6 Konsumenten migriert (BackupPanel, NewsCard,
+>   WcaProfileCard, LeaderboardTab, PatchNotesPanel, WcaUpcomingCard).
+>   Commit `ca0f55e`.
+> - `W.wca-profile-bugfix` (internal) — **User-Befund nach Live-Test:**
+>   Wettkampf-Count 0, Medaillen 0, Recent-Comps leer. Ursache: 4 Key-
+>   Mismatches gegen die echte WCA-API-v0 (verifiziert gegen Zemdegs):
+>   `competition_count` (Singular!) statt `competitions_count`,
+>   records-Keys `world`/`continental`/`national` statt WR/CR/NR,
+>   PR-rank-Keys `continent_rank`/`country_rank` statt
+>   `continental_rank`/`national_rank`, und `/persons/{id}` liefert
+>   GAR KEIN `competitions`-Feld — Wettkampf-Historie kommt aus
+>   `/persons/{id}/competitions` (separater Endpoint). Backend mappt
+>   die Quirks intern, Frontend unverändert. **Lesson archiviert:
+>   API-Quirks immer mit Live-Response gegenchecken.** Commit `e5c0273`.
 
-**Fr-Plan:**
-- Vormittag: HardwareList + OutlierCard + SettingsPanel + AccountSettingsPanel + features-data.ts
-- Nachmittag: WCA-Profil-Light (echter neuer Feature-Endpoint, kein i18n)
-- Spät: Konsolidierungs-Welle W.i18n-en-release
+### 🔜 Restplan Turnier-Sprint (nur noch Sa-Vormittag)
 
-**Sa Vormittag:** Demo-Probe + Last-Polish + ggf. TrainerTab/CommunityTab nachziehen.
+**Sa 30.05. Vormittag:** Demo-Probe + Last-Polish-Runde am Phone.
+Checkliste:
+- Auf EN umstellen → Klick-Through Login → Dashboard → Timer → Analyse →
+  Verwaltung. Achten auf hartkodierte DE-Reste (sollte 0 sein nach
+  W.i18n-qa + W.i18n-en-release).
+- WCA-ID setzen (eigene ID des Demo-Users) → WCA-Karte erscheint sofort
+  (Cache-Invalidation post-QA-Fix verifiziert) → Wettkampf-Count +
+  Medaillen + PRs + Recent-Comps zeigen echte Zahlen.
+- Solve eintippen, Penalty toggeln, AO5/AO12 prüfen.
+- Backup-Download in EN-Modus → JSON enthält `user_wca_id`-Feld.
+
+**Optionale Post-Demo-Items (Backlog, nicht Sprint-blocker):**
+- Volle Roadmap-Übersetzung (~1h: ROADMAP_INTRO + 6 Phase-Titles + 50
+  Item-Titles + 30 Notes nach `roadmap.*` Locale-Keys). Aktuell zeigt
+  EN-Modal den amber „German only"-Banner.
+- AdminStatsPanel + AdminUsersPanel hartkodiert `"de-DE"` — Admin-only,
+  Demo-irrelevant, getIntlLocale-Migration für Vollständigkeit.
+- Backend-Test-Suite (P6, intern) — 0% Coverage, Smoke-Tests pro
+  Endpoint-Cluster.
 
 ### Welle 1 — #2 Average-PB-Punkte + Hook-Drift
 

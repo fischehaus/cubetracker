@@ -82,18 +82,39 @@ git log "$LAST_TAG..HEAD" --name-only --pretty=format:"COMMIT:%h %s" \
 - **Für jeden User-facing-feat()-Commit wurde auch `features-data.ts` mit-geändert:** ✓.
 - **Mindestens eine User-facing-Welle ohne `features-data.ts`-Update:** ⚠ Auflisten, fragen ob du Bullets ergänzt.
 
-### 6. STATUS.md / NEXT_SESSION.md veraltet?
+### 6. NEXT_SESSION.md veraltet? (auto-fix wenn ja)
 
 ```bash
 # letzte Modifikation der Doku
 git log -1 --format="%h %ai %s" -- ROADMAP.md NEXT_SESSION.md 2>&1
-git log -1 --format="%h %ai %s" -- D:/Claude-Projekte/STATUS.md 2>&1 || true
 # letzter Commit insgesamt
 git log -1 --format="%h %ai %s"
+# Lücke: wieviele Commits zwischen letzter NEXT_SESSION-Touch und HEAD?
+LAST_DOC=$(git log -1 --format="%H" -- NEXT_SESSION.md)
+git rev-list --count "$LAST_DOC..HEAD"
 ```
 
-- **Doku-Modifikation neuer als letzter signifikanter Commit:** ✓.
-- **Doku veraltet (Lücke > 3 Commits):** ⚠ Erinnern dass STATUS.md / NEXT_SESSION.md ein Update vertragen würde, aber nicht zwingend fixen.
+- **Doku-Modifikation neuer als letzter signifikanter Commit (Lücke ≤ 3):** ✓.
+- **Doku veraltet (Lücke > 3 Commits):** ⚠ — **AUTOMATISCH AKTUALISIEREN
+  ohne nachzufragen.** NEXT_SESSION.md ist die Single-Source für die
+  Wiederaufnahme; wenn der `/abschluss` läuft, ist das genau der richtige
+  Moment um sie auf den finalen Stand zu bringen. Vorgehen:
+    1. Letzten ERLEDIGT-Block lesen + auf Sprint-Ende-Zustand bringen
+       (Header-Bilanz an die echten Commit/Tag-Zahlen anpassen).
+    2. Alle Wellen seit dem letzten Doku-Touch ergänzen (1-Zeilen-
+       Beschreibung pro Welle mit Tag-Name + Commit-Hash).
+    3. „🔜 Restplan"-Block neu schreiben — was offen ist nach dem
+       aktuellen Stand. Wenn der Sprint durch ist: „nur noch
+       Demo-Probe / Last-Polish".
+    4. Update committen + pushen direkt im selben Lauf
+       (`docs(session): Sprint-Abschluss-Stand` o.ä.).
+  Der User-Befund vom 2026-05-27 war der Trigger: vor der nächsten
+  Session muss eine korrekte Wiederaufnahme-Doku existieren, sonst
+  startet die folgende Session aus veraltetem Stand.
+
+  Wenn ROADMAP.md ebenfalls betroffen ist (neue Phase fertig, Items
+  abgehakt): mit-aktualisieren. STATUS.md liegt außerhalb des Repos
+  (`D:/Claude-Projekte/STATUS.md`) — nur erinnern, kein Auto-Edit.
 
 ### 7. Offene Todos in der aktuellen Session?
 
@@ -167,8 +188,8 @@ curl -s "https://www.cubetracker.de/$b" | grep -c "HIER_EINEN_NEUEN_STRING_AUS_D
 Fälligkeit prüfen, nicht den ganzen Lauf machen.
 
 ```bash
-# jüngstes Datum im Lauf-Protokoll von MAINTENANCE.md (Eintraege "- YYYY-MM-DD ..."):
-grep -oE "^- 202[0-9]-[0-9]{2}-[0-9]{2}" "D:/Projekte/cubetracker/MAINTENANCE.md" | sort | tail -1
+# jüngstes Datum im Lauf-Protokoll von MAINTENANCE.md (auch in **bold**-Form):
+grep -oE "^- (\*\*)?202[0-9]-[0-9]{2}-[0-9]{2}" "D:/Projekte/cubetracker/MAINTENANCE.md" | tr -d '*' | sort | tail -1
 ```
 
 - **Letzter Lauf < 4 Wochen her:** ✓.
@@ -188,7 +209,7 @@ Tabellarisch:
 | 3 | Patch-Notes | … |
 | 4 | Git-Tags | … |
 | 5 | features-data.ts | … |
-| 6 | Doku | … |
+| 6 | Doku (auto-fix bei ⚠) | … |
 | 7 | Todos | … |
 | 8 | Backend-Smoke | … |
 | 9 | Live-Deploy | … |
@@ -196,3 +217,7 @@ Tabellarisch:
 
 **Wenn alles grün:** „Session kann sauber beendet werden."
 **Wenn ⚠:** „Ich empfehle folgendes vor Session-Ende zu fixen: [Liste]. Soll ich?"
+
+**Sonderfall Check 6:** wenn nur die Doku ⚠ ist, NICHT fragen — direkt
+NEXT_SESSION.md aktualisieren + committen + pushen (siehe Auto-Fix-
+Anleitung im Check selbst). Erst danach das Schluss-Statement.
