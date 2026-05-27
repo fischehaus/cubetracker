@@ -8,6 +8,7 @@
 // rausgefiltert (Dev-Schuld / Bundle-Split / Test-Coverage etc.).
 // Admins sehen alles inkl. amber „intern"-Badge.
 
+import { useTranslation } from "react-i18next";
 import {
   ROADMAP_INTRO,
   ROADMAP_PHASES,
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function RoadmapModal({ onClose, isAdmin = false }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
@@ -35,22 +37,23 @@ export function RoadmapModal({ onClose, isAdmin = false }: Props) {
         <div className="flex items-start justify-between mb-2 gap-3">
           <div>
             <h2 className="text-2xl font-semibold text-gray-100">
-              🗺 Roadmap
+              {t("roadmap.title")}
             </h2>
             <p className="mt-1 text-sm text-gray-400">{ROADMAP_INTRO}</p>
           </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-100 text-2xl leading-none"
-            aria-label="Schliessen"
+            aria-label={t("roadmap.closeAria")}
           >
             ×
           </button>
         </div>
 
         <p className="mt-4 mb-5 text-xs text-gray-500">
-          Hast du Wünsche oder fehlende Punkte? Sag's uns via Footer-Link
-          „Feedback" oder direkt auf GitHub.
+          {t("roadmap.feedbackHintPrefix")}{" "}
+          <strong>„{t("roadmap.feedbackHintLink")}"</strong>{" "}
+          {t("roadmap.feedbackHintSuffix")}
         </p>
 
         <ol className="space-y-5">
@@ -108,6 +111,7 @@ function PhaseCard({
 }
 
 function ItemRow({ item }: { item: RoadmapItem }) {
+  const { t } = useTranslation();
   return (
     <li
       className={`flex items-start gap-2 ${
@@ -122,9 +126,9 @@ function ItemRow({ item }: { item: RoadmapItem }) {
         {item.internal && (
           <span
             className="ml-2 rounded px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-200 border border-amber-500/40 no-underline"
-            title="Nur für Admin sichtbar — Dev-/Tech-Schuld-Thema, User sehen das nicht"
+            title={t("roadmap.internalBadgeTitle")}
           >
-            intern
+            {t("roadmap.internalBadge")}
           </span>
         )}
         {item.effort && (

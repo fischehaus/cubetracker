@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-footer-modals",
+        released=date(2026, 5, 27),
+        title="Feedback + Patch-Notes + Roadmap-Modal DE/EN",
+        highlights=[
+            "FeedbackModal: Header + Close-Aria, Intro, 2-Mode-Tabs "
+            "(GitHub-Issue / Per Email), GitHub-Mode mit 3-Bullet-Liste "
+            "+ 2 Action-Buttons, Email-Mode mit Type-Selector (3 Optionen "
+            "Bug/Feature/Other), Message-Textarea + Placeholder + Char-"
+            "Counter, Success/Error-Messages, Send/Cancel-Buttons, Rate-"
+            "Limit-Note.",
+            "PatchNotesPanel: Loading/Error/Empty-States, Header mit "
+            "interpoliertem Entries-Count, „Aktuelle Version vom {date}\"-"
+            "Zeile mit lokalisiertem Datum (de-DE vs en-GB), Internal-"
+            "Badge + Tooltip, Commit-Hash-Tooltip.",
+            "RoadmapModal: Title + Close-Aria + Feedback-Hint mit "
+            "strong-Tag für „Feedback\"-Link, ItemRow Internal-Badge + "
+            "Tooltip.",
+            "Date-Locale für fmtDate() folgt jetzt `i18n.resolvedLanguage`.",
+            "Locales-Namespaces neu: feedback + patchNotes + roadmap "
+            "(~45 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-solve-detail",
         released=date(2026, 5, 27),
         title="Solve-Detail + Session-Switcher DE/EN",

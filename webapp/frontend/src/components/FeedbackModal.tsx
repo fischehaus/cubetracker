@@ -10,6 +10,7 @@
 // welchen wählen sollte.
 
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useSubmitFeedback, type FeedbackType } from "../lib/api";
 import { AxiosError } from "axios";
 
@@ -20,6 +21,7 @@ interface Props {
 const GITHUB_REPO_URL = "https://github.com/fischehaus/cubetracker";
 
 export function FeedbackModal({ onClose }: Props) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<"github" | "email">("github");
 
   return (
@@ -33,21 +35,18 @@ export function FeedbackModal({ onClose }: Props) {
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold text-gray-100">
-            💬 Feedback geben
+            {t("feedback.title")}
           </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-100 text-2xl leading-none"
-            aria-label="Schliessen"
+            aria-label={t("feedback.closeAria")}
           >
             ×
           </button>
         </div>
 
-        <p className="text-sm text-gray-400 mb-4">
-          Bug gefunden? Feature-Wunsch? Etwas funktioniert nicht? Es gibt
-          zwei Wege:
-        </p>
+        <p className="text-sm text-gray-400 mb-4">{t("feedback.intro")}</p>
 
         {/* Mode-Tabs */}
         <div className="flex gap-2 mb-5 border-b border-gray-700">
@@ -60,7 +59,7 @@ export function FeedbackModal({ onClose }: Props) {
                 : "border-transparent text-gray-500 hover:text-gray-300"
             }`}
           >
-            GitHub-Issue
+            {t("feedback.modeGithub")}
           </button>
           <button
             type="button"
@@ -71,7 +70,7 @@ export function FeedbackModal({ onClose }: Props) {
                 : "border-transparent text-gray-500 hover:text-gray-300"
             }`}
           >
-            Per Email (ohne GitHub-Account)
+            {t("feedback.modeEmail")}
           </button>
         </div>
 
@@ -86,21 +85,16 @@ export function FeedbackModal({ onClose }: Props) {
 // ============================================================
 
 function GitHubMode({ onClose: _onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-300">
-        Im GitHub-Issue-Tracker landen alle Reports öffentlich + andere
-        User sehen + kommentieren mit. Bevorzugt für:
-      </p>
+      <p className="text-sm text-gray-300">{t("feedback.githubIntro")}</p>
       <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
-        <li>Bug-Reports mit Reproduzier-Schritten</li>
-        <li>Feature-Wünsche bei denen Diskussion sinnvoll ist</li>
-        <li>Du hast schon einen GitHub-Account</li>
+        <li>{t("feedback.githubBullet1")}</li>
+        <li>{t("feedback.githubBullet2")}</li>
+        <li>{t("feedback.githubBullet3")}</li>
       </ul>
-      <p className="text-sm text-gray-300">
-        Wir haben Templates für Bug-Report + Feature-Wunsch, die dich
-        Schritt-für-Schritt durch die wichtigen Fragen führen.
-      </p>
+      <p className="text-sm text-gray-300">{t("feedback.githubTemplates")}</p>
 
       <div className="flex flex-wrap gap-3 pt-2">
         <a
@@ -109,7 +103,7 @@ function GitHubMode({ onClose: _onClose }: { onClose: () => void }) {
           rel="noopener noreferrer"
           className="rounded bg-purple-600 px-4 py-2 text-base font-medium text-white hover:bg-purple-700"
         >
-          🚀 Issue erstellen
+          {t("feedback.githubCreateIssue")}
         </a>
         <a
           href={`${GITHUB_REPO_URL}/issues`}
@@ -117,7 +111,7 @@ function GitHubMode({ onClose: _onClose }: { onClose: () => void }) {
           rel="noopener noreferrer"
           className="rounded border border-gray-700 px-4 py-2 text-base text-gray-300 hover:bg-gray-800 hover:text-gray-100"
         >
-          Bestehende Issues anschauen
+          {t("feedback.githubBrowseIssues")}
         </a>
       </div>
     </div>
@@ -129,6 +123,7 @@ function GitHubMode({ onClose: _onClose }: { onClose: () => void }) {
 // ============================================================
 
 function EmailMode({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const [feedbackType, setFeedbackType] = useState<FeedbackType>("other");
   const [message, setMessage] = useState("");
   const submit = useSubmitFeedback();
@@ -157,34 +152,32 @@ function EmailMode({ onClose }: { onClose: () => void }) {
   const errMsg = (() => {
     const e = submit.error as AxiosError<{ detail?: string }> | null;
     if (!e) return null;
-    return e.response?.data?.detail || e.message || "Unbekannter Fehler";
+    return e.response?.data?.detail || e.message || t("feedback.errorUnknown");
   })();
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
-      <p className="text-sm text-gray-300">
-        Schreib einfach was du hast — wir schicken das als Email an den
-        Entwickler. Deine Email-Adresse (aus dem Account) wird mitgesendet,
-        damit wir antworten können.
-      </p>
+      <p className="text-sm text-gray-300">{t("feedback.emailIntro")}</p>
 
       <label className="block">
-        <span className="text-sm font-medium text-gray-300">Worum geht's?</span>
+        <span className="text-sm font-medium text-gray-300">
+          {t("feedback.emailTypeLabel")}
+        </span>
         <select
           value={feedbackType}
           onChange={(e) => setFeedbackType(e.target.value as FeedbackType)}
           disabled={submit.isPending}
           className="mt-1 w-full max-w-xs rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
         >
-          <option value="bug">🐛 Bug — etwas funktioniert nicht</option>
-          <option value="feature">✨ Feature-Wunsch / Verbesserung</option>
-          <option value="other">💬 Allgemeines Feedback / Frage</option>
+          <option value="bug">{t("feedback.typeBug")}</option>
+          <option value="feature">{t("feedback.typeFeature")}</option>
+          <option value="other">{t("feedback.typeOther")}</option>
         </select>
       </label>
 
       <label className="block">
         <span className="text-sm font-medium text-gray-300">
-          Deine Nachricht
+          {t("feedback.messageLabel")}
         </span>
         <textarea
           value={message}
@@ -192,17 +185,17 @@ function EmailMode({ onClose }: { onClose: () => void }) {
           disabled={submit.isPending}
           rows={8}
           maxLength={4000}
-          placeholder="Beschreib das Problem oder die Idee in deinen Worten. Bei Bugs hilft: was hast du gemacht, was hast du erwartet, was ist stattdessen passiert?"
+          placeholder={t("feedback.messagePlaceholder")}
           className="mt-1 w-full rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none resize-y"
         />
         <span className="text-xs text-gray-500">
-          {trimmed.length} / 4000 Zeichen (min. 10)
+          {t("feedback.charCount", { count: trimmed.length })}
         </span>
       </label>
 
       {submit.isSuccess && (
         <div className="rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">
-          ✓ Feedback gesendet. Danke! Wir antworten so bald wir können.
+          {t("feedback.successMessage")}
         </div>
       )}
 
@@ -218,7 +211,9 @@ function EmailMode({ onClose }: { onClose: () => void }) {
           disabled={submit.isPending || tooShort || tooLong}
           className="rounded bg-purple-600 px-4 py-2 text-base font-medium text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {submit.isPending ? "Sende …" : "Feedback senden"}
+          {submit.isPending
+            ? t("feedback.sendBusy")
+            : t("feedback.sendButton")}
         </button>
         <button
           type="button"
@@ -226,10 +221,10 @@ function EmailMode({ onClose }: { onClose: () => void }) {
           disabled={submit.isPending}
           className="rounded border border-gray-700 px-3 py-2 text-base text-gray-300 hover:bg-gray-800"
         >
-          Abbrechen
+          {t("feedback.cancelButton")}
         </button>
         <span className="text-[11px] text-gray-500">
-          Rate-Limit: max. 3 Feedback-Mails pro Stunde.
+          {t("feedback.rateLimitNote")}
         </span>
       </div>
     </form>

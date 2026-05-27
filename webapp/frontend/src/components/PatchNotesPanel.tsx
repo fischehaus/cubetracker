@@ -4,11 +4,12 @@
 // Source-of-Truth für Versions-Bumps + Highlights ist die Backend-
 // Datei — kein Doppel-Pflege-Risiko.
 
+import { useTranslation } from "react-i18next";
 import { usePatchNotes, type PatchNote } from "../lib/api";
 
-function fmtDate(iso: string): string {
+function fmtDate(iso: string, locale: string): string {
   try {
-    return new Date(iso).toLocaleDateString("de-DE", {
+    return new Date(iso).toLocaleDateString(locale, {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -19,12 +20,14 @@ function fmtDate(iso: string): string {
 }
 
 export function PatchNotesPanel() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.resolvedLanguage === "en" ? "en-GB" : "de-DE";
   const { data, isLoading, error } = usePatchNotes();
 
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <p className="text-gray-400">Lade Patch Notes …</p>
+        <p className="text-gray-400">{t("patchNotes.loading")}</p>
       </div>
     );
   }
@@ -33,7 +36,8 @@ export function PatchNotesPanel() {
     return (
       <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-6">
         <p className="text-red-300">
-          Fehler beim Laden: {error instanceof Error ? error.message : "Unbekannt"}
+          {t("patchNotes.errorPrefix")}
+          {error instanceof Error ? error.message : t("patchNotes.errorUnknown")}
         </p>
       </div>
     );
@@ -42,7 +46,7 @@ export function PatchNotesPanel() {
   if (!data || data.patches.length === 0) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <p className="text-gray-400">Noch keine Patch Notes.</p>
+        <p className="text-gray-400">{t("patchNotes.empty")}</p>
       </div>
     );
   }
@@ -53,23 +57,30 @@ export function PatchNotesPanel() {
     <div className="space-y-4 max-w-3xl">
       <header>
         <h2 className="text-2xl font-semibold text-gray-100">
-          Patch Notes{" "}
+          {t("patchNotes.title")}{" "}
           <span className="text-sm text-gray-500">
-            ({data.patches.length} Einträge)
+            {t("patchNotes.countSummary", { count: data.patches.length })}
           </span>
         </h2>
         <p className="mt-1 text-sm text-gray-400">
-          Aktuelle Version:{" "}
+          {t("patchNotes.currentVersionPrefix")}{" "}
           <code className="rounded bg-purple-500/20 px-2 py-0.5 text-purple-200">
             v{latest.version}
           </code>{" "}
-          vom {fmtDate(latest.released)}
+          {t("patchNotes.currentVersionSuffix", {
+            date: fmtDate(latest.released, dateLocale),
+          })}
         </p>
       </header>
 
       <ol className="space-y-3">
         {data.patches.map((p, idx) => (
-          <PatchNoteCard key={p.version} note={p} isLatest={idx === 0} />
+          <PatchNoteCard
+            key={p.version}
+            note={p}
+            isLatest={idx === 0}
+            dateLocale={dateLocale}
+          />
         ))}
       </ol>
     </div>
@@ -79,10 +90,13 @@ export function PatchNotesPanel() {
 function PatchNoteCard({
   note,
   isLatest,
+  dateLocale,
 }: {
   note: PatchNote;
   isLatest: boolean;
+  dateLocale: string;
 }) {
+  const { t } = useTranslation();
   return (
     <li
       className={`rounded-lg border p-4 ${
@@ -105,9 +119,9 @@ function PatchNoteCard({
           {note.internal && (
             <code
               className="rounded bg-amber-500/20 px-1.5 py-0.5 text-xs font-medium text-amber-300"
-              title="Interner Eintrag — fuer Non-Admins ausgeblendet"
+              title={t("patchNotes.internalBadgeTitle")}
             >
-              intern
+              {t("patchNotes.internalBadge")}
             </code>
           )}
           <h3 className="text-base font-semibold text-gray-100">
@@ -115,11 +129,11 @@ function PatchNoteCard({
           </h3>
         </div>
         <div className="flex items-baseline gap-2 text-xs text-gray-500">
-          <time>{fmtDate(note.released)}</time>
+          <time>{fmtDate(note.released, dateLocale)}</time>
           {note.commit && (
             <code
               className="rounded bg-gray-800 px-1.5 py-0.5 text-gray-500"
-              title="Git-Commit-Hash"
+              title={t("patchNotes.commitHashTitle")}
             >
               {note.commit}
             </code>
