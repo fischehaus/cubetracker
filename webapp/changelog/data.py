@@ -44,6 +44,41 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ux-demo-polish-qa",
+        released=date(2026, 5, 28),
+        title="QA-Hotfix nach UX-Demo-Polish (0 KRITISCH + 3 SOLLTE)",
+        highlights=[
+            "QA-Sub-Agent-Review der W.ux-demo-polish + W.roadmap-"
+            "restore-Wellen: 0 KRITISCH, 3 SOLLTE, 2 NICE, 4 POSITIV. "
+            "Alle 3 SOLLTE-Findings sofort gefixt.",
+            "**SOLLTE 1** (sort_order-Kollision): bootstrap_roadmap "
+            "und bootstrap_ux_polish_items berechneten max(sort_order) "
+            "innerhalb des Loops ohne explizites db.flush() — bei 3 "
+            "P1-Items im selben Boot wuerden alle dieselbe sort_order "
+            "bekommen (autoflush nicht garantiert in allen Session-"
+            "Configs). Fix: explizites db.flush() vor jeder max()-"
+            "Query.",
+            "**SOLLTE 2** (WCAG 2.1.1): SolveList-Mobile-Card hatte "
+            "role='button' + tabIndex=0 ohne onKeyDown-Handler. Tab-"
+            "Navigation per BT-Keyboard/Folding-Phone landete auf der "
+            "Card, Enter/Space loeste aber nichts aus. Fix: onKeyDown "
+            "fuer Enter+Space hinzugefuegt (oeffnet Detail-Modal). "
+            "Echtes <button> ging nicht weil verschachtelte Aktions-"
+            "<button>s invalid waeren.",
+            "**SOLLTE 3** (Event-Bubbling): Aktions-Container in der "
+            "Mobile-Card stoppte nur onClick, nicht onKeyDown. Nach "
+            "SOLLTE-2-Fix wuerde Enter auf +2/DNF/🗑 gleichzeitig "
+            "die Aktion + das Detail-Modal triggern. Fix: onKeyDown="
+            "{(e) => e.stopPropagation()} am Container.",
+            "NICE-Findings (Backlog): PatchNotesPanel hat eigenes "
+            "hartes p-6 in Loading/Error-States (Doppel-Padding auf "
+            "Mobile). UNIQUE-Constraint auf roadmap_items.title_de "
+            "fuer Parallel-Boot-Race waere defensiv — beide selten "
+            "genug fuer spaeter.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-restore",
         released=date(2026, 5, 28),
         title="Roadmap-DB-Restore (25 fehlende Items nachgereicht)",

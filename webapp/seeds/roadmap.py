@@ -550,6 +550,11 @@ def bootstrap_ux_polish_items(db: OrmSession) -> int:
         ).scalar_one_or_none()
         if existing is not None:
             continue
+        # W.ux-demo-polish-qa (QA-SOLLTE): explizites flush() vor max()
+        # damit mehrere neue Items derselben Phase im selben Loop NICHT
+        # alle denselben max_sort zurueckkriegen (autoflush ist nicht
+        # garantiert in allen Session-Configs).
+        db.flush()
         max_sort = (
             db.execute(
                 select(func.max(RoadmapItem.sort_order)).where(
@@ -613,6 +618,10 @@ def bootstrap_roadmap(db: OrmSession) -> int:
         ).scalar_one_or_none()
         if existing is not None:
             continue
+        # W.ux-demo-polish-qa (QA-SOLLTE): explizites flush() vor max()
+        # damit mehrere neue Items derselben Phase im selben Loop nicht
+        # denselben sort_order bekommen.
+        db.flush()
         max_sort = (
             db.execute(
                 select(func.max(RoadmapItem.sort_order)).where(

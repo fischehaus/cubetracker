@@ -299,6 +299,17 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                   : "border-gray-800 bg-gray-900/40"
               } p-3 cursor-pointer hover:bg-gray-800/50`}
               onClick={() => setDetailSolve(s)}
+              // W.ux-demo-polish-qa (QA-SOLLTE WCAG 2.1.1): Tastatur-
+              // Aktivierung der Card. role="button" + tabIndex=0 ohne
+              // onKeyDown war Verstoss — die Card war fokussierbar
+              // aber nicht aktivierbar. Echtes <button> geht nicht weil
+              // verschachtelte <button>-Aktionen invalid waeren.
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setDetailSolve(s);
+                }
+              }}
               role="button"
               tabIndex={0}
             >
@@ -363,6 +374,10 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
               <div
                 className="flex gap-2 mt-2"
                 onClick={(e) => e.stopPropagation()}
+                // W.ux-demo-polish-qa (QA-SOLLTE): Keyboard-Event auch
+                // stoppen — sonst triggert Enter auf einem Aktions-
+                // Button gleichzeitig den Card-onKeyDown (Detail-Modal).
+                onKeyDown={(e) => e.stopPropagation()}
               >
                 {!s.dnf && (
                   <button
