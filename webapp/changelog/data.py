@@ -44,6 +44,50 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-en-release",
+        released=date(2026, 5, 28),
+        title="🇬🇧 Englische Version verfügbar — App komplett zweisprachig",
+        highlights=[
+            "Cubetracker ist jetzt vollständig auf Englisch nutzbar. "
+            "Im Header oben (und auf der Login-Seite oben rechts) liegt "
+            "ein 1-Klick-Sprach-Switcher mit Flaggen 🇩🇪 DE · 🇬🇧 EN — "
+            "deine Wahl wird im Browser gespeichert und beim nächsten "
+            "Besuch übernommen.",
+            "Beim allerersten Aufruf erkennt die App deine Browser-"
+            "Sprache automatisch — englischsprachige Speedcuber landen "
+            "direkt auf Englisch, alle anderen auf Deutsch. Du kannst "
+            "die Sprache jederzeit über den Header umstellen, ohne dich "
+            "neu anzumelden.",
+            "Was alles übersetzt ist: Login + Register + Passwort-vergessen, "
+            "der komplette Timer-Tab (Solve-Eingabe, Spacebar-Modus, Touch-"
+            "Modus, Trainings-Sets), das gesamte Dashboard (Stats, Letzte "
+            "Rekorde, Activity, News, WCA-Wettkämpfe, Achievements/"
+            "Challenges-Übersicht, Multi-Compare), der Analyse-Tab "
+            "(alle Charts, Solve-Liste, Filter, Solve-Detail), Trainer "
+            "(Algorithm-Trainer, Daily Challenges, Achievements), Community "
+            "(Friends, Leaderboard), die ganze Verwaltung (Sessions, "
+            "Hardware, Meine Daten inkl. Gefahren-Bereich, Outliers, "
+            "Einstellungen, Backup/Restore/Snapshots, Import/Export, "
+            "Account-Settings), alle Toaster (Achievement / Challenge / "
+            "PB), alle Modals (Feedback, Patch-Notes, Roadmap, Was-kann-"
+            "diese-App), Onboarding und der globale Footer.",
+            "Datums-Anzeigen folgen jetzt der gewählten Sprache: deutsch "
+            "= 28.05.2026, englisch = 28 May 2026. Relative Zeit-Angaben "
+            "(„vor 3 Tagen\" / „3 days ago\") ebenfalls. Zahlen-Formate "
+            "und Plural-Formen passen sich an.",
+            "Backend-Inhalte (z.B. Achievement-Texte, Patch-Notes-Historie) "
+            "bleiben in der Sprache der Erstellung — neue Patch-Notes ab "
+            "diesem Release ggf. bilingual.",
+            "Unter der Haube: react-i18next mit ~1200 Strings in beiden "
+            "Sprachen, browser-language-detector und persistenter "
+            "Sprach-Wahl im localStorage. Bundle-statisch — keine "
+            "Netzwerk-Roundtrips für Sprachwechsel.",
+            "Sprint-Bilanz: in 3 Tagen wurden ~30 i18n-Wellen umgesetzt — "
+            "der Audit-Trail dieser Einzel-Wellen ist im Admin-Changelog "
+            "unter den intern markierten Einträgen einsehbar.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-footer-modals",
         released=date(2026, 5, 27),
         title="Feedback + Patch-Notes + Roadmap-Modal DE/EN",
@@ -373,6 +417,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Best-ao12/Solves), Sort-Indicator, Footer.",
             "Locales-Namespace neu: charts (~80 Strings).",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-multi-compare",
@@ -390,6 +435,7 @@ PATCH_NOTES: list[PatchNote] = [
             "▼/▲-Erklärung übersetzt.",
             "Locales-Namespace neu: multiCompare (~26 Strings).",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-dashboard-sections",
@@ -404,6 +450,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Damit ist das Dashboard auch beim Scan über die Sektion-"
             "Header durchgehend DE/EN-konsistent.",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-danger-zone",
@@ -422,6 +469,7 @@ PATCH_NOTES: list[PatchNote] = [
             "confirm) komplett DE/EN.",
             "Locales-Namespace neu: dangerZone (~26 Strings).",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-live-card",
@@ -441,6 +489,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Delete-Confirm und Delete-Title.",
             "Locales-Namespace neu: lastSolvesPreview (~25 Strings).",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-verwaltung-1",
@@ -460,6 +509,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Outlier/Admin) folgen in weiteren Wellen.",
             "Locales-Namespaces neu: verwaltung / meineDaten.",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-toaster",
@@ -478,6 +528,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Locales-Namespaces neu: toasterAchievement / "
             "toasterChallenge / toasterPb (10 neue Strings).",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-timer-complete",
@@ -502,6 +553,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Locales-Namespaces neu: info / touchTimer / spacebarTimer "
             "/ trainingSet (44 neue Strings gesamt).",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-jsonfix-qa",
@@ -549,6 +601,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Locales-Namespaces neu: activity / news / wca / "
             "achievementsMini / challengesMini.",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-auth-pages",
@@ -565,6 +618,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Import-Tipp, Dismiss-Aria-Label.",
             "Locales-Namespaces neu: authPages.* + onboarding.*.",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-list",
@@ -583,6 +637,7 @@ PATCH_NOTES: list[PatchNote] = [
             "filters.* (7 Strings, geteilt zwischen Analyse- und "
             "Dashboard-Filter-Bar).",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-stats",
@@ -601,6 +656,7 @@ PATCH_NOTES: list[PatchNote] = [
             "der jeweiligen Sprache. Plural-Form für Cube-Counter.",
             "Locales-Namespaces neu: stats.*, recentPbs.*, reminders.*.",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-timer",
@@ -624,6 +680,7 @@ PATCH_NOTES: list[PatchNote] = [
             "health.* — jede Komponente hat ihren eigenen Block, damit "
             "die JSON-Files lesbar bleiben.",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-flags",
@@ -646,6 +703,7 @@ PATCH_NOTES: list[PatchNote] = [
             "dokumentierten KI-unterstützten Code, auch für visuelle "
             "Marken-Assets.",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-loginpage",
@@ -664,6 +722,7 @@ PATCH_NOTES: list[PatchNote] = [
             "der Login-Page bleiben in dieser Welle noch deutsch — werden "
             "in einer separaten Welle aus features-data.ts gehoben.",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.i18n-setup",
@@ -695,6 +754,7 @@ PATCH_NOTES: list[PatchNote] = [
             "Pass — Live-Add ohne Neu-Deploy nicht möglich, dafür "
             "bundle-statisch (schneller).",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.roadmap-intern",
