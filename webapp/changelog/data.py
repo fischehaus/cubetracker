@@ -44,6 +44,33 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feedback-inbox-ui",
+        released=date(2026, 5, 28),
+        title="Admin-Feedback-Inbox-UI mit Filter + Antwort-Workflow",
+        highlights=[
+            "Phase 3 (Frontend) der Tester+Feedback-Welle: neuer "
+            "AdminFeedbackInboxPanel im Admin-Tab unter Stats.",
+            "Header zeigt Stats-Badges für offene Kategorien (rot bei "
+            "Bugs, lila bei Features, blau bei Allgemein, grau bei "
+            "Sonstigem) — auf einen Blick siehst du was hängt.",
+            "Filter-Bar: Status (Alle/Neu/In-Bearbeitung/Erledigt/"
+            "Archiviert) + Kategorie. Liste sortiert nach „status='new' "
+            "zuerst, dann nach Datum descending\".",
+            "Pro Item: Kategorie-Badge + Status-Badge + Antwort-Badge "
+            "(💬 Antwort gesehen / wartet auf User), User-Info, Datum, "
+            "expandable Message (truncated nach 200 Zeichen).",
+            "Quick-Toggles (in-progress / done / archive) + Antwort-"
+            "Editor (Textarea + Save) + Delete mit Confirm. Antwort "
+            "schreiben setzt Status automatisch auf in_progress wenn "
+            "vorher new.",
+            "Per-Row-Busy-Disable (analog AdminRoadmapPanel-Pattern). "
+            "Mutations invalidieren ['admin-feedback'] + ['admin-"
+            "feedback-stats'].",
+            "45 neue Locale-Keys DE/EN symmetrisch (1258/1258).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feedback-modal-rebuild",
         released=date(2026, 5, 28),
         title="Feedback-Modal: „Per Email\"-Mode raus, „Per App\"-Mode rein",
