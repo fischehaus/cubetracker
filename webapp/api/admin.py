@@ -38,12 +38,20 @@ from db.models import (
     Achievement,
     Hardware,
     LiveTest,
+    RoadmapItem,
     Session as DbSession,
     Snapshot,
     Solve,
     User,
 )
-from db.schemas import LiveTestCreate, LiveTestRead, LiveTestUpdate
+from db.schemas import (
+    LiveTestCreate,
+    LiveTestRead,
+    LiveTestUpdate,
+    RoadmapItemCreate,
+    RoadmapItemRead,
+    RoadmapItemUpdate,
+)
 from emailing.service import send_admin_message
 from services import github as gh_service
 
@@ -779,3 +787,118 @@ def delete_live_test(
     db.delete(test)
     db.commit()
     logger.info("[ADMIN] %s deleted live-test %s", admin.email, test_id)
+
+
+# ============================================================
+# Roadmap-Items (Phase W.roadmap-db, 2026-05-28)
+# ============================================================
+# Cross-Admin-Visibility: keine per-User-Filter. Jeder Admin sieht alle
+# Items (via Public GET /roadmap mit is_admin=True) und kann jedes
+# Item bearbeiten/löschen. Public-User bekommen internal=True-Items
+# nicht geliefert (Filter im Public-Endpoint /roadmap).
+
+
+@router.post("/roadmap/items", status_code=status.HTTP_201_CREATED)
+@limiter.limit(ADMIN_LIMIT)
+def create_roadmap_item(
+    request: Request,
+    payload: RoadmapItemCreate,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Neues Roadmap-Item anlegen. Wenn sort_order nicht gesetzt: ans
+    Ende der Phase (max(existing) + 10) — lässt Lücken für späteres
+    Einsortieren ohne Komplett-Reordering."""
+    if payload.sort_order is not None:
+        sort_order = payload.sort_order
+    else:
+        # Max sort_order in der Phase + 10. Wenn Phase leer: 10.
+        max_so = db.execute(
+            select(func.coalesce(func.max(RoadmapItem.sort_order), 0)).where(
+                RoadmapItem.phase_id == payload.phase_id
+            )
+        ).scalar() or 0
+        sort_order = int(max_so) + 10
+    item = RoadmapItem(
+        phase_id=payload.phase_id,
+        sort_order=sort_order,
+        title_de=payload.title_de.strip(),
+        title_en=payload.title_en.strip(),
+        note_de=(payload.note_de.strip() if payload.note_de else None),
+        note_en=(payload.note_en.strip() if payload.note_en else None),
+        effort=(payload.effort.strip() if payload.effort else None),
+        status=payload.status,
+        internal=payload.internal,
+    )
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    logger.info(
+        "[ADMIN] %s created roadmap-item %s (phase=%s, '%s')",
+        admin.email,
+        item.id,
+        item.phase_id,
+        item.title_de[:50],
+    )
+    return RoadmapItemRead.model_validate(item).model_dump(mode="json")
+
+
+@router.patch("/roadmap/items/{item_id}")
+@limiter.limit(ADMIN_LIMIT)
+def update_roadmap_item(
+    request: Request,
+    item_id: int,
+    payload: RoadmapItemUpdate,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Patch: einzelne Felder ändern. Mindestens 1 Feld muss gesetzt sein."""
+    item = db.get(RoadmapItem, item_id)
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Roadmap-Item nicht gefunden.",
+        )
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mindestens ein Feld muss gesetzt sein.",
+        )
+    for key, value in updates.items():
+        # Strings trimmen (Pflichtfelder werden ohnehin via min_length=1
+        # validiert, optionale dürfen leer-String → None werden).
+        if key in ("title_de", "title_en") and isinstance(value, str):
+            value = value.strip()
+        elif key in ("note_de", "note_en", "effort") and isinstance(value, str):
+            value = value.strip() or None
+        setattr(item, key, value)
+    db.commit()
+    db.refresh(item)
+    logger.info(
+        "[ADMIN] %s patched roadmap-item %s -> %s",
+        admin.email,
+        item.id,
+        list(updates.keys()),
+    )
+    return RoadmapItemRead.model_validate(item).model_dump(mode="json")
+
+
+@router.delete("/roadmap/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(ADMIN_LIMIT)
+def delete_roadmap_item(
+    request: Request,
+    item_id: int,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> None:
+    """Löscht ein Roadmap-Item permanent."""
+    item = db.get(RoadmapItem, item_id)
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Roadmap-Item nicht gefunden.",
+        )
+    db.delete(item)
+    db.commit()
+    logger.info("[ADMIN] %s deleted roadmap-item %s", admin.email, item_id)

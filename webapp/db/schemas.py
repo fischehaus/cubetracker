@@ -304,3 +304,69 @@ class LiveTestRead(BaseModel):
     github_issue_number: int | None
     created_at: datetime
     created_by_user_id: int | None
+
+
+# ============================================================
+# Roadmap-Schemas (Phase W.roadmap-db, 2026-05-28)
+# ============================================================
+
+# Erlaubte Phase-IDs — müssen mit roadmap-phases.ts clientseitig
+# übereinstimmen. Bei Erweiterung beide Stellen anpassen.
+RoadmapPhaseIdLiteral = Literal["P1", "P2", "P3", "P4", "P5", "P6"]
+RoadmapStatusLiteral = Literal["active", "done"]
+
+
+class RoadmapItemRead(BaseModel):
+    """Read-Schema für Roadmap-Item (Public + Admin).
+
+    Beide Sprachen werden mit-geliefert — Frontend rendert je nach UI-
+    Sprache. `internal` ist nur sinnvoll für Admins (Non-Admins bekommen
+    die Items mit internal=True gar nicht erst geliefert).
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    phase_id: str
+    sort_order: int
+    title_de: str
+    title_en: str
+    note_de: str | None
+    note_en: str | None
+    effort: str | None
+    status: str
+    internal: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class RoadmapItemCreate(BaseModel):
+    """Payload zum Anlegen eines neuen Roadmap-Items (Admin-only)."""
+
+    model_config = ConfigDict(extra="forbid")
+    phase_id: RoadmapPhaseIdLiteral
+    title_de: str = Field(min_length=1, max_length=256)
+    title_en: str = Field(min_length=1, max_length=256)
+    note_de: str | None = Field(default=None, max_length=2000)
+    note_en: str | None = Field(default=None, max_length=2000)
+    effort: str | None = Field(default=None, max_length=64)
+    status: RoadmapStatusLiteral = "active"
+    internal: bool = False
+    # Optional: wenn nicht gesetzt, hängt das Item ans Ende der Phase
+    # (sort_order = max(existing) + 10).
+    sort_order: int | None = None
+
+
+class RoadmapItemUpdate(BaseModel):
+    """Patch: einzelne Felder ändern (alle optional)."""
+
+    model_config = ConfigDict(extra="forbid")
+    phase_id: RoadmapPhaseIdLiteral | None = None
+    title_de: str | None = Field(default=None, min_length=1, max_length=256)
+    title_en: str | None = Field(default=None, min_length=1, max_length=256)
+    note_de: str | None = Field(default=None, max_length=2000)
+    note_en: str | None = Field(default=None, max_length=2000)
+    effort: str | None = Field(default=None, max_length=64)
+    status: RoadmapStatusLiteral | None = None
+    internal: bool | None = None
+    sort_order: int | None = None

@@ -474,6 +474,60 @@ class NewsItem(Base):
     )
 
 
+class RoadmapItem(Base):
+    """Roadmap-Item (Phase W.roadmap-db, 2026-05-28).
+
+    Pflegbar via Admin-UI. Global pro Repo, kein user_id. Zwei-sprachig
+    persistiert (title_de + title_en + note_de + note_en), die UI rendert
+    je nach UI-Sprache.
+
+    Phase-Meta (P1-P6 Titel + Summary + Timeframe + Status) bleibt clientseitig
+    als Konstante in `webapp/frontend/src/lib/roadmap-phases.ts` — Phasen
+    ändern sich selten, Items häufig.
+
+    Sichtbarkeit: `internal=True` blendet aus dem Public-View aus (Tech-
+    Schuld-Items / Dev-Workflow). Admin sieht alles inkl. amber Badge.
+    """
+
+    __tablename__ = "roadmap_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # Phase-Identifier ("P1" - "P6"). Validation client-seitig + im Endpoint.
+    phase_id: Mapped[str] = mapped_column(String(8), nullable=False, index=True)
+    # Reihenfolge innerhalb der Phase (niedriger = oben). Bei Equal: nach id ASC.
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    title_de: Mapped[str] = mapped_column(String(256), nullable=False)
+    title_en: Mapped[str] = mapped_column(String(256), nullable=False)
+    note_de: Mapped[str | None] = mapped_column(Text, nullable=True)
+    note_en: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Aufwand-Schätzung (z.B. "~1 Tag", "1-2 Wochen"). Sprach-unabhängig.
+    effort: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # status: "active" (offen, Default) | "done" (✓ + Strich). Admin kann
+    # done-Items behalten („gerade fertig") oder löschen (verschwindet aus
+    # User-View komplett).
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="active", server_default="active"
+    )
+    # internal=True → nur Admin sieht das Item (Tech-Schuld, Dev-Workflow).
+    internal: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+    )
+
+    __table_args__ = (
+        # Sort-Index für die Standard-Query "alle items pro phase, sortiert".
+        Index("ix_roadmap_phase_order", "phase_id", "sort_order"),
+    )
+
+
 class PostalCodeGeo(Base):
     """Geocoding-Cache für Postleitzahlen (Phase W.wca-comps).
 

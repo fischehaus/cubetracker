@@ -44,6 +44,40 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-db",
+        released=date(2026, 5, 28),
+        title="Roadmap in DB — Schema + Seed + Endpoints (Backend)",
+        highlights=[
+            "Roadmap-Items wandern aus der statischen lib/roadmap-data.ts "
+            "in eine echte DB-Tabelle (roadmap_items) — Admin kann ab "
+            "der nächsten Welle (W.roadmap-admin-ui) im Tab Admin neue "
+            "Items anlegen, bestehende editieren, löschen, und das "
+            "internal-Flag toggeln.",
+            "Schema: id + phase_id (P1-P6) + sort_order + title_de + "
+            "title_en + note_de + note_en + effort + status + internal "
+            "+ created_at + updated_at. Migration in main.py:lifespan "
+            "(create_all + defensive CREATE INDEX IF NOT EXISTS).",
+            "Seed: 28 kuratierte Items aus dem alten roadmap-data.ts, "
+            "ALLE done-Items wurden gestrichen (Sprint-Bereinigung — "
+            "Hetzner-Migration komplett, Backlog fertig, Turnier-Sprint "
+            "live). Pro Item DE + EN Übersetzung — der germanOnlyNotice-"
+            "Banner aus W.i18n-roadmap-notice wird in der nächsten Welle "
+            "obsolet.",
+            "Public-Endpoint GET /api/roadmap: liefert alle Items "
+            "sortiert nach (phase_id, sort_order, id). Non-Admin "
+            "filtert internal=True raus. Admin sieht alles + flag im "
+            "Response.",
+            "Admin-CRUD: POST /api/admin/roadmap/items, PATCH /api/"
+            "admin/roadmap/items/{id}, DELETE /api/admin/roadmap/items/"
+            "{id}. Alle mit ADMIN_LIMIT-Rate-Limit. Cross-Admin: jeder "
+            "Admin sieht + bearbeitet alle Items, kein per-User-Filter.",
+            "Bootstrap idempotent via Count-Check auf roadmap_items. "
+            "Beim zweiten Container-Start passiert nichts mehr — der "
+            "Admin pflegt ab dann selbst.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.demo-probe-meppel-seed",
         released=date(2026, 5, 28),
         title="Demo-Probe-Live-Tests vor Meppel-Turnier (Admin-Bootstrap)",

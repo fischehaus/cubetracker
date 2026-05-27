@@ -29,6 +29,7 @@ from api import hardware as hardware_api
 from api import import_cstimer as import_api
 from api import leaderboard as leaderboard_api
 from api import news as news_api
+from api import roadmap as roadmap_api
 from api import sessions as sessions_api
 from api import solves as solves_api
 from api import stats as stats_api
@@ -103,6 +104,13 @@ async def lifespan(app: FastAPI):
                 # client+server-seitig).
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS wca_id VARCHAR(10)",
                 "CREATE INDEX IF NOT EXISTS ix_users_wca_id ON users (wca_id)",
+                # Phase W.roadmap-db (2026-05-28): persistente Roadmap-Items.
+                # Schema kommt aus db.models.RoadmapItem (create_all() oben
+                # hat sie schon angelegt — diese Statements sind defensive
+                # Idempotenz-Checks falls eine alte DB-Version existiert).
+                # Indexe sind im Modell deklariert, hier auch nur defensive.
+                "CREATE INDEX IF NOT EXISTS ix_roadmap_items_phase_id ON roadmap_items (phase_id)",
+                "CREATE INDEX IF NOT EXISTS ix_roadmap_phase_order ON roadmap_items (phase_id, sort_order)",
             ]
             with engine.begin() as conn:
                 for sql in migrations:
@@ -175,6 +183,23 @@ async def lifespan(app: FastAPI):
                         )
             except Exception as lt_e:  # noqa: BLE001
                 print(f"WARN: demo-probe live-tests bootstrap failed: {lt_e}")
+
+            # W.roadmap-db (2026-05-28): einmaliger Bootstrap der Roadmap-
+            # Items aus seeds/roadmap.py. Idempotent — wenn schon Items
+            # in roadmap_items existieren, wird nichts angelegt. Ab dann
+            # pflegt der Admin via /admin/roadmap-Endpoints + Admin-UI.
+            try:
+                from seeds.roadmap import bootstrap_roadmap
+                from db.database import SessionLocal
+
+                with SessionLocal() as rm_db:
+                    created = bootstrap_roadmap(rm_db)
+                    if created > 0:
+                        print(
+                            f"INFO: roadmap bootstrap -> {created} Items angelegt"
+                        )
+            except Exception as rm_e:  # noqa: BLE001
+                print(f"WARN: roadmap bootstrap failed: {rm_e}")
         except Exception as e:  # noqa: BLE001
             print(f"WARN: DB schema-init failed: {e}")
     yield
@@ -245,6 +270,7 @@ api_router.include_router(changelog_api.router)
 api_router.include_router(wca_api.router)
 api_router.include_router(news_api.router)
 api_router.include_router(feedback_api.router)
+api_router.include_router(roadmap_api.router)
 app.include_router(api_router)
 
 
