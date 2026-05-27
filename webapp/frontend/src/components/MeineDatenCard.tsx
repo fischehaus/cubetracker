@@ -3,9 +3,11 @@
 // Die detaillierten Tools (Restore, Snapshots, Import) leben darunter im
 // BackupPanel / ImportPanel.
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { downloadFullBackup } from "../lib/backup";
 
 export function MeineDatenCard() {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +18,7 @@ export function MeineDatenCard() {
       await downloadFullBackup();
     } catch (e) {
       console.error("downloadFullBackup fehlgeschlagen:", e);
-      setError("Backup konnte nicht erstellt werden. Bitte nochmal versuchen.");
+      setError(t("meineDaten.downloadError"));
     } finally {
       setBusy(false);
     }
@@ -26,10 +28,10 @@ export function MeineDatenCard() {
     <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-6 space-y-4">
       <div>
         <h2 className="text-2xl font-semibold text-gray-100">
-          🔒 Deine Daten gehören dir
+          {t("meineDaten.title")}
         </h2>
         <p className="text-sm text-gray-300 mt-1">
-          Du hast jederzeit die volle Kontrolle über deine Daten.
+          {t("meineDaten.subtitle")}
         </p>
       </div>
 
@@ -37,34 +39,39 @@ export function MeineDatenCard() {
         <li className="flex items-start gap-2">
           <span className="text-emerald-400 mt-0.5">✓</span>
           <span>
-            <strong className="text-gray-100">Vollständiges Backup</strong> all
-            deiner Solves, Sessions, Hardware &amp; Achievements — jederzeit als
-            offenes, lesbares JSON.
+            <strong className="text-gray-100">
+              {t("meineDaten.bullet1Strong")}
+            </strong>{" "}
+            {t("meineDaten.bullet1Rest")}
           </span>
         </li>
         <li className="flex items-start gap-2">
           <span className="text-emerald-400 mt-0.5">✓</span>
           <span>
-            Jederzeit wieder{" "}
-            <strong className="text-gray-100">importieren</strong> oder deinen{" "}
-            <strong className="text-gray-100">Account komplett löschen</strong>{" "}
-            (unter „Account").
+            {t("meineDaten.bullet2Prefix")}{" "}
+            <strong className="text-gray-100">
+              {t("meineDaten.bullet2Import")}
+            </strong>{" "}
+            {t("meineDaten.bullet2Middle")}{" "}
+            <strong className="text-gray-100">
+              {t("meineDaten.bullet2DeleteAccount")}
+            </strong>{" "}
+            {t("meineDaten.bullet2Suffix")}
           </span>
         </li>
         <li className="flex items-start gap-2">
           <span className="text-emerald-400 mt-0.5">✓</span>
           <span>
-            Zusätzlich sichern wir die Datenbank{" "}
-            <strong className="text-gray-100">täglich automatisch</strong>{" "}
-            (Server in Deutschland/EU) — gegen Datenverlust.
+            {t("meineDaten.bullet3Prefix")}{" "}
+            <strong className="text-gray-100">
+              {t("meineDaten.bullet3Daily")}
+            </strong>{" "}
+            {t("meineDaten.bullet3Suffix")}
           </span>
         </li>
         <li className="flex items-start gap-2">
           <span className="text-emerald-400 mt-0.5">✓</span>
-          <span>
-            Kein Verkauf und keine Weitergabe deiner Daten an Dritte zu
-            Werbezwecken.
-          </span>
+          <span>{t("meineDaten.bullet4")}</span>
         </li>
       </ul>
 
@@ -74,7 +81,9 @@ export function MeineDatenCard() {
           disabled={busy}
           className="rounded-lg bg-emerald-600 px-5 py-2.5 text-white font-medium hover:bg-emerald-700 disabled:opacity-50"
         >
-          {busy ? "Wird vorbereitet…" : "📥 Vollständiges Backup herunterladen"}
+          {busy
+            ? t("meineDaten.downloadPreparing")
+            : t("meineDaten.downloadButton")}
         </button>
         {error && (
           <div className="mt-2 rounded border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm text-red-300">
@@ -83,9 +92,7 @@ export function MeineDatenCard() {
         )}
       </div>
 
-      <p className="text-xs text-gray-500">
-        Wiederherstellen, Snapshots &amp; csTimer-Import findest du weiter unten.
-      </p>
+      <p className="text-xs text-gray-500">{t("meineDaten.moreToolsHint")}</p>
     </div>
   );
 }

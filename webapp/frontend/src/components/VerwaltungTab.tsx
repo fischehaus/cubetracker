@@ -6,6 +6,7 @@
 // reload erhalten, das ist OK für einen verwaltungs-tab).
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { AdminPanel } from "./AdminPanel";
 import { BackupPanel } from "./BackupPanel";
@@ -35,23 +36,39 @@ interface SubTab {
   icon: string;
 }
 
-const SUB_TABS: SubTab[] = [
-  { id: "sessions", label: "Sessions", icon: "📁" },
-  { id: "hardware", label: "Hardware", icon: "🧊" },
-  { id: "daten", label: "Meine Daten", icon: "📥" },
-  { id: "outliers", label: "Outliers", icon: "⚠" },
-  { id: "settings", label: "Einstellungen", icon: "⚙" },
+// Reihenfolge + Icons sprach-unabhaengig; Labels via t() zur Render-Zeit.
+const SUB_TAB_ICONS: Record<VerwaltungSection, string> = {
+  sessions: "📁",
+  hardware: "🧊",
+  daten: "📥",
+  outliers: "⚠",
+  settings: "⚙",
+  admin: "🛡",
+};
+
+const SUB_TAB_ORDER: VerwaltungSection[] = [
+  "sessions",
+  "hardware",
+  "daten",
+  "outliers",
+  "settings",
 ];
 
-// Admin-Tab nur für User mit is_admin === true (env-driven, siehe
-// backend api/admin.py). Liegt am Ende um die Tab-Reihenfolge für
-// Non-Admins stabil zu halten.
-const ADMIN_TAB: SubTab = { id: "admin", label: "Admin", icon: "🛡" };
-
 export function VerwaltungTab() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.is_admin ?? false;
-  const tabs = isAdmin ? [...SUB_TABS, ADMIN_TAB] : SUB_TABS;
+  const baseTabs: SubTab[] = SUB_TAB_ORDER.map((id) => ({
+    id,
+    label: t(`verwaltung.${id}`),
+    icon: SUB_TAB_ICONS[id],
+  }));
+  const adminTab: SubTab = {
+    id: "admin",
+    label: t("verwaltung.admin"),
+    icon: SUB_TAB_ICONS.admin,
+  };
+  const tabs = isAdmin ? [...baseTabs, adminTab] : baseTabs;
 
   const [section, setSection] = useState<VerwaltungSection>("sessions");
 
@@ -88,7 +105,7 @@ export function VerwaltungTab() {
         tabs={tabs}
         current={section}
         onChange={(id) => setSection(id as VerwaltungSection)}
-        ariaLabel="Verwaltungs-Bereiche"
+        ariaLabel={t("verwaltung.ariaSubTabs")}
         size="md"
       />
 
@@ -104,18 +121,12 @@ export function VerwaltungTab() {
               im Spiel (Cubetracker-Backup vs csTimer-Export).
               User-Verwirrung-Potenzial hoch -> klarer Aufmacher. */}
           <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-4 text-sm text-blue-200">
-            <p className="font-medium mb-1">Welches Format hast du?</p>
+            <p className="font-medium mb-1">
+              {t("verwaltung.formatHintTitle")}
+            </p>
             <ul className="list-disc list-inside space-y-1 text-xs text-blue-100/80">
-              <li>
-                <strong>Cubetracker-Backup</strong> (Filename z.B.{" "}
-                <code>cubetracker_…_….json</code>): unter
-                <strong> „Backup &amp; Wiederherstellung"</strong> hochladen.
-              </li>
-              <li>
-                <strong>csTimer-Export</strong> (Filename z.B.{" "}
-                <code>cstimer_20260513_….txt</code> oder <code>.json</code>):
-                unter <strong> „csTimer-Import"</strong> hochladen.
-              </li>
+              <li>{t("verwaltung.formatHintBackup")}</li>
+              <li>{t("verwaltung.formatHintCstimer")}</li>
             </ul>
           </div>
 

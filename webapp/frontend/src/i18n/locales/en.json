@@ -333,6 +333,37 @@
     "patchNotesTitle": "Show patch notes",
     "closeAria": "Close"
   },
+  "verwaltung": {
+    "ariaSubTabs": "Settings sections",
+    "sessions": "Sessions",
+    "hardware": "Hardware",
+    "daten": "My data",
+    "outliers": "Outliers",
+    "settings": "Preferences",
+    "admin": "Admin",
+    "formatHintTitle": "Which format do you have?",
+    "formatHintBackup": "Cubetracker backup (filename e.g. cubetracker_…_….json): upload under \"Backup & restore\".",
+    "formatHintCstimer": "csTimer export (filename e.g. cstimer_20260513_….txt or .json): upload under \"csTimer import\"."
+  },
+  "meineDaten": {
+    "title": "🔒 Your data belongs to you",
+    "subtitle": "You're in full control of your data at any time.",
+    "bullet1Strong": "Full backup",
+    "bullet1Rest": "of all your solves, sessions, hardware & achievements — at any time as open, readable JSON.",
+    "bullet2Prefix": "Re-",
+    "bullet2Import": "import",
+    "bullet2Middle": "at any time, or",
+    "bullet2DeleteAccount": "delete your account entirely",
+    "bullet2Suffix": "(under \"Account\").",
+    "bullet3Prefix": "We additionally back up the database",
+    "bullet3Daily": "automatically every day",
+    "bullet3Suffix": "(servers in Germany/EU) — protecting against data loss.",
+    "bullet4": "No selling or sharing of your data with third parties for advertising.",
+    "downloadPreparing": "Preparing…",
+    "downloadButton": "📥 Download full backup",
+    "downloadError": "Backup could not be created. Please try again.",
+    "moreToolsHint": "Restore, snapshots & csTimer import are further down."
+  },
   "toasterAchievement": {
     "unlockedLabel": "🏆 Achievement unlocked",
     "closeAria": "Close toast",

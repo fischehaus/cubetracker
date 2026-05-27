@@ -333,6 +333,37 @@
     "patchNotesTitle": "Patch Notes anzeigen",
     "closeAria": "Schließen"
   },
+  "verwaltung": {
+    "ariaSubTabs": "Verwaltungs-Bereiche",
+    "sessions": "Sessions",
+    "hardware": "Hardware",
+    "daten": "Meine Daten",
+    "outliers": "Outliers",
+    "settings": "Einstellungen",
+    "admin": "Admin",
+    "formatHintTitle": "Welches Format hast du?",
+    "formatHintBackup": "Cubetracker-Backup (Filename z.B. cubetracker_…_….json): unter „Backup & Wiederherstellung\" hochladen.",
+    "formatHintCstimer": "csTimer-Export (Filename z.B. cstimer_20260513_….txt oder .json): unter „csTimer-Import\" hochladen."
+  },
+  "meineDaten": {
+    "title": "🔒 Deine Daten gehören dir",
+    "subtitle": "Du hast jederzeit die volle Kontrolle über deine Daten.",
+    "bullet1Strong": "Vollständiges Backup",
+    "bullet1Rest": "all deiner Solves, Sessions, Hardware & Achievements — jederzeit als offenes, lesbares JSON.",
+    "bullet2Prefix": "Jederzeit wieder",
+    "bullet2Import": "importieren",
+    "bullet2Middle": "oder deinen",
+    "bullet2DeleteAccount": "Account komplett löschen",
+    "bullet2Suffix": "(unter „Account\").",
+    "bullet3Prefix": "Zusätzlich sichern wir die Datenbank",
+    "bullet3Daily": "täglich automatisch",
+    "bullet3Suffix": "(Server in Deutschland/EU) — gegen Datenverlust.",
+    "bullet4": "Kein Verkauf und keine Weitergabe deiner Daten an Dritte zu Werbezwecken.",
+    "downloadPreparing": "Wird vorbereitet…",
+    "downloadButton": "📥 Vollständiges Backup herunterladen",
+    "downloadError": "Backup konnte nicht erstellt werden. Bitte nochmal versuchen.",
+    "moreToolsHint": "Wiederherstellen, Snapshots & csTimer-Import findest du weiter unten."
+  },
   "toasterAchievement": {
     "unlockedLabel": "🏆 Erfolg freigeschaltet",
     "closeAria": "Toast schließen",

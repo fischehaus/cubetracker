@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-verwaltung-1",
+        released=date(2026, 5, 27),
+        title="Verwaltung-Tab Header + Meine-Daten-Card in Englisch",
+        highlights=[
+            "Verwaltung-Sub-Tab-Bar komplett übersetzt: Sessions / "
+            "Hardware / Meine Daten / Outliers / Einstellungen (+ "
+            "Admin-Tab für Admin-User) folgen jetzt der UI-Sprache.",
+            "Meine-Daten-Card (oben im Daten-Sub-Tab): Header, "
+            "Sub-Title, alle 4 Ownership-Bullets, Backup-Download-"
+            "Button und Fehler-Meldung — komplett DE/EN.",
+            "Format-Hint-Block im Daten-Tab (Cubetracker-Backup vs "
+            "csTimer-Export) ebenfalls übersetzt.",
+            "Restliche Sub-Panels (Backup/Import/CsTimer-Export/Danger-"
+            "Zone/SessionList/HardwareList/Settings/AccountSettings/"
+            "Outlier/Admin) folgen in weiteren Wellen.",
+            "Locales-Namespaces neu: verwaltung / meineDaten.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-toaster",
         released=date(2026, 5, 27),
         title="Achievement-/Challenge-/PB-Toaster in Englisch",
