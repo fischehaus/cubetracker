@@ -68,6 +68,14 @@ export function MyFeedbackPanel() {
   // Wenn der User ein Item mit ungelesener Antwort aufklappt → als
   // gelesen markieren (Server-Update). Idempotent — wenn schon
   // gelesen, kein Re-Update.
+  //
+  // QA-Fix W.tester-feedback-qa: nur auf expandedId-Change feuern, NICHT
+  // auf messages-Change. Sonst wird beim 60s-Refetch alle 60s erneut
+  // markSeen gefeuert solange ein Item aufgeklappt ist (Backend ist
+  // idempotent, aber unnoetiger Traffic). messages-Stand wird via
+  // Closure beim expandedId-Change ausgewertet — das ist gewollt
+  // weil danach ohnehin invalidiert wird.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (expandedId === null) return;
     const item = messages.find((m) => m.id === expandedId);
@@ -75,7 +83,7 @@ export function MyFeedbackPanel() {
     if (item.admin_response && !item.user_seen_response_at) {
       markSeen.mutate({ id: expandedId });
     }
-  }, [expandedId, messages, markSeen]);
+  }, [expandedId]);
 
   if (isLoading) {
     return (

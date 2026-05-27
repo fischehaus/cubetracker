@@ -36,7 +36,11 @@ from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from db.database import get_db
 from db.models import FeedbackMessage, User
-from db.schemas import FeedbackMessageCreate, FeedbackMessageRead
+from db.schemas import (
+    FeedbackMessageCreate,
+    FeedbackMessageRead,
+    FeedbackMessageUserRead,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +76,8 @@ def create_feedback_message(
         payload.category,
         msg.id,
     )
-    return FeedbackMessageRead.model_validate(msg).model_dump(mode="json")
+    # User-Endpoint nutzt slim Schema (ohne user_id-Echo).
+    return FeedbackMessageUserRead.model_validate(msg).model_dump(mode="json")
 
 
 @router.get("/me/messages")
@@ -85,6 +90,9 @@ def list_my_feedback(
     Wird vom „Mein Feedback"-Bereich (Verwaltung → Meine Daten)
     konsumiert. Admin-Antworten werden mitgeliefert sobald sie
     geschrieben sind (admin_response + admin_response_at).
+
+    QA-Fix W.tester-feedback-qa: nutzt FeedbackMessageUserRead (ohne
+    user_id + admin_response_by_user_id) — keine ID-Enumeration.
     """
     rows = (
         db.execute(
@@ -97,7 +105,8 @@ def list_my_feedback(
     )
     return {
         "messages": [
-            FeedbackMessageRead.model_validate(r).model_dump(mode="json") for r in rows
+            FeedbackMessageUserRead.model_validate(r).model_dump(mode="json")
+            for r in rows
         ],
         "count": len(rows),
     }

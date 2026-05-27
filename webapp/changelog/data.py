@@ -44,6 +44,48 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.tester-feedback-qa",
+        released=date(2026, 5, 28),
+        title="QA-Hotfix nach Tester+Feedback (2 KRITISCH + 4 SOLLTE)",
+        highlights=[
+            "QA-Sub-Agent fand 2 KRITISCH + 5 SOLLTE + 1 NICE + 4 "
+            "POSITIV. Sofort gefixt:",
+            "**KRITISCH 1** (Datenverlust): FeedbackMessageAdminUpdate."
+            "admin_response hatte kein min_length=1 — leerer String "
+            "überschrieb still eine bestehende Antwort. Jetzt min_"
+            "length=1; explizites null bleibt der dokumentierte Pfad "
+            "zum Löschen einer Antwort.",
+            "**KRITISCH 2** (stale form): InboxRow.responseDraft hing "
+            "am useState-Init-Wert. Nach Admin-Antwort → Refetch hatte "
+            "msg.admin_response neuen Wert, aber Editor zeigte alten "
+            "Draft. Fix: useEffect synct setResponseDraft auf msg."
+            "admin_response-Change. Analog zum W.roadmap-admin-qa-Fix.",
+            "**SOLLTE** (privacy): User-Endpoint /feedback/me/messages "
+            "leakte user_id + admin_response_by_user_id. Neuer Schema-"
+            "Typ FeedbackMessageUserRead ohne diese internen IDs. ID-"
+            "Enumeration ist damit nicht mehr möglich.",
+            "**SOLLTE** (Security/Sortenrein): delete_live_test ist "
+            "jetzt require_admin (nicht require_admin_or_tester) — "
+            "Tester kann PASS/FAIL/SKIP machen, aber nicht Test-"
+            "Historie wegwerfen. Defense-in-Depth gegen kompromittierte "
+            "Tester-Accounts.",
+            "**SOLLTE** (Performance): MyFeedbackPanel feuerte markSeen "
+            "alle 60s neu wenn ein Item aufgeklappt war (Query-Refetch "
+            "triggerte useEffect via messages-Dep). Fix: useEffect-Deps "
+            "auf [expandedId] reduziert, messages via Closure.",
+            "**SOLLTE** (Code-Hygiene): FeedbackUnreadToaster `const t "
+            "= setTimeout(…)` shadowed `t` von useTranslation. "
+            "Umbenannt zu `autohideTimer`.",
+            "POSITIV-Findings: Auth-Filter sauber (alle 4 /admin/"
+            "feedback/* hinter require_admin, Tester sieht Inbox "
+            "nicht), POST /feedback/messages kein user_id-Spoofing "
+            "möglich, mark_response_seen-IDOR-frei (404 statt 403), "
+            "is_tester-Migration idempotent, VerwaltungTab-Section-"
+            "Guard doppelt geprüft.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.session-scan-feedback",
         released=date(2026, 5, 28),
         title="Session-Start-Context + /abschluss scannen Bugs + Feedback",

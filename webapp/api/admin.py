@@ -803,11 +803,16 @@ def update_live_test(
 def delete_live_test(
     request: Request,
     test_id: int,
-    admin: User = Depends(require_admin_or_tester),
+    admin: User = Depends(require_admin),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Löscht einen Live-Test. Kein Confirm nötig — Test-Einträge sind
-    keine User-Daten."""
+    keine User-Daten.
+
+    QA-Fix W.tester-feedback-qa (2026-05-28): Delete bleibt
+    Admin-only (require_admin), nicht require_admin_or_tester. Tester
+    braucht für QA-Workflow nur PASS/FAIL/SKIP — Löschen ist
+    destruktiver und gehört zu Admin-Verantwortung."""
     test = db.get(LiveTest, test_id)
     if test is None:
         raise HTTPException(

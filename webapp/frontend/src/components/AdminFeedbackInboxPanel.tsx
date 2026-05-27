@@ -16,7 +16,7 @@
 // die Inbox > 100 Items hat, sollte hier eine virtualisierte Liste oder
 // Pagination dazukommen — Backlog-Item.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useAdminDeleteFeedback,
@@ -264,6 +264,13 @@ function InboxRow({
   const { t } = useTranslation();
   const [responseDraft, setResponseDraft] = useState(msg.admin_response ?? "");
   const [showResponseEditor, setShowResponseEditor] = useState(false);
+  // QA-Fix W.tester-feedback-qa: useState initialisiert nur einmal —
+  // wenn der Admin antwortet → Query-Refetch → msg.admin_response
+  // ist neu, aber responseDraft haengt am alten Init-Wert. Sync via
+  // useEffect.
+  useEffect(() => {
+    setResponseDraft(msg.admin_response ?? "");
+  }, [msg.admin_response]);
 
   const catLabel = CATEGORY_LABELS[msg.category as FeedbackCategory] ?? {
     icon: "📝",

@@ -346,18 +346,25 @@ class FeedbackMessageAdminUpdate(BaseModel):
     Beide optional damit der Admin z.B. nur den Status auf „archived"
     setzen kann ohne Antwort. admin_response_at wird serverseitig
     gesetzt sobald admin_response geschrieben wird.
+
+    QA-Fix W.tester-feedback-qa (2026-05-28): admin_response hat
+    min_length=1 — leerer String wird nicht mehr akzeptiert. Wer eine
+    Antwort löschen will: explizit `null` senden (Pydantic erlaubt
+    None weiterhin via `str | None`). Vorher konnte ein leerer-String-
+    Submit eine bestehende Antwort still überschreiben (Datenverlust).
     """
 
     model_config = ConfigDict(extra="forbid")
     status: FeedbackStatusLiteral | None = None
-    admin_response: str | None = Field(default=None, max_length=4000)
+    admin_response: str | None = Field(default=None, min_length=1, max_length=4000)
 
 
 class FeedbackMessageRead(BaseModel):
-    """Read-Schema für Admin-Inbox + User-eigene Liste.
+    """Read-Schema für Admin-Inbox.
 
-    Frontend rendert je nach Kontext unterschiedlich (Admin sieht alles
-    inkl. user_id; User sieht nur seine eigenen).
+    Enthält user_id + admin_response_by_user_id für Admin-Audit-Trail.
+    User-eigene Endpoints (/feedback/me/*) nutzen das slim
+    `FeedbackMessageUserRead` ohne diese internen IDs.
     """
 
     model_config = ConfigDict(from_attributes=True)
@@ -371,6 +378,27 @@ class FeedbackMessageRead(BaseModel):
     admin_response: str | None
     admin_response_at: datetime | None
     admin_response_by_user_id: int | None
+    user_seen_response_at: datetime | None
+
+
+class FeedbackMessageUserRead(BaseModel):
+    """User-Sicht: ohne interne user_id-/admin_response_by-Felder.
+
+    QA-Fix W.tester-feedback-qa (2026-05-28): vermeidet dass User die
+    interne ID seines eigenen Accounts oder die eines antwortenden
+    Admins sieht. Reine Privacy-Hygiene — kein direkter Angriff, aber
+    ID-Enumeration wäre sonst möglich.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    category: str
+    message: str
+    created_at: datetime
+    status: str
+    admin_response: str | None
+    admin_response_at: datetime | None
     user_seen_response_at: datetime | None
 
 

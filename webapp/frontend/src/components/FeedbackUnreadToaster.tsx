@@ -28,8 +28,10 @@ export function FeedbackUnreadToaster() {
     if (!isLoggedIn || dismissed) return;
     if (data?.unread_count && data.unread_count > 0) {
       setVisible(true);
-      const t = setTimeout(() => setVisible(false), 6000);
-      return () => clearTimeout(t);
+      // QA-Fix W.tester-feedback-qa: Variable nicht `t` nennen —
+      // shadowed sonst `t` aus useTranslation im umgebenden Scope.
+      const autohideTimer = setTimeout(() => setVisible(false), 6000);
+      return () => clearTimeout(autohideTimer);
     }
   }, [isLoggedIn, dismissed, data?.unread_count]);
 
