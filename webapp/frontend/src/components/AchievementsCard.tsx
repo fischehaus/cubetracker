@@ -5,17 +5,18 @@
 // Bestandsdaten-Import oder wenn Definitionen sich geändert haben).
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useAchievements, useRecheckAchievements } from "../lib/api";
 import { formatDate } from "../lib/format";
 import { InfoButton } from "./InfoButton";
 import type { AchievementItem } from "../lib/types";
 
-const CATEGORY_LABELS: Record<AchievementItem["category"], string> = {
-  volume: "Volumen",
-  speed: "Geschwindigkeit (3x3)",
-  variety: "Vielseitigkeit",
-  hardware: "Hardware",
-  consistency: "Konsistenz & Streaks",
+const CATEGORY_LABEL_KEYS: Record<AchievementItem["category"], string> = {
+  volume: "achievements.categoryVolume",
+  speed: "achievements.categorySpeed",
+  variety: "achievements.categoryVariety",
+  hardware: "achievements.categoryHardware",
+  consistency: "achievements.categoryConsistency",
 };
 
 const CATEGORY_ORDER: AchievementItem["category"][] = [
@@ -27,6 +28,7 @@ const CATEGORY_ORDER: AchievementItem["category"][] = [
 ];
 
 export function AchievementsCard() {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useAchievements();
   const recheck = useRecheckAchievements();
 
@@ -44,14 +46,15 @@ export function AchievementsCard() {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-base text-gray-400">
-        Erfolge werden geladen …
+        {t("achievements.loading")}
       </div>
     );
   }
   if (error) {
     return (
       <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
-        Fehler: {error.message}
+        {t("achievements.errorPrefix")}
+        {error.message}
       </div>
     );
   }
@@ -65,35 +68,36 @@ export function AchievementsCard() {
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-semibold text-gray-100">
-            Erfolge{" "}
+            {t("achievements.title")}{" "}
             <span className="text-base text-gray-400">
-              ({unlockedCount} von {totalCount} freigeschaltet)
+              {t("achievements.countSummary", {
+                unlocked: unlockedCount,
+                total: totalCount,
+              })}
             </span>
           </h2>
           <InfoButton>
-            <p className="font-medium mb-1">Erfolge / Achievements</p>
-            <p>
-              30+ Personal-Trainer-Ziele in Kategorien (Volume, Speed,
-              Konsistenz, Streaks etc.). Werden automatisch geprüft nach
-              jedem Solve. Verschlossene Erfolge zeigen Hint-Text — gibt
-              dir nächstes Trainings-Ziel ohne zu spoilern. „Recheck"
-              prüft nochmal alles durch (Backup nach großen Imports).
-            </p>
+            <p className="font-medium mb-1">{t("achievements.infoTitle")}</p>
+            <p>{t("achievements.infoBody")}</p>
           </InfoButton>
         </div>
         <button
           onClick={() => recheck.mutate()}
           disabled={recheck.isPending}
           className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700 disabled:opacity-50"
-          title="Manuell neu prüfen — z.B. nach Daten-Import"
+          title={t("achievements.recheckButtonTitle")}
         >
-          {recheck.isPending ? "Prüfe …" : "🔄 Neu prüfen"}
+          {recheck.isPending
+            ? t("achievements.recheckBusy")
+            : t("achievements.recheckButton")}
         </button>
       </div>
 
       {recheck.data && recheck.data.newly_unlocked_count > 0 && (
         <div className="mb-4 rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-          {recheck.data.newly_unlocked_count} neue Erfolge freigeschaltet 🎉
+          {t("achievements.newlyUnlocked", {
+            count: recheck.data.newly_unlocked_count,
+          })}
         </div>
       )}
 
@@ -104,9 +108,12 @@ export function AchievementsCard() {
           return (
             <div key={cat}>
               <h3 className="text-base font-semibold text-gray-300 mb-2">
-                {CATEGORY_LABELS[cat]}{" "}
+                {t(CATEGORY_LABEL_KEYS[cat])}{" "}
                 <span className="text-sm text-gray-500 font-normal">
-                  ({unlocked}/{items.length})
+                  {t("achievements.categoryCountSummary", {
+                    unlocked,
+                    total: items.length,
+                  })}
                 </span>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -119,16 +126,13 @@ export function AchievementsCard() {
         })}
       </div>
 
-      <p className="mt-4 text-xs text-gray-500">
-        Erfolge sind monotonic: einmal freigeschaltet bleiben sie erhalten,
-        auch wenn die Voraussetzung später nicht mehr erfüllt ist
-        (z.B. nach Solve-Löschen).
-      </p>
+      <p className="mt-4 text-xs text-gray-500">{t("achievements.footer")}</p>
     </div>
   );
 }
 
 function AchievementTile({ item }: { item: AchievementItem }) {
+  const { t } = useTranslation();
   const isUnlocked = item.unlocked_at !== null;
   return (
     <div
@@ -137,7 +141,13 @@ function AchievementTile({ item }: { item: AchievementItem }) {
           ? "border-yellow-500/40 bg-yellow-500/5"
           : "border-gray-700 bg-gray-900/40 opacity-60"
       }`}
-      title={isUnlocked ? `Freigeschaltet: ${formatDate(item.unlocked_at!)}` : "Noch nicht freigeschaltet"}
+      title={
+        isUnlocked
+          ? t("achievements.tileUnlocked", {
+              date: formatDate(item.unlocked_at!),
+            })
+          : t("achievements.tileLocked")
+      }
     >
       <div className="flex items-start gap-2">
         <span

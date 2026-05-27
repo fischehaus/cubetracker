@@ -84,7 +84,7 @@ export function ChallengesMiniCard({ onSwitchTab }: Props) {
                     isDone ? "text-emerald-300" : "text-gray-400"
                   }`}
                 >
-                  {progressLabel(c)}
+                  {progressLabel(c, t)}
                 </span>
               </li>
             );

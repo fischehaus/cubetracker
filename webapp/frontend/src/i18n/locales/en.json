@@ -771,6 +771,64 @@
     "modalSubheading": "Multi-user web app for tracking + analysing speedcubing solves.",
     "modalFooter": "Multi-user web variant, actively under construction. Data lives in a Postgres DB, no tracking, no ad code."
   },
+  "trainerTab": {
+    "subTabHeute": "Today",
+    "subTabAlgs": "Algs",
+    "subTabErfolge": "Achievements",
+    "subTabAriaLabel": "Trainer sections"
+  },
+  "dailyChallenges": {
+    "loading": "Loading daily challenges …",
+    "errorPrefix": "Error: ",
+    "title": "Daily challenges",
+    "countSummary": "({{done}} / {{total}} completed)",
+    "infoBody": "Three small daily tasks. Regenerated at midnight UTC. Difficulties vary (e.g. \"do X solves today\", \"reach AO5 under Y\", \"no DNF in 10 solves\"). Dismiss function for challenges you don't want to tackle today. Refresh button generates new ones (e.g. if you got something impossible).",
+    "regenerateButton": "🔄 Regenerate",
+    "regenerateBusy": "Generating …",
+    "regenerateButtonTitle": "Discards today's challenges and regenerates fresh",
+    "emptyState": "No active challenges for today. Click \"Regenerate\" to create some.",
+    "footer": "Challenges are regenerated daily (based on your stats) and their progress counts monotonically upward — even if a solve is deleted later, completion stays."
+  },
+  "challengeCard": {
+    "completedTitle": "completed",
+    "dismissAria": "Dismiss challenge",
+    "dismissTitle": "Dismiss challenge"
+  },
+  "challenges": {
+    "labelVolume": "Volume",
+    "labelSpeed": "Speed",
+    "labelComeback": "Comeback",
+    "labelDiversity": "Diversity",
+    "descVolumeCube": "Do {{count}} {{cube}} solves today",
+    "descVolumeAny": "Do {{count}} solves today (any cube)",
+    "descSpeed": "Achieve a {{cube}} solve under {{target}}s",
+    "descSpeedFallback": "cube",
+    "descComeback": "Do at least one {{cube}} solve — it hasn't been trained for a while",
+    "descDiversity": "Train {{count}} different cube types today",
+    "descUnknown": "Unknown challenge",
+    "progressDone": "✓ done"
+  },
+  "achievements": {
+    "loading": "Loading achievements …",
+    "errorPrefix": "Error: ",
+    "title": "Achievements",
+    "countSummary": "({{unlocked}} of {{total}} unlocked)",
+    "infoTitle": "Achievements",
+    "infoBody": "30+ personal trainer goals in categories (volume, speed, consistency, streaks, etc.). Checked automatically after every solve. Locked achievements show hint text — gives you the next training goal without spoiling. \"Recheck\" runs the full check again (backup after large imports).",
+    "recheckButton": "🔄 Recheck",
+    "recheckBusy": "Checking …",
+    "recheckButtonTitle": "Recheck manually — e.g. after a data import",
+    "newlyUnlocked": "{{count}} new achievements unlocked 🎉",
+    "categoryVolume": "Volume",
+    "categorySpeed": "Speed (3x3)",
+    "categoryVariety": "Variety",
+    "categoryHardware": "Hardware",
+    "categoryConsistency": "Consistency & streaks",
+    "categoryCountSummary": "({{unlocked}}/{{total}})",
+    "footer": "Achievements are monotonic: once unlocked they stay, even if the requirement is no longer met later (e.g. after deleting solves).",
+    "tileLocked": "Not unlocked yet",
+    "tileUnlocked": "Unlocked: {{date}}"
+  },
   "backupPanel": {
     "title": "Backup & restore",
     "infoBody": "Full export of your data (solves, sessions, hardware, achievements) as a JSON file. Restore from your own backup using merge mode (nothing is overwritten) or replace mode (everything is rewritten, with a confirm string). Snapshots = restore points, max 2 per user — created automatically before larger operations (restore, bulk import).",

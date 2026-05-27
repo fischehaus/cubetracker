@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { onChallengeCompleted, useChallengesToday } from "../lib/api";
 import {
   CHALLENGE_ICONS,
-  CHALLENGE_LABELS,
+  challengeLabel,
   describeChallenge,
 } from "../lib/challenges";
 
@@ -42,8 +42,8 @@ export function ChallengeCompletionToaster() {
           id: Date.now() + Math.random(),
           challengeId: cid,
           icon: CHALLENGE_ICONS[c.kind],
-          label: CHALLENGE_LABELS[c.kind],
-          text: describeChallenge(c),
+          label: challengeLabel(c.kind, t),
+          text: describeChallenge(c, t),
         });
       }
       if (newToasts.length === 0) return;

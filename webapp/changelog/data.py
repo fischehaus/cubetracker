@@ -44,6 +44,32 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-trainer-sub",
+        released=date(2026, 5, 27),
+        title="Trainer-Sub-Panels DE/EN",
+        highlights=[
+            "TrainerTab Sub-Tab-Bar lokalisiert (Heute / Algs / Erfolge) "
+            "mit labelKey-Pattern + lokalisiertem aria-label.",
+            "DailyChallengesPanel: Loading/Error-States, Header mit "
+            "interpoliertem Count, InfoButton, Regenerate-Button (mit "
+            "Busy-State + Tooltip), Empty-State, Footer.",
+            "ChallengeCard: completed-Tooltip + Dismiss-Aria/Title.",
+            "AchievementsCard: Loading/Error/Header/InfoButton/Recheck-"
+            "Button mit Busy-State, Newly-Unlocked-Counter (interpoliert), "
+            "5 Category-Labels (Volumen/Speed/Vielseitigkeit/Hardware/"
+            "Konsistenz), Category-Counts, Footer, Tile-Tooltips "
+            "(locked vs unlocked mit interpoliertem Datum).",
+            "Helper-Refactor in lib/challenges.ts: CHALLENGE_LABELS-"
+            "Konstante zu challengeLabel(kind, t)-Function, plus "
+            "describeChallenge(c, t) + progressLabel(c, t) nehmen jetzt "
+            "t-Param. 3 Konsumenten migriert (ChallengeCard, ChallengesMiniCard, "
+            "ChallengeCompletionToaster).",
+            "Locales-Namespaces neu: trainerTab, dailyChallenges, "
+            "challengeCard, challenges, achievements (~50 Strings total).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-features",
         released=date(2026, 5, 27),
         title="Marketing/Features-Texte DE/EN",

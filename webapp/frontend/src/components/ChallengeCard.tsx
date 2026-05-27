@@ -8,9 +8,10 @@
 //
 // Erfuellte Challenges werden farblich abgehoben (grün).
 
+import { useTranslation } from "react-i18next";
 import {
   CHALLENGE_ICONS,
-  CHALLENGE_LABELS,
+  challengeLabel,
   describeChallenge,
   progressLabel,
   progressPercent,
@@ -25,10 +26,11 @@ interface Props {
 }
 
 export function ChallengeCard({ challenge, onDismiss, compact = false }: Props) {
+  const { t } = useTranslation();
   const isDone = challenge.completed_at !== null;
   const pct = progressPercent(challenge);
   const icon = CHALLENGE_ICONS[challenge.kind];
-  const label = CHALLENGE_LABELS[challenge.kind];
+  const label = challengeLabel(challenge.kind, t);
 
   const padding = compact ? "p-3" : "p-4";
   const titleSize = compact ? "text-sm" : "text-base";
@@ -55,7 +57,10 @@ export function ChallengeCard({ challenge, onDismiss, compact = false }: Props) 
               {label}
             </span>
             {isDone && (
-              <span className="text-xs text-emerald-400" title="erfüllt">
+              <span
+                className="text-xs text-emerald-400"
+                title={t("challengeCard.completedTitle")}
+              >
                 ✓
               </span>
             )}
@@ -65,7 +70,7 @@ export function ChallengeCard({ challenge, onDismiss, compact = false }: Props) 
               isDone ? "text-emerald-100" : "text-gray-200"
             } leading-snug`}
           >
-            {describeChallenge(challenge)}
+            {describeChallenge(challenge, t)}
           </div>
 
           {/* Progress-Bar */}
@@ -87,7 +92,7 @@ export function ChallengeCard({ challenge, onDismiss, compact = false }: Props) 
                 isDone ? "text-emerald-300" : "text-gray-400"
               }`}
             >
-              {progressLabel(challenge)}
+              {progressLabel(challenge, t)}
             </span>
           </div>
         </div>
@@ -96,8 +101,8 @@ export function ChallengeCard({ challenge, onDismiss, compact = false }: Props) 
           <button
             onClick={() => onDismiss(challenge.id)}
             className="text-lg text-gray-500 hover:text-gray-300 leading-none -mt-1"
-            aria-label="Challenge verwerfen"
-            title="Challenge verwerfen"
+            aria-label={t("challengeCard.dismissAria")}
+            title={t("challengeCard.dismissTitle")}
           >
             ×
           </button>

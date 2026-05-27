@@ -9,6 +9,7 @@
 // app-reload — bewusst, „Heute" soll der primaere Einstieg bleiben.
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AchievementsCard } from "./AchievementsCard";
 import { AlgTrainerPanel } from "./AlgTrainerPanel";
 import { DailyChallengesPanel } from "./DailyChallengesPanel";
@@ -17,17 +18,18 @@ type TrainerSection = "heute" | "algs" | "erfolge";
 
 interface SubTab {
   id: TrainerSection;
-  label: string;
+  labelKey: string;
   icon: string;
 }
 
 const SUB_TABS: SubTab[] = [
-  { id: "heute", label: "Heute", icon: "🎯" },
-  { id: "algs", label: "Algs", icon: "🧩" },
-  { id: "erfolge", label: "Erfolge", icon: "🏆" },
+  { id: "heute", labelKey: "trainerTab.subTabHeute", icon: "🎯" },
+  { id: "algs", labelKey: "trainerTab.subTabAlgs", icon: "🧩" },
+  { id: "erfolge", labelKey: "trainerTab.subTabErfolge", icon: "🏆" },
 ];
 
 export function TrainerTab() {
+  const { t } = useTranslation();
   const [section, setSection] = useState<TrainerSection>("heute");
 
   return (
@@ -35,14 +37,14 @@ export function TrainerTab() {
       {/* Sub-Tab-Bar */}
       <nav
         className="flex gap-1 rounded-lg border border-gray-700 bg-gray-900/50 p-1"
-        aria-label="Trainer-Bereiche"
+        aria-label={t("trainerTab.subTabAriaLabel")}
       >
-        {SUB_TABS.map((t) => {
-          const active = section === t.id;
+        {SUB_TABS.map((tab) => {
+          const active = section === tab.id;
           return (
             <button
-              key={t.id}
-              onClick={() => setSection(t.id)}
+              key={tab.id}
+              onClick={() => setSection(tab.id)}
               aria-current={active ? "page" : undefined}
               className={`flex-1 flex items-center justify-center gap-2 rounded-md px-4 h-11 text-base font-medium transition ${
                 active
@@ -50,8 +52,8 @@ export function TrainerTab() {
                   : "text-gray-300 hover:bg-gray-800 hover:text-gray-100"
               }`}
             >
-              <span aria-hidden="true">{t.icon}</span>
-              <span>{t.label}</span>
+              <span aria-hidden="true">{tab.icon}</span>
+              <span>{t(tab.labelKey)}</span>
             </button>
           );
         })}

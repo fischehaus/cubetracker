@@ -771,6 +771,64 @@
     "modalSubheading": "Multi-User-Web-App zum Tracken + Analysieren von Speedcubing-Solves.",
     "modalFooter": "Multi-User-Web-Variante, aktiv im Aufbau. Daten leben in einer Postgres-DB, kein Tracking, kein Werbe-Code."
   },
+  "trainerTab": {
+    "subTabHeute": "Heute",
+    "subTabAlgs": "Algs",
+    "subTabErfolge": "Erfolge",
+    "subTabAriaLabel": "Trainer-Bereiche"
+  },
+  "dailyChallenges": {
+    "loading": "Tages-Challenges werden geladen …",
+    "errorPrefix": "Fehler: ",
+    "title": "Tages-Challenges",
+    "countSummary": "({{done}} / {{total}} erfüllt)",
+    "infoBody": "Drei kleine tägliche Aufgaben. Werden um Mitternacht UTC neu generiert. Schwierigkeitsgrade variieren (z.B. „mache X Solves heute\", „erreiche AO5 unter Y\", „kein DNF in 10 Solves\"). Dismiss-Funktion für Challenges die du heute nicht angehen willst. Refresh-Button generiert neu (z.B. wenn du was unmögliches bekommen hast).",
+    "regenerateButton": "🔄 Neu generieren",
+    "regenerateBusy": "Generiere …",
+    "regenerateButtonTitle": "Verwirft heutige Challenges und generiert frisch",
+    "emptyState": "Keine aktiven Challenges für heute. Klicke „Neu generieren\" um welche zu erstellen.",
+    "footer": "Challenges werden täglich neu generiert (basierend auf deinen Stats) und ihr Fortschritt zählt monoton hoch — auch wenn ein Solve später gelöscht wird, bleibt die Erfüllung erhalten."
+  },
+  "challengeCard": {
+    "completedTitle": "erfüllt",
+    "dismissAria": "Challenge verwerfen",
+    "dismissTitle": "Challenge verwerfen"
+  },
+  "challenges": {
+    "labelVolume": "Volumen",
+    "labelSpeed": "Speed",
+    "labelComeback": "Comeback",
+    "labelDiversity": "Vielseitigkeit",
+    "descVolumeCube": "Mache heute {{count}} {{cube}}-Solves",
+    "descVolumeAny": "Mache heute {{count}} Solves (egal welcher Cube)",
+    "descSpeed": "Schaffe einen {{cube}}-Solve unter {{target}}s",
+    "descSpeedFallback": "Cube",
+    "descComeback": "Mache mind. einen {{cube}}-Solve — er wurde länger nicht trainiert",
+    "descDiversity": "Trainiere heute {{count}} verschiedene Cube-Types",
+    "descUnknown": "Unbekannte Challenge",
+    "progressDone": "✓ erfüllt"
+  },
+  "achievements": {
+    "loading": "Erfolge werden geladen …",
+    "errorPrefix": "Fehler: ",
+    "title": "Erfolge",
+    "countSummary": "({{unlocked}} von {{total}} freigeschaltet)",
+    "infoTitle": "Erfolge / Achievements",
+    "infoBody": "30+ Personal-Trainer-Ziele in Kategorien (Volume, Speed, Konsistenz, Streaks etc.). Werden automatisch geprüft nach jedem Solve. Verschlossene Erfolge zeigen Hint-Text — gibt dir nächstes Trainings-Ziel ohne zu spoilern. „Recheck\" prüft nochmal alles durch (Backup nach großen Imports).",
+    "recheckButton": "🔄 Neu prüfen",
+    "recheckBusy": "Prüfe …",
+    "recheckButtonTitle": "Manuell neu prüfen — z.B. nach Daten-Import",
+    "newlyUnlocked": "{{count}} neue Erfolge freigeschaltet 🎉",
+    "categoryVolume": "Volumen",
+    "categorySpeed": "Geschwindigkeit (3x3)",
+    "categoryVariety": "Vielseitigkeit",
+    "categoryHardware": "Hardware",
+    "categoryConsistency": "Konsistenz & Streaks",
+    "categoryCountSummary": "({{unlocked}}/{{total}})",
+    "footer": "Erfolge sind monotonic: einmal freigeschaltet bleiben sie erhalten, auch wenn die Voraussetzung später nicht mehr erfüllt ist (z.B. nach Solve-Löschen).",
+    "tileLocked": "Noch nicht freigeschaltet",
+    "tileUnlocked": "Freigeschaltet: {{date}}"
+  },
   "backupPanel": {
     "title": "Backup & Wiederherstellung",
     "infoBody": "Voll-Export deiner Daten (Solves, Sessions, Hardware, Achievements) als JSON-Datei. Wiederherstellen aus eigenem Backup mit Merge-Modus (nichts wird überschrieben) oder Replace-Modus (alles wird neu geschrieben, mit Confirm-String). Snapshots = Wiederherstellungspunkte, max 2 pro User — automatisch vor größeren Operationen (Restore, Bulk-Import).",
