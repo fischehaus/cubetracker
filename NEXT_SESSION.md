@@ -24,17 +24,96 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint + Turnier-Sprint Start (Wellen 1-9)
+## ✅ ERLEDIGT 2026-05-27 — Backlog-Sprint + Turnier-Sprint i18n-Massenwelle
 
-**15 Commits + 11 Tags heute, alles live.** Live-Version: `W.i18n-flags` (public).
-Vier Roadmap-Items abgehakt (Average-PB, Danger-Zone, Letzte Rekorde, Roadmap-intern)
-+ drei QA-Hotfixe + GitHub-Issue #1 vollständig adressiert + **Turnier-Sprint
-Wellen 1-3** (i18n-Infra + LoginPage/Footer übersetzt + Flaggen-Switcher im
-Header inkl. ChatGPT-Logo-Hinweis).
+**~32 Commits + ~22 Tags an einem Tag, alles live.** Live-public-Version:
+`W.i18n-charts` (letzter public Tag; danach 3 internal-Wellen für die
+Verwaltung-Sub-Panels). Backend skippt internal-Einträge in
+`current_version()`, also sieht User nichts vom Internal-Spam.
+
+**Bilanz nach Mi-Spät + Do-Voll:**
+- Vormittag/Mittag: Backlog-Sprint (Average-PB, Danger-Zone, Letzte Rekorde,
+  Roadmap-intern) + 3 QA-Hotfixe + GitHub-Issue #1 vollständig adressiert
+- Mi-Spät: Turnier-Sprint Wellen 1-3 (i18n-Infra + LoginPage/Footer + Flaggen-
+  Switcher + ChatGPT-Logo-Hinweis im Impressum)
+- Do: **Turnier-Sprint Massen-i18n (Wellen 10-23)** — 17 weitere i18n-Wellen
+  (siehe Block direkt unten)
 
 🎯 **Aktiver Sprint:** Englisch-Variante + WCA-Profil-Light bis Sa 30.05. morgens
-für privates Demo beim WCA-Turnier in Meppel. Plan siehe „Restplan Turnier-Sprint"
-unten.
+für privates Demo beim WCA-Turnier in Meppel. **Plan siehe „Restplan Turnier-
+Sprint" unten.**
+
+### 📌 WICHTIG für nächste Session — Patch-Notes-Konsolidierung-Plan
+
+**Vereinbarung mit User (am Do, mid-sprint):** Am Ende des Turnier-Sprints
+werden ALLE 20+ einzelnen `W.i18n-*`-Patch-Notes auf `internal=True` geflaggt
+(analog gestern-Welle „Patch-Notes-intern"). Ein einziger public Patch-Note
+`W.i18n-en-release` ersetzt sie im User-Changelog — User sieht dort dann
+einen einzelnen sauberen „🇬🇧 Englische Version verfügbar!"-Eintrag statt
+20 fast-identische Einträge. Git-Tags + Audit-Trail bleiben unangetastet
+(Admin sieht alles weiterhin). Die ab `W.i18n-import-export` neuen Wellen
+sind schon mit `internal=True` direkt geschrieben — spart Refactor-Arbeit.
+
+→ **TODO am Sprint-Ende:** alle public `W.i18n-*`-Einträge in
+`webapp/changelog/data.py` von `internal` flag aktuell `False` (oder
+fehlend = Default `False`) auf `internal=True` umstellen, und neuen
+public `W.i18n-en-release` ganz oben einfügen.
+
+### Wellen 10-23 (Do, 27.05.) — Turnier-Sprint Massen-i18n
+
+> Reihenfolge gewählt nach Demo-Sichtbarkeit (oben = User sieht zuerst):
+>
+> **Solve-Flow & Dashboard:**
+> - `W.i18n-timer` — BigTimerInput, ScrambleCard, TimerControlsCard, HealthBadge, Modal-Close-Aria
+> - `W.i18n-stats` — StatsCard, RecentRecordsCard, ReminderCard
+> - `W.i18n-list` — SolveList (Tabelle + Filter), Filter-Bars (Analyse + Dashboard)
+> - `W.i18n-auth-pages` — ResetPasswordPage, VerifyEmailPage, OnboardingBanner
+> - `W.i18n-dashboard` — ActivityCard, NewsCard, WcaUpcomingCard, AchievementsMini, ChallengesMini
+> - `W.i18n-jsonfix-qa` (internal) — **🔧 JSON-Bug-Fix** der die heutigen EN-Strings live brachte (un-escaped " in scramble.* hatte Vite-Parse silent fallen lassen → alle Keys ab Bruchstelle leer im Bundle)
+> - `W.i18n-timer-complete` — SpacebarTimerCard, TouchTimerPad, SessionPlanCard, InfoButton
+> - `W.i18n-toaster` — AchievementToaster, ChallengeCompletionToaster, PbConfettiOverlay
+> - `W.i18n-verwaltung-1` — VerwaltungTab Sub-Tabs + MeineDatenCard
+> - `W.i18n-live-card` — LastSolvesPreview (Live + Letzte Solves im Timer-Tab)
+> - `W.i18n-danger-zone` — DangerZoneCard (3 Lösch-Aktionen)
+> - `W.i18n-dashboard-sections` — Dashboard-Section-Header (Heute/Performance/Antrieb/Welt)
+> - `W.i18n-multi-compare` — MultiCompareCard (Cube/Session/Drilldowns)
+> - `W.i18n-charts` — TrendsChart, PbProgressionCard, ActivityChart, HistogramChart, HardwareCompareCard
+> - `W.i18n-import-export` (internal) — ImportPanel + CsTimerExportPanel
+> - `W.i18n-backup-panel` (internal) — BackupPanel (Voll-Export + Restore + Snapshots)
+> - `W.i18n-session-list` (internal) — SessionList (Add/Rename/Notes/Merge/Delete-Modals)
+>
+> **User-Feedback-Loop war wertvoll:** mehrere Wellen entstanden direkt aus
+> Befunden während Klick-Sessions („Tabs sind englisch, Fenster nicht" →
+> JSON-Bug-Fix; „Live + Letzte Solves" → W.i18n-live-card; „Vergleich
+> ist noch deutsch" → W.i18n-multi-compare; „Sektion-Header HEUTE/DEINE
+> PERFORMANCE" → W.i18n-dashboard-sections).
+>
+> Damit komplett DE/EN: Login + Register + Mail-Pages + Dashboard
+> (alle Karten) + Timer-Tab (Solve-Flow + Live + Letzte-Solves +
+> Spacebar + Touch + Set + InfoPopups) + Analyse-Tab (Charts + SolveList +
+> Filter) + Verwaltung-Tab teilweise (Header + Meine Daten + DangerZone +
+> Sessions + Backup + Import/Export).
+
+### 🔜 Restplan Turnier-Sprint (Fr + Sa-Vormittag)
+
+**Was noch offen:**
+- `HardwareList` (480 Zeilen — die Cube-Inventar-Liste)
+- `OutlierCard` (238 Zeilen)
+- `SettingsPanel` (383 Zeilen)
+- `AccountSettingsPanel` (501 Zeilen — Profile + Email-Change + Password-Change + Account-Delete)
+- `AdminPanel` (21 Zeilen Wrapper — die 4 Sub-Panels nur Admin-only, Demo nicht relevant)
+- `TrainerTab` (65 Zeilen Wrapper + Sub-Components: AlgTrainerPanel etc.)
+- `CommunityTab` (50 Zeilen Wrapper + Sub-Components)
+- `features-data.ts` (Marketing-Texte für Login-Page + FeaturesModal — anderes Pattern, separate Welle)
+- **WCA-Profil-Light** (P9 — DB-Spalte + Backend-Endpoint + Frontend-Card)
+- **W.i18n-en-release Konsolidierungs-Welle** (siehe oben)
+
+**Fr-Plan:**
+- Vormittag: HardwareList + OutlierCard + SettingsPanel + AccountSettingsPanel + features-data.ts
+- Nachmittag: WCA-Profil-Light (echter neuer Feature-Endpoint, kein i18n)
+- Spät: Konsolidierungs-Welle W.i18n-en-release
+
+**Sa Vormittag:** Demo-Probe + Last-Polish + ggf. TrainerTab/CommunityTab nachziehen.
 
 ### Welle 1 — #2 Average-PB-Punkte + Hook-Drift
 
