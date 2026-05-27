@@ -49,6 +49,9 @@ export function AdminRoadmapPanel() {
   // globalem deleteMut.isPending — sonst sind alle Delete-Buttons
   // gleichzeitig disabled wenn der Admin einen löscht.
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  // Quick-Toggle (W.roadmap-admin-quickactions): per-Row Busy-State,
+  // damit nur die geklickte Zeile disabled ist.
+  const [quickTogglingId, setQuickTogglingId] = useState<number | null>(null);
 
   const items = data?.items ?? [];
 
@@ -220,8 +223,33 @@ export function AdminRoadmapPanel() {
                           );
                         }
                       }}
+                      onToggleInternal={() => {
+                        setQuickTogglingId(item.id);
+                        updateMut.mutate(
+                          {
+                            id: item.id,
+                            patch: { internal: !item.internal },
+                          },
+                          { onSettled: () => setQuickTogglingId(null) },
+                        );
+                      }}
+                      onToggleStatus={() => {
+                        setQuickTogglingId(item.id);
+                        updateMut.mutate(
+                          {
+                            id: item.id,
+                            patch: {
+                              status: item.status === "done" ? "active" : "done",
+                            },
+                          },
+                          { onSettled: () => setQuickTogglingId(null) },
+                        );
+                      }}
                       saveBusy={updateMut.isPending && editingId === item.id}
                       deleteBusy={deleteMut.isPending && deletingId === item.id}
+                      quickBusy={
+                        updateMut.isPending && quickTogglingId === item.id
+                      }
                     />
                   ))}
                 </ul>
@@ -389,8 +417,11 @@ function ItemRow({
   onCancelEdit,
   onSave,
   onDelete,
+  onToggleInternal,
+  onToggleStatus,
   saveBusy,
   deleteBusy,
+  quickBusy,
 }: {
   item: RoadmapItem;
   isEditing: boolean;
@@ -398,8 +429,11 @@ function ItemRow({
   onCancelEdit: () => void;
   onSave: (patch: RoadmapItemUpdateInput) => void;
   onDelete: () => void;
+  onToggleInternal: () => void;
+  onToggleStatus: () => void;
   saveBusy: boolean;
   deleteBusy: boolean;
+  quickBusy: boolean;
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<RoadmapItemUpdateInput>({
@@ -443,7 +477,46 @@ function ItemRow({
               </span>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {/* Quick-Toggle: Visibility (public/internal). 1-Klick-Toggle,
+                kein Confirm — Klick zurück macht es rückgängig. */}
+            <button
+              onClick={onToggleInternal}
+              disabled={quickBusy}
+              className={`text-xs rounded px-2 py-1 disabled:opacity-50 ${
+                item.internal
+                  ? "bg-amber-700/30 text-amber-200 hover:bg-emerald-700/40 hover:text-emerald-200"
+                  : "bg-emerald-700/30 text-emerald-200 hover:bg-amber-700/40 hover:text-amber-200"
+              }`}
+              title={
+                item.internal
+                  ? t("adminRoadmap.quickMakePublicTitle")
+                  : t("adminRoadmap.quickMakeInternalTitle")
+              }
+            >
+              {item.internal
+                ? t("adminRoadmap.quickMakePublic")
+                : t("adminRoadmap.quickMakeInternal")}
+            </button>
+            {/* Quick-Toggle: Status (active/done). */}
+            <button
+              onClick={onToggleStatus}
+              disabled={quickBusy}
+              className={`text-xs rounded px-2 py-1 disabled:opacity-50 ${
+                item.status === "done"
+                  ? "bg-gray-700 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100"
+                  : "bg-gray-700 text-gray-200 hover:bg-emerald-700/40 hover:text-emerald-200"
+              }`}
+              title={
+                item.status === "done"
+                  ? t("adminRoadmap.quickMakeActiveTitle")
+                  : t("adminRoadmap.quickMakeDoneTitle")
+              }
+            >
+              {item.status === "done"
+                ? t("adminRoadmap.quickMakeActive")
+                : t("adminRoadmap.quickMakeDone")}
+            </button>
             <button
               onClick={onStartEdit}
               className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100"

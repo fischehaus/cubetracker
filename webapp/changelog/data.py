@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-admin-quickactions",
+        released=date(2026, 5, 28),
+        title="Admin-Roadmap: Quick-Toggle für Intern/Öffentlich + Aktiv/Erledigt",
+        highlights=[
+            "User-Vorschlag: die zwei häufigsten Roadmap-Item-Änderungen "
+            "(intern↔öffentlich und aktiv↔erledigt) aus dem Edit-Mode "
+            "rausziehen — direkt als Quick-Toggle-Buttons in der View-"
+            "Mode-Row neben Bearbeiten/Löschen.",
+            "Visual: zwei neue Buttons pro Zeile. Internal-Toggle wechselt "
+            "die Farbe je nach aktuellem State (amber wenn intern, "
+            "emerald wenn öffentlich; Klick-Hover zeigt das Ziel an). "
+            "Status-Toggle zeigt „→ erledigt\" bzw. „→ aktiv\".",
+            "Keine Confirms — 1-Klick-Toggle, Rückgängig per zweitem "
+            "Klick (analog Live-Tests-PASS/FAIL). Per-Row Busy-State, "
+            "damit nur die geklickte Zeile disabled ist.",
+            "Backend unverändert — beide Toggles nutzen den existierenden "
+            "PATCH /api/admin/roadmap/items/{id}-Endpoint mit jeweils "
+            "nur dem geänderten Feld (internal oder status). Cache-"
+            "Invalidation greift wie immer auf ['roadmap'].",
+            "8 neue Locale-Keys DE/EN symmetrisch (1211/1211).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-admin-qa",
         released=date(2026, 5, 28),
         title="QA-Hotfix nach Roadmap-Admin-UI (3 SOLLTE)",
