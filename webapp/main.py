@@ -157,6 +157,24 @@ async def lifespan(app: FastAPI):
                         )
             except Exception as bf_e:  # noqa: BLE001
                 print(f"WARN: hardware backfill failed: {bf_e}")
+
+            # W.demo-probe-meppel-seed (2026-05-28): einmaliger Bootstrap
+            # der EN-Klick-Through-Demo-Probe-Live-Tests vor dem Meppel-
+            # Turnier. Idempotent via related_phase-Marker — beim zweiten
+            # Container-Start wird nichts mehr angelegt.
+            try:
+                from seeds.live_tests import bootstrap_demo_probe_tests
+                from db.database import SessionLocal
+
+                with SessionLocal() as lt_db:
+                    created = bootstrap_demo_probe_tests(lt_db)
+                    if created > 0:
+                        print(
+                            f"INFO: demo-probe live-tests bootstrap -> "
+                            f"{created} Tests angelegt"
+                        )
+            except Exception as lt_e:  # noqa: BLE001
+                print(f"WARN: demo-probe live-tests bootstrap failed: {lt_e}")
         except Exception as e:  # noqa: BLE001
             print(f"WARN: DB schema-init failed: {e}")
     yield

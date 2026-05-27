@@ -44,6 +44,33 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.demo-probe-meppel-seed",
+        released=date(2026, 5, 28),
+        title="Demo-Probe-Live-Tests vor Meppel-Turnier (Admin-Bootstrap)",
+        highlights=[
+            "Neue Seed-Datei `webapp/seeds/live_tests.py` mit 12 Demo-"
+            "Probe-Live-Tests, die der `main.py:lifespan` beim Cold-Start "
+            "idempotent in die `live_tests`-Tabelle einspielt (Idempotenz "
+            "via `related_phase='W.demo-probe-meppel'`-Count-Check).",
+            "Test-Set: Sprach-Switcher → Login-Seite → Dashboard alle "
+            "Karten → Timer-Tab Solve-Flow → Analyse-Tab Charts + Liste "
+            "+ Solve-Detail → Verwaltung alle Sub-Tabs → Trainer + "
+            "Community → WCA-Profil (ID setzen + echte Zahlen) → "
+            "Backup-Download mit wca_id-Feld → Roadmap-Modal DE-Banner "
+            "→ Sprach-Persistenz nach Reload + Logout.",
+            "Cross-Admin-Visibility (war im Bestand schon korrekt, jetzt "
+            "explizit im Code dokumentiert): /admin/live-tests-Endpoint "
+            "filtert NICHT nach created_by_user_id — alle Admins sehen "
+            "alle Tests. Lesen/Schreiben/Löschen ebenfalls global durch "
+            "`require_admin`-Dep geschützt, keine per-User-Gates.",
+            "Tests sind `created_by_user_id=None` (System-erstellt) und "
+            "haben `related_tag='v2.0.0-alpha.W.demo-probe-meppel'` als "
+            "Anker. Bei FAIL + Notiz → automatisches GitHub-Issue über "
+            "den bestehenden Workflow (W.live-tests Phase 3).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-profile-bugfix",
         released=date(2026, 5, 28),
         title="WCA-Profil: Wettkampf-Count + Medaillen + Ränge zeigten 0",
