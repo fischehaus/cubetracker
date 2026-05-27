@@ -44,6 +44,38 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-friends",
+        released=date(2026, 5, 27),
+        title="Friends-Tab DE/EN",
+        highlights=[
+            "FriendsTab komplett übersetzt — 5 Sub-Komponenten + großes "
+            "Onboarding-State-Handling.",
+            "DiscoverabilityCard: 2 States (aktiv vs onboarding mit "
+            "2-Step-Layout), Strong-Header + interpolierter Name, Aktions-"
+            "Links (Display-Name ändern, deaktivieren), Step-Headings, "
+            "Status-Badges (gesetzt/leer), 2-Mode-Title (need-Name vs "
+            "ready), Error-Box mit Prefix.",
+            "InlineNameEditor: Placeholder + Save-Button (Busy + ready) + "
+            "Cancel-Button.",
+            "SearchCard: Heading + InfoButton (multipart mit zwei strong-"
+            "Tags für Display-Name/exakte Email-Pfade), 2 Such-Inputs "
+            "(Display-Name + Email mit Submit-Button), 2 Result-Listen "
+            "mit Loading/Empty-States + interpoliertem Query-String + "
+            "Lookup-Not-Found-Text.",
+            "SearchResultRow: 4 Relationship-States (none/outgoing_pending "
+            "mit Cancel/incoming_pending/accepted), No-Display-Name-"
+            "Fallback.",
+            "PendingIncomingCard + PendingOutgoingCard: interpolierte "
+            "Count-Headings, No-Name-Fallback, Accept/Decline/Withdraw-"
+            "Buttons.",
+            "FriendsListCard: interpolierte Count-Heading, Loading + "
+            "Empty-States, No-Name-Fallback, Unfriend-Button mit Multi-"
+            "interpoliertem Confirm-Dialog inkl. Fallback („diesem User\").",
+            "Locales-Namespace neu: friends (~55 Strings).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-community",
         released=date(2026, 5, 27),
         title="Community-Tab + Bestenliste DE/EN",

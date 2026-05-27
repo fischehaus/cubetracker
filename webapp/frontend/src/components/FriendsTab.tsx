@@ -11,6 +11,7 @@
 // Backend-Endpoints, die User-Status + Self-Filtering enforcen.
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { InfoButton } from "./InfoButton";
 import {
@@ -66,6 +67,7 @@ function DiscoverabilityCard({
   isDiscoverable: boolean;
   displayName: string | null;
 }) {
+  const { t } = useTranslation();
   const update = useUpdateProfile();
   const hasName = !!displayName?.trim();
 
@@ -89,8 +91,8 @@ function DiscoverabilityCard({
     return (
       <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-200 space-y-1">
         <div>
-          <strong>Auffindbar</strong> als „{displayName}". Andere User
-          können dich per Display-Name-Suche finden.
+          <strong>{t("friends.discoverableHeaderPrefix")}</strong>
+          {t("friends.discoverableHeaderSuffix", { name: displayName })}
         </div>
         <div className="flex flex-wrap gap-3 text-xs">
           <button
@@ -100,14 +102,14 @@ function DiscoverabilityCard({
             }}
             className="underline hover:text-emerald-100"
           >
-            Display-Name ändern
+            {t("friends.changeDisplayName")}
           </button>
           <button
             onClick={() => update.mutate({ is_discoverable: false })}
             disabled={update.isPending}
             className="underline hover:text-emerald-100 disabled:opacity-50"
           >
-            Auffindbar deaktivieren
+            {t("friends.deactivateDiscoverable")}
           </button>
         </div>
         {editingName && (
@@ -127,23 +129,28 @@ function DiscoverabilityCard({
   return (
     <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-4 text-sm text-blue-100 space-y-3">
       <div>
-        <p className="font-medium text-blue-200">Wie wirst du gefunden?</p>
+        <p className="font-medium text-blue-200">
+          {t("friends.onboardingHeading")}
+        </p>
         <p className="mt-1">
-          Aktuell <strong>nicht auffindbar</strong>. Du kannst trotzdem
-          andere per Email-Lookup finden + ihnen Freundes-Anfragen schicken.
-          Damit DICH andere per Display-Name finden können, brauchst du
-          beides:
+          {t("friends.onboardingBodyPrefix")}{" "}
+          <strong>{t("friends.onboardingBodyStrong")}</strong>
+          {t("friends.onboardingBodySuffix")}
         </p>
       </div>
 
       {/* Schritt 1: Display-Name inline setzen */}
       <div className="rounded border border-blue-500/20 bg-blue-500/5 p-3 space-y-2">
         <div className="text-xs font-medium text-blue-200">
-          1. Display-Name
+          {t("friends.stepDisplayNameHeading")}
           {hasName ? (
-            <span className="ml-2 text-emerald-300">✓ gesetzt: „{displayName}"</span>
+            <span className="ml-2 text-emerald-300">
+              {t("friends.stepDisplayNameSet", { name: displayName })}
+            </span>
           ) : (
-            <span className="ml-2 text-amber-300">⚠ noch leer</span>
+            <span className="ml-2 text-amber-300">
+              {t("friends.stepDisplayNameMissing")}
+            </span>
           )}
         </div>
         {editingName || !hasName ? (
@@ -165,7 +172,7 @@ function DiscoverabilityCard({
             }}
             className="text-xs underline text-blue-200 hover:text-blue-100"
           >
-            Ändern
+            {t("friends.changeButton")}
           </button>
         )}
       </div>
@@ -173,7 +180,7 @@ function DiscoverabilityCard({
       {/* Schritt 2: Auffindbar aktivieren */}
       <div className="rounded border border-blue-500/20 bg-blue-500/5 p-3">
         <div className="text-xs font-medium text-blue-200 mb-2">
-          2. Auffindbar aktivieren
+          {t("friends.stepDiscoverHeading")}
         </div>
         <button
           onClick={() => update.mutate({ is_discoverable: true })}
@@ -181,17 +188,20 @@ function DiscoverabilityCard({
           className="rounded bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed"
           title={
             !hasName
-              ? "Erst Display-Name setzen (Schritt 1)"
-              : "Anderen erlauben, dich per Display-Name zu finden"
+              ? t("friends.enableTitleNeedName")
+              : t("friends.enableTitleReady")
           }
         >
-          {update.isPending ? "…" : "Auffindbar aktivieren"}
+          {update.isPending
+            ? t("friends.enableDiscoverableBusy")
+            : t("friends.enableDiscoverableButton")}
         </button>
       </div>
 
       {update.isError && (
         <div className="text-xs text-red-300">
-          Fehler: {update.error?.message}
+          {t("friends.errorPrefix")}
+          {update.error?.message}
         </div>
       )}
     </div>
@@ -211,6 +221,7 @@ function InlineNameEditor({
   onCancel: () => void;
   pending: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap gap-2">
       <input
@@ -223,7 +234,7 @@ function InlineNameEditor({
         }}
         maxLength={64}
         autoFocus
-        placeholder="z.B. dein Vorname"
+        placeholder={t("friends.namePlaceholder")}
         className="rounded border border-gray-600 bg-gray-800 px-2 py-1 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
       />
       <button
@@ -231,13 +242,13 @@ function InlineNameEditor({
         disabled={pending || !value.trim()}
         className="rounded bg-purple-600 px-3 py-1 text-xs text-white hover:bg-purple-700 disabled:opacity-40"
       >
-        {pending ? "…" : "Speichern"}
+        {pending ? t("friends.saveBusy") : t("friends.saveButton")}
       </button>
       <button
         onClick={onCancel}
         className="rounded bg-gray-700 px-3 py-1 text-xs text-gray-300 hover:bg-gray-600"
       >
-        Abbrechen
+        {t("friends.cancelButton")}
       </button>
     </div>
   );
@@ -248,6 +259,7 @@ function InlineNameEditor({
 // ============================================================
 
 function SearchCard() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [emailInput, setEmailInput] = useState("");
   const search = useFriendSearch(query);
@@ -276,15 +288,17 @@ function SearchCard() {
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4 space-y-3">
       <div className="flex items-center gap-2">
-        <h3 className="text-lg font-medium text-purple-300">User finden</h3>
+        <h3 className="text-lg font-medium text-purple-300">
+          {t("friends.searchHeading")}
+        </h3>
         <InfoButton>
-          <p className="font-medium mb-1">User finden</p>
+          <p className="font-medium mb-1">{t("friends.searchHeading")}</p>
           <p>
-            Zwei Suchwege: <strong>Display-Name</strong> (Prefix-Match,
-            ab 2 Zeichen, nur User die „Auffindbar\" aktiviert haben);
-            <strong> exakte Email</strong> (umgeht die Auffindbar-Sperre —
-            wer die Email kennt, kennt den User). Suchergebnisse zeigen
-            sofort den Beziehungs-Status (z.B. „bereits Freund\", „Anfrage offen\").
+            {t("friends.searchInfoPrefix")}{" "}
+            <strong>{t("friends.searchInfoDisplayName")}</strong>{" "}
+            {t("friends.searchInfoDisplayNameRest")}
+            <strong> {t("friends.searchInfoEmail")}</strong>{" "}
+            {t("friends.searchInfoEmailRest")}
           </p>
         </InfoButton>
       </div>
@@ -292,20 +306,20 @@ function SearchCard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Display-Name-Suche */}
         <label className="flex flex-col text-xs text-gray-400">
-          Per Display-Name (ab 2 Buchstaben, nur auffindbare User)
+          {t("friends.searchDisplayNameLabel")}
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             maxLength={64}
             className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
-            placeholder="z.B. 'Han'"
+            placeholder={t("friends.searchDisplayNamePlaceholder")}
           />
         </label>
 
         {/* Email-Lookup */}
         <form onSubmit={submitEmailLookup} className="flex flex-col text-xs text-gray-400">
-          Per exakter Email (kein Prefix-Match)
+          {t("friends.searchEmailLabel")}
           <div className="mt-1 flex gap-2">
             <input
               type="email"
@@ -313,14 +327,16 @@ function SearchCard() {
               onChange={(e) => setEmailInput(e.target.value)}
               maxLength={255}
               className="flex-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
-              placeholder="freund@example.com"
+              placeholder={t("friends.searchEmailPlaceholder")}
             />
             <button
               type="submit"
               disabled={lookup.isPending || !emailInput.trim()}
               className="rounded bg-gray-700 px-3 py-2 text-sm text-gray-200 hover:bg-gray-600 disabled:opacity-50"
             >
-              {lookup.isPending ? "…" : "Suchen"}
+              {lookup.isPending
+                ? t("friends.searchEmailBusy")
+                : t("friends.searchEmailButton")}
             </button>
           </div>
         </form>
@@ -330,16 +346,15 @@ function SearchCard() {
       {query.trim().length >= 2 && (
         <div className="rounded border border-gray-700 bg-gray-800/40 p-3 space-y-1.5">
           <div className="text-xs text-gray-500">
-            Display-Name-Treffer für „{query}":
+            {t("friends.searchResultsLabel", { query })}
           </div>
           {search.isLoading && (
-            <p className="text-sm text-gray-400">Suche …</p>
+            <p className="text-sm text-gray-400">
+              {t("friends.searchInProgress")}
+            </p>
           )}
           {search.data && search.data.results.length === 0 && (
-            <p className="text-sm text-gray-500">
-              Keine Treffer. (Andere User sind eventuell nicht auffindbar
-              gesetzt.)
-            </p>
+            <p className="text-sm text-gray-500">{t("friends.searchEmpty")}</p>
           )}
           {search.data?.results.map((r) => (
             <SearchResultRow
@@ -357,12 +372,11 @@ function SearchCard() {
       {lookupResult && (
         <div className="rounded border border-gray-700 bg-gray-800/40 p-3 space-y-1">
           <div className="text-xs text-gray-500">
-            Email-Lookup-Ergebnis:
+            {t("friends.lookupResultsLabel")}
           </div>
           {!lookupResult.found && (
             <p className="text-sm text-gray-500">
-              Kein User mit dieser Email gefunden — oder der Account ist
-              deaktiviert. (Antwort identisch zu „nicht da", kein Probing.)
+              {t("friends.lookupNotFound")}
             </p>
           )}
           {lookupResult.found && lookupResult.user && (
@@ -396,6 +410,7 @@ function SearchResultRow({
   onAccept: (friendship_id: number) => void;
   busy: boolean;
 }) {
+  const { t } = useTranslation();
   // QA-Fix M4: Cancel-Button bei outgoing_pending — User muss nicht zum
   // anderen Card runterscrollen
   const remove = useRemoveFriendship();
@@ -403,7 +418,9 @@ function SearchResultRow({
     <div className="flex items-center justify-between gap-2 py-1">
       <div className="text-sm text-gray-200">
         {result.display_name || (
-          <span className="italic text-gray-500">(kein Display-Name)</span>
+          <span className="italic text-gray-500">
+            {t("friends.noDisplayName")}
+          </span>
         )}
       </div>
       <div className="flex items-center gap-2">
@@ -413,13 +430,13 @@ function SearchResultRow({
             disabled={busy}
             className="rounded bg-purple-600/30 px-3 py-1 text-xs text-purple-200 hover:bg-purple-600/50 disabled:opacity-50"
           >
-            ➕ Anfragen
+            {t("friends.addRequestButton")}
           </button>
         )}
         {result.relationship === "outgoing_pending" && result.friendship_id && (
           <>
             <span className="rounded bg-yellow-500/20 px-2 py-1 text-[10px] text-yellow-300">
-              Anfrage offen
+              {t("friends.requestOpen")}
             </span>
             <button
               onClick={() =>
@@ -428,7 +445,7 @@ function SearchResultRow({
               disabled={busy || remove.isPending}
               className="rounded bg-gray-700 px-2 py-1 text-[10px] text-gray-300 hover:bg-gray-600 disabled:opacity-50"
             >
-              ↶ Zurücknehmen
+              {t("friends.withdrawRequest")}
             </button>
           </>
         )}
@@ -438,12 +455,12 @@ function SearchResultRow({
             disabled={busy}
             className="rounded bg-emerald-600/30 px-3 py-1 text-xs text-emerald-200 hover:bg-emerald-600/50 disabled:opacity-50"
           >
-            ✓ Annehmen
+            {t("friends.acceptButton")}
           </button>
         )}
         {result.relationship === "accepted" && (
           <span className="rounded bg-emerald-500/20 px-2 py-1 text-[10px] text-emerald-300">
-            Bereits Freunde
+            {t("friends.alreadyFriends")}
           </span>
         )}
       </div>
@@ -456,12 +473,13 @@ function SearchResultRow({
 // ============================================================
 
 function PendingIncomingCard({ items }: { items: Friendship[] }) {
+  const { t } = useTranslation();
   const accept = useAcceptFriend();
   const remove = useRemoveFriendship();
   return (
     <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-4 space-y-2">
       <h3 className="text-lg font-medium text-purple-300">
-        Eingehende Anfragen ({items.length})
+        {t("friends.incomingHeading", { count: items.length })}
       </h3>
       <ul className="space-y-1.5">
         {items.map((fs) => (
@@ -471,7 +489,9 @@ function PendingIncomingCard({ items }: { items: Friendship[] }) {
           >
             <div className="text-sm text-gray-200">
               {fs.other.display_name || (
-                <span className="italic text-gray-500">(kein Name)</span>
+                <span className="italic text-gray-500">
+                  {t("friends.noName")}
+                </span>
               )}
             </div>
             <div className="flex gap-1.5">
@@ -480,14 +500,14 @@ function PendingIncomingCard({ items }: { items: Friendship[] }) {
                 disabled={accept.isPending}
                 className="rounded bg-emerald-600/30 px-3 py-1 text-xs text-emerald-200 hover:bg-emerald-600/50 disabled:opacity-50"
               >
-                ✓ Annehmen
+                {t("friends.acceptButton")}
               </button>
               <button
                 onClick={() => remove.mutate({ friendship_id: fs.id })}
                 disabled={remove.isPending}
                 className="rounded bg-gray-700 px-3 py-1 text-xs text-gray-300 hover:bg-gray-600 disabled:opacity-50"
               >
-                ✗ Ablehnen
+                {t("friends.declineButton")}
               </button>
             </div>
           </li>
@@ -498,11 +518,12 @@ function PendingIncomingCard({ items }: { items: Friendship[] }) {
 }
 
 function PendingOutgoingCard({ items }: { items: Friendship[] }) {
+  const { t } = useTranslation();
   const remove = useRemoveFriendship();
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4 space-y-2">
       <h3 className="text-lg font-medium text-gray-300">
-        Verschickte Anfragen ({items.length})
+        {t("friends.outgoingHeading", { count: items.length })}
       </h3>
       <ul className="space-y-1.5">
         {items.map((fs) => (
@@ -512,7 +533,9 @@ function PendingOutgoingCard({ items }: { items: Friendship[] }) {
           >
             <div className="text-sm text-gray-300">
               {fs.other.display_name || (
-                <span className="italic text-gray-500">(kein Name)</span>
+                <span className="italic text-gray-500">
+                  {t("friends.noName")}
+                </span>
               )}
             </div>
             <button
@@ -520,7 +543,7 @@ function PendingOutgoingCard({ items }: { items: Friendship[] }) {
               disabled={remove.isPending}
               className="rounded bg-gray-700 px-3 py-1 text-xs text-gray-300 hover:bg-gray-600 disabled:opacity-50"
             >
-              ↶ Zurücknehmen
+              {t("friends.withdrawRequest")}
             </button>
           </li>
         ))}
@@ -540,17 +563,18 @@ function FriendsListCard({
   items: Friendship[];
   isLoading: boolean;
 }) {
+  const { t } = useTranslation();
   const remove = useRemoveFriendship();
   return (
     <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4 space-y-2">
       <h3 className="text-lg font-medium text-purple-300">
-        Meine Freunde ({items.length})
+        {t("friends.listHeading", { count: items.length })}
       </h3>
-      {isLoading && <p className="text-sm text-gray-400">Lade …</p>}
+      {isLoading && (
+        <p className="text-sm text-gray-400">{t("friends.listLoading")}</p>
+      )}
       {!isLoading && items.length === 0 && (
-        <p className="text-sm text-gray-500">
-          Noch keine Freunde. Such oben nach Display-Name oder Email.
-        </p>
+        <p className="text-sm text-gray-500">{t("friends.listEmpty")}</p>
       )}
       <ul className="space-y-1.5">
         {items.map((fs) => (
@@ -561,7 +585,9 @@ function FriendsListCard({
             <div className="flex items-baseline gap-2">
               <span className="text-sm font-medium text-gray-100">
                 {fs.other.display_name || (
-                  <span className="italic text-gray-500">(kein Name)</span>
+                  <span className="italic text-gray-500">
+                    {t("friends.noName")}
+                  </span>
                 )}
               </span>
               {fs.other.email && (
@@ -574,7 +600,11 @@ function FriendsListCard({
               onClick={() => {
                 if (
                   window.confirm(
-                    `Freundschaft mit ${fs.other.display_name ?? "diesem User"} wirklich beenden?`,
+                    t("friends.unfriendConfirm", {
+                      name:
+                        fs.other.display_name ??
+                        t("friends.unfriendFallback"),
+                    }),
                   )
                 ) {
                   remove.mutate({ friendship_id: fs.id });
@@ -583,7 +613,7 @@ function FriendsListCard({
               disabled={remove.isPending}
               className="rounded bg-gray-700 px-3 py-1 text-xs text-gray-300 hover:bg-red-600/50 hover:text-white disabled:opacity-50"
             >
-              Entfreunden
+              {t("friends.unfriendButton")}
             </button>
           </li>
         ))}
