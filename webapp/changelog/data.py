@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-danger-zone",
+        released=date(2026, 5, 27),
+        title="Gefahren-Bereich-Karte in Englisch",
+        highlights=[
+            "Danger-Zone-Card (unten in Verwaltung → Meine Daten) komplett "
+            "übersetzt: Header, Intro (mit „nicht rückgängig\"-Strong-Text), "
+            "Backup-Prompt, 3x Done-Messages, generischer Error-Banner.",
+            "Alle drei Lösch-Aktionen (Solves zurücksetzen / Tracking-Daten "
+            "zurücksetzen / Account komplett löschen) inkl. Title + "
+            "Description + Use-Case + Button-Label folgen jetzt der "
+            "UI-Sprache.",
+            "DangerAction-Sub-Komponente: 3 Tooltip-States (idle/armed/"
+            "other-armed) und 3 Button-Label-States (idle/running/"
+            "confirm) komplett DE/EN.",
+            "Locales-Namespace neu: dangerZone (~26 Strings).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-live-card",
         released=date(2026, 5, 27),
         title="Timer-Tab Live-Karte + Letzte-Solves-Tabelle in Englisch",
