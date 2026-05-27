@@ -198,9 +198,9 @@
   "scramble": {
     "title": "Scramble",
     "infoTitle": "Scramble",
-    "infoBody1": "Zufällige Verdrehungs-Sequenz nach WCA-Notation. Buchstaben = Seite (R, L, U, D, F, B), Strich („L'") = gegen den Uhrzeiger, Zahl 2 = doppelte Drehung. Wende den Scramble auf einen gelösten Cube an — dann sind alle Lösungen unter denselben Bedingungen vergleichbar. „Skip" wirft einen neuen.",
+    "infoBody1": "Zufällige Verdrehungs-Sequenz nach WCA-Notation. Buchstaben = Seite (R, L, U, D, F, B), Strich („L'\") = gegen den Uhrzeiger, Zahl 2 = doppelte Drehung. Wende den Scramble auf einen gelösten Cube an — dann sind alle Lösungen unter denselben Bedingungen vergleichbar. „Skip\" wirft einen neuen.",
     "infoPickerLabel": "Picker:",
-    "infoBody2": "Standard ist der passende Scramble zum gewählten Cube-Type. Toggle „WCA" ↔ „Inoffiziell" + Dropdown wählt einen anderen Typ. Wechsel des Cube-Types setzt den Override automatisch zurück.",
+    "infoBody2": "Standard ist der passende Scramble zum gewählten Cube-Type. Toggle „WCA\" ↔ „Inoffiziell\" + Dropdown wählt einen anderen Typ. Wechsel des Cube-Types setzt den Override automatisch zurück.",
     "customButton": "✏ Eigene",
     "customButtonTitle": "Eigenen Scramble eintippen (z.B. aus einer anderen App / Wettkampf)",
     "imageHide": "2D-Net-Vorschau ausblenden",

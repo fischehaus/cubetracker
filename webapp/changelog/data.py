@@ -44,6 +44,29 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.i18n-jsonfix-qa",
+        released=date(2026, 5, 27),
+        title="QA-Hotfix: i18n-Locales-JSON parsbar machen",
+        highlights=[
+            "Mini-QA fand: 4 un-escaped ASCII-Quotes in de.json:201+203 "
+            "(scramble.infoBody1 + scramble.infoBody2 mit „L'\", „Skip\", "
+            "„WCA\", „Inoffiziell\"). Python-JSON-Parser bricht dort ab.",
+            "Effekt im Live-Bundle: Vite hat den Parse-Error silent "
+            "geschluckt, das resulting Object war truncated → alle "
+            "Locale-Keys NACH dem Bruch fehlten. Tabs/UserMenu waren "
+            "übersetzt (kommen VOR dem Bruch), alles andere blieb DE.",
+            "Fix: ASCII-Quotes mit \\\" escaped, analog zu allen anderen "
+            "Stellen in der Datei. Beide Locales parsen jetzt sauber, "
+            "315 Keys in beiden, symmetrisch.",
+            "Symmetrie-Check + Untranslated-Detection: alle 30 identischen "
+            "DE=EN-Strings sind legitim (Cubing-Termini, Tech-Begriffe, "
+            "Symbol-/Emoji-Strings).",
+            "TODO als Backlog-Item: einen JSON-Parser-Lint im pre-commit-"
+            "Hook ergänzen, damit das nicht wieder durchrutscht.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.i18n-dashboard",
         released=date(2026, 5, 27),
         title="Restliche Dashboard-Karten DE/EN — Dashboard komplett",
