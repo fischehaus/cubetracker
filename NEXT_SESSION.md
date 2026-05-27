@@ -24,15 +24,16 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-27 — Turnier-Sprint VOLL DURCH (i18n + WCA-Profil + QA)
+## ✅ ERLEDIGT 2026-05-27 — Turnier-Sprint VOLL DURCH + Roadmap-DB + Demo-Probe-Seed
 
-**~56 Commits + ~37 Tags an einem Tag, alles live.** Live-public-Version:
-`W.wca-profile-light` (= aktuelles public-Demo-Feature). Backend skippt
-internal-Einträge in `current_version()`, also sieht der User nur die
-beiden Top-Wellen `W.i18n-en-release` + `W.wca-profile-light` im Changelog,
-nicht den ganzen Audit-Trail dahinter.
+**~62 Commits + ~42 Tags an einem Tag, alles live.** Live-public-Version:
+`W.roadmap-modal-api` (= letzte public-Welle; danach 4 internal: demo-probe-
+seed, roadmap-db, roadmap-admin-ui, roadmap-admin-qa). Backend skippt
+internal-Einträge in `current_version()`, also sieht der User im Changelog
+sauber drei Top-Wellen: `W.roadmap-modal-api`, `W.wca-profile-light`,
+`W.i18n-en-release` — nicht den ganzen Audit-Trail dahinter.
 
-**Bilanz Mi/Do im Detail:**
+**Bilanz Mi-spät / Do-Voll im Detail:**
 - Mi-Vormittag/Mittag: Backlog-Sprint (Average-PB, Danger-Zone, Letzte
   Rekorde, Roadmap-intern) + 3 QA-Hotfixe + GitHub-Issue #1 vollständig
   adressiert.
@@ -46,11 +47,14 @@ nicht den ganzen Audit-Trail dahinter.
 - Do-Spät: **WCA-Profil-Light komplett gebaut** — Schema + Endpoint +
   AccountSettings + Dashboard-Card + QA-Hotfix + 4-Bug-Fix gegen echte
   WCA-API-Quirks.
+- Do-Nacht/Fr-Früh: **Demo-Probe-Seed + Roadmap-Migration** (siehe Block
+  „Wellen 31-35" weiter unten).
 
 🎯 **Turnier-Sprint:** Englisch-Variante + WCA-Profil-Light für privates
 Demo beim WCA-Turnier in Meppel **Sa 30.05.** — beide Demo-Features sind
 **am Mi/Do live geworden**, ein Tag früher als geplant. **Restplan:** nur
-noch Sa-Vormittag Demo-Probe (siehe unten).
+noch Sa-Vormittag (oder schon Fr) Demo-Probe via den 12 Admin-Live-Tests
+(siehe „Restplan" unten).
 
 ### ✅ Patch-Notes-Konsolidierung erledigt
 
@@ -149,27 +153,88 @@ einem Commit `ea6d9a9`. Reproduzierbar dokumentiert.
 >   die Quirks intern, Frontend unverändert. **Lesson archiviert:
 >   API-Quirks immer mit Live-Response gegenchecken.** Commit `e5c0273`.
 
-### 🔜 Restplan Turnier-Sprint (nur noch Sa-Vormittag)
+### Wellen 31-35 (Do-Nacht / Fr-Früh, 27./28.05.) — Demo-Probe-Seed + Roadmap-DB
 
-**Sa 30.05. Vormittag:** Demo-Probe + Last-Polish-Runde am Phone.
-Checkliste:
-- Auf EN umstellen → Klick-Through Login → Dashboard → Timer → Analyse →
-  Verwaltung. Achten auf hartkodierte DE-Reste (sollte 0 sein nach
-  W.i18n-qa + W.i18n-en-release).
-- WCA-ID setzen (eigene ID des Demo-Users) → WCA-Karte erscheint sofort
-  (Cache-Invalidation post-QA-Fix verifiziert) → Wettkampf-Count +
-  Medaillen + PRs + Recent-Comps zeigen echte Zahlen.
-- Solve eintippen, Penalty toggeln, AO5/AO12 prüfen.
-- Backup-Download in EN-Modus → JSON enthält `user_wca_id`-Feld.
+> **Demo-Probe-Seed:**
+> - `W.demo-probe-meppel-seed` (internal) — 12 Live-Tests via Cold-
+>   Start-Bootstrap in `seeds/live_tests.py` angelegt. Reihenfolge
+>   folgt dem realen Demo-Flow am Phone (Login → Dashboard → Solve →
+>   Analyse → Verwaltung → Trainer → Community → WCA-Profil → Backup
+>   → Modals → Persistenz). Idempotent via related_phase-Marker.
+>   Cross-Admin-Visibility war im Bestand schon korrekt — kein
+>   Endpoint-Change nötig. Commit `bb329e7`.
+>
+> **Roadmap → DB-Migration (4 Wellen):**
+> - `W.roadmap-db` (internal) — Neue Tabelle `roadmap_items` (id +
+>   phase_id + sort_order + title_de + title_en + note_de + note_en +
+>   effort + status + internal + timestamps). Pydantic-Schemas mit
+>   Literal-Typing P1-P6 + active/done. Public-Endpoint GET /api/
+>   roadmap (filtert internal=True für Non-Admins). Admin-CRUD POST/
+>   PATCH/DELETE /api/admin/roadmap/items. Seed mit 28 kuratierten
+>   Items (alle done aus altem ts-File entfernt — Hetzner, Backlog,
+>   i18n, WCA-Profil sind durch). Bootstrap idempotent. Commit
+>   `711f8ef`.
+> - `W.roadmap-modal-api` (**public**) — RoadmapModal liest jetzt
+>   aus useRoadmap-Hook, alte lib/roadmap-data.ts (~300 Zeilen)
+>   gelöscht, neue lib/roadmap-phases.ts mit Phase-Meta + i18n-Keys.
+>   Vollständig DE/EN — der amber „German only"-Banner aus
+>   W.i18n-roadmap-notice ist Geschichte. Commit `7cb7723`.
+> - `W.roadmap-admin-ui` (internal) — AdminRoadmapPanel als neuer
+>   Block im Admin-Tab zwischen Live-Tests + Users. Liste gruppiert
+>   nach Phase + Counter, Filter (Phase/Status/Visibility), Inline-
+>   Edit alle 9 Felder, Create-Form + Delete-Confirm. Cache-
+>   Invalidation auf ['roadmap'] nach Mutations. 43 neue Locale-
+>   Keys DE/EN (1202/1202 symmetrisch). Commit `950f77b`.
+> - `W.roadmap-admin-qa` (internal) — QA-Sub-Agent fand 0 echte
+>   KRITISCH (Security-Kette POSITIV: require_admin + extra=forbid
+>   + Cache-Invalidation + Anonymous-Filter) + 3 SOLLTE. Sofort
+>   gefixt: deletingId-State (per-Row-Disable statt global),
+>   key={id}-{view|edit} ItemRow-Reset gegen stale-form, Empty-
+>   State im RoadmapModal (neuer Locale-Key roadmap.emptyState),
+>   Seed-Re-Run-Verhalten im Docstring dokumentiert. Commit
+>   `6775a78`.
+>
+> Live-Verify nach Coolify-Deploy: /api/roadmap anonym liefert
+> 24 Items (28 - 4 internal), Admin-Endpoints alle 401 unauth,
+> Bundle enthält Roadmap-Pflege + emptyState + alle Phase-Titel
+> DE+EN. POSITIV-Findings vom QA: Cross-Admin-Filter sauber,
+> Mass-Assignment via extra=forbid blockiert, Cache invalidiert
+> bei jeder Mutation.
 
-**Optionale Post-Demo-Items (Backlog, nicht Sprint-blocker):**
-- Volle Roadmap-Übersetzung (~1h: ROADMAP_INTRO + 6 Phase-Titles + 50
-  Item-Titles + 30 Notes nach `roadmap.*` Locale-Keys). Aktuell zeigt
-  EN-Modal den amber „German only"-Banner.
+### 🔜 Restplan Turnier-Sprint (Fr Abend + Sa Vormittag)
+
+**Du-Aktion (Fr Abend oder Sa Vormittag, ~30 Min):** Phone-Demo-Probe
+über die **12 Admin-Live-Tests** (Verwaltung → Admin → Live-Tests).
+Reihenfolge folgt dem realen Demo-Flow. Pro FAIL: Notiz im UI + status=
+fail → öffnet automatisch ein GitHub-Issue, das fixe ich morgen direkt.
+
+Checkliste-Highlights:
+1. Sprach-Switcher im Header (Flagge klicken → sofort EN)
+2. Login-Seite komplett EN
+3. Dashboard EN: alle 11 Karten ohne DE-Reste
+4. Timer-Tab EN: Solve eintippen + Penalty + Live-Karte
+5. Analyse-Tab EN: Charts + Solve-Liste + Solve-Detail-Modal
+6. Verwaltung-Tab EN: alle 6 Sub-Tabs
+7. Trainer + Community EN
+8. WCA-ID setzen → Karte erscheint sofort (Cache-Invalidation-Test)
+9. WCA-Profil: echte Zahlen (Wettkampf-Count + Medaillen + PRs + Comps)
+10. Backup-Download EN → JSON enthält user_wca_id
+11. Roadmap-Modal EN: zeigt jetzt vollständig EN (kein DE-Banner mehr —
+    seit W.roadmap-modal-api), Items kommen aus DB
+12. Sprach-Persistenz nach Reload + Logout
+
+**Optionale Post-Demo-Items (Backlog, NICHT Sprint-blocker):**
 - AdminStatsPanel + AdminUsersPanel hartkodiert `"de-DE"` — Admin-only,
   Demo-irrelevant, getIntlLocale-Migration für Vollständigkeit.
-- Backend-Test-Suite (P6, intern) — 0% Coverage, Smoke-Tests pro
-  Endpoint-Cluster.
+- Activity-Feed (P3-USP, ~3 Tage) — war ursprünglich für Turnier
+  vorgesehen, vertagt zugunsten i18n + WCA + Roadmap. Multi-User-
+  Differenzierung gegen csTimer.
+- PWA-Setup (P1, ~1 Tag) — letztes P1-Item, Phone-Homescreen-Install.
+- Phase 6 (~05.06.) — apex `cubetracker.de` → Hetzner + Render abbauen
+  + Branch `feature/W-api-prefix` → `main`.
+- Backend-Test-Suite (P6, internal) — 0% Coverage.
+- ConfirmDialog-Komponente statt native confirm() im Admin-Roadmap
+  (QA-NICE-Befund vom W.roadmap-admin-qa-Pass).
 
 ### Welle 1 — #2 Average-PB-Punkte + Hook-Drift
 
