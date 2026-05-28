@@ -197,6 +197,15 @@ def get_admin_stats(
     top_cubes = [{"cube_type": r[0], "solves": int(r[1])} for r in cube_rows]
 
     # Snapshot-Storage
+    # W.admin-snapshot-limit (2026-05-28): Soft-Limit dokumentieren —
+    # User-Wunsch „verbraucht / verfuegbar"-Anzeige. Default 1024 MB
+    # (1 GB) als pragmatischer Schwellenwert, ueber ENV CUBETRACKER_
+    # SNAPSHOT_STORAGE_LIMIT_MB ueberschreibbar. Kein technisches
+    # Limit erzwungen — das ist nur fuer das Admin-Dashboard.
+    import os
+    snapshot_storage_limit_mb = int(
+        os.environ.get("CUBETRACKER_SNAPSHOT_STORAGE_LIMIT_MB", "1024")
+    )
     total_snapshots = db.scalar(select(func.count(Snapshot.id))) or 0
     total_snapshot_bytes = (
         db.scalar(select(func.coalesce(func.sum(func.length(Snapshot.payload_json)), 0)))
@@ -222,6 +231,12 @@ def get_admin_stats(
             "snapshots_count": int(total_snapshots),
             "snapshots_total_bytes": int(total_snapshot_bytes),
             "snapshots_total_mb": round(int(total_snapshot_bytes) / 1024 / 1024, 2),
+            "snapshots_limit_mb": snapshot_storage_limit_mb,
+            "snapshots_used_pct": round(
+                (int(total_snapshot_bytes) / 1024 / 1024) /
+                max(snapshot_storage_limit_mb, 1) * 100,
+                1,
+            ),
         },
         "as_of": now.isoformat(),
     }

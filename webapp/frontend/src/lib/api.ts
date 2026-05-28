@@ -1193,6 +1193,8 @@ export interface AdminStats {
     snapshots_count: number;
     snapshots_total_bytes: number;
     snapshots_total_mb: number;
+    snapshots_limit_mb: number;
+    snapshots_used_pct: number;
   };
   as_of: string;
 }

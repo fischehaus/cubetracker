@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.admin-snapshot-limit",
+        released=date(2026, 5, 28),
+        title="Admin → Snapshot-Storage zeigt X / Limit + Progress-Bar",
+        highlights=[
+            "User-Wunsch: Snapshot-Storage-Anzeige im Admin-Stats-Panel "
+            "soll „verbraucht / Limit\" sein, nicht nur „verbraucht\".",
+            "Backend (api/admin.py:get_admin_stats): neue Felder im "
+            "storage-Block: snapshots_limit_mb + snapshots_used_pct. "
+            "Default-Limit 1024 MB, ueber ENV CUBETRACKER_SNAPSHOT_"
+            "STORAGE_LIMIT_MB ueberschreibbar. Kein technisches Limit "
+            "erzwungen — nur fuer das Dashboard.",
+            "Frontend (AdminStatsPanel): Tile zeigt jetzt „3.42 MB / "
+            "1024.00 MB\" + Sub-Label „X.Y % belegt\". Plus Progress-Bar "
+            "darunter mit Schwellenwert-Farben: <60% emerald, 60-85% "
+            "amber, >85% rot. ARIA-Label mit Prozent.",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-polish-pbs",
         released=date(2026, 5, 28),
         title="🎯 Timer-Tab Polish: PBs überall + globale Scrollbar + ao100",

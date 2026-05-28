@@ -194,10 +194,13 @@ export function AdminStatsPanel() {
             label="Snapshots gesamt"
             value={formatNumber(data.storage.snapshots_count)}
           />
+          {/* W.admin-snapshot-limit (2026-05-28): X / Limit + Prozent +
+              Progress-Bar. Limit kommt aus Backend (Default 1024 MB,
+              via ENV CUBETRACKER_SNAPSHOT_STORAGE_LIMIT_MB ueberschreibbar). */}
           <StatTile
-            label="Speicher gesamt"
-            value={`${data.storage.snapshots_total_mb.toFixed(2)} MB`}
-            sub={`${formatNumber(data.storage.snapshots_total_bytes)} bytes`}
+            label="Speicher (verbraucht / Limit)"
+            value={`${data.storage.snapshots_total_mb.toFixed(2)} MB / ${data.storage.snapshots_limit_mb.toFixed(2)} MB`}
+            sub={`${data.storage.snapshots_used_pct.toFixed(1)} % belegt`}
           />
           <StatTile
             label="Ø pro Snapshot"
@@ -211,6 +214,29 @@ export function AdminStatsPanel() {
                 : "—"
             }
           />
+        </div>
+        {/* Progress-Bar als visueller Indikator. Faerbung:
+            <60% gruen, 60-85% amber, >85% rot. */}
+        <div className="mt-4">
+          <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
+            <div
+              className={`h-full transition-all rounded-full ${
+                data.storage.snapshots_used_pct < 60
+                  ? "bg-emerald-500/70"
+                  : data.storage.snapshots_used_pct < 85
+                    ? "bg-amber-500/70"
+                    : "bg-red-500/70"
+              }`}
+              style={{
+                width: `${Math.min(data.storage.snapshots_used_pct, 100)}%`,
+              }}
+              role="progressbar"
+              aria-valuenow={Math.round(data.storage.snapshots_used_pct)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Snapshot-Storage zu ${data.storage.snapshots_used_pct.toFixed(1)}% belegt`}
+            />
+          </div>
         </div>
       </section>
 
