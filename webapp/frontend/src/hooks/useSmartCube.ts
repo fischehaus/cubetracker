@@ -13,6 +13,7 @@
 // erkannt → Inspection → Running → Solved erkennt.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { isCubeSolved } from "../lib/cube-solved";
 // W.gan-cube-connect-fix (2026-05-28): static import statt dynamic.
 // Begruendung: navigator.bluetooth.requestDevice() MUSS aus dem
 // User-Gesture-Handler (Click) heraus synchron aufgerufen werden —
@@ -53,6 +54,13 @@ type GanCubeEvent =
 
 export type SmartCubeStatus = "disconnected" | "connecting" | "connected" | "error";
 
+// W.gan-cube-auto-time: Solve-State-Machine.
+//   idle           — Cube verbunden, kein aktiver Solve
+//   solving        — Erster Move erkannt, Timer laeuft
+//   solved         — Cube ist solved, Timer gestoppt
+//                    (2 Sek Anzeige, dann zurueck zu idle)
+export type SmartCubeSolveState = "idle" | "solving" | "solved";
+
 export interface SmartCubeState {
   status: SmartCubeStatus;
   cubeName: string | null;
@@ -61,6 +69,16 @@ export interface SmartCubeState {
   lastFacelets: string | null;
   moveCount: number;
   errorMessage: string | null;
+  // Solve-State-Machinerie
+  solveState: SmartCubeSolveState;
+  // Timestamps in ms (Performance.now()-based, monoton)
+  solveStartedAt: number | null;
+  solveEndedAt: number | null;
+  // Anzahl Moves im aktuellen Solve
+  solveMoveCount: number;
+  // Letzter abgeschlossener Solve (fuer UI-Anzeige + auto-fill)
+  lastSolveTimeMs: number | null;
+  lastSolveMoves: number | null;
 }
 
 const INITIAL_STATE: SmartCubeState = {
@@ -71,7 +89,17 @@ const INITIAL_STATE: SmartCubeState = {
   lastFacelets: null,
   moveCount: 0,
   errorMessage: null,
+  solveState: "idle",
+  solveStartedAt: null,
+  solveEndedAt: null,
+  solveMoveCount: 0,
+  lastSolveTimeMs: null,
+  lastSolveMoves: null,
 };
+
+// Event-Name fuer Komponenten die auf abgeschlossene Solves reagieren
+// wollen (BigTimerInput → auto-fill). Detail: { time_ms, moves }.
+export const SMART_CUBE_SOLVE_EVENT = "cubetracker:smart-cube-solve";
 
 export function useSmartCube() {
   const [state, setState] = useState<SmartCubeState>(INITIAL_STATE);
@@ -189,13 +217,65 @@ export function useSmartCube() {
       // Event-Subscription
       subscriptionRef.current = conn.events$.subscribe((event) => {
         if (event.type === "MOVE") {
-          setState((s) => ({
-            ...s,
-            lastMove: event.move,
-            moveCount: s.moveCount + 1,
-          }));
+          setState((s) => {
+            // W.gan-cube-auto-time State-Machine:
+            // idle + erster Move → solving (Timer startet jetzt)
+            // solving + weiterer Move → moveCount++
+            // solved → erster Move startet neuen Solve
+            if (s.solveState === "idle" || s.solveState === "solved") {
+              return {
+                ...s,
+                lastMove: event.move,
+                moveCount: s.moveCount + 1,
+                solveState: "solving",
+                solveStartedAt: performance.now(),
+                solveEndedAt: null,
+                solveMoveCount: 1,
+              };
+            }
+            // solving — weiterer Move
+            return {
+              ...s,
+              lastMove: event.move,
+              moveCount: s.moveCount + 1,
+              solveMoveCount: s.solveMoveCount + 1,
+            };
+          });
         } else if (event.type === "FACELETS") {
-          setState((s) => ({ ...s, lastFacelets: event.facelets }));
+          setState((s) => {
+            const nowSolved = isCubeSolved(event.facelets);
+            // solving + Cube ist solved → Solve abgeschlossen
+            if (s.solveState === "solving" && nowSolved && s.solveStartedAt != null) {
+              const endedAt = performance.now();
+              const timeMs = Math.round(endedAt - s.solveStartedAt);
+              // Custom-Event fuer BigTimerInput auto-fill
+              try {
+                window.dispatchEvent(
+                  new CustomEvent(SMART_CUBE_SOLVE_EVENT, {
+                    detail: {
+                      time_ms: timeMs,
+                      moves: s.solveMoveCount,
+                    },
+                  }),
+                );
+              } catch {
+                /* ignore */
+              }
+              // eslint-disable-next-line no-console
+              console.log(
+                `[SmartCube] Solve abgeschlossen: ${timeMs} ms, ${s.solveMoveCount} Moves`,
+              );
+              return {
+                ...s,
+                lastFacelets: event.facelets,
+                solveState: "solved",
+                solveEndedAt: endedAt,
+                lastSolveTimeMs: timeMs,
+                lastSolveMoves: s.solveMoveCount,
+              };
+            }
+            return { ...s, lastFacelets: event.facelets };
+          });
         } else if (event.type === "BATTERY") {
           setState((s) => ({ ...s, batteryLevel: event.batteryLevel }));
         } else if (event.type === "HARDWARE") {
@@ -267,8 +347,36 @@ export function useSmartCube() {
   }, []);
 
   const reset = useCallback(() => {
-    setState((s) => ({ ...s, lastMove: null, moveCount: 0 }));
+    setState((s) => ({
+      ...s,
+      lastMove: null,
+      moveCount: 0,
+      solveState: "idle",
+      solveStartedAt: null,
+      solveEndedAt: null,
+      solveMoveCount: 0,
+    }));
   }, []);
+
+  // W.gan-cube-auto-time: nach „solved" State automatisch zurueck zu
+  // „idle" nach 3 Sekunden. Verhindert dass der naechste Solve-Move
+  // nicht erkannt wird, weil der State noch „solved" sagt.
+  useEffect(() => {
+    if (state.solveState !== "solved") return;
+    const timer = setTimeout(() => {
+      setState((s) => {
+        if (s.solveState !== "solved") return s;
+        return {
+          ...s,
+          solveState: "idle",
+          solveStartedAt: null,
+          solveEndedAt: null,
+          solveMoveCount: 0,
+        };
+      });
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [state.solveState]);
 
   // Cleanup beim Unmount — wichtig damit die BLE-Connection nicht
   // weiterlebt wenn der User aus dem Timer-Tab navigiert.

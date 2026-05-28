@@ -44,6 +44,41 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-auto-time",
+        released=date(2026, 5, 28),
+        title="🎯 Smart-Cube Auto-Time: dreh den Cube, Time landet ohne Tippen",
+        highlights=[
+            "Sub-Welle 3 der Smart-Cube-Integration: der „Wow\"-Moment. "
+            "Cube ist verbunden, du faengst an zu drehen — der Timer "
+            "startet automatisch. Cube ist geloest — Timer stoppt + "
+            "Solve wird DIREKT gespeichert. Kein Tippen, kein Spacebar.",
+            "**State-Machine** in useSmartCube:",
+            "  • `idle` — Cube ist verbunden, kein Solve aktiv "
+            "(gruener Pulse-Dot)",
+            "  • `solving` — Erster Move erkannt → Timer laeuft "
+            "(gelb-amber Pulse-Dot + Live-Move-Counter)",
+            "  • `solved` — Cube-Facelets = solved State erkannt → "
+            "Timer stoppt + Solve gespeichert (gold-yellow, fertige "
+            "Zeit + Move-Anzahl). Nach 3 Sek zurueck zu `idle`.",
+            "**Solved-Detection** via Facelets-Vergleich (lib/cube-"
+            "solved.ts): ein 3x3-Cube ist solved wenn alle 9 Stickers "
+            "pro Face dieselbe Farbe haben. Pattern-basiert, kein "
+            "fixer String-Vergleich — robust gegen Cube-Orientation.",
+            "**Auto-Save** via Custom-Event `cubetracker:smart-cube-"
+            "solve` mit { time_ms, moves }. BigTimerInput hat einen "
+            "Listener, ruft useCreateSolve.mutate() direkt — wie der "
+            "Spacebar-Mode, nur ohne menschliche Spacebar-Aktion.",
+            "**Timing-Praezision**: performance.now() statt Date.now() "
+            "(monoton, nicht von System-Clock beeinflusst). Auf den "
+            "Millisekunden genau.",
+            "**Demo-Tipp**: am besten im Fokus-Modus testen — dann ist "
+            "der Timer-Display der einzige Inhalt, und du siehst die "
+            "Time gleich riesig.",
+            "5 neue i18n-Keys DE/EN (1350/1350 symmetrisch).",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-mac-fallback",
         released=date(2026, 5, 28),
         title="🧊 GAN-Cube Windows-Pairing-Fix (MAC manuell + Cache)",

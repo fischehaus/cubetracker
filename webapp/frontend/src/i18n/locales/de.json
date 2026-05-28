@@ -50,6 +50,9 @@
     "lastMoveLabel": "Letzter Move:",
     "moveCountLabel": "{{count}} insgesamt",
     "mvpNote": "MVP-Welle: nur Pairing + Move-Indicator. Auto-Time-Insertion kommt als Nächstes.",
+    "autoTimeNote": "Solves werden automatisch erfasst: erster Move startet den Timer, gelöster Cube stoppt + speichert direkt.",
+    "solvingLabel": "Solving …",
+    "movesShort": "Moves",
     "pairingHint": "Pairing-Dialog vom Browser bestätigen. Der Cube muss angeschaltet (kurz eine Seite drehen) und in Reichweite sein.",
     "windowsHintSummary": "Hilfe: Windows-Chrome-Hinweis",
     "windowsHintBody": "Auf Windows kann die Auto-Erkennung der MAC-Adresse fehlschlagen — du wirst dann nach der MAC gefragt.\n\nLösung A (einmalig manuell): MAC unter chrome://bluetooth-internals/#devices kopieren und in den Prompt eingeben. Wird gecacht.\n\nLösung B (dauerhaft): chrome://flags#enable-experimental-web-platform-features aktivieren + Browser neu starten — dann läuft Auto-Erkennung."

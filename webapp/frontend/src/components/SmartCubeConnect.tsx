@@ -51,12 +51,28 @@ export function SmartCubeConnect({
   }
 
   if (state.status === "connected") {
+    // W.gan-cube-auto-time: Solve-State-spezifische Farben + Texte.
+    // idle    — gruener Pulse-Dot, „bereit"-Label
+    // solving — gelber Pulse-Dot, Live-Timer-Anzeige
+    // solved  — gold/yellow, fertige Zeit + Move-Count
+    const solveColor =
+      state.solveState === "solving"
+        ? "border-amber-500/40 bg-amber-500/5"
+        : state.solveState === "solved"
+          ? "border-yellow-500/50 bg-yellow-500/10"
+          : "border-emerald-500/40 bg-emerald-500/5";
+    const dotColor =
+      state.solveState === "solving"
+        ? "bg-amber-400"
+        : state.solveState === "solved"
+          ? "bg-yellow-400"
+          : "bg-emerald-400";
     return (
-      <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/5 p-3 space-y-2">
+      <div className={`rounded-lg border p-3 space-y-2 ${solveColor}`}>
         <div className="flex items-baseline justify-between gap-2 flex-wrap">
           <div className="flex items-baseline gap-2">
             <span
-              className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
+              className={`inline-block w-2 h-2 rounded-full animate-pulse ${dotColor}`}
               aria-hidden="true"
             />
             <span className="text-sm font-medium text-emerald-100">
@@ -76,10 +92,33 @@ export function SmartCubeConnect({
             {t("smartCube.disconnectButton")}
           </button>
         </div>
-        {state.lastMove !== null && (
+
+        {/* W.gan-cube-auto-time: Solve-State-Anzeige mit fertiger Zeit. */}
+        {state.solveState === "solving" && (
+          <div className="text-sm text-amber-200 font-mono flex items-center gap-2">
+            <span>⏱</span>
+            <span>{t("smartCube.solvingLabel")}</span>
+            <span className="text-amber-100">
+              ({state.solveMoveCount} {t("smartCube.movesShort")})
+            </span>
+          </div>
+        )}
+        {state.solveState === "solved" &&
+          state.lastSolveTimeMs !== null && (
+            <div className="text-sm text-yellow-200 font-mono flex items-baseline gap-3 flex-wrap">
+              <span className="text-base">✓</span>
+              <span className="text-yellow-100 text-2xl font-bold">
+                {(state.lastSolveTimeMs / 1000).toFixed(2)}s
+              </span>
+              <span className="text-yellow-300/80">
+                ({state.lastSolveMoves} {t("smartCube.movesShort")})
+              </span>
+            </div>
+          )}
+
+        {state.lastMove !== null && state.solveState === "idle" && (
           // W.gan-cube-mvp-qa (NICE): aria-live="off" explizit, damit
-          // Screen-Reader nicht jeden Move ansagt (speedcuben ist 50+
-          // Moves pro Solve — das waere extrem aufdringlich).
+          // Screen-Reader nicht jeden Move ansagt.
           <div
             className="text-xs text-emerald-300/80 font-mono"
             aria-live="off"
@@ -94,7 +133,7 @@ export function SmartCubeConnect({
           </div>
         )}
         <p className="text-[10px] text-emerald-200/60 italic">
-          {t("smartCube.mvpNote")}
+          {t("smartCube.autoTimeNote")}
         </p>
       </div>
     );
