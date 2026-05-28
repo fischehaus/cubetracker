@@ -80,3 +80,33 @@ body.skin-active {
   background-repeat: no-repeat;
   background-color: var(--bg); /* Fallback waehrend Bild laedt */
 }
+
+/* W.skin-glassmorphism (2026-05-28): Card-Stil "glass" — transparente
+ * Cards mit Backdrop-Blur. Greift NUR wenn body[data-card-style="glass"]
+ * aktiv ist. Default (solid) bleibt unveraendert — keine Regression
+ * fuer User die das Feature nicht nutzen.
+ *
+ * Tailwind-Pattern in der Codebase: Cards nutzen oft `bg-gray-800` oder
+ * `bg-gray-900` als deckenden Background. Mit dem Word-Selector
+ * `[class~="bg-gray-800"]` greifen wir genau diese Klassen, NICHT die
+ * halbtransparenten Varianten `bg-gray-800/5` oder `bg-gray-800/50`
+ * (das sind eigene CSS-Tokens mit Slash innerhalb, Word-Match
+ * trennt nur an Whitespace).
+ *
+ * `:not()`-Liste schuetzt vor false-positives auf Form-Elementen
+ * (Buttons sollen visuell klar abgesetzt bleiben, nicht transparent).
+ *
+ * Performance-Hinweis: backdrop-filter ist GPU-accelerated, kostet
+ * dennoch bei vielen Cards spuerbar — daher per Default solid.
+ */
+body[data-card-style="glass"] [class~="bg-gray-800"]:not(button):not(input):not(select):not(textarea):not(option) {
+  background-color: rgba(31, 41, 55, 0.7) !important;
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+}
+
+body[data-card-style="glass"] [class~="bg-gray-900"]:not(button):not(input):not(select):not(textarea):not(option) {
+  background-color: rgba(17, 24, 39, 0.78) !important;
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+}

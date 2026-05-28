@@ -44,6 +44,41 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-glassmorphism",
+        released=date(2026, 5, 28),
+        title="🪟 Card-Stil-Wahl: Deckend vs. Glas / transparent",
+        highlights=[
+            "Neue zweite Achse im Aussehen-Picker: **Card-Stil** — "
+            "unabhängig vom Skin-Hintergrund wählbar.",
+            "**Deckend** (Standard) — Cards mit voller Hintergrundfarbe "
+            "wie bisher; Skin-Bild scheint nur am Rand zwischen den "
+            "Cards durch. Status-quo der MVP-Welle, bleibt dauerhaft "
+            "wählbar.",
+            "**Glas / transparent** — Cards mit halbtransparenter Fülle "
+            "und Backdrop-Blur (10px + saturate 140%). Skin-Bild scheint "
+            "durch die Cards durch → „Glassmorphism\"-Effekt.",
+            "**Beide Achsen kombinierbar**: Skin=Cyberpunk + Card-Stil="
+            "Deckend (= MVP-Look) ODER Skin=Cyberpunk + Card-Stil=Glas "
+            "(= Full-Cyberpunk). Wechsel jederzeit per Klick im "
+            "Settings-Picker.",
+            "**Defensive Implementierung**: zentraler CSS-Override per "
+            "`body[data-card-style=\"glass\"]` + Tailwind-Word-Selector "
+            "`[class~=\"bg-gray-800\"]`. Default-Verhalten (= „solid\") "
+            "bleibt unverändert — User die das Feature nicht nutzen "
+            "haben keinerlei Regression.",
+            "**Button-/Form-Schutz**: `:not(button):not(input):not("
+            "select):not(textarea)` verhindert, dass Klick-Elemente in "
+            "Glas-Cards transparent werden. Sie bleiben visuell klar "
+            "abgesetzt.",
+            "**Hint bei Glas ohne Skin**: wenn man Card-Stil=Glas "
+            "wählt aber Skin=Kein-Hintergrund hat, zeigt der Picker "
+            "einen Amber-Hinweis dass der Effekt nichts hat zum "
+            "Durchscheinen.",
+            "Performance: backdrop-filter ist GPU-accelerated, "
+            "Bundle-Wachstum nur +1 KB gz Code + 0,6 KB CSS.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-cyberpunk-mvp",
         released=date(2026, 5, 28),
         title="🎨 Skin-System: Cyberpunk-Neon-Hintergrund",

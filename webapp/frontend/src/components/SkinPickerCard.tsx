@@ -17,10 +17,12 @@
 import { useTranslation } from "react-i18next";
 import { SKIN_REGISTRY } from "../lib/skins";
 import { useSkin } from "../lib/use-skin";
+import { CARD_STYLES, useCardStyle } from "../lib/card-style";
 
 export function SkinPickerCard() {
   const { t } = useTranslation();
   const { skinId, setSkinId } = useSkin();
+  const { cardStyle, setCardStyle } = useCardStyle();
 
   return (
     <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-4 md:p-6 space-y-4">
@@ -105,6 +107,57 @@ export function SkinPickerCard() {
       <p className="text-xs text-gray-500 italic">
         {t("skin.picker.hint")}
       </p>
+
+      {/* W.skin-glassmorphism: Card-Stil-Picker, separat vom Skin.
+       * "Solid" ist und bleibt der Default — Status-quo der MVP-Variante.
+       * "Glass" macht die Cards halbtransparent + Backdrop-Blur, sodass
+       * das Hintergrundbild durch die Cards scheint. Hat ohne aktiven
+       * Skin keinen sichtbaren Effekt (Body bleibt solid dunkel). */}
+      <div className="pt-4 border-t border-purple-500/20">
+        <h3
+          id="card-style-picker-title"
+          className="text-sm font-semibold text-gray-100 mb-2"
+        >
+          {t("cardStyle.title")}
+        </h3>
+        <div
+          role="radiogroup"
+          aria-labelledby="card-style-picker-title"
+          className="inline-flex rounded-lg border border-gray-700 bg-gray-800 p-1"
+        >
+          {CARD_STYLES.map((style) => {
+            const isActive = style.id === cardStyle;
+            return (
+              <button
+                key={style.id}
+                type="button"
+                role="radio"
+                aria-checked={isActive}
+                onClick={() => setCardStyle(style.id)}
+                className={[
+                  "rounded px-3 py-1.5 text-sm font-medium transition",
+                  "focus:outline-none focus:ring-2 focus:ring-purple-400",
+                  isActive
+                    ? "bg-purple-600 text-white"
+                    : "text-gray-300 hover:bg-gray-700",
+                ].join(" ")}
+              >
+                {t(style.labelKey)}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-gray-400 mt-2">
+          {cardStyle === "glass"
+            ? t("cardStyle.glass.description")
+            : t("cardStyle.solid.description")}
+        </p>
+        {cardStyle === "glass" && skinId === "none" && (
+          <p className="text-xs text-amber-300 mt-1.5">
+            {t("cardStyle.glass.noSkinHint")}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

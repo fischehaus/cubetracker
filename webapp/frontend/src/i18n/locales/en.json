@@ -1508,5 +1508,17 @@
       "label": "Cyberpunk Neon",
       "description": "Cube with neon glow in purple/blue"
     }
+  },
+  "cardStyle": {
+    "title": "Card style",
+    "solid": {
+      "label": "Solid",
+      "description": "Cards with full background color (default). The background image is only visible at the edges between cards."
+    },
+    "glass": {
+      "label": "Glass / translucent",
+      "description": "Cards with semi-transparent fill and blur. The background image shines through the cards.",
+      "noSkinHint": "Note: the glass effect is only visible when a background image is active — otherwise there is nothing to shine through."
+    }
   }
 }

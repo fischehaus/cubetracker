@@ -1508,5 +1508,17 @@
       "label": "Cyberpunk Neon",
       "description": "Cube + Neon-Glow in Lila/Blau"
     }
+  },
+  "cardStyle": {
+    "title": "Card-Stil",
+    "solid": {
+      "label": "Deckend",
+      "description": "Cards mit voller Hintergrundfarbe (Standard). Hintergrundbild ist nur am Rand zwischen den Cards sichtbar."
+    },
+    "glass": {
+      "label": "Glas / transparent",
+      "description": "Cards mit halbtransparenter Fülle und Weichzeichner. Hintergrundbild scheint durch die Cards durch.",
+      "noSkinHint": "Hinweis: Glas-Effekt sieht man nur, wenn auch ein Hintergrundbild aktiv ist — sonst gibt es nichts zum Durchscheinen."
+    }
   }
 }
