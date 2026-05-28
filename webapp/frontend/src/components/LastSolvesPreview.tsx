@@ -52,12 +52,24 @@ const WINDOW_VALUES: { value: number; key: string }[] = [
   { value: 100_000, key: "lastSolvesPreview.windowAll" },
 ];
 
-// X-Picker für die Letzte-Solves-Tabelle
-const TABLE_SIZE_OPTIONS: { value: number; label: string }[] = [
+// X-Picker für die Letzte-Solves-Tabelle.
+// W.timer-lastsolves-all (2026-05-28): erweitert um 200/500/„Alle" auf
+// User-Wunsch. Bei „Alle" (value = -1) wird intern fetchLimit = 100_000
+// gesetzt (Backend verkraftet das problemlos, siehe SolveList.tsx).
+// Bei > 100 Zeilen bekommt die Tabelle einen internen vertikalen Scroll
+// (max-h-96 + overflow-y-auto) damit die Karte nicht ewig hoch wird.
+const TABLE_SIZE_OPTIONS: {
+  value: number;
+  label: string | null;
+  i18nKey?: string;
+}[] = [
   { value: 10, label: "10" },
   { value: 20, label: "20" },
   { value: 50, label: "50" },
   { value: 100, label: "100" },
+  { value: 200, label: "200" },
+  { value: 500, label: "500" },
+  { value: -1, label: null, i18nKey: "lastSolvesPreview.tableSizeAll" },
 ];
 
 export function LastSolvesPreview({ cubeType, sessionId }: Props) {
@@ -72,7 +84,10 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
 
   // Wir laden max(windowSize, tableSize + AO_LOOKBACK) — eine Query reicht
   // für beide Use-Cases (Form-Vergleich + Tabelle).
-  const fetchLimit = Math.max(windowSize, tableSize + AO_LOOKBACK);
+  // W.timer-lastsolves-all: bei tableSize = -1 („Alle") → 100_000 als
+  // Effektiv-Limit (Backend verkraftet 50k+ ohne Probleme).
+  const effectiveTableSize = tableSize === -1 ? 100_000 : tableSize;
+  const fetchLimit = Math.max(windowSize, effectiveTableSize + AO_LOOKBACK);
   const params: { cube_type: string; session_id?: number; limit: number } = {
     cube_type: cubeType,
     limit: fetchLimit,
@@ -131,7 +146,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
   const tableRows = useMemo(() => {
     if (!solves || solves.length === 0) return [];
     const totalCount = stats?.count ?? solves.length;
-    return solves.slice(0, tableSize).map((s, indexInDesc) => ({
+    return solves.slice(0, effectiveTableSize).map((s, indexInDesc) => ({
       solve: s,
       solveNumber: totalCount - indexInDesc,
       time_ms: s.time_ms,
@@ -142,7 +157,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
       ao12: ao12Map.get(s.id) ?? null,
       ao100: ao100Map.get(s.id) ?? null,
     }));
-  }, [solves, stats?.count, tableSize, mo3Map, ao5Map, ao12Map, ao100Map]);
+  }, [solves, stats?.count, effectiveTableSize, mo3Map, ao5Map, ao12Map, ao100Map]);
 
   // Sortierte Anzeige — Sort beruehrt nur die UI, Solvenummer bleibt fest.
   const sortedRows = useMemo(
@@ -373,7 +388,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
             >
               {TABLE_SIZE_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
-                  {o.label}
+                  {o.label ?? (o.i18nKey ? t(o.i18nKey) : "?")}
                 </option>
               ))}
             </select>
@@ -386,9 +401,19 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           // Live-Karte oben verfügbar; in der Tabelle wenig nützlich,
           // weil 100er-Fenster sich pro Zeile fast nicht ändert (User-
           // Wunsch 2026-05-17: AO100 aus der Tabelle raus).
-          <div className="overflow-x-auto">
+          // W.timer-lastsolves-all: bei tableSize > 100 (200/500/Alle)
+          // bekommt der Wrapper internen vertikalen Scroll (max-h-96),
+          // damit die Karte nicht ewig hoch wird. Sticky-Header bleibt
+          // beim Scrollen sichtbar.
+          <div
+            className={`overflow-x-auto ${
+              tableSize === -1 || tableSize > 100
+                ? "max-h-96 overflow-y-auto"
+                : ""
+            }`}
+          >
             <table className="w-full text-sm">
-              <thead>
+              <thead className="sticky top-0 bg-gray-900/95 z-10">
                 <tr className="border-b border-gray-700 text-left text-xs text-gray-500">
                   <SortableHeader
                     label={t("lastSolvesPreview.colNumber")}

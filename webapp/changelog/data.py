@@ -44,6 +44,28 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-lastsolves-all",
+        released=date(2026, 5, 28),
+        title="⏱ Letzte Solves im Timer-Tab: jetzt bis „Alle\" + interner Scroll",
+        highlights=[
+            "User-Wunsch: in der Karte „Letzte Solves\" (Timer-Tab) "
+            "soll man ueber das 100er-Limit hinaus alle Solves "
+            "einsehen koennen — analog zum Selector im Analyse-Tab.",
+            "LastSolvesPreview-Selector erweitert von 10/20/50/100 "
+            "auf 10/20/50/100/200/500/Alle. Default bleibt 20.",
+            "Bei mehr als 100 Zeilen (200/500/Alle) bekommt die "
+            "Tabelle einen internen vertikalen Scroll (max-h-96 + "
+            "overflow-y-auto) — damit die Karte nicht ewig hoch "
+            "wird und der Rest des Timer-Tabs sichtbar bleibt.",
+            "Sticky-Header: Spaltenkopf bleibt beim Scrollen oben "
+            "sichtbar (sticky top-0 bg-gray-900/95 z-10).",
+            "Backend: fetchLimit wird bei „Alle\" intern auf 100_000 "
+            "gesetzt — die API verkraftet das problemlos (Pattern "
+            "wie im Analyse-Tab SolveList).",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.tester-readonly-roadmap",
         released=date(2026, 5, 28),
         title="Tester sieht Roadmap nur lesend (Rollen-Schnitt-Korrektur)",
