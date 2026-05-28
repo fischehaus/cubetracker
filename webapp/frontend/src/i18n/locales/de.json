@@ -1375,6 +1375,11 @@
     "hint": "Klick mich → springt zu „Verwaltung → Meine Daten → Mein Feedback\".",
     "dismissAria": "Schließen"
   },
+  "testerPanel": {
+    "feedbackHint": "Beim Testen Bug oder Wunsch gefunden? Schnell direkt eintragen — landet im Feedback-Inbox der Admins.",
+    "feedbackButton": "+ Feedback geben",
+    "feedbackButtonTitle": "Öffnet das Feedback-Modal (Per App-Modus, kein GitHub) — perfekt für Bugs und Wünsche beim Testen."
+  },
   "adminFeedback": {
     "title": "Feedback-Inbox",
     "infoBody": "User-Nachrichten aus dem „Per App\"-Modus des Feedback-Modals. Statt früher per Email landen sie jetzt hier — sortiert nach „neu zuerst\", mit blauem Dot bei ungelesen. Du kannst Status togglen (in Bearbeitung / erledigt / archiviert), eine Antwort schreiben (User sieht sie beim nächsten Login im „Mein Feedback\"-Bereich) und Spam löschen.",
@@ -1385,6 +1390,8 @@
     "openFeatures": "offene Wünsche",
     "openGeneral": "offene Fragen",
     "openOther": "offen",
+    "quickAddButton": "+ Neues Feedback",
+    "quickAddTitle": "Schnell einen eigenen Wunsch oder Bug eintragen — landet wie ein User-Feedback in dieser Inbox.",
     "filterStatusLabel": "Status:",
     "filterCategoryLabel": "Kategorie:",
     "filterAll": "Alle",

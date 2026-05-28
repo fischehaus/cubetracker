@@ -653,6 +653,26 @@ function MainLayout() {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, [tab]);
 
+  // W.feedback-admin-tester-improvements (2026-05-28): globaler
+  // Custom-Event-Listener fuer „+ Feedback"-Buttons im AdminFeedback-
+  // InboxPanel und TesterPanel. So koennen tief verschachtelte
+  // Komponenten das zentrale FeedbackModal triggern ohne Props-Drilling.
+  // Pattern analog `cubetracker:goto-verwaltung-section` (UserMenu).
+  useEffect(() => {
+    function onOpenFeedback() {
+      setShowFeedback(true);
+    }
+    window.addEventListener(
+      "cubetracker:open-feedback-modal",
+      onOpenFeedback,
+    );
+    return () =>
+      window.removeEventListener(
+        "cubetracker:open-feedback-modal",
+        onOpenFeedback,
+      );
+  }, []);
+
   const { user, logout } = useAuth();
   const { t } = useTranslation();
 

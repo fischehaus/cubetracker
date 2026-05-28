@@ -17,12 +17,37 @@
 // auf require_admin — Defense-in-Depth gegen Frontend-Manipulation.
 // Live-Tests bleiben editierbar (require_admin_or_tester).
 
+import { useTranslation } from "react-i18next";
 import { AdminLiveTestsPanel } from "./AdminLiveTestsPanel";
 import { AdminRoadmapPanel } from "./AdminRoadmapPanel";
 
 export function TesterPanel() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
+      {/* W.feedback-admin-tester-improvements (2026-05-28):
+          „+ Feedback"-Button prominent oben. Beim Testen findet der
+          Tester einen Bug oder einen Wunsch — ein Klick + er ist
+          sofort im FeedbackModal, kann es eintragen ohne ueber den
+          UserMenu zu gehen. Triggert das globale FeedbackModal via
+          Custom-Event (Listener in App.tsx). */}
+      <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-4 flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-sm text-purple-100 leading-snug">
+          {t("testerPanel.feedbackHint")}
+        </p>
+        <button
+          type="button"
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent("cubetracker:open-feedback-modal"),
+            )
+          }
+          className="text-sm rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 transition-colors font-medium"
+          title={t("testerPanel.feedbackButtonTitle")}
+        >
+          {t("testerPanel.feedbackButton")}
+        </button>
+      </div>
       <AdminLiveTestsPanel />
       <AdminRoadmapPanel readOnly={true} />
     </div>

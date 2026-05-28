@@ -1375,6 +1375,11 @@
     "hint": "Click me → jumps to \"Manage → My data → My feedback\".",
     "dismissAria": "Dismiss"
   },
+  "testerPanel": {
+    "feedbackHint": "Found a bug or have a wish while testing? File it quickly — lands in the admins' feedback inbox.",
+    "feedbackButton": "+ Give feedback",
+    "feedbackButtonTitle": "Opens the feedback modal (Per App mode, no GitHub) — perfect for bugs and wishes while testing."
+  },
   "adminFeedback": {
     "title": "Feedback inbox",
     "infoBody": "User messages from the \"Directly in the app\" mode of the feedback modal. Instead of being emailed they now land here — sorted \"newest first\", with a blue dot for unread. You can toggle status (in progress / done / archived), write a reply (the user sees it at next login in \"My feedback\"), and delete spam.",
@@ -1385,6 +1390,8 @@
     "openFeatures": "open wishes",
     "openGeneral": "open questions",
     "openOther": "open",
+    "quickAddButton": "+ New feedback",
+    "quickAddTitle": "Quickly file your own wish or bug — lands in this inbox just like a user feedback.",
     "filterStatusLabel": "Status:",
     "filterCategoryLabel": "Category:",
     "filterAll": "All",

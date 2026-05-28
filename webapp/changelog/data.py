@@ -44,6 +44,38 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feedback-admin-tester-improvements",
+        released=date(2026, 5, 28),
+        title="📝 Feedback-Inbox aufgeräumt + „+ Feedback\"-Buttons für Admin und Tester",
+        highlights=[
+            "Drei User-Wünsche zur internen Feedback-Inbox:",
+            "**Archivierte Feedbacks standardmäßig versteckt** "
+            "(AdminFeedbackInboxPanel). „Status: Alle\" zeigt jetzt "
+            "alles AUSSER archived. Wer alte archivierte Items sehen "
+            "will: Filter auf „Status: Archiviert\" setzen. So bleibt "
+            "die Inbox langfristig aufgeräumt.",
+            "**Neuer „+ Neues Feedback\"-Button im Admin-Feedback-"
+            "Inbox** neben den Stats-Badges (offene Bugs/Wünsche/...). "
+            "Ein Klick öffnet das FeedbackModal — Admin kann direkt "
+            "selbst einen Wunsch oder Bug eintragen ohne den Umweg "
+            "über das UserMenu.",
+            "**„+ Feedback geben\"-Button für Tester** prominent oben "
+            "im Tester-Tab (über Live-Tests). Beim Testen findet der "
+            "Tester einen Bug oder hat einen Wunsch — ein Klick und "
+            "er ist im FeedbackModal. Mit Begleittext „Beim Testen "
+            "Bug oder Wunsch gefunden?\".",
+            "Beide Buttons triggern das globale FeedbackModal via "
+            "Custom-Event `cubetracker:open-feedback-modal` — analog "
+            "zum bestehenden Pattern für UserMenu → Verwaltung-Sektion. "
+            "Listener in App.tsx setzt setShowFeedback(true).",
+            "**Wichtig**: nur INTERNE Feedbacks (Per-App-Modus), kein "
+            "GitHub-Modus — das ist die DB-Inbox, nicht der Issue-"
+            "Tracker.",
+            "5 neue i18n-Keys DE/EN unter testerPanel + adminFeedback.",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-connect-fix",
         released=date(2026, 5, 28),
         title="🧊 Smart-Cube-Pairing-Dialog erscheint endlich (Chrome User-Gesture-Fix)",

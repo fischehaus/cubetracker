@@ -71,7 +71,17 @@ export function AdminFeedbackInboxPanel() {
   const updateMut = useAdminUpdateFeedback();
   const deleteMut = useAdminDeleteFeedback();
 
-  const messages = useMemo(() => data?.messages ?? [], [data?.messages]);
+  // W.feedback-admin-tester-improvements (2026-05-28):
+  // Archivierte Feedbacks standardmaessig ausblenden. Nur sichtbar
+  // wenn der User explizit Status=Archiviert filtert. So bleibt die
+  // Inbox aufgeraeumt — alte Items sind nicht weg, nur weggeklappt.
+  const messages = useMemo(() => {
+    const all = data?.messages ?? [];
+    if (statusFilter === "all") {
+      return all.filter((m) => m.status !== "archived");
+    }
+    return all;
+  }, [data?.messages, statusFilter]);
   const totalOpen = stats?.total_open ?? 0;
   const openBugs = stats?.open_by_category?.bug ?? 0;
   const openFeatures = stats?.open_by_category?.feature ?? 0;
@@ -123,31 +133,49 @@ export function AdminFeedbackInboxPanel() {
             <p>{t("adminFeedback.infoBody")}</p>
           </InfoButton>
         </div>
-        {/* Stats-Badges für offene Items pro Kategorie */}
-        {totalOpen > 0 && (
-          <div className="flex flex-wrap gap-1.5 text-xs">
-            {openBugs > 0 && (
-              <span className="rounded border border-red-500/40 bg-red-500/10 text-red-200 px-2 py-0.5">
-                🐛 {openBugs} {t("adminFeedback.openBugs")}
-              </span>
-            )}
-            {openFeatures > 0 && (
-              <span className="rounded border border-purple-500/40 bg-purple-500/10 text-purple-200 px-2 py-0.5">
-                ✨ {openFeatures} {t("adminFeedback.openFeatures")}
-              </span>
-            )}
-            {openGeneral > 0 && (
-              <span className="rounded border border-blue-500/40 bg-blue-500/10 text-blue-200 px-2 py-0.5">
-                💬 {openGeneral} {t("adminFeedback.openGeneral")}
-              </span>
-            )}
-            {openOther > 0 && (
-              <span className="rounded border border-gray-500/40 bg-gray-500/10 text-gray-300 px-2 py-0.5">
-                📝 {openOther} {t("adminFeedback.openOther")}
-              </span>
-            )}
-          </div>
-        )}
+        {/* Stats-Badges für offene Items pro Kategorie + Quick-Add-Button.
+            W.feedback-admin-tester-improvements: + Feedback-Button direkt
+            neben den Stats, damit Admin schnell selbst was eintragen
+            kann ohne ueber UserMenu zu gehen. Triggert das globale
+            FeedbackModal via Custom-Event analog UserMenu → Settings. */}
+        <div className="flex flex-wrap items-center gap-2">
+          {totalOpen > 0 && (
+            <div className="flex flex-wrap gap-1.5 text-xs">
+              {openBugs > 0 && (
+                <span className="rounded border border-red-500/40 bg-red-500/10 text-red-200 px-2 py-0.5">
+                  🐛 {openBugs} {t("adminFeedback.openBugs")}
+                </span>
+              )}
+              {openFeatures > 0 && (
+                <span className="rounded border border-purple-500/40 bg-purple-500/10 text-purple-200 px-2 py-0.5">
+                  ✨ {openFeatures} {t("adminFeedback.openFeatures")}
+                </span>
+              )}
+              {openGeneral > 0 && (
+                <span className="rounded border border-blue-500/40 bg-blue-500/10 text-blue-200 px-2 py-0.5">
+                  💬 {openGeneral} {t("adminFeedback.openGeneral")}
+                </span>
+              )}
+              {openOther > 0 && (
+                <span className="rounded border border-gray-500/40 bg-gray-500/10 text-gray-300 px-2 py-0.5">
+                  📝 {openOther} {t("adminFeedback.openOther")}
+                </span>
+              )}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("cubetracker:open-feedback-modal"),
+              )
+            }
+            className="text-xs rounded bg-purple-600/40 border border-purple-500/50 text-purple-100 px-3 py-1 hover:bg-purple-600/60 transition-colors"
+            title={t("adminFeedback.quickAddTitle")}
+          >
+            {t("adminFeedback.quickAddButton")}
+          </button>
+        </div>
       </div>
 
       {/* Filter-Bar */}
