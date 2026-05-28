@@ -44,6 +44,35 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-mvp-deps",
+        released=date(2026, 5, 28),
+        title="Build-Hotfix nach W.gan-cube-mvp (Lock-File + Versionen)",
+        highlights=[
+            "Live-Verify nach W.gan-cube-mvp-Push hat aufgedeckt: "
+            "Backend-Version zeigte zwar W.gan-cube-mvp, aber der "
+            "Frontend-Bundle enthielt 0 Referenzen zu SmartCube/"
+            "useSmartCube/gan-web-bluetooth.",
+            "Diagnose: package.json hatte gan-web-bluetooth@^1.8.0 "
+            "angegeben — diese Version existiert in der Registry nicht "
+            "(echte Major-Versionen sind 1.0.x / 2.x / 3.x, aktuell "
+            "3.0.2). Zusaetzlich wurde package-lock.json nicht mit-"
+            "geaendert, also `npm ci` im Coolify-Build hat das Package "
+            "gar nicht installiert. Vite konnte den Import nicht "
+            "aufloesen → SmartCubeConnect wegoptimiert.",
+            "Fix: gan-web-bluetooth auf ^3.0.2, rxjs ^7.8.2 als "
+            "Top-Level-Dep (war nur peerDependency, npm installiert "
+            "peer-deps nicht auto), package-lock.json regeneriert.",
+            "API ist zwischen v1 und v3 nicht geaendert — Hook + "
+            "Komponente bleiben unangetastet, kein User-sichtbarer "
+            "Change zur W.gan-cube-mvp-Welle.",
+            "Lesson: Live-Verify nach Welle mit npm-Dep MUSS pruefen "
+            "ob ein erwarteter String aus dem neuen Code im Bundle "
+            "ankommt — Version-Badge allein ist kein Beweis dass "
+            "Frontend-Code wirklich deployt ist.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-mvp",
         released=date(2026, 5, 28),
         title="🧊 Smart-Cube-Pairing (GAN i4 / 12/14 / MoYu AI 2023)",
