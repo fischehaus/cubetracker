@@ -24,9 +24,94 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-28 (Abend) — UX-Audit + Mobile-Polish + Roadmap-Restore-Diagnose
+## ✅ ERLEDIGT 2026-05-28 (Voller Mega-Tag) — 25 Wellen in einer Sitzung
 
-**4 Wellen + 4 Tags an einem Abend, alles live.** Letzte public-Welle:
+**Letzte Welle: `W.gan-cube-auto-time-v4` (internal, Tag `becf7be`).**
+Live-public-Version: `W.gan-cube-auto-time-v3` (= letzte public Welle vor
+den v4-Diagnose-Logs). Working-Tree clean, alles gepusht.
+
+### Sprint-Gruppen heute (chronologisch)
+
+**Gruppe 1 — UX-Audit + Mobile-Polish + Diagnose-Korrektur** (4 Wellen):
+Siehe Block „Abend 2026-05-28" unten — W.ux-demo-polish, W.roadmap-restore
+(+ -clarify), W.ux-demo-polish-qa.
+
+**Gruppe 2 — Tester-Permission + Timer-Polish + LoginPage Trust** (8 Wellen):
+- `W.tester-readonly-roadmap` (+ QA) — Tester sieht Roadmap nur lesend
+- `W.timer-lastsolves-all` — „Alle Solves" + interner Scroll
+- `W.timer-focus-mode` — Fokus-Toggle versteckt Sub-Cards
+- `W.timer-display-size` (+ v2) — A−/A+ + neues App-Logo, danach
+  Polish + Alle-Solves-Bug-Fix
+- `W.login-trust-block` — „Was wir mit deinen Daten machen" auf LoginPage
+- `docs/permissions-matrix.md` — Single-Source-Doku via Sub-Agent
+- `W.timer-polish-pbs` (+ QA) — A−/A+ überall, globale Scrollbar,
+  PB-Markers in LastSolvesPreview, ao100-Toggle, PB-Werte in Live-Karte
+
+**Gruppe 3 — Admin + Feedback-Inbox** (2 Wellen):
+- `W.admin-snapshot-limit` — Storage X/Limit + Progress-Bar
+- `W.feedback-admin-tester-improvements` — archived versteckt + „+ Feedback"-
+  Button für Admin und Tester via Custom-Event
+
+**Gruppe 4 — GAN i4 Smart-Cube-Saga** (10 Wellen):
+1. `W.gan-cube-mvp` — Skeleton + Pairing-UI
+2. `W.gan-cube-mvp-deps` — npm-Versionsfix (^1.8.0 existierte nicht)
+3. `W.gan-cube-mvp-qa` — DISCONNECT-Handler + Race-Guard nach QA
+4. `W.gan-cube-mvp-tsbuild` — TypeScript-Types `web-bluetooth` für
+   navigator.bluetooth (Build crashed silent!)
+5. `W.gan-cube-connect-fix` — Chrome User-Gesture-Bug:
+   `await import("gan-web-bluetooth")` schiebt requestDevice hinter
+   Promise-Microtask → kein Dialog. Static import statt dynamic.
+6. `W.gan-cube-mac-fallback` — GAN-Cubes brauchen MAC für AES-Decryption.
+   Auf Windows-Chrome ist Auto-Detection aus. User-Prompt + localStorage-
+   Cache. Plus Hinweis auf chrome://flags fuer Auto-Detection.
+7. `W.gan-cube-auto-time` — Initial State-Machine (idle/solving/solved)
+   + Custom-Event `cubetracker:smart-cube-solve`
+8. `W.gan-cube-auto-time-v2` — Ready-State + Manual-Stop + Fokus-
+   Sichtbarkeit (SmartCubeConnect aus TimerControlsCard raus,
+   eigene Position in TimerTab)
+9. `W.gan-cube-auto-time-v3` — `REQUEST_FACELETS`-Polling: Library
+   schickt FACELETS nicht automatisch nach Move, muss explizit angefragt
+   werden via `sendCubeCommand({type: "REQUEST_FACELETS"})`
+10. `W.gan-cube-auto-time-v4` — detaillierter Diagnose-Log (internal)
+
+### 🔴 OFFEN für nächste Session — Smart-Cube-Auto-Detection
+
+**Was funktioniert:** Pairing, MAC-Workflow (Variante A oder B Chrome-Flag),
+Move-Counter, Manual-„Solve fertig"-Button → BigTimerInput-Auto-Save +
+Solve landet in der Tabelle.
+
+**Was NICHT funktioniert:** Auto-Solved-Detection trotz `REQUEST_FACELETS`-
+Polling. `isCubeSolved()` greift nicht (Cube wird nicht als solved erkannt).
+Mögliche Ursachen:
+- Facelets-Format anders als Doku sagt (`UUUUUUUUURRRR...` 54-char)?
+- Library schickt OLD-state nach REQUEST_FACELETS (Latency)?
+- Race-Condition zwischen MOVE + FACELETS + setState?
+
+**User-Aktion:** mit v4-Logs nochmal solven + Screenshot der Console mit
+dem letzten `[SmartCube] FACELETS len=... solved=... [U=W(✓) R=...]`-
+Zeile beim physisch gelösten Cube. Dann sehe ich präzise was die Library
+liefert.
+
+**Plus offen (v5):** großer Timer-Display im BigTimerInput zeigt während
+Smart-Cube-Solve den laufenden Timer (sonst sieht User „0.00" und denkt
+nichts passiert — der laufende Timer lebt nur im kleinen SmartCubeConnect-
+Block).
+
+### 🔜 Restplan (unverändert: Demo Sa 30.05.)
+
+- Phone-Demo-Probe via die 12 Admin-Live-Tests (Du-Aktion, ~30 min)
+- Bonus-Smoke-Test für die heute hinzugekommenen Wellen
+- Smart-Cube-Demo als „Wow"-Moment **WENN** Auto-Detection bis dahin läuft
+
+Bilanz heute: **25 Wellen + 25 Tags + ~30 Commits**. Realistisch zwischen
+Vormittag und 2-3 Uhr nachts. GAN-Cube war 10 davon — ein klassisches
+„Bibliothek-Verstehen kostet 10× mehr als gedacht".
+
+---
+
+## ✅ ERLEDIGT 2026-05-28 (Abend, Gruppe 1) — UX-Audit + Mobile-Polish + Roadmap-Restore-Diagnose
+
+**4 Wellen + 4 Tags am Abend, alles live.** Letzte public-Welle:
 `W.ux-demo-polish`. Backend skippt die drei nachfolgenden internal-Wellen
 in `current_version()`, also bleibt das Versions-Badge sauber bei der
 Mobile-Polish-Welle.
