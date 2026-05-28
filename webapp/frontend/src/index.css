@@ -110,3 +110,25 @@ body[data-card-style="glass"] [class~="bg-gray-900"]:not(button):not(input):not(
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
 }
+
+/* W.skin-hide-logo (2026-05-28): bei aktivem Skin wird das App-Logo
+ * ausgeblendet, weil das Cubetracker-Branding bereits ins Background-
+ * Bild integriert ist (unten links). Doppelung waere visuell unsauber.
+ *
+ * Greift an zwei Stellen:
+ *   - App.tsx: Logo-Button im Header (h-16/28/52 mit Klick auf Dashboard)
+ *   - LoginPage.tsx: Marken-Visitenkarte oben in der Auth-Card
+ *
+ * Bei aktivem Skin schaltet der App-Header auf `justify-content: flex-end`
+ * um, damit die Action-Bar (LanguageSwitcher + HealthBadge + UserMenu)
+ * rechts bleibt — sonst wuerden die Actions ohne Logo-Button nach links
+ * rutschen.
+ */
+body[data-skin] .cubetracker-app-logo,
+body[data-skin] .cubetracker-app-logo-button {
+  display: none;
+}
+
+body[data-skin] .cubetracker-app-header {
+  justify-content: flex-end;
+}

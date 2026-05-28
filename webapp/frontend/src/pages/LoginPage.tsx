@@ -63,7 +63,7 @@ export function LoginPage() {
           <img
             src="/cubetracker-logo.png"
             alt={t("auth.logoAlt")}
-            className="w-full mx-auto mb-4"
+            className="cubetracker-app-logo w-full mx-auto mb-4"
           />
           <p className="text-base text-gray-400 mb-6 text-center">
             {mode === "login"

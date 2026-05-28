@@ -710,7 +710,7 @@ function MainLayout() {
     // auf 360px-Screens), p-6 ab md.
     <div className="min-h-screen p-3 md:p-6">
       <div className="mx-auto max-w-7xl">
-        <header className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+        <header className="cubetracker-app-header flex items-center justify-between mb-6 gap-4 flex-wrap">
           {/* Volles Logo (mit Schriftzug + Tagline) ersetzt den separaten
               H1+Untertitel. Klick führt zurück zum Default-Tab. Logo
               enthält den App-Namen, daher visuell-doppelt wenn man's
@@ -721,7 +721,7 @@ function MainLayout() {
           <button
             type="button"
             onClick={() => setTab("dashboard")}
-            className="flex items-center group focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded-lg min-w-0"
+            className="cubetracker-app-logo-button flex items-center group focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded-lg min-w-0"
             aria-label="cubetracker — Speedcubing-Solve-Tracking — zum Dashboard"
           >
             <h1 className="sr-only">cubetracker — Speedcubing-Solve-Tracking</h1>

@@ -44,6 +44,32 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-hide-logo",
+        released=date(2026, 5, 28),
+        title="🪄 App-Logo verbergen wenn Hintergrund aktiv",
+        highlights=[
+            "Wenn ein Hintergrund-Skin aktiv ist, wird das App-Logo "
+            "(im Header oben links und auf der LoginPage in der "
+            "Auth-Card) ausgeblendet. Grund: das Cubetracker-Logo ist "
+            "bereits ins Background-Bild integriert (unten links) — "
+            "doppeltes Logo wäre visuell unsauber.",
+            "**Verhalten**: bei Skin=Kein bleibt das App-Logo wie "
+            "bisher sichtbar. Sobald ein anderer Skin gewählt wird, "
+            "verschwindet das App-Logo sofort — kein Reload nötig.",
+            "**Layout**: der App-Header schaltet bei aktivem Skin auf "
+            "`justify-content: flex-end`, damit die rechte Action-Bar "
+            "(Sprache + Versions-Badge + UserMenu) rechts bleibt und "
+            "nicht in die Lücke wandert.",
+            "**Funktionalität**: der Klick zum Dashboard, der vorher "
+            "am Logo-Button hing, ist im aktivem-Skin-Zustand kurzzeitig "
+            "weg. Der Dashboard-Tab ist über die TabBar weiterhin "
+            "erreichbar — kein Verlust.",
+            "Implementiert per CSS-Selector `body[data-skin] .cubetracker-"
+            "app-logo` mit Marker-Klassen an beiden Logo-Stellen, kein "
+            "React-Re-Render bei Skin-Wechsel (smoother Übergang).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-glassmorphism",
         released=date(2026, 5, 28),
         title="🪟 Card-Stil-Wahl: Deckend vs. Glas / transparent",
