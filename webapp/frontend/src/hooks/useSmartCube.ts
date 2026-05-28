@@ -54,12 +54,17 @@ type GanCubeEvent =
 
 export type SmartCubeStatus = "disconnected" | "connecting" | "connected" | "error";
 
-// W.gan-cube-auto-time: Solve-State-Machine.
-//   idle           — Cube verbunden, kein aktiver Solve
-//   solving        — Erster Move erkannt, Timer laeuft
-//   solved         — Cube ist solved, Timer gestoppt
-//                    (2 Sek Anzeige, dann zurueck zu idle)
-export type SmartCubeSolveState = "idle" | "solving" | "solved";
+// W.gan-cube-auto-time State-Machine + v2-Erweiterung (W.gan-cube-
+// auto-time-v2): neuer „ready"-State zwischen idle und solving.
+//   idle    — Cube verbunden, User scrambelt gerade (Moves werden
+//             gezaehlt aber starten KEINEN Solve — kritisch, sonst
+//             wuerde der erste Scramble-Move den Timer starten)
+//   ready   — User hat „Bereit fuer Solve" geklickt → naechster Move
+//             startet den Timer
+//   solving — Solve laeuft, Timer zaehlt mit performance.now()
+//   solved  — Cube solved erkannt ODER User klickt „Solve fertig"
+//             (Manual-Fallback); Timer gestoppt + Auto-Save dispatcht
+export type SmartCubeSolveState = "idle" | "ready" | "solving" | "solved";
 
 export interface SmartCubeState {
   status: SmartCubeStatus;
@@ -218,11 +223,12 @@ export function useSmartCube() {
       subscriptionRef.current = conn.events$.subscribe((event) => {
         if (event.type === "MOVE") {
           setState((s) => {
-            // W.gan-cube-auto-time State-Machine:
-            // idle + erster Move → solving (Timer startet jetzt)
-            // solving + weiterer Move → moveCount++
-            // solved → erster Move startet neuen Solve
-            if (s.solveState === "idle" || s.solveState === "solved") {
+            // v2 State-Machine:
+            // idle + Move      → Scramble-Move, nur counten (KEIN Solve-Start)
+            // ready + Move     → Solve-Start (Timer-Start jetzt)
+            // solving + Move   → solveMoveCount++
+            // solved + Move    → neuer Scramble (zurueck zu idle)
+            if (s.solveState === "ready") {
               return {
                 ...s,
                 lastMove: event.move,
@@ -233,15 +239,27 @@ export function useSmartCube() {
                 solveMoveCount: 1,
               };
             }
-            // solving — weiterer Move
+            if (s.solveState === "solving") {
+              return {
+                ...s,
+                lastMove: event.move,
+                moveCount: s.moveCount + 1,
+                solveMoveCount: s.solveMoveCount + 1,
+              };
+            }
+            // idle ODER solved → nur Move-Counter erhoehen, KEIN Solve-Start.
             return {
               ...s,
               lastMove: event.move,
               moveCount: s.moveCount + 1,
-              solveMoveCount: s.solveMoveCount + 1,
+              // Bei „solved" plus weiterer Move: zurueck zu idle damit
+              // der naechste Scramble nicht hier haengen bleibt.
+              ...(s.solveState === "solved" ? { solveState: "idle" } : {}),
             };
           });
         } else if (event.type === "FACELETS") {
+          // eslint-disable-next-line no-console
+          console.log("[SmartCube] FACELETS:", event.facelets);
           setState((s) => {
             const nowSolved = isCubeSolved(event.facelets);
             // solving + Cube ist solved → Solve abgeschlossen
@@ -358,6 +376,52 @@ export function useSmartCube() {
     }));
   }, []);
 
+  // W.gan-cube-auto-time-v2: User-Signal „Scramble fertig, ich solvte
+  // jetzt". Naechster Move startet Timer.
+  const prepareForSolve = useCallback(() => {
+    setState((s) => {
+      if (s.status !== "connected") return s;
+      return {
+        ...s,
+        solveState: "ready",
+        solveStartedAt: null,
+        solveEndedAt: null,
+        solveMoveCount: 0,
+      };
+    });
+  }, []);
+
+  // W.gan-cube-auto-time-v2: Manual-Fallback wenn Auto-Solved-Detection
+  // nicht greift (z.B. weil die Library FACELETS nicht zuverlaessig
+  // sendet). User klickt „Solve fertig", Timer stoppt + Auto-Save.
+  const stopSolve = useCallback(() => {
+    setState((s) => {
+      if (s.solveState !== "solving" || s.solveStartedAt == null) return s;
+      const endedAt = performance.now();
+      const timeMs = Math.round(endedAt - s.solveStartedAt);
+      try {
+        window.dispatchEvent(
+          new CustomEvent(SMART_CUBE_SOLVE_EVENT, {
+            detail: { time_ms: timeMs, moves: s.solveMoveCount },
+          }),
+        );
+      } catch {
+        /* ignore */
+      }
+      // eslint-disable-next-line no-console
+      console.log(
+        `[SmartCube] Solve manuell beendet: ${timeMs} ms, ${s.solveMoveCount} Moves`,
+      );
+      return {
+        ...s,
+        solveState: "solved",
+        solveEndedAt: endedAt,
+        lastSolveTimeMs: timeMs,
+        lastSolveMoves: s.solveMoveCount,
+      };
+    });
+  }, []);
+
   // W.gan-cube-auto-time: nach „solved" State automatisch zurueck zu
   // „idle" nach 3 Sekunden. Verhindert dass der naechste Solve-Move
   // nicht erkannt wird, weil der State noch „solved" sagt.
@@ -402,6 +466,8 @@ export function useSmartCube() {
     connect,
     disconnect,
     reset,
+    prepareForSolve,
+    stopSolve,
     isSupported,
   };
 }

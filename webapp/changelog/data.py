@@ -44,6 +44,45 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-auto-time-v2",
+        released=date(2026, 5, 28),
+        title="🎯 Smart-Cube v2: Ready-State + Manual-Stop + Fokus-Sichtbarkeit",
+        highlights=[
+            "Drei User-Test-Befunde behoben:",
+            "**Issue 1 (Fokus-Sichtbarkeit):** SmartCubeConnect lebte "
+            "in TimerControlsCard — wird im Fokus-Modus versteckt → "
+            "kein Connect-Button + kein Status mehr sichtbar. Fix: "
+            "SmartCubeConnect aus TimerControlsCard raus, lebt jetzt "
+            "direkt in TimerTab oben, immer sichtbar (Fokus + Voll).",
+            "**Issue 2 (Auto-Solved nicht erkannt):** State-Wechsel "
+            "solving → solved geschieht jetzt sowohl automatisch (wenn "
+            "FACELETS-Event mit solved-Pattern kommt) ALS AUCH manuell "
+            "(neuer „✓ Solve fertig\"-Button im solving-State). Plus "
+            "Console-Log [SmartCube] FACELETS: ... bei jedem Facelets-"
+            "Update — Diagnose welches Format die Library wirklich "
+            "schickt.",
+            "**Issue 3 (fundamentaler Workflow-Bug):** Aktuell hat "
+            "JEDER Move den Solve gestartet — auch der erste Scramble-"
+            "Move! Behoben: neuer „ready\"-State zwischen idle und "
+            "solving. Workflow jetzt:",
+            "  1. Cube verbunden → State `idle` (User scrambelt frei)",
+            "  2. Scramble fertig → User klickt „🟢 Bereit für Solve\" "
+            "→ State `ready` (blauer Pulse-Dot)",
+            "  3. Erster Move → State `solving` (Timer startet via "
+            "performance.now()) — amber Pulse-Dot + Live-Move-Counter",
+            "  4. Cube solved erkannt ODER User klickt „✓ Solve fertig\" "
+            "→ State `solved` → Auto-Save (Custom-Event)",
+            "  5. Nach 3 Sek zurueck zu `idle`, naechster Scramble.",
+            "5 neue i18n-Keys DE/EN (readyButton/Title/Label + stopButton/"
+            "Title) symmetrisch (1355/1355).",
+            "Bonus: Wenn die Auto-Solved-Detection generell nicht "
+            "klappt (z.B. weil die Library Facelets nicht zuverlaessig "
+            "sendet), kannst du den „Solve fertig\"-Button als "
+            "verlaesslichen Fallback nutzen.",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-auto-time",
         released=date(2026, 5, 28),
         title="🎯 Smart-Cube Auto-Time: dreh den Cube, Time landet ohne Tippen",

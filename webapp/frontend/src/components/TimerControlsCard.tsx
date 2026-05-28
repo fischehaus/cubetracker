@@ -16,8 +16,6 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSmartCube } from "../hooks/useSmartCube";
-import { SmartCubeConnect } from "./SmartCubeConnect";
 import {
   useCreateSession,
   useHardware,
@@ -357,28 +355,11 @@ export function TimerControlsCard({
         )}
       </div>
 
-      {/* W.gan-cube-mvp (2026-05-28): Smart-Cube-Pairing-Block unter den
-          Mode-Tipps. Hook im Parent damit Connection ueber den Tab-Lebenszyklus
-          haelt; bei TimerTab-Unmount cleanup. */}
-      <div className="mt-3">
-        <SmartCubeConnectBlock />
-      </div>
+      {/* W.gan-cube-auto-time-v2 (2026-05-28): SmartCubeConnect lebt
+          jetzt in TimerTab direkt (App.tsx), nicht mehr hier — damit
+          er auch im Fokus-Modus sichtbar ist (TimerControlsCard wird
+          dort versteckt). */}
     </div>
-  );
-}
-
-// Wrapper damit der useSmartCube-Hook im selben Render-Tree wie die
-// Buttons lebt — wir trennen das von TimerControlsCard damit der Hook
-// nicht den ganzen TimerControlsCard re-rendert bei jedem MOVE-Event.
-function SmartCubeConnectBlock() {
-  const { state, connect, disconnect, isSupported } = useSmartCube();
-  return (
-    <SmartCubeConnect
-      state={state}
-      connect={connect}
-      disconnect={disconnect}
-      isSupported={isSupported}
-    />
   );
 }
 

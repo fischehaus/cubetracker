@@ -32,6 +32,8 @@ import { ScrambleCard } from "./components/ScrambleCard";
 import { SessionPlanCard } from "./components/SessionPlanCard";
 import { TimerControlsCard } from "./components/TimerControlsCard";
 import { TouchTimerPad } from "./components/TouchTimerPad";
+import { SmartCubeConnect } from "./components/SmartCubeConnect";
+import { useSmartCube } from "./hooks/useSmartCube";
 import { useAppSettings } from "./lib/settings";
 import { useSessions } from "./lib/api";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
@@ -374,6 +376,13 @@ function TimerTab({
     // ausgeblendet.
     <div>
       {focusToggle}
+      {/* W.gan-cube-auto-time-v2: SmartCubeConnect lebt direkt in
+          TimerTab (nicht mehr in TimerControlsCard), damit er auch
+          im Fokus-Modus sichtbar ist. Lebt oben, damit der User die
+          Verbindung + den Solve-State immer im Blick hat. */}
+      <div className="mb-3">
+        <SmartCubeConnectBlock />
+      </div>
       <div
         className={
           focusMode
@@ -428,6 +437,25 @@ function TimerTab({
         )}
       </div>
     </div>
+  );
+}
+
+// W.gan-cube-auto-time-v2: Wrapper damit der useSmartCube-Hook in
+// TimerTab nicht die ganze Card bei jedem MOVE-Event re-rendert —
+// nur dieser Block re-rendert. Lebt jetzt direkt in TimerTab statt
+// in TimerControlsCard (damit auch im Fokus-Modus sichtbar).
+function SmartCubeConnectBlock() {
+  const { state, connect, disconnect, prepareForSolve, stopSolve, isSupported } =
+    useSmartCube();
+  return (
+    <SmartCubeConnect
+      state={state}
+      connect={connect}
+      disconnect={disconnect}
+      prepareForSolve={prepareForSolve}
+      stopSolve={stopSolve}
+      isSupported={isSupported}
+    />
   );
 }
 
