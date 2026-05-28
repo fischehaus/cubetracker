@@ -50,7 +50,9 @@
     "lastMoveLabel": "Last move:",
     "moveCountLabel": "{{count}} total",
     "mvpNote": "MVP wave: pairing + move indicator only. Auto-time insertion is next.",
-    "pairingHint": "Confirm the browser pairing dialog. The cube must be on (turn one face briefly) and within range."
+    "pairingHint": "Confirm the browser pairing dialog. The cube must be on (turn one face briefly) and within range.",
+    "windowsHintSummary": "Help: Windows Chrome note",
+    "windowsHintBody": "On Windows the MAC auto-detection can fail — you will then be asked to enter the MAC.\n\nOption A (one-time manual): copy the MAC from chrome://bluetooth-internals/#devices into the prompt. It gets cached.\n\nOption B (permanent): enable chrome://flags#enable-experimental-web-platform-features + restart the browser — then auto-detection works."
   },
   "trustBlock": {
     "headerTitle": "What we do with your data",

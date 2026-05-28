@@ -44,6 +44,40 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-mac-fallback",
+        released=date(2026, 5, 28),
+        title="🧊 GAN-Cube Windows-Pairing-Fix (MAC manuell + Cache)",
+        highlights=[
+            "User-Bug: nach Pairing-Dialog kommt „Unable to determine "
+            "cube MAC address, connection not possible\". Klassisches "
+            "Problem: GAN-Cubes verschluesseln Daten mit AES, dessen "
+            "Schluessel auf der MAC-Adresse basiert. Auf Windows-Chrome "
+            "ist die Web-Bluetooth-Advertisement-API standardmaessig "
+            "DEAKTIVIERT — die Library kann die MAC nicht autom. "
+            "ermitteln.",
+            "**Fix**: customMacAddressProvider-Callback in connectGanCube"
+            "() implementiert. Wenn die Library mit "
+            "`isFallbackCall=true` zurueckkommt: User wird per "
+            "window.prompt() nach der MAC gefragt. Eingegebene MAC "
+            "wird in localStorage pro `device.id` gecacht — beim "
+            "zweiten Pairing kein Prompt mehr.",
+            "**Prompt-Text** erklaert dem User wie er die MAC findet:"
+            " `chrome://bluetooth-internals/#devices` → Cube-Name → "
+            "Address-Spalte kopieren.",
+            "**Dauerhafte Loesung** (im Hilfe-Hinweis dokumentiert): "
+            "chrome://flags#enable-experimental-web-platform-features "
+            "aktivieren + Browser-Restart → Auto-Detection klappt.",
+            "Plus: SmartCubeConnect zeigt jetzt einen aufklappbaren "
+            "Hilfe-Hinweis („Hilfe: Windows-Chrome-Hinweis\") unter "
+            "dem Connect-Button mit beiden Loesungswegen.",
+            "Plus: MAC-Eingabe wird validiert (Format AB:12:34:5D:34:12) "
+            "— ungueltige Eingaben gehen wieder zurueck zu disconnected "
+            "mit Console-Log, statt mit kryptischem Backend-Fehler.",
+            "4 neue i18n-Keys DE/EN (windowsHintSummary, windowsHintBody).",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feedback-admin-tester-improvements",
         released=date(2026, 5, 28),
         title="📝 Feedback-Inbox aufgeräumt + „+ Feedback\"-Buttons für Admin und Tester",

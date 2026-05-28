@@ -143,6 +143,18 @@ export function SmartCubeConnect({
       <p className="text-[10px] text-gray-500 italic leading-snug">
         {t("smartCube.pairingHint")}
       </p>
+      {/* W.gan-cube-mac-fallback (2026-05-28): Windows-Chrome-Hinweis.
+          Auf Windows ist die Web-Bluetooth-Advertisement-API per Default
+          aus → Library kann MAC nicht autom. ermitteln → User wird per
+          prompt() gefragt. Hier nur kurze Vor-Info. */}
+      <details className="text-[10px] text-gray-500 mt-1">
+        <summary className="cursor-pointer hover:text-gray-400">
+          {t("smartCube.windowsHintSummary")}
+        </summary>
+        <div className="mt-1 pl-2 leading-snug whitespace-pre-line">
+          {t("smartCube.windowsHintBody")}
+        </div>
+      </details>
     </div>
   );
 }

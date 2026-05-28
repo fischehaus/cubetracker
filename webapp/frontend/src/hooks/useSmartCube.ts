@@ -114,7 +114,69 @@ export function useSmartCube() {
       // werden (siehe Kommentar oben am Datei-Kopf).
       // eslint-disable-next-line no-console
       console.log("[SmartCube] connect() start — calling connectGanCube...");
-      const conn = (await connectGanCube()) as GanCubeConnection;
+      // W.gan-cube-mac-fallback (2026-05-28): GAN-Cubes brauchen die
+      // MAC-Adresse fuer AES-Decryption. Auf Windows-Chrome ist die
+      // Web-Bluetooth-Advertisement-API standardmaessig deaktiviert
+      // (chrome://flags#enable-experimental-web-platform-features) —
+      // dann schlaegt Auto-Detection fehl und Library ruft unseren
+      // Callback mit `isFallbackCall=true` auf. Wir fragen den User
+      // per prompt() + cachen die MAC in localStorage pro device.id.
+      const macProvider = async (
+        device: BluetoothDevice,
+        isFallbackCall?: boolean,
+      ): Promise<string | null> => {
+        const cacheKey = `cubetracker.cube_mac.${device.id ?? device.name ?? "default"}`;
+        let cached: string | null = null;
+        try {
+          cached = localStorage.getItem(cacheKey);
+        } catch {
+          /* ignore Private-Mode/Quota */
+        }
+        // Erst-Call (kein Fallback): wenn Cache da, gib zurueck.
+        if (!isFallbackCall && cached) {
+          // eslint-disable-next-line no-console
+          console.log("[SmartCube] MAC aus Cache:", cached);
+          return cached;
+        }
+        // Fallback (Library kommt nicht autom. dran) ODER kein Cache:
+        // User per prompt fragen. Hint mit Anleitung zum Auffinden.
+        // eslint-disable-next-line no-console
+        console.warn(
+          "[SmartCube] Auto-MAC fehlgeschlagen — frage User per prompt." +
+            " Cube:" +
+            device.name,
+        );
+        const promptMsg =
+          `MAC-Adresse fuer "${device.name ?? "Cube"}" wird gebraucht ` +
+          `(GAN-Cubes verschluesseln Daten mit AES, der Schluessel haengt ` +
+          `an der MAC).\n\n` +
+          `Format: AB:12:34:5D:34:12\n\n` +
+          `So findest du sie:\n` +
+          `  1. Neuer Chrome-Tab: chrome://bluetooth-internals/#devices\n` +
+          `  2. Suche den Eintrag mit dem Cube-Namen "${device.name}"\n` +
+          `  3. Kopiere den Address-Wert\n\n` +
+          `Oder dauerhafte Loesung: chrome://flags#enable-experimental-` +
+          `web-platform-features aktivieren + Browser neu starten.`;
+        const userInput = window.prompt(promptMsg, cached ?? "");
+        if (!userInput) return null;
+        const mac = userInput.trim().toUpperCase();
+        if (!/^[0-9A-F]{2}(:[0-9A-F]{2}){5}$/.test(mac)) {
+          // eslint-disable-next-line no-console
+          console.error(
+            "[SmartCube] Ungueltige MAC-Adresse:",
+            mac,
+            "(Format: AB:12:34:5D:34:12)",
+          );
+          return null;
+        }
+        try {
+          localStorage.setItem(cacheKey, mac);
+        } catch {
+          /* ignore */
+        }
+        return mac;
+      };
+      const conn = (await connectGanCube(macProvider)) as GanCubeConnection;
       // eslint-disable-next-line no-console
       console.log("[SmartCube] connected:", conn);
       connectionRef.current = conn;
