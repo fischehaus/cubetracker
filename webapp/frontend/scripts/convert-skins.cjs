@@ -46,43 +46,55 @@ const outDir = path.resolve(__dirname, "..", "public", "skins", skinId);
 fs.mkdirSync(outDir, { recursive: true });
 
 // Reihenfolge wichtig: superwide-Variante zuerst, sonst matcht
-// `3840x1080` die superwide-Datei auch. Suffix-Toleranz:
-//   - Quellen vom 1. Pack (cyberpunk-neon): `_appsafe_<W>x<H>.png`
-//   - Quellen vom 2. Pack (legendary):
-//     `_appsafe_<W>x<H>_standard.jpg`
-//     `_appsafe_<W>x<H>_ultrawide.jpg`
-//     `_appsafe_<W>x<H>_superwide.jpg`
+// `3840x1080` die superwide-Datei auch.
+//
+// Suffix-Toleranz fuer drei Pack-Conventions:
+//   1. Pack (cyberpunk-neon):  `_appsafe_<W>x<H>.png`
+//   2. Pack (cyberpunk-laser): `_appsafe_<W>x<H>_<variant>.jpg`
+//   3. Pack (party-fun):       `_<W>x<H>_<variant>.jpg` (kein _appsafe_)
 // Plus akzeptierte Extensions: .png, .jpg, .jpeg (case-insensitive).
+// `_appsafe_` ist optional, Variante-Suffix (_standard|_ultrawide|
+// _superwide|_hd|_portrait) ebenfalls optional.
 const MAPPING = [
   {
-    match: /_appsafe_3840x1080_superwide(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    match: /(?:_appsafe)?_3840x1080_superwide(_standard|_ultrawide|_superwide|_hd)?\.(png|jpe?g)$/i,
     out: "3840x1080-super.webp",
   },
   {
-    match: /_appsafe_1920x1080(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    match: /(?:_appsafe)?_1366x768(_standard|_ultrawide|_superwide|_hd)?\.(png|jpe?g)$/i,
+    out: "1366x768.webp",
+  },
+  {
+    match: /(?:_appsafe)?_1920x1080(_standard|_ultrawide|_superwide|_hd)?\.(png|jpe?g)$/i,
     out: "1920x1080.webp",
   },
   {
-    match: /_appsafe_2560x1440(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    match: /(?:_appsafe)?_2560x1440(_standard|_ultrawide|_superwide|_hd)?\.(png|jpe?g)$/i,
     out: "2560x1440.webp",
   },
   {
-    match: /_appsafe_3440x1440(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    match: /(?:_appsafe)?_3440x1440(_standard|_ultrawide|_superwide|_hd)?\.(png|jpe?g)$/i,
     out: "3440x1440.webp",
   },
   {
-    match: /_appsafe_3840x1600(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    match: /(?:_appsafe)?_3840x1600(_standard|_ultrawide|_superwide|_hd)?\.(png|jpe?g)$/i,
     out: "3840x1600.webp",
   },
   {
-    match: /_appsafe_1080x1920_portrait(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    match: /(?:_appsafe)?_1080x1920_portrait(_standard|_ultrawide|_superwide|_hd|_portrait)?\.(png|jpe?g)$/i,
     out: "1080x1920-portrait.webp",
   },
 ];
 
+// File-Filter: nur Files mit "cubetracker_"-Prefix (filtert preview-
+// contact-sheets, readability-tests, Convenience-Kopien ohne Prefix).
+// Plus: maxenergy-Files explizit raus (2. Pack hatte die als Splash-
+// Variante; im App-Background ist nur _appsafe_ gewollt).
 const sourceFiles = fs
   .readdirSync(srcDir)
-  .filter((f) => /\.(png|jpe?g)$/i.test(f));
+  .filter((f) => /\.(png|jpe?g)$/i.test(f))
+  .filter((f) => f.startsWith("cubetracker_"))
+  .filter((f) => !f.includes("_maxenergy_"));
 
 async function main() {
   let converted = 0;

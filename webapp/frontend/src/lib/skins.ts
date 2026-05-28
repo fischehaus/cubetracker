@@ -118,23 +118,52 @@ export const SKIN_REGISTRY: Skin[] = [
     ],
   },
   {
-    id: "legendary-partymodus",
-    labelKey: "skin.legendaryPartymodus.label",
-    descriptionKey: "skin.legendaryPartymodus.description",
-    preview: "/skins/legendary-partymodus/preview.webp",
+    // Renamed 2026-05-28 von `legendary-partymodus`. Migrations-Mapping
+    // in lib/use-skin.ts LEGACY_SKIN_ID_MAP haelt User-Wahl konsistent.
+    id: "cyberpunk-laser",
+    labelKey: "skin.cyberpunkLaser.label",
+    descriptionKey: "skin.cyberpunkLaser.description",
+    preview: "/skins/cyberpunk-laser/preview.webp",
     // Cube ist mittig-links, Logo unten links -> center center hat die
     // beste Balance bei verschiedenen Aspect-Ratios (Cube + Logo
     // bleiben beide moeglichst sichtbar).
     position: "center center",
     resolutions: [
-      { width: 1920, src: "/skins/legendary-partymodus/1920x1080.webp" },
-      { width: 2560, src: "/skins/legendary-partymodus/2560x1440.webp" },
-      { width: 3440, src: "/skins/legendary-partymodus/3440x1440.webp" },
-      { width: 3840, src: "/skins/legendary-partymodus/3840x1600.webp" },
+      { width: 1920, src: "/skins/cyberpunk-laser/1920x1080.webp" },
+      { width: 2560, src: "/skins/cyberpunk-laser/2560x1440.webp" },
+      { width: 3440, src: "/skins/cyberpunk-laser/3440x1440.webp" },
+      { width: 3840, src: "/skins/cyberpunk-laser/3840x1600.webp" },
       {
         width: 3840,
-        src: "/skins/legendary-partymodus/3840x1080-super.webp",
+        src: "/skins/cyberpunk-laser/3840x1080-super.webp",
         aspectRatio: "32:9",
+      },
+    ],
+  },
+  {
+    id: "party-fun",
+    labelKey: "skin.partyFun.label",
+    descriptionKey: "skin.partyFun.description",
+    preview: "/skins/party-fun/preview.webp",
+    // 3D-Cube zentriert mittig, Bonbons + Confetti rundherum.
+    // center center balanciert alle Visuals.
+    position: "center center",
+    resolutions: [
+      // Neu in diesem Pack: HD-Laptop (1366x768) + Portrait (1080x1920)
+      { width: 1366, src: "/skins/party-fun/1366x768.webp" },
+      { width: 1920, src: "/skins/party-fun/1920x1080.webp" },
+      { width: 2560, src: "/skins/party-fun/2560x1440.webp" },
+      { width: 3440, src: "/skins/party-fun/3440x1440.webp" },
+      { width: 3840, src: "/skins/party-fun/3840x1600.webp" },
+      {
+        width: 3840,
+        src: "/skins/party-fun/3840x1080-super.webp",
+        aspectRatio: "32:9",
+      },
+      {
+        width: 1080,
+        src: "/skins/party-fun/1080x1920-portrait.webp",
+        aspectRatio: "9:16",
       },
     ],
   },

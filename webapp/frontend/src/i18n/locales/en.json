@@ -1508,9 +1508,13 @@
       "label": "Cyberpunk Neon",
       "description": "Cube with neon glow in purple/blue"
     },
-    "legendaryPartymodus": {
-      "label": "Legendary Party Mode",
-      "description": "Lasers, confetti, energy lines — wild but readable"
+    "cyberpunkLaser": {
+      "label": "Cyberpunk Laser",
+      "description": "Cube with laser beams, confetti, energy lines — wild but readable"
+    },
+    "partyFun": {
+      "label": "Party Fun",
+      "description": "Bright colors, candy, friendly — away from the cyberpunk look"
     }
   },
   "cardStyle": {

@@ -57,7 +57,7 @@ docs/*.pdf
 dpa-*.pdf
 
 # Skin-Quellen (W.skin-cyberpunk-mvp + folgende, 2026-05-28). Quell-Pakete
-# (PNG/JPG, 16+ MB pro Pack) werden per scripts/convert-skins.cjs in
+# (PNG/JPG, 10-20+ MB pro Pack) werden per scripts/convert-skins.cjs in
 # WebPs unter public/skins/ ueberfuehrt. WebPs sind klein (~100-250 KB)
 # und gehoeren ins Repo, die Quellen nicht. Originale bleiben lokal
 # in frontend/src/assets/.
@@ -71,4 +71,7 @@ dpa-*.pdf
 *_maxenergy_*.jpg
 *_maxenergy_*.jpeg
 *_wallpaper_original_generated.png
+cubetracker_colorparty_*
+cubetracker_*_mode.css
 preview_contact_sheet.*
+readability_test_*

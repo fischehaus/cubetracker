@@ -44,6 +44,39 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-rename-and-party-fun",
+        released=date(2026, 5, 28),
+        title="🎨 „Legendary Partymodus\" → „Cyberpunk Laser\" + dritter Skin „Party Fun\"",
+        highlights=[
+            "**Umbenannt**: „Legendary Partymodus\" heißt ab sofort "
+            "„Cyberpunk Laser\" — der Name passt besser zum tatsächlichen "
+            "Look (Cube mit Laser-Beams im Cyberpunk-Stil).",
+            "**Sanfte Migration**: wer den alten Skin in den "
+            "Einstellungen aktiv hatte, behält ihn automatisch — der "
+            "Legacy-ID-Mapper im Hook übersetzt `legendary-partymodus` "
+            "transparent auf `cyberpunk-laser`. Kein Reset, kein Reload "
+            "der Einstellung nötig.",
+            "**Dritter Skin live: Party Fun** — bewusst weg vom "
+            "Cyberpunk-Look. Helle Paint-Splash-Bonbons, 3D-Cube "
+            "mittig, freundliche Farben. Für User die's bunt mögen.",
+            "**Neue Auflösungen** im Party-Fun-Pack: zusätzlich "
+            "1366×768 (HD-Laptop) und 1080×1920 (Mobile Portrait!). "
+            "Das System picked auf dem Phone hochkant jetzt automatisch "
+            "die Portrait-Variante statt das beschnittene Landscape-Bild.",
+            "**Asset-Pipeline universal**: Convert-Script akzeptiert "
+            "jetzt drei Pack-Conventions parallel — mit `_appsafe_`-"
+            "Marker (Pack 1+2) und ohne (Pack 3). Weitere Auflösungen "
+            "und Suffix-Varianten kommen ohne Code-Änderung durch.",
+            "**Gesamt jetzt 3 Skins + Kein-Hintergrund**: Cyberpunk "
+            "Neon (Cube unten links), Cyberpunk Laser (Cube mittig-"
+            "links mit Lasern), Party Fun (3D-Cube mittig mit "
+            "Farb-Splash). Plus den Card-Stil Deckend/Glas als "
+            "zweite Achse.",
+            "Bundle-Impact: ~880 KB neue WebPs für Party Fun (7 "
+            "Auflösungen), on-demand geladen nur wenn aktiv.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-legendary-partymode",
         released=date(2026, 5, 28),
         title="🎉 Zweiter Skin: Legendary Partymodus",

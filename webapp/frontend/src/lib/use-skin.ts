@@ -14,6 +14,22 @@ const STORAGE_KEY = "cubetracker.skin.v1";
 const CHANGE_EVENT = "cubetracker:skin-changed";
 
 /**
+ * Legacy-Mapping fuer umbenannte Skin-IDs. User die einen Skin in
+ * localStorage gespeichert haben, dessen ID inzwischen umbenannt wurde,
+ * werden transparent auf die neue ID gemappt.
+ *
+ * Reihenfolge der Renames:
+ *   - 2026-05-28: legendary-partymodus -> cyberpunk-laser
+ */
+const LEGACY_SKIN_ID_MAP: Record<string, string> = {
+  "legendary-partymodus": "cyberpunk-laser",
+};
+
+function mapLegacySkinId(id: string): string {
+  return LEGACY_SKIN_ID_MAP[id] ?? id;
+}
+
+/**
  * Liest aktive Skin-ID aus localStorage, Fallback auf Default.
  * Defensive: bei Storage-Block (Private-Mode) wird Default zurueckgegeben.
  */
@@ -22,8 +38,12 @@ export function loadSkinId(): string {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_SKIN_ID;
-    // Defensive: nur den ID-String zulassen, kein JSON-Parse-Risiko
-    return raw.trim() || DEFAULT_SKIN_ID;
+    // Defensive: nur den ID-String zulassen, kein JSON-Parse-Risiko.
+    // Plus Legacy-Mapping fuer umbenannte Skin-IDs.
+    // Plus Whitelist-Validierung gegen Registry via getSkin() (Fallback
+    // auf Default wenn unbekannt).
+    const mapped = mapLegacySkinId(raw.trim() || DEFAULT_SKIN_ID);
+    return getSkin(mapped).id;
   } catch {
     return DEFAULT_SKIN_ID;
   }

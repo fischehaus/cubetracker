@@ -1508,9 +1508,13 @@
       "label": "Cyberpunk Neon",
       "description": "Cube + Neon-Glow in Lila/Blau"
     },
-    "legendaryPartymodus": {
-      "label": "Legendary Partymodus",
-      "description": "Laser, Konfetti, Energy-Lines — wild aber lesbar"
+    "cyberpunkLaser": {
+      "label": "Cyberpunk Laser",
+      "description": "Cube mit Laser-Linien, Konfetti, Energy-Lines — wild aber lesbar"
+    },
+    "partyFun": {
+      "label": "Party Fun",
+      "description": "Bunte Farben, Bonbons, freundlich — weg vom Cyberpunk-Look"
     }
   },
   "cardStyle": {
