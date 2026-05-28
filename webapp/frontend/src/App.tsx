@@ -377,13 +377,6 @@ function TimerTab({
     // ausgeblendet.
     <div>
       {focusToggle}
-      {/* W.gan-cube-auto-time-v2: SmartCubeConnect lebt direkt in
-          TimerTab (nicht mehr in TimerControlsCard), damit er auch
-          im Fokus-Modus sichtbar ist. Lebt oben, damit der User die
-          Verbindung + den Solve-State immer im Blick hat. */}
-      <div className="mb-3">
-        <SmartCubeConnectBlock />
-      </div>
       <div
         className={
           focusMode
@@ -427,6 +420,12 @@ function TimerTab({
               onHardwareIdChange={setTimerHardwareId}
             />
           )}
+          {/* W.smart-cube-position-restore (2026-05-28): SmartCubeConnect
+              lebt wieder unter TimerControlsCard (= "Timer-Modus"-Block).
+              Im Fokus-Modus damit ebenfalls ausgeblendet, konsistent mit
+              den anderen Sub-Cards. User-Wunsch — vor der Demo wieder
+              der gewohnte Platz. */}
+          {!focusMode && <SmartCubeConnectBlock />}
         </main>
         {!focusMode && (
           <aside className="lg:order-1">
@@ -443,8 +442,9 @@ function TimerTab({
 
 // W.gan-cube-auto-time-v2: Wrapper damit der useSmartCube-Hook in
 // TimerTab nicht die ganze Card bei jedem MOVE-Event re-rendert —
-// nur dieser Block re-rendert. Lebt jetzt direkt in TimerTab statt
-// in TimerControlsCard (damit auch im Fokus-Modus sichtbar).
+// nur dieser Block re-rendert. W.smart-cube-position-restore
+// (2026-05-28): Position wieder unter TimerControlsCard, im Fokus-
+// Modus damit ausgeblendet (vor-Demo-Polish).
 function SmartCubeConnectBlock() {
   const { state, connect, disconnect, prepareForSolve, stopSolve, isSupported } =
     useSmartCube();

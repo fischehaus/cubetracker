@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.smart-cube-position-restore",
+        released=date(2026, 5, 28),
+        title="📍 Smart-Cube-Block wieder unter Timer-Modus",
+        highlights=[
+            "User-Wunsch vor der Demo: der Smart-Cube-Connect-Block "
+            "lebt wieder dort wo er ursprünglich war — direkt unter "
+            "dem „Timer-Modus\"-Block (TimerControlsCard).",
+            "Konsequenz: im Fokus-Modus ist er jetzt mit ausgeblendet "
+            "— konsistent mit den anderen Sub-Cards (Session, Hardware "
+            "etc.). Wer im Fokus-Modus den Smart-Cube nutzen will, "
+            "verbindet vorher und schaltet dann in den Fokus.",
+            "Hintergrund: war in W.gan-cube-auto-time-v2 nach oben "
+            "gezogen damit er im Fokus-Modus sichtbar bleibt. Vor "
+            "der Demo lieber an seinem gewohnten Platz unten.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-solid-fix",
         released=date(2026, 5, 28),
         title="🔧 Card-Stil „Deckend\" wirkt jetzt auch auf Akzent-Cards",
