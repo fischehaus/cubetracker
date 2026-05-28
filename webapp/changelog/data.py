@@ -44,6 +44,47 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.login-redesign-and-demo",
+        released=date(2026, 5, 28),
+        title="🎬 LoginPage neu + „Demo ausprobieren\"-Button",
+        highlights=[
+            "Komplett überarbeitete LoginPage vor der Demo am Samstag:",
+            "**Skin-Slideshow im Hintergrund**: rotiert automatisch alle "
+            "6 Sekunden durch die 3 Skins (Cyberpunk Neon → Cyberpunk "
+            "Laser → Party Fun → repeat). Sichtbar auch bevor man sich "
+            "einloggt — neue Besucher sehen das Skin-System direkt in "
+            "Aktion. Unabhängig vom User-Setting (das wird erst nach "
+            "Login aktiv).",
+            "**🎬 'Demo ausprobieren'-Button** prominent unter dem "
+            "Login: 1-Klick-Login als shared Demo-Account mit ~120 "
+            "vorgefertigten Sample-Solves (3x3, 4x4, OH, Pyra). Read-"
+            "only — Demo-User kann die App anschauen, aber nichts "
+            "speichern. Frontend zeigt einen Amber-Banner mit der "
+            "Erklärung 'Demo-Modus' oben über allen Tabs.",
+            "**Marketing-Inhalte kompakt**: rechte Spalte komplett "
+            "abgeschafft. Stattdessen zentriert unter dem Login: 3 "
+            "Trust-Pills (🇪🇺 EU-Server · 🚫 Kein Tracking · 🔓 Open "
+            "Source) + 4 Feature-Highlights als Icon-Tiles (Timer, "
+            "Stats, Trainer, Community). Kein Wand-of-Text mehr.",
+            "**Demo-Banner**: wenn der aktuelle User der Demo-Account "
+            "ist, erscheint oben über allen Tabs ein dezenter Amber-"
+            "Banner mit Hinweis + CTA 'Eigenen Account anlegen'. "
+            "Klick logt den Demo-User aus und zurück zur LoginPage.",
+            "**🔒 QA-Hotfixes vor Live-Deploy** mit eingebaut: "
+            "`/auth/forgot-password` + `/auth/reset-password` "
+            "filtern jetzt Demo-User raus (sonst könnte jemand via "
+            "Reset-Token den Demo-Account hijacken oder alle laufenden "
+            "Sessions revoken). `/auth/logout` macht für Demo-User nur "
+            "noch den Refresh-Cookie weg, KEIN token_version-Bump — "
+            "sonst würde ein Logout-Aufruf alle parallelen Demo-"
+            "Besucher rauswerfen.",
+            "Plus 2 weitere QA-Hotfixes: `_DUMMY_PW_HASH` ist jetzt "
+            "lazy via `lru_cache` (kein 250ms-Block beim Modul-Import), "
+            "hardcoded Demo-Email-String ersetzt durch Konstanten-"
+            "Import `from seeds.demo_user import DEMO_EMAIL`.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.demo-user-backend",
         released=date(2026, 5, 28),
         title="🎬 Demo-User-Backend: Read-only-Account für „mal reinschauen\"",
