@@ -44,6 +44,39 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-mvp-tsbuild",
+        released=date(2026, 5, 28),
+        title="Build-Hotfix #2: TypeScript-Type für navigator.bluetooth",
+        highlights=[
+            "ROOT CAUSE des „Smart-Cube-Block nicht sichtbar\"-Problems "
+            "endlich gefunden: seit dem ersten W.gan-cube-mvp-Push "
+            "(937daa7, vor 2h) failt der TypeScript-Compile im Coolify-"
+            "Build silent. Symptom:",
+            "  src/hooks/useSmartCube.ts(77,22): "
+            "  error TS2339: Property 'bluetooth' does not exist on "
+            "  type 'Navigator'.",
+            "GitHub-Action triggert Coolify, Coolify nimmt API-Call an "
+            "(= 200 OK = „success\" in der Action), aber der eigentliche "
+            "Vite-Build crashed auf tsc. Container bleibt beim alten "
+            "Image. Bundle-Hash MBTGTWHx ist seit 2h identisch — alle "
+            "drei Wellen (W.gan-cube-mvp, -deps, -qa) sind in den letzten "
+            "2h gar nicht live gewesen.",
+            "Fix: @types/web-bluetooth ^0.0.21 als devDependency + "
+            "tsconfig.app.json `types` auf `[vite/client, web-bluetooth]` "
+            "erweitert (war vorher nur vite/client — exclusive Liste).",
+            "**Wichtige Lesson:** GitHub-Action „success\" beweist nur "
+            "dass Coolify den API-Call angenommen hat, NICHT dass der "
+            "Build wirklich durchgekommen ist. Bei npm-Dep-Wellen MUSS "
+            "lokal `npm run build` pro-aktiv laufen — sonst dreht man "
+            "Runden wie die letzten 2 Stunden.",
+            "Build-Result lokal verifiziert: main bundle 498 KB gz, "
+            "Async-Chunk fuer gan-web-bluetooth + rxjs 26 KB gz, alle "
+            "QA-Hotfixes drin (DISCONNECT-Handler, User-Cancel, Race-"
+            "Guard).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-mvp-qa",
         released=date(2026, 5, 28),
         title="QA-Hotfix nach W.gan-cube-mvp (2 KRITISCH + 3 SOLLTE + 2 NICE)",
