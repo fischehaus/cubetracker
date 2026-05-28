@@ -15,6 +15,7 @@ aggregiert).
 from __future__ import annotations
 
 import logging
+import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -202,10 +203,21 @@ def get_admin_stats(
     # (1 GB) als pragmatischer Schwellenwert, ueber ENV CUBETRACKER_
     # SNAPSHOT_STORAGE_LIMIT_MB ueberschreibbar. Kein technisches
     # Limit erzwungen — das ist nur fuer das Admin-Dashboard.
-    import os
-    snapshot_storage_limit_mb = int(
-        os.environ.get("CUBETRACKER_SNAPSHOT_STORAGE_LIMIT_MB", "1024")
-    )
+    # QA-Fix W.timer-polish-pbs-qa (KRITISCH): defensive ValueError-
+    # Behandlung. Vorher konnte ein falsch gesetzter ENV-Wert (z.B.
+    # "1024MB" mit Suffix, oder leerer String) den gesamten Stats-
+    # Endpoint mit 500 crashen.
+    try:
+        snapshot_storage_limit_mb = int(
+            os.environ.get("CUBETRACKER_SNAPSHOT_STORAGE_LIMIT_MB", "1024")
+        )
+    except ValueError:
+        logger.warning(
+            "CUBETRACKER_SNAPSHOT_STORAGE_LIMIT_MB ist nicht parsable als "
+            "int (Wert: %r) — Default 1024 MB benutzt.",
+            os.environ.get("CUBETRACKER_SNAPSHOT_STORAGE_LIMIT_MB"),
+        )
+        snapshot_storage_limit_mb = 1024
     total_snapshots = db.scalar(select(func.count(Snapshot.id))) or 0
     total_snapshot_bytes = (
         db.scalar(select(func.coalesce(func.sum(func.length(Snapshot.payload_json)), 0)))

@@ -44,6 +44,45 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-polish-pbs-qa",
+        released=date(2026, 5, 28),
+        title="QA-Hotfix nach Timer-Polish + Snapshot-Limit (1 KRITISCH + 3 SOLLTE)",
+        highlights=[
+            "QA-Sub-Agent-Review der Wellen W.timer-polish-pbs und "
+            "W.admin-snapshot-limit: 1 KRITISCH + 3 SOLLTE + 3 NICE + "
+            "3 POSITIV. Verdikt: NICHT safe to deploy as-is. Alle 4 "
+            "Findings sofort gefixt.",
+            "**KRITISCH** (Admin-Stats 500-Crash): `int(os.environ.get("
+            "'CUBETRACKER_SNAPSHOT_STORAGE_LIMIT_MB', '1024'))` ohne "
+            "try/except. Jede falsch gesetzte ENV (Tippfehler, leerer "
+            "String, '1024MB' mit Suffix) waere als ValueError aus dem "
+            "/admin/stats-Endpoint mit 500 rausgeflogen — ganze Admin-"
+            "Stats-Seite tot. Fix: import os an Modul-Kopf + try/except "
+            "ValueError mit Logger-Warning + Fallback 1024 MB.",
+            "**SOLLTE** (PB-Row Schrift zu dunkel): Ternary im <tr> ließ "
+            "`text-gray-100` weg wenn isBest=true (nur `bg-yellow-500/5` "
+            "gesetzt). Frisch eingetragener neuer PB erschien mit "
+            "text-gray-400 (= Fallback fuer alte Rows) statt heller. "
+            "Fix: `bg-yellow-500/5 text-gray-100` zusammen im isBest-"
+            "Branch.",
+            "**SOLLTE** (Scrollbar-Doppelregel): seit der globalen "
+            "Scrollbar-Regel in index.css waren die alten inline-"
+            "Tailwind-Klassen in LastSolvesPreview (`[&::-webkit-"
+            "scrollbar]:w-2` etc.) redundant + inkonsistent (8px Inline "
+            "vs 10px Global). Inline-Styling entfernt — globale Regel "
+            "uebernimmt.",
+            "**SOLLTE** (PB-Gold-Logik dokumentiert): `current_ao5 <= "
+            "best_ao5` triggert gold auch bei Gleichheit. Bewusst — "
+            "User sieht „auf PB-Niveau\"-Anzeige sobald er sich erneut "
+            "auf seinem Best bewegt. Kommentar im Code, was die "
+            "Semantik ist.",
+            "POSITIV-Findings vom QA: try/catch um localStorage-Calls, "
+            "max(limit, 1)-Division-by-Zero-Guard, vollstaendige "
+            "ARIA-Attribute auf Progress-Bar.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.admin-snapshot-limit",
         released=date(2026, 5, 28),
         title="Admin → Snapshot-Storage zeigt X / Limit + Progress-Bar",

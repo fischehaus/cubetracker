@@ -302,6 +302,12 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                 {stats?.current_ao5 != null ? formatTime(stats.current_ao5) : "–"}
               </div>
               {stats?.best_ao5 != null && (
+                // QA-Fix W.timer-polish-pbs-qa (SOLLTE): `<=` ist gewollt
+                // statt `<`. Bedeutung „aktueller AO5 liegt auf PB-Niveau"
+                // — User sieht gold sobald er sich erneut auf seinem Best
+                // bewegt (auch ohne strikte Verbesserung). Wenn jemand
+                // nur „echter neuer PB seit Min" sehen will, ist eine
+                // Backend-Flag-Erweiterung der saubere Weg.
                 <div
                   className={`text-xs font-mono mt-0.5 ${
                     stats.current_ao5 != null && stats.current_ao5 <= stats.best_ao5
@@ -504,24 +510,18 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           // Sticky-Header bleibt beim Scrollen sichtbar.
           // Hoehe-Rechnung: ~36px pro Zeile * 20 + ~40px sticky-header
           // = ~760px. Mit max-h-[760px] reine Tailwind-Loesung.
+          // QA-Fix W.timer-polish-pbs-qa (SOLLTE): inline-Scrollbar-
+          // Styling entfernt — seit W.timer-polish-pbs gibt es eine
+          // globale Cubetracker-Scrollbar in index.css die alle
+          // scrollbaren Elemente einheitlich purple stylt. Inline-
+          // Klassen waren Doppelregel mit anderer Breite (8px vs
+          // global 10px), Inkonsistenz im Look.
           <div
             className={`overflow-x-auto ${
               tableSize === -1 || tableSize > 20
-                ? "max-h-[760px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-800/40 [&::-webkit-scrollbar-thumb]:bg-purple-500/55 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-purple-500/80"
+                ? "max-h-[760px] overflow-y-auto"
                 : ""
             }`}
-            style={
-              tableSize === -1 || tableSize > 20
-                ? {
-                    // Firefox + Chrome 121+ native CSS-Properties.
-                    // Webkit-Browser (Safari) styled via Tailwind
-                    // arbitrary variants (className oben).
-                    scrollbarColor:
-                      "rgba(168, 85, 247, 0.55) rgba(31, 41, 55, 0.4)",
-                    scrollbarWidth: "thin",
-                  }
-                : undefined
-            }
           >
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-gray-900/95 z-10">
@@ -585,9 +585,15 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                   return (
                     <tr
                       key={s.id}
+                      // QA-Fix W.timer-polish-pbs-qa (SOLLTE): text-gray-100
+                      // war im isBest-Branch vergessen — bei frisch-eingetragenem
+                      // PB (= isBest UND isNewest) fiel die Schrift auf
+                      // text-gray-400 zurueck (zu dunkel). Jetzt: PB-Row hat
+                      // bg-yellow-500/5 PLUS text-gray-100 fuer kontrastreiche
+                      // Anzeige.
                       className={`border-b border-gray-800 last:border-0 hover:bg-gray-800/30 ${
                         isBest
-                          ? "bg-yellow-500/5"
+                          ? "bg-yellow-500/5 text-gray-100"
                           : isNewest
                             ? "text-gray-100"
                             : "text-gray-400"
