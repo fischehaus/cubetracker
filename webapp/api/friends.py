@@ -34,7 +34,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session as OrmSession
 
-from auth.deps import get_current_user, require_not_demo
+from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from db.database import get_db
 from db.models import Friendship, User
@@ -271,7 +271,7 @@ def search_users(
 def lookup_email(
     request: Request,
     payload: EmailLookupPayload,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> EmailLookupResponse:
     """Exakter Email-Match. Umgeht is_discoverable, weil exakte Email
@@ -293,7 +293,7 @@ def lookup_email(
 def post_friend_request(
     request: Request,
     payload: FriendRequestPayload,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> FriendshipRead:
     """Neue Friend-Anfrage an einen User (per ID, von Search/Lookup-Result).
@@ -320,7 +320,7 @@ def post_friend_request(
 def post_accept(
     request: Request,
     friendship_id: int,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> FriendshipRead:
     """Eingehende Anfrage annehmen.
@@ -351,7 +351,7 @@ def post_accept(
 def delete_friendship(
     request: Request,
     friendship_id: int,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Friendship löschen — Mehrzweck-Endpoint (abbrechen, ablehnen,

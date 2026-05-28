@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session as OrmSession
 
-from auth.deps import get_current_user, require_not_demo
+from auth.deps import get_current_user
 from challenges.service import get_or_generate_today, regenerate_today
 from db.database import get_db
 from db.models import Challenge, User
@@ -54,7 +54,7 @@ def get_today(
 
 @router.post("/today/regenerate")
 def regenerate(
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Verwirft + regeneriert heutige Challenges des Users."""
@@ -68,7 +68,7 @@ def regenerate(
 @router.post("/{challenge_id}/dismiss")
 def dismiss_challenge(
     challenge_id: int,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """User klickt eigene Challenge weg. Fremde -> 404 (kein Probing)."""

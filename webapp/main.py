@@ -108,11 +108,6 @@ async def lifespan(app: FastAPI):
                 # „Tester" für Live-Tests + Roadmap-Pflege ohne Admin-
                 # Vollzugriff. Default FALSE, Promotion via Admin-UI.
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_tester BOOLEAN NOT NULL DEFAULT FALSE",
-                # Phase W.demo-user-backend (2026-05-28): Flag für den
-                # einen geseedeten Demo-User. Default FALSE, Demo-User
-                # wird in lifespan-Bootstrap als einziger User mit
-                # is_demo=TRUE angelegt (via seeds/demo_user.py).
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_demo BOOLEAN NOT NULL DEFAULT FALSE",
                 # feedback_messages-Tabelle: create_all() oben legt sie
                 # bereits an, hier defensive Idempotenz-Checks für die Indexe.
                 "CREATE INDEX IF NOT EXISTS ix_feedback_status_created ON feedback_messages (status, created_at)",
@@ -178,23 +173,6 @@ async def lifespan(app: FastAPI):
                         )
             except Exception as bf_e:  # noqa: BLE001
                 print(f"WARN: hardware backfill failed: {bf_e}")
-
-            # W.demo-user-backend (2026-05-28): einmaliger Bootstrap des
-            # Demo-Users. Idempotent — wenn Demo-User schon existiert,
-            # nichts machen. Bei Erst-Anlegen: ~120 Sample-Solves seeden.
-            try:
-                from seeds.demo_user import bootstrap_demo_user
-                from db.database import SessionLocal
-
-                with SessionLocal() as du_db:
-                    created, solves_seeded = bootstrap_demo_user(du_db)
-                    if created:
-                        print(
-                            f"INFO: demo-user bootstrap -> User angelegt + "
-                            f"{solves_seeded} Sample-Solves geseedet"
-                        )
-            except Exception as du_e:  # noqa: BLE001
-                print(f"WARN: demo-user bootstrap failed: {du_e}")
 
             # W.demo-probe-meppel-seed (2026-05-28): einmaliger Bootstrap
             # der EN-Klick-Through-Demo-Probe-Live-Tests vor dem Meppel-

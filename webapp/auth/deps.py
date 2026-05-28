@@ -97,34 +97,3 @@ def get_current_user_optional(
     if user.token_version != token_ver:
         return None
     return user
-
-
-# ============================================================
-# Demo-User-Guard (W.demo-user-backend, 2026-05-28).
-# Blockt mutating Endpoints fuer den geseedeten Demo-User.
-# Demo ist read-only damit ein shared Account ohne Drift funktioniert.
-# Vor jeder Mutation als zusaetzliche Dep einfuegen:
-#     @router.post("/foo")
-#     def foo(user: User = Depends(require_not_demo), ...):
-# ============================================================
-
-
-def require_not_demo(
-    current_user: User = Depends(get_current_user),
-) -> User:
-    """Wirft 403 wenn der Aufrufer der Demo-User ist.
-
-    Demo-User ist read-only. Alle Lese-Endpoints funktionieren normal,
-    Mutationen (POST/PATCH/DELETE auf eigene Solves/Sessions/Settings/
-    Feedback/Account-Edits) werden geblockt.
-
-    Frontend disabled die UI-Buttons zusaetzlich -- diese Dep ist die
-    Defense-in-Depth gegen direkten API-Call mit dem Demo-JWT.
-    """
-    if current_user.is_demo:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Diese Aktion ist im Demo-Modus deaktiviert. "
-            "Bitte erstelle einen eigenen Account.",
-        )
-    return current_user

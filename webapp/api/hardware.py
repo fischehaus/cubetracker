@@ -16,7 +16,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session as OrmSession
 
 from achievements.service import run_achievement_check
-from auth.deps import get_current_user, require_not_demo
+from auth.deps import get_current_user
 from db.database import get_db
 from db.models import Hardware, Solve, User
 from db.schemas import HardwareCreate, HardwareRead, HardwareUpdate
@@ -59,7 +59,7 @@ def list_hardware(
 @router.post("", response_model=HardwareRead, status_code=status.HTTP_201_CREATED)
 def create_hardware(
     payload: HardwareCreate,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> Hardware:
     """Neuen Hardware-Eintrag für aktuellen User anlegen.
@@ -141,7 +141,7 @@ def get_hardware(
 def update_hardware(
     hw_id: int,
     payload: HardwareUpdate,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> Hardware:
     hw = _get_or_404(hw_id, current_user, db)
@@ -156,7 +156,7 @@ def update_hardware(
 @router.delete("/{hw_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_hardware(
     hw_id: int,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Hardware löschen.
@@ -175,7 +175,7 @@ def seed_hardware(
         description="Wenn False: nur wenn EIGENE Hardware-Liste leer ist. "
         "Wenn True: Einträge werden zusätzlich angelegt (kann Duplikate erzeugen).",
     ),
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Lade die Standard-Hardware-Liste vom 2026-05-03 ins EIGENE Inventar.
@@ -227,7 +227,7 @@ class HardwareBulkDelete(BaseModel):
 @router.post("/bulk-update")
 def bulk_update_hardware(
     payload: HardwareBulkUpdate,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, int]:
     """Setzt is_active auf eine Menge eigener Hardware-Einträge.
@@ -256,7 +256,7 @@ def bulk_update_hardware(
 @router.post("/bulk-delete")
 def bulk_delete_hardware(
     payload: HardwareBulkDelete,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, int]:
     """Löscht eine Menge eigener Hardware-Einträge.

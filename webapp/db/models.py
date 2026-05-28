@@ -102,15 +102,6 @@ class User(Base):
     is_tester: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="false"
     )
-    # Phase W.demo-user-backend (2026-05-28): Flag für den Demo-User.
-    # Genau EIN User mit is_demo=True existiert (geseedet beim Container-
-    # Start). Mutating Endpoints checken require_not_demo und blocken
-    # bei is_demo=True. Login geht ueber `/auth/demo-login` (kein
-    # Passwort), normaler Login via /auth/login funktioniert NICHT
-    # (Demo-User hat einen unbrauchbaren Passwort-Hash).
-    is_demo: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, server_default="false"
-    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )

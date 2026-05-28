@@ -35,7 +35,7 @@ from fastapi import (
 from sqlalchemy.orm import Session as OrmSession
 
 from achievements.service import run_achievement_check
-from auth.deps import get_current_user, require_not_demo
+from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from backup.service import BackupServiceError, check_json_bomb, create_snapshot
 from db.database import SessionLocal, get_db
@@ -101,7 +101,7 @@ async def import_cstimer(
     background: BackgroundTasks,
     file: UploadFile = File(..., description="csTimer-Export-Datei (.txt/.json)"),
     dry_run: bool = Query(default=False, description="Nur Stats, nichts schreiben"),
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """csTimer-Datei für aktuellen User importieren — Merge-by-Default,

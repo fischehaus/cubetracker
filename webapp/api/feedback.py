@@ -32,7 +32,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session as OrmSession
 
-from auth.deps import get_current_user, require_not_demo
+from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from db.database import get_db
 from db.models import FeedbackMessage, User
@@ -52,7 +52,7 @@ router = APIRouter(prefix="/feedback", tags=["feedback"])
 def create_feedback_message(
     request: Request,
     payload: FeedbackMessageCreate,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Neue Feedback-Nachricht vom eingeloggten User in die Admin-Inbox.
@@ -133,7 +133,7 @@ def my_unread_response_count(
 @router.post("/me/messages/{message_id}/seen", status_code=status.HTTP_204_NO_CONTENT)
 def mark_response_seen(
     message_id: int,
-    current_user: User = Depends(require_not_demo),
+    current_user: User = Depends(get_current_user),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """User markiert eine Admin-Antwort als gelesen.
