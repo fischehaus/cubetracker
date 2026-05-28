@@ -1,14 +1,24 @@
 /**
- * Login + Register + ForgotPassword auf einer Seite — Mode-Switch.
- * Dunkles Theme passend zur App.
+ * LoginPage — Konzept A (W.login-redesign, 2026-05-28).
+ *
+ * Aufbau:
+ *   - Skin-Slideshow im Hintergrund (rotiert alle 6s durch die Skins,
+ *     unabhaengig vom User-Setting)
+ *   - Logo mittig + Tagline
+ *   - Login/Register-Card
+ *   - Trust-Pills (3 inline)
+ *   - Feature-Highlights (4 Icon-Tiles)
+ *   - Footer mit Impressum + Datenschutz
+ *
+ * Trust + Feature lebten frueher rechts neben dem Login als lange Spalten.
+ * Jetzt zentriert + kompakt, damit der Eye-Anchor klar auf Login bleibt.
  */
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
-import { FeatureListPanel } from "../components/FeatureListPanel";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
-import { TrustBlock } from "../components/TrustBlock";
+import { LoginPageBackgroundLayer } from "../components/LoginPageBackgroundLayer";
 import { useFeatures } from "../lib/features-data";
 
 type Mode = "login" | "register" | "forgot";
@@ -16,7 +26,7 @@ type Mode = "login" | "register" | "forgot";
 export function LoginPage() {
   const { login, register } = useAuth();
   const { t } = useTranslation();
-  const { tagline, heroHighlights } = useFeatures();
+  const { tagline } = useFeatures();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +45,6 @@ export function LoginPage() {
       } else if (mode === "register") {
         await register(email, password);
       } else {
-        // forgot
         await api.post("/auth/forgot-password", { email });
         setInfo(t("auth.forgotInfo"));
       }
@@ -48,30 +57,34 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
-      <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-[620px_1fr] gap-6 lg:gap-10 items-start">
-        {/* Linke Spalte: Logo + Login-Form. Card-Breite 1.5× erhöht
-            damit das Logo entsprechend größer wirkt (User-Wunsch). */}
-        <div className="w-full max-w-[600px] mx-auto lg:max-w-none bg-gray-800/50 border border-gray-700 rounded-2xl shadow-xl p-6">
-          {/* Sprach-Switcher rechts oben in der Card — englische Speedcuber
-              sehen ihn vor dem Login. */}
-          <div className="flex justify-end mb-2">
-            <LanguageSwitcher size="sm" />
-          </div>
-          {/* Logo prominent — wie eine Marken-Visitenkarte. Volle Card-
-              Innenbreite (Card ist max-w-md = 448px, Padding p-6 = 24px,
-              also ~400px Innenraum). */}
-          <img
-            src="/cubetracker-logo.png"
-            alt={t("auth.logoAlt")}
-            className="cubetracker-app-logo w-full mx-auto mb-4"
-          />
-          <p className="text-base text-gray-400 mb-6 text-center">
-            {mode === "login"
-              ? t("auth.welcomeBack")
-              : mode === "register"
-                ? t("auth.createAccount")
-                : t("auth.forgotPassword")}
-          </p>
+      <LoginPageBackgroundLayer />
+
+      {/* Sprachswitcher rechts oben — schwebt frei ueber dem Skin */}
+      <div className="max-w-3xl mx-auto flex justify-end mb-4">
+        <LanguageSwitcher size="sm" />
+      </div>
+
+      {/* Logo + Tagline zentriert */}
+      <div className="max-w-md mx-auto text-center mb-4">
+        <img
+          src="/cubetracker-logo.png"
+          alt={t("auth.logoAlt")}
+          className="cubetracker-app-logo w-full max-w-xs mx-auto mb-2"
+        />
+        <p className="text-sm text-gray-100 leading-relaxed px-4 drop-shadow-md">
+          {tagline}
+        </p>
+      </div>
+
+      {/* Login / Register Form */}
+      <div className="max-w-md mx-auto bg-gray-800 border border-gray-700 rounded-2xl shadow-xl p-5 mb-5">
+        <p className="text-sm text-gray-400 mb-4 text-center">
+          {mode === "login"
+            ? t("auth.welcomeBack")
+            : mode === "register"
+              ? t("auth.createAccount")
+              : t("auth.forgotPassword")}
+        </p>
 
         {mode !== "forgot" && (
           <div className="flex gap-2 mb-4">
@@ -152,7 +165,7 @@ export function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-4 text-center text-sm">
+        <div className="mt-3 text-center text-sm">
           {mode === "login" && (
             <button
               type="button"
@@ -180,51 +193,31 @@ export function LoginPage() {
             </button>
           )}
         </div>
-        </div>
-
-        {/* Rechte Spalte: Was-ist-das + Feature-Liste für Besucher
-            ohne Account. Auf Desktop nebeneinander, auf Mobile gestapelt. */}
-        <aside className="space-y-4 max-w-2xl mx-auto lg:mx-0">
-          <div className="rounded-2xl border border-purple-500/30 bg-purple-500/5 p-5">
-            <p className="text-base text-gray-200 leading-relaxed">
-              {tagline}
-            </p>
-            <ul className="mt-3 space-y-1 text-sm text-purple-200">
-              {heroHighlights.map((h, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span aria-hidden="true" className="text-purple-400">
-                    ✓
-                  </span>
-                  <span>{h}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* W.login-trust-block: Datensicherheits-/Privacy-Cards
-              direkt unter dem Hero, BEVOR der FeaturesListPanel — der
-              User soll Vertrauen aufbauen koennen bevor er die Feature-
-              Liste durchscrollt. */}
-          <TrustBlock />
-
-          <FeatureListPanel compact />
-        </aside>
       </div>
 
-      <footer className="mx-auto max-w-6xl mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
-        <span>{t("footer.appName")}</span>
-        <span aria-hidden="true">·</span>
-        <a
-          href="/impressum"
-          className="text-gray-500 hover:text-gray-200 underline"
-        >
+      {/* Trust-Pills */}
+      <div className="max-w-2xl mx-auto flex flex-wrap justify-center gap-2 mb-5 px-2">
+        <TrustPill icon="🇪🇺" label={t("auth.trustEuServer")} />
+        <TrustPill icon="🚫" label={t("auth.trustNoTracking")} />
+        <TrustPill icon="🔓" label={t("auth.trustOpenSource")} />
+      </div>
+
+      {/* Feature-Highlights */}
+      <div className="max-w-2xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-2 mb-6 px-2">
+        <FeatureTile icon="🎯" label={t("auth.featureTimer")} />
+        <FeatureTile icon="📊" label={t("auth.featureStats")} />
+        <FeatureTile icon="🔥" label={t("auth.featureTrainer")} />
+        <FeatureTile icon="👥" label={t("auth.featureCommunity")} />
+      </div>
+
+      <footer className="mx-auto max-w-2xl mt-6 flex flex-wrap items-center justify-center gap-3 text-xs">
+        <span className="text-gray-200 drop-shadow-md">{t("footer.appName")}</span>
+        <span aria-hidden="true" className="text-gray-400">·</span>
+        <a href="/impressum" className="text-gray-200 hover:text-purple-200 underline drop-shadow-md">
           {t("footer.imprint")}
         </a>
-        <span aria-hidden="true">·</span>
-        <a
-          href="/datenschutz"
-          className="text-gray-500 hover:text-gray-200 underline"
-        >
+        <span aria-hidden="true" className="text-gray-400">·</span>
+        <a href="/datenschutz" className="text-gray-200 hover:text-purple-200 underline drop-shadow-md">
           {t("footer.privacy")}
         </a>
       </footer>
@@ -253,6 +246,26 @@ function TabButton({
     >
       {children}
     </button>
+  );
+}
+
+function TrustPill({ icon, label }: { icon: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-xs text-gray-200">
+      <span aria-hidden="true">{icon}</span>
+      {label}
+    </span>
+  );
+}
+
+function FeatureTile({ icon, label }: { icon: string; label: string }) {
+  return (
+    <div className="rounded-lg bg-gray-800 border border-gray-700 px-3 py-3 text-center">
+      <div className="text-2xl mb-1" aria-hidden="true">
+        {icon}
+      </div>
+      <div className="text-xs text-gray-200">{label}</div>
+    </div>
   );
 }
 

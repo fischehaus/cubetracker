@@ -214,7 +214,14 @@
     "forgotLink": "Passwort vergessen?",
     "backToLogin": "← zurück zum Login",
     "forgotInfo": "Wenn die Email-Adresse registriert ist, ist eine Mail mit Reset-Link unterwegs. Prüfe auch Spam-Ordner.",
-    "logoAlt": "cubetracker — Speedcubing Solve-Tracking"
+    "logoAlt": "cubetracker — Speedcubing Solve-Tracking",
+    "trustEuServer": "EU-Server",
+    "trustNoTracking": "Kein Tracking",
+    "trustOpenSource": "Open Source",
+    "featureTimer": "Timer + Solves",
+    "featureStats": "Stats + PBs",
+    "featureTrainer": "PLL/OLL Trainer",
+    "featureCommunity": "Friends + Leaderboard"
   },
   "footer": {
     "appName": "cubetracker",
