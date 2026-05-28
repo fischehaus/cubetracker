@@ -44,6 +44,34 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-solid-fix",
+        released=date(2026, 5, 28),
+        title="🔧 Card-Stil „Deckend\" wirkt jetzt auch auf Akzent-Cards",
+        highlights=[
+            "**User-Befund**: „Card-Stil Deckend funktioniert nicht\" — "
+            "weil ~90% der Cards in der App das Tailwind-Akzent-Pattern "
+            "`bg-<farbe>-500/5` (5% Opacity) nutzen, blieben sie bei "
+            "aktivem Skin IMMER halbtransparent. Egal welcher Card-Stil "
+            "gewählt war.",
+            "**Fix**: alle Akzent-Card-Backgrounds an die Card-Stil-"
+            "Logik angebunden. Im Deckend-Mode bekommen sie einen "
+            "deckenden dunklen Background (rgba 17,24,39,0.94). Im "
+            "Glas-Mode den vollen Glassmorphism-Look (rgba 0.78 + "
+            "Blur). Border + Text-Farbe bleiben — der Akzent wird "
+            "über die Border kommuniziert.",
+            "**Welche Cards betroffen**: alle Container mit "
+            "`bg-{red,emerald,purple,amber,yellow,blue,pink,orange,"
+            "cyan,indigo}-{500,600}/{5,10,15,20}`. Status-Indicator-"
+            "Buttons (z.B. rote Fail-Buttons) bleiben unverändert "
+            "(geschützt via :not(button)).",
+            "**Bewusst nicht angefasst**: höhere Opacity-Stufen ab "
+            "/30 (z.B. `bg-blue-500/30` für Badges) — die sind "
+            "absichtlich sichtbar und sollen nicht verflachen.",
+            "Bundle: +2 KB CSS gzipped (zusätzliche Selektor-Liste). "
+            "Kein JavaScript-Wachstum.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-rename-and-party-fun",
         released=date(2026, 5, 28),
         title="🎨 „Legendary Partymodus\" → „Cyberpunk Laser\" + dritter Skin „Party Fun\"",

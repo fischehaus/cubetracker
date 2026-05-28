@@ -114,6 +114,72 @@ body[data-card-style="glass"] [class~="bg-gray-900"]:not(button):not(input):not(
   -webkit-backdrop-filter: blur(10px) saturate(140%);
 }
 
+/* W.skin-solid-fix (2026-05-28): Akzent-Cards im Tailwind-Pattern
+ * `bg-<color>-{500|600}/{5|10|15|20}` sind im Code mit 5-20% Opacity
+ * gerendert -- damit sehen sie bei aktivem Skin IMMER halbtransparent
+ * aus, egal welcher Card-Stil. User-Befund nach W.skin-glassmorphism:
+ * "Deckend funktioniert nicht" weil ~90% der Cards Akzent-Pattern
+ * nutzen und unveraendert durchscheinen.
+ *
+ * Fix: alle Akzent-Card-Backgrounds an die Card-Style-Logik binden.
+ *   - Solid-Mode bei aktivem Skin: deckender dunkler Background.
+ *   - Glass-Mode bei aktivem Skin: glass-Look (gleiche Werte wie
+ *     bg-gray-800 im Glass-Mode).
+ * Border + Text-Farbe bleiben unveraendert -- der Akzent wird ueber
+ * die Border-Farbe kommuniziert, nicht ueber Background-Tint.
+ *
+ * Selektor-Strategie: explizite :is()-Liste mit `[class~="..."]`
+ * exakt-Tokens, NICHT substring-Match -- sonst wuerden hoehere
+ * Opacity-Varianten (z.B. bg-purple-500/50) faelschlicherweise
+ * gematcht (substring "500/5" ist drin). Verbose aber praezise.
+ *
+ * Exclusion-Liste: button/input/select/textarea/option -- damit
+ * Status-Indicator-Buttons (z.B. bg-red-500/20 fuer fehlerhafte
+ * Tests) NICHT verflachen.
+ */
+
+/* SOLID-Mode (Default) bei aktivem Skin: Akzent-Cards -> deckend dunkel */
+body[data-skin]:not([data-card-style="glass"]) :is(
+  [class~="bg-red-500/5"], [class~="bg-red-500/10"], [class~="bg-red-500/15"], [class~="bg-red-500/20"],
+  [class~="bg-red-600/5"],
+  [class~="bg-emerald-500/5"], [class~="bg-emerald-500/10"], [class~="bg-emerald-500/15"], [class~="bg-emerald-500/20"],
+  [class~="bg-emerald-600/5"],
+  [class~="bg-purple-500/5"], [class~="bg-purple-500/10"], [class~="bg-purple-500/15"], [class~="bg-purple-500/20"],
+  [class~="bg-purple-600/5"],
+  [class~="bg-amber-500/5"], [class~="bg-amber-500/10"], [class~="bg-amber-500/15"], [class~="bg-amber-500/20"],
+  [class~="bg-yellow-500/5"], [class~="bg-yellow-500/10"], [class~="bg-yellow-500/20"],
+  [class~="bg-blue-500/5"], [class~="bg-blue-500/10"], [class~="bg-blue-500/15"], [class~="bg-blue-500/20"],
+  [class~="bg-blue-600/5"],
+  [class~="bg-pink-500/5"], [class~="bg-pink-500/10"],
+  [class~="bg-orange-500/5"], [class~="bg-orange-500/10"],
+  [class~="bg-cyan-500/5"], [class~="bg-cyan-500/10"],
+  [class~="bg-indigo-500/5"], [class~="bg-indigo-500/10"]
+):not(button):not(input):not(select):not(textarea):not(option) {
+  background-color: rgba(17, 24, 39, 0.94) !important;
+}
+
+/* GLASS-Mode bei aktivem Skin: Akzent-Cards -> Glass-Look */
+body[data-card-style="glass"] :is(
+  [class~="bg-red-500/5"], [class~="bg-red-500/10"], [class~="bg-red-500/15"], [class~="bg-red-500/20"],
+  [class~="bg-red-600/5"],
+  [class~="bg-emerald-500/5"], [class~="bg-emerald-500/10"], [class~="bg-emerald-500/15"], [class~="bg-emerald-500/20"],
+  [class~="bg-emerald-600/5"],
+  [class~="bg-purple-500/5"], [class~="bg-purple-500/10"], [class~="bg-purple-500/15"], [class~="bg-purple-500/20"],
+  [class~="bg-purple-600/5"],
+  [class~="bg-amber-500/5"], [class~="bg-amber-500/10"], [class~="bg-amber-500/15"], [class~="bg-amber-500/20"],
+  [class~="bg-yellow-500/5"], [class~="bg-yellow-500/10"], [class~="bg-yellow-500/20"],
+  [class~="bg-blue-500/5"], [class~="bg-blue-500/10"], [class~="bg-blue-500/15"], [class~="bg-blue-500/20"],
+  [class~="bg-blue-600/5"],
+  [class~="bg-pink-500/5"], [class~="bg-pink-500/10"],
+  [class~="bg-orange-500/5"], [class~="bg-orange-500/10"],
+  [class~="bg-cyan-500/5"], [class~="bg-cyan-500/10"],
+  [class~="bg-indigo-500/5"], [class~="bg-indigo-500/10"]
+):not(button):not(input):not(select):not(textarea):not(option) {
+  background-color: rgba(17, 24, 39, 0.78) !important;
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+}
+
 /* W.skin-hide-logo (2026-05-28): bei aktivem Skin wird das App-Logo
  * ausgeblendet, weil das Cubetracker-Branding bereits ins Background-
  * Bild integriert ist (unten links). Doppelung waere visuell unsauber.
