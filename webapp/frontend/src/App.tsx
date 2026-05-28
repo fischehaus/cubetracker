@@ -192,6 +192,17 @@ function PatchNotesModal({ onClose }: { onClose: () => void }) {
 // aktiviert es und es bleibt persistent.
 const FOCUS_MODE_STORAGE_KEY = "cubetracker.timer_focus_mode";
 
+// W.timer-display-size (2026-05-28): Reihenfolge fuer die A−/A+-
+// Rotation im Fokus-Modus. Settings.timer_font_size ist eine Stufe,
+// hier rotieren wir durch sm → md → lg → xl → xxl.
+const TIMER_FONT_SIZE_ORDER: ("sm" | "md" | "lg" | "xl" | "xxl")[] = [
+  "sm",
+  "md",
+  "lg",
+  "xl",
+  "xxl",
+];
+
 function TimerTab({
   timerCubeType,
   setTimerCubeType,
@@ -242,8 +253,23 @@ function TimerTab({
 
   // Settings nur für TouchPad-Sichtbarkeit — Tap-Pad nur im Spacebar-Modus,
   // sonst gibt es nichts zu „triggern" (Text-Mode = Soft-Tastatur).
-  const [settings] = useAppSettings();
+  // W.timer-display-size: setSettings hochgezogen, damit die +/-Buttons
+  // im Fokus-Modus die timer_font_size rotieren koennen.
+  const [settings, setSettings] = useAppSettings();
   const showTouchPad = settings.spacebar_enabled;
+  // Stufen-Rotation fuer A−/A+ im Fokus-Modus.
+  const fontSizeIdx = TIMER_FONT_SIZE_ORDER.indexOf(settings.timer_font_size);
+  const canShrink = fontSizeIdx > 0;
+  const canGrow = fontSizeIdx < TIMER_FONT_SIZE_ORDER.length - 1;
+  function bumpFontSize(direction: "up" | "down") {
+    const nextIdx =
+      direction === "up" ? fontSizeIdx + 1 : fontSizeIdx - 1;
+    if (nextIdx < 0 || nextIdx >= TIMER_FONT_SIZE_ORDER.length) return;
+    setSettings({
+      ...settings,
+      timer_font_size: TIMER_FONT_SIZE_ORDER[nextIdx],
+    });
+  }
 
   // QA-Fix Welle 2 (2026-05-16): hardwareId bei Cube-Wechsel auf null
   // resetten. Sonst Race-Condition: useSuggestHardware in TimerControlsCard
@@ -269,7 +295,43 @@ function TimerTab({
   // TimerControlsCard weg, Layout einspaltig — Scramble + Timer-Display
   // + (TouchPad) bekommen den ganzen Bildschirm.
   const focusToggle = (
-    <div className="flex justify-end mb-2">
+    <div className="flex justify-end mb-2 gap-2 items-center">
+      {/* W.timer-display-size: A−/A+ Buttons rotieren timer_font_size
+          durch 5 Stufen. NUR im Fokus-Modus sichtbar — sonst lebt die
+          Einstellung im Settings-Tab (Verwaltung → Einstellungen). */}
+      {focusMode && (
+        <div className="flex items-center gap-1 mr-1">
+          <span
+            className="text-[11px] text-gray-500 uppercase tracking-wide mr-1"
+            aria-hidden="true"
+          >
+            {t("timerTab.fontSizeLabel")}
+          </span>
+          <button
+            type="button"
+            onClick={() => bumpFontSize("down")}
+            disabled={!canShrink}
+            className="rounded border border-gray-700 bg-gray-800/60 px-2 py-1 text-xs text-gray-300 hover:bg-gray-700/80 hover:text-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            title={t("timerTab.fontSizeShrinkTitle")}
+            aria-label={t("timerTab.fontSizeShrinkAria")}
+          >
+            A−
+          </button>
+          <span className="text-[10px] text-gray-500 min-w-[28px] text-center font-mono">
+            {settings.timer_font_size.toUpperCase()}
+          </span>
+          <button
+            type="button"
+            onClick={() => bumpFontSize("up")}
+            disabled={!canGrow}
+            className="rounded border border-gray-700 bg-gray-800/60 px-2 py-1 text-xs text-gray-300 hover:bg-gray-700/80 hover:text-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            title={t("timerTab.fontSizeGrowTitle")}
+            aria-label={t("timerTab.fontSizeGrowAria")}
+          >
+            A+
+          </button>
+        </div>
+      )}
       <button
         type="button"
         onClick={() => setFocusMode((v) => !v)}

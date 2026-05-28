@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-display-size",
+        released=date(2026, 5, 28),
+        title="🅰 Zeit-Display skalieren im Fokus-Modus + neues App-Logo",
+        highlights=[
+            "Im Fokus-Modus (Timer-Tab) gibt es jetzt zwei A−/A+-"
+            "Buttons direkt neben dem „🎯 Fokus aktivieren\"-Toggle, "
+            "die die Schriftgroesse der Zeitanzeige rotieren. 5 "
+            "Stufen (sm → md → lg → xl → xxl, Default xxl).",
+            "Die Settings sind dieselben wie in Verwaltung → "
+            "Einstellungen → „Schriftgroesse der Zeitanzeige\" — die "
+            "+/-Buttons im Fokus-Modus sind nur der direkte Zugriff "
+            "fuer waehrend einer Solving-Session. Persistiert auch "
+            "ueber den Fokus-Modus hinaus.",
+            "Neues App-Logo: das alte Logo wurde durch eine neue "
+            "Version ersetzt (main_logo.png 1.4 MB → "
+            "public/cubetracker-logo.png). Wird in Login-Page-Card "
+            "sowie im App-Header (rechts vom UserMenu) automatisch "
+            "uebernommen — keine weiteren Code-Aenderungen noetig.",
+            "5 neue i18n-Keys (fontSizeLabel + ShrinkTitle/GrowTitle/"
+            "ShrinkAria/GrowAria) DE/EN symmetrisch.",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.login-trust-block",
         released=date(2026, 5, 28),
         title="🛡 „Was wir mit deinen Daten machen\" auf der LoginPage",

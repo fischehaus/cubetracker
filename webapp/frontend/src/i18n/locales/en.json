@@ -30,7 +30,12 @@
     "focusToggleOn": "🎯 Enable focus",
     "focusToggleOff": "🪟 Full view",
     "focusToggleOnTitle": "Hide the live card, recent solves and sub-cards. Scramble and timer display take the whole screen. Stays active after reload.",
-    "focusToggleOffTitle": "Back to the full view with live card, recent solves and sub-cards."
+    "focusToggleOffTitle": "Back to the full view with live card, recent solves and sub-cards.",
+    "fontSizeLabel": "Aa",
+    "fontSizeShrinkTitle": "Shrink the time display",
+    "fontSizeGrowTitle": "Grow the time display",
+    "fontSizeShrinkAria": "Shrink time display",
+    "fontSizeGrowAria": "Grow time display"
   },
   "trustBlock": {
     "headerTitle": "What we do with your data",

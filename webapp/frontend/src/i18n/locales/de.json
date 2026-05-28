@@ -30,7 +30,12 @@
     "focusToggleOn": "🎯 Fokus aktivieren",
     "focusToggleOff": "🪟 Volle Ansicht",
     "focusToggleOnTitle": "Live + Letzte Solves + Sub-Cards ausblenden. Scramble + Timer-Display nehmen den ganzen Bildschirm ein. Bleibt auch nach Reload aktiv.",
-    "focusToggleOffTitle": "Zurück zur vollen Ansicht mit Live-Karte, letzten Solves und Sub-Cards."
+    "focusToggleOffTitle": "Zurück zur vollen Ansicht mit Live-Karte, letzten Solves und Sub-Cards.",
+    "fontSizeLabel": "Aa",
+    "fontSizeShrinkTitle": "Zeitanzeige kleiner",
+    "fontSizeGrowTitle": "Zeitanzeige größer",
+    "fontSizeShrinkAria": "Zeitanzeige verkleinern",
+    "fontSizeGrowAria": "Zeitanzeige vergrößern"
   },
   "trustBlock": {
     "headerTitle": "Was wir mit deinen Daten machen",
