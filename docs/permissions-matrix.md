@@ -703,6 +703,28 @@ User-Browser            Backend                Admin-Browser
 Art. 6(1)(f) als Rechtsgrundlage für das einzig technisch nötige
 Refresh-Cookie).
 
+### Web-Bluetooth (Smart-Cube-Pairing) — kein Server-Roundtrip
+
+Phase W.gan-cube-mvp (2026-05-28) integriert die NPM-Library
+`gan-web-bluetooth` für die Verbindung zu GAN-Smart-Cubes (GAN i4 et al.).
+
+| Aspekt | Wer sieht / wo lebt das Datum |
+|---|---|
+| **Cube-Pairing** | Browser-native Permission-Prompt. **Kein Server**, kein Drittanbieter-Endpoint angesteuert. |
+| **Geräte-Name + MAC** | Nur im Browser-Speicher des User-Tabs. Wird **nicht** ans Backend gesendet. |
+| **Move-Events (z.B. "R", "U'")** | Frontend-State (`useSmartCube.lastMove`, `moveCount`). Werden in dieser Welle **nicht** persistiert. |
+| **Battery-Level** | Nur Anzeige im SmartCubeConnect-Block, kein DB-Schreib-Pfad. |
+| **Solve-Time** (kommt in W.gan-cube-auto-time) | Geht wie bei manueller Eingabe ans Backend `POST /solves`. Cube ist nur ein Eingabe-Pfad, kein neuer Datenkanal. |
+| **Library-Code** | Open-Source (afedotov/gan-web-bluetooth, MIT). Per Tree-Shaking-Audit: kein `fetch`/`XMLHttpRequest`/`navigator.sendBeacon`/`window.location`-Aufruf in der Library. Pure BLE-Wrapper. |
+| **Browser-Constraint** | Web-Bluetooth-API nur in Chrome / Edge / Brave / Opera (Desktop + Android). Safari (iOS/macOS) + Firefox haben kein Web-Bluetooth → SmartCubeConnect zeigt Hinweis statt Connect-Button. |
+
+**Trust-Block-Kompatibilität:** die Aussage „Kein Tracking, keine
+Drittanbieter-Cookies" auf der LoginPage bleibt korrekt — die
+Library macht keinen Server-Call und installiert keine Cookies.
+Der Browser fragt den User explizit nach Bluetooth-Erlaubnis pro
+Pairing-Vorgang; nach Tab-Close oder Disconnect ist die Verbindung
+weg.
+
 ---
 
 ## 9. Bekannte Privacy-by-Design-Spots

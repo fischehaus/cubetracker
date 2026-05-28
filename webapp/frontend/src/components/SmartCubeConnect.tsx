@@ -77,7 +77,13 @@ export function SmartCubeConnect({
           </button>
         </div>
         {state.lastMove !== null && (
-          <div className="text-xs text-emerald-300/80 font-mono">
+          // W.gan-cube-mvp-qa (NICE): aria-live="off" explizit, damit
+          // Screen-Reader nicht jeden Move ansagt (speedcuben ist 50+
+          // Moves pro Solve — das waere extrem aufdringlich).
+          <div
+            className="text-xs text-emerald-300/80 font-mono"
+            aria-live="off"
+          >
             {t("smartCube.lastMoveLabel")}{" "}
             <span className="text-emerald-100 font-semibold">
               {state.lastMove}

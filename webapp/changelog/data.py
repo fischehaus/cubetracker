@@ -44,6 +44,53 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-mvp-qa",
+        released=date(2026, 5, 28),
+        title="QA-Hotfix nach W.gan-cube-mvp (2 KRITISCH + 3 SOLLTE + 2 NICE)",
+        highlights=[
+            "QA-Sub-Agent-Review der Smart-Cube-Welle: 2 KRITISCH + 3 "
+            "SOLLTE + 2 NICE + 4 POSITIV. Verdikt: NICHT safe to "
+            "deploy as-is. Alle 7 Findings sofort gefixt.",
+            "**KRITISCH 1** (DISCONNECT-Event): useSmartCube-Hook hatte "
+            "keinen Handler fuer das DISCONNECT-Event der Library. Wenn "
+            "der Cube ausser Reichweite ging oder Akku leer war, blieb "
+            "der gruene Pulse-Dot dauerhaft + alle weiteren Move-Events "
+            "kamen nie an. Fix: case in events$-Handler ergaenzt, "
+            "setState zurueck zu disconnected+error.",
+            "**KRITISCH 2** (rxjs doppelt installiert): rxjs war als "
+            "top-level dependency in package.json, obwohl gan-web-"
+            "bluetooth rxjs bereits als eigene Dep mitbringt. Top-"
+            "level-Eintrag entfernt, Lock-File regeneriert. rxjs lebt "
+            "jetzt nur als transitive Dep der Library.",
+            "**SOLLTE** (User-Cancel als Fehler): Browser-Pairing-"
+            "Dialog mit X schliessen wirft DOMException NotFoundError. "
+            "Vorher: rote Fehlerbox mit Browser-internem Text. Jetzt: "
+            "wird erkannt + still zurueck zum disconnected-State, "
+            "keine Fehlermeldung.",
+            "**SOLLTE** (Race-Condition double-connect): wenn der User "
+            "schnell zweimal Connect klickt, lief connectGanCube() "
+            "parallel. Fix: Guard am Anfang von connect() — wenn "
+            "status connecting/connected → no-op.",
+            "**SOLLTE** (permissions-matrix.md): neuer Bluetooth-"
+            "Abschnitt in Section 8 (Anti-Tracking-Audit), der "
+            "dokumentiert: Library macht keinen Server-Call, Cube-"
+            "Daten leben nur im Browser-Tab, kein Drittanbieter-"
+            "Endpoint, MIT-lizenziert + tree-shaking-auditiert.",
+            "**NICE** (aria-live=off auf lastMove): Speedcuber haben "
+            "50+ Moves pro Solve — Screen-Reader wuerde sonst jede "
+            "Drehung ansagen. aria-live=off explizit.",
+            "**NICE** (void disconnect im cleanup): Promise.catch um "
+            "unbehandelte BLE-Disconnect-Rejections beim Unmount.",
+            "POSITIV-Findings vom QA: Dynamic-Import korrekt als "
+            "eigener Async-Chunk (26kb gz), Wrapper-Pattern in "
+            "TimerControlsCard verhindert Card-Re-Render bei Move-"
+            "Events, BigTimerInput-Grenze (kein Auto-Time-Code) "
+            "sauber eingehalten, Lock-File-Hotfix richtig als "
+            "separater Commit gefuehrt.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-mvp-deps",
         released=date(2026, 5, 28),
         title="Build-Hotfix nach W.gan-cube-mvp (Lock-File + Versionen)",
