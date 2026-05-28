@@ -56,11 +56,19 @@ Thumbs.db
 docs/*.pdf
 dpa-*.pdf
 
-# Skin-Quellen (W.skin-cyberpunk-mvp, 2026-05-28). PNG-Pakete + die
-# vom User generierten ZIPs sind gross (16+ MB pro Pack) und werden
-# per scripts/convert-skins.cjs in WebPs unter public/skins/ ueberfuehrt.
-# Die WebPs sind klein (~70 KB) und gehoeren ins Repo, die PNG-Quellen
-# nicht. Originale bleiben lokal in frontend/src/assets/.
+# Skin-Quellen (W.skin-cyberpunk-mvp + folgende, 2026-05-28). Quell-Pakete
+# (PNG/JPG, 16+ MB pro Pack) werden per scripts/convert-skins.cjs in
+# WebPs unter public/skins/ ueberfuehrt. WebPs sind klein (~100-250 KB)
+# und gehoeren ins Repo, die Quellen nicht. Originale bleiben lokal
+# in frontend/src/assets/.
 *_wallpaper_pack.zip
+*_partymodus_pack.zip
 *_wallpaper_appsafe_*.png
+*_appsafe_*.png
+*_appsafe_*.jpg
+*_appsafe_*.jpeg
+*_maxenergy_*.png
+*_maxenergy_*.jpg
+*_maxenergy_*.jpeg
 *_wallpaper_original_generated.png
+preview_contact_sheet.*

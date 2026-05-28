@@ -49,6 +49,11 @@ export function BackgroundLayer() {
   const url = resolveSkinImage(skin, viewport.width, viewport.height);
   if (!url) return null;
 
+  // Per-Skin position (siehe lib/skins.ts SkinBackgroundPosition).
+  // Default "center bottom" passt zu den meisten Hero-Bildern mit Cube
+  // am unteren Rand.
+  const backgroundPosition = skin.position ?? "center bottom";
+
   return (
     <div
       aria-hidden="true"
@@ -56,6 +61,7 @@ export function BackgroundLayer() {
       className="cubetracker-background-layer"
       style={{
         backgroundImage: `url("${url}")`,
+        backgroundPosition,
       }}
     />
   );

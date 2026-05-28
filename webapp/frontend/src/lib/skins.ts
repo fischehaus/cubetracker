@@ -38,6 +38,27 @@ export interface SkinResolution {
   aspectRatio?: "32:9" | "9:16";
 }
 
+/**
+ * CSS `background-position`-Wert pro Skin. Skin-Designer bestimmt damit
+ * wo das Bild verankert wird, wenn cover-Skalierung beschneidet.
+ *
+ *   "center bottom" — Cube/Logo unten links verankert (Cyberpunk-Layout)
+ *   "center center" — gleichmaessig oben + unten beschnitten (Legendary —
+ *     Cube ist hier mittig-links, Logo unten links; center center hat
+ *     die beste Balance fuer beide Elemente)
+ *   "center top"    — fuer Skins wo wichtige Visuals oben liegen
+ *
+ * Default ist "center bottom" — passt zu den meisten Speedcubing-Cube-
+ * Hero-Bildern wo der Cube am unteren Bildrand sitzt.
+ */
+export type SkinBackgroundPosition =
+  | "center bottom"
+  | "center center"
+  | "center top"
+  | "left bottom"
+  | "left center"
+  | "left top";
+
 export interface Skin {
   /** Stable ID, in localStorage gespeichert. */
   id: string;
@@ -52,6 +73,11 @@ export interface Skin {
   preview: string | null;
   /** Liste aller verfuegbaren Resolutions. Leer bei `none`. */
   resolutions: SkinResolution[];
+  /**
+   * CSS background-position. Optional — Default "center bottom".
+   * Wird vom BackgroundLayer als inline-style gesetzt.
+   */
+  position?: SkinBackgroundPosition;
 }
 
 /**
@@ -75,6 +101,8 @@ export const SKIN_REGISTRY: Skin[] = [
     labelKey: "skin.cyberpunkNeon.label",
     descriptionKey: "skin.cyberpunkNeon.description",
     preview: "/skins/cyberpunk-neon/preview.webp",
+    // Cube + Logo sind unten links im Bild -> bottom-position verankert sie
+    position: "center bottom",
     resolutions: [
       // Aufsteigende width, der Resolver picked die kleinste >= VP-Breite.
       // Superwide separat, wird per AR-Check bevorzugt.
@@ -85,6 +113,27 @@ export const SKIN_REGISTRY: Skin[] = [
       {
         width: 3840,
         src: "/skins/cyberpunk-neon/3840x1080-super.webp",
+        aspectRatio: "32:9",
+      },
+    ],
+  },
+  {
+    id: "legendary-partymodus",
+    labelKey: "skin.legendaryPartymodus.label",
+    descriptionKey: "skin.legendaryPartymodus.description",
+    preview: "/skins/legendary-partymodus/preview.webp",
+    // Cube ist mittig-links, Logo unten links -> center center hat die
+    // beste Balance bei verschiedenen Aspect-Ratios (Cube + Logo
+    // bleiben beide moeglichst sichtbar).
+    position: "center center",
+    resolutions: [
+      { width: 1920, src: "/skins/legendary-partymodus/1920x1080.webp" },
+      { width: 2560, src: "/skins/legendary-partymodus/2560x1440.webp" },
+      { width: 3440, src: "/skins/legendary-partymodus/3440x1440.webp" },
+      { width: 3840, src: "/skins/legendary-partymodus/3840x1600.webp" },
+      {
+        width: 3840,
+        src: "/skins/legendary-partymodus/3840x1080-super.webp",
         aspectRatio: "32:9",
       },
     ],

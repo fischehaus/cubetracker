@@ -1507,6 +1507,10 @@
     "cyberpunkNeon": {
       "label": "Cyberpunk Neon",
       "description": "Cube + Neon-Glow in Lila/Blau"
+    },
+    "legendaryPartymodus": {
+      "label": "Legendary Partymodus",
+      "description": "Laser, Konfetti, Energy-Lines — wild aber lesbar"
     }
   },
   "cardStyle": {

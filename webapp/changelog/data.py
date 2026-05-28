@@ -44,6 +44,37 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-legendary-partymode",
+        released=date(2026, 5, 28),
+        title="🎉 Zweiter Skin: Legendary Partymodus",
+        highlights=[
+            "Zweiter Background-Skin live: **„Legendary Partymodus\"** — "
+            "Cube mit Laser-Linien, Konfetti-Partikeln, Energy-Lines + "
+            "warmen Festival-Akzenten. Lila/Pink/Cyan-Palette mit "
+            "ruhiger dunkler Mitte für lesbare Cards.",
+            "**Auswählbar im selben Picker** unter Verwaltung → "
+            "Einstellungen → 🎨 Aussehen. Wechsel zwischen Cyberpunk "
+            "Neon und Legendary Partymodus per Klick.",
+            "**Per-Skin Background-Position**: Skin-Designer entscheidet "
+            "wo das Bild verankert wird. Cyberpunk Neon = `center "
+            "bottom` (Cube + Logo unten), Legendary = `center center` "
+            "(Cube mittig-links, Logo unten — Balance für beide).",
+            "**Auflösungen**: 1920×1080, 2560×1440, 3440×1440, "
+            "3840×1600, 3840×1080 (DualUp). System picked automatisch "
+            "die beste für deinen Monitor.",
+            "**Asset-Pipeline erweitert**: Convert-Script akzeptiert "
+            "jetzt PNG + JPG + JPEG, plus die Suffix-Varianten "
+            "`_standard`, `_ultrawide`, `_superwide` aus dem neuen "
+            "Pack-Format. Weitere Skin-Pakete können in beiden "
+            "Conventions geliefert werden.",
+            "**Bildgrößen**: 106-256 KB pro WebP. Total ~900 KB neue "
+            "Assets im Bundle (on-demand geladen wenn Skin aktiv).",
+            "Tipp: Der „MaxEnergy\"-Variante aus dem Skin-Pack ist "
+            "für Splash-Screens / Achievement-Moments gedacht — wird "
+            "in einer späteren Welle nachgereicht.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-hide-logo",
         released=date(2026, 5, 28),
         title="🪄 App-Logo verbergen wenn Hintergrund aktiv",

@@ -76,6 +76,9 @@ body.skin-active {
   z-index: -1;
   pointer-events: none;
   background-size: cover;
+  /* background-position kommt als inline-style vom BackgroundLayer-Component
+   * (per-Skin konfigurierbar via Skin.position). Fallback hier ist "center
+   * bottom", passt zu den meisten Hero-Bildern mit Cube am unteren Rand. */
   background-position: center bottom;
   background-repeat: no-repeat;
   background-color: var(--bg); /* Fallback waehrend Bild laedt */

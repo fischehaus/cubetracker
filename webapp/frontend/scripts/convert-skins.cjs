@@ -45,22 +45,44 @@ if (!skinId || !srcDir) {
 const outDir = path.resolve(__dirname, "..", "public", "skins", skinId);
 fs.mkdirSync(outDir, { recursive: true });
 
+// Reihenfolge wichtig: superwide-Variante zuerst, sonst matcht
+// `3840x1080` die superwide-Datei auch. Suffix-Toleranz:
+//   - Quellen vom 1. Pack (cyberpunk-neon): `_appsafe_<W>x<H>.png`
+//   - Quellen vom 2. Pack (legendary):
+//     `_appsafe_<W>x<H>_standard.jpg`
+//     `_appsafe_<W>x<H>_ultrawide.jpg`
+//     `_appsafe_<W>x<H>_superwide.jpg`
+// Plus akzeptierte Extensions: .png, .jpg, .jpeg (case-insensitive).
 const MAPPING = [
-  { match: /_appsafe_1920x1080\.png$/i, out: "1920x1080.webp" },
-  { match: /_appsafe_2560x1440\.png$/i, out: "2560x1440.webp" },
-  { match: /_appsafe_3440x1440\.png$/i, out: "3440x1440.webp" },
-  { match: /_appsafe_3840x1600\.png$/i, out: "3840x1600.webp" },
   {
-    match: /_appsafe_3840x1080_superwide\.png$/i,
+    match: /_appsafe_3840x1080_superwide(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
     out: "3840x1080-super.webp",
   },
   {
-    match: /_appsafe_1080x1920_portrait\.png$/i,
+    match: /_appsafe_1920x1080(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    out: "1920x1080.webp",
+  },
+  {
+    match: /_appsafe_2560x1440(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    out: "2560x1440.webp",
+  },
+  {
+    match: /_appsafe_3440x1440(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    out: "3440x1440.webp",
+  },
+  {
+    match: /_appsafe_3840x1600(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
+    out: "3840x1600.webp",
+  },
+  {
+    match: /_appsafe_1080x1920_portrait(_standard|_ultrawide|_superwide)?\.(png|jpe?g)$/i,
     out: "1080x1920-portrait.webp",
   },
 ];
 
-const sourceFiles = fs.readdirSync(srcDir).filter((f) => f.endsWith(".png"));
+const sourceFiles = fs
+  .readdirSync(srcDir)
+  .filter((f) => /\.(png|jpe?g)$/i.test(f));
 
 async function main() {
   let converted = 0;

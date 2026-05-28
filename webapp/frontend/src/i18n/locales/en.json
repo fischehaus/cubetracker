@@ -1507,6 +1507,10 @@
     "cyberpunkNeon": {
       "label": "Cyberpunk Neon",
       "description": "Cube with neon glow in purple/blue"
+    },
+    "legendaryPartymodus": {
+      "label": "Legendary Party Mode",
+      "description": "Lasers, confetti, energy lines — wild but readable"
     }
   },
   "cardStyle": {
