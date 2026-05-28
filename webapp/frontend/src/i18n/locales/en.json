@@ -1493,5 +1493,20 @@
     "badgeDone": "done",
     "readOnlyBadge": "🔍 View only",
     "readOnlyHint": "As a tester you can see the full roadmap including internal items, but you cannot make changes — that stays admin-only."
+  },
+  "skin": {
+    "picker": {
+      "title": "Appearance / Background",
+      "subtitle": "Pick a background for the app. Stored only on this device.",
+      "hint": "Note: backgrounds are a visual extra. The app works equally well with or without one."
+    },
+    "none": {
+      "label": "No background",
+      "description": "Standard dark mode"
+    },
+    "cyberpunkNeon": {
+      "label": "Cyberpunk Neon",
+      "description": "Cube with neon glow in purple/blue"
+    }
   }
 }

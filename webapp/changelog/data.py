@@ -44,6 +44,38 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-cyberpunk-mvp",
+        released=date(2026, 5, 28),
+        title="🎨 Skin-System: Cyberpunk-Neon-Hintergrund",
+        highlights=[
+            "Neues optionales Feature: User können ein Hintergrundbild "
+            "für die App wählen. Default bleibt der klassische dunkle "
+            "Hintergrund — niemand muss aktiv etwas einstellen.",
+            "**Erster Skin: „Cyberpunk Neon\"** — Cube mit Neon-Glow in "
+            "Lila/Blau, Cubetracker-Logo unten links, Linien-Reflexionen. "
+            "Passt zur Lila-Akzentfarbe der App.",
+            "**Resolutions pro Skin**: das System wählt automatisch die "
+            "beste Auflösung für deinen Monitor — 1920×1080 (FullHD), "
+            "2560×1440 (QHD), 3440×1440 (UWQHD), 3840×1600 (5K), "
+            "3840×1080 (DualUp/32:9). Resize-aware, passt sich bei "
+            "Fenster-Verschiebung an.",
+            "**Einstellung**: Verwaltung → Einstellungen → „🎨 Aussehen / "
+            "Hintergrund\". Sofort-Apply, kein Reload. Gespeichert pro "
+            "Gerät (localStorage).",
+            "**Performance**: WebP-Format, ~70-150 KB pro Auflösung. Bei "
+            "„Kein Hintergrund\" wird nichts geladen — kein Overhead für "
+            "User die das Feature nicht nutzen.",
+            "**Format-Konvention** dokumentiert: zukünftige Skin-Pakete "
+            "folgen dem `{skin-id}_wallpaper_appsafe_<width>x<height>.png` "
+            "Schema; Konverter-Script `npm run skins:build` produziert "
+            "die WebP-Outputs in einem Schritt.",
+            "**Hinweis**: Cards bleiben in dieser Welle solid (Hintergrund "
+            "nur am Rand sichtbar). Die transparente Glassmorphism-"
+            "Variante kommt in einer Folge-Welle, wenn die MVP-Variante "
+            "im Live-Test sauber aussieht.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-auto-time-v4",
         released=date(2026, 5, 28),
         title="🔍 Smart-Cube v4: Detaillierter FACELETS-Log für Diagnose",

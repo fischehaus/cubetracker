@@ -1493,5 +1493,20 @@
     "badgeDone": "erledigt",
     "readOnlyBadge": "🔍 Nur Ansicht",
     "readOnlyHint": "Als Tester siehst du die komplette Roadmap inkl. interner Items, kannst aber keine Änderungen vornehmen — das bleibt Admins vorbehalten."
+  },
+  "skin": {
+    "picker": {
+      "title": "Aussehen / Hintergrund",
+      "subtitle": "Wähle einen Hintergrund für die App. Wird nur auf diesem Gerät gespeichert.",
+      "hint": "Hinweis: Hintergrundbilder sind als optisches Extra gedacht. Die App funktioniert mit oder ohne Bild gleich gut."
+    },
+    "none": {
+      "label": "Kein Hintergrund",
+      "description": "Standard-Dunkelmodus"
+    },
+    "cyberpunkNeon": {
+      "label": "Cyberpunk Neon",
+      "description": "Cube + Neon-Glow in Lila/Blau"
+    }
   }
 }

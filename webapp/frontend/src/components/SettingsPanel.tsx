@@ -5,6 +5,7 @@
 import { useTranslation } from "react-i18next";
 import { AccountSettingsPanel } from "./AccountSettingsPanel";
 import { InfoButton } from "./InfoButton";
+import { SkinPickerCard } from "./SkinPickerCard";
 import {
   FONT_SIZE_LABELS,
   SETTINGS_DEFAULTS,
@@ -51,6 +52,13 @@ export function SettingsPanel() {
     <div className="space-y-4">
       {/* W.8: Account-Settings (Profil, Passwort, Email, Account-Löschen) */}
       <AccountSettingsPanel />
+
+      {/* W.skin-cyberpunk-mvp: Skin-Picker (Background-Bilder).
+       * Geräte-spezifisch via localStorage — analog zu den anderen
+       * App-Settings darunter. Bewusst oben unter Account einsortiert
+       * weil "Aussehen" stark sichtbar ist und unter Setup/Style-Themen
+       * gehört, nicht unter Timer-Verhalten. */}
+      <SkinPickerCard />
 
       {/* App-Settings (Spacebar, Drills, Font-Size) — Geräte-spezifisch */}
       <Section

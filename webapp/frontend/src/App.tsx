@@ -22,6 +22,7 @@ import { AchievementToaster } from "./components/AchievementToaster";
 import { ActivityCard } from "./components/ActivityCard";
 import { ActivityChart } from "./components/ActivityChart";
 import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
+import { BackgroundLayer } from "./components/BackgroundLayer";
 import { BigTimerInput } from "./components/BigTimerInput";
 import { ChallengeCompletionToaster } from "./components/ChallengeCompletionToaster";
 import { FeedbackUnreadToaster } from "./components/FeedbackUnreadToaster";
@@ -942,6 +943,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        {/* W.skin-cyberpunk-mvp: Background-Skin-Layer hinter App-Content.
+         * Liegt VOR AuthGuard damit auch die LoginPage den Skin zeigt
+         * (Wow-Moment fuer neue User die sich gerade registrieren).
+         * Skin "none" (Default) rendert null — keine Kosten. */}
+        <BackgroundLayer />
         <AuthGuard />
       </AuthProvider>
     </QueryClientProvider>

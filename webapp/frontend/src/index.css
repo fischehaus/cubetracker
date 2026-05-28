@@ -52,3 +52,31 @@ body {
 *::-webkit-scrollbar-corner {
   background: rgba(31, 41, 55, 0.4);
 }
+
+/* W.skin-cyberpunk-mvp (2026-05-28): Background-Skin-System.
+ *
+ * BackgroundLayer ist ein fixed-position Div hinter dem App-Content.
+ * Nutzt background-size: cover + position center bottom — Cube + Logo
+ * der "appsafe"-PNGs liegen unten links, bleiben so auf jedem Aspect-
+ * Ratio sichtbar (auch wenn ein Teil oben beschnitten wird).
+ *
+ * body.skin-active ueberschreibt den Body-Background mit transparent
+ * — sonst wuerde der solid #16171d das Skin-Bild verdecken.
+ *
+ * Glassmorphism (= halbtransparente Cards) kommt in W.skin-glassmorphism
+ * als separater Schritt; hier bleibt der Card-Stil unveraendert.
+ */
+body.skin-active {
+  background: transparent;
+}
+
+.cubetracker-background-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-color: var(--bg); /* Fallback waehrend Bild laedt */
+}
