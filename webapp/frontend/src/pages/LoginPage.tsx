@@ -8,6 +8,7 @@ import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
 import { FeatureListPanel } from "../components/FeatureListPanel";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
+import { TrustBlock } from "../components/TrustBlock";
 import { useFeatures } from "../lib/features-data";
 
 type Mode = "login" | "register" | "forgot";
@@ -199,6 +200,12 @@ export function LoginPage() {
               ))}
             </ul>
           </div>
+
+          {/* W.login-trust-block: Datensicherheits-/Privacy-Cards
+              direkt unter dem Hero, BEVOR der FeaturesListPanel — der
+              User soll Vertrauen aufbauen koennen bevor er die Feature-
+              Liste durchscrollt. */}
+          <TrustBlock />
 
           <FeatureListPanel compact />
         </aside>

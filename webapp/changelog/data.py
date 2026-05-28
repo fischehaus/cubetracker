@@ -44,6 +44,50 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.login-trust-block",
+        released=date(2026, 5, 28),
+        title="🛡 „Was wir mit deinen Daten machen\" auf der LoginPage",
+        highlights=[
+            "User-Wunsch: ein Block auf der LoginPage, der Misstrauen "
+            "abbaut bevor sich jemand registriert. Tonalitaet: "
+            "sachlich-praezise, kein Werbe-Sprech — Zielgruppe sind "
+            "speedcubende Power-User, die explizit fragen werden „was "
+            "passiert mit meinen Daten\".",
+            "Neue Komponente TrustBlock im aside der LoginPage zwischen "
+            "Hero-Card und FeaturesListPanel. 5 Karten in priorisierter "
+            "Conversion-Reihenfolge:",
+            "**🇪🇺 Deine Daten bleiben in Europa** — Hetzner Falkenstein, "
+            "Let's-Encrypt-TLS, taegliche Backups.",
+            "**🚫 Kein Tracking. Punkt.** — kein GA / Mixpanel / Werbe-"
+            "Cookie. Genau 1 funktionales Login-Cookie (HttpOnly + "
+            "Secure). Quellcode offen auf GitHub.",
+            "**👤 Du waehlst, wie du heisst** — Display-Name frei, "
+            "Pseudonym OK, E-Mail nur fuer Login + Reset, WCA-ID "
+            "optional (Stats kommen live von der WCA-API, wir "
+            "speichern nur die ID).",
+            "**👥 Andere User sehen nur, was du teilst** — anonyme "
+            "Besucher null. Andere User null solange ihr nicht "
+            "befreundet seid. Freunde sehen display_name + "
+            "oeffentliche PRs + Hardware. E-Mail erst bei "
+            "beidseitig-accepted Friendship.",
+            "**🛡 Was Admin sieht — und was nicht** — sichtbar: "
+            "E-Mail + display_name + grobe Stats fuer Support. NICHT "
+            "sichtbar (mit ⓘ-Popover ausfuehrlich): Plaintext-"
+            "Passwoerter (nur bcrypt-Hash), Backups anderer User, "
+            "WCA-Profil-Live-Daten, Drittanbieter-IDs.",
+            "Footer mit Links zur Datenschutzerklaerung + GitHub-Repo "
+            "fuer User die die Behauptungen pruefen wollen.",
+            "Faktenbasis: docs/permissions-matrix.md (in selber "
+            "Session vom Sub-Agent erstellt). Bei jeder neuen "
+            "Privacy-/Tracking-Aenderung muss Matrix re-validiert + "
+            "TrustBlock-Texte ggf. angepasst werden — sonst leakt "
+            "eine veraltete Marketing-Aussage.",
+            "27 neue i18n-Keys DE/EN symmetrisch unter neuem "
+            "trustBlock-Namespace.",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.tester-readonly-roadmap-qa",
         released=date(2026, 5, 28),
         title="QA-Hotfix nach Tester-Readonly-Roadmap (2 Findings)",
