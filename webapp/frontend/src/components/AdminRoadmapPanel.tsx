@@ -12,6 +12,13 @@
 // Cross-Admin: alle Admins sehen + bearbeiten alle Items (Backend hat
 // keinen per-User-Filter, siehe webapp/api/admin.py:create/update/delete_
 // roadmap_item).
+//
+// **W.tester-readonly-roadmap (2026-05-28):** `readOnly`-Prop hinzugefügt.
+// Wenn true: Tester-Modus, alle CRUD-Aktionen (+ Neu / Bearbeiten / Löschen
+// / Quick-Toggles) werden ausgeblendet — Filter + Liste mit allen Details
+// (inkl. internal-Badge) bleiben sichtbar. Backend-seitig sind die
+// Roadmap-CRUD-Endpoints zurück auf require_admin (kein API-Zugang fuer
+// Tester — Defense-in-Depth).
 
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,7 +40,7 @@ const PHASE_IDS = ROADMAP_PHASES_META.map((p) => p.id);
 type StatusFilter = "all" | RoadmapStatus;
 type VisibilityFilter = "all" | "public" | "internal";
 
-export function AdminRoadmapPanel() {
+export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } = {}) {
   const { t } = useTranslation();
   const { data, isLoading, error } = useRoadmap();
   const createMut = useAdminCreateRoadmapItem();
@@ -108,12 +115,22 @@ export function AdminRoadmapPanel() {
             <p>{t("adminRoadmap.infoBody")}</p>
           </InfoButton>
         </div>
-        <button
-          onClick={() => setShowCreate((v) => !v)}
-          className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"
-        >
-          {showCreate ? t("adminRoadmap.addNewCancel") : t("adminRoadmap.addNewButton")}
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => setShowCreate((v) => !v)}
+            className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"
+          >
+            {showCreate ? t("adminRoadmap.addNewCancel") : t("adminRoadmap.addNewButton")}
+          </button>
+        )}
+        {readOnly && (
+          <span
+            className="text-xs rounded border border-amber-500/40 bg-amber-500/10 text-amber-200 px-2 py-1"
+            title={t("adminRoadmap.readOnlyHint")}
+          >
+            {t("adminRoadmap.readOnlyBadge")}
+          </span>
+        )}
       </div>
 
       {/* Filter-Bar */}
@@ -159,8 +176,8 @@ export function AdminRoadmapPanel() {
         </label>
       </div>
 
-      {/* Create-Form */}
-      {showCreate && (
+      {/* Create-Form (admin-only) */}
+      {!readOnly && showCreate && (
         <CreateForm
           onSubmit={(input) =>
             createMut.mutate(input, { onSuccess: () => setShowCreate(false) })
@@ -199,7 +216,8 @@ export function AdminRoadmapPanel() {
                       // Server-Update).
                       key={`${item.id}-${editingId === item.id ? "edit" : "view"}`}
                       item={item}
-                      isEditing={editingId === item.id}
+                      readOnly={readOnly}
+                      isEditing={!readOnly && editingId === item.id}
                       onStartEdit={() => setEditingId(item.id)}
                       onCancelEdit={() => setEditingId(null)}
                       onSave={(patch) =>
@@ -412,6 +430,7 @@ function CreateForm({
 
 function ItemRow({
   item,
+  readOnly,
   isEditing,
   onStartEdit,
   onCancelEdit,
@@ -424,6 +443,7 @@ function ItemRow({
   quickBusy,
 }: {
   item: RoadmapItem;
+  readOnly: boolean;
   isEditing: boolean;
   onStartEdit: () => void;
   onCancelEdit: () => void;
@@ -477,62 +497,64 @@ function ItemRow({
               </span>
             )}
           </div>
-          <div className="flex gap-2 flex-wrap">
-            {/* Quick-Toggle: Visibility (public/internal). 1-Klick-Toggle,
-                kein Confirm — Klick zurück macht es rückgängig. */}
-            <button
-              onClick={onToggleInternal}
-              disabled={quickBusy}
-              className={`text-xs rounded px-2 py-1 disabled:opacity-50 ${
-                item.internal
-                  ? "bg-amber-700/30 text-amber-200 hover:bg-emerald-700/40 hover:text-emerald-200"
-                  : "bg-emerald-700/30 text-emerald-200 hover:bg-amber-700/40 hover:text-amber-200"
-              }`}
-              title={
-                item.internal
-                  ? t("adminRoadmap.quickMakePublicTitle")
-                  : t("adminRoadmap.quickMakeInternalTitle")
-              }
-            >
-              {item.internal
-                ? t("adminRoadmap.quickMakePublic")
-                : t("adminRoadmap.quickMakeInternal")}
-            </button>
-            {/* Quick-Toggle: Status (active/done). */}
-            <button
-              onClick={onToggleStatus}
-              disabled={quickBusy}
-              className={`text-xs rounded px-2 py-1 disabled:opacity-50 ${
-                item.status === "done"
-                  ? "bg-gray-700 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100"
-                  : "bg-gray-700 text-gray-200 hover:bg-emerald-700/40 hover:text-emerald-200"
-              }`}
-              title={
-                item.status === "done"
-                  ? t("adminRoadmap.quickMakeActiveTitle")
-                  : t("adminRoadmap.quickMakeDoneTitle")
-              }
-            >
-              {item.status === "done"
-                ? t("adminRoadmap.quickMakeActive")
-                : t("adminRoadmap.quickMakeDone")}
-            </button>
-            <button
-              onClick={onStartEdit}
-              className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100"
-            >
-              {t("adminRoadmap.editButton")}
-            </button>
-            <button
-              onClick={onDelete}
-              disabled={deleteBusy}
-              className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-200 hover:bg-red-700/40 hover:text-red-200 disabled:opacity-50"
-            >
-              {deleteBusy
-                ? t("adminRoadmap.deleteBusy")
-                : t("adminRoadmap.deleteButton")}
-            </button>
-          </div>
+          {!readOnly && (
+            <div className="flex gap-2 flex-wrap">
+              {/* Quick-Toggle: Visibility (public/internal). 1-Klick-Toggle,
+                  kein Confirm — Klick zurück macht es rückgängig. */}
+              <button
+                onClick={onToggleInternal}
+                disabled={quickBusy}
+                className={`text-xs rounded px-2 py-1 disabled:opacity-50 ${
+                  item.internal
+                    ? "bg-amber-700/30 text-amber-200 hover:bg-emerald-700/40 hover:text-emerald-200"
+                    : "bg-emerald-700/30 text-emerald-200 hover:bg-amber-700/40 hover:text-amber-200"
+                }`}
+                title={
+                  item.internal
+                    ? t("adminRoadmap.quickMakePublicTitle")
+                    : t("adminRoadmap.quickMakeInternalTitle")
+                }
+              >
+                {item.internal
+                  ? t("adminRoadmap.quickMakePublic")
+                  : t("adminRoadmap.quickMakeInternal")}
+              </button>
+              {/* Quick-Toggle: Status (active/done). */}
+              <button
+                onClick={onToggleStatus}
+                disabled={quickBusy}
+                className={`text-xs rounded px-2 py-1 disabled:opacity-50 ${
+                  item.status === "done"
+                    ? "bg-gray-700 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100"
+                    : "bg-gray-700 text-gray-200 hover:bg-emerald-700/40 hover:text-emerald-200"
+                }`}
+                title={
+                  item.status === "done"
+                    ? t("adminRoadmap.quickMakeActiveTitle")
+                    : t("adminRoadmap.quickMakeDoneTitle")
+                }
+              >
+                {item.status === "done"
+                  ? t("adminRoadmap.quickMakeActive")
+                  : t("adminRoadmap.quickMakeDone")}
+              </button>
+              <button
+                onClick={onStartEdit}
+                className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100"
+              >
+                {t("adminRoadmap.editButton")}
+              </button>
+              <button
+                onClick={onDelete}
+                disabled={deleteBusy}
+                className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-200 hover:bg-red-700/40 hover:text-red-200 disabled:opacity-50"
+              >
+                {deleteBusy
+                  ? t("adminRoadmap.deleteBusy")
+                  : t("adminRoadmap.deleteButton")}
+              </button>
+            </div>
+          )}
         </div>
         <div className="text-xs text-gray-400 italic">
           🇬🇧 {item.title_en}

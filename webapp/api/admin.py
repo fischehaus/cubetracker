@@ -830,6 +830,14 @@ def delete_live_test(
 # Items (via Public GET /roadmap mit is_admin=True) und kann jedes
 # Item bearbeiten/löschen. Public-User bekommen internal=True-Items
 # nicht geliefert (Filter im Public-Endpoint /roadmap).
+#
+# W.tester-readonly-roadmap (2026-05-28): CRUD zurück auf require_admin
+# (vorher require_admin_or_tester). Tester sehen weiterhin alle Items
+# inkl. internal=True via Public GET /roadmap mit is_admin_or_tester-
+# Filter — aber NUR lesend. Reine Rolle-Schnitt-Korrektur: Tester
+# soll Roadmap-Status nachvollziehen koennen (= sehen), aber nicht
+# editieren — sonst koennte ein kompromittierter Tester die Roadmap
+# verfaelschen.
 
 
 @router.post("/roadmap/items", status_code=status.HTTP_201_CREATED)
@@ -837,7 +845,7 @@ def delete_live_test(
 def create_roadmap_item(
     request: Request,
     payload: RoadmapItemCreate,
-    admin: User = Depends(require_admin_or_tester),
+    admin: User = Depends(require_admin),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Neues Roadmap-Item anlegen. Wenn sort_order nicht gesetzt: ans
@@ -883,7 +891,7 @@ def update_roadmap_item(
     request: Request,
     item_id: int,
     payload: RoadmapItemUpdate,
-    admin: User = Depends(require_admin_or_tester),
+    admin: User = Depends(require_admin),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Patch: einzelne Felder ändern. Mindestens 1 Feld muss gesetzt sein."""
@@ -923,7 +931,7 @@ def update_roadmap_item(
 def delete_roadmap_item(
     request: Request,
     item_id: int,
-    admin: User = Depends(require_admin_or_tester),
+    admin: User = Depends(require_admin),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Löscht ein Roadmap-Item permanent."""

@@ -1409,6 +1409,8 @@
     "phaseSection": "Phase {{phase}}",
     "badgePublic": "public",
     "badgeInternal": "internal",
-    "badgeDone": "done"
+    "badgeDone": "done",
+    "readOnlyBadge": "🔍 View only",
+    "readOnlyHint": "As a tester you can see the full roadmap including internal items, but you cannot make changes — that stays admin-only."
   }
 }

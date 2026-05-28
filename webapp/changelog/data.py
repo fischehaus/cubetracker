@@ -44,6 +44,34 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.tester-readonly-roadmap",
+        released=date(2026, 5, 28),
+        title="Tester sieht Roadmap nur lesend (Rollen-Schnitt-Korrektur)",
+        highlights=[
+            "User-Wunsch: die Tester-Rolle soll die Roadmap weiterhin "
+            "sehen koennen (inkl. interner Tech-Schuld-Items), aber "
+            "nicht editieren — Live-Tests-Pflege bleibt voll ihre.",
+            "Backend: 3 Roadmap-CRUD-Endpoints in api/admin.py "
+            "(POST/PATCH/DELETE /admin/roadmap/items) zurueck auf "
+            "require_admin (vorher require_admin_or_tester). Public "
+            "GET /api/roadmap bleibt mit is_admin_or_tester-Filter, "
+            "Tester sehen also weiterhin alle Items inkl. internal=True.",
+            "Frontend: AdminRoadmapPanel bekommt `readOnly`-Prop. "
+            "TesterPanel ruft mit readOnly=true — Quick-Toggles, "
+            "Bearbeiten, Loeschen, Neu-Button sind ausgeblendet. "
+            "Filter (Phase/Status/Visibility) bleibt, damit Tester "
+            "auch internal-only-Filter nutzen koennen.",
+            "Defense-in-Depth: selbst wenn ein kompromittierter Tester-"
+            "Client die Backend-Endpoints direkt anspricht, antworten "
+            "die mit 404 (require_admin fail-closed via Fail-closed-"
+            "Pattern aus W.tester-role-db).",
+            "UX-Hinweis im Tester-Modus: amber Badge \"🔍 Nur Ansicht\" "
+            "neben dem Roadmap-Title, mit Tooltip-Erklaerung. Klar "
+            "kommunizierte Beschraenkung statt versteckter Buttons.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-restore-clarify",
         released=date(2026, 5, 28),
         title="Korrektur: W.roadmap-restore war Fehldiagnose, kein Datenverlust",
