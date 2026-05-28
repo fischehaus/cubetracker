@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session as OrmSession
 
 from achievements.definitions import ALL_ACHIEVEMENTS
 from achievements.service import run_achievement_check
-from auth.deps import get_current_user
+from auth.deps import get_current_user, require_not_demo
 from db.database import get_db
 from db.models import Achievement, User
 
@@ -51,7 +51,7 @@ def list_achievements(
 
 @router.post("/recheck")
 def recheck_achievements(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Manueller Voll-Recheck (z.B. nach Import großer Datenmengen)."""

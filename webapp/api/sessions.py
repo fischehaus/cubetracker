@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session as OrmSession
 
-from auth.deps import get_current_user
+from auth.deps import get_current_user, require_not_demo
 from db.database import get_db
 from db.models import Session as DbSession, Solve, User
 from db.schemas import SessionCreate, SessionRead, SessionUpdate
@@ -52,7 +52,7 @@ def list_sessions(
 @router.post("", response_model=SessionRead, status_code=status.HTTP_201_CREATED)
 def create_session(
     payload: SessionCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> DbSession:
     """Neue Session anlegen.
@@ -105,7 +105,7 @@ def get_session(
 def update_session(
     session_id: int,
     payload: SessionUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> DbSession:
     s = _get_or_404(session_id, current_user, db)
@@ -126,7 +126,7 @@ def delete_session(
         "VOR dem Löschen auf diese Ziel-Session umgelegt. Sonst: "
         "session_id wird NULL (FK SET NULL).",
     ),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Session löschen.
@@ -160,7 +160,7 @@ def delete_session(
 def merge_session(
     session_id: int,
     target_id: int = Query(..., description="Ziel-Session, in die gemerged wird"),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> DbSession:
     """Source-Session in target mergen. Beide müssen demselben User gehören."""

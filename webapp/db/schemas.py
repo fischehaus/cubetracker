@@ -49,6 +49,10 @@ class UserRead(BaseModel):
     # Roadmap-Pflege ohne Admin-Vollzugriff. Frontend zeigt Tester-Tab
     # in der VerwaltungTab wenn is_tester && !is_admin.
     is_tester: bool = False
+    # Phase W.demo-user-backend (2026-05-28): Demo-User-Flag. Frontend
+    # zeigt einen "Demo-Modus"-Banner + disabled mutating-Buttons wenn
+    # is_demo=True. Backend blockiert mutations via require_not_demo.
+    is_demo: bool = False
     # Phase W.9: Opt-In für User-Suche per display_name. Frontend zeigt
     # einen Toggle in den Einstellungen.
     is_discoverable: bool = False

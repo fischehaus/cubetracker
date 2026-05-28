@@ -164,6 +164,13 @@ def register(
     Rate-Limit: 5/min per IP (Brute-Force + Spam-Schutz).
     """
     email_lc = payload.email.lower().strip()
+    # W.demo-user-backend (2026-05-28): Demo-Email ist reserviert.
+    # Der Demo-User wird beim Bootstrap geseedet, kein normaler Register.
+    if email_lc == "demo@cubetracker.de":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Diese Email-Adresse ist reserviert.",
+        )
     existing = db.scalar(select(User).where(User.email == email_lc))
     if existing is not None:
         raise HTTPException(
@@ -238,6 +245,14 @@ def login(
         # bcrypt-hash von einem unbenutzten Wert (lazy via cache).
         verify_password(payload.password, _dummy_hash())
         raise invalid_credentials
+    # W.demo-user-backend (2026-05-28): Demo-User kann sich nicht regulaer
+    # einloggen -- nur via /auth/demo-login. Verteidigt gegen den Fall
+    # dass jemand das Passwort-Hash raten koennte (nicht realistisch,
+    # aber Defense-in-Depth -- der Demo-Account darf nicht ueber den
+    # Standard-Flow nutzbar sein, sonst koennte man ihn auch hijacken).
+    if user.is_demo:
+        verify_password(payload.password, _dummy_hash())
+        raise invalid_credentials
     if not verify_password(payload.password, user.hashed_password):
         raise invalid_credentials
 
@@ -263,6 +278,40 @@ def login(
         # Auto-Refresh ist nice-to-have, Login hat absolute Prio.
         pass
 
+    return AccessTokenOnly(access_token=access)
+
+
+@router.post("/demo-login", response_model=AccessTokenOnly)
+@limiter.limit(LOGIN_LIMIT)
+def demo_login(
+    request: Request,
+    response: Response,
+    db: OrmSession = Depends(get_db),
+) -> AccessTokenOnly:
+    """Login als shared Demo-User ohne Passwort.
+
+    Voraussetzung: Demo-User wurde beim Container-Bootstrap angelegt
+    (siehe seeds/demo_user.py). Wenn der User nicht existiert: 503 --
+    der Bootstrap ist dann schiefgegangen, Admin muss nachgucken.
+
+    Demo-User ist read-only. Alle mutating Endpoints sind via
+    require_not_demo blockiert. Frontend disabled Mutations-Buttons
+    zusaetzlich. Damit ist ein shared Account ohne Drift moeglich.
+
+    Rate-Limit: 5/min per IP (analog Login, gegen Spam).
+    """
+    demo = db.scalar(select(User).where(User.email == "demo@cubetracker.de"))
+    if demo is None or not demo.is_active or not demo.is_demo:
+        # Bootstrap ist schiefgegangen -- Admin muss nachgucken.
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Demo-Account ist gerade nicht verfügbar. Bitte später "
+            "noch einmal versuchen oder einen eigenen Account anlegen.",
+        )
+
+    access = create_token(demo.id, "access", token_version=demo.token_version)
+    refresh = create_token(demo.id, "refresh", token_version=demo.token_version)
+    _set_refresh_cookie(response, refresh)
     return AccessTokenOnly(access_token=access)
 
 
@@ -353,7 +402,7 @@ def me(current_user: User = Depends(get_current_user)) -> User:
 @router.patch("/me", response_model=UserRead)
 def update_me(
     payload: UserUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> User:
     """Profil-Update: aktuell nur display_name. Email-Change geht über
@@ -392,7 +441,7 @@ def update_me(
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 def delete_me(
     response: Response,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """DSGVO: User löscht sich selbst inkl. ALLER Daten.
@@ -419,7 +468,7 @@ def reset_solves(
     confirm: str = Query(
         ..., description="Muss exakt 'RESET_SOLVES' sein (Versehen-Schutz)."
     ),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Loescht ALLE Solves des aktuellen Users. Sessions, Hardware,
@@ -443,7 +492,7 @@ def reset_tracking(
     confirm: str = Query(
         ..., description="Muss exakt 'RESET_TRACKING' sein (Versehen-Schutz)."
     ),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Loescht ALLE Tracking-Daten des aktuellen Users (Solves + Sessions +
@@ -481,7 +530,7 @@ def change_password(
     request: Request,
     payload: PasswordChange,
     response: Response,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> Response:
     """Eingeloggter User ändert sein Passwort.
@@ -665,7 +714,7 @@ def verify_email(
 @limiter.limit(VERIFY_RESEND_LIMIT)
 def resend_verification(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> Response:
     """Eingeloggter User fordert eine neue Verify-Mail an (z.B. wenn
@@ -692,7 +741,7 @@ def resend_verification(
 def change_email(
     request: Request,
     payload: EmailChangeRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> Response:
     """User ändert Email. Workflow:

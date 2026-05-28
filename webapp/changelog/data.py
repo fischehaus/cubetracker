@@ -44,6 +44,43 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.demo-user-backend",
+        released=date(2026, 5, 28),
+        title="🎬 Demo-User-Backend: Read-only-Account für „mal reinschauen\"",
+        highlights=[
+            "Backend-Vorbereitung für den Demo-Login (Frontend folgt "
+            "in der nächsten Welle). Ziel: User können die App "
+            "ausprobieren ohne sich zu registrieren — ein gemeinsamer "
+            "read-only Demo-Account mit ~120 Sample-Solves.",
+            "**Demo-User**: `demo@cubetracker.de`, beim Container-"
+            "Bootstrap mit 118 Sample-Solves seeded (3x3=80, 4x4=18, "
+            "OH=12, Pyra=8 über 60 Tage gestreut, realistische Times "
+            "mit leichtem Improve-Trend, ~4% DNF + ~6% +2).",
+            "**Read-only-Enforcement**: alle mutating Endpoints (~34 "
+            "POST/PATCH/DELETE) sind via neuer `require_not_demo`-"
+            "Dependency abgesichert. Demo-User kann nicht: Solves "
+            "anlegen/editieren/löschen, Sessions verändern, Hardware "
+            "ändern, Settings speichern, Backup restoren, Feedback "
+            "senden, Account-Details ändern, Friends-Requests senden.",
+            "**Defense-in-Depth**: Normal-Login via `/auth/login` für "
+            "den Demo-User explizit blockiert (unbrauchbarer Passwort-"
+            "Hash + zusätzlicher `is_demo`-Check). Login nur über den "
+            "neuen Endpoint `POST /api/auth/demo-login` (kein Body, "
+            "kein Passwort).",
+            "**Email reserviert**: Register-Endpoint blockiert "
+            "`demo@cubetracker.de` als reserviert (sonst könnte "
+            "jemand den Account vor dem Bootstrap claimen).",
+            "Schema: `users.is_demo: bool` Spalte. Mini-Migration "
+            "via lifespan `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`. "
+            "Bootstrap idempotent — bei Container-Restart wird der "
+            "Demo-User nicht überschrieben.",
+            "**Nicht User-facing in dieser Welle** — Frontend zeigt "
+            "den Demo-Button noch nicht. Kommt mit `W.login-redesign-"
+            "and-demo` als nächste Welle.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.smart-cube-position-restore",
         released=date(2026, 5, 28),
         title="📍 Smart-Cube-Block wieder unter Timer-Modus",

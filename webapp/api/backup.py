@@ -33,7 +33,7 @@ from fastapi import (
 from sqlalchemy.orm import Session as OrmSession
 
 from achievements.service import run_achievement_check
-from auth.deps import get_current_user
+from auth.deps import get_current_user, require_not_demo
 from auth.rate_limit import limiter
 from backup.service import (
     BackupServiceError,
@@ -94,7 +94,7 @@ async def restore_backup(
     confirm: str | None = Query(
         default=None, description=f"Pflicht wenn mode=replace: '{REPLACE_CONFIRM}'"
     ),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """JSON-Backup zurückspielen — eigene Daten only.
@@ -214,7 +214,7 @@ def get_snapshots(
 @limiter.limit(SNAPSHOT_LIMIT)
 def create_snapshot_endpoint(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Manueller Snapshot eigener Daten. Älteste wird ggf. verworfen."""
@@ -233,7 +233,7 @@ def restore_snapshot_endpoint(
     request: Request,
     snapshot_id: int,
     dry_run: bool = Query(default=False),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Auf einen Snapshot zurückspielen — replace-Mode (bit-genau).
@@ -257,7 +257,7 @@ def restore_snapshot_endpoint(
 def delete_snapshot_endpoint(
     request: Request,
     snapshot_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Eigenen Snapshot löschen."""

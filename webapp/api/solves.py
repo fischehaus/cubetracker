@@ -25,7 +25,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session as OrmSession
 
 from achievements.service import run_achievement_check
-from auth.deps import get_current_user
+from auth.deps import get_current_user, require_not_demo
 from challenges.service import update_today_progress_for_solve
 from db.database import get_db
 from db.models import Hardware, Session as DbSession, Solve, User
@@ -177,7 +177,7 @@ def list_solves(
 def create_solve(
     payload: SolveCreate,
     response: Response,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> Solve:
     """Neuen Solve für aktuellen User anlegen.
@@ -214,7 +214,7 @@ def update_solve(
     solve_id: int,
     payload: SolveUpdate,
     response: Response,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> Solve:
     """Teil-Update eines Solves (alle Felder optional, nur eigene).
@@ -242,7 +242,7 @@ def update_solve(
 def delete_solve(
     solve_id: int,
     response: Response,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_not_demo),
     db: OrmSession = Depends(get_db),
 ) -> None:
     """Solve löschen (nur eigene). Achievements bleiben unlocked
