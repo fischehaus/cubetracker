@@ -124,11 +124,20 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
           </button>
         )}
         {readOnly && (
-          <span
-            className="text-xs rounded border border-amber-500/40 bg-amber-500/10 text-amber-200 px-2 py-1"
-            title={t("adminRoadmap.readOnlyHint")}
-          >
-            {t("adminRoadmap.readOnlyBadge")}
+          // W.tester-readonly-roadmap-qa (QA-NICE → vorgezogen): das
+          // Badge hatte nur `title=` — auf Touch + Screen-Reader stumm.
+          // Jetzt Badge + InfoButton-Pattern (gleiche Mechanik wie alle
+          // anderen ⓘ-Erklaerungen im Projekt).
+          <span className="inline-flex items-center gap-1.5">
+            <span className="text-xs rounded border border-amber-500/40 bg-amber-500/10 text-amber-200 px-2 py-1">
+              {t("adminRoadmap.readOnlyBadge")}
+            </span>
+            <InfoButton align="right">
+              <p className="font-medium mb-1">
+                {t("adminRoadmap.readOnlyBadge")}
+              </p>
+              <p>{t("adminRoadmap.readOnlyHint")}</p>
+            </InfoButton>
           </span>
         )}
       </div>

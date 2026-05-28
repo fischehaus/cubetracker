@@ -107,11 +107,15 @@ def require_admin_or_tester(
     current_user: User = Depends(get_current_user),
 ) -> User:
     """FastAPI-Dependency für Endpoints, die Admin ODER Tester sehen
-    dürfen (Live-Tests + Roadmap-Pflege, Phase W.tester-role-db).
+    dürfen (Phase W.tester-role-db, 2026-05-28).
 
-    Admin > Tester > Normal. Tester sind „lite-Admins" mit Zugriff auf
-    Live-Tests + Roadmap-Items, NICHT aber auf User-Management, Stats,
-    Feedback-Inbox oder Announcements — die bleiben hinter require_admin.
+    Admin > Tester > Normal. Tester sind „lite-Admins" mit Schreib-
+    Zugriff NUR auf Live-Tests (Status setzen, Notizen, GitHub-Issue-
+    Auto-Posting). Roadmap-CRUD ist seit W.tester-readonly-roadmap
+    (2026-05-28) admin-only — Tester sehen die Roadmap nur lesend via
+    Public-Endpoint `/api/roadmap` mit `is_admin_or_tester`-Filter
+    (zeigt internal-Items). User-Management, Stats, Feedback-Inbox
+    und Announcements waren immer admin-only.
 
     Fail-closed wie require_admin: generischer 404 statt 403, kein
     Endpoint-Probing möglich.

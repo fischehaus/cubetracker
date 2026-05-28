@@ -44,6 +44,40 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.tester-readonly-roadmap-qa",
+        released=date(2026, 5, 28),
+        title="QA-Hotfix nach Tester-Readonly-Roadmap (2 Findings)",
+        highlights=[
+            "QA-Sub-Agent-Review der W.tester-readonly-roadmap-Welle: "
+            "0 KRITISCH, 2 SOLLTE, 2 NICE, 4 POSITIV. Verdikt: „safe "
+            "to deploy as-is\". Vorgezogene Fixes:",
+            "**SOLLTE** (Docstring): require_admin_or_tester in api/"
+            "admin.py:106 erwaehnte noch „Live-Tests + Roadmap-Pflege\" "
+            "als Tester-Berechtigung — irrefuehrend nach dem Refactor. "
+            "Aktualisiert: Tester schreibt NUR Live-Tests, sieht "
+            "Roadmap nur lesend. Verhindert dass der naechste "
+            "Entwickler aus Versehen require_admin_or_tester an einen "
+            "CRUD-Endpoint setzt.",
+            "**NICE** (a11y / Touch): das amber „🔍 Nur Ansicht\"-"
+            "Badge im AdminRoadmapPanel hatte nur title= als Tooltip — "
+            "auf Touch-Geraeten + Screen-Readern stumm. Jetzt Badge + "
+            "InfoButton-Pattern (gleiche Mechanik wie alle anderen "
+            "ⓘ-Erklaerungen im Projekt). Demo-relevant fuer Meppel.",
+            "**SOLLTE** (Role-Downgrade-Lag, NICHT gefixt): wenn ein "
+            "Admin waehrend einer aktiven Browser-Session zu Tester "
+            "zurueckgesetzt wird, sieht er die Admin-Version bis zum "
+            "Token-Refresh. Akzeptables Restrisiko — Token-TTL ist "
+            "kurz, betrifft nur den eigenen Browser-Tab, kein Cross-"
+            "User-Issue. Dokumentiert in der Lessons-Archive-Backlog.",
+            "**NICE** (Code-Hygiene, NICHT gefixt): unused Callbacks "
+            "(onStartEdit/onSave/etc.) werden im Tester-Kontext ans "
+            "ItemRow gegeben, dort aber nicht aufgerufen. Kein Bug — "
+            "Refactor zur separaten ReadOnlyItemRow nur sinnvoll wenn "
+            "die Komponente weiter waechst.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-focus-mode",
         released=date(2026, 5, 28),
         title="🎯 Fokus-Modus im Timer-Tab",
