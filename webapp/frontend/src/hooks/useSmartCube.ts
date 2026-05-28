@@ -40,6 +40,10 @@ type GanCubeConnection = {
   disconnect?: () => Promise<void> | void;
   deviceName?: string;
   deviceMAC?: string;
+  // W.gan-cube-auto-time-v3: sendCubeCommand fuer REQUEST_FACELETS-
+  // Polling. Die Library schickt FACELETS-Events nicht automatisch
+  // nach jedem MOVE — wir muessen sie explizit anfragen.
+  sendCubeCommand?: (command: { type: "REQUEST_FACELETS" | "REQUEST_HARDWARE" | "REQUEST_BATTERY" | "REQUEST_RESET" }) => Promise<void> | void;
 };
 
 // QA-Fix W.gan-cube-mvp-qa (KRITISCH 1): DISCONNECT-Event ergaenzt —
@@ -212,6 +216,16 @@ export function useSmartCube() {
       const conn = (await connectGanCube(macProvider)) as GanCubeConnection;
       // eslint-disable-next-line no-console
       console.log("[SmartCube] connected:", conn);
+      // W.gan-cube-auto-time-v3: initial Facelets + Battery + Hardware
+      // anfragen — sonst weiss die App nicht ob der Cube schon solved
+      // ist und die Akku-Anzeige bleibt leer.
+      try {
+        void conn.sendCubeCommand?.({ type: "REQUEST_FACELETS" });
+        void conn.sendCubeCommand?.({ type: "REQUEST_BATTERY" });
+        void conn.sendCubeCommand?.({ type: "REQUEST_HARDWARE" });
+      } catch {
+        /* ignore */
+      }
       connectionRef.current = conn;
       setState((s) => ({
         ...s,
@@ -257,6 +271,15 @@ export function useSmartCube() {
               ...(s.solveState === "solved" ? { solveState: "idle" } : {}),
             };
           });
+          // W.gan-cube-auto-time-v3: explizit Facelets anfragen wenn
+          // ein Solve aktiv ist. Die Library schickt FACELETS NICHT
+          // automatisch nach jedem Move — wir muessen pollen, damit
+          // die Solved-Detection greift.
+          try {
+            void conn.sendCubeCommand?.({ type: "REQUEST_FACELETS" });
+          } catch {
+            /* ignore */
+          }
         } else if (event.type === "FACELETS") {
           // eslint-disable-next-line no-console
           console.log("[SmartCube] FACELETS:", event.facelets);

@@ -44,6 +44,41 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-auto-time-v3",
+        released=date(2026, 5, 28),
+        title="🎯 Smart-Cube v3: Library aktiv nach Facelets pollen",
+        highlights=[
+            "User-Test-Befund: Move-Counter zählt im solving-State "
+            "korrekt, aber Auto-Solved-Detection greift nicht — "
+            "Solve wird nicht automatisch ausgelöst.",
+            "**Diagnose**: Aus den `gan-web-bluetooth`-TypeScript-"
+            "Definitionen klar geworden: die Library schickt FACELETS-"
+            "Events NICHT automatisch nach jedem Move. Sie müssen via "
+            "`sendCubeCommand({ type: 'REQUEST_FACELETS' })` explizit "
+            "angefragt werden. Mein vorheriger Code hat ausschließlich "
+            "auf die initiale FACELETS-Nachricht nach Connect gehört "
+            "— deshalb blieb die Solved-Detection still.",
+            "**Fix**: nach jedem MOVE-Event im ready/solving/idle/"
+            "solved-State wird `conn.sendCubeCommand({ type: 'REQUEST_"
+            "FACELETS' })` aufgerufen. Die Library antwortet kurz "
+            "danach mit einem FACELETS-Event → isCubeSolved() prüft "
+            "den State → solve-Detection läuft.",
+            "**Plus**: initial nach Connect werden REQUEST_FACELETS + "
+            "REQUEST_BATTERY + REQUEST_HARDWARE geschickt, damit die "
+            "App direkt den vollen Cube-Zustand kennt (Akku-Anzeige "
+            "ist sonst leer + Cube-Hardware-Name wird nicht "
+            "übernommen).",
+            "**Facelets-Format bestätigt** aus den Library-Types: "
+            "Standard Kociemba-Notation `UUUUUUUUURRRRRRRRR...` mit "
+            "54 Zeichen — genau wie isCubeSolved() es erwartet. Auto-"
+            "Detection sollte jetzt also greifen.",
+            "Type-Erweiterung `GanCubeConnection.sendCubeCommand?` mit "
+            "den 4 Command-Types (REQUEST_FACELETS / HARDWARE / "
+            "BATTERY / RESET).",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-auto-time-v2",
         released=date(2026, 5, 28),
         title="🎯 Smart-Cube v2: Ready-State + Manual-Stop + Fokus-Sichtbarkeit",
