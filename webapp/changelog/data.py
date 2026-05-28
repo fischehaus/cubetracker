@@ -44,6 +44,32 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-auto-time-v4",
+        released=date(2026, 5, 28),
+        title="🔍 Smart-Cube v4: Detaillierter FACELETS-Log für Diagnose",
+        highlights=[
+            "User-Bericht: Auto-Solved-Detection greift trotz v3 nicht "
+            "(Move-Counter zaehlt, REQUEST_FACELETS-Polling laeuft, "
+            "aber nowSolved bleibt false). User musste manuell „Solve "
+            "fertig\" klicken.",
+            "**Diagnose-Verbesserung**: jeder FACELETS-Log zeigt jetzt:",
+            "  • `len=` Anzahl Zeichen (sollte 54 sein)",
+            "  • `solved=` Boolean-Ergebnis von isCubeSolved()",
+            "  • Pro Face: `U=W(✓)` = U-Face Mitte ist 'W' und alle 9 "
+            "Stickers gleich (oder ✗ falls nicht)",
+            "  • `raw=` der komplette Facelets-String",
+            "Format-Beispiel: `[SmartCube] FACELETS len=54 solved=true "
+            "[U=W(✓) R=R(✓) F=G(✓) D=Y(✓) L=O(✓) B=B(✓)] raw=...`",
+            "Damit sehen wir bei deinem naechsten Test sofort: ist die "
+            "Laenge wirklich 54? Stimmt das Pattern? Welche Face "
+            "scheitert? Plus das raw-Format zur Library-Verifikation.",
+            "Nach v4-Test mit Console-Log-Output kann ich isCubeSolved() "
+            "praezise anpassen (anderes Format, andere Laenge, oder "
+            "Bug in der Pattern-Detection).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-auto-time-v3",
         released=date(2026, 5, 28),
         title="🎯 Smart-Cube v3: Library aktiv nach Facelets pollen",

@@ -281,10 +281,28 @@ export function useSmartCube() {
             /* ignore */
           }
         } else if (event.type === "FACELETS") {
+          // W.gan-cube-auto-time-v4: detaillierter Diagnose-Log um
+          // zu sehen warum Auto-Detection nicht greift. Pro Face den
+          // ersten Sticker + Boolean ob alle 9 Stickers gleich sind.
+          const f = event.facelets ?? "";
+          const len = f.length;
+          const nowSolved = isCubeSolved(f);
+          const faceInfo =
+            len === 54
+              ? [
+                  `U=${f[0]}(${f.substring(0, 9).split("").every((c) => c === f[0]) ? "✓" : "✗"})`,
+                  `R=${f[9]}(${f.substring(9, 18).split("").every((c) => c === f[9]) ? "✓" : "✗"})`,
+                  `F=${f[18]}(${f.substring(18, 27).split("").every((c) => c === f[18]) ? "✓" : "✗"})`,
+                  `D=${f[27]}(${f.substring(27, 36).split("").every((c) => c === f[27]) ? "✓" : "✗"})`,
+                  `L=${f[36]}(${f.substring(36, 45).split("").every((c) => c === f[36]) ? "✓" : "✗"})`,
+                  `B=${f[45]}(${f.substring(45, 54).split("").every((c) => c === f[45]) ? "✓" : "✗"})`,
+                ].join(" ")
+              : `(length != 54: ${len})`;
           // eslint-disable-next-line no-console
-          console.log("[SmartCube] FACELETS:", event.facelets);
+          console.log(
+            `[SmartCube] FACELETS len=${len} solved=${nowSolved} [${faceInfo}] raw=${f}`,
+          );
           setState((s) => {
-            const nowSolved = isCubeSolved(event.facelets);
             // solving + Cube ist solved → Solve abgeschlossen
             if (s.solveState === "solving" && nowSolved && s.solveStartedAt != null) {
               const endedAt = performance.now();
@@ -304,18 +322,18 @@ export function useSmartCube() {
               }
               // eslint-disable-next-line no-console
               console.log(
-                `[SmartCube] Solve abgeschlossen: ${timeMs} ms, ${s.solveMoveCount} Moves`,
+                `[SmartCube] Solve AUTOMATISCH abgeschlossen: ${timeMs} ms, ${s.solveMoveCount} Moves`,
               );
               return {
                 ...s,
-                lastFacelets: event.facelets,
+                lastFacelets: f,
                 solveState: "solved",
                 solveEndedAt: endedAt,
                 lastSolveTimeMs: timeMs,
                 lastSolveMoves: s.solveMoveCount,
               };
             }
-            return { ...s, lastFacelets: event.facelets };
+            return { ...s, lastFacelets: f };
           });
         } else if (event.type === "BATTERY") {
           setState((s) => ({ ...s, batteryLevel: event.batteryLevel }));
