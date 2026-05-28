@@ -15,3 +15,40 @@ body {
   -webkit-font-smoothing: antialiased;
   font-synthesis: none;
 }
+
+/* W.timer-polish-pbs (2026-05-28): Cubetracker-Scrollbar global.
+ * User-Wunsch: alle Scrollbars in der App farb-passend statt
+ * Browser-Default. Purple-Thumb (rgba 168 85 247 / 0.55) auf
+ * Dark-Gray-Track. Funktioniert in:
+ *  - Firefox + Chromium 121+ via scrollbar-color (CSS Standard)
+ *  - Chrome/Safari/Edge (Webkit) via ::-webkit-scrollbar (Legacy)
+ * Beide gleichzeitig setzen — Browser nimmt was er versteht.
+ */
+* {
+  scrollbar-color: rgba(168, 85, 247, 0.55) rgba(31, 41, 55, 0.4);
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.4);
+  border-radius: 5px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.55);
+  border-radius: 5px;
+  border: 2px solid rgba(31, 41, 55, 0.4);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.8);
+}
+
+*::-webkit-scrollbar-corner {
+  background: rgba(31, 41, 55, 0.4);
+}

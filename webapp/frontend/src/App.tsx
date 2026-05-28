@@ -301,12 +301,11 @@ function TimerTab({
   const focusToggle = (
     <div className="flex justify-end mb-2 gap-2 items-center">
       {/* W.timer-display-size: A−/A+ Buttons rotieren timer_font_size
-          durch 7 Stufen (sm → 4XL). NUR im Fokus-Modus sichtbar — sonst
-          lebt die Einstellung im Settings-Tab (Verwaltung → Einstellungen).
-          v2 (2026-05-28): Buttons selbst groesser + prominenter, eigene
-          Card mit Border, Label-Pill in der Mitte. */}
-      {focusMode && (
-        <div className="inline-flex items-center gap-2 rounded-lg border border-purple-500/30 bg-gray-900/60 p-1.5 shadow-sm">
+          durch 7 Stufen (sm → 4XL). Eigene Card mit Border, Label-Pill
+          in der Mitte. v3 (W.timer-polish-pbs 2026-05-28): jetzt auch
+          in der vollen Ansicht sichtbar (vorher nur Fokus-Modus, User-
+          Wunsch). */}
+      <div className="inline-flex items-center gap-2 rounded-lg border border-purple-500/30 bg-gray-900/60 p-1.5 shadow-sm">
           <span
             className="text-[11px] text-purple-300/80 uppercase tracking-wider px-2"
             aria-hidden="true"
@@ -340,7 +339,6 @@ function TimerTab({
             A+
           </button>
         </div>
-      )}
       <button
         type="button"
         onClick={() => setFocusMode((v) => !v)}

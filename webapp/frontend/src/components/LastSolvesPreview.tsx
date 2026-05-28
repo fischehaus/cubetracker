@@ -11,7 +11,7 @@
 // Keine Edit-Aktionen ausser Delete und +2/DNF auf den letzten —
 // die volle bearbeitbare Liste lebt im ANALYSE-Tab.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useDeleteSolve,
@@ -110,6 +110,46 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
 
   const lastSolve = solves && solves.length > 0 ? solves[0] : null;
   const isLastPb = lastSolve != null && stats?.best_solve_id === lastSolve.id;
+
+  // W.timer-polish-pbs (2026-05-28): PB-Marker analog SolveList.
+  // Backend liefert pb_solve_ids (alle alten Single-PBs), ao5_pb_solve_ids,
+  // ao12_pb_solve_ids. Plus best_solve_id (aktueller Single-PB).
+  const bestSolveId = stats?.best_solve_id ?? null;
+  const pbSolveIds = useMemo(
+    () => new Set<number>(stats?.pb_solve_ids ?? []),
+    [stats?.pb_solve_ids],
+  );
+  const ao5PbSolveIds = useMemo(
+    () => new Set<number>(stats?.ao5_pb_solve_ids ?? []),
+    [stats?.ao5_pb_solve_ids],
+  );
+  const ao12PbSolveIds = useMemo(
+    () => new Set<number>(stats?.ao12_pb_solve_ids ?? []),
+    [stats?.ao12_pb_solve_ids],
+  );
+  const bestAo5SolveId = stats?.best_ao5_solve_id ?? null;
+  const bestAo12SolveId = stats?.best_ao12_solve_id ?? null;
+
+  // W.timer-polish-pbs: ao100-Toggle (default off). User-Wunsch: optional
+  // ao100 als zusaetzliche Spalte in der Letzte-Solves-Tabelle anzeigen.
+  // Persistiert via localStorage damit der Toggle ueber Reloads bleibt.
+  const [showAo100, setShowAo100] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("cubetracker.last_solves_show_ao100") === "1";
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "cubetracker.last_solves_show_ao100",
+        showAo100 ? "1" : "0",
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [showAo100]);
 
   // Rolling Mo3 / AO5 / AO12 / AO100 pro Solve. API liefert DESC, Rolling
   // braucht chronologisch — reversen + per ID zurueckmappen.
@@ -243,7 +283,10 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           {/* 2x2-Grid mit den 4 aktuellen Averages. Mo3 wird clientseitig
               aus der bereits geladenen mo3Map abgeleitet (kein Backend-
               Endpoint dafür) — der neueste Solve hat die ID des letzten
-              Mo3-Fenster-Endes. */}
+              Mo3-Fenster-Endes.
+              W.timer-polish-pbs: PB-Wert in kleinerer Schrift unter dem
+              current-Wert (User-Wunsch). „PB 10.45" — gold wenn current
+              gleich PB ist (= neuer Bestwert). */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="text-sm text-gray-500">mo3</div>
@@ -258,18 +301,52 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
               <div className="font-mono text-3xl text-gray-100">
                 {stats?.current_ao5 != null ? formatTime(stats.current_ao5) : "–"}
               </div>
+              {stats?.best_ao5 != null && (
+                <div
+                  className={`text-xs font-mono mt-0.5 ${
+                    stats.current_ao5 != null && stats.current_ao5 <= stats.best_ao5
+                      ? "text-yellow-300"
+                      : "text-gray-500"
+                  }`}
+                >
+                  PB {formatTime(stats.best_ao5)}
+                </div>
+              )}
             </div>
             <div>
               <div className="text-sm text-gray-500">ao12</div>
               <div className="font-mono text-3xl text-gray-100">
                 {stats?.current_ao12 != null ? formatTime(stats.current_ao12) : "–"}
               </div>
+              {stats?.best_ao12 != null && (
+                <div
+                  className={`text-xs font-mono mt-0.5 ${
+                    stats.current_ao12 != null && stats.current_ao12 <= stats.best_ao12
+                      ? "text-yellow-300"
+                      : "text-gray-500"
+                  }`}
+                >
+                  PB {formatTime(stats.best_ao12)}
+                </div>
+              )}
             </div>
             <div>
               <div className="text-sm text-gray-500">ao100</div>
               <div className="font-mono text-3xl text-gray-100">
                 {stats?.current_ao100 != null ? formatTime(stats.current_ao100) : "–"}
               </div>
+              {stats?.best_ao100 != null && (
+                <div
+                  className={`text-xs font-mono mt-0.5 ${
+                    stats.current_ao100 != null &&
+                    stats.current_ao100 <= stats.best_ao100
+                      ? "text-yellow-300"
+                      : "text-gray-500"
+                  }`}
+                >
+                  PB {formatTime(stats.best_ao100)}
+                </div>
+              )}
             </div>
           </div>
 
@@ -383,20 +460,34 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
               <p>{t("lastSolvesPreview.tableInfoBody")}</p>
             </InfoButton>
           </div>
-          <label className="flex items-center gap-1.5 text-xs text-gray-500">
-            {t("lastSolvesPreview.countLabel")}
-            <select
-              value={tableSize}
-              onChange={(e) => setTableSize(parseInt(e.target.value, 10))}
-              className="rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
-            >
-              {TABLE_SIZE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label ?? (o.i18nKey ? t(o.i18nKey) : "?")}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* W.timer-polish-pbs: AO100-Toggle (Checkbox) — User-Wunsch.
+                Aus der Tabelle waere AO100 normalerweise raus (zu eng auf
+                der schmalen Sidebar), aber wer's anschalten will, kann. */}
+            <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showAo100}
+                onChange={(e) => setShowAo100(e.target.checked)}
+                className="accent-purple-500 w-3 h-3"
+              />
+              {t("lastSolvesPreview.toggleAo100")}
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-gray-500">
+              {t("lastSolvesPreview.countLabel")}
+              <select
+                value={tableSize}
+                onChange={(e) => setTableSize(parseInt(e.target.value, 10))}
+                className="rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 text-sm text-gray-100 focus:border-purple-500 focus:outline-none"
+              >
+                {TABLE_SIZE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label ?? (o.i18nKey ? t(o.i18nKey) : "?")}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
 
         {sortedRows.length > 0 ? (
@@ -470,45 +561,139 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                     dir={sortDir}
                     onClick={handleSort}
                   />
+                  {showAo100 && (
+                    <SortableHeader
+                      label={t("lastSolvesPreview.colAo100")}
+                      sortKey="ao100"
+                      activeKey={sortKey}
+                      dir={sortDir}
+                      onClick={handleSort}
+                    />
+                  )}
                   <th className="py-1.5 pr-1 text-right font-medium"></th>
                 </tr>
               </thead>
               <tbody>
                 {sortedRows.map((row) => {
                   const isNewest = row.solveNumber === (stats?.count ?? 0);
+                  const s = row.solve;
+                  // W.timer-polish-pbs: PB-Marker analog SolveList.
+                  const isBest = s.id === bestSolveId;
+                  const isOldPb = !isBest && pbSolveIds.has(s.id);
+                  const isAo5Pb = ao5PbSolveIds.has(s.id);
+                  const isAo12Pb = ao12PbSolveIds.has(s.id);
                   return (
                     <tr
-                      key={row.solve.id}
+                      key={s.id}
                       className={`border-b border-gray-800 last:border-0 hover:bg-gray-800/30 ${
-                        isNewest ? "text-gray-100" : "text-gray-400"
+                        isBest
+                          ? "bg-yellow-500/5"
+                          : isNewest
+                            ? "text-gray-100"
+                            : "text-gray-400"
                       }`}
                     >
                       <td className="py-1.5 pr-2 text-xs text-gray-500 font-mono">
                         {row.solveNumber}
                       </td>
                       <td className="py-1.5 pr-2 font-mono">
-                        {formatSolveTime(row.solve)}
+                        {isBest && (
+                          <span
+                            className="text-yellow-300 text-xs mr-1"
+                            title={t("lastSolvesPreview.pbStarTitle")}
+                          >
+                            ★
+                          </span>
+                        )}
+                        {isOldPb && (
+                          <span
+                            className="text-yellow-600/80 text-xs mr-1"
+                            title={t("lastSolvesPreview.pbOldTitle")}
+                          >
+                            ☆
+                          </span>
+                        )}
+                        <span
+                          className={
+                            isBest
+                              ? "text-yellow-300 font-semibold"
+                              : isOldPb
+                                ? "text-yellow-500/90"
+                                : ""
+                          }
+                        >
+                          {formatSolveTime(s)}
+                        </span>
                       </td>
                       <td className="py-1.5 pr-2 font-mono text-gray-500">
                         {row.mo3 !== null ? formatTime(row.mo3) : "–"}
                       </td>
-                      <td className="py-1.5 pr-2 font-mono text-gray-500">
-                        {row.ao5 !== null ? formatTime(row.ao5) : "–"}
+                      <td className="py-1.5 pr-2 font-mono">
+                        {row.ao5 !== null ? (
+                          <span
+                            className={
+                              isAo5Pb ? "text-cyan-300" : "text-gray-500"
+                            }
+                          >
+                            {isAo5Pb && (
+                              <span
+                                className="text-cyan-400 mr-1"
+                                title={
+                                  s.id === bestAo5SolveId
+                                    ? t("lastSolvesPreview.ao5PbCurrentTitle")
+                                    : t("lastSolvesPreview.ao5PbOldTitle")
+                                }
+                              >
+                                ●
+                              </span>
+                            )}
+                            {formatTime(row.ao5)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">–</span>
+                        )}
                       </td>
-                      <td className="py-1.5 pr-2 font-mono text-gray-500">
-                        {row.ao12 !== null ? formatTime(row.ao12) : "–"}
+                      <td className="py-1.5 pr-2 font-mono">
+                        {row.ao12 !== null ? (
+                          <span
+                            className={
+                              isAo12Pb ? "text-emerald-300" : "text-gray-500"
+                            }
+                          >
+                            {isAo12Pb && (
+                              <span
+                                className="text-emerald-400 mr-1"
+                                title={
+                                  s.id === bestAo12SolveId
+                                    ? t("lastSolvesPreview.ao12PbCurrentTitle")
+                                    : t("lastSolvesPreview.ao12PbOldTitle")
+                                }
+                              >
+                                ●
+                              </span>
+                            )}
+                            {formatTime(row.ao12)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">–</span>
+                        )}
                       </td>
+                      {showAo100 && (
+                        <td className="py-1.5 pr-2 font-mono text-gray-500">
+                          {row.ao100 !== null ? formatTime(row.ao100) : "–"}
+                        </td>
+                      )}
                       <td className="py-1.5 pr-0 text-right">
                         <button
                           onClick={() => {
                             if (
                               confirm(
                                 t("lastSolvesPreview.deleteRowConfirm", {
-                                  time: formatSolveTime(row.solve),
+                                  time: formatSolveTime(s),
                                 }),
                               )
                             )
-                              del.mutate(row.solve.id);
+                              del.mutate(s.id);
                           }}
                           className="text-xs rounded bg-gray-800 px-1.5 py-0.5 text-gray-500 hover:bg-red-700/40 hover:text-red-200"
                           title={t("lastSolvesPreview.deleteRowTitle")}

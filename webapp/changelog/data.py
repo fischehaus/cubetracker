@@ -44,6 +44,38 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-polish-pbs",
+        released=date(2026, 5, 28),
+        title="🎯 Timer-Tab Polish: PBs überall + globale Scrollbar + ao100",
+        highlights=[
+            "Fünf User-Wünsche in einer Welle:",
+            "**A−/A+ jetzt auch in der vollen Ansicht** sichtbar "
+            "(vorher nur im Fokus-Modus). Conditional aufgehoben — der "
+            "Größenregler hängt jetzt immer rechts über dem Timer-Tab.",
+            "**Globale Cubetracker-Scrollbar:** alle Scrollbars in der "
+            "App jetzt farb-passend (Purple-Thumb auf Dark-Gray-Track, "
+            "rgba 168/85/247/0.55). Funktioniert in Firefox + Chromium "
+            "121+ via `scrollbar-color`, in Safari/Webkit via `::-webkit-"
+            "scrollbar`. Implementiert in index.css für alle scrollbaren "
+            "Elemente — Modals, Tabellen, alles.",
+            "**PB-Markers in „Letzte Solves\"** (Timer-Tab) analog zur "
+            "Solve-Liste im Analyse-Tab: Gold-★ für aktuellen Single-"
+            "PB, schwaches ☆ für alte Singles, Cyan-● für AO5-PBs, "
+            "Emerald-● für AO12-PBs. Mit Tooltip „Aktueller / War mal "
+            "Bestwert\".",
+            "**PB-Werte neben current ao5/ao12/ao100** in der Live-"
+            "Karte: in kleinerer Schrift unter dem aktuellen Wert "
+            "steht jetzt „PB 10.45\" — gold gefärbt wenn current = PB "
+            "(= neuer Bestwert).",
+            "**AO100 als Toggle-Spalte** in der Letzte-Solves-Tabelle: "
+            "neue Checkbox „AO100 zeigen\" neben dem Anzahl-Selector. "
+            "Default OFF (schmale Sidebar bleibt aufgeräumt), an wenn "
+            "der User es will — persistent via localStorage.",
+            "8 neue i18n-Keys DE/EN symmetrisch (1340/1340).",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.gan-cube-mvp-tsbuild",
         released=date(2026, 5, 28),
         title="Build-Hotfix #2: TypeScript-Type für navigator.bluetooth",
