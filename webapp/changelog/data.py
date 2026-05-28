@@ -44,6 +44,28 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-card-fix-v2",
+        released=date(2026, 5, 28),
+        title="🔧 Card-Stil: graue Cards mit Slash-Opacity gefixt",
+        highlights=[
+            "User-Befund: nach einmal 'Deckend' + zurück zu 'Glas' "
+            "blieben einige Cards halbtransparent obwohl 'Deckend' "
+            "gewählt war (oder umgekehrt).",
+            "**Ursache**: viele User-Settings-Cards (WCA-ID, Passwort "
+            "ändern, Email ändern etc.) nutzen das Tailwind-Pattern "
+            "`bg-gray-900/50` oder `bg-gray-800/40` — graue Container "
+            "mit Slash-Opacity-Suffix. Mein Solid-Mode-Override aus "
+            "W.skin-solid-fix hat aber nur die farbigen Akzent-Cards "
+            "(bg-emerald-500/5 etc.) erfasst, NICHT die grauen.",
+            "**Fix**: Selektor-Liste um die grauen Slash-Tokens erweitert "
+            "(bg-gray-{700,800,900}/{30,40,50,60,80}). Jetzt werden ALLE "
+            "Card-Container — egal ob farbig oder grau, egal ob mit "
+            "/5 oder /50 Opacity — konsistent auf den gewählten Card-"
+            "Stil gemappt.",
+            "Bundle: minimaler CSS-Wachstum, kein JS-Wachstum.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.login-redesign",
         released=date(2026, 5, 28),
         title="🎨 LoginPage neu: Skin-Slideshow + kompakte Trust + Features",

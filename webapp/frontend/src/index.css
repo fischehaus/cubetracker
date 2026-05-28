@@ -165,7 +165,15 @@ body[data-skin]:not([data-card-style="glass"]) :is(
   [class~="bg-pink-500/5"], [class~="bg-pink-500/10"],
   [class~="bg-orange-500/5"], [class~="bg-orange-500/10"],
   [class~="bg-cyan-500/5"], [class~="bg-cyan-500/10"],
-  [class~="bg-indigo-500/5"], [class~="bg-indigo-500/10"]
+  [class~="bg-indigo-500/5"], [class~="bg-indigo-500/10"],
+  /* W.skin-card-fix-v2 (2026-05-28): graue Cards mit Slash-Opacity
+   * sind im Code halbtransparent (z.B. bg-gray-900/50 fuer User-
+   * Settings-Cards). Im Solid-Mode bei aktivem Skin muessen die
+   * ebenfalls auf deckend dunkel geschoben werden, sonst sieht
+   * der User halbtransparente Cards trotz "Deckend"-Auswahl. */
+  [class~="bg-gray-700/40"], [class~="bg-gray-700/50"], [class~="bg-gray-700/80"],
+  [class~="bg-gray-800/30"], [class~="bg-gray-800/40"], [class~="bg-gray-800/50"], [class~="bg-gray-800/60"], [class~="bg-gray-800/80"],
+  [class~="bg-gray-900/40"], [class~="bg-gray-900/50"], [class~="bg-gray-900/60"]
 ):not(button):not(input):not(select):not(textarea):not(option) {
   background-color: rgba(17, 24, 39, 0.94) !important;
 }
@@ -185,7 +193,11 @@ body[data-card-style="glass"] :is(
   [class~="bg-pink-500/5"], [class~="bg-pink-500/10"],
   [class~="bg-orange-500/5"], [class~="bg-orange-500/10"],
   [class~="bg-cyan-500/5"], [class~="bg-cyan-500/10"],
-  [class~="bg-indigo-500/5"], [class~="bg-indigo-500/10"]
+  [class~="bg-indigo-500/5"], [class~="bg-indigo-500/10"],
+  /* W.skin-card-fix-v2: analog auch im Glass-Mode greifen */
+  [class~="bg-gray-700/40"], [class~="bg-gray-700/50"], [class~="bg-gray-700/80"],
+  [class~="bg-gray-800/30"], [class~="bg-gray-800/40"], [class~="bg-gray-800/50"], [class~="bg-gray-800/60"], [class~="bg-gray-800/80"],
+  [class~="bg-gray-900/40"], [class~="bg-gray-900/50"], [class~="bg-gray-900/60"]
 ):not(button):not(input):not(select):not(textarea):not(option) {
   background-color: rgba(17, 24, 39, 0.78) !important;
   backdrop-filter: blur(10px) saturate(140%);
