@@ -211,6 +211,21 @@ Spezifische Bug-Events / Postmortems / Architektur-Lessons liegen in
 - Pre-Commit-Tag-Falle (mehrfach 2026-05-17)
 - Auto-Mode-Classifier-Blocks + Permission-Allowlist-Pflege
 
+## Sichtbarkeits-Matrix (Wer sieht was?)
+
+`docs/permissions-matrix.md` ist die **Single-Source-of-Truth** für die
+Frage „wer sieht welche Daten?". 5 Rollen (anonym / user / friend /
+tester / admin), alle Datenmodelle + API-Endpoints + UI-Tabs + Privacy-
+Details (z.B. „was Admin NICHT sieht" → Plaintext-Passwörter, andere
+User-Backups, Solves anderer User außer in Aggregat-Stats). Auch
+Anti-Tracking-Audit (kein GA/Mixpanel/Hotjar etc., nur 1 funktionales
+Cookie). Stand 2026-05-28.
+
+**Pflicht-Lesen bei:** neue Endpoints, Auth-Code, Cross-User-Filter,
+Privacy-Texten auf Login-/Datenschutz-Seite, Tester-/Admin-Rolle-
+Änderungen. Bei Schema-/Endpoint-Änderung: Matrix mit-aktualisieren
+(sonst Single-Source verlogen).
+
 ## Audit-Log (Setup-Reviews)
 
 - `docs/audit-2026-05-20.md` — Doku-vs-Setup-Audit. Welle 1: 10 Quick-Wins +
