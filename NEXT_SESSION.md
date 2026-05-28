@@ -24,6 +24,100 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-28 (Spätschicht) — Skin-System + LoginPage-Refresh + Demo-Backend-Revert
+
+**Letzte public Welle: `W.skin-card-fix-v2` (Tag `221fdc0`).** Working-Tree
+clean (5 alte untracked PNGs/scripts/ aus Vor-Tagen, nicht Session-relevant),
+alles gepusht. Bilanz Spätschicht: **9 Wellen + 7 Tags + ~16 Commits** (inkl.
+3 Revert-Commits für die gescheiterte Demo-Backend-Welle).
+
+### Sprint-Gruppen Spätschicht
+
+**Gruppe 5 — Skin-System (3 Skins + Card-Stil + Logo-Hide)** (6 Wellen):
+- `W.skin-cyberpunk-mvp` (Tag `e35fdba`) — Background-Skin-System + 1. Skin
+  „Cyberpunk Neon" + Settings-Picker. Asset-Pipeline mit sharp/WebP + 5
+  Auflösungen pro Skin. localStorage-Persistenz, BackgroundLayer.
+- `W.skin-glassmorphism` (Tag `d02f251`) — Card-Stil als zweite Achse:
+  „Deckend" (Status-quo) vs. „Glas / transparent" (rgba 0.78 + blur 10px
+  saturate 140%). Zentraler CSS-Override per `body[data-card-style="glass"]`.
+- `W.skin-hide-logo` (Tag `bdfa98e`) — App-Logo (Header + LoginPage) wird
+  bei aktivem Skin ausgeblendet, weil das Cubetracker-Logo im Background-
+  Bild integriert ist (Doppelung vermeiden). Header schaltet auf flex-end.
+- `W.skin-legendary-partymode` (Tag `d5ed5e1`) — zweiter Skin (jetzt
+  umbenannt zu „Cyberpunk Laser"). Per-Skin `background-position` (Cube
+  Mitte-links statt unten). Convert-Script JPG-Support.
+- `W.skin-rename-and-party-fun` (Tag `78575d3`) — Rename „Legendary
+  Partymodus" → „Cyberpunk Laser" mit LEGACY_SKIN_ID_MAP für sanfte
+  Migration. Plus dritter Skin „Party Fun" (helle Paint-Splash-Bonbons,
+  Cube mittig, 7 Auflösungen inkl. 1366×768 HD + 1080×1920 Portrait).
+- `W.skin-solid-fix` (Tag `1987920`) — Akzent-Cards (`bg-emerald-500/5`
+  etc.) wurden im Deckend-Modus nicht erfasst weil sie schon mit /5
+  opacity halbtransparent gerendert sind. Selektor-Liste erweitert.
+- `W.skin-card-fix-v2` (Tag `221fdc0`) — gleiche Klasse Bug für graue
+  Slash-Tokens (`bg-gray-900/50`, `bg-gray-800/40` etc.) — typisch für
+  User-Settings-Cards (WCA-ID, Passwort, Email). Selektor-Liste erweitert.
+
+**Gruppe 6 — Vor-Demo-Polish** (1 Welle):
+- `W.smart-cube-position-restore` (Tag `144cae5`) — SmartCubeConnect-
+  Block wieder unter TimerControlsCard (= „Timer-Modus"). Im Fokus-Modus
+  damit ausgeblendet. User-Wunsch.
+
+**Gruppe 7 — LoginPage-Refresh** (1 Welle):
+- `W.login-redesign` (Tag `e249089` + Patch-Note-Nachschlag `885ea99`) —
+  Konzept A: Skin-Slideshow im Hintergrund (rotiert alle 6s durch die 3
+  Skins, opacity-Crossfade 1200ms), Logo zentriert, kompakte Login-Card,
+  3 Trust-Pills inline, 4 Feature-Icon-Tiles. Komplett-Refactor des
+  bisherigen 2-Spalten-Layouts. LoginPageBackgroundLayer als eigene
+  Komponente.
+
+### 🔴 Reverted Demo-Backend-Welle
+
+Die Demo-Backend-Welle hat das Backend live gekillt → 502. Revert:
+- `W.demo-user-backend` (Commit `1ec82c3`) — Schema-Migration `users.is_demo`,
+  Bootstrap mit ~120 Sample-Solves, `require_not_demo`-Dep auf 34 mutating
+  Endpoints, neuer Endpoint `POST /auth/demo-login`. Lokal SQLite-Smoke
+  hatte funktioniert (118 Solves), aber Production-Postgres-Container
+  crashed-loop't. Verdacht: eager `_DUMMY_PW_HASH = hash_password(...)`
+  Top-Level + Solve-Bulk-Insert blockt uvicorn-Worker beim Cold-Start.
+- `W.login-redesign-and-demo` (Commits `de97e82` + `3f42de2`) — Frontend-
+  Welle mit Demo-Login-Button + DemoBanner. Reverted weil keine
+  Backend-Endpoint mehr.
+- Revert-Commits `ce7a95c`, `bc2c07d`, `4ffbcaa` — Coolify hat den
+  Revert-Push als Backend-Change erkannt + den alten Backend-Stand
+  re-deployed → live wieder OK (Health zeigt `W.skin-solid-fix`-Backend +
+  jetzt mit `W.skin-card-fix-v2`-Frontend).
+
+**Lesson für nächste Demo-Backend-Welle:**
+1. Schema-Migration ALLEIN pushen → verify Backend lebt → next
+2. Bootstrap ohne Sample-Solves → verify → next
+3. Sample-Solves in Chunks von 20 → verify → next
+4. `require_not_demo`-Dep nur auf solves.py → verify → next
+5. Etc. — jeder Step einzeln live-verifizieren BEVOR der nächste.
+
+### 🔜 Restplan vor Demo Sa 30.05.
+
+- ✅ Skin-System komplett (3 Skins + Card-Stil + 2 Fixes)
+- ✅ Smart-Cube-Position wieder unten (vor-Demo-Wunsch)
+- ✅ LoginPage neu (Konzept A, Skin-Showcase, kompakt)
+- ✅ Backend lebt (W.skin-card-fix-v2)
+- ⏸ Demo-Account-Button vertagt auf Post-Demo-Sprint
+- ⏸ Smart-Cube-Auto-Solved-Detection wartet weiterhin auf v4-Diagnose-Logs vom User
+- 🔲 Phone-Demo-Probe via 12 Admin-Live-Tests (Du-Aktion, ~30 min)
+- 🔲 features-data.ts ergänzen mit Skin-System-Bullets (offen — User-facing-
+  Welle ohne Marketing-Bullet, kann auch Post-Demo)
+
+### ⚠ Offene Punkte für die nächste Session
+
+1. **Smart-Cube v4-Diagnose-Logs** abwarten (User-Aktion: gelösten Cube +
+   Console-Screenshot mit `[SmartCube] FACELETS len=... solved=...`)
+2. **Demo-Backend-Welle Schritt-für-Schritt** neu aufbauen (siehe Lesson oben)
+3. **features-data.ts ergänzen** mit Bullet für Skin-System + Card-Stil +
+   Smart-Cube-Integration
+4. **QA-Hotfixes aus den ursprünglichen Reviews** noch offen: Flash-of-wrong-
+   style auf Reload, convert-skins Path-Traversal-Schutz, A11y Arrow-Key-Nav
+
+---
+
 ## ✅ ERLEDIGT 2026-05-28 (Voller Mega-Tag) — 25 Wellen in einer Sitzung
 
 **Letzte Welle: `W.gan-cube-auto-time-v4` (internal, Tag `becf7be`).**
