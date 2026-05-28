@@ -23,7 +23,6 @@ import { ActivityCard } from "./components/ActivityCard";
 import { ActivityChart } from "./components/ActivityChart";
 import { AnalyseFilterBar } from "./components/AnalyseFilterBar";
 import { BackgroundLayer } from "./components/BackgroundLayer";
-import { DemoBanner } from "./components/DemoBanner";
 import { BigTimerInput } from "./components/BigTimerInput";
 import { ChallengeCompletionToaster } from "./components/ChallengeCompletionToaster";
 import { FeedbackUnreadToaster } from "./components/FeedbackUnreadToaster";
@@ -711,10 +710,6 @@ function MainLayout() {
     // auf 360px-Screens), p-6 ab md.
     <div className="min-h-screen p-3 md:p-6">
       <div className="mx-auto max-w-7xl">
-        {/* W.login-redesign-and-demo (2026-05-28): Demo-Banner als oberstes
-            Element wenn der aktuelle User der Demo-Account ist. Bei normalen
-            Usern rendert die Komponente null. */}
-        <DemoBanner />
         <header className="cubetracker-app-header flex items-center justify-between mb-6 gap-4 flex-wrap">
           {/* Volles Logo (mit Schriftzug + Tagline) ersetzt den separaten
               H1+Untertitel. Klick führt zurück zum Default-Tab. Logo
@@ -948,13 +943,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {/* W.skin-cyberpunk-mvp + W.login-redesign-and-demo:
-         *   - BackgroundLayer rendert den User-Skin global (auch LoginPage).
-         *   - LoginPage hat zusaetzlich eine eigene Skin-Slideshow im
-         *     LoginPageBackgroundLayer — die rotiert durch alle Skins als
-         *     Marketing. Beide Layer sind fixed -z-10, der Slideshow-Layer
-         *     liegt zuletzt im DOM und ueberdeckt den User-Skin auf der
-         *     LoginPage.
+        {/* W.skin-cyberpunk-mvp: Background-Skin-Layer hinter App-Content.
+         * Liegt VOR AuthGuard damit auch die LoginPage den Skin zeigt
+         * (Wow-Moment fuer neue User die sich gerade registrieren).
          * Skin "none" (Default) rendert null — keine Kosten. */}
         <BackgroundLayer />
         <AuthGuard />

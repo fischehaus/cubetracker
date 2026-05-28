@@ -26,10 +26,8 @@ Idempotenz:
 
 from __future__ import annotations
 
-import logging
 import random
 from datetime import datetime, timedelta, timezone
-from functools import lru_cache
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session as OrmSession
@@ -37,28 +35,17 @@ from sqlalchemy.orm import Session as OrmSession
 from auth.password import hash_password
 from db.models import Solve, User
 
-logger = logging.getLogger(__name__)
-
 DEMO_EMAIL = "demo@cubetracker.de"
 DEMO_DISPLAY_NAME = "Demo"
 
-
-@lru_cache(maxsize=1)
-def _dummy_pw_hash() -> str:
-    """Unbrauchbarer Passwort-Hash, lazy via cache (QA-SOLLTE 2026-05-28).
-
-    Bcrypt-Format aber unmoeglich zu rebuilden (50-Random-Zeichen,
-    vorher gehashed). Theoretisch koennte ein Angreifer nie das Login-
-    Passwort hier raten. Plus: /auth/login wirft "Email oder Passwort
-    falsch" wenn das nicht matched -- normaler Login-Flow.
-    Demo-Login geht nur via /auth/demo-login (kein Passwort-Check).
-
-    Lazy via lru_cache damit hash_password (bcrypt ~250ms) erst beim
-    ersten Bootstrap-Call kalkuliert wird, nicht beim Modul-Import.
-    """
-    return hash_password("DEMO_USER_NO_LOGIN_XX_" + "".join(
-        chr(ord("a") + (i * 7) % 26) for i in range(30)
-    ))
+# Unbrauchbarer Passwort-Hash. Bcrypt-Format aber unmoeglich zu rebuilden
+# (50-Random-Zeichen, vorher gehashed). Theoretisch koennte ein Angreifer
+# nie das Login-Passwort hier raten. Plus: /auth/login wirft "Email oder
+# Passwort falsch" wenn das nicht matched -- normaler Login-Flow.
+# Demo-Login geht nur via /auth/demo-login (kein Passwort-Check).
+_DUMMY_PW_HASH = hash_password("DEMO_USER_NO_LOGIN_XX_" + "".join(
+    chr(ord("a") + (i * 7) % 26) for i in range(30)
+))
 
 
 def _seed_solves(db: OrmSession, user_id: int) -> int:
@@ -136,10 +123,9 @@ def bootstrap_demo_user(db: OrmSession) -> tuple[bool, int]:
             # Defensive: User mit der Demo-Email existiert aber is_demo=False.
             # Das sollte nicht passieren — Register-Endpoint sollte die
             # Email-Kollision verhindern. Nichts tun, nicht ueberschreiben.
-            logger.warning(
-                "User mit Email %r existiert ohne is_demo-Flag — "
-                "Demo-Bootstrap uebersprungen.",
-                DEMO_EMAIL,
+            print(
+                f"WARN: User mit Email {DEMO_EMAIL!r} existiert ohne "
+                "is_demo-Flag — Demo-Bootstrap uebersprungen."
             )
             return False, 0
         # Demo-User existiert bereits + is_demo gesetzt. Idempotent: nichts tun.
@@ -150,7 +136,7 @@ def bootstrap_demo_user(db: OrmSession) -> tuple[bool, int]:
     # Erst-Anlegen.
     demo = User(
         email=DEMO_EMAIL,
-        hashed_password=_dummy_pw_hash(),
+        hashed_password=_DUMMY_PW_HASH,
         display_name=DEMO_DISPLAY_NAME,
         is_active=True,
         email_verified=True,  # Skip Email-Verify-Block fuer Demo-Login
