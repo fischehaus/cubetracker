@@ -166,7 +166,9 @@ def register(
     email_lc = payload.email.lower().strip()
     # W.demo-user-backend (2026-05-28): Demo-Email ist reserviert.
     # Der Demo-User wird beim Bootstrap geseedet, kein normaler Register.
-    if email_lc == "demo@cubetracker.de":
+    from seeds.demo_user import DEMO_EMAIL
+
+    if email_lc == DEMO_EMAIL:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Diese Email-Adresse ist reserviert.",
@@ -300,7 +302,10 @@ def demo_login(
 
     Rate-Limit: 5/min per IP (analog Login, gegen Spam).
     """
-    demo = db.scalar(select(User).where(User.email == "demo@cubetracker.de"))
+    # DEMO_EMAIL aus seeds — single source of truth fuer die Demo-Email.
+    from seeds.demo_user import DEMO_EMAIL
+
+    demo = db.scalar(select(User).where(User.email == DEMO_EMAIL))
     if demo is None or not demo.is_active or not demo.is_demo:
         # Bootstrap ist schiefgegangen -- Admin muss nachgucken.
         raise HTTPException(
@@ -384,7 +389,17 @@ def logout(
 
     Auch wenn der Angreifer Access- oder Refresh-Tokens kopiert hat:
     sobald token_version hochgezählt ist, schlagen alle alten Tokens fehl.
+
+    W.demo-user-backend (QA-Fix 2026-05-28): Demo-User darf token_version
+    NICHT erhoehen — sonst werden alle parallelen Demo-Sessions revoked
+    (Demo ist ein shared Account). Wir clearen nur den Refresh-Cookie auf
+    dem aktuellen Client; der Demo-JWT laeuft natuerlich ab (Access 15min),
+    der naechste Demo-Login holt sich einen neuen Token.
     """
+    if current_user.is_demo:
+        _clear_refresh_cookie(response)
+        response.status_code = status.HTTP_204_NO_CONTENT
+        return response
     _bump_token_version(db, current_user.id)
     db.commit()
     _clear_refresh_cookie(response)
@@ -578,7 +593,13 @@ def forgot_password(
     """
     email_lc = payload.email.lower().strip()
     user = db.scalar(select(User).where(User.email == email_lc))
-    if user is not None and user.is_active:
+    # W.demo-user-backend (QA-Fix 2026-05-28): Demo-User vom Reset-Flow
+    # ausnehmen. Sonst koennte jemand `/auth/forgot-password` mit der
+    # Demo-Email triggern -> Reset-Token in DB -> Reset-Mail an Demo-
+    # Mailbox (niemand kontrolliert sie, aber DB-Write + Mail-Spam).
+    # Plus: bei geleaktem Token koennte `reset_password` token_version
+    # bumpen und alle Demo-Sessions revoken.
+    if user is not None and user.is_active and not user.is_demo:
         # S4: alte offene Reset-Tokens dieses Users zumachen
         db.execute(
             update(PasswordResetToken)
@@ -639,6 +660,13 @@ def reset_password(
     user = db.get(User, user_id)
     if user is None or not user.is_active:
         # Sehr unwahrscheinlich (Token + User Cascade), aber defensiv
+        raise invalid
+    # W.demo-user-backend (QA-Fix 2026-05-28): Demo-User schuetzen.
+    # forgot_password verhindert das eigentlich schon (kein Token wird
+    # erzeugt), aber Defense-in-Depth: wenn jemand einen alten Token
+    # vor unserem Fix erzeugt hatte, reset_password wuerde immer noch
+    # akzeptieren -> hier zweite Tuere zuschlagen.
+    if user.is_demo:
         raise invalid
 
     user.hashed_password = hash_password(payload.new_password)

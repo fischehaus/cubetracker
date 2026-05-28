@@ -41,6 +41,9 @@ export interface UserRead {
   country_iso2: string | null;
   /** Phase W.wca-profile-light: offizielle WCA-ID (Format „2024SMIT01"). */
   wca_id: string | null;
+  /** Phase W.demo-user-backend: Demo-Account-Flag. Frontend zeigt
+   *  einen Demo-Banner + disabled mutating-Buttons wenn true. */
+  is_demo: boolean;
 }
 
 export interface AuthState {
@@ -49,6 +52,9 @@ export interface AuthState {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
+  /** Phase W.demo-user-backend: Login als shared Demo-User ohne
+   *  Passwort. Liefert read-only-Account mit ~120 Sample-Solves. */
+  demoLogin: () => Promise<void>;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
 }
@@ -67,6 +73,15 @@ async function apiRegister(email: string, password: string): Promise<UserRead> {
 
 async function apiLogin(email: string, password: string): Promise<UserRead> {
   const r = await api.post<AccessTokenOnly>("/auth/login", { email, password });
+  setAccessToken(r.data.access_token);
+  const me = await api.get<UserRead>("/auth/me");
+  return me.data;
+}
+
+async function apiDemoLogin(): Promise<UserRead> {
+  // Demo-Login ohne Passwort, kein Body. Backend liefert AccessToken
+  // fuer den geseedeten Demo-User (siehe seeds/demo_user.py).
+  const r = await api.post<AccessTokenOnly>("/auth/demo-login");
   setAccessToken(r.data.access_token);
   const me = await api.get<UserRead>("/auth/me");
   return me.data;
@@ -167,6 +182,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [qc],
   );
 
+  const demoLogin = useCallback(async () => {
+    qc.clear();
+    const me = await apiDemoLogin();
+    setUser(me);
+  }, [qc]);
+
   const logout = useCallback(async () => {
     await apiLogout();
     setUser(null);
@@ -190,10 +211,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       register,
+      demoLogin,
       logout,
       refreshMe,
     }),
-    [user, isLoading, login, register, logout, refreshMe],
+    [user, isLoading, login, register, demoLogin, logout, refreshMe],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -214,7 +214,22 @@
     "forgotLink": "Passwort vergessen?",
     "backToLogin": "← zurück zum Login",
     "forgotInfo": "Wenn die Email-Adresse registriert ist, ist eine Mail mit Reset-Link unterwegs. Prüfe auch Spam-Ordner.",
-    "logoAlt": "cubetracker — Speedcubing Solve-Tracking"
+    "logoAlt": "cubetracker — Speedcubing Solve-Tracking",
+    "demoLoginCtaTitle": "Demo ausprobieren",
+    "demoLoginCtaSubtitle": "Ohne Anmeldung — vorgefertigtes Beispiel-Konto",
+    "demoLoading": "Demo wird geladen…",
+    "trustEuServer": "EU-Server",
+    "trustNoTracking": "Kein Tracking",
+    "trustOpenSource": "Open Source",
+    "featureTimer": "Timer + Solves",
+    "featureStats": "Stats + PBs",
+    "featureTrainer": "PLL/OLL Trainer",
+    "featureCommunity": "Friends + Leaderboard"
+  },
+  "demo": {
+    "bannerTitle": "Demo-Modus",
+    "bannerBody": "Du nutzt einen Beispiel-Account. Änderungen werden nicht gespeichert.",
+    "signOutAndRegister": "Eigenen Account anlegen"
   },
   "footer": {
     "appName": "cubetracker",
