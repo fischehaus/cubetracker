@@ -13,6 +13,16 @@
 // erkannt → Inspection → Running → Solved erkennt.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+// W.gan-cube-connect-fix (2026-05-28): static import statt dynamic.
+// Begruendung: navigator.bluetooth.requestDevice() MUSS aus dem
+// User-Gesture-Handler (Click) heraus synchron aufgerufen werden —
+// jede Promise-Microtask-Boundary (await) zwischen Click und
+// requestDevice fuehrt dazu dass Chrome die User-Gesture wegwirft
+// + der Pairing-Dialog kommt nicht. `await import("gan-web-bluetooth")`
+// war so eine Boundary — verschluckte den Dialog still ohne Error.
+// Trade-off: ~26 kb gz mehr im Main-Bundle. Akzeptabel fuer
+// Funktionalitaet.
+import { connectGanCube } from "gan-web-bluetooth";
 
 // Lokale Typen-Aliase. W.gan-cube-mvp-qa: vorher selbst-definiert,
 // jetzt mit der echten Library-Shape gehalten. Wenn gan-web-bluetooth
@@ -99,10 +109,14 @@ export function useSmartCube() {
     // Nicht ueber State direkt pruefen (das ist stale), sondern via Ref.
     if (connectionRef.current !== null) return;
     try {
-      // Dynamic import — gan-web-bluetooth nicht im initialen Bundle
-      // (User der nie Smart-Cube nutzt zahlt das ~30kb nicht).
-      const { connectGanCube } = await import("gan-web-bluetooth");
+      // Static import oben — KEIN await import hier! requestDevice
+      // muss aus dem User-Gesture-Click ohne async-Boundary aufgerufen
+      // werden (siehe Kommentar oben am Datei-Kopf).
+      // eslint-disable-next-line no-console
+      console.log("[SmartCube] connect() start — calling connectGanCube...");
       const conn = (await connectGanCube()) as GanCubeConnection;
+      // eslint-disable-next-line no-console
+      console.log("[SmartCube] connected:", conn);
       connectionRef.current = conn;
       setState((s) => ({
         ...s,
@@ -144,13 +158,20 @@ export function useSmartCube() {
         }
       });
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
+      console.error("[SmartCube] connect() failed:", err);
       // QA-Fix W.gan-cube-mvp-qa (SOLLTE User-Cancel): Wenn der User
       // den Browser-Pairing-Dialog schliesst ohne ein Geraet zu waehlen,
       // wirft die API eine DOMException "NotFoundError". Das ist eine
       // normale Aktion, kein Fehler — still zum disconnected-State.
+      // W.gan-cube-connect-fix: NotAllowedError (User-Gesture lost,
+      // Permission denied) und AbortError (Dialog abgebrochen) auch
+      // als User-Cancel behandeln.
       const isUserCancel =
         err instanceof Error &&
         (err.name === "NotFoundError" ||
+          err.name === "NotAllowedError" ||
+          err.name === "AbortError" ||
           err.message.toLowerCase().includes("user cancelled") ||
           err.message.toLowerCase().includes("cancelled by user"));
       if (isUserCancel) {

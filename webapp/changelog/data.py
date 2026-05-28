@@ -44,6 +44,37 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-connect-fix",
+        released=date(2026, 5, 28),
+        title="🧊 Smart-Cube-Pairing-Dialog erscheint endlich (Chrome User-Gesture-Fix)",
+        highlights=[
+            "User-Bug: „Cube verbinden\"-Klick wird erkannt, aber der "
+            "Browser-Pairing-Dialog kommt nicht. Diagnose: Chrome (und "
+            "alle Web-Bluetooth-Browser) verlangen dass navigator."
+            "bluetooth.requestDevice() **direkt aus dem User-Gesture-"
+            "Click-Handler** aufgerufen wird — JEDE Promise-Microtask-"
+            "Boundary (await) zwischen Click und requestDevice fuehrt "
+            "dazu dass die User-Gesture verloren geht. Dialog wird "
+            "still verschluckt, kein Error.",
+            "**Ursache**: `await import(\"gan-web-bluetooth\")` in "
+            "useSmartCube.connect() war eine solche Boundary — die "
+            "Library wurde dynamisch geladen, danach kam der "
+            "requestDevice-Call zu spaet.",
+            "**Fix**: static import von gan-web-bluetooth statt "
+            "dynamic. Library landet jetzt im Main-Bundle (525 KB gz "
+            "statt 499 KB + 26 KB async-Chunk) — Trade-off Bundle-Size "
+            "fuer Funktionalitaet. requestDevice wird jetzt synchron "
+            "im selben User-Gesture-Stack aufgerufen.",
+            "Plus: NotAllowedError + AbortError werden jetzt auch als "
+            "User-Cancel behandelt (vorher rote Fehlerbox bei diesen "
+            "DOMException-Codes).",
+            "Plus: console.log + console.error in connect() fuer "
+            "Debug-Sichtbarkeit in der Browser-Console (`[SmartCube] "
+            "connect() start...`).",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-polish-pbs-qa",
         released=date(2026, 5, 28),
         title="QA-Hotfix nach Timer-Polish + Snapshot-Limit (1 KRITISCH + 3 SOLLTE)",
