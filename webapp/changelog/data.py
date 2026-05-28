@@ -44,6 +44,36 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.gan-cube-mvp",
+        released=date(2026, 5, 28),
+        title="🧊 Smart-Cube-Pairing (GAN i4 / 12/14 / MoYu AI 2023)",
+        highlights=[
+            "Erste Welle der Smart-Cube-Integration. MVP: Connect + "
+            "Pairing + Move-Indicator. Auto-Time-Insertion (Timer "
+            "startet/stoppt mit dem Cube) kommt in einer Folge-Welle.",
+            "**Library:** `gan-web-bluetooth` (npm, ~30kb gz) — "
+            "dynamic-importiert, also kein Bundle-Impact fuer User "
+            "die nie Smart-Cube nutzen.",
+            "**Unterstuetzte Cubes:** GAN i4, GAN Mini ui FreePlay, "
+            "GAN 12/14 ui, GAN356i / Carry / 3, Monster Go 3Ai, MoYu "
+            "AI 2023 (nutzt GAN-Gen2-Protokoll).",
+            "**Browser-Constraint:** Chrome / Edge / Brave / Opera "
+            "(Desktop + Android). Safari (iOS/macOS) + Firefox haben "
+            "kein Web-Bluetooth — der Block zeigt dort eine amber "
+            "Hinweis-Box mit Empfehlung.",
+            "**Wo:** neuer Block unter den Mode-Tipps in der "
+            "TimerControlsCard (Timer-Tab). Connect-Button gross + "
+            "purple, im verbundenen Zustand: gruener Pulse-Dot + "
+            "Cube-Name + Battery + letzter Move + Move-Counter.",
+            "**Privacy:** Bluetooth-Pairing ist Browser-nativ, kein "
+            "Drittanbieter-Code, keine Cloud-Telemetrie. Cube-Daten "
+            "bleiben lokal im Browser — Backend bekommt nur die "
+            "Solve-Time wie bei manueller Eingabe.",
+            "14 neue i18n-Keys unter smartCube-Namespace DE/EN.",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-display-size-v2",
         released=date(2026, 5, 28),
         title="Größenregler-Polish + „Alle Solves\"-Bug gefixt",

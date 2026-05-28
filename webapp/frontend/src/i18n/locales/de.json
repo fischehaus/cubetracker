@@ -37,6 +37,21 @@
     "fontSizeShrinkAria": "Zeitanzeige verkleinern",
     "fontSizeGrowAria": "Zeitanzeige vergrößern"
   },
+  "smartCube": {
+    "headerTitle": "Smart-Cube (Bluetooth)",
+    "infoBody": "Verbindet einen GAN-Smart-Cube (z.B. GAN i4, GAN 12/14 ui, MoYu AI 2023) via Web-Bluetooth-API. Aktuell zeigt diese MVP-Welle nur, dass die Verbindung steht und Bewegungen erkannt werden. Automatisches Solve-Tracking (Timer startet/stoppt mit dem Cube) kommt in einer Folge-Welle. Browser-Constraint: Chrome / Edge / Brave / Opera (Desktop + Android). Safari + Firefox haben kein Web-Bluetooth.",
+    "connectButton": "🧊 Cube verbinden",
+    "retryButton": "Erneut versuchen",
+    "connectingLabel": "Verbinde …",
+    "disconnectButton": "Trennen",
+    "unsupportedTitle": "Web-Bluetooth nicht verfügbar",
+    "unsupportedBody": "Dein Browser unterstützt Web-Bluetooth nicht. Empfohlen: Chrome / Edge / Brave (Desktop + Android). Safari (iOS/macOS) und Firefox haben keine Web-Bluetooth-Unterstützung.",
+    "unnamedCube": "Smart-Cube",
+    "lastMoveLabel": "Letzter Move:",
+    "moveCountLabel": "{{count}} insgesamt",
+    "mvpNote": "MVP-Welle: nur Pairing + Move-Indicator. Auto-Time-Insertion kommt als Nächstes.",
+    "pairingHint": "Pairing-Dialog vom Browser bestätigen. Der Cube muss angeschaltet (kurz eine Seite drehen) und in Reichweite sein."
+  },
   "trustBlock": {
     "headerTitle": "Was wir mit deinen Daten machen",
     "headerSubtitle": "Kurze Fassung — Details in der Datenschutzerklärung",
