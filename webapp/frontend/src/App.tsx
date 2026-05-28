@@ -187,6 +187,11 @@ function PatchNotesModal({ onClose }: { onClose: () => void }) {
 // Tab-Inhalte
 // ============================================================
 
+// W.timer-focus-mode (2026-05-28): localStorage-Key fuer den Fokus-
+// Modus-Toggle. Default OFF (Bestands-User-Schutz) — wer Fokus mag,
+// aktiviert es und es bleibt persistent.
+const FOCUS_MODE_STORAGE_KEY = "cubetracker.timer_focus_mode";
+
 function TimerTab({
   timerCubeType,
   setTimerCubeType,
@@ -194,6 +199,7 @@ function TimerTab({
   timerCubeType: string;
   setTimerCubeType: (s: string) => void;
 }) {
+  const { t } = useTranslation();
   // TIMER hat keine externe Filter-Leiste — Cube/Session/Hardware
   // werden in der TimerControlsCard gewählt.
   // Welle 2 (2026-05-16): hardwareId aus BigTimerInput hochgezogen, damit
@@ -202,6 +208,23 @@ function TimerTab({
   // fallt.
   const [timerSessionId, setTimerSessionId] = useState<number | null>(null);
   const [timerHardwareId, setTimerHardwareId] = useState<number | null>(null);
+  // W.timer-focus-mode: blendet Live-/Letzte-Solves + SessionPlan +
+  // TimerControlsCard aus, damit Scramble + Timer-Display den ganzen
+  // Bildschirm nutzen. Persistent via localStorage.
+  const [focusMode, setFocusMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(FOCUS_MODE_STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(FOCUS_MODE_STORAGE_KEY, focusMode ? "1" : "0");
+    } catch {
+      /* ignore — Private-Mode oder Quota voll */
+    }
+  }, [focusMode]);
 
   // Scramble-State im TimerTab orchestriert.
   // - currentScramble: aktueller String, an BigTimerInput für Save
@@ -241,6 +264,34 @@ function TimerTab({
     setTimerHardwareId(null);
   }, [timerCubeType]);
 
+  // W.timer-focus-mode: Toggle-Button rechtsbuendig ueber dem Layout.
+  // Im Fokus-Modus: aside (Live/Letzte-Solves) + SessionPlanCard +
+  // TimerControlsCard weg, Layout einspaltig — Scramble + Timer-Display
+  // + (TouchPad) bekommen den ganzen Bildschirm.
+  const focusToggle = (
+    <div className="flex justify-end mb-2">
+      <button
+        type="button"
+        onClick={() => setFocusMode((v) => !v)}
+        className={`text-xs rounded px-3 py-1.5 border transition-colors ${
+          focusMode
+            ? "border-purple-500/50 bg-purple-600/30 text-purple-100 hover:bg-purple-600/50"
+            : "border-gray-700 bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 hover:text-gray-100"
+        }`}
+        title={
+          focusMode
+            ? t("timerTab.focusToggleOffTitle")
+            : t("timerTab.focusToggleOnTitle")
+        }
+        aria-pressed={focusMode}
+      >
+        {focusMode
+          ? t("timerTab.focusToggleOff")
+          : t("timerTab.focusToggleOn")}
+      </button>
+    </div>
+  );
+
   return (
     // Layout: Desktop = Live/Letzte-Solves links (420px), Solving rechts.
     // DOM-Reihenfolge im main = mobile-visuelle Reihenfolge (Welle 2,
@@ -250,40 +301,63 @@ function TimerTab({
     // ganz oben weil's eine optionale Trainings-Karte ist.
     // Auf lg dreht `lg:order-1/2` nur die zwei Hauptspalten um (aside
     // links, main rechts) — die DOM-Reihenfolge bleibt a11y-korrekt.
-    <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
-      <main className="lg:order-2 space-y-4">
-        <SessionPlanCard cubeType={timerCubeType} sessionId={timerSessionId} />
-        <ScrambleCard
-          cubeType={timerCubeType}
-          scrambleTypeOverride={scrambleTypeOverride}
-          regenerationSeed={regenSeed}
-          onScrambleGenerated={setCurrentScramble}
-        />
-        <BigTimerInput
-          cubeType={timerCubeType}
-          sessionId={timerSessionId}
-          hardwareId={timerHardwareId}
-          scramble={currentScramble}
-          onSolveSaved={() => setRegenSeed((s) => s + 1)}
-        />
-        {/* TouchTimerPad rendert auf Desktop immer null — auf Phone nur
-            sichtbar wenn Spacebar-Modus aktiv ist (Text-Mode = Soft-Tastatur,
-            da gibt es nichts zu triggern). Lebt seit Welle 2 ausserhalb von
-            BigTimerInput, damit der Selektor-Block in TimerControlsCard
-            UNTER dem Pad scrollen kann. */}
-        {showTouchPad && <TouchTimerPad />}
-        <TimerControlsCard
-          cubeType={timerCubeType}
-          onCubeTypeChange={setTimerCubeType}
-          sessionId={timerSessionId}
-          onSessionIdChange={setTimerSessionId}
-          hardwareId={timerHardwareId}
-          onHardwareIdChange={setTimerHardwareId}
-        />
-      </main>
-      <aside className="lg:order-1">
-        <LastSolvesPreview cubeType={timerCubeType} sessionId={timerSessionId} />
-      </aside>
+    // W.timer-focus-mode: Wenn focusMode → einspaltig, aside + Sub-Cards
+    // ausgeblendet.
+    <div>
+      {focusToggle}
+      <div
+        className={
+          focusMode
+            ? "grid grid-cols-1 gap-6"
+            : "grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6"
+        }
+      >
+        <main className={focusMode ? "space-y-4" : "lg:order-2 space-y-4"}>
+          {!focusMode && (
+            <SessionPlanCard
+              cubeType={timerCubeType}
+              sessionId={timerSessionId}
+            />
+          )}
+          <ScrambleCard
+            cubeType={timerCubeType}
+            scrambleTypeOverride={scrambleTypeOverride}
+            regenerationSeed={regenSeed}
+            onScrambleGenerated={setCurrentScramble}
+          />
+          <BigTimerInput
+            cubeType={timerCubeType}
+            sessionId={timerSessionId}
+            hardwareId={timerHardwareId}
+            scramble={currentScramble}
+            onSolveSaved={() => setRegenSeed((s) => s + 1)}
+          />
+          {/* TouchTimerPad rendert auf Desktop immer null — auf Phone nur
+              sichtbar wenn Spacebar-Modus aktiv ist (Text-Mode = Soft-Tastatur,
+              da gibt es nichts zu triggern). Lebt seit Welle 2 ausserhalb von
+              BigTimerInput, damit der Selektor-Block in TimerControlsCard
+              UNTER dem Pad scrollen kann. */}
+          {showTouchPad && <TouchTimerPad />}
+          {!focusMode && (
+            <TimerControlsCard
+              cubeType={timerCubeType}
+              onCubeTypeChange={setTimerCubeType}
+              sessionId={timerSessionId}
+              onSessionIdChange={setTimerSessionId}
+              hardwareId={timerHardwareId}
+              onHardwareIdChange={setTimerHardwareId}
+            />
+          )}
+        </main>
+        {!focusMode && (
+          <aside className="lg:order-1">
+            <LastSolvesPreview
+              cubeType={timerCubeType}
+              sessionId={timerSessionId}
+            />
+          </aside>
+        )}
+      </div>
     </div>
   );
 }

@@ -26,6 +26,12 @@
     "communityDesc": "Freunde + Bestenliste",
     "mainNavAria": "Hauptnavigation"
   },
+  "timerTab": {
+    "focusToggleOn": "🎯 Fokus aktivieren",
+    "focusToggleOff": "🪟 Volle Ansicht",
+    "focusToggleOnTitle": "Live + Letzte Solves + Sub-Cards ausblenden. Scramble + Timer-Display nehmen den ganzen Bildschirm ein. Bleibt auch nach Reload aktiv.",
+    "focusToggleOffTitle": "Zurück zur vollen Ansicht mit Live-Karte, letzten Solves und Sub-Cards."
+  },
   "userMenu": {
     "settings": "Mein Account & Einstellungen",
     "patchNotes": "Patch Notes",

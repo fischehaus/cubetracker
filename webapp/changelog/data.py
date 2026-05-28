@@ -44,6 +44,31 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-focus-mode",
+        released=date(2026, 5, 28),
+        title="🎯 Fokus-Modus im Timer-Tab",
+        highlights=[
+            "User-Wunsch: Toggle der die Sub-Cards im Timer-Tab "
+            "ausblendet, damit Scramble + Timer-Display den ganzen "
+            "Bildschirm einnehmen koennen — fuer Speedcuber die wenig "
+            "Ablenkung wollen.",
+            "Neuer „🎯 Fokus aktivieren\"-Button rechts ueber dem "
+            "TimerTab-Layout. Klick → Live-Karte + Letzte-Solves-"
+            "Tabelle + SessionPlanCard + TimerControlsCard werden "
+            "ausgeblendet, Layout wird einspaltig.",
+            "Sichtbar bleiben: Scramble, BigTimerInput (Soft-Tastatur "
+            "im Text-Modus / Spacebar-Tracking im Spacebar-Modus), "
+            "TouchTimerPad (auf Phone).",
+            "Zustand persistiert in localStorage (Key: "
+            "cubetracker.timer_focus_mode). Bleibt auch nach Reload "
+            "aktiv — wer Fokus mag, bleibt im Fokus.",
+            "Default OFF damit Bestands-User nicht ueberrascht "
+            "werden. Cube/Session/Hardware wechseln geht weiterhin "
+            "ueber „🪟 Volle Ansicht\"-Toggle zurueck zur Sub-Card.",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-lastsolves-all",
         released=date(2026, 5, 28),
         title="⏱ Letzte Solves im Timer-Tab: jetzt bis „Alle\" + interner Scroll",

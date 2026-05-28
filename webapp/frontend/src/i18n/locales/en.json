@@ -26,6 +26,12 @@
     "communityDesc": "Friends + leaderboard",
     "mainNavAria": "Main navigation"
   },
+  "timerTab": {
+    "focusToggleOn": "🎯 Enable focus",
+    "focusToggleOff": "🪟 Full view",
+    "focusToggleOnTitle": "Hide the live card, recent solves and sub-cards. Scramble and timer display take the whole screen. Stays active after reload.",
+    "focusToggleOffTitle": "Back to the full view with live card, recent solves and sub-cards."
+  },
   "userMenu": {
     "settings": "My Account & Settings",
     "patchNotes": "Patch Notes",
