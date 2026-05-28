@@ -289,7 +289,8 @@ function FontSizeToggle({
 }) {
   return (
     <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 inline-flex flex-wrap">
-      {(["sm", "md", "lg", "xl", "xxl"] as TimerFontSize[]).map((fs) => {
+      {/* W.timer-display-size-v2: 7 Stufen statt 5 — xxxl + xxxxl ergaenzt. */}
+      {(["sm", "md", "lg", "xl", "xxl", "xxxl", "xxxxl"] as TimerFontSize[]).map((fs) => {
         const active = value === fs;
         return (
           <button

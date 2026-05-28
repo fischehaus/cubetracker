@@ -194,14 +194,18 @@ const FOCUS_MODE_STORAGE_KEY = "cubetracker.timer_focus_mode";
 
 // W.timer-display-size (2026-05-28): Reihenfolge fuer die A−/A+-
 // Rotation im Fokus-Modus. Settings.timer_font_size ist eine Stufe,
-// hier rotieren wir durch sm → md → lg → xl → xxl.
-const TIMER_FONT_SIZE_ORDER: ("sm" | "md" | "lg" | "xl" | "xxl")[] = [
-  "sm",
-  "md",
-  "lg",
-  "xl",
-  "xxl",
-];
+// hier rotieren wir durch alle 7 Stufen.
+// W.timer-display-size-v2 (2026-05-28): xxxl + xxxxl ergaenzt — User
+// wollte „noch groesser", die alte XXL (8rem) reichte nicht aus.
+const TIMER_FONT_SIZE_ORDER: (
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl"
+  | "xxl"
+  | "xxxl"
+  | "xxxxl"
+)[] = ["sm", "md", "lg", "xl", "xxl", "xxxl", "xxxxl"];
 
 function TimerTab({
   timerCubeType,
@@ -297,12 +301,14 @@ function TimerTab({
   const focusToggle = (
     <div className="flex justify-end mb-2 gap-2 items-center">
       {/* W.timer-display-size: A−/A+ Buttons rotieren timer_font_size
-          durch 5 Stufen. NUR im Fokus-Modus sichtbar — sonst lebt die
-          Einstellung im Settings-Tab (Verwaltung → Einstellungen). */}
+          durch 7 Stufen (sm → 4XL). NUR im Fokus-Modus sichtbar — sonst
+          lebt die Einstellung im Settings-Tab (Verwaltung → Einstellungen).
+          v2 (2026-05-28): Buttons selbst groesser + prominenter, eigene
+          Card mit Border, Label-Pill in der Mitte. */}
       {focusMode && (
-        <div className="flex items-center gap-1 mr-1">
+        <div className="inline-flex items-center gap-2 rounded-lg border border-purple-500/30 bg-gray-900/60 p-1.5 shadow-sm">
           <span
-            className="text-[11px] text-gray-500 uppercase tracking-wide mr-1"
+            className="text-[11px] text-purple-300/80 uppercase tracking-wider px-2"
             aria-hidden="true"
           >
             {t("timerTab.fontSizeLabel")}
@@ -311,20 +317,23 @@ function TimerTab({
             type="button"
             onClick={() => bumpFontSize("down")}
             disabled={!canShrink}
-            className="rounded border border-gray-700 bg-gray-800/60 px-2 py-1 text-xs text-gray-300 hover:bg-gray-700/80 hover:text-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-700 bg-gray-800 text-base font-semibold text-gray-200 hover:bg-purple-700/40 hover:text-white hover:border-purple-500/60 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800 disabled:hover:text-gray-200 disabled:hover:border-gray-700"
             title={t("timerTab.fontSizeShrinkTitle")}
             aria-label={t("timerTab.fontSizeShrinkAria")}
           >
             A−
           </button>
-          <span className="text-[10px] text-gray-500 min-w-[28px] text-center font-mono">
+          <span
+            className="px-3 py-1 rounded-full bg-purple-600/30 border border-purple-500/40 text-purple-100 text-xs font-mono font-semibold min-w-[3.5rem] text-center"
+            aria-live="polite"
+          >
             {settings.timer_font_size.toUpperCase()}
           </span>
           <button
             type="button"
             onClick={() => bumpFontSize("up")}
             disabled={!canGrow}
-            className="rounded border border-gray-700 bg-gray-800/60 px-2 py-1 text-xs text-gray-300 hover:bg-gray-700/80 hover:text-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-700 bg-gray-800 text-base font-semibold text-gray-200 hover:bg-purple-700/40 hover:text-white hover:border-purple-500/60 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800 disabled:hover:text-gray-200 disabled:hover:border-gray-700"
             title={t("timerTab.fontSizeGrowTitle")}
             aria-label={t("timerTab.fontSizeGrowAria")}
           >

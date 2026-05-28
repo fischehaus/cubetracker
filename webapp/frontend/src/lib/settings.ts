@@ -32,7 +32,14 @@ export type InspectionMode = "wca" | "pragmatic";
  * Schrift-Größe für Timer + ScrambleCard. Default `lg`.
  * Wirkt auf font-size + line-height beider Karten konsistent.
  */
-export type TimerFontSize = "sm" | "md" | "lg" | "xl" | "xxl";
+export type TimerFontSize =
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl"
+  | "xxl"
+  | "xxxl"
+  | "xxxxl";
 
 /**
  * Audio-Modus für die Inspection-Warnings bei 8s + 12s.
@@ -122,14 +129,18 @@ export const TIMER_FONT_SCALE: Record<TimerFontSize, { timer: string; scramble: 
   lg: { timer: "5rem", scramble: "1.25rem" },
   xl: { timer: "6.5rem", scramble: "1.5rem" },
   xxl: { timer: "8rem", scramble: "1.875rem" },
+  xxxl: { timer: "11rem", scramble: "2.25rem" },
+  xxxxl: { timer: "15rem", scramble: "2.75rem" },
 };
 
 export const FONT_SIZE_LABELS: Record<TimerFontSize, string> = {
-  sm: "Klein",
-  md: "Mittel",
-  lg: "Groß",
-  xl: "Sehr groß",
+  sm: "S",
+  md: "M",
+  lg: "L",
+  xl: "XL",
   xxl: "XXL",
+  xxxl: "3XL",
+  xxxxl: "4XL",
 };
 
 const STORAGE_KEY = "cubetracker.settings.v1";

@@ -44,6 +44,41 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-display-size-v2",
+        released=date(2026, 5, 28),
+        title="Größenregler-Polish + „Alle Solves\"-Bug gefixt",
+        highlights=[
+            "User-Feedback nach W.timer-display-size: (1) noch groesser, "
+            "(2) Anzeige zur Vergroesserung besser aussehen, (3) „Alle "
+            "Solves\" zeigt aktuell GAR KEINE Solves.",
+            "**Schrift-Stufen erweitert** (settings.ts): 5 → 7 Stufen. "
+            "Neu: `xxxl` (11rem) und `xxxxl` (15rem). FONT_SIZE_LABELS "
+            "auf neutrale S/M/L/XL/XXL/3XL/4XL umgestellt (vorher "
+            "DE-Strings „Klein/Mittel/...\", die mit den neuen Stufen "
+            "inkonsistent geworden waeren). SettingsPanel listet jetzt "
+            "alle 7 Stufen, A−/A+ im Fokus rotiert durch alle 7.",
+            "**A−/A+ Buttons redesigned**: vorher pixelige 2-Spalten-"
+            "Icons, jetzt eigene Karte mit purple-Border, 40×40-Buttons "
+            "mit aktiv-scale + hover-Color, in der Mitte ein Pill mit "
+            "der aktuellen Stufe (purple-Akzent) — passt zum Theme + "
+            "klarere Ziel-Affordance auf Touch-Geraeten.",
+            "**„Alle Solves\"-Bug gefixt** (LastSolvesPreview): vorher "
+            "wurde effectiveTableSize=100_000 gesetzt, fetchLimit = "
+            "100_000+99 = 100_099 — Backend cap `le=100_000` lieferte "
+            "422 Validation Error → keine Solves in der Tabelle. "
+            "Effektiv-Limit auf 50_000 gecappt (50_099 + AO_LOOKBACK "
+            "= 50_099 < 100_000). Realistisches Maximum.",
+            "**„Letzte Solves\" — Sicht max 20 Zeilen** (vorher 100): "
+            "User-Wunsch. Bei tableSize > 20 wird die Tabelle auf "
+            "max-h-[760px] (= ~20 Zeilen + sticky-Header) begrenzt + "
+            "scrollt intern. Plus farb-passender Scrollbar (Purple-"
+            "Thumb auf Dark-Gray-Track, Firefox + Chrome 121+ via "
+            "scrollbar-color, Safari/Webkit via Tailwind arbitrary "
+            "variants).",
+        ],
+        internal=False,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-display-size",
         released=date(2026, 5, 28),
         title="🅰 Zeit-Display skalieren im Fokus-Modus + neues App-Logo",

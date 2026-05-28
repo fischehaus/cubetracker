@@ -84,9 +84,13 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
 
   // Wir laden max(windowSize, tableSize + AO_LOOKBACK) — eine Query reicht
   // für beide Use-Cases (Form-Vergleich + Tabelle).
-  // W.timer-lastsolves-all: bei tableSize = -1 („Alle") → 100_000 als
-  // Effektiv-Limit (Backend verkraftet 50k+ ohne Probleme).
-  const effectiveTableSize = tableSize === -1 ? 100_000 : tableSize;
+  // W.timer-lastsolves-all v2 (2026-05-28): BUG-FIX! vorher 100_000 als
+  // Effektiv-Limit + AO_LOOKBACK 99 = 100_099 → Backend cap `le=100_000`
+  // wirft 422 → Frontend zeigt KEINE Solves bei „Alle". Jetzt auf 50_000
+  // gecappt (50_099 + 99 < 100_000). Realistisches Maximum fuer einen
+  // einzelnen User; falls jemand >50k Solves hat, kann er den Analyse-
+  // Tab nutzen (eigener Selector).
+  const effectiveTableSize = tableSize === -1 ? 50_000 : tableSize;
   const fetchLimit = Math.max(windowSize, effectiveTableSize + AO_LOOKBACK);
   const params: { cube_type: string; session_id?: number; limit: number } = {
     cube_type: cubeType,
@@ -401,16 +405,32 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           // Live-Karte oben verfügbar; in der Tabelle wenig nützlich,
           // weil 100er-Fenster sich pro Zeile fast nicht ändert (User-
           // Wunsch 2026-05-17: AO100 aus der Tabelle raus).
-          // W.timer-lastsolves-all: bei tableSize > 100 (200/500/Alle)
-          // bekommt der Wrapper internen vertikalen Scroll (max-h-96),
-          // damit die Karte nicht ewig hoch wird. Sticky-Header bleibt
-          // beim Scrollen sichtbar.
+          // W.timer-lastsolves-all v2 (2026-05-28): bei tableSize > 20
+          // (statt vorher > 100) bekommt der Wrapper internen vertikalen
+          // Scroll. User-Wunsch: max ca. 20 Zeilen sichtbar, danach
+          // scrollen — egal welcher Selector-Wert gewaehlt ist. Plus
+          // farb-passender Scrollbar (purple-thin) statt Browser-Default.
+          // Sticky-Header bleibt beim Scrollen sichtbar.
+          // Hoehe-Rechnung: ~36px pro Zeile * 20 + ~40px sticky-header
+          // = ~760px. Mit max-h-[760px] reine Tailwind-Loesung.
           <div
             className={`overflow-x-auto ${
-              tableSize === -1 || tableSize > 100
-                ? "max-h-96 overflow-y-auto"
+              tableSize === -1 || tableSize > 20
+                ? "max-h-[760px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-800/40 [&::-webkit-scrollbar-thumb]:bg-purple-500/55 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-purple-500/80"
                 : ""
             }`}
+            style={
+              tableSize === -1 || tableSize > 20
+                ? {
+                    // Firefox + Chrome 121+ native CSS-Properties.
+                    // Webkit-Browser (Safari) styled via Tailwind
+                    // arbitrary variants (className oben).
+                    scrollbarColor:
+                      "rgba(168, 85, 247, 0.55) rgba(31, 41, 55, 0.4)",
+                    scrollbarWidth: "thin",
+                  }
+                : undefined
+            }
           >
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-gray-900/95 z-10">
