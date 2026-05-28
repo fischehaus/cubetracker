@@ -44,6 +44,33 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.login-redesign",
+        released=date(2026, 5, 28),
+        title="🎨 LoginPage neu: Skin-Slideshow + kompakte Trust + Features",
+        highlights=[
+            "Vor der Demo am Samstag: die LoginPage hat ein neues, "
+            "fokussierteres Layout bekommen.",
+            "**Skin-Slideshow im Hintergrund**: rotiert automatisch alle "
+            "6 Sekunden durch die 3 Skins (Cyberpunk Neon → Cyberpunk "
+            "Laser → Party Fun → repeat). Sichtbar auch bevor man sich "
+            "einloggt — neue Besucher sehen das Skin-System direkt in "
+            "Aktion. Unabhängig vom User-Setting (das wird erst nach "
+            "Login aktiv).",
+            "**Layout zentriert**: statt 2-Spalten-Marketing. Logo + "
+            "Tagline oben, Login/Register-Card mittig, dann 3 Trust-"
+            "Pills (EU-Server / Kein Tracking / Open Source) plus 4 "
+            "Feature-Highlights als Icon-Tiles (Timer, Stats, Trainer, "
+            "Community).",
+            "**Mobile-Optimierung**: kein langes Scrollen mehr durch "
+            "Hero + TrustBlock + FeatureListPanel rechts. Alles in "
+            "einer Single-Column auf allen Breakpoints.",
+            "**Bewusst kein Demo-Account in dieser Welle**: das Demo-"
+            "Backend-Feature war ein Stabilitäts-Risiko vor der Demo. "
+            "Kommt in einer separaten Welle nach dem Wochenende, mit "
+            "sauberer Schritt-für-Schritt-Live-Verifikation.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.smart-cube-position-restore",
         released=date(2026, 5, 28),
         title="📍 Smart-Cube-Block wieder unter Timer-Modus",
