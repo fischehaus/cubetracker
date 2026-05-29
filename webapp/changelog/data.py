@@ -44,6 +44,36 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.cache-invalidation-prefix",
+        released=date(2026, 5, 30),
+        title="🔁 Cache-Invalidation: Domain-Prefix statt 13-Zeilen-Listen",
+        highlights=[
+            "React-Query-Keys laufen jetzt über eine zentrale `qk`-"
+            "Konstante (lib/queryKeys.ts) mit Domain-Prefix-Hierarchie "
+            "(`solves-domain`, `sessions-domain`, …). Mutations "
+            "invalidieren per Prefix-Match statt 13 Einzelkeys "
+            "aufzuzählen — neue Stats-Endpoints werden ab jetzt "
+            "automatisch mit-invalidiert, kein Drift mehr durch "
+            "vergessene Listen-Updates. Touched: api.ts (~140 Stellen) "
+            "+ BackupPanel + AccountSettingsPanel + ImportPanel + "
+            "App.tsx + neue queryKeys.ts. TypeScript-Compile grün.",
+            "Beifang: 3 reale Bugs gefixt, die der Refactor aufgedeckt "
+            "hat — (a) Wipe-Demo-Data invalidierte `[\"activity\"]` / "
+            "`[\"temporal\"]` / `[\"by-cube\"]` (echte Keys haben "
+            "`stats-`-Prefix → stille No-Ops, Stats zeigten nach "
+            "Reset stale Werte), (b) CSV-Import invalidierte nur "
+            "Solves+Sessions (Stats+Achievements blieben stale), "
+            "(c) Leaderboard wurde NIRGENDWO invalidiert (eigenes "
+            "Ranking blieb nach jedem Solve bis zum Tab-Wechsel "
+            "stale). Alle drei via Prefix-Invalidation jetzt sauber.",
+            "QA-Sub-Agent-Review: 1 KRITISCH (ImportPanel — vor "
+            "Commit gefixt), 1 SOLLTE (App.tsx health-Key in Hierarchie "
+            "integriert), 1 NICE (BackupPanel-Restore-Kommentar "
+            "präzisiert). Alle erledigt vor Push.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-export-key",
         released=date(2026, 5, 29),
         title="🔑 Roadmap-Export-Endpoint mit festem Key (Tooling)",

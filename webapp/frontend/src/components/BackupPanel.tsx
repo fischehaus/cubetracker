@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { qk } from "../lib/queryKeys";
 import { downloadFullBackup } from "../lib/backup";
 import { getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
@@ -119,21 +120,25 @@ export function BackupPanel() {
 
   // ====== Snapshots ======
   const snapshotsQ = useQuery({
-    queryKey: ["snapshots"],
+    queryKey: qk.snapshots.all(),
     queryFn: async () => (await api.get<SnapshotsResponse>("/backup/snapshots")).data,
   });
   const createSnapshotMut = useMutation({
     mutationFn: async () => (await api.post<SnapshotItem>("/backup/snapshots")).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["snapshots"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.snapshots.all() }),
   });
   const restoreSnapshotMut = useMutation({
     mutationFn: async (id: number) =>
       (await api.post<RestoreResult>(`/backup/snapshots/${id}/restore`)).data,
+    // Absicht: Restore ersetzt ALLE User-Daten (Solves, Sessions, Hardware,
+    // Achievements, Snapshots, …) → bewusster kompletter Cache-Reset.
+    // Domain-Prefix-Invalidation würde zwar Solves+Sessions+Hardware decken,
+    // aber wir wollen wirklich ALLES (auch news-latest etc. neu laden).
     onSuccess: () => qc.invalidateQueries(),
   });
   const deleteSnapshotMut = useMutation({
     mutationFn: async (id: number) => api.delete(`/backup/snapshots/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["snapshots"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.snapshots.all() }),
   });
 
   return (

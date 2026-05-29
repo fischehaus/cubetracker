@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
+import { qk } from "../lib/queryKeys";
 import { COUNTRIES } from "../lib/countries";
 import { InfoButton } from "./InfoButton";
 
@@ -238,7 +239,7 @@ function WcaIdSection() {
       // QA-Fix W.wca-profile-qa: ohne diese Invalidation zeigt das
       // Dashboard noch bis zu 6h (staleTime) das alte WCA-Profil.
       // Live-Demo: User trägt ID ein → Karte erscheint sofort.
-      qc.invalidateQueries({ queryKey: ["wca-me-profile"] });
+      qc.invalidateQueries({ queryKey: qk.wca.meProfile() });
       setInfo(
         trimmed
           ? t("accountSettings.okWcaIdSaved")

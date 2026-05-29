@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { qk } from "../lib/queryKeys";
 import { InfoButton } from "./InfoButton";
 
 interface ImportResult {
@@ -40,9 +41,18 @@ export function ImportPanel() {
         timeout: 300_000,
       });
       setResult(r.data);
-      // Liste + Sessions invalidieren, damit UI die neuen Daten zeigt
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["sessions"] });
+      // CSV-Import schreibt potenziell 1000+ Solves + neue Sessions/Hardware
+      // + triggert Achievement-Recheck im Backend. Domain-Prefix-Invalidation
+      // deckt: alle Stats-Varianten + PBs + Suggest-Listen + Achievements +
+      // Challenges + Leaderboard. QA-Fix W.cache-invalidation-prefix:
+      // vorher invalidierte nur ["solves"]+["sessions"] (Stats/Achievements
+      // blieben stale, Leaderboard sowieso nie mit-invalidiert).
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.sessions.all() });
+      qc.invalidateQueries({ queryKey: qk.hardware.all() });
+      qc.invalidateQueries({ queryKey: qk.achievements.all() });
+      qc.invalidateQueries({ queryKey: qk.challenges.all() });
+      qc.invalidateQueries({ queryKey: qk.leaderboard.all() });
     } catch (e) {
       const msg =
         e instanceof Error ? e.message : t("importPanel.unknownError");

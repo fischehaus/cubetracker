@@ -18,6 +18,7 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from "@tanstack/react-query";
+import { qk } from "./queryKeys";
 import type {
   AchievementItem,
   ChallengeItem,
@@ -220,7 +221,7 @@ export interface SolveListParams {
 
 export function useSolves(params: SolveListParams = {}): UseQueryResult<Solve[]> {
   return useQuery({
-    queryKey: ["solves", params],
+    queryKey: qk.solves.list(params),
     queryFn: async (): Promise<Solve[]> => {
       const r = await api.get<Solve[]>("/solves", { params });
       return r.data;
@@ -236,23 +237,20 @@ export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
       return r.data;
     },
     onSuccess: () => {
-      // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard,
-      // ActivityChart veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
-      // Auch suggest-queries (most-used) sind betroffen.
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["stats"] });
-      qc.invalidateQueries({ queryKey: ["pb-history"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-session"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
-      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
-      qc.invalidateQueries({ queryKey: ["stats-activity"] });
-      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
-      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
-      qc.invalidateQueries({ queryKey: ["achievements"] });
-      qc.invalidateQueries({ queryKey: ["challenges-today"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-alg-case"] });
+      // Solve-Mutation → Domain-Prefix-Invalidation (W.cache-invalidation-prefix):
+      //   qk.solves.all() deckt: list + alle Stats-Varianten (overall/by-cube/
+      //   by-session/by-hardware/temporal/activity/by-alg-case) + pb-history +
+      //   recent-pbs in einem Schlag ab. Neuer Stats-Key unter qk.solves wird
+      //   automatisch mit-invalidiert — kein Drift mehr durch vergessene Listen.
+      //   suggestAll() refresht "zuletzt benutzt"-Listen unabhängig vom cubeType.
+      //   leaderboard.all() (🆕 vs. vor Refactor): ohne dies blieb das eigene
+      //   Ranking nach Solve-Eintrag bis Tab-Wechsel stale.
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.sessions.suggestAll() });
+      qc.invalidateQueries({ queryKey: qk.hardware.suggestAll() });
+      qc.invalidateQueries({ queryKey: qk.achievements.all() });
+      qc.invalidateQueries({ queryKey: qk.challenges.all() });
+      qc.invalidateQueries({ queryKey: qk.leaderboard.all() });
     },
   });
 }
@@ -269,23 +267,20 @@ export function useUpdateSolve(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard,
-      // ActivityChart veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
-      // Auch suggest-queries (most-used) sind betroffen.
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["stats"] });
-      qc.invalidateQueries({ queryKey: ["pb-history"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-session"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
-      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
-      qc.invalidateQueries({ queryKey: ["stats-activity"] });
-      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
-      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
-      qc.invalidateQueries({ queryKey: ["achievements"] });
-      qc.invalidateQueries({ queryKey: ["challenges-today"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-alg-case"] });
+      // Solve-Mutation → Domain-Prefix-Invalidation (W.cache-invalidation-prefix):
+      //   qk.solves.all() deckt: list + alle Stats-Varianten (overall/by-cube/
+      //   by-session/by-hardware/temporal/activity/by-alg-case) + pb-history +
+      //   recent-pbs in einem Schlag ab. Neuer Stats-Key unter qk.solves wird
+      //   automatisch mit-invalidiert — kein Drift mehr durch vergessene Listen.
+      //   suggestAll() refresht "zuletzt benutzt"-Listen unabhängig vom cubeType.
+      //   leaderboard.all() (🆕 vs. vor Refactor): ohne dies blieb das eigene
+      //   Ranking nach Solve-Eintrag bis Tab-Wechsel stale.
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.sessions.suggestAll() });
+      qc.invalidateQueries({ queryKey: qk.hardware.suggestAll() });
+      qc.invalidateQueries({ queryKey: qk.achievements.all() });
+      qc.invalidateQueries({ queryKey: qk.challenges.all() });
+      qc.invalidateQueries({ queryKey: qk.leaderboard.all() });
     },
   });
 }
@@ -297,23 +292,20 @@ export function useDeleteSolve(): UseMutationResult<void, Error, number> {
       await api.delete(`/solves/${id}`);
     },
     onSuccess: () => {
-      // Solves UND alle Stats-Varianten invalidieren — sonst zeigen
-      // StatsCard, MultiCubeCompareCard, OutlierCard, ActivityCard,
-      // ActivityChart veraltete Werte nach +2/DNF-Toggle, Create oder Delete.
-      // Auch suggest-queries (most-used) sind betroffen.
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["stats"] });
-      qc.invalidateQueries({ queryKey: ["pb-history"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-session"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
-      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
-      qc.invalidateQueries({ queryKey: ["stats-activity"] });
-      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
-      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
-      qc.invalidateQueries({ queryKey: ["achievements"] });
-      qc.invalidateQueries({ queryKey: ["challenges-today"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-alg-case"] });
+      // Solve-Mutation → Domain-Prefix-Invalidation (W.cache-invalidation-prefix):
+      //   qk.solves.all() deckt: list + alle Stats-Varianten (overall/by-cube/
+      //   by-session/by-hardware/temporal/activity/by-alg-case) + pb-history +
+      //   recent-pbs in einem Schlag ab. Neuer Stats-Key unter qk.solves wird
+      //   automatisch mit-invalidiert — kein Drift mehr durch vergessene Listen.
+      //   suggestAll() refresht "zuletzt benutzt"-Listen unabhängig vom cubeType.
+      //   leaderboard.all() (🆕 vs. vor Refactor): ohne dies blieb das eigene
+      //   Ranking nach Solve-Eintrag bis Tab-Wechsel stale.
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.sessions.suggestAll() });
+      qc.invalidateQueries({ queryKey: qk.hardware.suggestAll() });
+      qc.invalidateQueries({ queryKey: qk.achievements.all() });
+      qc.invalidateQueries({ queryKey: qk.challenges.all() });
+      qc.invalidateQueries({ queryKey: qk.leaderboard.all() });
     },
   });
 }
@@ -387,7 +379,7 @@ const EMPTY_STATS: StatsResponse = {
 
 export function useStats(params: StatsParams = {}): UseQueryResult<StatsResponse> {
   return useQuery({
-    queryKey: ["stats", params],
+    queryKey: qk.solves.statsOverall(params),
     queryFn: () =>
       withStub(
         async () => (await api.get<StatsResponse>("/stats", { params })).data,
@@ -424,7 +416,7 @@ export function usePbHistory(
   params: StatsParams = {},
 ): UseQueryResult<PbHistoryResponse> {
   return useQuery({
-    queryKey: ["pb-history", params],
+    queryKey: qk.solves.pbHistory(params),
     queryFn: () =>
       withStub(
         async () =>
@@ -466,7 +458,7 @@ const emptyRecentPbs = (limit: number): RecentPbsResponse => ({
 
 export function useRecentPbs(limit: number = 5): UseQueryResult<RecentPbsResponse> {
   return useQuery({
-    queryKey: ["recent-pbs", limit],
+    queryKey: qk.solves.recentPbs(limit),
     queryFn: () =>
       withStub(
         async () =>
@@ -536,7 +528,7 @@ export function useStatsBySession(
   const params: Record<string, string> = {};
   if (cubeType) params.cube_type = cubeType;
   return useQuery({
-    queryKey: ["stats-by-session", params],
+    queryKey: qk.solves.statsBySession(params),
     queryFn: () =>
       withStub(
         async () =>
@@ -577,7 +569,7 @@ export function useStatsByHardware(
   if (cubeType) params.cube_type = cubeType;
   if (sessionId !== null) params.session_id = sessionId;
   return useQuery({
-    queryKey: ["stats-by-hardware", params],
+    queryKey: qk.solves.statsByHardware(params),
     queryFn: () =>
       withStub(
         async () => (await api.get<StatsByHardwareResponse>("/stats/by-hardware", { params })).data,
@@ -597,7 +589,7 @@ export function useStatsByCube(
   const params: { session_id?: number } = {};
   if (sessionId !== null) params.session_id = sessionId;
   return useQuery({
-    queryKey: ["stats-by-cube", params],
+    queryKey: qk.solves.statsByCube(params),
     queryFn: () =>
       withStub(
         async () => (await api.get<StatsByCubeResponse>("/stats/by-cube", { params })).data,
@@ -635,7 +627,7 @@ export function useTemporalStats(
     current_ao5: null,
   };
   return useQuery({
-    queryKey: ["stats-temporal", params],
+    queryKey: qk.solves.statsTemporal(params),
     queryFn: () =>
       withStub(
         async () => (await api.get<TemporalResponse>("/stats/temporal", { params })).data,
@@ -688,7 +680,7 @@ export function useActivity(p: ActivityParams): UseQueryResult<ActivityResponse>
     params.session_id = p.session_id;
   }
   return useQuery({
-    queryKey: ["stats-activity", params],
+    queryKey: qk.solves.statsActivity(params),
     queryFn: () =>
       withStub(
         async () => (await api.get<ActivityResponse>("/stats/activity", { params })).data,
@@ -710,7 +702,7 @@ export function useActivity(p: ActivityParams): UseQueryResult<ActivityResponse>
 
 export function useSessions(): UseQueryResult<Session[]> {
   return useQuery({
-    queryKey: ["sessions"],
+    queryKey: qk.sessions.list(),
     queryFn: async (): Promise<Session[]> => {
       const r = await api.get<Session[]>("/sessions");
       return r.data;
@@ -729,7 +721,7 @@ export function useCreateSession(): UseMutationResult<
       const r = await api.post<Session>("/sessions", payload);
       return r.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["sessions"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.sessions.all() }),
   });
 }
 
@@ -745,9 +737,9 @@ export function useUpdateSession(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["sessions"] });
+      qc.invalidateQueries({ queryKey: qk.sessions.all() });
       // Solves hängen am Session-Namen → invalidieren falls UI Name zeigt
-      qc.invalidateQueries({ queryKey: ["solves"] });
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
     },
   });
 }
@@ -767,15 +759,11 @@ export function useDeleteSession(): UseMutationResult<
       await api.delete(`/sessions/${id}`, { params });
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["sessions"] });
-      // Solves wandern oder verlieren ihre session_id
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["stats"] });
-      qc.invalidateQueries({ queryKey: ["pb-history"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
-      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
-      qc.invalidateQueries({ queryKey: ["stats-activity"] });
-      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
+      qc.invalidateQueries({ queryKey: qk.sessions.all() });
+      // Solves wandern oder verlieren ihre session_id — qk.solves.all()
+      // deckt list + alle Stats-Varianten + pb-history in einem Schlag ab.
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.leaderboard.all() });  // 🆕 Bug-Fix
     },
   });
 }
@@ -800,14 +788,9 @@ export function useMergeSession(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["sessions"] });
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["stats"] });
-      qc.invalidateQueries({ queryKey: ["pb-history"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-cube"] });
-      qc.invalidateQueries({ queryKey: ["stats-temporal"] });
-      qc.invalidateQueries({ queryKey: ["stats-activity"] });
-      qc.invalidateQueries({ queryKey: ["sessions-suggest"] });
+      qc.invalidateQueries({ queryKey: qk.sessions.all() });
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.leaderboard.all() });  // 🆕 Bug-Fix
     },
   });
 }
@@ -826,7 +809,7 @@ export function useSuggestSession(
   cubeType: string | undefined
 ): UseQueryResult<SessionSuggestion> {
   return useQuery({
-    queryKey: ["sessions-suggest", cubeType],
+    queryKey: qk.sessions.suggest(cubeType),
     queryFn: async (): Promise<SessionSuggestion> => {
       if (!cubeType) {
         return { session_id: null, count: 0, cube_type: "" };
@@ -853,7 +836,7 @@ export function useHardware(
   params: HardwareListParams = {}
 ): UseQueryResult<Hardware[]> {
   return useQuery({
-    queryKey: ["hardware", params],
+    queryKey: qk.hardware.list(params),
     queryFn: async (): Promise<Hardware[]> => {
       const r = await api.get<Hardware[]>("/hardware", { params });
       return r.data;
@@ -872,7 +855,7 @@ export function useCreateHardware(): UseMutationResult<
       const r = await api.post<Hardware>("/hardware", payload);
       return r.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["hardware"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.hardware.all() }),
   });
 }
 
@@ -888,11 +871,10 @@ export function useUpdateHardware(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["hardware"] });
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
-      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
-      qc.invalidateQueries({ queryKey: ["achievements"] });
+      qc.invalidateQueries({ queryKey: qk.hardware.all() });
+      // qk.solves.all() schließt stats-by-hardware ein.
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.achievements.all() });
     },
   });
 }
@@ -904,11 +886,10 @@ export function useDeleteHardware(): UseMutationResult<void, Error, number> {
       await api.delete(`/hardware/${id}`);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["hardware"] });
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
-      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
-      qc.invalidateQueries({ queryKey: ["achievements"] });
+      qc.invalidateQueries({ queryKey: qk.hardware.all() });
+      // qk.solves.all() schließt stats-by-hardware ein.
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.achievements.all() });
     },
   });
 }
@@ -930,8 +911,7 @@ export function useBulkUpdateHardware(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["hardware"] });
-      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
+      qc.invalidateQueries({ queryKey: qk.hardware.all() });
     },
   });
 }
@@ -950,11 +930,10 @@ export function useBulkDeleteHardware(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["hardware"] });
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["stats-by-hardware"] });
-      qc.invalidateQueries({ queryKey: ["hardware-suggest"] });
-      qc.invalidateQueries({ queryKey: ["achievements"] });
+      qc.invalidateQueries({ queryKey: qk.hardware.all() });
+      // qk.solves.all() schließt stats-by-hardware ein.
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.achievements.all() });
     },
   });
 }
@@ -974,7 +953,7 @@ export function useSeedHardware(): UseMutationResult<SeedResult, Error, boolean>
       });
       return r.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["hardware"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.hardware.all() }),
   });
 }
 
@@ -996,7 +975,7 @@ export function useSuggestHardware(
   cubeType: string | undefined
 ): UseQueryResult<HardwareSuggestion> {
   return useQuery({
-    queryKey: ["hardware-suggest", cubeType],
+    queryKey: qk.hardware.suggest(cubeType),
     queryFn: async (): Promise<HardwareSuggestion> => {
       if (!cubeType) {
         return { hardware_id: null, count: 0, cube_type: "", reason: "none" };
@@ -1016,7 +995,7 @@ export function useSuggestHardware(
 
 export function useAchievements(): UseQueryResult<AchievementItem[]> {
   return useQuery({
-    queryKey: ["achievements"],
+    queryKey: qk.achievements.all(),
     queryFn: () =>
       withStub(
         async () => (await api.get<AchievementItem[]>("/achievements")).data,
@@ -1043,7 +1022,7 @@ export function useRecheckAchievements(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["achievements"] });
+      qc.invalidateQueries({ queryKey: qk.achievements.all() });
     },
   });
 }
@@ -1071,7 +1050,7 @@ export function useStatsByAlgCase(
   subset: string
 ): UseQueryResult<StatsByAlgCaseResponse> {
   return useQuery({
-    queryKey: ["stats-by-alg-case", subset],
+    queryKey: qk.solves.statsByAlgCase(subset),
     queryFn: () =>
       withStub(
         async () =>
@@ -1099,7 +1078,7 @@ export interface ChallengesHistoryResponse {
 
 export function useChallengesToday(): UseQueryResult<ChallengesTodayResponse> {
   return useQuery({
-    queryKey: ["challenges-today"],
+    queryKey: qk.challenges.today(),
     queryFn: () =>
       withStub(
         async () => (await api.get<ChallengesTodayResponse>("/challenges/today")).data,
@@ -1112,7 +1091,7 @@ export function useChallengesHistory(
   days: number = 30
 ): UseQueryResult<ChallengesHistoryResponse> {
   return useQuery({
-    queryKey: ["challenges-history", days],
+    queryKey: qk.challenges.history(days),
     queryFn: () =>
       withStub(
         async () =>
@@ -1141,8 +1120,7 @@ export function useRegenerateChallenges(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["challenges-today"] });
-      qc.invalidateQueries({ queryKey: ["challenges-history"] });
+      qc.invalidateQueries({ queryKey: qk.challenges.all() });
     },
   });
 }
@@ -1159,8 +1137,7 @@ export function useDismissChallenge(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["challenges-today"] });
-      qc.invalidateQueries({ queryKey: ["challenges-history"] });
+      qc.invalidateQueries({ queryKey: qk.challenges.all() });
     },
   });
 }
@@ -1208,7 +1185,7 @@ export function useAdminStats(
   enabled: boolean,
 ): UseQueryResult<AdminStats> {
   return useQuery({
-    queryKey: ["admin-stats"],
+    queryKey: qk.admin.stats(),
     queryFn: async (): Promise<AdminStats> => {
       const r = await api.get<AdminStats>("/admin/stats");
       return r.data;
@@ -1241,7 +1218,7 @@ interface AdminUsersResponse {
 
 export function useAdminUsers(enabled: boolean): UseQueryResult<AdminUsersResponse> {
   return useQuery({
-    queryKey: ["admin-users"],
+    queryKey: qk.admin.users(),
     queryFn: async (): Promise<AdminUsersResponse> => {
       const r = await api.get<AdminUsersResponse>("/admin/users");
       return r.data;
@@ -1273,8 +1250,7 @@ export function useAdminPatchUser(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-users"] });
-      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+      qc.invalidateQueries({ queryKey: qk.admin.all() });
     },
   });
 }
@@ -1295,8 +1271,7 @@ export function useAdminDeleteUser(): UseMutationResult<
       });
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-users"] });
-      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+      qc.invalidateQueries({ queryKey: qk.admin.all() });
     },
   });
 }
@@ -1408,7 +1383,7 @@ export function useFriendsList(
   enabled: boolean,
 ): UseQueryResult<FriendsListResponse> {
   return useQuery({
-    queryKey: ["friends-list"],
+    queryKey: qk.friends.list(),
     queryFn: async (): Promise<FriendsListResponse> => {
       const r = await api.get<FriendsListResponse>("/friends/list");
       return r.data;
@@ -1422,7 +1397,7 @@ export function useFriendSearch(
   q: string,
 ): UseQueryResult<FriendSearchResponse> {
   return useQuery({
-    queryKey: ["friend-search", q],
+    queryKey: qk.friends.search(q),
     queryFn: async (): Promise<FriendSearchResponse> => {
       const r = await api.get<FriendSearchResponse>("/friends/search", {
         params: { q },
@@ -1464,8 +1439,7 @@ export function useSendFriendRequest(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["friends-list"] });
-      qc.invalidateQueries({ queryKey: ["friend-search"] });
+      qc.invalidateQueries({ queryKey: qk.friends.all() });
     },
   });
 }
@@ -1482,8 +1456,7 @@ export function useAcceptFriend(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["friends-list"] });
-      qc.invalidateQueries({ queryKey: ["friend-search"] });
+      qc.invalidateQueries({ queryKey: qk.friends.all() });
     },
   });
 }
@@ -1499,8 +1472,7 @@ export function useRemoveFriendship(): UseMutationResult<
       await api.delete(`/friends/${friendship_id}`);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["friends-list"] });
-      qc.invalidateQueries({ queryKey: ["friend-search"] });
+      qc.invalidateQueries({ queryKey: qk.friends.all() });
     },
   });
 }
@@ -1523,7 +1495,7 @@ export function useUpdateProfile(): UseMutationResult<
       // Wir feuern unser eigenes Event statt direkt im Hook auf
       // AuthContext zuzugreifen (zirkulaer wäre doof).
       window.dispatchEvent(new Event("cubetracker:profile-updated"));
-      qc.invalidateQueries({ queryKey: ["friends-list"] });
+      qc.invalidateQueries({ queryKey: qk.friends.all() });
     },
   });
 }
@@ -1561,7 +1533,7 @@ export function useLeaderboardCubeTypes(
   enabled: boolean,
 ): UseQueryResult<CubeTypesResponse> {
   return useQuery({
-    queryKey: ["leaderboard-cube-types"],
+    queryKey: qk.leaderboard.cubeTypes(),
     queryFn: async () => {
       const r = await api.get<CubeTypesResponse>("/leaderboard/cube-types");
       return r.data;
@@ -1575,7 +1547,7 @@ export function useLeaderboard(
   cubeType: string | null,
 ): UseQueryResult<LeaderboardResponse> {
   return useQuery({
-    queryKey: ["leaderboard", cubeType],
+    queryKey: qk.leaderboard.byCube(cubeType),
     queryFn: async () => {
       const r = await api.get<LeaderboardResponse>("/leaderboard", {
         params: { cube_type: cubeType },
@@ -1657,8 +1629,7 @@ export function useCreateFeedbackMessage(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["my-feedback"] });
-      qc.invalidateQueries({ queryKey: ["my-feedback-unread"] });
+      qc.invalidateQueries({ queryKey: qk.feedback.user.all() });
     },
   });
 }
@@ -1668,7 +1639,7 @@ export function useMyFeedback(
   enabled: boolean = true,
 ): UseQueryResult<FeedbackMessagesResponse> {
   return useQuery({
-    queryKey: ["my-feedback"],
+    queryKey: qk.feedback.user.list(),
     queryFn: async () => {
       const r = await api.get<FeedbackMessagesResponse>("/feedback/me/messages");
       return r.data;
@@ -1683,7 +1654,7 @@ export function useMyFeedbackUnreadCount(
   enabled: boolean = true,
 ): UseQueryResult<{ unread_count: number }> {
   return useQuery({
-    queryKey: ["my-feedback-unread"],
+    queryKey: qk.feedback.user.unread(),
     queryFn: async () => {
       const r = await api.get<{ unread_count: number }>(
         "/feedback/me/unread-count",
@@ -1707,8 +1678,7 @@ export function useMarkFeedbackResponseSeen(): UseMutationResult<
       await api.post(`/feedback/me/messages/${id}/seen`);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["my-feedback"] });
-      qc.invalidateQueries({ queryKey: ["my-feedback-unread"] });
+      qc.invalidateQueries({ queryKey: qk.feedback.user.all() });
     },
   });
 }
@@ -1735,7 +1705,7 @@ export function useAdminFeedbackMessages(
   const status = filters?.status;
   const category = filters?.category;
   return useQuery({
-    queryKey: ["admin-feedback", status ?? "all", category ?? "all"],
+    queryKey: qk.feedback.admin.list(status, category),
     queryFn: async () => {
       const params: Record<string, string> = {};
       if (status && status !== "all") params.status = status;
@@ -1755,7 +1725,7 @@ export function useAdminFeedbackStats(
   enabled: boolean,
 ): UseQueryResult<FeedbackInboxStats> {
   return useQuery({
-    queryKey: ["admin-feedback-stats"],
+    queryKey: qk.feedback.admin.stats(),
     queryFn: async () => {
       const r = await api.get<FeedbackInboxStats>("/admin/feedback/stats");
       return r.data;
@@ -1780,8 +1750,7 @@ export function useAdminUpdateFeedback(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-feedback"] });
-      qc.invalidateQueries({ queryKey: ["admin-feedback-stats"] });
+      qc.invalidateQueries({ queryKey: qk.feedback.admin.all() });
     },
   });
 }
@@ -1797,15 +1766,14 @@ export function useAdminDeleteFeedback(): UseMutationResult<
       await api.delete(`/admin/feedback/messages/${id}`);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-feedback"] });
-      qc.invalidateQueries({ queryKey: ["admin-feedback-stats"] });
+      qc.invalidateQueries({ queryKey: qk.feedback.admin.all() });
     },
   });
 }
 
 export function usePatchNotes(): UseQueryResult<ChangelogResponse> {
   return useQuery({
-    queryKey: ["patch-notes"],
+    queryKey: qk.patchNotes.all(),
     queryFn: async () => {
       const r = await api.get<ChangelogResponse>("/changelog");
       return r.data;
@@ -1926,7 +1894,7 @@ export function useMyWcaProfile(
   enabled: boolean = true,
 ): UseQueryResult<WcaPersonProfile> {
   return useQuery({
-    queryKey: ["wca-me-profile"],
+    queryKey: qk.wca.meProfile(),
     queryFn: async () => {
       const r = await api.get<WcaPersonProfile>("/wca/me/profile");
       return r.data;
@@ -1967,7 +1935,7 @@ export function useLatestNews(
   limit: number = 10,
 ): UseQueryResult<NewsLatestResponse> {
   return useQuery({
-    queryKey: ["news-latest", limit],
+    queryKey: qk.news.latest(limit),
     queryFn: async () => {
       const r = await api.get<NewsLatestResponse>("/news/latest", {
         params: { limit },
@@ -1991,7 +1959,7 @@ export function useUpcomingCompetitions(
   const limit = opts?.limit ?? 10;
   const daysAhead = opts?.daysAhead ?? 180;
   return useQuery({
-    queryKey: ["wca-upcoming", maxDistanceKm, limit, daysAhead],
+    queryKey: qk.wca.upcoming(maxDistanceKm, limit, daysAhead),
     queryFn: async () => {
       const r = await api.get<UpcomingCompetitionsResponse>(
         "/wca/competitions/upcoming",
@@ -2065,7 +2033,7 @@ export interface RoadmapItemUpdateInput {
 
 export function useRoadmap(enabled: boolean = true): UseQueryResult<RoadmapResponse> {
   return useQuery({
-    queryKey: ["roadmap"],
+    queryKey: qk.roadmap.all(),
     queryFn: async () => {
       const r = await api.get<RoadmapResponse>("/roadmap");
       return r.data;
@@ -2087,7 +2055,7 @@ export function useAdminCreateRoadmapItem(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["roadmap"] });
+      qc.invalidateQueries({ queryKey: qk.roadmap.all() });
     },
   });
 }
@@ -2104,7 +2072,7 @@ export function useAdminUpdateRoadmapItem(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["roadmap"] });
+      qc.invalidateQueries({ queryKey: qk.roadmap.all() });
     },
   });
 }
@@ -2120,7 +2088,7 @@ export function useAdminDeleteRoadmapItem(): UseMutationResult<
       await api.delete(`/admin/roadmap/items/${id}`);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["roadmap"] });
+      qc.invalidateQueries({ queryKey: qk.roadmap.all() });
     },
   });
 }
@@ -2150,7 +2118,7 @@ export function useAdminReorderRoadmap(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["roadmap"] });
+      qc.invalidateQueries({ queryKey: qk.roadmap.all() });
     },
   });
 }
@@ -2201,7 +2169,7 @@ export function useAdminLiveTests(
   statusFilter?: LiveTestStatus | "all",
 ): UseQueryResult<LiveTestsResponse> {
   return useQuery({
-    queryKey: ["admin-live-tests", statusFilter ?? "all"],
+    queryKey: qk.adminLiveTests.list(statusFilter),
     queryFn: async () => {
       const params: Record<string, string> = {};
       if (statusFilter && statusFilter !== "all") params.status = statusFilter;
@@ -2225,7 +2193,7 @@ export function useAdminCreateLiveTest(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-live-tests"] });
+      qc.invalidateQueries({ queryKey: qk.adminLiveTests.all() });
     },
   });
 }
@@ -2242,7 +2210,7 @@ export function useAdminUpdateLiveTest(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-live-tests"] });
+      qc.invalidateQueries({ queryKey: qk.adminLiveTests.all() });
     },
   });
 }
@@ -2258,7 +2226,7 @@ export function useAdminDeleteLiveTest(): UseMutationResult<
       await api.delete(`/admin/live-tests/${id}`);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-live-tests"] });
+      qc.invalidateQueries({ queryKey: qk.adminLiveTests.all() });
     },
   });
 }
@@ -2280,14 +2248,17 @@ export function useResetSolves(): UseMutationResult<void, Error, void> {
       // Alle solve-/stats-/sessions-bezogenen Queries refetchen.
       // QA-Fix W.danger-zone-qa: sessions + achievements zeigen sonst
       // veraltete Counts/Badges nach dem Reset bis zum Hard-Reload.
-      qc.invalidateQueries({ queryKey: ["solves"] });
-      qc.invalidateQueries({ queryKey: ["stats"] });
-      qc.invalidateQueries({ queryKey: ["pb-history"] });
-      qc.invalidateQueries({ queryKey: ["activity"] });
-      qc.invalidateQueries({ queryKey: ["temporal"] });
-      qc.invalidateQueries({ queryKey: ["by-cube"] });
-      qc.invalidateQueries({ queryKey: ["sessions"] });
-      qc.invalidateQueries({ queryKey: ["achievements"] });
+      // Wipe-Demo-Data → alles was sich durch Solve/Session-Reset ändert.
+      // 🆕 Vor dem Refactor invalidierte dieser Block die Keys ["activity"],
+      // ["temporal"], ["by-cube"] — die echten Stats-Keys haben aber das
+      // "stats-"-Prefix, also waren das stille No-Ops und Stats-Karten
+      // zeigten nach Wipe stale Werte bis Hard-Reload. Mit qk.solves.all()
+      // sind alle Stats-Varianten automatisch dabei.
+      qc.invalidateQueries({ queryKey: qk.solves.all() });
+      qc.invalidateQueries({ queryKey: qk.sessions.all() });
+      qc.invalidateQueries({ queryKey: qk.achievements.all() });
+      qc.invalidateQueries({ queryKey: qk.challenges.all() });
+      qc.invalidateQueries({ queryKey: qk.leaderboard.all() });
     },
   });
 }

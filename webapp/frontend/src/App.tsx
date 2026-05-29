@@ -17,6 +17,7 @@ import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { ImpressumPage } from "./pages/ImpressumPage";
 import { DatenschutzPage } from "./pages/DatenschutzPage";
 import { api } from "./lib/api";
+import { qk } from "./lib/queryKeys";
 import { AchievementsMiniCard } from "./components/AchievementsMiniCard";
 import { AchievementToaster } from "./components/AchievementToaster";
 import { ActivityCard } from "./components/ActivityCard";
@@ -120,7 +121,7 @@ function HealthBadge({ onClick }: { onClick: () => void }) {
   // MainLayout, damit auch das UserMenu denselben Modal nutzen kann).
   const { t } = useTranslation();
   const { data, error } = useQuery<Health>({
-    queryKey: ["health"],
+    queryKey: qk.health.all(),
     queryFn: async () => {
       try {
         return (await api.get<Health>("/health")).data;
