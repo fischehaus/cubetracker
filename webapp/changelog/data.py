@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-algorithm-lab-codex-v2",
+        released=date(2026, 5, 30),
+        title="🎨 Skin-Update: Algorithm Lab + Codex Vitruvian (No-Cube-Edition)",
+        highlights=[
+            "Die zwei Theme-Skins „Algorithm Lab\" und „Codex Vitruvian\" "
+            "wurden auf v2 aktualisiert. Die neuen Versionen sind "
+            "\"No Real Cube Edition\" — keine realistischen Plastik-3x3-"
+            "Cubes im Hintergrund mehr, dafür klarere Wireframes, "
+            "OLL/PLL-Diagramme und Algorithmus-Notizen. Bessere "
+            "Lesbarkeit der UI-Schicht oben drüber.",
+            "Skin-IDs unverändert (`algorithm-lab`, `codex-vitruvian`) — "
+            "User-Settings bleiben gültig, der neue Look erscheint nach "
+            "Reload automatisch. Alle 5 Auflösungen (1920×1080, "
+            "2560×1440, 3440×1440, 3840×1080-super, 3840×1600) ersetzt "
+            "plus Preview-Thumbnail. JPG-Quellen aus den v2-Theme-Packs "
+            "wurden zu WebP konvertiert (~3 MB total, gleicher Pfad).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.cstimer-dynamic-import",
         released=date(2026, 5, 30),
         title="⚡ Schnellerer App-Start: Scramble-Code lazy-geladen",
