@@ -44,6 +44,36 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-doku-cleanup",
+        released=date(2026, 5, 29),
+        title="🗺️ Roadmap-Doku-Cleanup: 6 Stellen Drift-Fix",
+        highlights=[
+            "Audit-Methode auf die Roadmap angewandt (analog zum Feature-"
+            "Audit von heute Morgen): Sub-Agent-Inventar über 5 Schichten "
+            "(ROADMAP.md / seeds/roadmap.py / lib/roadmap-phases.ts / "
+            "changelog/data.py / NEXT_SESSION.md) + Cross-Diff.",
+            "Befund 1 (HARD): 5 aktive Stellen verweisen noch auf das "
+            "nicht-mehr-existierende `webapp/frontend/src/lib/roadmap-"
+            "data.ts`. Das File wurde mit W.roadmap-modal-api gelöscht "
+            "— Phase-Meta liegt seither in `roadmap-phases.ts`, Items "
+            "in der DB-Tabelle `roadmap_items` (gepflegt via Admin-UI).",
+            "Fix-Stellen: NEXT_SESSION.md (Single-Source-Tabelle), "
+            "MAINTENANCE.md (2 Maintenance-Checks), ROADMAP.md (Header-"
+            "Block neu strukturiert), seeds/roadmap.py (Docstring-"
+            "Quelle), post-git-commit.sh (Hook-Hint).",
+            "Befund 2 (KONZEPTIONELL): zwei koexistierende Phase-"
+            "Konzepte waren nirgends erklärt — `ROADMAP.md` zählt "
+            "historische Release-Phasen 1..9 (+ Sub-Phasen, Tags v0.1..v1.0), "
+            "die aktuelle App-Roadmap nutzt thematische Cluster P1..P6 "
+            "(Polish / Multi-User-USP / Power-User / Reichweite / Tech-"
+            "Schuld). Aufklärungs-Block oben in ROADMAP.md ergänzt.",
+            "Item-Stand bestätigt: 33 DB-Seeds verteilt auf P1/P3/P4/P5/P6 "
+            "(P2 ist `done` und nicht im Seed) — kein Item-Drift, nur "
+            "Doku-Drift gefunden.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feature-curation",
         released=date(2026, 5, 29),
         title="📐 Feature-Modal kuratiert: 23 Public + „Mehr anzeigen\"-Toggle",

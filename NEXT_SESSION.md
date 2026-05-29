@@ -11,7 +11,7 @@ liest aus / referenziert sie:
 | File | Inhalt | Update bei |
 |---|---|---|
 | `webapp/changelog/data.py` | Patch-Notes (PATCH_NOTES list) — neueste oben | Jedem `feat()` / `fix()`-Commit, vor Tag-Push |
-| `webapp/frontend/src/lib/roadmap-data.ts` | Roadmap-Phasen P1-P6 (Frontend-Modal) | Wenn neue Items / Phasen-Wechsel |
+| `webapp/frontend/src/lib/roadmap-phases.ts` (Phase-Meta) + DB-Tabelle `roadmap_items` (Items, gepflegt via Admin-UI) | Roadmap-Phasen P1-P6 + Items (Frontend-Modal liest beides) | Phase-Meta: TS-Datei editieren. Items: App → „Verwaltung → Admin → Roadmap" |
 | `webapp/frontend/src/lib/features-data.ts` | User-facing Feature-Liste (Login-Page + Modal) | Bei jedem User-facing-Feature |
 | `webapp/db/models.py` + `webapp/main.py:lifespan` | Schema + Mini-Migrations (ALTER TABLE IF NOT EXISTS) | Bei Schema-Änderungen |
 | `webapp/frontend/src/lib/api.ts` | React-Query-Hooks (Single-Source für Frontend-API-Calls) | Bei neuen Endpoints |
@@ -24,15 +24,17 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-29 (Vor-Demo-Sa) — 5 Wellen Pre-Demo-Polish + Feature-Modal-Refactor
+## ✅ ERLEDIGT 2026-05-29 (Vor-Demo-Sa) — 6 Wellen Pre-Demo-Polish + Feature-Modal-Refactor + Roadmap-Doku-Cleanup
 
-**Letzte Welle: `W.feature-curation` (Tag `7c16ecb`).** Branch
-`feature/W-api-prefix`, alles gepusht, Backend live (Health zeigt
-`v2.0.0-alpha.W.feature-curation`). Working-Tree clean ausser 5 alte
-PNGs/scripts/ (irrelevant) + **1 NEUES Wallpaper-Pack** vom User
-(`frontend/src/assets/cubetracker_pb_hunt_competition_focus_template2_pack.zip`)
-— das ist Stoff für die nächste Welle (vermutlich vierter Skin "PB Hunt
-Competition Focus" oder ähnlich, lt. Filename).
+**Letzte Welle: `W.roadmap-doku-cleanup` (internal, Tag folgt im Push).**
+Davor: `W.feature-curation` (Tag `7c16ecb`). Branch
+`feature/W-api-prefix`, alles gepusht, Backend live (Health zeigt nach
+Push `v2.0.0-alpha.W.roadmap-doku-cleanup`). Working-Tree clean ausser 5 alte
+PNGs/scripts/ (irrelevant) + **2 NEUE Wallpaper-Packs** vom User
+(`frontend/src/assets/cubetracker_pb_hunt_competition_focus_template2_pack.zip`
+und neu dazugekommen `cubetracker_algorithm_lab_theme_pack.zip`)
+— Stoff für die nächste(n) Skin-Welle(n) (vermutlich vierter Skin „PB Hunt
+Competition Focus" + fünfter „Algorithm Lab", lt. Filenames).
 
 ### Sprint-Gruppen heute (5 Wellen)
 
@@ -72,6 +74,20 @@ Competition Focus" oder ähnlich, lt. Filename).
   bei aktivem Skin sichtbar (User-Wunsch). CSS-Override via zweite
   Klasse `cubetracker-logo-always`.
 
+**Gruppe 10 — Roadmap-Doku-Cleanup** (1 Welle, internal):
+- `W.roadmap-doku-cleanup` (Tag folgt) — analoges Sub-Agent-Audit wie
+  morgens für Features, jetzt auf die Roadmap angewandt. Cross-Diff über
+  5 Schichten (ROADMAP.md / seeds/roadmap.py / lib/roadmap-phases.ts /
+  changelog/data.py / NEXT_SESSION.md). Ergebnis: **6 Stellen Doku-Drift**
+  — 5 verwiesen auf nicht-mehr-existentes `roadmap-data.ts` (das File
+  wurde mit W.roadmap-modal-api gelöscht, Phase-Meta liegt seither in
+  `roadmap-phases.ts`, Items in DB-Tabelle `roadmap_items`), 1 Hook-Hint
+  in `post-git-commit.sh` gab veraltete Anweisung. Plus: Aufklärungs-
+  Block in ROADMAP.md ergänzt, der die zwei Phase-Konzepte erklärt
+  (historische Release-Timeline 1..9 vs. thematische Cluster P1..P6).
+  **Item-Stand bestätigt**: 33 DB-Seeds in P1/P3/P4/P5/P6, P2=done — kein
+  Item-Drift, nur Doku-Drift.
+
 ### 🔜 Offen für nächste Session (Sa Vormittag — Demo-Tag)
 
 **Direkte Demo-Vorbereitung:**
@@ -98,6 +114,11 @@ Competition Focus" oder ähnlich, lt. Filename).
   Tester-LiveTests-Bug klarstellen).
 - **🟡 Hook erweitern**: BulletDef.audience-Pflicht-Check (verhindert
   vergessen beim nächsten Bullet-Add).
+- **🟡 Roadmap-Drift-Hook** (optional, niedrige Prio): analog Features-
+  Hook ein post-commit-Check „bei `feat(W.X)`-Commits warnen, wenn weder
+  `roadmap-phases.ts` noch ein DB-Roadmap-Endpoint angefasst wurde".
+  Aus dem Roadmap-Audit 2026-05-29 als Stufe 3 zurückgestellt — Roadmap-
+  Drift passiert deutlich seltener als Feature-Drift, Wert ist niedrig.
 
 ---
 

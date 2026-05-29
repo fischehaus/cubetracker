@@ -3,8 +3,10 @@
 Erst-Bootstrap der `roadmap_items`-Tabelle beim Cold-Start. Idempotent:
 wenn schon Items in der Tabelle sind, wird nichts angelegt.
 
-Quelle: kuratierte Liste basierend auf `webapp/frontend/src/lib/
-roadmap-data.ts` (Stand 2026-05-27), bereinigt um:
+Quelle: kuratierte Liste basierend auf der vormaligen
+`webapp/frontend/src/lib/roadmap-data.ts` (Stand 2026-05-27, mit
+W.roadmap-modal-api gelöscht — Phase-Meta liegt jetzt in
+`roadmap-phases.ts`, Items in dieser Seed-Liste + DB), bereinigt um:
 - alle `done: true`-Items (Hetzner-Migration komplett, Backlog-Sprint
   fertig, Turnier-Sprint Items done)
 - alle veralteten Einträge (i18n + WCA-Profil sind seit dem Sprint live)

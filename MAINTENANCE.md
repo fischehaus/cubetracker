@@ -82,8 +82,9 @@ Die kanonischen Files stehen in `NEXT_SESSION.md` → Tabelle „Single-Source-F
 Prüfen, dass sie zur Realität passen:
 
 - **`NEXT_SESSION.md`** ist jünger als der letzte Feature-Commit (sonst veraltet).
-- **`webapp/frontend/src/lib/roadmap-data.ts`**: erledigte Items als `done`/Phase
-  korrekt? Neue Wünsche aufgenommen?
+- **Roadmap-Items** (DB-Tabelle `roadmap_items`, gepflegt via App → „Verwaltung
+  → Admin → Roadmap"): erledigte Items als `done` markieren oder löschen, neue
+  Wünsche aufnehmen. Phase-Meta P1..P6 in `webapp/frontend/src/lib/roadmap-phases.ts`.
 - **`webapp/changelog/data.py`** + **`features-data.ts`**: decken die letzten
   user-facing Commits ab?
 - **Veraltete Begriffe** aufspüren (nicht jeder Treffer ist ein Fehler — Historie/
@@ -193,8 +194,10 @@ ssh root@178.105.103.78 "docker ps --format '{{.Names}}\t{{.Status}}'"
 
 ## 9. Roadmap- & Task-Pflege 👤/🤖
 
-- `roadmap-data.ts`: erledigte Items markieren, neue Wünsche einpflegen
-  (= Single-Source, erscheint im App-Roadmap-Modal).
+- **Roadmap-Items**: erledigte markieren / neue Wünsche einpflegen via
+  App → „Verwaltung → Admin → Roadmap" (Items leben in DB-Tabelle
+  `roadmap_items`). Phase-Meta P1..P6 in `roadmap-phases.ts`. Beide
+  erscheinen im App-Roadmap-Modal.
 - Claude-Task-Liste aufräumen (erledigte schließen, Stale löschen).
 - Offene GitHub-Issues sichten: `gh issue list` (Bug-Reports/Feature-Wünsche).
 

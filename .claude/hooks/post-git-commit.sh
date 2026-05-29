@@ -75,7 +75,7 @@ if echo "$subject" | grep -qE '^(feat|fix)[(:]'; then
     notes+="📝 feat/fix-Commit ohne neuen Patch-Notes-Eintrag (webapp/changelog/data.py). "
     notes+="Konvention: jeder feat/fix braucht einen PatchNote (oben einfuegen) — sonst "
     notes+="haengt das Versions-Badge hinterher. Bei erledigten Roadmap-Items zusaetzlich "
-    notes+="in webapp/frontend/src/lib/roadmap-data.ts done:true setzen.\n"
+    notes+="in der App unter 'Verwaltung -> Admin -> Roadmap' als done markieren.\n"
   fi
 fi
 
