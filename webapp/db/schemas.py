@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -470,4 +470,9 @@ class RoadmapReorder(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
     phase_id: RoadmapPhaseIdLiteral
-    ordered_ids: list[int] = Field(min_length=1, max_length=200)
+    # ge=1: DB-IDs sind positiv. Negative/0-IDs wuerden zwar ohnehin per
+    # db.get() -> None uebersprungen, aber frueh ablehnen ist konsistent
+    # mit den anderen ID-Schemas im Projekt.
+    ordered_ids: list[Annotated[int, Field(ge=1)]] = Field(
+        min_length=1, max_length=200
+    )

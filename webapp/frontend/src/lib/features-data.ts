@@ -150,7 +150,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
     titleKey: "features.accountTitle",
     icon: "🔒",
     bullets: [
-      { key: "features.accountBullet7", audience: "public" }, // 3 Hintergrund-Themen + Card-Stil
+      { key: "features.accountBullet7", audience: "public" }, // 6 Hintergrund-Themen + Card-Stil
       { key: "features.accountBullet9", audience: "expanded" }, // Roadmap + Patch-Notes-Modal
       { key: "features.accountBullet5", audience: "expanded" }, // DSGVO-Account-Löschung
       { key: "features.accountBullet1", audience: "internal" }, // Kein Cookie-Banner (Trust-Block-Material)

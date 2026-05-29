@@ -297,6 +297,11 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
                       canMoveDown={reorderEnabled && idx < phaseItems.length - 1}
                       reorderBusy={reorderMut.isPending}
                       onMoveUp={() => {
+                        // Guard (QA-SOLLTE): nur ausführen wenn Reorder
+                        // erlaubt + nicht am oberen Rand. Verhindert einen
+                        // Reorder mit gefiltertem Array bei manuell
+                        // ent-disabletem Button (Defense-in-Depth).
+                        if (!reorderEnabled || idx <= 0) return;
                         const arr = [...phaseItems];
                         [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
                         reorderMut.mutate({
@@ -305,6 +310,8 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
                         });
                       }}
                       onMoveDown={() => {
+                        if (!reorderEnabled || idx >= phaseItems.length - 1)
+                          return;
                         const arr = [...phaseItems];
                         [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
                         reorderMut.mutate({
