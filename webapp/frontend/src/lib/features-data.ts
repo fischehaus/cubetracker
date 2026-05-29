@@ -83,6 +83,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
       "features.hardwareBullet2",
       "features.hardwareBullet3",
       "features.hardwareBullet4",
+      "features.hardwareBullet5",
     ],
   },
   {
@@ -119,6 +120,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
       "features.accountBullet4",
       "features.accountBullet5",
       "features.accountBullet6",
+      "features.accountBullet7",
     ],
   },
 ];

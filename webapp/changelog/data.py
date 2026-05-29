@@ -44,6 +44,26 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.features-data-update",
+        released=date(2026, 5, 29),
+        title="📋 Feature-Liste: Skin-System + GAN Smart-Cube nachgetragen",
+        highlights=[
+            "Hygiene-Welle vor der Demo: die Marketing-Feature-Liste "
+            "(features-data.ts, sichtbar im 'Was kann diese App?'-Modal) "
+            "war für die Skin-Wellen und die Smart-Cube-Integration noch "
+            "nicht aktualisiert.",
+            "**Neu in Hardware-Inventar**: GAN i4 Smart-Cube koppeln via "
+            "Web-Bluetooth (Chrome auf Windows/Mac/Android), Move-Counter "
+            "live im Timer-Tab, Auto-Solve-Detection noch in Entwicklung.",
+            "**Neu in Account + Sicherheit**: Personalisierung mit 3 "
+            "wählbaren Hintergrund-Themen (Cyberpunk Neon, Cyberpunk "
+            "Laser, Party Fun) plus Card-Stil-Wahl (deckend vs. Glas / "
+            "transparent mit Backdrop-Blur), pro Gerät einstellbar.",
+            "Reine Doku-Welle, keine Code-Änderung an Features selbst.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-card-fix-v2",
         released=date(2026, 5, 28),
         title="🔧 Card-Stil: graue Cards mit Slash-Opacity gefixt",

@@ -839,6 +839,7 @@
     "hardwareBullet2": "You tick off the cubes you really own + get statistics per hardware",
     "hardwareBullet3": "Bulk actions per cube type (activate / deactivate / delete)",
     "hardwareBullet4": "Add your own cubes + rename freely",
+    "hardwareBullet5": "Pair GAN i4 smart cube (Web Bluetooth, Chrome on Windows/Mac/Android) — live move counter in the timer tab, auto-solve detection in development",
     "worldTitle": "Speedcubing world",
     "worldBullet1": "WCA tournaments near you: list of upcoming official competitions with distance calculation (straight line) based on your postal code + country from your profile",
     "worldBullet2": "DACH bonus: users in DE/AT/CH automatically also see tournaments from direct neighbouring countries (DE users e.g. AT, CH, NL, BE, LU, FR, DK, PL, CZ)",
@@ -860,6 +861,7 @@
     "accountBullet4": "Postal code + country in profile (optional) — feeds the WCA tournament search on the dashboard. Used exclusively for distance calculation, never shared",
     "accountBullet5": "Account deletion (GDPR compliant, all data gone)",
     "accountBullet6": "Multi-user isolation: your data is technically separated from others",
+    "accountBullet7": "Personalization: pick from 3 background themes (Cyberpunk Neon, Cyberpunk Laser, Party Fun) plus card style (solid vs. glass / translucent with backdrop blur) — per-device, toggle any time",
     "modalHeading": "What can cubetracker do?",
     "modalSubheading": "Multi-user web app for tracking + analysing speedcubing solves.",
     "modalFooter": "Multi-user web variant, actively under construction. Data lives in a Postgres DB, no tracking, no ad code."
