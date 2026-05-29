@@ -584,6 +584,151 @@ def bootstrap_ux_polish_items(db: OrmSession) -> int:
     return created
 
 
+# ============================================================
+# W.roadmap-wsjf-reorder (2026-05-29): einmaliges deterministisches
+# Reorder der Live-DB-Items nach WSJF-Priorisierung
+# (Cost-of-Delay / Effort, ausgewogen ueber USP / Reichweite /
+# Risiko-Reduktion / User-Nachfrage).
+#
+# WARUM eine eigene Migration: bootstrap_roadmap + bootstrap_ux_polish
+# sind INSERT-only — sort_order/phase_id bestehender Items werden NIE
+# angefasst (damit Admin-UI-Reorders erhalten bleiben). Um die LIVE-DB
+# einmalig auf die WSJF-Reihenfolge zu bringen, braucht es einen
+# expliziten UPDATE-Pass.
+#
+# SELBST-DEAKTIVIERENDER GUARD (Sentinel): solange das Sentinel-Item
+# ("Backend-Test-Suite") noch in P6 liegt (Ausgangszustand aus
+# ROADMAP_SEED), laeuft das Reorder. Der Pass verschiebt es nach P1 —
+# ab dem naechsten Boot ist der Sentinel != P6 -> skip. Damit laeuft
+# die Migration genau EINMAL pro DB (greift auch bei Cold-Start, weil
+# ROADMAP_SEED das Item bewusst in P6 anlegt) und ueberschreibt danach
+# keine spaeteren manuellen Admin-Reorders.
+#
+# Zwei bewusste Phasen-Wechsel (P6 -> P1):
+#   - Backend-Test-Suite (Risiko-Reduktion, Fundament fuer kuenftige
+#     Backend-Wellen — die 3x zurueckgerollte Demo-Backend-Welle war
+#     das Symptom fehlender Tests).
+#   - Random-Move-Fallback (Robustheit-Quick-Win, 1-2h).
+# ============================================================
+
+# (title_de, ziel-phase_id) in gewuenschter Reihenfolge je Phase.
+# sort_order wird daraus als (Listen-Position je Phase) * 10 abgeleitet.
+WSJF_TARGET_ORDER: list[tuple[str, str]] = [
+    # --- P1 — Polish & Casual (active) ---
+    ("503-Banner für WCA-Profil (globale Fail-Anzeige)", "P1"),
+    ("Random-Move-Fallback-Specs für Dino/Floppy/Tower (csTimer-Cubes)", "P1"),  # <- P6
+    ("Solve-Liste: Virtualisierung für 1000+ Solves", "P1"),
+    ("Recharts Code-Splitting (Bundle-Optimierung)", "P1"),
+    ("Cache-Invalidation refactoren (Query-Key-Prefix)", "P1"),
+    ("Toast-Manager (Severity-Stacking + dedizierte Engine)", "P1"),
+    ("PWA-Setup (Phone-Homescreen-Install)", "P1"),
+    ("Backend-Test-Suite einführen (pytest unter webapp/tests/)", "P1"),  # <- P6 (Sentinel)
+    # --- P3 — Multi-User-USP ---
+    ("Public-Profile als teilbare Solving-Card", "P3"),
+    ("Activity-Feed: was haben Freunde zuletzt gemacht", "P3"),
+    ("Online-Battle / Race-Mode (WebSocket)", "P3"),
+    ("Friend-Challenges (1v1 Best-of-AO5)", "P3"),  # DEPENDS Battle -> nach Battle
+    # --- P4 — Power-User ---
+    ("3x3 + 4x4 Trainer-Subsets via csTimer (ZBLL/ZBLS/VLS/COLL/Roux/EOline/2gen/CTO/EDO/ELL/…)", "P4"),
+    ("Bluetooth Smart Cube (GAN/MoYu via gan-web-bluetooth)", "P4"),
+    ("3D-Cube-Visualisierung (cubing.js)", "P4"),  # unlockt Reconstruction + VRC-Replay
+    ("Reconstruction-Tool (Solver findet Lösung zum Solve)", "P4"),  # DEPENDS 3D-Vis
+    # --- P5 — Reichweite ---
+    ("PLL-Bilder einbinden (analog OLL)", "P5"),  # WSJF top, aber extern blockiert (21 PNGs)
+    ("Cookieless-Analytics (Besucherzahlen ohne Cookie-Banner)", "P5"),
+    ("News-Quellen erweitern (HTML-Scraping)", "P5"),
+    ("Gear / Redi / Master Pyra+Skewb Random-State-Solver", "P5"),
+    # --- P6 — Nische / Spezial-User (ongoing) ---
+    ("csTimer-Vendor dynamic-importen (Bundle-Split)", "P6"),
+    ("Alembic statt Inline-Mini-Migrations in main.py", "P6"),
+    ("csTimer solver/-Files vendoren (schaltet 8 weitere Puzzles frei)", "P6"),
+    ("Metronom (Trainings-TPS-Hilfe)", "P6"),
+    ("Color-Themes (Custom-Farbschemen)", "P6"),
+    ("Gruppen + Coaching (Trainer/Schüler)", "P6"),
+    ("FMC-Modus (Move-Counter)", "P6"),
+    ("Multi-BLD", "P6"),
+    ("BLD-Helper (Constraint-Scrambler)", "P6"),
+    ("Stackmat-Hardware-Input (USB/Audio)", "P6"),
+    ("Cross / EOLine / Roux-Solver", "P6"),
+    ("Virtual-Cube-Input (Tastatur-Solve)", "P6"),
+    ("VRC-Replay", "P6"),  # DEPENDS 3D-Vis
+]
+
+# Smart-Cube Status-Drift-Hygiene: Pairing/Connect + Auto-Time v1-v4
+# sind live (GAN i4), nur v5 Auto-Solved-Detection ist offen. Nur die
+# Note wird aktualisiert — title_de bleibt als stabiler Match-Key.
+_SMART_CUBE_TITLE = "Bluetooth Smart Cube (GAN/MoYu via gan-web-bluetooth)"
+_SMART_CUBE_NOTE_DE = (
+    "Pairing + Connect-UI + Auto-Time-Insertion v1-v4 sind für den GAN i4 "
+    "bereits live (Web-Bluetooth-API). Offen: v5 Auto-Solved-Detection "
+    "(wartet auf Diagnose-Logs eines gelösten Cubes). Später: MoYu-Support."
+)
+_SMART_CUBE_NOTE_EN = (
+    "Pairing + connect UI + auto-time insertion v1-v4 are already live "
+    "for the GAN i4 (Web Bluetooth API). Open: v5 auto-solved detection "
+    "(waiting on diagnostic logs from a solved cube). Later: MoYu support."
+)
+_REORDER_SENTINEL_TITLE = "Backend-Test-Suite einführen (pytest unter webapp/tests/)"
+
+
+def reorder_roadmap_once(db: OrmSession) -> int:
+    """Einmaliges WSJF-Reorder der Live-DB-Roadmap. Selbst-deaktivierend.
+
+    Guard: laeuft nur solange das Sentinel-Item noch in P6 liegt. Sobald
+    es (durch diesen Pass) nach P1 verschoben wurde, gilt die Migration
+    als erledigt -> alle weiteren Boots skippen, manuelle Admin-Reorders
+    bleiben unangetastet.
+
+    Greift auch nach einem DB-Wipe + Re-Seed, weil bootstrap_roadmap den
+    Sentinel bewusst wieder in P6 anlegt (ROADMAP_SEED bleibt unangetastet).
+
+    Bewusst KEIN Row-Lock (QA-SOLLTE W.roadmap-wsjf-reorder, toleriert):
+    bei parallelem Boot (Rolling-Deploy-Overlap) koennen beide Worker
+    reordern, aber sie schreiben identische Werte — idempotent, kein
+    Datenschaden, sort_order ist nicht unique-constrained. Ein Postgres-
+    only FOR-UPDATE-Lock waere Over-Engineering fuer eine einmalige
+    Roadmap-Sortierung + wuerde die SQLite-Tests verkomplizieren.
+
+    Items aus WSJF_TARGET_ORDER, die (noch) nicht in der DB sind, werden
+    mit WARN uebersprungen (kein harter Fehler). Returns: Anzahl
+    aktualisierter Items (0 = bereits migriert / Sentinel fehlt).
+    """
+    from db.models import RoadmapItem
+
+    sentinel = db.execute(
+        select(RoadmapItem).where(RoadmapItem.title_de == _REORDER_SENTINEL_TITLE)
+    ).scalar_one_or_none()
+    # Sentinel fehlt (Item nie angelegt) ODER schon in P1 -> nichts tun.
+    if sentinel is None or sentinel.phase_id != "P6":
+        return 0
+
+    per_phase_step: dict[str, int] = {}
+    updated = 0
+    for title_de, target_phase in WSJF_TARGET_ORDER:
+        row = db.execute(
+            select(RoadmapItem).where(RoadmapItem.title_de == title_de)
+        ).scalar_one_or_none()
+        if row is None:
+            print(f"WARN: reorder_roadmap_once: Item nicht gefunden: {title_de!r}")
+            continue
+        per_phase_step[target_phase] = per_phase_step.get(target_phase, 0) + 10
+        row.phase_id = target_phase
+        row.sort_order = per_phase_step[target_phase]
+        updated += 1
+
+    # Smart-Cube Status-Drift-Hygiene (nur Note, Key bleibt stabil).
+    smart = db.execute(
+        select(RoadmapItem).where(RoadmapItem.title_de == _SMART_CUBE_TITLE)
+    ).scalar_one_or_none()
+    if smart is not None:
+        smart.note_de = _SMART_CUBE_NOTE_DE
+        smart.note_en = _SMART_CUBE_NOTE_EN
+
+    if updated > 0:
+        db.commit()
+    return updated
+
+
 def bootstrap_roadmap(db: OrmSession) -> int:
     """Idempotenter Seeder für die Roadmap-Items.
 

@@ -200,6 +200,7 @@ async def lifespan(app: FastAPI):
                 from seeds.roadmap import (
                     bootstrap_roadmap,
                     bootstrap_ux_polish_items,
+                    reorder_roadmap_once,
                 )
                 from db.database import SessionLocal
 
@@ -217,6 +218,16 @@ async def lifespan(app: FastAPI):
                         print(
                             f"INFO: ux-polish items migration -> "
                             f"{polish_created} Items angelegt"
+                        )
+                    # W.roadmap-wsjf-reorder (2026-05-29): einmaliges
+                    # WSJF-Reorder der Live-DB. Selbst-deaktivierend via
+                    # Sentinel (Backend-Test-Suite in P6?). Laeuft genau
+                    # einmal pro DB, danach skip.
+                    reordered = reorder_roadmap_once(rm_db)
+                    if reordered > 0:
+                        print(
+                            f"INFO: roadmap WSJF-reorder -> "
+                            f"{reordered} Items neu sortiert"
                         )
             except Exception as rm_e:  # noqa: BLE001
                 print(f"WARN: roadmap bootstrap failed: {rm_e}")

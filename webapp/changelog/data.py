@@ -44,6 +44,35 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-wsjf-reorder",
+        released=date(2026, 5, 29),
+        title="🗺️ Roadmap nach WSJF priorisiert + einmalige Reorder-Migration",
+        highlights=[
+            "Die 33 Roadmap-Items wurden in eine entwicklungs-sinnvolle "
+            "Reihenfolge gebracht. Methode: WSJF (Cost-of-Delay ÷ Effort), "
+            "wobei Cost-of-Delay ausgewogen aus 4 Kriterien kommt — "
+            "USP-Beitrag, Reichweite, Risiko-Reduktion, User-Nachfrage.",
+            "Reihenfolge innerhalb jeder Phase (P1/P3/P4/P5/P6) neu sortiert. "
+            "Zwei bewusste Phasen-Wechsel P6 → P1: Backend-Test-Suite "
+            "(Fundament für künftige Backend-Wellen — die 3x zurückgerollte "
+            "Demo-Backend-Welle war das Symptom fehlender Tests) + Random-"
+            "Move-Fallback (Robustheit-Quick-Win, 1-2h).",
+            "Harte Abhängigkeiten als Constraints respektiert: 3D-Cube-Vis "
+            "vor Reconstruction-Tool, Online-Battle vor Friend-Challenges.",
+            "Smart-Cube-Item Status-Drift bereinigt: stand als „geplant\", "
+            "ist aber für GAN i4 längst teil-live (Pairing/Connect + Auto-"
+            "Time v1-v4) — Note ehrlich gemacht (offen: v5 Auto-Solved-"
+            "Detection, wartet auf Diagnose-Logs).",
+            "Technik: einmalige, selbst-deaktivierende Migration "
+            "`reorder_roadmap_once` (Sentinel = „Backend-Test-Suite noch in "
+            "P6?\"). Nötig weil die Seeder bewusst INSERT-only sind (damit "
+            "manuelle Admin-Reorders erhalten bleiben). Läuft genau einmal "
+            "pro DB, danach skip. Smoke-getestet (33 Items, sort_order "
+            "sequenziell, idempotent) + QA-Pass mit 0 KRITISCH.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-doku-cleanup",
         released=date(2026, 5, 29),
         title="🗺️ Roadmap-Doku-Cleanup: 6 Stellen Drift-Fix",

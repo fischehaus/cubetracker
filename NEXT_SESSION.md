@@ -24,18 +24,20 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-29 (Vor-Demo-Sa) — 6 Wellen Pre-Demo-Polish + Feature-Modal-Refactor + Roadmap-Doku-Cleanup
+## ✅ ERLEDIGT 2026-05-29 (Vor-Demo-Sa) — 7 Wellen Pre-Demo-Polish + Feature-Modal-Refactor + Roadmap-Doku-Cleanup + WSJF-Reorder
 
-**Letzte Welle: `W.roadmap-doku-cleanup` (internal, Tag folgt im Push).**
-Davor: `W.feature-curation` (Tag `7c16ecb`). Branch
+**Letzte Welle: `W.roadmap-wsjf-reorder` (internal, Tag folgt im Push).**
+Davor: `W.roadmap-doku-cleanup` (Tag `v2.0.0-alpha.W.roadmap-doku-cleanup`),
+`W.feature-curation` (Tag `7c16ecb`). Branch
 `feature/W-api-prefix`, alles gepusht. Backend live, Health-Badge bleibt bei
-`v2.0.0-alpha.W.feature-curation` (W.roadmap-doku-cleanup ist `internal=True`,
+`v2.0.0-alpha.W.feature-curation` (die 2 roadmap-Wellen sind `internal=True`,
 `current_version()` überspringt internal-Einträge). Working-Tree clean ausser 5 alte
-PNGs/scripts/ (irrelevant) + **2 NEUE Wallpaper-Packs** vom User
-(`frontend/src/assets/cubetracker_pb_hunt_competition_focus_template2_pack.zip`
-und neu dazugekommen `cubetracker_algorithm_lab_theme_pack.zip`)
-— Stoff für die nächste(n) Skin-Welle(n) (vermutlich vierter Skin „PB Hunt
-Competition Focus" + fünfter „Algorithm Lab", lt. Filenames).
+PNGs/scripts/ (irrelevant) + **3 NEUE Wallpaper-Packs** vom User in
+`frontend/src/assets/`: `cubetracker_pb_hunt_competition_focus_template2_pack.zip`,
+`cubetracker_algorithm_lab_theme_pack.zip`,
+`cubetracker_codex_vitruvian_cube_theme_pack.zip` — Stoff für die
+nächsten Skin-Wellen (Skins 4-6: „PB Hunt Competition Focus", „Algorithm
+Lab", „Codex Vitruvian Cube", lt. Filenames).
 
 ### Sprint-Gruppen heute (5 Wellen)
 
@@ -88,6 +90,21 @@ Competition Focus" + fünfter „Algorithm Lab", lt. Filenames).
   (historische Release-Timeline 1..9 vs. thematische Cluster P1..P6).
   **Item-Stand bestätigt**: 33 DB-Seeds in P1/P3/P4/P5/P6, P2=done — kein
   Item-Drift, nur Doku-Drift.
+
+**Gruppe 11 — Roadmap nach WSJF priorisiert** (1 Welle, internal):
+- `W.roadmap-wsjf-reorder` (Tag folgt) — die 33 Items in eine
+  entwicklungs-sinnvolle Reihenfolge gebracht. WSJF = Cost-of-Delay ÷
+  Effort, CoD ausgewogen aus USP/Reichweite/Risiko/Nachfrage. Pro Phase
+  neu sortiert + **2 Phasen-Wechsel P6→P1**: Backend-Test-Suite
+  (Fundament) + Random-Move-Fallback (Quick-Win). Abhängigkeiten als
+  Constraints (3D-Vis vor Reconstruction, Battle vor Friend-Challenges).
+  Smart-Cube Status-Drift-Note bereinigt (v1-v4 live, v5 offen).
+  **Technik**: einmalige selbst-deaktivierende Migration
+  `reorder_roadmap_once` (Sentinel = Backend-Test in P6), weil Seeder
+  INSERT-only sind. Smoke-getestet + QA 0 KRITISCH. **Wenn du künftig
+  die Reihenfolge ändern willst**: Items via Admin-UI reordern (bleibt
+  jetzt erhalten, Migration ist deaktiviert) ODER `WSJF_TARGET_ORDER` in
+  `seeds/roadmap.py` editieren + Sentinel-Item kurz auf P6 zurücksetzen.
 
 ### 🔜 Offen für nächste Session (Sa Vormittag — Demo-Tag)
 
