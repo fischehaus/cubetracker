@@ -24,6 +24,79 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-29 (Spätabend) — 3 weitere Wellen: Tests + SolveList + Export-Key
+
+Nach dem Tier-A-Batch noch 3 substanzielle Wellen draufgesetzt — alles
+getaggt + gepusht, **32 Backend-Tests grün**, QA-Sub-Agent über jeden
+heiklen Teil (0 KRITISCH).
+
+- `W.backend-test-suite` (Tag `v2.0.0-alpha.W.backend-test-suite`, **internal**) —
+  Roadmap-Item „Backend-Test-Suite einführen". Befund: `tests/` existierte
+  schon (2 Files, pyproject hatte `testpaths`). Erweitert um:
+  **`webapp/.venv`** (Editable-Install `-e .[dev]`, die /abschluss-erwartete
+  Stelle), `conftest.py` (Test-SQLite via `DATABASE_URL` vor Import,
+  `make_user`-Fixture mintet Token direkt → kein Login-Rate-Limit), und
+  **13 Smoke-Tests** über health / auth (register/login/me + Negativ) /
+  solves (create/list + Cross-User-Isolation) / roadmap (public vs admin-
+  Flag) / admin-guard. Schöner Nebenbefund: `require_admin` returnt für
+  authenticated Non-Admins **404** statt 403 (versteckt Admin-Endpoints).
+  **Tests laufen mit:** `webapp/.venv/Scripts/python.exe -m pytest tests/ -q`
+
+- `W.solvelist-scroll-cap` (Tag, **public**) — User-Wunsch: SolveList in
+  bounded Scroll-Box statt Seite zu sprengen. Default-Limit 100→50,
+  Mobile-Cards + Desktop-Tabelle je in `max-h-[70vh] overflow-y-auto`,
+  Desktop-Header sticky. Limit-Selektor bleibt. Honest-Note: leichte
+  Variante; bei weiterhin ruckelndem 1000-Zeilen-Mount auf alten Phones
+  ist react-window die Folge.
+
+- `W.roadmap-export-key` (Tag, **internal**) — User-Wunsch: dauerhafter
+  Roadmap-Zugriff fürs Tooling, ohne den stündlich ablaufenden JWT.
+  Neue key-gated Endpoints `GET /api/roadmap/export` (volle Items inkl.
+  internal) + `POST /api/roadmap/export/done` (setzt status=done per
+  title_de-Match, idempotent). Auth via Header `X-Roadmap-Key` gegen
+  ENV `ROADMAP_EXPORT_KEY`. **Safe-by-default:** Endpoints sind 404 bis
+  die ENV-Var gesetzt ist. Constant-time-Compare, schmaler Write-Surface
+  (nur status="done"). Tooling (`roadmap-fetch.py`) bevorzugt jetzt den
+  Export-Key, JWT bleibt Fallback. 7 Tests dazu (Gesamtsuite 32 grün).
+  QA-Sub-Agent: 0 KRITISCH, 2 SOLLTE umgesetzt (per-Titel-max_length,
+  try/except um db.commit).
+
+### 🔲 OFFENE USER-AKTION (1×, ermöglicht den durabel-Tooling-Pfad)
+
+**`ROADMAP_EXPORT_KEY` setzen** — 4 Schritte, je ~10 sec:
+
+1. **Key generieren** (lokal, nie in den Chat):
+   `python -c "import secrets; print(secrets.token_urlsafe(32))"`
+2. **Coolify** → Backend-App → Environment → `ROADMAP_EXPORT_KEY=‹wert›` →
+   **Redeploy** (Coolify-Knopf oder neuer Push). Bis dahin: Endpoint 404.
+3. **Lokal:** `D:\Projekte\cubetracker\.tmp\roadmap-export-key` (gitignored,
+   `.txt`/`.md`-Endung wird auch akzeptiert) — derselbe Wert.
+4. **Testen:** `python .claude/hooks/roadmap-fetch.py --brief` →
+   sollte „Admin, inkl. intern" ohne Ablauf zeigen.
+
+Danach kann `.tmp/admin-token` weg (Export-Key gewinnt; JWT bleibt nur
+als Fallback im Code).
+
+### 🔜 Reste für die nächste Session (frischer Stand)
+
+**🟡 Tier B (mehr Regressions-Fläche, je ~3h, einzeln mit Extra-QA):**
+- Cache-Invalidation-Refactor (15 Mutation-Hooks → Query-Key-Prefix-Pattern).
+- Toast-Manager (Severity-Stacking + dedizierte Engine — touch 3 bestehende Toaster).
+- csTimer-Vendor dynamic-importen (Bundle-Split, Async-Refactor scramble.ts).
+
+**🔴 Blockiert / groß:**
+- PLL-Bilder (deine 21 PNGs warten).
+- Smart-Cube v5 (Diagnose-Logs gelöster Cube + Console-Screenshot).
+- PWA-Setup (Service-Worker-Caching-Entscheidungen + Icons).
+- Alembic (DB-Migration-Framework — Deploy-Risiko).
+- Battle/3D-Vis/Reconstruction/Trainer-Subsets (mehrere Wochen, Design).
+- Ranking / Level (dein eigenes Item — großes Feature mit Profil + Level-Badges).
+
+**🟢 SolveList wenn alte-Phone-Mount-Jank noch da ist:**
+- Echte DOM-Virtualisierung via `react-window` (nur ~sichtbare Zeilen im DOM).
+
+---
+
 ## ✅ ERLEDIGT 2026-05-29 (Abend) — 5 risikoarme Auto-Mode-Wellen (Tier A)
 
 Nach dem `.tmp/admin-token`-Setup (Token funktioniert) `/roadmap` durchgelaufen
