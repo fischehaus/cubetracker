@@ -1,120 +1,40 @@
-// AchievementToaster: globaler Layer der auf onAchievementUnlocked
-// hört (kommt aus axios-response-interceptor) und Toasts unten
-// rechts anzeigt.
+// AchievementToaster (W.toast-manager, 2026-05-30): nur noch Trigger-
+// Listener. Lauscht auf onAchievementUnlocked (axios-Interceptor) und
+// pushed pro Achievement einen Toast via die zentrale Engine
+// (lib/toast.ts). Das Render passiert in <ToastHost />.
 //
-// Mehrere Toasts stacken sich. Jeder verschwindet nach 5s automatisch
-// — oder wenn der User auf × klickt. Bei Bulk-import (csTimer) können
-// es viele auf einmal sein, dann Cap auf 5 sichtbar; rest geht in
-// summen-toast „+N weitere".
+// Vorher rendete diese Komponente selbst die JSX-Karten + managete
+// State/Auto-Dismiss/Stacking — jetzt ~10× kürzer und nur noch die
+// "wann taucht der Toast auf"-Logik.
+//
+// Komponente returnt null (pure Side-Effect via useEffect).
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { onAchievementUnlocked, useAchievements } from "../lib/api";
-
-interface Toast {
-  id: number;
-  code: string;
-  name: string;
-  icon: string;
-  description: string;
-}
-
-const AUTO_DISMISS_MS = 5000;
-const MAX_VISIBLE = 5;
+import { toast } from "../lib/toast";
 
 export function AchievementToaster() {
   const { t } = useTranslation();
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [extraCount, setExtraCount] = useState(0);
-  // Wir brauchen die Definitionen, um beim toast den name + icon zu zeigen.
-  // Cache via useAchievements (queryKey shared mit dem Tab — kein Extra-call).
+  // Definitions-Cache für Name/Icon/Description-Lookup.
+  // queryKey shared mit dem Tab — kein Extra-Call.
   const { data: definitions } = useAchievements();
 
   useEffect(() => {
     const unsub = onAchievementUnlocked((codes) => {
-      if (!definitions) return; // ohne defs: ignorieren (kommt selten vor)
-      const newToasts: Toast[] = [];
+      if (!definitions) return; // ohne defs: ignorieren (sehr selten)
       for (const code of codes) {
         const def = definitions.find((a) => a.code === code);
         if (!def) continue;
-        newToasts.push({
-          id: Date.now() + Math.random(),
-          code,
-          name: def.name,
+        toast.achievement({
+          title: t("toasterAchievement.unlockedLabel"),
+          message: `${def.name} — ${def.description}`,
           icon: def.icon,
-          description: def.description,
         });
       }
-      if (newToasts.length === 0) return;
-
-      setToasts((prev) => {
-        const combined = [...prev, ...newToasts];
-        if (combined.length > MAX_VISIBLE) {
-          setExtraCount((c) => c + (combined.length - MAX_VISIBLE));
-          return combined.slice(combined.length - MAX_VISIBLE);
-        }
-        return combined;
-      });
-
-      // Jeder neue Toast bekommt sein Auto-Dismiss
-      newToasts.forEach((t) => {
-        window.setTimeout(() => dismiss(t.id), AUTO_DISMISS_MS);
-      });
     });
     return unsub;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [definitions]);
+  }, [definitions, t]);
 
-  function dismiss(id: number) {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }
-
-  function dismissAll() {
-    setToasts([]);
-    setExtraCount(0);
-  }
-
-  if (toasts.length === 0 && extraCount === 0) return null;
-
-  return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-xs">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 backdrop-blur p-4 shadow-lg flex items-start gap-3"
-        >
-          <span className="text-2xl shrink-0">{toast.icon}</span>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm text-yellow-200/80 uppercase tracking-wide">
-              {t("toasterAchievement.unlockedLabel")}
-            </div>
-            <div className="text-base text-yellow-100 font-semibold mt-0.5">
-              {toast.name}
-            </div>
-            <div className="text-sm text-yellow-200/80 mt-0.5">
-              {toast.description}
-            </div>
-          </div>
-          <button
-            onClick={() => dismiss(toast.id)}
-            className="text-xl text-yellow-300/60 hover:text-yellow-200 leading-none -mt-1"
-            aria-label={t("toasterAchievement.closeAria")}
-          >
-            ×
-          </button>
-        </div>
-      ))}
-      {extraCount > 0 && (
-        <div className="rounded border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-200 flex items-center gap-2">
-          <span>{t("toasterAchievement.moreCount", { count: extraCount })}</span>
-          <button
-            onClick={dismissAll}
-            className="ml-auto text-xs underline hover:text-yellow-100"
-          >
-            {t("toasterAchievement.dismissAll")}
-          </button>
-        </div>
-      )}
-    </div>
-  );
+  return null;
 }

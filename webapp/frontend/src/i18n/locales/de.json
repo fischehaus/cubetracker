@@ -1260,6 +1260,11 @@
     "downloadError": "Backup konnte nicht erstellt werden. Bitte nochmal versuchen.",
     "moreToolsHint": "Wiederherstellen, Snapshots & csTimer-Import findest du weiter unten."
   },
+  "toast": {
+    "closeAria": "Toast schließen",
+    "moreCount": "+ {{count}} weitere",
+    "dismissAll": "alle schließen"
+  },
   "toasterAchievement": {
     "unlockedLabel": "🏆 Erfolg freigeschaltet",
     "closeAria": "Toast schließen",

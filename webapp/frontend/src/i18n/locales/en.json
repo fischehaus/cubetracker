@@ -1260,6 +1260,11 @@
     "downloadError": "Backup could not be created. Please try again.",
     "moreToolsHint": "Restore, snapshots & csTimer import are further down."
   },
+  "toast": {
+    "closeAria": "Close toast",
+    "moreCount": "+ {{count}} more",
+    "dismissAll": "dismiss all"
+  },
   "toasterAchievement": {
     "unlockedLabel": "🏆 Achievement unlocked",
     "closeAria": "Close toast",

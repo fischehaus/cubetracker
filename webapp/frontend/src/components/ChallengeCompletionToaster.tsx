@@ -1,9 +1,12 @@
-// ChallengeCompletionToaster (Phase 7b): globaler Layer der auf
-// onChallengeCompleted hört (kommt aus axios-response-interceptor)
-// und Toasts unten rechts anzeigt — strukturell identisch zum
-// AchievementToaster, nur in grüner Farbgebung und mit Challenge-Lookup.
+// ChallengeCompletionToaster (W.toast-manager, 2026-05-30): nur noch
+// Trigger-Listener. Lauscht auf onChallengeCompleted (axios-Interceptor)
+// und pushed pro Challenge einen Toast via lib/toast.ts.
+// Render in <ToastHost />.
+//
+// Default-Position für severity=challenge ist BL (bottom-left), wie
+// die ursprüngliche eigene Render-Schicht.
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { onChallengeCompleted, useChallengesToday } from "../lib/api";
 import {
@@ -11,105 +14,29 @@ import {
   challengeLabel,
   describeChallenge,
 } from "../lib/challenges";
-
-interface Toast {
-  id: number;
-  challengeId: number;
-  icon: string;
-  label: string;
-  text: string;
-}
-
-const AUTO_DISMISS_MS = 5000;
-const MAX_VISIBLE = 5;
+import { toast } from "../lib/toast";
 
 export function ChallengeCompletionToaster() {
   const { t } = useTranslation();
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [extraCount, setExtraCount] = useState(0);
-  // Wir brauchen die Definitionen, um beim toast den text + icon zu zeigen.
-  // Cache via useChallengesToday (queryKey shared mit Trainer/Mini — kein extra-call).
   const { data } = useChallengesToday();
 
   useEffect(() => {
     const unsub = onChallengeCompleted((ids) => {
       if (!data) return;
-      const newToasts: Toast[] = [];
       for (const cid of ids) {
         const c = data.challenges.find((x) => x.id === cid);
         if (!c) continue;
-        newToasts.push({
-          id: Date.now() + Math.random(),
-          challengeId: cid,
+        toast.challenge({
+          title: t("toasterChallenge.completedLabel", {
+            label: challengeLabel(c.kind, t),
+          }),
+          message: describeChallenge(c, t),
           icon: CHALLENGE_ICONS[c.kind],
-          label: challengeLabel(c.kind, t),
-          text: describeChallenge(c, t),
         });
       }
-      if (newToasts.length === 0) return;
-
-      setToasts((prev) => {
-        const combined = [...prev, ...newToasts];
-        if (combined.length > MAX_VISIBLE) {
-          setExtraCount((c) => c + (combined.length - MAX_VISIBLE));
-          return combined.slice(combined.length - MAX_VISIBLE);
-        }
-        return combined;
-      });
-
-      newToasts.forEach((t) => {
-        window.setTimeout(() => dismiss(t.id), AUTO_DISMISS_MS);
-      });
     });
     return unsub;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [data, t]);
 
-  function dismiss(id: number) {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }
-
-  function dismissAll() {
-    setToasts([]);
-    setExtraCount(0);
-  }
-
-  if (toasts.length === 0 && extraCount === 0) return null;
-
-  return (
-    <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 max-w-xs">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 backdrop-blur p-4 shadow-lg flex items-start gap-3"
-        >
-          <span className="text-2xl shrink-0">{toast.icon}</span>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm text-emerald-200/80 uppercase tracking-wide">
-              {t("toasterChallenge.completedLabel", { label: toast.label })}
-            </div>
-            <div className="text-sm text-emerald-100 mt-0.5">{toast.text}</div>
-          </div>
-          <button
-            onClick={() => dismiss(toast.id)}
-            className="text-xl text-emerald-300/60 hover:text-emerald-200 leading-none -mt-1"
-            aria-label={t("toasterChallenge.closeAria")}
-          >
-            ×
-          </button>
-        </div>
-      ))}
-      {extraCount > 0 && (
-        <div className="rounded border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200 flex items-center gap-2">
-          <span>{t("toasterChallenge.moreCount", { count: extraCount })}</span>
-          <button
-            onClick={dismissAll}
-            className="ml-auto text-xs underline hover:text-emerald-100"
-          >
-            {t("toasterChallenge.dismissAll")}
-          </button>
-        </div>
-      )}
-    </div>
-  );
+  return null;
 }

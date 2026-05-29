@@ -44,6 +44,38 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.toast-manager",
+        released=date(2026, 5, 30),
+        title="🔔 Toast-Manager: zentrale Engine + Severity-Stacking",
+        highlights=[
+            "Neuer zentraler Toast-Hub (lib/toast.ts) mit 6 Severities "
+            "(success/info/warning/error/achievement/challenge) und 4 "
+            "Positionen (TR/TL/BR/BL). Convenience-API: "
+            "`toast.success('Solve gespeichert')`, `toast.error(...)`, "
+            "`toast.achievement({title, message, icon})`. Pushed wird in "
+            "einen Singleton-Store, rendert wird in EINER <ToastHost />-"
+            "Komponente in App.tsx. Bestehende 3 Toaster sind jetzt "
+            "reine Listener (null-rendering) — ~90% Code-Duplikat zwischen "
+            "Achievement- und Challenge-Toaster eliminiert.",
+            "Severity-Stacking: pro Position max 5 sichtbar, „+N weitere\""
+            "-Summen-Toast unten dran, „Alle ausblenden\"-Knopf. "
+            "Auto-Dismiss-Default je Severity sinnvoll (Errors bleiben "
+            "bis User-Dismiss, Success 4s, Info/Warning/Achievement/"
+            "Challenge 5-6s). dedupKey-Pattern verhindert Doppel-Pushen "
+            "bei Query-Refetch. Künftige Use-Cases (Solve-saved, Restore-"
+            "done, Smart-Cube-Disconnected, …) brauchen keine neue "
+            "Toaster-Komponente mehr — einfach `toast.*` aufrufen.",
+            "QA-Sub-Agent: 0 KRITISCH, 4 SOLLTE + 2 NICE — alle vor "
+            "Push gefixt. Multi-Instance-Snapshot-Race per useMemo-"
+            "Closures isoliert, ein zentraler aria-live-Announcer "
+            "für Screen-Reader (statt 4× pro Stack), MoreCard-Severity "
+            "auf ältesten versteckten Toast korrigiert, Title/Text-"
+            "Farben getauscht. PbConfettiOverlay-Timer-Leak als separate "
+            "Mini-Welle ausgelagert.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.cache-invalidation-prefix",
         released=date(2026, 5, 30),
         title="🔁 Cache-Invalidation: Domain-Prefix statt 13-Zeilen-Listen",

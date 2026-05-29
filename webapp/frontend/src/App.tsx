@@ -27,6 +27,7 @@ import { BackgroundLayer } from "./components/BackgroundLayer";
 import { BigTimerInput } from "./components/BigTimerInput";
 import { ChallengeCompletionToaster } from "./components/ChallengeCompletionToaster";
 import { FeedbackUnreadToaster } from "./components/FeedbackUnreadToaster";
+import { ToastHost } from "./components/ToastHost";
 import { ChallengesMiniCard } from "./components/ChallengesMiniCard";
 import { DashboardFilterBar } from "./components/DashboardFilterBar";
 import { PbConfettiOverlay } from "./components/PbConfettiOverlay";
@@ -860,7 +861,11 @@ function MainLayout() {
         </footer>
       </div>
 
-      {/* Globale Toaster + Modals — bleiben auf jedem Tab sichtbar */}
+      {/* Globale Toaster + Modals — bleiben auf jedem Tab sichtbar.
+          Die 3 Spezial-Toaster sind seit W.toast-manager (2026-05-30)
+          pure Listener (null-rendering); der eigentliche Render-Layer
+          ist <ToastHost />. */}
+      <ToastHost />
       <AchievementToaster />
       <ChallengeCompletionToaster />
       <PbConfettiOverlay />
