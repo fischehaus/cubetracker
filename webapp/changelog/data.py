@@ -44,6 +44,42 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feature-curation",
+        released=date(2026, 5, 29),
+        title="📐 Feature-Modal kuratiert: 23 Public + „Mehr anzeigen\"-Toggle",
+        highlights=[
+            "Vor der Demo morgen: das „Was kann diese App?\"-Modal war "
+            "mit 55 Bullets über 8 Kategorien überfrachtet. Aus User-"
+            "Sicht hat das mehr abgeschreckt als überzeugt.",
+            "**Refactor**: jedes Bullet hat jetzt eine Audience-"
+            "Klassifikation:",
+            "  • `public` — die ~23 Bullets die einen csTimer-User wirklich "
+            "aufhorchen lassen (Smart-Cube, Voice-Alerts, Multi-Cube-"
+            "Compare, WCA-Integration, Skin-System, Trainings-Sets, ...)",
+            "  • `expanded` — 13 Detail-Bullets im „Mehr anzeigen\"-Drawer "
+            "(z.B. Auto-Preselect, Multi-Bull-Markers, DACH-Bonus, etc.)",
+            "  • `internal` — 11 Bullets ganz raus aus der User-Sicht "
+            "(Trust-Block-Material, defensive UX-Details, technische "
+            "Mechanik) — bleiben in features-data.ts als Anker für QA-"
+            "Listen.",
+            "**5 Konsolidierungen**: redundante Bullets verschmolzen "
+            "(Timer-Modi in Hauptbullet, Sessions + Trainings-Sets, "
+            "Import + Export, JSON-Backup inkl. Achievements, "
+            "Standard-Cubes + Markieren).",
+            "**2 Kategorie-Umzüge**: PLZ+Land von Account zu Speedcubing-"
+            "Welt (gehört zur WCA-Turnier-Suche), Feedback-Workflow von "
+            "Account zu Community (User↔Admin-Kommunikation).",
+            "**Toggle „Mehr anzeigen\"** im Modal — default 1-Bildschirm-"
+            "kuratierte Sicht, ein Klick zeigt die Detail-Bullets.",
+            "Single-Source: alle 3 Sichten kommen aus einer Liste "
+            "(features-data.ts mit `BulletAudience`-Type), gefiltert "
+            "per `filterBulletsByAudience()`. Keine doppelten Listen, "
+            "kein Drift.",
+            "i18n: DE+EN 1384/1384 (vorher 1387, jetzt nach Konsolidierung "
+            "+ 2 neue showMore/showFewer-Keys).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feature-audit-and-hook",
         released=date(2026, 5, 29),
         title="📋 Feature-Audit: 6 fehlende Bullets nachgezogen + Hook gegen zukünftigen Drift",

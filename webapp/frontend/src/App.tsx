@@ -877,6 +877,9 @@ function MainLayout() {
 
 function FeaturesModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
+  // W.feature-curation (2026-05-29): Toggle zwischen kuratierter
+  // Public-Sicht (Default) und Expanded-Sicht (+ Detail-Bullets).
+  const [showExpanded, setShowExpanded] = useState(false);
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
@@ -895,7 +898,20 @@ function FeaturesModal({ onClose }: { onClose: () => void }) {
             ×
           </button>
         </div>
-        <FeatureListPanel />
+        <FeatureListPanel
+          audienceFilter={showExpanded ? "expanded" : "public"}
+        />
+        <div className="mt-4 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setShowExpanded((v) => !v)}
+            className="text-sm text-purple-300 hover:text-purple-200 underline focus:outline-none focus:ring-2 focus:ring-purple-400 rounded px-2 py-1"
+          >
+            {showExpanded
+              ? t("features.showFewer")
+              : t("features.showMore")}
+          </button>
+        </div>
       </div>
     </div>
   );

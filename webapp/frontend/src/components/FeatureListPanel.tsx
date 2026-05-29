@@ -9,7 +9,11 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useFeatures } from "../lib/features-data";
+import {
+  filterBulletsByAudience,
+  useFeatures,
+  type BulletAudience,
+} from "../lib/features-data";
 
 interface Props {
   /** Header anzeigen (in Modal: ja; embedded auf LoginPage: optional). */
@@ -21,21 +25,36 @@ interface Props {
    * gesetzt, scrollt das Panel beim Mount zur entsprechenden Kategorie
    * und highlightet sie kurz mit einem lila Ring. Genutzt vom LoginPage-
    * Klick auf Trust-Pills + Feature-Tiles.
-   *
-   * Akzeptiert den vollen titleKey (z.B. "features.solvingTitle") oder
-   * die kategorie-spezifische Bezeichnung (siehe lib/features-data.ts).
    */
   scrollToCategoryTitleKey?: string;
+  /**
+   * W.feature-curation (2026-05-29): Audience-Filter.
+   *   - "public" (Default) → nur die kuratierten Marketing-Bullets
+   *   - "expanded" → public + erweiterte Detail-Bullets (für "Mehr anzeigen")
+   *   - "internal" → alles, inkl. Backstage-Bullets (Admin/QA-Sicht)
+   * Kategorien ohne sichtbare Bullets werden ausgeblendet.
+   */
+  audienceFilter?: BulletAudience;
 }
 
 export function FeatureListPanel({
   showHeader = true,
   compact = false,
   scrollToCategoryTitleKey,
+  audienceFilter = "public",
 }: Props) {
   const { t } = useTranslation();
   const { categories } = useFeatures();
   const listRef = useRef<HTMLUListElement | null>(null);
+
+  // Pro Kategorie nach audience filtern; leere Kategorien werden
+  // unten beim Render uebersprungen.
+  const visibleCategories = categories
+    .map((cat) => ({
+      ...cat,
+      bullets: filterBulletsByAudience(cat.bullets, audienceFilter),
+    }))
+    .filter((cat) => cat.bullets.length > 0);
 
   // Beim Mount mit `scrollToCategoryTitleKey` zur Ziel-Card scrollen +
   // kurz highlighten. Die Card hat data-category-key (s.u.).
@@ -76,7 +95,7 @@ export function FeatureListPanel({
       )}
 
       <ul ref={listRef} className={compact ? "space-y-3" : "space-y-4"}>
-        {categories.map((cat) => (
+        {visibleCategories.map((cat) => (
           <li
             key={cat.title}
             data-category-key={cat.titleKey}
@@ -101,8 +120,8 @@ export function FeatureListPanel({
                 compact ? "text-xs leading-snug" : "text-sm"
               }`}
             >
-              {cat.bullets.map((b, i) => (
-                <li key={i}>{b}</li>
+              {cat.bullets.map((b) => (
+                <li key={b.key}>{b.text}</li>
               ))}
             </ul>
           </li>

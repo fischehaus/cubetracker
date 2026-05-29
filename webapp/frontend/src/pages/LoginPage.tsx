@@ -287,6 +287,7 @@ function LoginFeaturesModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const [showExpanded, setShowExpanded] = useState(false);
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
@@ -305,7 +306,21 @@ function LoginFeaturesModal({
             ×
           </button>
         </div>
-        <FeatureListPanel scrollToCategoryTitleKey={scrollToKey} />
+        <FeatureListPanel
+          scrollToCategoryTitleKey={scrollToKey}
+          audienceFilter={showExpanded ? "expanded" : "public"}
+        />
+        <div className="mt-4 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setShowExpanded((v) => !v)}
+            className="text-sm text-purple-300 hover:text-purple-200 underline focus:outline-none focus:ring-2 focus:ring-purple-400 rounded px-2 py-1"
+          >
+            {showExpanded
+              ? t("features.showFewer")
+              : t("features.showMore")}
+          </button>
+        </div>
       </div>
     </div>
   );
