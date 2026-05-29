@@ -28,8 +28,9 @@ Commits sind.
 
 **Letzte Welle: `W.roadmap-doku-cleanup` (internal, Tag folgt im Push).**
 Davor: `W.feature-curation` (Tag `7c16ecb`). Branch
-`feature/W-api-prefix`, alles gepusht, Backend live (Health zeigt nach
-Push `v2.0.0-alpha.W.roadmap-doku-cleanup`). Working-Tree clean ausser 5 alte
+`feature/W-api-prefix`, alles gepusht. Backend live, Health-Badge bleibt bei
+`v2.0.0-alpha.W.feature-curation` (W.roadmap-doku-cleanup ist `internal=True`,
+`current_version()` überspringt internal-Einträge). Working-Tree clean ausser 5 alte
 PNGs/scripts/ (irrelevant) + **2 NEUE Wallpaper-Packs** vom User
 (`frontend/src/assets/cubetracker_pb_hunt_competition_focus_template2_pack.zip`
 und neu dazugekommen `cubetracker_algorithm_lab_theme_pack.zip`)
