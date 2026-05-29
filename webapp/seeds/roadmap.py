@@ -49,6 +49,48 @@ ROADMAP_SEED: list[dict[str, Any]] = [
         "effort": "1 Tag",
         "internal": False,
     },
+    {
+        # W.roadmap-seed-ranking (2026-05-29): vom Admin im Panel angelegt
+        # (live id=29), hier in den Seed gezogen damit es einen DB-Wipe
+        # ueberlebt. note_de verbatim vom Admin; note_en nachuebersetzt.
+        "phase_id": "P1",
+        "title_de": "Ranking / Level",
+        "title_en": "Ranking / Level",
+        "note_de": (
+            "Ein Rankingsystem nach dem bekannten lol-Modus (Iron; Bronze; "
+            "Silver; Gold; Platinum; Emerald; Diamond) oder einem ähnlichen "
+            "modus. Dabei soll die KI gemäß der WCA-Zeiten der Solves "
+            "entsprechend der Normalverteilung berechnen, auf welchem Rang "
+            "man derzeit pro Cube liegt. In Bezug auf die App Cubetracker "
+            "sollte es ein Levelsystem geben (1 - 10: Die Namen für die 10 "
+            "Level müssen noch überlegt werden) - mit unterschiedlichen "
+            "Abzeichen pro Level, sodass man in der Freundesliste oder "
+            "anderen communitylisten die noch kommen könnten am abzeichen "
+            "erkennen kann, wie lange man schon dabei ist bzw. wie viele "
+            "solves man schon bei cubetracker hat. Dabei darf nicht die "
+            "Anzahl der solves herangezogen werden können, da diese "
+            "importiert werden können. es müssen echte Cubetracker solves "
+            "sein. Zudem sollte dann jeder user ein Userprofil haben. Dort "
+            "sollten die wichtigsten Infos zu dem User und sehr präsent das "
+            "Levellogo und der Rang zu sehen sein. Man soll sein "
+            "öffentliches Profil editieren dürfen und auch entscheiden "
+            "dürfen, was andere und freunde sehen dürfen."
+        ),
+        "note_en": (
+            "A ranking system in the style of the well-known LoL tiers "
+            "(Iron, Bronze, Silver, Gold, Platinum, Emerald, Diamond) or "
+            "similar. The app computes the current rank per cube from WCA "
+            "times via a normal distribution. Plus a level system (1-10, "
+            "level names TBD) with a distinct badge per level — so in the "
+            "friends list or future community lists you can tell at a glance "
+            "how long / how active someone has been. Based NOT on solve "
+            "count (importable!) but on genuine Cubetracker solves. Each "
+            "user gets an editable public profile (level badge + rank "
+            "prominently shown) with control over what others / friends see."
+        ),
+        "effort": None,
+        "internal": True,
+    },
     # ============================================================
     # P3 — Multi-User-USP (August 2026)
     # ============================================================
