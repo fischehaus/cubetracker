@@ -44,6 +44,21 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.solvelist-scroll-cap",
+        released=date(2026, 5, 29),
+        title="📜 Solve-Liste: kompakte Scroll-Box statt endloser Seite",
+        highlights=[
+            "Die Solve-Liste lebt jetzt in einer höhenbegrenzten Scroll-Box "
+            "(max. ~70% Bildschirmhöhe) mit eigener Scrollbar — statt die "
+            "ganze Seite bei 1000 Solves / „Alle\" in die Länge zu ziehen. "
+            "Auf älteren Phones scrollt es dadurch ruhiger.",
+            "Standard-Anzeige ist jetzt 50 Solves (vorher 100) — über den "
+            "Limit-Selektor weiterhin bis „Alle\" erweiterbar.",
+            "Auf dem Desktop bleiben die Spaltenköpfe beim Scrollen oben "
+            "stehen (sticky Header).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.backend-test-suite",
         released=date(2026, 5, 29),
         title="🧪 Backend-Smoke-Tests (pytest)",

@@ -64,7 +64,11 @@ type EditingState = { solveId: number; field: "time" } | null;
 
 export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) {
   const { t } = useTranslation();
-  const [limit, setLimit] = useState<number>(100);
+  // W.solvelist-scroll-cap (2026-05-29): Default 50 statt 100 — „max 50
+  // sichtbar". Die Liste lebt in einer höhenbegrenzten Scrollbox (siehe
+  // max-h-[70vh] unten), damit grosse Limits die Seite nicht sprengen +
+  // der Scroll auf älteren Phones ruhiger ist.
+  const [limit, setLimit] = useState<number>(50);
   const [editing, setEditing] = useState<EditingState>(null);
   const [draftValue, setDraftValue] = useState<string>("");
   const [editError, setEditError] = useState<string | null>(null);
@@ -285,7 +289,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
           - Card-Click öffnet SolveDetailModal (statt Inline-Edit).
           - Aktions-Buttons (+2/DNF/🗑) per stopPropagation isoliert.
           - Tabelle weiterhin für md+ (siehe darunter). */}
-      <div className="md:hidden space-y-2 mb-3">
+      <div className="md:hidden space-y-2 mb-3 max-h-[70vh] overflow-y-auto pr-1">
         {sortedDisplay.map((row) => {
           const s = row.solve;
           const isBest = s.id === bestSolveId;
@@ -424,11 +428,13 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         })}
       </div>
 
-      {/* Desktop-Tabelle (md+): unverändert. */}
-      <div className="hidden md:block overflow-x-auto">
+      {/* Desktop-Tabelle (md+). W.solvelist-scroll-cap: höhenbegrenzte
+          Scrollbox + sticky Header, damit grosse Limits die Seite nicht
+          sprengen + die Spaltenköpfe beim Scrollen sichtbar bleiben. */}
+      <div className="hidden md:block overflow-auto max-h-[70vh]">
         <table className="w-full text-base">
           <thead>
-            <tr className="border-b border-gray-700 text-left text-gray-400 text-sm">
+            <tr className="border-b border-gray-700 text-left text-gray-400 text-sm sticky top-0 bg-gray-900 z-10">
               <SortableTh
                 label={t("solveList.colNumber")}
                 sortKey="num"
