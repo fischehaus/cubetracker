@@ -1357,6 +1357,8 @@
     "errorNotFound": "WCA-ID „{{id}}\" wurde im WCA-System nicht gefunden.",
     "errorNotFoundHint": "Schreibweise prüfen oder ID in den Account-Einstellungen korrigieren.",
     "errorGeneric": "WCA-Profil konnte nicht geladen werden.",
+    "serviceDownBanner": "Der WCA-Service ist derzeit nicht erreichbar — dein WCA-Profil und die offiziellen Records können vorübergehend fehlen oder veraltet sein.",
+    "serviceDownDismiss": "Hinweis ausblenden",
     "delegate": "WCA-Delegate",
     "statComps": "Wettkämpfe",
     "statMedals": "Medaillen",

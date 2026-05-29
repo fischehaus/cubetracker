@@ -1357,6 +1357,8 @@
     "errorNotFound": "WCA ID \"{{id}}\" was not found in the WCA system.",
     "errorNotFoundHint": "Check spelling or correct the ID in account settings.",
     "errorGeneric": "WCA profile could not be loaded.",
+    "serviceDownBanner": "The WCA service is currently unavailable — your WCA profile and official records may be temporarily missing or outdated.",
+    "serviceDownDismiss": "Dismiss notice",
     "delegate": "WCA Delegate",
     "statComps": "Comps",
     "statMedals": "Medals",

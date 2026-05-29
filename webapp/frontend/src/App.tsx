@@ -47,6 +47,7 @@ import { FeatureListPanel } from "./components/FeatureListPanel";
 import { FeedbackModal } from "./components/FeedbackModal";
 import { RoadmapModal } from "./components/RoadmapModal";
 import { OnboardingBanner } from "./components/OnboardingBanner";
+import { WcaStatusBanner } from "./components/WcaStatusBanner";
 import { PatchNotesPanel } from "./components/PatchNotesPanel";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { UserMenu } from "./components/UserMenu";
@@ -773,6 +774,8 @@ function MainLayout() {
             Mail erneut senden.
           </div>
         )}
+
+        <WcaStatusBanner />
 
         <OnboardingBanner onSwitchTab={setTab} />
 

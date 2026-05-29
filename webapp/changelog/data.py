@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-503-banner",
+        released=date(2026, 5, 29),
+        title="📡 WCA-Ausfall: klarer Hinweis statt stiller Lücke",
+        highlights=[
+            "Wenn der offizielle WCA-Service mal nicht erreichbar ist "
+            "(502/503/504), zeigt die App jetzt ein dezentes Banner oben — "
+            "damit weißt du sofort, dass dein WCA-Profil und die offiziellen "
+            "Records vorübergehend fehlen oder veraltet sein können, statt "
+            "dich über eine leere Karte zu wundern.",
+            "Das Banner blendet sich automatisch wieder aus, sobald der "
+            "WCA-Service zurück ist (und lässt sich manuell wegklicken).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.random-move-fallback",
         released=date(2026, 5, 29),
         title="🎲 Robusterer Scramble-Fallback (Dino/Floppy/Tower)",
