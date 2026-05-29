@@ -45,7 +45,14 @@ BRIEF = "--brief" in sys.argv
 UPDATE_SNAPSHOT = "--update-snapshot" in sys.argv
 
 PROJECT = os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
-TOKEN_FILE = os.path.join(PROJECT, ".tmp", "admin-token")
+# Kanonisch ist `.tmp/admin-token` (ohne Endung). Windows-Editoren (Notepad
+# etc.) haengen aber gern .txt/.md an — beide als Fallback akzeptieren, damit
+# der Token-Setup nicht an der Datei-Endung scheitert.
+TOKEN_CANDIDATES = [
+    os.path.join(PROJECT, ".tmp", "admin-token"),
+    os.path.join(PROJECT, ".tmp", "admin-token.txt"),
+    os.path.join(PROJECT, ".tmp", "admin-token.md"),
+]
 SNAP_FILE = os.path.join(PROJECT, ".tmp", "roadmap-snapshot.json")
 SEED_FILE = os.path.join(PROJECT, "webapp", "seeds", "roadmap.py")
 API_URL = "https://www.cubetracker.de/api/roadmap"
@@ -58,11 +65,15 @@ SETUP_HINT = (
 
 
 def read_token() -> str | None:
-    try:
-        with open(TOKEN_FILE, encoding="utf-8") as fh:
-            return fh.read().strip() or None
-    except FileNotFoundError:
-        return None
+    for path in TOKEN_CANDIDATES:
+        try:
+            with open(path, encoding="utf-8") as fh:
+                tok = fh.read().strip()
+        except FileNotFoundError:
+            continue
+        if tok:
+            return tok
+    return None
 
 
 def fetch_roadmap(token: str) -> dict:
