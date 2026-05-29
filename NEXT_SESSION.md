@@ -24,7 +24,76 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-05-29 (Spätabend) — 3 weitere Wellen: Tests + SolveList + Export-Key
+## ✅ ERLEDIGT 2026-05-30 (Nacht) — Tier B komplett + 4 Skin-Wellen
+
+Nach `/compact` weitergegangen — **5 weitere Wellen** committet+getaggt+
+gepusht, alle live. Tier B ist damit **komplett durch**.
+
+- `W.cache-invalidation-prefix` (Tag, **internal**) — Tier-B-Refactor: alle
+  React-Query-Keys laufen jetzt über zentrale `qk`-Konstante (neue
+  `lib/queryKeys.ts`) mit Domain-Prefix-Hierarchie. Mutations invalidieren
+  per Prefix-Match statt 13-Zeilen-Einzellisten. Beifang: **3 reale Bugs
+  gefixt** — stille No-Op-Invalidates in `useResetMyData`, stales
+  Leaderboard nach Solve, stales Stats nach CSV-Import. ~140 Stellen in
+  api.ts + BackupPanel + AccountSettingsPanel + ImportPanel + App.tsx.
+  QA-Sub-Agent: 0 KRITISCH + 4 SOLLTE + 2 NICE — alle vor Push gefixt.
+
+- `W.toast-manager` (Tag, **internal**) — Tier-B-Refactor: zentraler Pub-Sub-
+  Store `lib/toast.ts` (6 Severities, 4 Positionen) + `ToastHost.tsx`-
+  Renderer. Die 3 alten Toaster (Achievement/Challenge/FeedbackUnread)
+  sind jetzt reine Listener (null-rendering) — ~90% Code-Doppel
+  eliminiert. Künftige Toasts brauchen keine neue Komponente, einfach
+  `toast.success(...)`. QA: 0 KRITISCH + 4 SOLLTE + 2 NICE alle gefixt.
+  **Follow-up offen:** `PbConfettiOverlay`-Timer-Leak (als spawned Task
+  geflagt, pre-existing).
+
+- `W.cstimer-dynamic-import` (Tag, **public**) — Tier-B-Bundle-Splitter,
+  letzte Welle vor Tier-B-Abschluss. csTimer-Code aus Initial-Bundle
+  rauslazy-loaden, scramble.ts wird async. **-122 KB unkomprimiert /
+  -43 KB gzip** beim Erstladen — spürbar bei langsamem Mobile +
+  Login-Flow (wo Scrambles gar nicht gebraucht werden).
+
+- `W.skin-algorithm-lab-codex-v2` (Tag, **public**) — Algorithm Lab +
+  Codex Vitruvian auf **"No Real Cube Edition"** aktualisiert (12 WebP-
+  Files ersetzt, gleiche IDs → User-Settings bleiben gültig). Die
+  realistischen Plastik-Cubes sind raus, dafür Wireframes/OLL+PLL-
+  Diagramme.
+
+- `W.skin-pixel-academy-lofi` (Tag, **public**) — Zwei NEUE Skins:
+  **Pixel Academy** (Pixel-Art Coding-Club, bunt, Kids 8-12) und
+  **Lofi Solver** (cozy rainy-night, dunkel, warmes Orange/Violett).
+  Total Skin-Anzahl jetzt 9 (none + 8). Plus features-data.ts-Drift-
+  Korrektur (Bullet sagte "6 Themen", jetzt korrekt 8).
+
+### ✅ Erledigt: ROADMAP_EXPORT_KEY-Setup
+
+Die offene User-Aktion vom Spätabend-Block ist durch — Coolify hat den
+Key (Backend antwortet auf `/api/roadmap/export` mit `is_admin: true`),
+lokale Datei `.tmp/roadmap-export-key` ist da, `roadmap-fetch.py --brief`
+zeigt "34 Items (Admin, inkl. intern)". Tooling-Pfad ist durabel,
+`.tmp/admin-token` wird nicht mehr gebraucht.
+
+### 🔜 Reste für die nächste Session
+
+**🟢 Frei wählbar — keine offenen Wellen, alles Tier-B-fertig:**
+
+**🔴 Blockiert / groß (warten auf User-Input):**
+- PLL-Bilder (deine 21 PNGs warten).
+- Smart-Cube v5 (Diagnose-Logs gelöster Cube + Console-Screenshot).
+- PWA-Setup (Service-Worker-Caching-Entscheidungen + Icons).
+- Alembic (DB-Migration-Framework — Deploy-Risiko).
+- Battle/3D-Vis/Reconstruction/Trainer-Subsets (mehrere Wochen, Design).
+- Ranking / Level (großes Feature mit Profil + Level-Badges).
+
+**🟢 Optional / Polish:**
+- SolveList: react-window-Virtualisierung wenn Mount-Jank auf alten Phones
+  weiterhin auftritt.
+- PbConfettiOverlay-Timer-Leak (separater Task, off-scope von toast-manager).
+- Browser-Cache-Strategie für Skin-Asset-Swaps (Versionssuffix oder CDN-Purge).
+
+---
+
+## ✅ ERLEDIGT 2026-05-29 (Spätabend) — 3 Wellen: Tests + SolveList + Export-Key
 
 Nach dem Tier-A-Batch noch 3 substanzielle Wellen draufgesetzt — alles
 getaggt + gepusht, **32 Backend-Tests grün**, QA-Sub-Agent über jeden
