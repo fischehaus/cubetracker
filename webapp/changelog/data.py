@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.recharts-split",
+        released=date(2026, 5, 29),
+        title="⚡ Schnellerer Erststart: Diagramme werden lazy geladen",
+        highlights=[
+            "Die Chart-Bibliothek (Recharts, ~80kb gzip) wurde bisher beim "
+            "ersten App-Laden mitgeladen — auch für alle, die nie den "
+            "Analyse-/Dashboard-Tab öffnen. Jetzt wird sie erst geladen, "
+            "wenn wirklich ein Diagramm gerendert wird.",
+            "Effekt: das Initial-Bundle ist ~110kb gzip kleiner (536 → 426kb), "
+            "die App startet spürbar schneller — besonders auf dem Phone.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-503-banner",
         released=date(2026, 5, 29),
         title="📡 WCA-Ausfall: klarer Hinweis statt stiller Lücke",
