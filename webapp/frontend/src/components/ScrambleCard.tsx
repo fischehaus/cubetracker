@@ -24,6 +24,7 @@ import {
   defaultScrambleTypeForCube,
   generateScramble,
   isWcaQualityCustomPuzzle,
+  prefetchScrambleVendors,
   resolveScrambleTypeOverride,
   UNOFFICIAL_SCRAMBLE_TYPES,
   WCA_SCRAMBLE_TYPES,
@@ -131,6 +132,16 @@ export function ScrambleCard({
   // Kategorie für den Toggle — derived aus dem effektivenType.
   const effectiveCategory = categoryFor(effectiveType);
 
+  // Bundle-Split-Prefetch (W.cstimer-dynamic-import, 2026-05-30):
+  // triggert den Vendor-Chunk-Load schon beim Mount, damit zum ersten
+  // generateScramble-Call (im nächsten useEffect) die Vendors meistens
+  // schon im Hot-Cache liegen — kein sichtbarer Loading-State im 99%-
+  // Fall. fire-and-forget, kein await nötig.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    prefetchScrambleVendors();
+  }, []);
+
   // QA-Hinweis: onScrambleGenerated bewusst NICHT in den deps. Der Parent
   // (TimerTab) gibt `setCurrentScramble` direkt aus `useState` rein — die
   // Identität bleibt stabil. Würde der Parent das mal in einen inline-
@@ -143,9 +154,18 @@ export function ScrambleCard({
     // nicht überschreiben. Nach Skip / Save / Cube-Wechsel wird
     // isCustom resetet.
     if (isCustom) return;
-    const next = generateScramble(effectiveType);
-    setScramble(next);
-    onScrambleGenerated(next);
+    // Race-Schutz: wenn die Komponente unmountet oder effectiveType
+    // zwischen async-await wechselt, ignorieren wir das Ergebnis.
+    let cancelled = false;
+    void (async () => {
+      const next = await generateScramble(effectiveType);
+      if (cancelled) return;
+      setScramble(next);
+      onScrambleGenerated(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effectiveType, regenerationSeed, skipCounter, isCustom]);
 

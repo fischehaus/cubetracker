@@ -14,25 +14,78 @@
 // Instanz. Das ist OK weil scrambow keine teure Initialisierung hat
 // und wir so race-conditions zwischen concurrent generations vermeiden.
 
-// Wir importieren NICHT von "scrambow" direkt, weil dessen UMD-Bundle
-// von Vite 8 / Rolldown wegen scope-übergreifender `f`-Wiederverwendung
-// nicht geparst werden kann. Stattdessen patched-vendor-copy unter
-// src/vendor/, die das zweite `f` zu `_F` umbenennt (semantisch
-// identisch, im skewb-Scrambler-Loop). Types kommen aus dem npm-Paket
-// via *.d.ts-Stub im selben vendor-Ordner.
-import { Scrambow } from "../vendor/scrambow-patched";
-// Eigenbau-Random-State-Solver für einzelne Custom-Puzzles
-// (Phase W.ivy-rs, 2026-05-17 — erstes Puzzle). Reines TypeScript ohne
-// externe Deps, BFS-Lookup-Table beim ersten Aufruf. Lesson aus dem
-// cstimer_module-Browser-Crash: keine Native-Node-Globals importieren,
-// daher Eigenbau statt npm-Paket.
-import { generateIvyScramble } from "./ivyScramble";
-// csTimer-Random-State-Scrambler für inoffizielle Cubes (Phase
-// W.cstimer-vendor, 2026-05-17). GPL-v3, gevendorter Subset aus
-// github.com/cs0x7f/cstimer. Public-API: getCstimerScramble(type).
-// Liefert null wenn der Type nicht registriert ist (= safe-fallback
-// auf unseren Random-Move-Generator weiter unten).
-import { getCstimerScramble } from "./cstimer-vendor";
+// Bundle-Split (W.cstimer-dynamic-import, 2026-05-30):
+// Die drei Scramble-Vendors (scrambow ~50 KB + cstimer-vendor ~140 KB
+// unminified + ivyScramble klein) werden NICHT mehr top-level importiert,
+// sondern lazy via dynamischem `import()` bei der ersten generateScramble-
+// Anfrage geladen. Vorteile:
+//   - Initial-Bundle (Login-Page, Stats-Tabs) wird ~50-80 KB minified
+//     kleiner — sichtbar bei jedem Erstladen.
+//   - Pure Helpers + Konstanten (Picker-UI etc.) bleiben sync verfügbar,
+//     keine UI-Latenz beim Card-Mount.
+//   - Bei Smoke-Test-Aufrufen werden die Vendors nur geladen wenn
+//     wirklich generateScramble läuft — Test-Setup wird stabiler.
+//
+// Caveat: generateScramble + generateCustomScramble wurden zu async.
+// ScrambleCard.tsx prefetched die Vendors beim Mount (fire-and-forget),
+// damit der erste User-Klick auf "Skip" ohne spürbare Latenz ist.
+//
+// Die Vendor-Hintergründe (warum scrambow PATCHED ist, warum csTimer
+// GPL-v3 als Vendor) sind unverändert — siehe alte Versionen in git
+// blame falls man den Kontext braucht.
+
+type ScrambowCtor = typeof import("../vendor/scrambow-patched").Scrambow;
+type GetCstimerScramble = typeof import("./cstimer-vendor").getCstimerScramble;
+type GenerateIvyScramble = typeof import("./ivyScramble").generateIvyScramble;
+
+interface ScrambleVendors {
+  Scrambow: ScrambowCtor;
+  getCstimerScramble: GetCstimerScramble;
+  generateIvyScramble: GenerateIvyScramble;
+}
+
+let vendorCache: Promise<ScrambleVendors> | null = null;
+
+/**
+ * Lädt die Scramble-Vendors lazy + memoiziert die Promise (idempotent,
+ * parallele Calls warten auf denselben Promise statt zweimal zu fetchen).
+ * Bei späteren Calls Mikrotask-schnell, weil die import-Promise resolved
+ * ist und nur der Memo-Wert zurückgegeben wird.
+ */
+async function loadScrambleVendors(): Promise<ScrambleVendors> {
+  if (!vendorCache) {
+    // QA-Fix W.cstimer-dynamic-import (KRITISCH): bei einem Reject
+    // (Network-Glitch, CDN-Hiccup beim Chunk-Fetch) MUSS der Cache
+    // genullt werden — sonst awaitet jeder Folge-Call den rejected
+    // Promise und Scramble-Generierung bleibt bis Hard-Reload tot.
+    // Mit dem catch-Hook macht der nächste Call einen frischen
+    // import()-Versuch.
+    vendorCache = Promise.all([
+      import("../vendor/scrambow-patched"),
+      import("./cstimer-vendor"),
+      import("./ivyScramble"),
+    ])
+      .then(([scrambow, cstimer, ivy]) => ({
+        Scrambow: scrambow.Scrambow,
+        getCstimerScramble: cstimer.getCstimerScramble,
+        generateIvyScramble: ivy.generateIvyScramble,
+      }))
+      .catch((err) => {
+        vendorCache = null;
+        throw err;
+      });
+  }
+  return vendorCache;
+}
+
+/**
+ * Opportunistisches Vorladen — Caller (ScrambleCard.tsx beim Mount)
+ * triggert dies fire-and-forget, damit zum ersten Scramble-Klick
+ * alles im Hot-Cache liegt.
+ */
+export function prefetchScrambleVendors(): void {
+  void loadScrambleVendors();
+}
 
 /**
  * Mapping unserer App-Codes auf csTimer-internal-Types. Nur Einträge
@@ -382,7 +435,11 @@ function pick<T>(arr: T[]): T {
  * der Tab hängen. Bei <2 Moves geben wir den Filter auf — Qualitaet
  * wird dann schlechter, aber Tab bleibt responsive.
  */
-export function generateCustomScramble(spec: CustomScrambleSpec): string {
+// QA-NICE W.cstimer-dynamic-import: explizite Return-Type-Annotation
+// für konsistenten Export-Stil (rest des Files macht es auch).
+export function generateCustomScramble(
+  spec: CustomScrambleSpec,
+): string {
   const moves: string[] = [];
   const filterEnabled = spec.moves.length >= 2;
   let lastBase: string | null = null;
@@ -435,7 +492,14 @@ export function isWcaQualityCustomPuzzle(code: string): boolean {
  * Wir crashen nicht, weil ein fehlender Scramble den Timer nicht
  * blockieren soll.
  */
-export function generateScramble(typeOverride: string): string {
+export async function generateScramble(typeOverride: string): Promise<string> {
+  // W.cstimer-dynamic-import (2026-05-30): vorher war diese Funktion
+  // synchron mit top-level Vendor-Imports. Jetzt lazy — die ersten 3
+  // Stufen brauchen die Vendor-Funktionen, also wird der Vendor-Chunk
+  // einmalig geladen + gecacht (loadScrambleVendors). Memoisiert, also
+  // kein Overhead bei Folge-Calls.
+  const { getCstimerScramble, generateIvyScramble, Scrambow } =
+    await loadScrambleVendors();
   // 1) csTimer-Random-State-Scrambler (Phase W.cstimer-vendor, 2026-05-17;
   //    Ivy ergänzt in W.cstimer-ivy-switch): gear/redi/master_pyraminx/ivy
   //    via vendored GPL-v3-Modul. Bei csTimer-Init-Crash → Fallback weiter
@@ -460,7 +524,8 @@ export function generateScramble(typeOverride: string): string {
     }
   }
   // 3) Custom Puzzles mit Random-Move-Spec (Fallback für master_skewb
-  //    + zusätzliches Sicherheits-Netz)
+  //    + zusätzliches Sicherheits-Netz). generateCustomScramble ist pure
+  //    (kein Vendor), bleibt sync.
   if (typeOverride in CUSTOM_PUZZLE_SPECS) {
     return generateCustomScramble(CUSTOM_PUZZLE_SPECS[typeOverride]);
   }

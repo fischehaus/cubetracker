@@ -106,8 +106,8 @@ describe("generateScramble (smoke)", () => {
     "pll", "oll",
   ];
   for (const t of types) {
-    it(`type "${t}" produces non-empty scramble`, () => {
-      const s = generateScramble(t);
+    it(`type "${t}" produces non-empty scramble`, async () => {
+      const s = await generateScramble(t);
       expect(s.length).toBeGreaterThan(0);
     });
   }
@@ -126,8 +126,8 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
   // csTimer-Pfad: variable Länge, nur non-empty + plausible Max-Länge.
   const csTimerCases = ["gear", "redi", "master_pyraminx"];
   for (const type of csTimerCases) {
-    it(`"${type}" (csTimer) produces non-empty scramble`, () => {
-      const s = generateScramble(type);
+    it(`"${type}" (csTimer) produces non-empty scramble`, async () => {
+      const s = await generateScramble(type);
       const moves = s.split(/\s+/).filter((x) => x.length > 0);
       expect(moves.length).toBeGreaterThan(0);
       // Plausibilitaets-Obergrenze — csTimer-Random-State liefert
@@ -141,17 +141,17 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
     { type: "master_skewb", minMoves: 25 },
   ];
   for (const { type, minMoves } of randomMoveCases) {
-    it(`"${type}" (random-move) produces a scramble with ${minMoves} moves`, () => {
-      const s = generateScramble(type);
+    it(`"${type}" (random-move) produces a scramble with ${minMoves} moves`, async () => {
+      const s = await generateScramble(type);
       const moves = s.split(/\s+/).filter((x) => x.length > 0);
       expect(moves.length).toBe(minMoves);
     });
-    it(`"${type}" (random-move) never repeats the same base move directly`, () => {
+    it(`"${type}" (random-move) never repeats the same base move directly`, async () => {
       // 100 Iterationen — QA-Fix Welle 3 (2026-05-16). Geringe Base-Zahl
       // bei einigen Specs macht Glueckstreffer wahrscheinlich, daher viele
       // Wiederholungen.
       for (let i = 0; i < 100; i++) {
-        const s = generateScramble(type);
+        const s = await generateScramble(type);
         const moves = s.split(/\s+/).filter((x) => x.length > 0);
         for (let j = 1; j < moves.length; j++) {
           const base = (m: string) => m.replace(/['2]$/, "");
@@ -164,10 +164,10 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
     });
   }
 
-  it("fto (scrambow-unterstützt) produces non-empty scramble", () => {
+  it("fto (scrambow-unterstützt) produces non-empty scramble", async () => {
     // FTO ist von scrambow supportiert — wir routen es zu scrambow,
     // nicht zu unserem Custom-Generator.
-    const s = generateScramble("fto");
+    const s = await generateScramble("fto");
     expect(s.length).toBeGreaterThan(0);
   });
 });
@@ -200,8 +200,8 @@ describe("Random-Move-Fallback dino/floppy/tower (W.random-move-fallback, 2026-0
       }
     });
 
-    it(`"${type}" via generateScramble (csTimer-Pfad) liefert non-empty`, () => {
-      expect(generateScramble(type).length).toBeGreaterThan(0);
+    it(`"${type}" via generateScramble (csTimer-Pfad) liefert non-empty`, async () => {
+      expect((await generateScramble(type)).length).toBeGreaterThan(0);
     });
   }
 });

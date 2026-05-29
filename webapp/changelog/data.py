@@ -44,6 +44,31 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.cstimer-dynamic-import",
+        released=date(2026, 5, 30),
+        title="⚡ Schnellerer App-Start: Scramble-Code lazy-geladen",
+        highlights=[
+            "Die drei Scramble-Bibliotheken (scrambow, csTimer-Vendor, "
+            "Eigenbau-Ivy-Solver) werden NICHT mehr im Initial-Bundle "
+            "ausgeliefert, sondern erst gefetcht wenn der Timer-Tab "
+            "erscheint. Das spart **122 KB unkomprimiert / 43 KB "
+            "gzip** beim Erstladen — spürbar bei langsamer Mobile-"
+            "Connection und dem Login-Flow (wo Scrambles gar nicht "
+            "gebraucht werden).",
+            "Damit es trotzdem flott bleibt: der Timer-Tab triggert "
+            "den Lazy-Load beim Card-Mount opportunistisch (fire-and-"
+            "forget) — zur Zeit deines ersten „Skip\"-Klicks liegt "
+            "das Vendor-Bundle in der Regel schon im Browser-Cache. "
+            "Auch bei langsamen Verbindungen bleibt der Klick "
+            "race-condition-safe: wechselst du den Cube-Type "
+            "während noch ein Scramble lädt, wird das alte Ergebnis "
+            "verworfen.",
+            "Tests: alle 44 scramble.test.ts-Cases auf async/await "
+            "umgestellt, grün in ~1s. TypeScript-Compile grün. "
+            "QA-Sub-Agent-Review absolviert vor Push.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.toast-manager",
         released=date(2026, 5, 30),
         title="🔔 Toast-Manager: zentrale Engine + Severity-Stacking",
