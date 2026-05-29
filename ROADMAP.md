@@ -8,8 +8,8 @@
 > Die **aktuelle, gepflegte Roadmap** (thematische Phasen P1..P6 der
 > Web-Variante) hat ein **anderes Phase-Konzept** — nicht durchgezählte
 > Release-Phasen, sondern thematische Cluster (P1 Polish/Casual, P3
-> Multi-User-USP, P4 Power-User, P5 Reichweite, P6 Tech-Schuld). Sie lebt
-> in zwei Teilen:
+> Multi-User-USP, P4 Power-User, P5 Reichweite, P6 Nische/Spezial-User).
+> Sie lebt in zwei Teilen:
 >
 > - **Phase-Meta** P1..P6 in `webapp/frontend/src/lib/roadmap-phases.ts`
 > - **Roadmap-Items** in der DB-Tabelle `roadmap_items` (gepflegt via
