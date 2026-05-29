@@ -235,3 +235,13 @@ body[data-skin] .cubetracker-app-logo-button {
 body[data-skin] .cubetracker-app-header {
   justify-content: flex-end;
 }
+
+/* W.login-logo-visible (2026-05-29): LoginPage-Logo bleibt IMMER
+ * sichtbar -- auch bei aktivem Skin oder waehrend der Skin-Slideshow.
+ * User-Wunsch: ohne Logo ist unklar auf welcher Seite man landet,
+ * waehrend im eingeloggten Zustand der Header-Tab-Bar das Branding
+ * uebernimmt. Ueberschreibt den display:none-Hide oben mittels
+ * spezifischerer Klassen-Kombi. */
+body[data-skin] .cubetracker-app-logo.cubetracker-logo-always {
+  display: block;
+}

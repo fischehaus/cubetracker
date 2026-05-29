@@ -87,7 +87,7 @@ export function LoginPage() {
         <img
           src="/cubetracker-logo.png"
           alt={t("auth.logoAlt")}
-          className="cubetracker-app-logo w-full max-w-xs mx-auto mb-2"
+          className="cubetracker-app-logo cubetracker-logo-always w-full max-w-xs mx-auto mb-2"
         />
         <p className="text-sm text-gray-100 leading-relaxed px-4 drop-shadow-md">
           {tagline}

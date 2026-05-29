@@ -44,6 +44,23 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.login-logo-visible",
+        released=date(2026, 5, 29),
+        title="🪧 LoginPage: Logo bleibt immer sichtbar",
+        highlights=[
+            "User-Wunsch: das App-Logo auf der LoginPage soll auch dann "
+            "sichtbar bleiben wenn ein Hintergrund-Skin aktiv ist. Sonst "
+            "ist unklar auf welcher Seite man landet.",
+            "Fix: das LoginPage-Logo bekommt eine zweite Klasse "
+            "`cubetracker-logo-always`, die im CSS den `display:none`-"
+            "Hide bei `body[data-skin]` ueberschreibt.",
+            "Header-Logo im eingeloggten Zustand wird weiterhin "
+            "ausgeblendet bei aktivem Skin -- da uebernimmt die TabBar "
+            "die Branding-Funktion, und das Logo im Background-Bild "
+            "vermeidet Doppelung.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.pre-demo-fixes",
         released=date(2026, 5, 29),
         title="🔧 Drei Demo-Vorbereitungs-Fixes (Smart-Cube + Tester + LoginPage)",
