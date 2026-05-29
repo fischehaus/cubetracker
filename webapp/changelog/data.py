@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.random-move-fallback",
+        released=date(2026, 5, 29),
+        title="🎲 Robusterer Scramble-Fallback (Dino/Floppy/Tower)",
+        highlights=[
+            "Dino-, Floppy- und Tower-Cube-Scrambles kommen normal vom "
+            "csTimer-Modul (Random-State). Falls dessen Init mal crasht, gab "
+            "es bisher einen leeren Scramble („nicht verfügbar\"). Jetzt "
+            "greift ein Random-Move-Fallback (analog Ivy/Gear/Redi) — der "
+            "Timer bleibt immer bespielbar. QA-Befund vom 2026-05-17.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-admin-reorder",
         released=date(2026, 5, 29),
         title="🔼 Roadmap-Pflege: Items per ▲▼ sortieren (oben zuerst)",

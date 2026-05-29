@@ -8,7 +8,9 @@
 import { describe, expect, it } from "vitest";
 import {
   cubeTypeToScrambowType,
+  CUSTOM_PUZZLE_SPECS,
   defaultScrambleTypeForCube,
+  generateCustomScramble,
   generateScramble,
   isAlgTrainerSubset,
   resolveScrambleTypeOverride,
@@ -168,6 +170,40 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
     const s = generateScramble("fto");
     expect(s.length).toBeGreaterThan(0);
   });
+});
+
+describe("Random-Move-Fallback dino/floppy/tower (W.random-move-fallback, 2026-05-29)", () => {
+  // Diese 3 laufen normalerweise über csTimer (APP_TO_CSTIMER). Die
+  // CUSTOM_PUZZLE_SPECS-Einträge sind der Crash-Fallback (greift wenn
+  // csTimer-Init fehlschlägt — sonst gab es einen leeren Scramble-String).
+  // Da csTimer im Test-Env läuft, testen wir den Fallback isoliert über die
+  // Spec + generateCustomScramble.
+  const fallbackTypes = ["dino", "floppy", "tower"];
+
+  for (const type of fallbackTypes) {
+    it(`"${type}" hat eine Fallback-Spec in CUSTOM_PUZZLE_SPECS`, () => {
+      expect(CUSTOM_PUZZLE_SPECS[type]).toBeDefined();
+      expect(CUSTOM_PUZZLE_SPECS[type].moves.length).toBeGreaterThanOrEqual(2);
+      expect(CUSTOM_PUZZLE_SPECS[type].length).toBeGreaterThan(0);
+    });
+
+    it(`"${type}" Fallback: korrekte Länge + kein direkt wiederholtes Base-Move`, () => {
+      const spec = CUSTOM_PUZZLE_SPECS[type];
+      for (let i = 0; i < 50; i++) {
+        const s = generateCustomScramble(spec);
+        const moves = s.split(/\s+/).filter((x) => x.length > 0);
+        expect(moves.length).toBe(spec.length);
+        for (let j = 1; j < moves.length; j++) {
+          const base = (m: string) => m.replace(/['2]$/, "");
+          expect(base(moves[j])).not.toBe(base(moves[j - 1]));
+        }
+      }
+    });
+
+    it(`"${type}" via generateScramble (csTimer-Pfad) liefert non-empty`, () => {
+      expect(generateScramble(type).length).toBeGreaterThan(0);
+    });
+  }
 });
 
 describe("Scramble-Type-Listen + Helpers", () => {

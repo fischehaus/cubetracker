@@ -292,7 +292,10 @@ interface CustomScrambleSpec {
   length: number;
 }
 
-const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
+// Exportiert für isolierte Fallback-Tests (scramble.test.ts) — die
+// dino/floppy/tower-Specs greifen nur bei csTimer-Crash, daher nicht über
+// generateScramble testbar (csTimer läuft im Test-Env).
+export const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
   // Ivy Cube — Fix 2026-05-17 nach User-Hinweis dass Scrambles nicht
   // korrekt waren. Korrekte Standard-Notation (Speedsolving-Wiki):
   // 4 Eck-Achsen U/L/R/B (NICHT F — meine vorherige Liste war falsch).
@@ -336,6 +339,30 @@ const CUSTOM_PUZZLE_SPECS: Record<string, CustomScrambleSpec> = {
     modifiers: ["", "'"],
     length: 25,
   },
+  // ── Crash-Fallbacks (W.random-move-fallback, 2026-05-29) ──
+  // dino/floppy/tower laufen normalerweise über csTimer (APP_TO_CSTIMER,
+  // Random-State). Diese Specs greifen NUR falls csTimer-Init crasht —
+  // bisher lieferte generateScramble dann "" ("Scramble nicht verfügbar").
+  // Notation ist approximativ (nicht exakt csTimer-kompatibel), aber
+  // non-empty + plausibel. QA-Befund SOLLTE #3 (2026-05-17).
+  dino: {
+    // Dino-Cube: Ecken-Twist, hier als 6 Faces CW/CCW approximiert.
+    moves: ["U", "R", "F", "D", "L", "B"],
+    modifiers: ["", "'"],
+    length: 10,
+  },
+  floppy: {
+    // Floppy (1x3x3): flach → nur 180°-Turns sinnvoll.
+    moves: ["U", "R", "D", "L"],
+    modifiers: ["2"],
+    length: 8,
+  },
+  tower: {
+    // Tower (2x2x3): 180° ist auf jeder Fläche legal → uniform "2".
+    moves: ["U", "D", "R", "F"],
+    modifiers: ["2"],
+    length: 10,
+  },
 };
 
 /** Random-Helper — Math.random ist für Scrambles voellig ausreichend. */
@@ -355,7 +382,7 @@ function pick<T>(arr: T[]): T {
  * der Tab hängen. Bei <2 Moves geben wir den Filter auf — Qualitaet
  * wird dann schlechter, aber Tab bleibt responsive.
  */
-function generateCustomScramble(spec: CustomScrambleSpec): string {
+export function generateCustomScramble(spec: CustomScrambleSpec): string {
   const moves: string[] = [];
   const filterEnabled = spec.moves.length >= 2;
   let lastBase: string | null = null;
