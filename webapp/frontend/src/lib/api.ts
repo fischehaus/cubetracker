@@ -2125,6 +2125,36 @@ export function useAdminDeleteRoadmapItem(): UseMutationResult<
   });
 }
 
+export interface RoadmapReorderInput {
+  phase_id: string;
+  /** Item-IDs in gewünschter Reihenfolge (oben zuerst). */
+  ordered_ids: number[];
+}
+
+/**
+ * Atomares Reorder einer Phase (W.roadmap-admin-reorder). Backend vergibt
+ * sort_order in 10er-Schritten anhand der Position in ordered_ids.
+ */
+export function useAdminReorderRoadmap(): UseMutationResult<
+  { phase_id: string; reordered: number },
+  Error,
+  RoadmapReorderInput
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input) => {
+      const r = await api.post<{ phase_id: string; reordered: number }>(
+        "/admin/roadmap/reorder",
+        input,
+      );
+      return r.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["roadmap"] });
+    },
+  });
+}
+
 // ============================================================
 // Admin: Live-Tests (Phase W.live-tests, 2026-05-17)
 // ============================================================

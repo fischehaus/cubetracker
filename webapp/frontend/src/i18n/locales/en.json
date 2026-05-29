@@ -1504,7 +1504,10 @@
     "badgeInternal": "internal",
     "badgeDone": "done",
     "readOnlyBadge": "🔍 View only",
-    "readOnlyHint": "As a tester you can see the full roadmap including internal items, but you cannot make changes — that stays admin-only."
+    "readOnlyHint": "As a tester you can see the full roadmap including internal items, but you cannot make changes — that stays admin-only.",
+    "moveUpTitle": "Move up — appears earlier in the list",
+    "moveDownTitle": "Move down — appears later in the list",
+    "reorderFilterHint": "Reorder with ▲▼ once the status and visibility filters are set to \"All\" (top first)."
   },
   "skin": {
     "picker": {

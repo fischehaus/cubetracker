@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next";
 import {
   useAdminCreateRoadmapItem,
   useAdminDeleteRoadmapItem,
+  useAdminReorderRoadmap,
   useAdminUpdateRoadmapItem,
   useRoadmap,
   type RoadmapItem,
@@ -46,6 +47,7 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
   const createMut = useAdminCreateRoadmapItem();
   const updateMut = useAdminUpdateRoadmapItem();
   const deleteMut = useAdminDeleteRoadmapItem();
+  const reorderMut = useAdminReorderRoadmap();
 
   const [phaseFilter, setPhaseFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -61,6 +63,13 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
   const [quickTogglingId, setQuickTogglingId] = useState<number | null>(null);
 
   const items = data?.items ?? [];
+
+  // Reorder (▲/▼) nur erlauben wenn KEIN Status-/Sichtbarkeits-Filter aktiv
+  // ist — sonst wuerde die Phase nur anhand der sichtbaren Items neu
+  // nummeriert und versteckte Items verwuerfeln. phaseFilter ist okay
+  // (innerhalb einer Phase bleiben alle Items sichtbar).
+  const reorderEnabled =
+    !readOnly && statusFilter === "all" && visFilter === "all";
 
   const filteredItems = useMemo(() => {
     return items.filter((it) => {
@@ -185,6 +194,13 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
         </label>
       </div>
 
+      {/* Reorder-Hinweis: ▲▼ brauchen die ungefilterte Phasen-Sicht */}
+      {!readOnly && !reorderEnabled && (
+        <p className="text-xs text-gray-500 italic">
+          {t("adminRoadmap.reorderFilterHint")}
+        </p>
+      )}
+
       {/* Create-Form (admin-only) */}
       {!readOnly && showCreate && (
         <CreateForm
@@ -215,7 +231,7 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
                   <span className="text-gray-600">({phaseItems.length})</span>
                 </h4>
                 <ul className="space-y-1.5">
-                  {phaseItems.map((item) => (
+                  {phaseItems.map((item, idx) => (
                     <ItemRow
                       // QA-Fix W.roadmap-admin-qa: key wechselt bei
                       // Edit/View — zwingt React den ItemRow neu zu
@@ -277,6 +293,25 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
                       quickBusy={
                         updateMut.isPending && quickTogglingId === item.id
                       }
+                      canMoveUp={reorderEnabled && idx > 0}
+                      canMoveDown={reorderEnabled && idx < phaseItems.length - 1}
+                      reorderBusy={reorderMut.isPending}
+                      onMoveUp={() => {
+                        const arr = [...phaseItems];
+                        [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+                        reorderMut.mutate({
+                          phase_id: phase.id,
+                          ordered_ids: arr.map((x) => x.id),
+                        });
+                      }}
+                      onMoveDown={() => {
+                        const arr = [...phaseItems];
+                        [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
+                        reorderMut.mutate({
+                          phase_id: phase.id,
+                          ordered_ids: arr.map((x) => x.id),
+                        });
+                      }}
                     />
                   ))}
                 </ul>
@@ -450,6 +485,11 @@ function ItemRow({
   saveBusy,
   deleteBusy,
   quickBusy,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+  reorderBusy,
 }: {
   item: RoadmapItem;
   readOnly: boolean;
@@ -463,6 +503,11 @@ function ItemRow({
   saveBusy: boolean;
   deleteBusy: boolean;
   quickBusy: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  reorderBusy: boolean;
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<RoadmapItemUpdateInput>({
@@ -507,7 +552,30 @@ function ItemRow({
             )}
           </div>
           {!readOnly && (
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap items-center">
+              {/* Reorder (W.roadmap-admin-reorder): oben zuerst. Disabled an
+                  den Phasen-Raendern + waehrend laufendem Reorder + wenn ein
+                  Status-/Sichtbarkeits-Filter aktiv ist (dann canMove*=false). */}
+              <div className="flex gap-0.5">
+                <button
+                  onClick={onMoveUp}
+                  disabled={!canMoveUp || reorderBusy}
+                  aria-label={t("adminRoadmap.moveUpTitle")}
+                  title={t("adminRoadmap.moveUpTitle")}
+                  className="text-xs rounded bg-gray-700 px-1.5 py-1 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  ▲
+                </button>
+                <button
+                  onClick={onMoveDown}
+                  disabled={!canMoveDown || reorderBusy}
+                  aria-label={t("adminRoadmap.moveDownTitle")}
+                  title={t("adminRoadmap.moveDownTitle")}
+                  className="text-xs rounded bg-gray-700 px-1.5 py-1 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  ▼
+                </button>
+              </div>
               {/* Quick-Toggle: Visibility (public/internal). 1-Klick-Toggle,
                   kein Confirm — Klick zurück macht es rückgängig. */}
               <button

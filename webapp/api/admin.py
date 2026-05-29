@@ -55,6 +55,7 @@ from db.schemas import (
     RoadmapItemCreate,
     RoadmapItemRead,
     RoadmapItemUpdate,
+    RoadmapReorder,
 )
 from emailing.service import send_admin_message
 from services import github as gh_service
@@ -955,6 +956,36 @@ def update_roadmap_item(
         list(updates.keys()),
     )
     return RoadmapItemRead.model_validate(item).model_dump(mode="json")
+
+
+@router.post("/roadmap/reorder")
+@limiter.limit(ADMIN_LIMIT)
+def reorder_roadmap_items(
+    request: Request,
+    payload: RoadmapReorder,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Setzt die sort_order der Items einer Phase neu (10er-Schritte)
+    anhand der uebergebenen Reihenfolge (oben zuerst). Atomar in einer
+    Transaktion. Nur Items der angegebenen Phase werden beruecksichtigt;
+    fremde/unbekannte IDs werden uebersprungen (kein Fehler)."""
+    updated = 0
+    for idx, item_id in enumerate(payload.ordered_ids, start=1):
+        item = db.get(RoadmapItem, item_id)
+        if item is None or item.phase_id != payload.phase_id:
+            continue
+        item.sort_order = idx * 10
+        updated += 1
+    db.commit()
+    logger.info(
+        "[ADMIN] %s reordered roadmap phase %s (%d/%d items)",
+        admin.email,
+        payload.phase_id,
+        updated,
+        len(payload.ordered_ids),
+    )
+    return {"phase_id": payload.phase_id, "reordered": updated}
 
 
 @router.delete("/roadmap/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)

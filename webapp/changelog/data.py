@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-admin-reorder",
+        released=date(2026, 5, 29),
+        title="🔼 Roadmap-Pflege: Items per ▲▼ sortieren (oben zuerst)",
+        highlights=[
+            "Im Admin-Panel „Roadmap-Pflege\" lässt sich die Reihenfolge "
+            "der Items jetzt direkt per ▲/▼-Buttons ändern — oben zuerst, "
+            "genau wie sie im User-Roadmap-Modal erscheinen.",
+            "Backend: neuer atomarer Endpoint POST /admin/roadmap/reorder "
+            "(vergibt sort_order in 10er-Schritten anhand der Reihenfolge, "
+            "alles in einer Transaktion). Schema lehnt leere Listen, "
+            "fremde Phasen und Extra-Felder ab.",
+            "Die ▲/▼-Buttons sind bewusst nur aktiv, wenn KEIN Status-/"
+            "Sichtbarkeits-Filter läuft — sonst würde die Phase nur anhand "
+            "der sichtbaren Items neu nummeriert und versteckte Items "
+            "verwürfeln. Ein Hinweis erklärt das im Panel.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-three-themes",
         released=date(2026, 5, 29),
         title="🎨 Drei neue Hintergrund-Skins",

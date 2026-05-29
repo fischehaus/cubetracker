@@ -456,3 +456,18 @@ class RoadmapItemUpdate(BaseModel):
     status: RoadmapStatusLiteral | None = None
     internal: bool | None = None
     sort_order: int | None = None
+
+
+class RoadmapReorder(BaseModel):
+    """Atomares Reorder einer Phase (W.roadmap-admin-reorder, 2026-05-29).
+
+    `ordered_ids` ist die Liste der Item-IDs in der gewuenschten
+    Reihenfolge (oben zuerst). Das Backend vergibt sort_order in
+    10er-Schritten (10, 20, 30, ...) anhand der Position. Nur Items der
+    angegebenen Phase werden beruecksichtigt; fremde/unbekannte IDs
+    werden ignoriert.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    phase_id: RoadmapPhaseIdLiteral
+    ordered_ids: list[int] = Field(min_length=1, max_length=200)
