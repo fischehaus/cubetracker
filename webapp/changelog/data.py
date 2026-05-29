@@ -44,6 +44,32 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.pre-demo-fixes",
+        released=date(2026, 5, 29),
+        title="🔧 Drei Demo-Vorbereitungs-Fixes (Smart-Cube + Tester + LoginPage)",
+        highlights=[
+            "Drei kleine, gezielte Fixes vor der Demo morgen:",
+            "**Smart-Cube-Block auch im Fokus-Modus sichtbar**: liegt jetzt "
+            "direkt unter dem großen Timer-Display, unabhängig vom Fokus-"
+            "Toggle. Wer im Fokus solven will, sieht weiterhin den "
+            "Verbindungs-Status + Move-Counter.",
+            "**Tester sehen + editieren jetzt Live-Tests**: das Panel zeigte "
+            "Testern bisher dauerhaft 'Lade Live-Tests …' weil der React-"
+            "Query-Gate auf is_admin gepinnt war. Jetzt fetcht das Panel "
+            "für Admin ODER Tester. Backend war schon korrekt "
+            "(require_admin_or_tester), nur das Frontend hat blockiert.",
+            "**LoginPage-Tiles + Pills klickbar**: ein Klick auf eine "
+            "Trust-Pill (🇪🇺 EU-Server, 🚫 Kein Tracking, 🔓 Open Source) "
+            "oder ein Feature-Tile (🎯 Timer, 📊 Stats, 🔥 Trainer, 👥 "
+            "Community) öffnet jetzt das 'Was kann diese App?'-Modal und "
+            "scrollt direkt zur passenden Kategorie. Die Ziel-Karte glüht "
+            "kurz lila auf (2.4s) damit klar ist wo der Klick gelandet ist.",
+            "Implementierung: FeatureListPanel hat ein neues optionales "
+            "`scrollToCategoryTitleKey`-Prop + die FeatureCategory-Interface "
+            "hat den titleKey jetzt mit dabei (sprachunabhängige Identifikation).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.features-data-update",
         released=date(2026, 5, 29),
         title="📋 Feature-Liste: Skin-System + GAN Smart-Cube nachgetragen",

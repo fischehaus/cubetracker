@@ -84,6 +84,16 @@ body.skin-active {
   background-color: var(--bg); /* Fallback waehrend Bild laedt */
 }
 
+/* W.pre-demo-fixes (2026-05-29): Highlight-Animation fuer die Feature-
+ * Kategorie wenn der User auf eine LoginPage-Pill/Tile klickt und das
+ * Modal zur passenden Kategorie scrollt. 2.4s lila Glow + dann sanfter
+ * Fade-out. */
+.cubetracker-category-highlight {
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.7),
+    0 0 28px 4px rgba(168, 85, 247, 0.35);
+  border-color: rgba(168, 85, 247, 0.7) !important;
+}
+
 /* W.login-redesign (2026-05-28): Skin-Slideshow auf LoginPage.
  * Mehrere Layer gestapelt, opacity-Crossfade per inline-style. */
 .cubetracker-login-bg-layer {

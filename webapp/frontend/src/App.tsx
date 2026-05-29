@@ -404,11 +404,14 @@ function TimerTab({
             scramble={currentScramble}
             onSolveSaved={() => setRegenSeed((s) => s + 1)}
           />
+          {/* W.pre-demo-fixes (2026-05-29): SmartCubeConnect-Block liegt
+              direkt unter dem Timer-Display — auch im Fokus-Modus sichtbar.
+              User-Wunsch: wer im Fokus solven will, soll den Verbindungs-
+              Status + Move-Counter weiter sehen koennen. */}
+          <SmartCubeConnectBlock />
           {/* TouchTimerPad rendert auf Desktop immer null — auf Phone nur
               sichtbar wenn Spacebar-Modus aktiv ist (Text-Mode = Soft-Tastatur,
-              da gibt es nichts zu triggern). Lebt seit Welle 2 ausserhalb von
-              BigTimerInput, damit der Selektor-Block in TimerControlsCard
-              UNTER dem Pad scrollen kann. */}
+              da gibt es nichts zu triggern). */}
           {showTouchPad && <TouchTimerPad />}
           {!focusMode && (
             <TimerControlsCard
@@ -420,12 +423,6 @@ function TimerTab({
               onHardwareIdChange={setTimerHardwareId}
             />
           )}
-          {/* W.smart-cube-position-restore (2026-05-28): SmartCubeConnect
-              lebt wieder unter TimerControlsCard (= "Timer-Modus"-Block).
-              Im Fokus-Modus damit ebenfalls ausgeblendet, konsistent mit
-              den anderen Sub-Cards. User-Wunsch — vor der Demo wieder
-              der gewohnte Platz. */}
-          {!focusMode && <SmartCubeConnectBlock />}
         </main>
         {!focusMode && (
           <aside className="lg:order-1">

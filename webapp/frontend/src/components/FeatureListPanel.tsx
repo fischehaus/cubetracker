@@ -7,6 +7,7 @@
 // Source-of-Truth: lib/features-data.ts. Wenn neue Features
 // dazukommen → dort einen Bullet adden, beide Stellen zeigen's.
 
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useFeatures } from "../lib/features-data";
 
@@ -15,14 +16,48 @@ interface Props {
   showHeader?: boolean;
   /** Compact-Mode reduziert Padding + Font-Size — für schmale Sidebar. */
   compact?: boolean;
+  /**
+   * W.pre-demo-fixes (2026-05-29): Optionaler titleKey-String. Wenn
+   * gesetzt, scrollt das Panel beim Mount zur entsprechenden Kategorie
+   * und highlightet sie kurz mit einem lila Ring. Genutzt vom LoginPage-
+   * Klick auf Trust-Pills + Feature-Tiles.
+   *
+   * Akzeptiert den vollen titleKey (z.B. "features.solvingTitle") oder
+   * die kategorie-spezifische Bezeichnung (siehe lib/features-data.ts).
+   */
+  scrollToCategoryTitleKey?: string;
 }
 
 export function FeatureListPanel({
   showHeader = true,
   compact = false,
+  scrollToCategoryTitleKey,
 }: Props) {
   const { t } = useTranslation();
   const { categories } = useFeatures();
+  const listRef = useRef<HTMLUListElement | null>(null);
+
+  // Beim Mount mit `scrollToCategoryTitleKey` zur Ziel-Card scrollen +
+  // kurz highlighten. Die Card hat data-category-key (s.u.).
+  useEffect(() => {
+    if (!scrollToCategoryTitleKey) return;
+    // Defer 50ms damit der DOM (inkl. eventuell wechselnder Modal-Position) gesetzt ist
+    const id = window.setTimeout(() => {
+      const root = listRef.current;
+      if (!root) return;
+      const target = root.querySelector<HTMLElement>(
+        `[data-category-key="${CSS.escape(scrollToCategoryTitleKey)}"]`,
+      );
+      if (!target) return;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      target.classList.add("cubetracker-category-highlight");
+      window.setTimeout(() => {
+        target.classList.remove("cubetracker-category-highlight");
+      }, 2400);
+    }, 50);
+    return () => window.clearTimeout(id);
+  }, [scrollToCategoryTitleKey]);
+
   return (
     <div className={compact ? "space-y-3" : "space-y-4"}>
       {showHeader && (
@@ -40,11 +75,12 @@ export function FeatureListPanel({
         </header>
       )}
 
-      <ul className={compact ? "space-y-3" : "space-y-4"}>
+      <ul ref={listRef} className={compact ? "space-y-3" : "space-y-4"}>
         {categories.map((cat) => (
           <li
             key={cat.title}
-            className={`rounded-lg border border-gray-700 bg-gray-900/50 ${
+            data-category-key={cat.titleKey}
+            className={`rounded-lg border border-gray-700 bg-gray-900/50 transition-shadow ${
               compact ? "p-3" : "p-4"
             }`}
           >

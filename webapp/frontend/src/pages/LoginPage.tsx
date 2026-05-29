@@ -19,9 +19,26 @@ import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { LoginPageBackgroundLayer } from "../components/LoginPageBackgroundLayer";
+import { FeatureListPanel } from "../components/FeatureListPanel";
 import { useFeatures } from "../lib/features-data";
 
 type Mode = "login" | "register" | "forgot";
+
+// W.pre-demo-fixes (2026-05-29): Mapping LoginPage-Pill/Tile -> Feature-
+// Kategorie-titleKey. Beim Klick scrollt das Features-Modal zu diesem
+// Eintrag und highlightet ihn kurz.
+const TRUST_TARGETS = {
+  euServer: "features.accountTitle",
+  noTracking: "features.accountTitle",
+  openSource: "features.dataTitle",
+} as const;
+
+const FEATURE_TARGETS = {
+  timer: "features.solvingTitle",
+  stats: "features.analysisTitle",
+  trainer: "features.trainerTitle",
+  community: "features.communityTitle",
+} as const;
 
 export function LoginPage() {
   const { login, register } = useAuth();
@@ -33,6 +50,7 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [featuresOpen, setFeaturesOpen] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -195,19 +213,47 @@ export function LoginPage() {
         </div>
       </div>
 
-      {/* Trust-Pills */}
+      {/* Trust-Pills — klickbar (oeffnet Features-Modal zur passenden Kategorie) */}
       <div className="max-w-2xl mx-auto flex flex-wrap justify-center gap-2 mb-5 px-2">
-        <TrustPill icon="🇪🇺" label={t("auth.trustEuServer")} />
-        <TrustPill icon="🚫" label={t("auth.trustNoTracking")} />
-        <TrustPill icon="🔓" label={t("auth.trustOpenSource")} />
+        <TrustPill
+          icon="🇪🇺"
+          label={t("auth.trustEuServer")}
+          onClick={() => setFeaturesOpen(TRUST_TARGETS.euServer)}
+        />
+        <TrustPill
+          icon="🚫"
+          label={t("auth.trustNoTracking")}
+          onClick={() => setFeaturesOpen(TRUST_TARGETS.noTracking)}
+        />
+        <TrustPill
+          icon="🔓"
+          label={t("auth.trustOpenSource")}
+          onClick={() => setFeaturesOpen(TRUST_TARGETS.openSource)}
+        />
       </div>
 
-      {/* Feature-Highlights */}
+      {/* Feature-Highlights — klickbar */}
       <div className="max-w-2xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-2 mb-6 px-2">
-        <FeatureTile icon="🎯" label={t("auth.featureTimer")} />
-        <FeatureTile icon="📊" label={t("auth.featureStats")} />
-        <FeatureTile icon="🔥" label={t("auth.featureTrainer")} />
-        <FeatureTile icon="👥" label={t("auth.featureCommunity")} />
+        <FeatureTile
+          icon="🎯"
+          label={t("auth.featureTimer")}
+          onClick={() => setFeaturesOpen(FEATURE_TARGETS.timer)}
+        />
+        <FeatureTile
+          icon="📊"
+          label={t("auth.featureStats")}
+          onClick={() => setFeaturesOpen(FEATURE_TARGETS.stats)}
+        />
+        <FeatureTile
+          icon="🔥"
+          label={t("auth.featureTrainer")}
+          onClick={() => setFeaturesOpen(FEATURE_TARGETS.trainer)}
+        />
+        <FeatureTile
+          icon="👥"
+          label={t("auth.featureCommunity")}
+          onClick={() => setFeaturesOpen(FEATURE_TARGETS.community)}
+        />
       </div>
 
       <footer className="mx-auto max-w-2xl mt-6 flex flex-wrap items-center justify-center gap-3 text-xs">
@@ -221,6 +267,46 @@ export function LoginPage() {
           {t("footer.privacy")}
         </a>
       </footer>
+
+      {/* Features-Modal — oeffnet sich beim Klick auf Pill/Tile */}
+      {featuresOpen !== null && (
+        <LoginFeaturesModal
+          scrollToKey={featuresOpen}
+          onClose={() => setFeaturesOpen(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function LoginFeaturesModal({
+  scrollToKey,
+  onClose,
+}: {
+  scrollToKey: string;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-100 text-2xl leading-none"
+            aria-label={t("health.closeAria")}
+          >
+            ×
+          </button>
+        </div>
+        <FeatureListPanel scrollToCategoryTitleKey={scrollToKey} />
+      </div>
     </div>
   );
 }
@@ -249,23 +335,47 @@ function TabButton({
   );
 }
 
-function TrustPill({ icon, label }: { icon: string; label: string }) {
+function TrustPill({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: string;
+  label: string;
+  onClick: () => void;
+}) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-xs text-gray-200">
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-xs text-gray-200 hover:bg-gray-700 hover:border-purple-500/60 hover:text-gray-100 transition focus:outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer"
+    >
       <span aria-hidden="true">{icon}</span>
       {label}
-    </span>
+    </button>
   );
 }
 
-function FeatureTile({ icon, label }: { icon: string; label: string }) {
+function FeatureTile({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: string;
+  label: string;
+  onClick: () => void;
+}) {
   return (
-    <div className="rounded-lg bg-gray-800 border border-gray-700 px-3 py-3 text-center">
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-lg bg-gray-800 border border-gray-700 px-3 py-3 text-center hover:bg-gray-700 hover:border-purple-500/60 transition focus:outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer"
+    >
       <div className="text-2xl mb-1" aria-hidden="true">
         {icon}
       </div>
       <div className="text-xs text-gray-200">{label}</div>
-    </div>
+    </button>
   );
 }
 

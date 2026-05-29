@@ -17,6 +17,12 @@ export interface FeatureCategory {
   title: string;
   icon: string;
   bullets: string[];
+  /**
+   * W.pre-demo-fixes (2026-05-29): titleKey beibehalten damit Konsumenten
+   * (z.B. LoginPage-Klick-Mapping, FeatureListPanel-Scroll-Target) die
+   * Kategorie sprachunabhaengig identifizieren koennen.
+   */
+  titleKey: string;
 }
 
 // Struktur: pro Category ein title-Key + bullet-Keys (1..N).
@@ -152,6 +158,7 @@ export function useFeatures(): {
         title: t(def.titleKey),
         icon: def.icon,
         bullets: def.bulletKeys.map((k) => t(k)),
+        titleKey: def.titleKey,
       })),
       tagline: t("features.tagline"),
       heroHighlights: HERO_KEYS.map((k) => t(k)),

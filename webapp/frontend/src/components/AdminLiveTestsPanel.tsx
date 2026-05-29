@@ -48,10 +48,16 @@ const STATUS_COLORS: Record<LiveTestStatus, { bg: string; text: string; label: s
 export function AdminLiveTestsPanel() {
   const { user: me } = useAuth();
   const isAdmin = me?.is_admin ?? false;
+  // W.pre-demo-fixes (2026-05-29): Tester duerfen Live-Tests ebenfalls
+  // sehen + editieren. Backend laesst beide durch (require_admin_or_tester),
+  // im Frontend musste der `enabled`-Gate aufgemacht werden -- vorher
+  // sah der Tester nur "Lade Live-Tests ...".
+  const isTester = me?.is_tester ?? false;
+  const canAccess = isAdmin || isTester;
   const [filter, setFilter] = useState<LiveTestStatus | "all">("open");
   const [createOpen, setCreateOpen] = useState(false);
   const { data, isLoading, error, refetch, isFetching } = useAdminLiveTests(
-    isAdmin,
+    canAccess,
     filter,
   );
 
