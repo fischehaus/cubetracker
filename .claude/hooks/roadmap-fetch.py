@@ -62,15 +62,25 @@ TOKEN_CANDIDATES = [
     os.path.join(PROJECT, ".tmp", "admin-token.txt"),
     os.path.join(PROJECT, ".tmp", "admin-token.md"),
 ]
+# Export-Key (W.roadmap-export-key): langlebiger Secret, bevorzugt vor dem
+# kurzlebigen Admin-JWT. Aus ENV ROADMAP_EXPORT_KEY oder .tmp/roadmap-export-key.
+EXPORT_KEY_CANDIDATES = [
+    os.path.join(PROJECT, ".tmp", "roadmap-export-key"),
+    os.path.join(PROJECT, ".tmp", "roadmap-export-key.txt"),
+    os.path.join(PROJECT, ".tmp", "roadmap-export-key.md"),
+]
 SNAP_FILE = os.path.join(PROJECT, ".tmp", "roadmap-snapshot.json")
 SEED_FILE = os.path.join(PROJECT, "webapp", "seeds", "roadmap.py")
 API_BASE = "https://www.cubetracker.de/api"
 API_URL = f"{API_BASE}/roadmap"
+EXPORT_URL = f"{API_BASE}/roadmap/export"
+EXPORT_DONE_URL = f"{API_BASE}/roadmap/export/done"
 
 SETUP_HINT = (
-    "   Token holen: als Admin auf cubetracker.de einloggen → DevTools →\n"
-    "   Application → Local Storage → `cubetracker_access_token` kopieren →\n"
-    "   in .tmp/admin-token ablegen (gitignored). Manuell jederzeit: /roadmap"
+    "   Bevorzugt (langlebig): Export-Key in .tmp/roadmap-export-key legen —\n"
+    "   derselbe Wert wie die ENV-Var ROADMAP_EXPORT_KEY auf dem Server.\n"
+    "   Alternativ (kurzlebig): Admin-`cubetracker_access_token` aus dem\n"
+    "   Browser-localStorage in .tmp/admin-token. Manuell jederzeit: /roadmap"
 )
 
 
@@ -86,9 +96,45 @@ def read_token() -> str | None:
     return None
 
 
+def read_export_key() -> str | None:
+    """Export-Key aus ENV ROADMAP_EXPORT_KEY oder .tmp/roadmap-export-key."""
+    env_key = os.getenv("ROADMAP_EXPORT_KEY", "").strip()
+    if env_key:
+        return env_key
+    for path in EXPORT_KEY_CANDIDATES:
+        try:
+            with open(path, encoding="utf-8") as fh:
+                key = fh.read().strip()
+        except FileNotFoundError:
+            continue
+        if key:
+            return key
+    return None
+
+
 def fetch_roadmap(token: str) -> dict:
     req = urllib.request.Request(
         API_URL, headers={"Authorization": f"Bearer {token}"}
+    )
+    with urllib.request.urlopen(req, timeout=8) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def fetch_export(key: str) -> dict:
+    """GET /roadmap/export mit X-Roadmap-Key — volle Roadmap inkl. internal."""
+    req = urllib.request.Request(EXPORT_URL, headers={"X-Roadmap-Key": key})
+    with urllib.request.urlopen(req, timeout=8) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def mark_done_via_export(key: str, titles: list[str]) -> dict:
+    """POST /roadmap/export/done mit X-Roadmap-Key — setzt Items auf done."""
+    body = json.dumps({"titles": titles}).encode("utf-8")
+    req = urllib.request.Request(
+        EXPORT_DONE_URL,
+        data=body,
+        method="POST",
+        headers={"X-Roadmap-Key": key, "Content-Type": "application/json"},
     )
     with urllib.request.urlopen(req, timeout=8) as resp:
         return json.loads(resp.read().decode("utf-8"))
@@ -141,20 +187,30 @@ def save_snapshot(items: list[dict]) -> None:
 
 
 def main() -> int:
-    token = read_token()
-    if not token:
-        print("🗺️  Roadmap-Abruf übersprungen — keine .tmp/admin-token-Datei.")
+    # Export-Key bevorzugt (langlebig) — JWT-Admin-Token bleibt Fallback.
+    export_key = read_export_key()
+    token = None if export_key else read_token()
+    if not export_key and not token:
+        print(
+            "🗺️  Roadmap-Abruf übersprungen — kein Export-Key + kein Admin-Token."
+        )
         print(SETUP_HINT)
         return 0
 
     try:
-        data = fetch_roadmap(token)
+        data = fetch_export(export_key) if export_key else fetch_roadmap(token)  # type: ignore[arg-type]
     except urllib.error.HTTPError as exc:
-        if exc.code in (401, 403):
+        if export_key and exc.code == 404:
             print(
-                "🗺️  Roadmap-Abruf: Token abgelaufen/ungültig (HTTP "
-                f"{exc.code}). Neuen `cubetracker_access_token` aus dem "
-                "Browser-localStorage in .tmp/admin-token legen."
+                "🗺️  Roadmap-Export: HTTP 404 — Endpoint deaktiviert oder Key "
+                "stimmt nicht. Prüfen: ROADMAP_EXPORT_KEY ist auf dem Server "
+                "gesetzt UND .tmp/roadmap-export-key enthält denselben Wert."
+            )
+        elif not export_key and exc.code in (401, 403):
+            print(
+                "🗺️  Roadmap-Abruf: Admin-Token abgelaufen/ungültig (HTTP "
+                f"{exc.code}). Frischen cubetracker_access_token in "
+                ".tmp/admin-token legen — oder besser den Export-Key nutzen."
             )
         else:
             print(f"🗺️  Roadmap-Abruf fehlgeschlagen (HTTP {exc.code}).")
@@ -166,13 +222,29 @@ def main() -> int:
     items = data.get("items", [])
     is_admin = bool(data.get("is_admin"))
 
-    # --mark-done: genannte Items auf status="done" setzen (Admin-only).
+    # --mark-done: genannte Items auf status="done" setzen.
     if MARK_DONE_TITLES:
+        if export_key:
+            # Export-Pfad: ein einziger POST setzt alle Items atomar.
+            try:
+                res = mark_done_via_export(export_key, MARK_DONE_TITLES)
+            except Exception as exc:  # noqa: BLE001
+                print(
+                    f"  ✗ Export-Mark-Done fehlgeschlagen ({type(exc).__name__})."
+                )
+                return 0
+            for tt in res.get("updated", []):
+                print(f"  ✓ done gesetzt: {tt}")
+            for tt in res.get("already_done", []):
+                print(f"  = schon done: {tt}")
+            for tt in res.get("not_found", []):
+                print(f"  ? nicht gefunden: {tt!r}")
+            return 0
+        # JWT-Fallback: per-Item-PATCH (Admin-only).
         if not is_admin:
             print(
                 "⚠ Token ist kein Admin (oder abgelaufen) — kann keine Items "
-                "auf done setzen. Frischen cubetracker_access_token in "
-                ".tmp/admin-token legen."
+                "auf done setzen. Frischen Token legen oder Export-Key nutzen."
             )
             return 0
         by_title = {it["title_de"]: it for it in items}
@@ -184,7 +256,7 @@ def main() -> int:
                 print(f"  = schon done: {title}")
             else:
                 try:
-                    patch_item_status(token, it["id"], "done")
+                    patch_item_status(token, it["id"], "done")  # type: ignore[arg-type]
                     print(f"  ✓ done gesetzt: {title}")
                 except Exception as exc:  # noqa: BLE001
                     print(f"  ✗ Fehler ({type(exc).__name__}): {title}")

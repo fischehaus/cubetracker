@@ -44,6 +44,26 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-export-key",
+        released=date(2026, 5, 29),
+        title="🔑 Roadmap-Export-Endpoint mit festem Key (Tooling)",
+        highlights=[
+            "Neuer dedizierter Auth-Pfad für das Claude-Roadmap-Tooling: "
+            "`GET /api/roadmap/export` + `POST /api/roadmap/export/done`, "
+            "gated durch einen langlebigen Secret-Key (ENV "
+            "`ROADMAP_EXPORT_KEY`, Header `X-Roadmap-Key`). Ersetzt den "
+            "kurzlebigen Admin-JWT, der ~stündlich ablief.",
+            "Safe-by-Default: ohne gesetzte ENV-Var sind beide Endpoints "
+            "deaktiviert (404). Bei Mismatch ebenfalls 404 (versteckt die "
+            "Existenz, analog `require_admin`). Constant-time-Vergleich.",
+            "Schmaler Write-Surface: `/export/done` kann ausschließlich "
+            "`status=\"done\"` setzen (kein Delete, kein Content-Edit). "
+            "Schema lehnt leere Listen/zu lange Titel ab. Verifiziert "
+            "durch 7 neue pytest-Smoke-Tests (Gesamt-Suite: 32 grün).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.solvelist-scroll-cap",
         released=date(2026, 5, 29),
         title="📜 Solve-Liste: kompakte Scroll-Box statt endloser Seite",

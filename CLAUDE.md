@@ -169,10 +169,21 @@ unpushed Commits. Greift als Backup falls der User vergisst `/abschluss`
 aufzurufen.
 
 **Roadmap-Abruf (`/roadmap` + Session-Start):** die Live-Roadmap (inkl.
-interner Items) wird via `.claude/hooks/roadmap-fetch.py` geholt — liest
-`.tmp/admin-token` (gitignored, = Admin-`cubetracker_access_token` aus dem
-Browser-localStorage) und ruft `GET /api/roadmap` mit Bearer-Auth. Der
-SessionStart-Hook zeigt automatisch neue Items + Items die nur live (im
+interner Items) wird via `.claude/hooks/roadmap-fetch.py` geholt. Zwei
+Auth-Pfade:
+
+  1. **Bevorzugt (langlebig, W.roadmap-export-key):** Secret aus ENV
+     `ROADMAP_EXPORT_KEY` (Coolify) bzw. `.tmp/roadmap-export-key`
+     (gitignored, gleicher Wert). Endpoint `GET /api/roadmap/export` mit
+     Header `X-Roadmap-Key`. Auch `--mark-done` läuft darüber
+     (`POST /api/roadmap/export/done`). **Kein Ablauf**, kein Refresh
+     nötig. Endpoint ist deaktiviert (404) solange die ENV-Var nicht
+     gesetzt ist — safe-by-default.
+  2. **Fallback (kurzlebig):** Admin-`cubetracker_access_token` aus dem
+     Browser-localStorage in `.tmp/admin-token` (gitignored). Läuft
+     stündlich ab.
+
+Der SessionStart-Hook zeigt automatisch neue Items + Items die nur live (im
 Admin-Panel) existieren, nicht im Code-Seed. Manuell + ausführlich:
 `/roadmap` (Skill `.claude/commands/roadmap.md`). Reihenfolge pflegt der
 Admin im App-Tab „Verwaltung → Admin → Roadmap" per ▲/▼ (oben zuerst);

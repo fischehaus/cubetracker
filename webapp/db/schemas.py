@@ -476,3 +476,18 @@ class RoadmapReorder(BaseModel):
     ordered_ids: list[Annotated[int, Field(ge=1)]] = Field(
         min_length=1, max_length=200
     )
+
+
+class RoadmapExportMarkDone(BaseModel):
+    """Body für POST /roadmap/export/done (W.roadmap-export-key, 2026-05-29).
+
+    `titles` = title_de-Werte der Items, die auf status="done" gesetzt werden
+    sollen. Key-gated (X-Roadmap-Key-Header), kein JWT nötig.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    # max_length pro Titel: title_de in der DB ist String(256) — gleich.
+    # Verhindert dass jemand 100x grosse Payloads schickt (QA-SOLLTE).
+    titles: list[Annotated[str, Field(min_length=1, max_length=256)]] = Field(
+        min_length=1, max_length=100
+    )
