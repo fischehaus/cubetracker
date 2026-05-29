@@ -24,6 +24,49 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-29 (Nachmittag) — 3 User-Tasks: Skins + Roadmap-Pflege + /roadmap-Tooling
+
+**Letzte Welle: `W.roadmap-admin-reorder-qa` (Hardening, kein Tag).** Branch
+`feature/W-api-prefix`, alles gepusht. Health-Badge → `v2.0.0-alpha.W.skin-three-themes`
+(letzter public PatchNote). Working-Tree clean ausser den bekannten untracked
+Assets (PNGs/ZIPs/scripts/).
+
+**Vier Wellen:**
+- `W.skin-three-themes` (Tag `cc5d988` / `v2.0.0-alpha.W.skin-three-themes`,
+  **public**) — 3 neue Hintergrund-Skins eingebaut: `pb-hunt-focus`,
+  `algorithm-lab`, `codex-vitruvian` (jetzt 6 Skins). Pipeline:
+  `appsafe/`-Subordner je ZIP → `convert-skins.cjs` → je 5 WebP + Preview.
+  Registry in `lib/skins.ts`, i18n DE+EN, Marketing-Bullet `accountBullet7`
+  3→6. **Hero-Splash-Varianten liegen in separatem Ordner → kein Konflikt**
+  (`--src` zeigt auf `appsafe/`).
+- `W.roadmap-admin-reorder` (Tag `37955c3` / `v2.0.0-alpha.W.roadmap-admin-reorder`,
+  internal) — Roadmap-Items im Admin-Panel per ▲/▼ sortierbar (oben zuerst).
+  Atomarer Endpoint `POST /admin/roadmap/reorder` (require_admin) +
+  `useAdminReorderRoadmap`-Hook. **Reorder nur aktiv ohne Status-/Sichtbarkeits-
+  Filter** (sonst würden versteckte Items verwürfelt — Hinweis im Panel).
+- `roadmap-session-fetch` (Commit `fa003ff`, reines Tooling, kein Tag) —
+  `/roadmap`-Command + Session-Start-Abruf der Live-Roadmap. Engine:
+  `.claude/hooks/roadmap-fetch.py` (liest `.tmp/admin-token`, Bearer →
+  `GET /api/roadmap`; Snapshot-Diff für neue Items + Code-Seed-Regex für
+  live-only Items). In `session-start-context.sh` + CLAUDE.md verdrahtet.
+- `W.roadmap-admin-reorder-qa` (Commit `cae3975`, Hardening) — qa-reviewer:
+  0 echte KRITISCH, 2 SOLLTE gefixt (Schema `ge=1`, Callback-Guard), 1 NICE.
+
+**Roadmap-Reconciliation-Befund:** Live-DB zeigt öffentlich nur **3 Items**
+(Admin hat ~30 auf `internal=True` gesetzt, inkl. PWA/Activity-Feed/Battle).
+Das ist **bewusste Admin-Wahl** (per „Öffentlich"-Toggle jederzeit änderbar) —
+alle 33 Seed-Items sind live, kein Verlust. `/roadmap` flaggt künftig
+automatisch live-only Items (im Panel angelegt, nicht im Code-Seed).
+
+### 🔲 OFFENE USER-AKTION (1×, ermöglicht /roadmap + Session-Start-Abruf)
+**`.tmp/admin-token` anlegen:** als Admin auf cubetracker.de einloggen →
+DevTools → Application → Local Storage → Wert von `cubetracker_access_token`
+kopieren → in `.tmp/admin-token` (gitignored) ablegen. Danach zieht der
+Session-Start-Hook + `/roadmap` die volle Live-Roadmap. Token ist kurzlebig →
+bei „HTTP 401" einfach neu kopieren.
+
+---
+
 ## ✅ ERLEDIGT 2026-05-29 (Vor-Demo-Sa) — 7 Wellen Pre-Demo-Polish + Feature-Modal-Refactor + Roadmap-Doku-Cleanup + WSJF-Reorder
 
 **Letzte Welle: `W.roadmap-wsjf-reorder` (internal, Tag folgt im Push).**
