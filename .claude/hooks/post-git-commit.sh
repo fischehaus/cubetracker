@@ -79,6 +79,38 @@ if echo "$subject" | grep -qE '^(feat|fix)[(:]'; then
   fi
 fi
 
+# === Check 4: User-facing feat-Commit ohne features-data.ts-Update ===
+# Schliesst die zweite Doku-Luecke (siehe Feature-Audit 2026-05-29):
+# nicht jeder feat()-Commit wird in der Marketing-Feature-Liste
+# (features-data.ts + features.*-Locales) nachgezogen. Resultat: das
+# "Was kann diese App?"-Modal verpasst neue Features ueber Wochen.
+#
+# Heuristik: nur fuer `feat(W.<name>)`-Commits, bei denen <name> NICHT
+# auf einen reinen Backstage-Pattern matched (qa, fix, hardening,
+# tsbuild, deps, deploy-fix, hotfix, ...). Diese sind erfahrungsgemaess
+# Backstage und brauchen kein Marketing-Bullet.
+if echo "$subject" | grep -qE '^feat\('; then
+  welle_name="$(echo "$subject" | sed -n 's/^feat(\([^)]*\)).*/\1/p')"
+  # NUR ueberspringen wenn der Name eindeutig backstage ist.
+  backstage_pattern='(^|-)(qa|hardening|tsbuild|deps|deploy-fix|hotfix|build-fix|ci|tooling|chore-fix|jsonfix|hidden|internal|migration)(-|$)'
+  if ! echo "$welle_name" | grep -qE "$backstage_pattern"; then
+    changed="$(git diff-tree --no-commit-id --name-only HEAD 2>/dev/null || true)"
+    if ! echo "$changed" | grep -qE 'features-data\.ts|features-data\.tsx'; then
+      # Locale-Diff zaehlt auch — manchmal genuegen neue features.*-Keys.
+      features_locale_changed="$(git diff-tree --unified=0 HEAD -- 'webapp/frontend/src/i18n/locales/*.json' 2>/dev/null \
+        | grep -cE '^\+\s*"features\.' || true)"
+      if [[ "${features_locale_changed:-0}" -eq 0 ]]; then
+        notes+="📋 User-facing feat-Welle ohne features-data.ts-Update (\`${welle_name}\`). "
+        notes+="Konvention: jede User-facing Welle braucht einen Marketing-Bullet — "
+        notes+="entweder einen neuen \`features.*Bullet*\`-Key in DE+EN-Locales + "
+        notes+="den Key in webapp/frontend/src/lib/features-data.ts:CATEGORY_DEFS "
+        notes+="adden, ODER pruefen ob ein bestehender Bullet das Feature abdeckt. "
+        notes+="Backstage-Wellen (qa, fix, tsbuild, deps, hotfix, ...) sind okay zu skippen.\n"
+      fi
+    fi
+  fi
+fi
+
 # === Output ===
 if [[ -z "$notes" ]]; then
   # Nichts zu warnen: stumm raus (keinen Noise erzeugen).

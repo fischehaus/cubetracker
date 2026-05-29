@@ -46,6 +46,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
       "features.solvingBullet6",
       "features.solvingBullet7",
       "features.solvingBullet8",
+      "features.solvingBullet9",
     ],
   },
   {
@@ -61,6 +62,8 @@ const CATEGORY_DEFS: CategoryDef[] = [
       "features.analysisBullet7",
       "features.analysisBullet8",
       "features.analysisBullet9",
+      "features.analysisBullet10",
+      "features.analysisBullet11",
     ],
   },
   {
@@ -102,6 +105,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
       "features.worldBullet4",
       "features.worldBullet5",
       "features.worldBullet6",
+      "features.worldBullet7",
     ],
   },
   {
@@ -127,6 +131,8 @@ const CATEGORY_DEFS: CategoryDef[] = [
       "features.accountBullet5",
       "features.accountBullet6",
       "features.accountBullet7",
+      "features.accountBullet8",
+      "features.accountBullet9",
     ],
   },
 ];

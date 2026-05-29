@@ -44,6 +44,34 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feature-audit-and-hook",
+        released=date(2026, 5, 29),
+        title="📋 Feature-Audit: 6 fehlende Bullets nachgezogen + Hook gegen zukünftigen Drift",
+        highlights=[
+            "Audit der Marketing-Feature-Liste gegen den Code-Stand: 7 "
+            "User-facing Features waren in features-data.ts NICHT erwähnt. "
+            "6 davon jetzt als Bullets ergänzt (Mehrsprachigkeit DE/EN, "
+            "Voice-Alerts in der Inspection, Multi-Cube-Compare, Outlier-"
+            "Pflege, Feedback-Workflow mit Antwort-Toaster, Roadmap- + "
+            "Patch-Notes-Modale für Transparenz).",
+            "**6 neue Bullets** verteilt auf 4 Kategorien:",
+            "  • solvingBullet9 — Voice-Alerts statt nur Beep",
+            "  • analysisBullet10 — Multi-Cube-Compare",
+            "  • analysisBullet11 — Outlier-Pflege",
+            "  • worldBullet7 — Mehrsprachigkeit DE/EN",
+            "  • accountBullet8 — Direkter Draht zum Admin",
+            "  • accountBullet9 — Roadmap- + Patch-Notes-Transparenz",
+            "**Pre-Commit-Hook erweitert**: der bestehende post-git-commit.sh "
+            "warnt jetzt zusätzlich bei jedem `feat(W.X)`-Commit der weder "
+            "features-data.ts noch ein neuer features.*-Locale-Key anfasst — "
+            "es sei denn W.X matched ein Backstage-Pattern (qa/fix/hardening/"
+            "tsbuild/deps/hotfix/...). Damit kein Marketing-Bullet mehr "
+            "wochenlang im Drift hängt.",
+            "CLAUDE.md mit der erweiterten Konvention aktualisiert.",
+            "i18n DE+EN symmetrisch (1387/1387).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.login-logo-visible",
         released=date(2026, 5, 29),
         title="🪧 LoginPage: Logo bleibt immer sichtbar",

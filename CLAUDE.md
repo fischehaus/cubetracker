@@ -175,7 +175,14 @@ Der `post-git-commit.sh`-Hook erinnert daran.
 
 **Bei User-facing-Features:** Bullet in `webapp/frontend/src/lib/features-data.ts`
 ergänzen (zeigt sich auf Login-Seite + im „Was kann diese App?"-Modal).
-Wird im `/abschluss`-Check explizit kontrolliert.
+Wird im `/abschluss`-Check explizit kontrolliert. Plus: der
+`post-git-commit.sh`-Hook warnt nach jedem `feat(W.X)`-Commit, wenn weder
+`features-data.ts` noch ein neuer `features.*`-Locale-Key dabei war — es
+sei denn `W.X` matched ein bekanntes Backstage-Pattern (qa, fix,
+hardening, tsbuild, deps, hotfix, ...). Damit kein Marketing-Bullet mehr
+wochenlang im Drift hängt (Audit 2026-05-29: 7 Lücken in features-data
+aufgedeckt — Mehrsprachigkeit, Voice-Alerts, Multi-Cube-Compare,
+Outlier-Pflege, Feedback-Workflow, Roadmap-/Patch-Notes-Modal).
 
 ## Context-Management & Session-Resume
 
