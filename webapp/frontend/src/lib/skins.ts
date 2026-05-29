@@ -167,6 +167,62 @@ export const SKIN_REGISTRY: Skin[] = [
       },
     ],
   },
+  {
+    // W.skin-three-themes (2026-05-29). appsafe-Pack: Cube/Logo am Rand,
+    // Mitte frei fuer Cards -> center center cropt ausgewogen.
+    id: "pb-hunt-focus",
+    labelKey: "skin.pbHuntFocus.label",
+    descriptionKey: "skin.pbHuntFocus.description",
+    preview: "/skins/pb-hunt-focus/preview.webp",
+    position: "center center",
+    resolutions: [
+      { width: 1920, src: "/skins/pb-hunt-focus/1920x1080.webp" },
+      { width: 2560, src: "/skins/pb-hunt-focus/2560x1440.webp" },
+      { width: 3440, src: "/skins/pb-hunt-focus/3440x1440.webp" },
+      { width: 3840, src: "/skins/pb-hunt-focus/3840x1600.webp" },
+      {
+        width: 3840,
+        src: "/skins/pb-hunt-focus/3840x1080-super.webp",
+        aspectRatio: "32:9",
+      },
+    ],
+  },
+  {
+    id: "algorithm-lab",
+    labelKey: "skin.algorithmLab.label",
+    descriptionKey: "skin.algorithmLab.description",
+    preview: "/skins/algorithm-lab/preview.webp",
+    position: "center center",
+    resolutions: [
+      { width: 1920, src: "/skins/algorithm-lab/1920x1080.webp" },
+      { width: 2560, src: "/skins/algorithm-lab/2560x1440.webp" },
+      { width: 3440, src: "/skins/algorithm-lab/3440x1440.webp" },
+      { width: 3840, src: "/skins/algorithm-lab/3840x1600.webp" },
+      {
+        width: 3840,
+        src: "/skins/algorithm-lab/3840x1080-super.webp",
+        aspectRatio: "32:9",
+      },
+    ],
+  },
+  {
+    id: "codex-vitruvian",
+    labelKey: "skin.codexVitruvian.label",
+    descriptionKey: "skin.codexVitruvian.description",
+    preview: "/skins/codex-vitruvian/preview.webp",
+    position: "center center",
+    resolutions: [
+      { width: 1920, src: "/skins/codex-vitruvian/1920x1080.webp" },
+      { width: 2560, src: "/skins/codex-vitruvian/2560x1440.webp" },
+      { width: 3440, src: "/skins/codex-vitruvian/3440x1440.webp" },
+      { width: 3840, src: "/skins/codex-vitruvian/3840x1600.webp" },
+      {
+        width: 3840,
+        src: "/skins/codex-vitruvian/3840x1080-super.webp",
+        aspectRatio: "32:9",
+      },
+    ],
+  },
 ];
 
 /** Default-Skin-ID, wenn localStorage leer ist. */

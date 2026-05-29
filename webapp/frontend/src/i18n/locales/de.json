@@ -859,7 +859,7 @@
     "accountBullet3": "Display-Name + Email-Change-Flow mit Re-Verifikation",
     "accountBullet5": "Account-Löschung (DSGVO-konform, alle Daten weg)",
     "accountBullet6": "Multi-User-Isolation: deine Daten sind technisch von anderen getrennt",
-    "accountBullet7": "Personalisierung: 3 wählbare Hintergrund-Themen (Cyberpunk Neon, Cyberpunk Laser, Party Fun) plus Card-Stil (deckend vs. Glas / transparent mit Backdrop-Blur) — pro Gerät einstellbar, jederzeit umschaltbar",
+    "accountBullet7": "Personalisierung: 6 wählbare Hintergrund-Themen (Cyberpunk Neon, Cyberpunk Laser, Party Fun, PB Hunt Competition Focus, Algorithm Lab, Codex Vitruvian Cube) plus Card-Stil (deckend vs. Glas / transparent mit Backdrop-Blur) — pro Gerät einstellbar, jederzeit umschaltbar",
     "accountBullet9": "Volle Transparenz: integriertes Roadmap-Modal (was als nächstes kommt + woran wir gerade bauen) und Patch-Notes-Modal (alle Wellen der letzten Wochen mit Datum + Highlight-Liste) — beide jederzeit aus dem Menü erreichbar",
     "modalHeading": "Was kann cubetracker?",
     "modalSubheading": "Multi-User-Web-App zum Tracken + Analysieren von Speedcubing-Solves.",
@@ -1527,6 +1527,18 @@
     "partyFun": {
       "label": "Party Fun",
       "description": "Bunte Farben, Bonbons, freundlich — weg vom Cyberpunk-Look"
+    },
+    "pbHuntFocus": {
+      "label": "PB Hunt – Competition Focus",
+      "description": "Wettkampf-Stimmung: dunkel, fokussiert, für die PB-Jagd"
+    },
+    "algorithmLab": {
+      "label": "Algorithm Lab",
+      "description": "Cleaner Analyse-Look mit OLL/PLL-Boards & Notation in Blau"
+    },
+    "codexVitruvian": {
+      "label": "Codex – Vitruvian Cube",
+      "description": "Da-Vinci-Codex-Stil: Pergament, Konstruktionszeichnungen, Gold"
     }
   },
   "cardStyle": {

@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-three-themes",
+        released=date(2026, 5, 29),
+        title="🎨 Drei neue Hintergrund-Skins",
+        highlights=[
+            "Drei neue wählbare Hintergründe — damit gibt es jetzt 6 Skins "
+            "zur Auswahl (unter Verwaltung → Aussehen / Hintergrund):",
+            "  • PB Hunt – Competition Focus: dunkel, fokussiert, "
+            "Wettkampf-Stimmung für die PB-Jagd.",
+            "  • Algorithm Lab: cleaner Analyse-Look mit OLL/PLL-Boards "
+            "und Notation in Blau.",
+            "  • Codex – Vitruvian Cube: Da-Vinci-Codex-Stil mit "
+            "Pergament, Konstruktionszeichnungen und Gold-Akzenten.",
+            "Jeder Skin kommt in 5 Auflösungen (FullHD bis Superwide 32:9) "
+            "als WebP — die App lädt automatisch die kleinste passende für "
+            "deinen Bildschirm. Wie immer pro Gerät gespeichert, jederzeit "
+            "umschaltbar, und kombinierbar mit dem Card-Stil (deckend / Glas).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-wsjf-reorder",
         released=date(2026, 5, 29),
         title="🗺️ Roadmap nach WSJF priorisiert + einmalige Reorder-Migration",
