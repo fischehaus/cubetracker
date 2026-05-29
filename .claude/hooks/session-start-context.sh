@@ -83,6 +83,14 @@ inbox_hint=$'\n💬 Admin-Feedback-Inbox vor neuer Welle pruefen:\n'
 inbox_hint+="   https://www.cubetracker.de/ → Verwaltung → Admin → Feedback-Inbox"$'\n'
 inbox_hint+="   (Sortiert nach Neu/Bug/Feature/Allgemein; Antwort kommt zurueck zum User.)"
 
+# Phase W.roadmap-session-fetch (2026-05-29): Live-Roadmap abrufen, wenn
+# .tmp/admin-token existiert. Zeigt neue Items seit letztem Start + Items
+# die nur live (im Admin-Panel) angelegt wurden (Code-Seed-Diff). Ohne
+# Token: kurzer Setup-Hinweis. Bricht den Hook nie ab (Script exit 0).
+roadmap_out="$(python .claude/hooks/roadmap-fetch.py --brief --update-snapshot 2>/dev/null || true)"
+roadmap_block=""
+[[ -n "$roadmap_out" ]] && roadmap_block=$'\n\n'"$roadmap_out"
+
 cat <<EOF
 === Cubetracker — Repo-Stand beim Session-Start ===
 
@@ -92,7 +100,7 @@ Remote: $remote_url
 Patch-Notes-Version (aktuell): $current_version$unpushed_msg
 
 Letzte 5 Commits:
-$recent$github_issue_section$inbox_hint
+$recent$github_issue_section$inbox_hint$roadmap_block
 
 📖 Bevor du loslegst, kurz lesen wenn du den aktuellen Stand brauchst:
    - webapp/README.md         (Multi-User-Web-Variante, live auf Hetzner)

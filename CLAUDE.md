@@ -168,6 +168,17 @@ proaktiv auf, bevor du dich verabschiedest.
 unpushed Commits. Greift als Backup falls der User vergisst `/abschluss`
 aufzurufen.
 
+**Roadmap-Abruf (`/roadmap` + Session-Start):** die Live-Roadmap (inkl.
+interner Items) wird via `.claude/hooks/roadmap-fetch.py` geholt — liest
+`.tmp/admin-token` (gitignored, = Admin-`cubetracker_access_token` aus dem
+Browser-localStorage) und ruft `GET /api/roadmap` mit Bearer-Auth. Der
+SessionStart-Hook zeigt automatisch neue Items + Items die nur live (im
+Admin-Panel) existieren, nicht im Code-Seed. Manuell + ausführlich:
+`/roadmap` (Skill `.claude/commands/roadmap.md`). Reihenfolge pflegt der
+Admin im App-Tab „Verwaltung → Admin → Roadmap" per ▲/▼ (oben zuerst);
+Sichtbarkeit per „Öffentlich"-Toggle. Der Code-Seed
+(`webapp/seeds/roadmap.py`) ist nur Cold-Start-Bootstrap.
+
 **Patch-Notes-Konvention:** jeder `feat(W.X)`/`fix(W.X)`-Commit braucht
 einen PatchNote-Eintrag in `webapp/changelog/data.py` mit
 `version="2.0.0-alpha.W.X"`. Plus Git-Tag `v2.0.0-alpha.W.X` nach Push.
