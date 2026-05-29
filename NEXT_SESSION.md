@@ -24,6 +24,41 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-29 (Abend) — 5 risikoarme Auto-Mode-Wellen (Tier A)
+
+Nach dem `.tmp/admin-token`-Setup (Token funktioniert) `/roadmap` durchgelaufen
+→ Live-Roadmap = 34 Items. Daraus die risikoarmen, solo-machbaren Items gebaut
+(User-Greenlight „Tier A komplett + Ranking"). Alle gebaut → Build/Test grün →
+einzeln gepusht → **QA-Sub-Agent über den Batch: 0 KRITISCH, safe-to-deploy.**
+
+- `W.roadmap-seed-ranking` (Commit, kein Tag) — live-only Item „Ranking / Level"
+  (P1, intern, von dir im Panel angelegt) in `seeds/roadmap.py` gesichert
+  (DB-Wipe-Schutz). note_de verbatim, note_en nachübersetzt.
+- `W.random-move-fallback` (Tag, internal) — Dino/Floppy/Tower hingen nur an
+  csTimer; bei dessen Crash gab es leeren Scramble. Jetzt Fallback-Specs in
+  `CUSTOM_PUZZLE_SPECS`. Tests + Node-Check grün.
+- `W.wca-503-banner` (Tag, **public**) — globales Banner bei WCA-Ausfall
+  (502/503/504), neue `WcaStatusBanner.tsx`, reused `useMyWcaProfile`-Query.
+- `W.recharts-split` (Tag, internal) — Recharts via `LazyCharts.tsx` lazy →
+  Initial-Bundle **536 → 426kb gzip (~110kb kleiner)**. Charts laden erst
+  beim Render.
+- `W.roadmap-admin-reorder-qa`-Nachzug + dieser Block: QA-NICE (bare `open()`
+  in roadmap-fetch.py → `with`).
+
+**Token-Mechanik bewährt:** `.tmp/admin-token` (akzeptiert auch `.txt`/`.md`-
+Endung), `/roadmap` zeigt live-only Items + neue seit letztem Start.
+
+### 🔜 Reste / Ideen (nicht Tier A)
+- **🟡 Tier B** (mehr Regressions-Fläche, einzeln mit Check): Cache-Invalidation-
+  Refactor, Solve-Liste-Virtualisierung, Toast-Manager, csTimer-Vendor-Lazy.
+- **🔴 Blockiert/groß:** PLL-Bilder (deine PNGs), Smart-Cube v5 (deine Logs),
+  PWA, Alembic, Battle/3D-Vis/Reconstruction.
+- **🟢 Roadmap-Items als „done" markieren:** Random-Move-Fallback + 503-Banner
+  + Recharts-Split sind erledigt → im Admin-Panel auf done setzen (oder ich per
+  PATCH, wenn du willst).
+
+---
+
 ## ✅ ERLEDIGT 2026-05-29 (Nachmittag) — 3 User-Tasks: Skins + Roadmap-Pflege + /roadmap-Tooling
 
 **Letzte Welle: `W.roadmap-admin-reorder-qa` (Hardening, kein Tag).** Branch

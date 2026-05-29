@@ -87,7 +87,8 @@ def fetch_roadmap(token: str) -> dict:
 def seed_titles() -> set[str]:
     """title_de-Werte aus dem Code-Seed (regex, ohne Modul-Import)."""
     try:
-        txt = open(SEED_FILE, encoding="utf-8").read()
+        with open(SEED_FILE, encoding="utf-8") as fh:
+            txt = fh.read()
     except FileNotFoundError:
         return set()
     return set(re.findall(r'"title_de":\s*"((?:[^"\\]|\\.)*)"', txt))
