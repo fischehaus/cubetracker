@@ -44,6 +44,21 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.backend-test-suite",
+        released=date(2026, 5, 29),
+        title="🧪 Backend-Smoke-Tests (pytest)",
+        highlights=[
+            "Erste echte Test-Abdeckung der Backend-Endpoints: pytest-Infra "
+            "(conftest mit Test-SQLite + Auth-Fixtures, die Token direkt "
+            "minten) + 13 Smoke-Tests über die Kern-Cluster — Health, Auth "
+            "(Register/Login/Me + Negativ-Fälle), Solves (Create/List + "
+            "Cross-User-Isolation), Roadmap (Public vs Admin) und die "
+            "Admin-Permission-Boundary. 25 Tests grün (inkl. der 12 "
+            "bestehenden). Fundament, das künftige Backend-Wellen absichert.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.recharts-split",
         released=date(2026, 5, 29),
         title="⚡ Schnellerer Erststart: Diagramme werden lazy geladen",
