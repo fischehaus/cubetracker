@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-pixel-academy-lofi",
+        released=date(2026, 5, 30),
+        title="🎨 Zwei neue Skins: Pixel Academy + Lofi Solver",
+        highlights=[
+            "**Pixel Academy** — Pixel-Art / Coding-Club-Look mit "
+            "bunten Akzenten (Cyan, Mint, Pink, Yellow). Speziell für "
+            "junge Cuber (8-12 Jahre) entworfen, aber auch erwachsenen-"
+            "tauglich.",
+            "**Lofi Solver** — Cinematic Rainy-Night-Vibe in dunklen "
+            "Violett/Orange-Tönen. Cozy Fokus-Atmosphäre, besonders gut "
+            "für lange Übungs-Sessions. Pairing mit Glassmorphism-Cards "
+            "wirkt am stärksten.",
+            "Beide Skins haben alle 5 App-Auflösungen (1920×1080 bis "
+            "3840×1600 + 3840×1080-superwide). Im Tab „Verwaltung → "
+            "Aussehen\" auswählbar. Total ~1 MB zusätzliche Asset-Größe.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-algorithm-lab-codex-v2",
         released=date(2026, 5, 30),
         title="🎨 Skin-Update: Algorithm Lab + Codex Vitruvian (No-Cube-Edition)",

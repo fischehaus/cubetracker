@@ -1549,6 +1549,14 @@
     "codexVitruvian": {
       "label": "Codex – Vitruvian Cube",
       "description": "Da Vinci codex style: parchment, construction drawings, gold"
+    },
+    "pixelAcademy": {
+      "label": "Pixel Academy",
+      "description": "Pixel-art coding-club style — colorful and playful, made for younger cubers"
+    },
+    "lofiSolverPremium": {
+      "label": "Lofi Solver",
+      "description": "Cinematic rainy-night vibes — cozy focus atmosphere"
     }
   },
   "cardStyle": {

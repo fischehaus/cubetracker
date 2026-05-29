@@ -223,6 +223,47 @@ export const SKIN_REGISTRY: Skin[] = [
       },
     ],
   },
+  {
+    // W.skin-pixel-academy (2026-05-30). Pixel-Art / Coding-Club-Look
+    // (Audience: Kids 8-12). Bunte Akzente, klare Card-Trennung.
+    id: "pixel-academy",
+    labelKey: "skin.pixelAcademy.label",
+    descriptionKey: "skin.pixelAcademy.description",
+    preview: "/skins/pixel-academy/preview.webp",
+    position: "center center",
+    resolutions: [
+      { width: 1920, src: "/skins/pixel-academy/1920x1080.webp" },
+      { width: 2560, src: "/skins/pixel-academy/2560x1440.webp" },
+      { width: 3440, src: "/skins/pixel-academy/3440x1440.webp" },
+      { width: 3840, src: "/skins/pixel-academy/3840x1600.webp" },
+      {
+        width: 3840,
+        src: "/skins/pixel-academy/3840x1080-super.webp",
+        aspectRatio: "32:9",
+      },
+    ],
+  },
+  {
+    // W.skin-lofi-solver-premium (2026-05-30). Cinematic cozy rainy-night
+    // focus theme. Sehr dunkler Background → besonders bei Card-Stil
+    // „glassmorphism" lesbar.
+    id: "lofi-solver-premium",
+    labelKey: "skin.lofiSolverPremium.label",
+    descriptionKey: "skin.lofiSolverPremium.description",
+    preview: "/skins/lofi-solver-premium/preview.webp",
+    position: "center center",
+    resolutions: [
+      { width: 1920, src: "/skins/lofi-solver-premium/1920x1080.webp" },
+      { width: 2560, src: "/skins/lofi-solver-premium/2560x1440.webp" },
+      { width: 3440, src: "/skins/lofi-solver-premium/3440x1440.webp" },
+      { width: 3840, src: "/skins/lofi-solver-premium/3840x1600.webp" },
+      {
+        width: 3840,
+        src: "/skins/lofi-solver-premium/3840x1080-super.webp",
+        aspectRatio: "32:9",
+      },
+    ],
+  },
 ];
 
 /** Default-Skin-ID, wenn localStorage leer ist. */
