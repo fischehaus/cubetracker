@@ -179,6 +179,15 @@ Admin im App-Tab „Verwaltung → Admin → Roadmap" per ▲/▼ (oben zuerst);
 Sichtbarkeit per „Öffentlich"-Toggle. Der Code-Seed
 (`webapp/seeds/roadmap.py`) ist nur Cold-Start-Bootstrap.
 
+**Roadmap-Item erledigt → auf „done" setzen (verbindlich, nicht nur
+erinnern):** Wenn eine `feat(W.X)`/`fix(W.X)`-Welle ein Roadmap-Item
+abschließt, das Item danach auf done setzen:
+`python .claude/hooks/roadmap-fetch.py --mark-done "<title_de exakt>" [...]`
+(matcht per title_de, idempotent, mehrere Titel möglich). Braucht einen
+gültigen Admin-Token in `.tmp/admin-token`; bei „kein Admin (abgelaufen)"
+→ User um frischen `cubetracker_access_token` bitten, dann erneut. Hält
+die Live-Roadmap akkurat, ohne dass der Admin manuell nachklicken muss.
+
 **Patch-Notes-Konvention:** jeder `feat(W.X)`/`fix(W.X)`-Commit braucht
 einen PatchNote-Eintrag in `webapp/changelog/data.py` mit
 `version="2.0.0-alpha.W.X"`. Plus Git-Tag `v2.0.0-alpha.W.X` nach Push.

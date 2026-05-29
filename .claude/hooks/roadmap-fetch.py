@@ -43,6 +43,15 @@ except Exception:  # noqa: BLE001
 
 BRIEF = "--brief" in sys.argv
 UPDATE_SNAPSHOT = "--update-snapshot" in sys.argv
+# --mark-done "<title_de>" ["<title_de>" ...]: setzt die genannten Roadmap-
+# Items auf status="done" (PATCH, braucht Admin-Token). Titel exakt wie
+# title_de. Wird nach Abschluss eines Roadmap-Items aufgerufen.
+_MARK_IDX = sys.argv.index("--mark-done") if "--mark-done" in sys.argv else -1
+MARK_DONE_TITLES = (
+    [a for a in sys.argv[_MARK_IDX + 1:] if not a.startswith("--")]
+    if _MARK_IDX >= 0
+    else []
+)
 
 PROJECT = os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
 # Kanonisch ist `.tmp/admin-token` (ohne Endung). Windows-Editoren (Notepad
@@ -55,7 +64,8 @@ TOKEN_CANDIDATES = [
 ]
 SNAP_FILE = os.path.join(PROJECT, ".tmp", "roadmap-snapshot.json")
 SEED_FILE = os.path.join(PROJECT, "webapp", "seeds", "roadmap.py")
-API_URL = "https://www.cubetracker.de/api/roadmap"
+API_BASE = "https://www.cubetracker.de/api"
+API_URL = f"{API_BASE}/roadmap"
 
 SETUP_HINT = (
     "   Token holen: als Admin auf cubetracker.de einloggen → DevTools →\n"
@@ -82,6 +92,22 @@ def fetch_roadmap(token: str) -> dict:
     )
     with urllib.request.urlopen(req, timeout=8) as resp:
         return json.loads(resp.read().decode("utf-8"))
+
+
+def patch_item_status(token: str, item_id: int, new_status: str) -> int:
+    """PATCH /admin/roadmap/items/{id} — setzt status. Braucht Admin-Token."""
+    body = json.dumps({"status": new_status}).encode("utf-8")
+    req = urllib.request.Request(
+        f"{API_BASE}/admin/roadmap/items/{item_id}",
+        data=body,
+        method="PATCH",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=8) as resp:
+        return resp.status
 
 
 def seed_titles() -> set[str]:
@@ -139,6 +165,31 @@ def main() -> int:
 
     items = data.get("items", [])
     is_admin = bool(data.get("is_admin"))
+
+    # --mark-done: genannte Items auf status="done" setzen (Admin-only).
+    if MARK_DONE_TITLES:
+        if not is_admin:
+            print(
+                "⚠ Token ist kein Admin (oder abgelaufen) — kann keine Items "
+                "auf done setzen. Frischen cubetracker_access_token in "
+                ".tmp/admin-token legen."
+            )
+            return 0
+        by_title = {it["title_de"]: it for it in items}
+        for title in MARK_DONE_TITLES:
+            it = by_title.get(title)
+            if it is None:
+                print(f"  ? nicht gefunden: {title!r}")
+            elif it.get("status") == "done":
+                print(f"  = schon done: {title}")
+            else:
+                try:
+                    patch_item_status(token, it["id"], "done")
+                    print(f"  ✓ done gesetzt: {title}")
+                except Exception as exc:  # noqa: BLE001
+                    print(f"  ✗ Fehler ({type(exc).__name__}): {title}")
+        return 0
+
     prev_ids = load_prev_ids()
     cur_ids = {it["id"] for it in items}
     new_items = (

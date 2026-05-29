@@ -77,4 +77,8 @@ denk den Modul-Check (`.claude/rules/discipline.md`) durch, und los.
   ▲/▼ (oben zuerst). Sichtbarkeit pro Item per „Öffentlich"-Toggle.
 - Der Code-Seed (`webapp/seeds/roadmap.py`) ist der Cold-Start-Bootstrap;
   die Live-DB ist die laufende Wahrheit. `/roadmap` zeigt die Live-DB.
+- Item erledigt → auf done setzen:
+  `python .claude/hooks/roadmap-fetch.py --mark-done "<title_de>"` (matcht
+  per Titel, idempotent, mehrere möglich; braucht gültigen Admin-Token).
+  Verbindlich nach Abschluss eines Roadmap-Items — nicht nur erinnern.
 - Phasen-Struktur P1..P6: `webapp/frontend/src/lib/roadmap-phases.ts`.
