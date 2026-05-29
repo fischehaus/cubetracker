@@ -24,6 +24,83 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-29 (Vor-Demo-Sa) — 5 Wellen Pre-Demo-Polish + Feature-Modal-Refactor
+
+**Letzte Welle: `W.feature-curation` (Tag `7c16ecb`).** Branch
+`feature/W-api-prefix`, alles gepusht, Backend live (Health zeigt
+`v2.0.0-alpha.W.feature-curation`). Working-Tree clean ausser 5 alte
+PNGs/scripts/ (irrelevant) + **1 NEUES Wallpaper-Pack** vom User
+(`frontend/src/assets/cubetracker_pb_hunt_competition_focus_template2_pack.zip`)
+— das ist Stoff für die nächste Welle (vermutlich vierter Skin "PB Hunt
+Competition Focus" oder ähnlich, lt. Filename).
+
+### Sprint-Gruppen heute (5 Wellen)
+
+**Gruppe 8 — Marketing-Liste + Cross-Diff** (3 Wellen):
+- `W.features-data-update` (Tag `bb9a1ed`, internal) — Skin-System +
+  GAN-Smart-Cube als Bullets in `features-data.ts` nachgezogen
+  (war im /abschluss-Check ⚠ markiert).
+- `W.feature-audit-and-hook` (Tag `69ef56b`) — vollständiger Sub-Agent-
+  Audit aller ~70 Features im Code gegen die Marketing-Liste. 6 Lücken
+  als neue Bullets nachgezogen (Mehrsprachigkeit DE/EN, Voice-Alerts,
+  Multi-Cube-Compare, Outlier-Pflege, Feedback-Workflow,
+  Roadmap+Patch-Notes-Modal). **Plus post-git-commit.sh-Hook erweitert**
+  (Check 4): warnt jetzt bei `feat(W.X)`-Wellen die weder
+  `features-data.ts` noch neuen `features.*`-Locale-Key anfassen, es
+  sei denn W.X matched Backstage-Pattern (qa/fix/hardening/...).
+- `W.feature-curation` (Tag `7c16ecb`) — strukturelles Refactor der
+  Marketing-Liste: jedes Bullet hat jetzt eine `audience`-Klassifikation
+  (public/expanded/internal). Default-LoginPage-Modal zeigt 23
+  kuratierte Public-Bullets, „Mehr anzeigen"-Toggle zeigt zusätzlich
+  13 Expanded-Bullets. 11 Internal-Bullets sind ganz raus aus
+  User-Sicht. **5 Konsolidierungen** (Timer-Modi + Hauptbullet,
+  Sessions + Trainings-Sets, csTimer Import + Export, JSON-Backup
+  inkl. Achievements, Hardware-Standard-Liste + Markieren). **2
+  Kategorie-Umzüge** (PLZ → Speedcubing-Welt, Feedback → Community).
+  Single-Source via `BulletAudience`-Type + `filterBulletsByAudience()`
+  Helfer-Funktion.
+
+**Gruppe 9 — Vor-Demo-Polish** (3 Wellen):
+- `W.pre-demo-fixes` (Tag `e881738`) — drei Fixes vor der Demo: (1)
+  Smart-Cube-Block liegt jetzt direkt unter `BigTimerInput`, auch im
+  Fokus-Modus sichtbar. (2) `AdminLiveTestsPanel` fetcht jetzt für
+  Tester (Bug: `enabled` war auf `isAdmin` gepinnt, Tester sahen
+  permanent „Lade Live-Tests …"). (3) LoginPage-Tiles + Trust-Pills
+  sind klickbar — öffnen das Features-Modal und scrollen zur
+  passenden Kategorie (lila Highlight 2.4s).
+- `W.login-logo-visible` (Tag `d35d4b7`) — LoginPage-Logo bleibt auch
+  bei aktivem Skin sichtbar (User-Wunsch). CSS-Override via zweite
+  Klasse `cubetracker-logo-always`.
+
+### 🔜 Offen für nächste Session (Sa Vormittag — Demo-Tag)
+
+**Direkte Demo-Vorbereitung:**
+- **🔲 Phone-Demo-Probe via 12 Admin-Live-Tests** (Du-Aktion, ~30 min) —
+  Reihenfolge folgt dem realen Demo-Flow. Bei FAIL: Notiz im UI → ich
+  fixe gezielt.
+- **🔲 Viertes Wallpaper-Pack** als Skin „PB Hunt Competition Focus"
+  einbauen — ZIP liegt schon in `frontend/src/assets/`. Workflow ist
+  klar (npm run skins:build → Registry-Eintrag → i18n → Push), ~30 min.
+
+**Demo-irrelevant aber bald nachzuholen:**
+- **🔴 Smart-Cube Auto-Solved-Detection** (`W.gan-cube-auto-time-v4`-
+  Welle wartet weiterhin auf v4-Logs vom User: gelöster Cube +
+  Console-Screenshot mit `[SmartCube] FACELETS len=... solved=...`-
+  Zeile). Ohne die Diagnose kein v5-Fix möglich.
+- **🟡 Demo-Backend-Welle Schritt-für-Schritt** neu aufbauen (Lesson
+  aus dem Revert: jeder Step einzeln live-verifizieren — Schema-
+  Migration → Seed leer → Solve-Chunks von 20 → require_not_demo).
+- **🟡 QA-Hotfixes** aus den Skin-Reviews: Flash-of-wrong-style auf
+  Reload, A11y Arrow-Key-Nav im Radiogroup, convert-skins Path-
+  Traversal-Schutz, Progress-Bar-Tracks im Glass-Mode.
+- **🟡 Permissions-Matrix updaten** (`docs/permissions-matrix.md`
+  Stand 2026-05-28 → 29: Skin-System + Card-Style ergänzen,
+  Tester-LiveTests-Bug klarstellen).
+- **🟡 Hook erweitern**: BulletDef.audience-Pflicht-Check (verhindert
+  vergessen beim nächsten Bullet-Add).
+
+---
+
 ## ✅ ERLEDIGT 2026-05-28 (Spätschicht) — Skin-System + LoginPage-Refresh + Demo-Backend-Revert
 
 **Letzte public Welle: `W.skin-card-fix-v2` (Tag `221fdc0`).** Working-Tree
