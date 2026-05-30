@@ -1265,6 +1265,10 @@
     "moreCount": "+ {{count}} more",
     "dismissAll": "dismiss all"
   },
+  "pwa": {
+    "updateTitle": "🔄 New version available",
+    "updateAvailable": "Tap to update — reloads the app."
+  },
   "toasterAchievement": {
     "unlockedLabel": "🏆 Achievement unlocked",
     "closeAria": "Close toast",

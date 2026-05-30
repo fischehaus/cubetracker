@@ -44,6 +44,33 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.pwa-offline",
+        released=date(2026, 5, 30),
+        title="📴 PWA Phase B: Offline-Start + Neue-Version-Hinweis",
+        highlights=[
+            "Cubetracker hat jetzt einen Service-Worker: Nach dem ersten "
+            "Besuch lädt das App-Gerüst auch **offline** (statt weißem "
+            "Screen / Browser-Dino). Statische Teile (Code, Bilder, "
+            "Skins) kommen blitzschnell aus dem lokalen Cache, im "
+            "Hintergrund wird auf neue Versionen geprüft.",
+            "Wichtig & bewusst: deine **Daten** (Solves, Statistiken) "
+            "kommen weiterhin immer frisch vom Server und werden NIE "
+            "gecacht — offline siehst du also das App-Gerüst, aber für "
+            "aktuelle Solve-Daten brauchst du Verbindung. Kein Risiko, "
+            "alte Zahlen angezeigt zu bekommen.",
+            "Neuer „🔄 Neue Version verfügbar“-Hinweis: wenn ein Update "
+            "deployt wurde, erscheint ein Toast — ein Tipp darauf lädt "
+            "die App sauber neu. Kein manuelles Hard-Refresh / Cache-"
+            "Leeren mehr nötig.",
+            "Technik-Notiz: bewusst hand-gerollter Service-Worker (kein "
+            "Workbox-Plugin) wegen Vite-8/Rolldown-Kompatibilität + "
+            "voller Kontrolle über die Caching-Regeln. QA-Sub-Agent-"
+            "Review mit Fokus auf die typischen SW-Fallen (Stale-Cache-"
+            "Lock, API-Cache-Unfall, Reload-Loop) — 3 SOLLTE + 1 NICE "
+            "vor Deploy gefixt.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.pwa-manifest",
         released=date(2026, 5, 30),
         title="📲 App auf den Homescreen installierbar (PWA-Manifest)",

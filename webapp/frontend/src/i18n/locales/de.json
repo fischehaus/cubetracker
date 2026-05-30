@@ -1265,6 +1265,10 @@
     "moreCount": "+ {{count}} weitere",
     "dismissAll": "alle schließen"
   },
+  "pwa": {
+    "updateTitle": "🔄 Neue Version verfügbar",
+    "updateAvailable": "Tippen zum Aktualisieren — lädt die App neu."
+  },
   "toasterAchievement": {
     "unlockedLabel": "🏆 Erfolg freigeschaltet",
     "closeAria": "Toast schließen",
