@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ia-nav-entdopplung",
+        released=date(2026, 5, 31),
+        title="🧹 Aufgeräumte Navigation: ein Ort pro Aktion",
+        highlights=[
+            "Letzter Schliff der Navigations-Überarbeitung: Funktionen, die "
+            "vorher doppelt im Footer UND im Menü oben rechts standen (Was "
+            "kann die App, Roadmap, Feedback), gibt es jetzt nur noch an "
+            "einer Stelle — im Menü oben rechts. Auch die Sprachwahl lebt "
+            "jetzt nur noch dort. Der Footer bleibt schlank: Impressum, "
+            "Datenschutz und der Hinweis aufs Menü.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ia-subtab-routing",
         released=date(2026, 5, 31),
         title="🔖 Statistik-Detailansicht ist jetzt verlinkbar",

@@ -51,7 +51,6 @@ import { RoadmapModal } from "./components/RoadmapModal";
 import { OnboardingBanner } from "./components/OnboardingBanner";
 import { WcaStatusBanner } from "./components/WcaStatusBanner";
 import { PatchNotesPanel } from "./components/PatchNotesPanel";
-import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { UserMenu } from "./components/UserMenu";
 import { ReminderCard } from "./components/ReminderCard";
 import { SolveList } from "./components/SolveList";
@@ -965,11 +964,11 @@ function MainLayout() {
             />
           </button>
           <div className="flex items-center gap-3">
-            {/* W.ux-demo-polish: LanguageSwitcher + HealthBadge auf Phone
-                ausblenden. Backups: LanguageSwitcher liegt im UserMenu,
-                PatchNotes erreichbar via UserMenu → "PatchNotes". */}
+            {/* HealthBadge (Version + PatchNotes-Zugang) auf Phone
+                ausblenden — PatchNotes ist dort via UserMenu erreichbar.
+                Sprache + alle weiteren Optionen leben seit W.ia-nav-
+                entdopplung kanonisch im UserMenu (keine Header-Dopplung mehr). */}
             <div className="hidden md:flex items-center gap-3">
-              <LanguageSwitcher />
               <HealthBadge onClick={() => setShowPatches(true)} />
             </div>
             {user && (
@@ -1062,30 +1061,6 @@ function MainLayout() {
           <span>
             {t("footer.appName")} — {t("footer.tagline")}
           </span>
-          <span aria-hidden="true" className="text-gray-500">·</span>
-          <button
-            type="button"
-            onClick={() => setShowFeatures(true)}
-            className="text-gray-100 hover:text-white underline drop-shadow-sm"
-          >
-            {t("footer.featuresLink")}
-          </button>
-          <span aria-hidden="true" className="text-gray-500">·</span>
-          <button
-            type="button"
-            onClick={() => setShowRoadmap(true)}
-            className="text-gray-100 hover:text-white underline drop-shadow-sm"
-          >
-            {t("footer.roadmapLink")}
-          </button>
-          <span aria-hidden="true" className="text-gray-500">·</span>
-          <button
-            type="button"
-            onClick={() => setShowFeedback(true)}
-            className="text-gray-100 hover:text-white underline drop-shadow-sm"
-          >
-            {t("footer.feedbackLink")}
-          </button>
           <span aria-hidden="true" className="text-gray-500">·</span>
           <a
             href="/impressum"
