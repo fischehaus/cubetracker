@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ia-subtab-routing",
+        released=date(2026, 5, 31),
+        title="🔖 Statistik-Detailansicht ist jetzt verlinkbar",
+        highlights=[
+            "Die Detail-Ansicht im Statistik-Tab (Charts + Solveliste) hat "
+            "jetzt eine eigene Adresse (Endung #statistik/detail) — du "
+            "kannst sie direkt als Lesezeichen speichern, und der "
+            "Zurück-Knopf des Browsers wechselt jetzt korrekt zwischen "
+            "Übersicht und Detail (vorher blieb die Ansicht stehen).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ia-admin-bereich",
         released=date(2026, 5, 31),
         title="🛡 Admin & Tester: eigener Bereich im Menü statt Verwaltungs-Tab",

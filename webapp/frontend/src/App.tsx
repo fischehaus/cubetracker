@@ -130,6 +130,7 @@ function tabFromHash(): {
 } | null {
   if (typeof window === "undefined") return null;
   const raw = window.location.hash.replace(/^#\/?/, "").trim();
+  // Legacy-Hashes (ganzer String, z.B. "analyse"/"friends") zuerst.
   const legacy = LEGACY_HASH_MAP[raw];
   if (legacy) {
     return {
@@ -138,8 +139,17 @@ function tabFromHash(): {
       statistikInitial: legacy.statistikSub,
     };
   }
-  if ((VALID_TABS as string[]).includes(raw)) {
-    return { tab: raw as AppTab };
+  // Sub-Tab-Form #<tab>/<sub> (W.ia-subtab-routing): aktuell nur Statistik
+  // (#statistik/detail). overview ist suffixlos (#statistik).
+  const [top, sub] = raw.split("/");
+  if (top === "statistik") {
+    return {
+      tab: "statistik",
+      statistikInitial: sub === "detail" ? "detail" : "overview",
+    };
+  }
+  if ((VALID_TABS as string[]).includes(top)) {
+    return { tab: top as AppTab };
   }
   return null;
 }
@@ -667,8 +677,9 @@ function AnalyseTab({
  *
  * State bleibt bewusst in MainLayout (durchgereicht) — so überlebt der
  * jeweilige Filter einen Tab-Wechsel; Übersicht- und Detail-Filter sind
- * unabhängig. Der section-State (Übersicht/Detail) lebt lokal; Sub-Tab-
- * URL-Routing kommt erst in W.ia-subtab-routing.
+ * unabhängig. Auch die Sub-Ansicht (section) ist seit W.ia-subtab-routing
+ * controlled (in MainLayout), damit sie im URL-Hash #statistik/detail
+ * bookmarkbar ist + auf Browser-Back reagiert.
  */
 function StatistikTab({
   overviewSessionId,
@@ -678,7 +689,8 @@ function StatistikTab({
   detailCubeFilter,
   setDetailCubeFilter,
   onSwitchTab,
-  initialSection,
+  section,
+  onSectionChange,
 }: {
   overviewSessionId: number | null;
   setOverviewSessionId: (id: number | null) => void;
@@ -687,12 +699,10 @@ function StatistikTab({
   detailCubeFilter: string;
   setDetailCubeFilter: (s: string) => void;
   onSwitchTab: (tab: AppTab) => void;
-  initialSection?: StatistikSection;
+  section: StatistikSection;
+  onSectionChange: (s: StatistikSection) => void;
 }) {
   const { t } = useTranslation();
-  const [section, setSection] = useState<StatistikSection>(
-    initialSection ?? "overview",
-  );
 
   const subTabs: ScrollableTabItem[] = [
     { id: "overview", label: t("statistikTab.subTabOverview"), icon: "📊" },
@@ -702,7 +712,7 @@ function StatistikTab({
   // Drill-down aus der Übersicht: Klick auf einen Cube → Detail mit Filter.
   const drillToDetail = (cube: string) => {
     setDetailCubeFilter(cube);
-    setSection("detail");
+    onSectionChange("detail");
   };
 
   return (
@@ -710,7 +720,7 @@ function StatistikTab({
       <ScrollableTabBar
         tabs={subTabs}
         current={section}
-        onChange={(id) => setSection(id as StatistikSection)}
+        onChange={(id) => onSectionChange(id as StatistikSection)}
         ariaLabel={t("statistikTab.ariaLabel")}
         size="md"
       />
@@ -778,6 +788,11 @@ function MainLayout() {
   // läuft der I/O bei jedem Re-Render von MainLayout (QA W.ia-statistik-merge).
   const [initial] = useState(loadInitialTab);
   const [tab, setTab] = useState<AppTab>(initial.tab);
+  // Ref auf den aktuellen Tab: (1) der hashchange-Listener liest ihn frisch
+  // ohne Effect-Neuregistrierung (kein Stale-Closure-Race); (2) der Persist-
+  // Effect erkennt damit Top- vs. Sub-Tab-Wechsel (Sub → pushState, Browser-
+  // Back-fähig; Top → replaceState, kein History-Spam zwischen Haupt-Tabs).
+  const tabRef = useRef(tab);
   // Modals für Patch-Notes + Features-Liste — State lebt hier zentral,
   // weil mehrere Trigger drauf zugreifen (Version-Badge, UserMenu, Footer).
   const [showPatches, setShowPatches] = useState(false);
@@ -790,11 +805,12 @@ function MainLayout() {
   const [communityInitial] = useState<CommunitySection | undefined>(
     initial.communityInitial,
   );
-  // Initial-Sub-Tab im Statistik-Tab — nur beim ersten Mount aus Hash bzw.
-  // localStorage-Migration (legacy #analyse / "analyse" → Detail). Spätere
-  // Wechsel zwischen Übersicht/Detail leben lokal im StatistikTab.
-  const [statistikInitial] = useState<StatistikSection | undefined>(
-    initial.statistikInitial,
+  // Aktive Sub-Ansicht im Statistik-Tab. CONTROLLED hier in MainLayout (wie
+  // kontoSection), damit der URL-Hash #statistik/detail zentral synchron
+  // bleibt (W.ia-subtab-routing) — bookmarkbar + Browser-Back. Initial aus
+  // Hash bzw. localStorage-Migration (legacy #analyse → detail).
+  const [statistikSection, setStatistikSection] = useState<StatistikSection>(
+    initial.statistikInitial ?? "overview",
   );
   // Aktive Sektion der „Konto & Daten"-Ansicht (W.ia-konto-usermenu).
   // CONTROLLED hier in MainLayout, damit Direkt-Sprünge (UserMenu,
@@ -813,29 +829,45 @@ function MainLayout() {
     } catch {
       // localStorage kann blockiert sein (private mode, etc.) — egal.
     }
-    // URL-Hash setzen ohne page-reload. Nur wenn wirklich anders,
-    // sonst gibt es overschuessige history-einträge.
-    const target = `#${tab}`;
+    // URL-Hash setzen ohne page-reload. Sub-Tab im Hash für Statistik
+    // (W.ia-subtab-routing): #statistik/detail ist bookmarkbar; overview
+    // bleibt suffixlos (#statistik).
+    const target =
+      tab === "statistik" && statistikSection === "detail"
+        ? "#statistik/detail"
+        : `#${tab}`;
     if (window.location.hash !== target) {
-      window.history.replaceState(null, "", target);
+      // Sub-Tab-Wechsel (Top-Tab unverändert) → pushState, damit Browser-Back
+      // zwischen Übersicht/Detail wechselt. Top-Tab-Wechsel → replaceState,
+      // sonst sammeln sich überflüssige History-Einträge zwischen Haupt-Tabs.
+      if (tabRef.current === tab) {
+        window.history.pushState(null, "", target);
+      } else {
+        window.history.replaceState(null, "", target);
+      }
     }
-  }, [tab]);
+    tabRef.current = tab;
+  }, [tab, statistikSection]);
 
-  // Browser-Back/Forward: hash-änderung von aussen reagieren.
-  // BEKANNTE GRENZE (QA W.ia-statistik-merge): reagiert nur auf den TOP-
-  // Tab, nicht auf Sub-Tab-Sprünge bei gleichem Tab. Tippt ein User manuell
-  // #analyse während er schon auf dem Statistik-Tab ist, bleibt die Sub-
-  // Ansicht (Übersicht/Detail) stehen — der statistikInitial-Wert ist nach
-  // dem Mount eingefroren. Beim Seiten-Load (Bookmark) ist alles korrekt.
-  // Sauberer Fix kommt mit W.ia-subtab-routing (Sub-Tab in den URL-Hash).
+  // Browser-Back/Forward: hash-änderung von aussen reagieren — inkl. Sub-Tab
+  // (W.ia-subtab-routing). Behebt die frühere Grenze: ein Sprung zu
+  // #statistik/detail während man schon auf Statistik ist, setzt jetzt die
+  // Sub-Ansicht (vorher blieb sie stehen, weil statistikInitial nach dem
+  // Mount eingefroren war).
   useEffect(() => {
     function onHashChange() {
       const result = tabFromHash();
-      if (result && result.tab !== tab) setTab(result.tab);
+      if (!result) return;
+      // tabRef statt Closure-tab → frischer Wert, keine Stale-Closure-Race;
+      // Listener wird nur einmal registriert (deps []).
+      if (result.tab !== tabRef.current) setTab(result.tab);
+      if (result.tab === "statistik" && result.statistikInitial) {
+        setStatistikSection(result.statistikInitial);
+      }
     }
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
-  }, [tab]);
+  }, []);
 
   // W.feedback-admin-tester-improvements (2026-05-28): globaler
   // Custom-Event-Listener fuer „+ Feedback"-Buttons im AdminFeedback-
@@ -998,7 +1030,8 @@ function MainLayout() {
             detailCubeFilter={analyseCubeFilter}
             setDetailCubeFilter={setAnalyseCubeFilter}
             onSwitchTab={setTab}
-            initialSection={statistikInitial}
+            section={statistikSection}
+            onSectionChange={setStatistikSection}
           />
         )}
         {tab === "konto" && (
