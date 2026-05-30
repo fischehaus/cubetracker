@@ -13,6 +13,7 @@ import {
 } from "../lib/api";
 import { ChallengeCard } from "./ChallengeCard";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle, Button, EmptyState } from "./ui";
 
 export function DailyChallengesPanel() {
   const { t } = useTranslation();
@@ -32,26 +33,26 @@ export function DailyChallengesPanel() {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-base text-gray-400">
+      <Card className="text-base text-gray-400">
         {t("dailyChallenges.loading")}
-      </div>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
+      <Card tone="danger" className="text-red-300 text-base">
         {t("dailyChallenges.errorPrefix")}
         {error.message}
-      </div>
+      </Card>
     );
   }
   if (!data) return null;
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold text-gray-100">
+          <CardTitle>
             {t("dailyChallenges.title")}{" "}
             <span className="text-base text-gray-400">
               {t("dailyChallenges.countSummary", {
@@ -59,28 +60,27 @@ export function DailyChallengesPanel() {
                 total: visible.length,
               })}
             </span>
-          </h2>
+          </CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("dailyChallenges.title")}</p>
             <p>{t("dailyChallenges.infoBody")}</p>
           </InfoButton>
         </div>
-        <button
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => regenerate.mutate()}
           disabled={regenerate.isPending}
-          className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700 disabled:opacity-50"
           title={t("dailyChallenges.regenerateButtonTitle")}
         >
           {regenerate.isPending
             ? t("dailyChallenges.regenerateBusy")
             : t("dailyChallenges.regenerateButton")}
-        </button>
+        </Button>
       </div>
 
       {visible.length === 0 ? (
-        <p className="text-base text-gray-400">
-          {t("dailyChallenges.emptyState")}
-        </p>
+        <EmptyState size="sm" title={t("dailyChallenges.emptyState")} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {visible.map((c) => (
@@ -94,6 +94,6 @@ export function DailyChallengesPanel() {
       )}
 
       <p className="mt-4 text-xs text-gray-500">{t("dailyChallenges.footer")}</p>
-    </div>
+    </Card>
   );
 }

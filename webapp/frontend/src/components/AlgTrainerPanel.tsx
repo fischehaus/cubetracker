@@ -28,6 +28,7 @@ import {
 import { formatSolveTime, formatTime, parseTimeInput } from "../lib/format";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle, Button } from "./ui";
 import type { Solve } from "../lib/types";
 import { CubeStateView } from "./CubeStateView";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
@@ -63,12 +64,10 @@ export function AlgTrainerPanel() {
   }
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold text-gray-100">
-            {t("algTrainer.title")}
-          </h2>
+          <CardTitle>{t("algTrainer.title")}</CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("algTrainer.title")}</p>
             <p>{t("algTrainer.infoBody")}</p>
@@ -165,7 +164,7 @@ export function AlgTrainerPanel() {
       </div>
 
       <p className="mt-4 text-xs text-gray-500">{t("algTrainer.footer")}</p>
-    </div>
+    </Card>
   );
 }
 
@@ -326,22 +325,24 @@ function DrillCard({
       )}
 
       <div className="mt-3 flex gap-2">
-        <button
+        <Button
+          variant="secondary"
           onClick={() => setScrambleSeed((s) => s + 1)}
-          className="flex-1 text-sm rounded border border-gray-700 px-3 py-2 text-gray-300 hover:bg-gray-800"
+          className="flex-1"
           title={t("drillCard.skipButtonTitle")}
         >
           {t("drillCard.skipButton")}
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="primary"
           onClick={save}
           disabled={create.isPending}
-          className="flex-1 text-sm rounded bg-purple-600 px-3 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
+          className="flex-1"
         >
           {create.isPending
             ? t("drillCard.saveBusy")
             : t("drillCard.saveButton")}
-        </button>
+        </Button>
       </div>
 
       {error && (

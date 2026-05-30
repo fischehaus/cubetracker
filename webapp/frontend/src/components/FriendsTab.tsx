@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { InfoButton } from "./InfoButton";
+import { Card, EmptyState } from "./ui";
 import {
   useAcceptFriend,
   useEmailLookup,
@@ -286,7 +287,7 @@ function SearchCard() {
   };
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4 space-y-3">
+    <Card padding="sm" className="space-y-3">
       <div className="flex items-center gap-2">
         <h3 className="text-lg font-medium text-purple-300">
           {t("friends.searchHeading")}
@@ -395,7 +396,7 @@ function SearchCard() {
           {sendReq.error?.message}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -521,7 +522,7 @@ function PendingOutgoingCard({ items }: { items: Friendship[] }) {
   const { t } = useTranslation();
   const remove = useRemoveFriendship();
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4 space-y-2">
+    <Card padding="sm" className="space-y-2">
       <h3 className="text-lg font-medium text-gray-300">
         {t("friends.outgoingHeading", { count: items.length })}
       </h3>
@@ -548,7 +549,7 @@ function PendingOutgoingCard({ items }: { items: Friendship[] }) {
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }
 
@@ -566,7 +567,7 @@ function FriendsListCard({
   const { t } = useTranslation();
   const remove = useRemoveFriendship();
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4 space-y-2">
+    <Card padding="sm" className="space-y-2">
       <h3 className="text-lg font-medium text-purple-300">
         {t("friends.listHeading", { count: items.length })}
       </h3>
@@ -574,7 +575,7 @@ function FriendsListCard({
         <p className="text-sm text-gray-400">{t("friends.listLoading")}</p>
       )}
       {!isLoading && items.length === 0 && (
-        <p className="text-sm text-gray-500">{t("friends.listEmpty")}</p>
+        <EmptyState size="sm" title={t("friends.listEmpty")} />
       )}
       <ul className="space-y-1.5">
         {items.map((fs) => (
@@ -618,6 +619,6 @@ function FriendsListCard({
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }

@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { COMMON_CUBE_TYPES, formatTime, getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle, EmptyState } from "./ui";
 import {
   useFriendsList,
   useLeaderboard,
@@ -90,12 +91,12 @@ export function LeaderboardTab() {
     <div className="space-y-4 max-w-5xl">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold text-gray-100">
+          <CardTitle>
             {t("leaderboard.title")}{" "}
             <span className="text-sm text-gray-500">
               {t("leaderboard.countSummary", { count: friendsCount })}
             </span>
-          </h2>
+          </CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("leaderboard.title")}</p>
             <p>{t("leaderboard.infoBody")}</p>
@@ -129,16 +130,16 @@ export function LeaderboardTab() {
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-300">
+        <Card tone="danger" padding="sm" className="text-sm text-red-300">
           {t("leaderboard.errorPrefix")}
           {error instanceof Error ? error.message : t("leaderboard.errorUnknown")}
-        </div>
+        </Card>
       )}
 
       {isLoading && (
-        <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+        <Card>
           <p className="text-gray-400">{t("leaderboard.loading")}</p>
-        </div>
+        </Card>
       )}
 
       {data && (
@@ -164,9 +165,9 @@ function LeaderboardTable({
   const { t } = useTranslation();
   if (rows.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-center text-sm text-gray-400">
-        {t("leaderboard.tableEmpty", { cube: cubeType })}
-      </div>
+      <Card>
+        <EmptyState title={t("leaderboard.tableEmpty", { cube: cubeType })} />
+      </Card>
     );
   }
 
@@ -175,7 +176,7 @@ function LeaderboardTable({
     // sind durch `hidden md:table-cell` nur 4 Spalten sichtbar, die
     // passen via w-full in jeden Screen. overflow-x-auto bleibt als
     // Fallback (z.B. extrem langer Display-Name).
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-2 sm:p-4 overflow-x-auto">
+    <Card padding="none" className="p-2 sm:p-4 overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           {/* Mobile-First: auf <md nur Rang/User/Best Single/Best AO5 —
@@ -205,7 +206,7 @@ function LeaderboardTable({
           ))}
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 }
 

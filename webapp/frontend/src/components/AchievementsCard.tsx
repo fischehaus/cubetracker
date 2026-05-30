@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useAchievements, useRecheckAchievements } from "../lib/api";
 import { formatDate } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle, Button } from "./ui";
 import type { AchievementItem } from "../lib/types";
 
 const CATEGORY_LABEL_KEYS: Record<AchievementItem["category"], string> = {
@@ -45,17 +46,17 @@ export function AchievementsCard() {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-base text-gray-400">
+      <Card className="text-base text-gray-400">
         {t("achievements.loading")}
-      </div>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
+      <Card tone="danger" className="text-red-300 text-base">
         {t("achievements.errorPrefix")}
         {error.message}
-      </div>
+      </Card>
     );
   }
   if (!data) return null;
@@ -64,10 +65,10 @@ export function AchievementsCard() {
   const totalCount = data.length;
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold text-gray-100">
+          <CardTitle>
             {t("achievements.title")}{" "}
             <span className="text-base text-gray-400">
               {t("achievements.countSummary", {
@@ -75,22 +76,23 @@ export function AchievementsCard() {
                 total: totalCount,
               })}
             </span>
-          </h2>
+          </CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("achievements.infoTitle")}</p>
             <p>{t("achievements.infoBody")}</p>
           </InfoButton>
         </div>
-        <button
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => recheck.mutate()}
           disabled={recheck.isPending}
-          className="text-sm rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700 disabled:opacity-50"
           title={t("achievements.recheckButtonTitle")}
         >
           {recheck.isPending
             ? t("achievements.recheckBusy")
             : t("achievements.recheckButton")}
-        </button>
+        </Button>
       </div>
 
       {recheck.data && recheck.data.newly_unlocked_count > 0 && (
@@ -127,7 +129,7 @@ export function AchievementsCard() {
       </div>
 
       <p className="mt-4 text-xs text-gray-500">{t("achievements.footer")}</p>
-    </div>
+    </Card>
   );
 }
 
