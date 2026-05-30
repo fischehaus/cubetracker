@@ -44,6 +44,21 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-readability-headings",
+        released=date(2026, 5, 30),
+        title="🔍 Dashboard-Section-Headings auf Skin lesbar",
+        highlights=[
+            "Nachzug zur Lesbarkeits-Welle: die 4 Section-Headings auf "
+            "dem Dashboard („HEUTE\", „DEINE PERFORMANCE\", „TRAINING\", "
+            "„WELT\") schwebten als reiner Text auf dem Skin-Hintergrund — "
+            "auf hellen Bereichen (Codex Vitruvian / Pergament, Pixel "
+            "Academy) waren sie quasi unsichtbar. Jetzt: kleine "
+            "halb-deckende Pille mit backdrop-blur drumherum (gleicher "
+            "Stil wie die Versions-Pille, nur kleiner). Bleibt dezent, "
+            "die Stats-Karten dominieren weiterhin.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-readability",
         released=date(2026, 5, 30),
         title="🔍 Lesbarkeit auf Skin-Hintergründen verbessert",

@@ -550,9 +550,14 @@ function DashboardSection({
 }) {
   return (
     <section aria-labelledby={id} className="space-y-3">
+      {/* W.skin-readability-headings (2026-05-30): inline-Pille mit
+          semi-deckendem bg + backdrop-blur, sodass das Heading auch auf
+          hellen Skin-Bereichen (z.B. Codex Vitruvian Pergament) stabil
+          lesbar ist. Pille bleibt dezent (text-xs, schmaler Pad), die
+          Karten unten dominieren weiterhin. */}
       <h2
         id={id}
-        className="text-xs font-semibold uppercase tracking-[0.15em] text-purple-300/80"
+        className="inline-block rounded-md bg-gray-900/55 backdrop-blur-sm px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-purple-200"
       >
         {title}
       </h2>
