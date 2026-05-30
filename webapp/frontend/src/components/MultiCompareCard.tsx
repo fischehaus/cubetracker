@@ -19,6 +19,7 @@ import {
 } from "../lib/api";
 import { formatTime } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle } from "./ui";
 
 type CompareMode = "cube" | "session";
 
@@ -41,12 +42,10 @@ export function MultiCompareCard({ sessionId }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold text-gray-100">
-            {t("multiCompare.title")}
-          </h2>
+          <CardTitle>{t("multiCompare.title")}</CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("multiCompare.title")}</p>
             <p>{t("multiCompare.infoBody")}</p>
@@ -96,7 +95,7 @@ export function MultiCompareCard({ sessionId }: Props) {
       <p className="mt-4 text-xs text-gray-500 leading-snug">
         {t("multiCompare.footerHint")}
       </p>
-    </div>
+    </Card>
   );
 }
 

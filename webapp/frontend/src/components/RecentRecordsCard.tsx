@@ -14,6 +14,7 @@ import {
 } from "../lib/api";
 import { formatTime } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { Card, EmptyState } from "./ui";
 
 interface Props {
   /** Klick auf einen Eintrag fuehrt zum Analyse-Tab mit gesetztem Cube-Filter. */
@@ -26,31 +27,31 @@ export function RecentRecordsCard({ onClickCube }: Props) {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-sm text-gray-400">
+      <Card className="text-sm text-gray-400">
         {t("recentPbs.loading")}
-      </div>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-sm text-red-300">
+      <Card tone="danger" className="text-sm text-red-300">
         {t("recentPbs.errorPrefix", { message: error.message })}
-      </div>
+      </Card>
     );
   }
   if (!data || data.events.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+      <Card>
         <h3 className="text-xl font-semibold text-gray-100 mb-2 flex items-center gap-2">
           {t("recentPbs.title")}
         </h3>
-        <p className="text-sm text-gray-400">{t("recentPbs.emptyText")}</p>
-      </div>
+        <EmptyState icon="🏆" title={t("recentPbs.emptyText")} />
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center gap-2 mb-3">
         <h3 className="text-xl font-semibold text-gray-100">
           {t("recentPbs.title")}
@@ -69,7 +70,7 @@ export function RecentRecordsCard({ onClickCube }: Props) {
           />
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }
 

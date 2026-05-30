@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useTemporalStats } from "../lib/api";
 import { formatTime } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { Card } from "./ui";
 
 interface Props {
   sessionId: number | null;
@@ -21,16 +22,16 @@ export function ActivityCard({ sessionId, slice }: Props) {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 text-gray-400 text-sm">
+      <Card className="text-gray-400 text-sm">
         {t("activity.loadingPrefix", { label: sliceLabel })}
-      </div>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-5 text-red-300 text-sm">
+      <Card tone="danger" className="text-red-300 text-sm">
         {t("activity.errorPrefix", { message: error.message })}
-      </div>
+      </Card>
     );
   }
   if (!data) return null;
@@ -45,7 +46,7 @@ export function ActivityCard({ sessionId, slice }: Props) {
   const restCount = cubeEntries.length - top.length;
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center gap-2 mb-2">
         <h3 className="text-sm uppercase tracking-wide text-gray-500">
           {sliceLabel}
@@ -107,6 +108,6 @@ export function ActivityCard({ sessionId, slice }: Props) {
           {t("activity.noActivity")}
         </p>
       )}
-    </div>
+    </Card>
   );
 }

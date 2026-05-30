@@ -11,13 +11,14 @@ import { useTranslation } from "react-i18next";
 import { useLatestNews, type NewsItem } from "../lib/api";
 import { getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { Card, EmptyState } from "./ui";
 
 export function NewsCard() {
   const { t, i18n } = useTranslation();
   const { data, isLoading, error } = useLatestNews(10);
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
+    <Card>
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <span aria-hidden="true" className="text-lg">
           📰
@@ -44,7 +45,7 @@ export function NewsCard() {
       )}
 
       {data && data.items.length === 0 && (
-        <p className="text-sm text-gray-500">{t("news.emptyText")}</p>
+        <EmptyState icon="📰" title={t("news.emptyText")} />
       )}
 
       {data && data.items.length > 0 && (
@@ -58,7 +59,7 @@ export function NewsCard() {
           ))}
         </ul>
       )}
-    </div>
+    </Card>
   );
 }
 

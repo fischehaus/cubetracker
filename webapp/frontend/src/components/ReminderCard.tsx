@@ -9,6 +9,7 @@
 import { useTranslation } from "react-i18next";
 import { useStatsByCube, type CubeStats } from "../lib/api";
 import { InfoButton } from "./InfoButton";
+import { Card } from "./ui";
 
 const REMINDER_DAYS = 7;
 const MAX_VISIBLE = 6; // bei vielen Reminder-Cubes nicht überlaufen lassen
@@ -47,7 +48,7 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
   if (neglected.length === 0) {
     if (emptyMode === "hide") return null;
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+      <Card>
         <div className="flex items-center gap-2 mb-2">
           <h3 className="text-sm uppercase tracking-wide text-gray-500">
             {t("reminders.title")}
@@ -60,7 +61,7 @@ export function ReminderCard({ sessionId, emptyMode = "hide" }: Props) {
         <div className="text-base text-gray-400">
           {t("reminders.allFresh", { days: REMINDER_DAYS })}
         </div>
-      </div>
+      </Card>
     );
   }
 

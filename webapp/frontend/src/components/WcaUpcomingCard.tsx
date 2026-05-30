@@ -14,6 +14,7 @@ import { AxiosError } from "axios";
 import { useUpcomingCompetitions, type WcaCompetition } from "../lib/api";
 import { getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { Card } from "./ui";
 
 // Aufsteigende Distanz-Toggles für "Distanz erweitern" — User kann mit
 // einem Klick die Suche vergrößern wenn die nächstgelegene Comp zu
@@ -45,7 +46,7 @@ export function WcaUpcomingCard() {
     httpStatus === 422 && /Postleitzahl|Land|country|PLZ/i.test(backendDetail);
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
+    <Card>
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <span aria-hidden="true" className="text-lg">
           🏆
@@ -156,7 +157,7 @@ export function WcaUpcomingCard() {
           </p>
         </>
       )}
-    </div>
+    </Card>
   );
 }
 

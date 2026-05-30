@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 import { cn } from "../../lib/cn";
 
 interface EmptyStateProps {
-  /** Optionales Emoji/Icon — dezent, groß, zentriert. */
+  /** Optionales Emoji/Icon — dezent, zentriert. */
   icon?: ReactNode;
   /** Kurze Titel-Zeile (was ist leer / was fehlt). */
   title: ReactNode;
@@ -19,6 +19,11 @@ interface EmptyStateProps {
   hint?: ReactNode;
   /** Optionale Handlungsaufforderung (z.B. ein <Button>). */
   action?: ReactNode;
+  /** Größe. "md" (Default) = Vollformat-Card mit großem Icon + viel Luft.
+   *  "sm" = kompakt für Mini-Kacheln (weniger py, kleineres Icon) —
+   *  sonst bläht der Leerzustand kleine Dashboard-Kacheln auf
+   *  (QA W.design-system 2026-05-30). */
+  size?: "sm" | "md";
   className?: string;
 }
 
@@ -27,17 +32,23 @@ export function EmptyState({
   title,
   hint,
   action,
+  size = "md",
   className,
 }: EmptyStateProps) {
+  const isSm = size === "sm";
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-2 py-8 text-center",
+        "flex flex-col items-center justify-center text-center",
+        isSm ? "gap-1 py-3" : "gap-2 py-8",
         className,
       )}
     >
       {icon && (
-        <div className="text-3xl opacity-60" aria-hidden="true">
+        <div
+          className={cn(isSm ? "text-xl" : "text-3xl", "opacity-60")}
+          aria-hidden="true"
+        >
           {icon}
         </div>
       )}

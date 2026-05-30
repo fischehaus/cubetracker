@@ -11,6 +11,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useAchievements } from "../lib/api";
 import { InfoButton } from "./InfoButton";
+import { Card, EmptyState } from "./ui";
 import type { AppTab } from "./TabBar";
 
 interface Props {
@@ -39,14 +40,14 @@ export function AchievementsMiniCard({ onSwitchTab }: Props) {
 
   if (isLoading || !summary) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5 text-base text-gray-500">
+      <Card className="text-base text-gray-500">
         {t("achievementsMini.loading")}
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
+    <Card>
       <div className="flex items-center justify-between mb-3 gap-2">
         <div className="flex items-center gap-2">
           <h3 className="text-base font-semibold text-gray-200">
@@ -65,9 +66,7 @@ export function AchievementsMiniCard({ onSwitchTab }: Props) {
       </div>
 
       {summary.recent.length === 0 ? (
-        <p className="text-sm text-gray-500">
-          {t("achievementsMini.emptyText")}
-        </p>
+        <EmptyState size="sm" icon="🏅" title={t("achievementsMini.emptyText")} />
       ) : (
         <ul className="space-y-1.5">
           {summary.recent.map((a) => (
@@ -85,6 +84,6 @@ export function AchievementsMiniCard({ onSwitchTab }: Props) {
       >
         {t("achievementsMini.viewAll")}
       </button>
-    </div>
+    </Card>
   );
 }
