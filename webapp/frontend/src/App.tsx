@@ -58,6 +58,10 @@ import { SolveList } from "./components/SolveList";
 import { CommunityTab, type CommunitySection } from "./components/CommunityTab";
 import { StatsCard } from "./components/StatsCard";
 import { TabBar, type AppTab } from "./components/TabBar";
+import {
+  ScrollableTabBar,
+  type ScrollableTabItem,
+} from "./components/ScrollableTabBar";
 import { TrainerTab } from "./components/TrainerTab";
 import { TrendsChart } from "./components/LazyCharts";
 import { PbProgressionCard } from "./components/LazyCharts";
@@ -74,35 +78,52 @@ const queryClient = new QueryClient({
 
 const TAB_STORAGE_KEY = "cubetracker.tab";
 
+// Sub-Ansichten im Statistik-Tab (W.ia-statistik-merge, 2026-05-30):
+// Übersicht = frühere Dashboard-Inhalte (Default), Detail = frühere Analyse
+// (Charts + Solveliste). Drill-down von Übersicht → Detail.
+export type StatistikSection = "overview" | "detail";
+
 // Hash-Routing für Tabs (Phase L-3c). URL-Hash <-> AppTab.
 // Vorteile: Browser-Back, Bookmarks, Reload landet auf gleicher Sicht.
 // Bewusst einfach via window.location.hash — keine Router-Lib nötig.
 const VALID_TABS: AppTab[] = [
   "timer",
-  "dashboard",
-  "analyse",
+  "statistik",
   "verwaltung",
   "trainer",
   "community",
 ];
 
-// Backward-Compat: alte URL-Hashes (#friends, #leaderboard) mappen auf
-// den neuen Community-Tab + setzen den passenden Sub-Tab. Damit landen
-// User mit Bookmarks/History-Einträgen weiter sinnvoll.
-const LEGACY_HASH_MAP: Record<string, { tab: AppTab; sub?: CommunitySection }> = {
-  friends: { tab: "community", sub: "friends" },
-  leaderboard: { tab: "community", sub: "leaderboard" },
+// Backward-Compat: alte URL-Hashes mappen auf die neue Struktur + setzen
+// den passenden Sub-Tab. Damit landen User mit Bookmarks/History-Einträgen
+// weiter sinnvoll:
+//   #friends / #leaderboard  → Community-Tab + Sub-Tab
+//   #dashboard / #analyse    → Statistik-Tab (W.ia-statistik-merge):
+//                              dashboard → Übersicht, analyse → Detail
+const LEGACY_HASH_MAP: Record<
+  string,
+  { tab: AppTab; communitySub?: CommunitySection; statistikSub?: StatistikSection }
+> = {
+  friends: { tab: "community", communitySub: "friends" },
+  leaderboard: { tab: "community", communitySub: "leaderboard" },
+  dashboard: { tab: "statistik", statistikSub: "overview" },
+  analyse: { tab: "statistik", statistikSub: "detail" },
 };
 
 function tabFromHash(): {
   tab: AppTab;
   communityInitial?: CommunitySection;
+  statistikInitial?: StatistikSection;
 } | null {
   if (typeof window === "undefined") return null;
   const raw = window.location.hash.replace(/^#\/?/, "").trim();
   const legacy = LEGACY_HASH_MAP[raw];
   if (legacy) {
-    return { tab: legacy.tab, communityInitial: legacy.sub };
+    return {
+      tab: legacy.tab,
+      communityInitial: legacy.communitySub,
+      statistikInitial: legacy.statistikSub,
+    };
   }
   if ((VALID_TABS as string[]).includes(raw)) {
     return { tab: raw as AppTab };
@@ -620,23 +641,113 @@ function AnalyseTab({
 }
 
 // ============================================================
+// StatistikTab — vereint Dashboard (Übersicht) + Analyse (Detail)
+// ============================================================
+
+/**
+ * Statistik-Tab (W.ia-statistik-merge, 2026-05-30): führt die früheren
+ * Tabs Dashboard + Analyse unter einem Dach zusammen. Sub-Nav schaltet
+ * zwischen Übersicht (Tagesform + Stats, Default) und Detail (Charts +
+ * volle Solveliste). Drill-down: ein Klick auf einen Cube in der Übersicht
+ * springt direkt in die Detail-Ansicht mit gesetztem Cube-Filter (ersetzt
+ * den früheren Tab-Sprung Dashboard → Analyse).
+ *
+ * State bleibt bewusst in MainLayout (durchgereicht) — so überlebt der
+ * jeweilige Filter einen Tab-Wechsel; Übersicht- und Detail-Filter sind
+ * unabhängig. Der section-State (Übersicht/Detail) lebt lokal; Sub-Tab-
+ * URL-Routing kommt erst in W.ia-subtab-routing.
+ */
+function StatistikTab({
+  overviewSessionId,
+  setOverviewSessionId,
+  detailSessionId,
+  setDetailSessionId,
+  detailCubeFilter,
+  setDetailCubeFilter,
+  onSwitchTab,
+  initialSection,
+}: {
+  overviewSessionId: number | null;
+  setOverviewSessionId: (id: number | null) => void;
+  detailSessionId: number | null;
+  setDetailSessionId: (id: number | null) => void;
+  detailCubeFilter: string;
+  setDetailCubeFilter: (s: string) => void;
+  onSwitchTab: (tab: AppTab) => void;
+  initialSection?: StatistikSection;
+}) {
+  const { t } = useTranslation();
+  const [section, setSection] = useState<StatistikSection>(
+    initialSection ?? "overview",
+  );
+
+  const subTabs: ScrollableTabItem[] = [
+    { id: "overview", label: t("statistikTab.subTabOverview"), icon: "📊" },
+    { id: "detail", label: t("statistikTab.subTabDetail"), icon: "📈" },
+  ];
+
+  // Drill-down aus der Übersicht: Klick auf einen Cube → Detail mit Filter.
+  const drillToDetail = (cube: string) => {
+    setDetailCubeFilter(cube);
+    setSection("detail");
+  };
+
+  return (
+    <div className="space-y-4">
+      <ScrollableTabBar
+        tabs={subTabs}
+        current={section}
+        onChange={(id) => setSection(id as StatistikSection)}
+        ariaLabel={t("statistikTab.ariaLabel")}
+        size="md"
+      />
+
+      {section === "overview" ? (
+        <DashboardTab
+          sessionId={overviewSessionId}
+          setSessionId={setOverviewSessionId}
+          onSwitchTab={onSwitchTab}
+          onSwitchToAnalyseCube={drillToDetail}
+        />
+      ) : (
+        <AnalyseTab
+          sessionId={detailSessionId}
+          setSessionId={setDetailSessionId}
+          cubeFilter={detailCubeFilter}
+          setCubeFilter={setDetailCubeFilter}
+        />
+      )}
+    </div>
+  );
+}
+
+// ============================================================
 // MainLayout
 // ============================================================
 
 function loadInitialTab(): {
   tab: AppTab;
   communityInitial?: CommunitySection;
+  statistikInitial?: StatistikSection;
 } {
-  if (typeof window === "undefined") return { tab: "dashboard" };
-  // Prio 1: URL-Hash (z.B. #analyse) — Bookmark/Reload-Wahl
+  if (typeof window === "undefined") return { tab: "statistik" };
+  // Prio 1: URL-Hash (z.B. #statistik) — Bookmark/Reload-Wahl
   const fromHash = tabFromHash();
   if (fromHash) return fromHash;
   // Prio 2: localStorage (zuletzt genutzt)
   const stored = window.localStorage.getItem(TAB_STORAGE_KEY);
+  // localStorage-Migration (W.ia-statistik-merge): Bestands-User haben evtl.
+  // noch die alten Tab-IDs gespeichert. Sauber auf den Statistik-Tab umleiten,
+  // sonst landen sie auf einem toten Tab. dashboard → Übersicht, analyse →
+  // Detail. Selbstheilend: beim nächsten Tab-Wechsel wird "statistik" persistiert.
+  if (stored === "dashboard")
+    return { tab: "statistik", statistikInitial: "overview" };
+  if (stored === "analyse")
+    return { tab: "statistik", statistikInitial: "detail" };
   if ((VALID_TABS as string[]).includes(stored ?? "")) {
     return { tab: stored as AppTab };
   }
-  return { tab: "dashboard" };
+  return { tab: "statistik" };
 }
 
 function MainLayout() {
@@ -649,7 +760,10 @@ function MainLayout() {
   );
   const [analyseSessionId, setAnalyseSessionId] = useState<number | null>(null);
   const [analyseCubeFilter, setAnalyseCubeFilter] = useState<string>("");
-  const initial = loadInitialTab();
+  // loadInitialTab einmalig beim Mount (lazy useState-Init) — liest
+  // localStorage + URL-Hash. Bewusst NICHT im Render-Body aufrufen, sonst
+  // läuft der I/O bei jedem Re-Render von MainLayout (QA W.ia-statistik-merge).
+  const [initial] = useState(loadInitialTab);
   const [tab, setTab] = useState<AppTab>(initial.tab);
   // Modals für Patch-Notes + Features-Liste — State lebt hier zentral,
   // weil mehrere Trigger drauf zugreifen (Version-Badge, UserMenu, Footer).
@@ -662,6 +776,12 @@ function MainLayout() {
   // Wechsel innerhalb des CommunityTabs leben in dessen lokalem state.
   const [communityInitial] = useState<CommunitySection | undefined>(
     initial.communityInitial,
+  );
+  // Initial-Sub-Tab im Statistik-Tab — nur beim ersten Mount aus Hash bzw.
+  // localStorage-Migration (legacy #analyse / "analyse" → Detail). Spätere
+  // Wechsel zwischen Übersicht/Detail leben lokal im StatistikTab.
+  const [statistikInitial] = useState<StatistikSection | undefined>(
+    initial.statistikInitial,
   );
 
   // Tab-Wahl persistieren — localStorage + URL-Hash, damit
@@ -681,6 +801,12 @@ function MainLayout() {
   }, [tab]);
 
   // Browser-Back/Forward: hash-änderung von aussen reagieren.
+  // BEKANNTE GRENZE (QA W.ia-statistik-merge): reagiert nur auf den TOP-
+  // Tab, nicht auf Sub-Tab-Sprünge bei gleichem Tab. Tippt ein User manuell
+  // #analyse während er schon auf dem Statistik-Tab ist, bleibt die Sub-
+  // Ansicht (Übersicht/Detail) stehen — der statistikInitial-Wert ist nach
+  // dem Mount eingefroren. Beim Seiten-Load (Bookmark) ist alles korrekt.
+  // Sauberer Fix kommt mit W.ia-subtab-routing (Sub-Tab in den URL-Hash).
   useEffect(() => {
     function onHashChange() {
       const result = tabFromHash();
@@ -728,9 +854,9 @@ function MainLayout() {
               h-16 (Phone) → h-28 (sm) → h-52 (md+, User-Wunsch 2.5x). */}
           <button
             type="button"
-            onClick={() => setTab("dashboard")}
+            onClick={() => setTab("statistik")}
             className="cubetracker-app-logo-button flex items-center group focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded-lg min-w-0"
-            aria-label="cubetracker — Speedcubing-Solve-Tracking — zum Dashboard"
+            aria-label="cubetracker — Speedcubing-Solve-Tracking — zur Statistik"
           >
             <h1 className="sr-only">cubetracker — Speedcubing-Solve-Tracking</h1>
             <img
@@ -797,23 +923,16 @@ function MainLayout() {
             setTimerCubeType={setTimerCubeType}
           />
         )}
-        {tab === "dashboard" && (
-          <DashboardTab
-            sessionId={dashboardSessionId}
-            setSessionId={setDashboardSessionId}
+        {tab === "statistik" && (
+          <StatistikTab
+            overviewSessionId={dashboardSessionId}
+            setOverviewSessionId={setDashboardSessionId}
+            detailSessionId={analyseSessionId}
+            setDetailSessionId={setAnalyseSessionId}
+            detailCubeFilter={analyseCubeFilter}
+            setDetailCubeFilter={setAnalyseCubeFilter}
             onSwitchTab={setTab}
-            onSwitchToAnalyseCube={(cube) => {
-              setAnalyseCubeFilter(cube);
-              setTab("analyse");
-            }}
-          />
-        )}
-        {tab === "analyse" && (
-          <AnalyseTab
-            sessionId={analyseSessionId}
-            setSessionId={setAnalyseSessionId}
-            cubeFilter={analyseCubeFilter}
-            setCubeFilter={setAnalyseCubeFilter}
+            initialSection={statistikInitial}
           />
         )}
         {tab === "verwaltung" && <VerwaltungTab />}

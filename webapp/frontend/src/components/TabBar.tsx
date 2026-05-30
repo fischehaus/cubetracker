@@ -1,7 +1,8 @@
-// TabBar: Top-Level-Navigation zwischen den 6 Haupt-Modi der App.
+// TabBar: Top-Level-Navigation zwischen den 5 Haupt-Modi der App.
 // - TIMER:      Solving-Modus, Eingabe groß + zentriert
-// - DASHBOARD:  Live-Übersicht, Tagesform + Reminders
-// - ANALYSE:    Deep-Dive, Charts + volle Solveliste (NUR Auswertung)
+// - STATISTIK:  Übersicht (Tagesform + Stats) + Detail (Charts + Solveliste).
+//               Vereint das frühere Dashboard + Analyse (W.ia-statistik-merge,
+//               2026-05-30) — Übersicht ist Default, Detail per Sub-Nav.
 // - VERWALTUNG: Sessions, Hardware, Import, Outlier-Pflege (Daten-Pflege)
 // - TRAINER:    Personal Trainer — Erfolge + Daily Challenges
 // - COMMUNITY:  Freunde + Bestenliste
@@ -14,8 +15,7 @@ import { ScrollableTabBar } from "./ScrollableTabBar";
 
 export type AppTab =
   | "timer"
-  | "dashboard"
-  | "analyse"
+  | "statistik"
   | "verwaltung"
   | "trainer"
   | "community";
@@ -31,8 +31,7 @@ interface TabDef {
 // werden zur Render-Zeit via t() lokalisiert (siehe useLocalizedTabs).
 const TAB_ICONS: Record<AppTab, string> = {
   timer: "⏱",
-  dashboard: "📊",
-  analyse: "📈",
+  statistik: "📊",
   verwaltung: "⚙",
   trainer: "🏆",
   community: "🤝",
@@ -40,8 +39,7 @@ const TAB_ICONS: Record<AppTab, string> = {
 
 const TAB_ORDER: AppTab[] = [
   "timer",
-  "dashboard",
-  "analyse",
+  "statistik",
   "verwaltung",
   "trainer",
   "community",

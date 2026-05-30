@@ -12,19 +12,22 @@
     "languageEn": "Englisch"
   },
   "tabs": {
-    "dashboard": "Dashboard",
+    "statistik": "Statistik",
     "timer": "Timer",
-    "analyse": "Analyse",
     "trainer": "Trainer",
     "community": "Community",
     "verwaltung": "Verwaltung",
-    "dashboardDesc": "Tagesform + Stats im Blick",
+    "statistikDesc": "Übersicht + Charts + Solveliste",
     "timerDesc": "Solves eintragen",
-    "analyseDesc": "Charts + Solveliste",
     "verwaltungDesc": "Sessions, Hardware, Import, Outliers",
     "trainerDesc": "Erfolge + Daily Challenges",
     "communityDesc": "Freunde + Bestenliste",
     "mainNavAria": "Hauptnavigation"
+  },
+  "statistikTab": {
+    "subTabOverview": "Übersicht",
+    "subTabDetail": "Detail",
+    "ariaLabel": "Statistik-Ansicht: Übersicht oder Detail"
   },
   "timerTab": {
     "focusToggleOn": "🎯 Fokus aktivieren",

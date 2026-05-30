@@ -12,19 +12,22 @@
     "languageEn": "English"
   },
   "tabs": {
-    "dashboard": "Dashboard",
+    "statistik": "Statistics",
     "timer": "Timer",
-    "analyse": "Analysis",
     "trainer": "Trainer",
     "community": "Community",
     "verwaltung": "Settings",
-    "dashboardDesc": "Today's form + stats at a glance",
+    "statistikDesc": "Overview + charts + solve list",
     "timerDesc": "Record solves",
-    "analyseDesc": "Charts + solve list",
     "verwaltungDesc": "Sessions, hardware, import, outliers",
     "trainerDesc": "Achievements + daily challenges",
     "communityDesc": "Friends + leaderboard",
     "mainNavAria": "Main navigation"
+  },
+  "statistikTab": {
+    "subTabOverview": "Overview",
+    "subTabDetail": "Details",
+    "ariaLabel": "Statistics view: overview or details"
   },
   "timerTab": {
     "focusToggleOn": "🎯 Enable focus",

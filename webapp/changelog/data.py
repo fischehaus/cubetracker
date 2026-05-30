@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ia-statistik-merge",
+        released=date(2026, 5, 30),
+        title="📊 Dashboard + Analyse vereint: der neue Statistik-Tab",
+        highlights=[
+            "Die bisher getrennten Tabs Dashboard und Analyse sind jetzt "
+            "ein einziger Tab: Statistik. Oben schaltest du zwischen "
+            "Übersicht (deine Tagesform + Kern-Stats, wie das frühere "
+            "Dashboard) und Detail (alle Charts + die volle Solveliste, "
+            "wie die frühere Analyse) um. Die Haupt-Navigation wird damit "
+            "ruhiger — 5 statt 6 Tabs.",
+            "Direkter Sprung in die Tiefe: ein Klick auf einen Würfel in "
+            "der Übersicht (z.B. bei den letzten Rekorden) öffnet sofort "
+            "die Detail-Charts für genau diesen Würfel.",
+            "Nichts geht verloren: wer Dashboard oder Analyse als "
+            "Lesezeichen gespeichert oder zuletzt offen hatte, landet "
+            "automatisch im passenden Bereich des neuen Statistik-Tabs.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.design-system-foundation",
         released=date(2026, 5, 30),
         title="🧱 Design-System-Grundlage (UI-Primitive)",
