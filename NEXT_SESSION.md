@@ -24,6 +24,78 @@ Commits sind.
 
 ---
 
+## 🔄 LAUFEND 2026-05-30 (Tag) — Große UX-/Struktur-Überarbeitung (2 Workstreams)
+
+> **Wichtigste offene Arbeit.** Referenz-Dokumente (PFLICHT-Lesen bei
+> Wiederaufnahme): `docs/ux-audit-2026-05-30.md` (Ist-Zustand + P1–P10)
+> und `docs/ia-zielbild-2026-05-30.md` (flow-orientiertes Zielbild +
+> 6-Wellen-Umbauplan).
+
+**User-Entscheidungen (verbindlich):** Tab-Umbau „neu denken (flow-
+orientiert)"; visuell „ruhiger/aufgeräumter"; Haupt-Nav = 4 Flow-Tabs
+(Timer/Statistik/Training/Community); Konto & Daten → ins UserMenu;
+Admin → eigener Bereich; Dashboard+Analyse → ein Tab „Statistik"
+(Übersicht→Detail).
+
+### Workstream 1 — Design-System (risikoarm, additiv, läuft)
+
+Neue Primitive in `src/components/ui/` (Card, CardTitle/SectionLabel/
+SubTitle, Button [sm/md/lg], EmptyState [sm/md]) + `lib/cn.ts`.
+**WICHTIG:** `<Card>` behält `bg-gray-900/50` — der Glassmorphism-/Skin-
+CSS-Selektor (index.css) hängt exakt an diesem + den Akzent-Varianten
+(bg-emerald-500/10 etc.). Tab-weise Migration:
+- ✅ Foundation + StatsCard (`W.design-system-foundation`, getaggt)
+- ✅ Dashboard 9 Cards (`W.design-system-dashboard`)
+- ✅ Analyse 6 + Timer 5 (`W.design-system-analyse-timer`)
+- 🔄 Trainer + Community (6 Dateien, lief beim letzten Stand)
+- ⬜ **Verwaltung/Admin-Panels bewusst NICHT separat** — werden im
+  IA-Umbau (WS2) mit-migriert (sonst Doppelarbeit, da sie umziehen).
+- ⬜ Spätere Runden: h3-Titel-Vereinheitlichung (farbige Icon-Titel,
+  Design-Entscheidung nötig), Button-Spezialfälle (segmented controls/
+  Toggle-Buttons), FilterBar-Konsolidierung (P10).
+
+Migrations-Rezept (für Sub-Agenten bewährt): Container-div→`<Card>`
+(p-6→default, p-4→sm, p-5→md; Zusatzklassen via className NICHT
+verlieren), Card-Haupttitel→`<CardTitle>`, Error→`tone="danger"`,
+nackter Leer-`<p>`→`<EmptyState>` (kompakt: size="sm"). Toggle-/Akzent-
+Buttons + emerald/purple/blue-Akzent-Cards bewusst LASSEN. Danach
+zentral `npx tsc --noEmit` + qa-reviewer + commit als `chore(W.design-
+system-<tab>)`.
+
+### Workstream 2 — IA-Umbau (invasiv, NOCH NICHT begonnen)
+
+6-Wellen-Plan in `docs/ia-zielbild-2026-05-30.md`:
+1. `W.ia-statistik-merge` (Dashboard+Analyse → ein Tab, Übersicht→Detail)
+2. `W.ia-konto-usermenu` (Verwaltung-Inhalte → UserMenu)
+3. `W.ia-admin-bereich` (Admin+Tester eigener Bereich, eigene Sub-Nav)
+4. `W.ia-tabbar-flow` (TabBar auf 4 Flow-Tabs; localStorage-Tab-Migration!)
+5. `W.ia-subtab-routing` (Sub-Tabs in URL-Hash, bookmarkbar)
+6. `W.ia-nav-entdopplung` (Footer/UserMenu-Redundanz, LanguageSwitcher)
+
+**Risiko-Hinweise:** localStorage `cubetracker.tab` Bestands-User
+(alte IDs analyse/dashboard/verwaltung → umleiten); Custom-Events
+(`cubetracker:goto-verwaltung-section`) mitführen. Invasiv → frischer
+Kontext empfohlen, eine Welle nach der anderen, QA dazwischen.
+
+---
+
+## ✅ ERLEDIGT 2026-05-30 (Tag) — UX-Vorarbeiten + PWA + Skins
+
+Vor der großen Überarbeitung mehrere User-Wünsche + Foundation, alle
+getaggt+gepusht+live:
+- `W.skin-readability` + `W.skin-readability-headings` — Footer/Health-
+  Badge/Dashboard-Section-Headings auf Skin-Hintergründen lesbar.
+- `W.timer-card-tap` — Timer-Display selbst auf Phone tappbar (Bonus
+  neben TouchTimerPad). Neu: `lib/touch-timer.ts` (dispatchSpace).
+- `W.pwa-manifest` + `W.pwa-offline` — **PWA komplett**: Homescreen-
+  Install + Service-Worker (offline App-Shell, /api/* network-only,
+  Update-Toast via lib/toast.ts). `public/sw.js` + `lib/pwa-register.ts`.
+  Grenze: kein Offline-MIT-Daten (bräuchte React-Query-Persistenz).
+- `W.skin-maxcontent` — +2 Skins (Pixel Academy + Lofi Solver Max
+  Content). Jetzt 10 Themes. Convert-Script `.tmp/convert_v2_skins.py`.
+
+---
+
 ## ✅ ERLEDIGT 2026-05-30 (Nacht) — Tier B komplett + 4 Skin-Wellen
 
 Nach `/compact` weitergegangen — **5 weitere Wellen** committet+getaggt+
