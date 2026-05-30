@@ -24,7 +24,7 @@ Commits sind.
 
 ---
 
-## 🔄 LAUFEND 2026-05-30/31 — Große UX-/Struktur-Überarbeitung (IA-Umbau W1–W5 ✅, nur W6 offen)
+## ✅ ERLEDIGT 2026-05-31 — Große UX-/Struktur-Überarbeitung (IA-Umbau W1–W6 KOMPLETT)
 
 > **Wichtigste offene Arbeit.** Referenz-Dokumente (PFLICHT-Lesen bei
 > Wiederaufnahme): `docs/ux-audit-2026-05-30.md` (Ist-Zustand + P1–P10)
@@ -80,8 +80,10 @@ getaggt + live + QA-geprüft:
    bookmarkbar (`#statistik/detail`) + Browser-Back via pushState.
    **⚠️ OFFEN (User-Wunsch): Variante A — Voll-Sub-Tab-Routing für ALLE 5
    Sub-Systeme (Konto/Admin/Community/Trainer auch) — nochmal anbieten/abwägen.**
-6. ⬜ `W.ia-nav-entdopplung` — Footer/UserMenu-Redundanz auflösen,
-   LanguageSwitcher vereinheitlichen. **Letzte Welle, klein.**
+6. ✅ `W.ia-nav-entdopplung` — Footer/UserMenu-Redundanz aufgelöst
+   (Features/Roadmap/Feedback nur noch im UserMenu = kanonischer Hub),
+   doppelter Header-LanguageSwitcher entfernt, verwaiste i18n-Keys weg.
+   **→ IA-UMBAU KOMPLETT. Alle Wellen getaggt + live verifiziert.**
 
 **Doku nachgezogen:** `docs/permissions-matrix.md` (Abschnitt 1+4) auf die
 neue Nav (4 Flow-Tabs + UserMenu-Bereiche) — Daten-Sichtbarkeit unverändert.
@@ -92,6 +94,19 @@ Button-Spezialfälle, FilterBar-Konsolidierung (P10) — nice-to-have, offen.
 **Workflow-Neuerung 2026-05-31:** ntfy-Push bei Fragen an den User ist
 jetzt verbindlich (CLAUDE.md) — vor dem Turn-Ende `.tmp/last-ntfy-message.txt`
 schreiben, der `stop-ntfy-notify.sh`-Hook pusht sie ans Topic `jjY2OjY`.
+
+### 🔜 Offen für nächste Session(en)
+
+1. **Variante A — Voll-Sub-Tab-Routing** (User-Wunsch, zuerst nochmal
+   abwägen): alle 5 Sub-Systeme (Konto/Admin/Community/Trainer auch)
+   bookmarkbar machen. Aufwand: 4 Komponenten → controlled + zentrale
+   Hash-Sync in MainLayout. Realnutzen gering — deshalb in W5 bewusst
+   schlank (nur Statistik). StatistikTab ist die Blaupause.
+2. **Workstream-1-Reste** (Design-System, nice-to-have): h3-Titel-
+   Vereinheitlichung (farbige Icon-Titel), Button-Spezialfälle (segmented
+   controls / Toggles), FilterBar-Konsolidierung (Audit-P10).
+3. **Phase 6** (~2026-06-05): Render-Abbau, DNS apex→Hetzner,
+   `feature/W-api-prefix` → `main`, GitHub-Default → main.
 
 ---
 
