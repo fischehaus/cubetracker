@@ -24,7 +24,7 @@ Commits sind.
 
 ---
 
-## 🔄 LAUFEND 2026-05-30 (Tag) — Große UX-/Struktur-Überarbeitung (2 Workstreams)
+## 🔄 LAUFEND 2026-05-30/31 — Große UX-/Struktur-Überarbeitung (IA-Umbau W1–W5 ✅, nur W6 offen)
 
 > **Wichtigste offene Arbeit.** Referenz-Dokumente (PFLICHT-Lesen bei
 > Wiederaufnahme): `docs/ux-audit-2026-05-30.md` (Ist-Zustand + P1–P10)
@@ -64,20 +64,34 @@ Buttons + emerald/purple/blue-Akzent-Cards bewusst LASSEN. Danach
 zentral `npx tsc --noEmit` + qa-reviewer + commit als `chore(W.design-
 system-<tab>)`.
 
-### Workstream 2 — IA-Umbau (invasiv, NOCH NICHT begonnen)
+### Workstream 2 — IA-Umbau (FAST DURCH — Stand 2026-05-31)
 
-6-Wellen-Plan in `docs/ia-zielbild-2026-05-30.md`:
-1. `W.ia-statistik-merge` (Dashboard+Analyse → ein Tab, Übersicht→Detail)
-2. `W.ia-konto-usermenu` (Verwaltung-Inhalte → UserMenu)
-3. `W.ia-admin-bereich` (Admin+Tester eigener Bereich, eigene Sub-Nav)
-4. `W.ia-tabbar-flow` (TabBar auf 4 Flow-Tabs; localStorage-Tab-Migration!)
-5. `W.ia-subtab-routing` (Sub-Tabs in URL-Hash, bookmarkbar)
-6. `W.ia-nav-entdopplung` (Footer/UserMenu-Redundanz, LanguageSwitcher)
+6-Wellen-Plan in `docs/ia-zielbild-2026-05-30.md`. Jede Welle einzeln
+getaggt + live + QA-geprüft:
+1. ✅ `W.ia-statistik-merge` — Dashboard+Analyse → ein Tab „Statistik"
+   (Übersicht→Detail, controlled section).
+2. ✅ `W.ia-konto-usermenu` — Verwaltung-Base-Inhalte → UserMenu „Konto &
+   Daten" (KontoDatenView, controlled). User-Entscheidung „sofort aufräumen".
+3. ✅ `W.ia-admin-bereich` — Admin+Tester eigener UserMenu-Bereich (Sub-Nav),
+   `VerwaltungTab.tsx` GELÖSCHT. Damit TabBar für ALLE 4 Flow-Tabs.
+4. ✅ **`W.ia-tabbar-flow` ENTFÄLLT** — durch W2+W3 miterledigt (4 Flow-Tabs
+   für alle + localStorage/Hash-Migration analyse/dashboard/verwaltung).
+5. ✅ `W.ia-subtab-routing` — SCHLANK (User-Wahl B): nur Statistik-Detail
+   bookmarkbar (`#statistik/detail`) + Browser-Back via pushState.
+   **⚠️ OFFEN (User-Wunsch): Variante A — Voll-Sub-Tab-Routing für ALLE 5
+   Sub-Systeme (Konto/Admin/Community/Trainer auch) — nochmal anbieten/abwägen.**
+6. ⬜ `W.ia-nav-entdopplung` — Footer/UserMenu-Redundanz auflösen,
+   LanguageSwitcher vereinheitlichen. **Letzte Welle, klein.**
 
-**Risiko-Hinweise:** localStorage `cubetracker.tab` Bestands-User
-(alte IDs analyse/dashboard/verwaltung → umleiten); Custom-Events
-(`cubetracker:goto-verwaltung-section`) mitführen. Invasiv → frischer
-Kontext empfohlen, eine Welle nach der anderen, QA dazwischen.
+**Doku nachgezogen:** `docs/permissions-matrix.md` (Abschnitt 1+4) auf die
+neue Nav (4 Flow-Tabs + UserMenu-Bereiche) — Daten-Sichtbarkeit unverändert.
+
+**Reste aus Workstream 1 (Design-System):** h3-Titel-Vereinheitlichung,
+Button-Spezialfälle, FilterBar-Konsolidierung (P10) — nice-to-have, offen.
+
+**Workflow-Neuerung 2026-05-31:** ntfy-Push bei Fragen an den User ist
+jetzt verbindlich (CLAUDE.md) — vor dem Turn-Ende `.tmp/last-ntfy-message.txt`
+schreiben, der `stop-ntfy-notify.sh`-Hook pusht sie ans Topic `jjY2OjY`.
 
 ---
 
