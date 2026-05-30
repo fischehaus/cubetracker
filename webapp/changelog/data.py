@@ -44,6 +44,23 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-card-tap",
+        released=date(2026, 5, 30),
+        title="📱 Timer-Display auf Phone tappbar",
+        highlights=[
+            "Auf Touch-Devices ist jetzt das **Timer-Display selbst** "
+            "tappbar zum Starten/Stoppen — statt nur den separaten "
+            "Tap-Pad-Knopf darunter. Das große Zeit-Feld ist ein "
+            "natürliches Touch-Target und der Workflow wird flüssiger.",
+            "Beide Tap-Targets bleiben parallel verfügbar: der "
+            "dedizierte Knopf unter dem Timer und das Display selbst. "
+            "Wer das eine bevorzugt, kann es weiter so nutzen; das "
+            "andere ist ein Bonus-Hotspot. Identisches Pointer-Capture-"
+            "Verhalten wie der Knopf (Finger-vom-Rand-rutschen verliert "
+            "kein keyup → kein in „ready\"-stecken-bleiben).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-readability-headings",
         released=date(2026, 5, 30),
         title="🔍 Dashboard-Section-Headings auf Skin lesbar",

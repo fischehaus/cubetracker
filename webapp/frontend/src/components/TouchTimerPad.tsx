@@ -17,16 +17,7 @@
 
 import { useTranslation } from "react-i18next";
 import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
-
-function dispatchSpace(type: "keydown" | "keyup") {
-  // bubbles=true egal weil wir auf window dispatchen, aber expliziter.
-  const ev = new KeyboardEvent(type, {
-    code: "Space",
-    key: " ",
-    bubbles: true,
-  });
-  window.dispatchEvent(ev);
-}
+import { dispatchSpace } from "../lib/touch-timer";
 
 export function TouchTimerPad() {
   const { t } = useTranslation();

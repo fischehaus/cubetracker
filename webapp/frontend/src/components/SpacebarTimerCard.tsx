@@ -24,6 +24,8 @@ import {
   type TimerPenalty,
   type TimerState,
 } from "../hooks/useSpacebarTimer";
+import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
+import { dispatchSpace } from "../lib/touch-timer";
 
 interface Props {
   enabled: boolean;
@@ -68,6 +70,43 @@ export function SpacebarTimerCard({
     settings,
     onComplete: onSave,
   });
+  const isTouchDevice = useIsTouchDevice();
+  // W.timer-card-tap (2026-05-30): User-Wunsch — auf Phone soll das
+  // Timer-Display selbst tappbar sein (statt nur der separate
+  // TouchTimerPad-Button darunter). Pattern identisch zum Pad: Pointer-
+  // Capture verhindert "lost pointerup" wenn der Finger über den Rand
+  // rutscht. Beide Tap-Targets parallel — User wählt was natürlicher
+  // ist (Finger auf riesigem Timer-Display vs. dedizierter Knopf).
+  const tapTimer = isTouchDevice && enabled;
+  const tapProps: React.HTMLAttributes<HTMLDivElement> = tapTimer
+    ? {
+        onPointerDown: (e) => {
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch {
+            /* setPointerCapture kann in seltenen Browser-Konstellationen werfen */
+          }
+          dispatchSpace("keydown");
+        },
+        onPointerUp: (e) => {
+          try {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+          } catch {
+            /* s.o. */
+          }
+          dispatchSpace("keyup");
+        },
+        onPointerCancel: () => {
+          // Touch unterbrochen (Browser-Geste, Anruf, Tab-Switch) → keyup
+          // sicher feuern, damit der Hook nicht in ready/holding stecken bleibt.
+          dispatchSpace("keyup");
+        },
+        onContextMenu: (e) => e.preventDefault(),
+        role: "button",
+        tabIndex: 0,
+        "aria-label": t("touchTimer.aria"),
+      }
+    : {};
 
   // Reset wenn Parent den seed bumpt (z.B. nach erfolgreichem Save)
   useEffect(() => {
@@ -80,7 +119,10 @@ export function SpacebarTimerCard({
     : 1;
 
   return (
-    <div className={cardClass(timer.state)}>
+    <div
+      className={`${cardClass(timer.state)}${tapTimer ? " cursor-pointer select-none touch-none" : ""}`}
+      {...tapProps}
+    >
       {/* Top: state-Hint + ggf. phase indicator */}
       <div className="flex items-center justify-between mb-2 gap-2 text-sm">
         <div className={hintClass(timer.state)}>
