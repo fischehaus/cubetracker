@@ -168,6 +168,17 @@ proaktiv auf, bevor du dich verabschiedest.
 unpushed Commits. Greift als Backup falls der User vergisst `/abschluss`
 aufzurufen.
 
+**ntfy-Push bei Fragen (User-Wunsch 2026-05-31, verbindlich):** Der
+`stop-ntfy-notify.sh`-Hook pingt bei JEDEM Turn-Ende das Topic `jjY2OjY`
+(mechanischer git-Fallback, wenn keine Override-Datei da ist). **Wenn du
+dem User eine Frage stellst oder auf seine Entscheidung/Rückkehr wartest:**
+schreib VOR dem Turn-Ende eine aussagekräftige „du bist dran"-Nachricht
+nach `.tmp/last-ntfy-message.txt` (optional Title in
+`.tmp/last-ntfy-title.txt`) — der Hook nutzt sie als Push-Body (Single-Use,
+danach gelöscht). So weiß der User **wann + wofür** er zurückkommen soll.
+Gilt auch nach Kompaktierung/Modell-Wechsel — diese Zeile ist die
+Erinnerung, die die Gewohnheit überlebt.
+
 **Roadmap-Abruf (`/roadmap` + Session-Start):** die Live-Roadmap (inkl.
 interner Items) wird via `.claude/hooks/roadmap-fetch.py` geholt. Zwei
 Auth-Pfade:
