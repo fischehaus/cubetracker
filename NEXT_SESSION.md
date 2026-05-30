@@ -47,7 +47,9 @@ CSS-Selektor (index.css) hängt exakt an diesem + den Akzent-Varianten
 - ✅ Foundation + StatsCard (`W.design-system-foundation`, getaggt)
 - ✅ Dashboard 9 Cards (`W.design-system-dashboard`)
 - ✅ Analyse 6 + Timer 5 (`W.design-system-analyse-timer`)
-- 🔄 Trainer + Community (6 Dateien, lief beim letzten Stand)
+- ✅ Trainer + Community 5 (`W.design-system-trainer-community`,
+  commit `f61dfde`) — **damit alle 4 Flow-Tabs design-system-konsistent.**
+  TrainerTab selbst hat keine Cards (nur hand-gerollte Sub-Tab-nav, P8).
 - ⬜ **Verwaltung/Admin-Panels bewusst NICHT separat** — werden im
   IA-Umbau (WS2) mit-migriert (sonst Doppelarbeit, da sie umziehen).
 - ⬜ Spätere Runden: h3-Titel-Vereinheitlichung (farbige Icon-Titel,
