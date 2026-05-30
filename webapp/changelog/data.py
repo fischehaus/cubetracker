@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ia-admin-bereich",
+        released=date(2026, 5, 31),
+        title="🛡 Admin & Tester: eigener Bereich im Menü statt Verwaltungs-Tab",
+        highlights=[
+            "Auch für Admin und Tester ist der Verwaltungs-Tab aus der "
+            "oberen Leiste verschwunden — ihre Werkzeuge liegen jetzt im "
+            "Menü oben rechts (Admin bzw. Tester). Damit hat jede Rolle "
+            "dieselbe schlanke 4-Tab-Leiste: Timer, Statistik, Training, "
+            "Community.",
+            "Der Admin-Bereich hat jetzt eine eigene Unter-Navigation "
+            "(Statistiken, Feedback, Live-Tests, Roadmap, Nutzer, "
+            "Ankündigung) statt sechs langer Panels untereinander — kein "
+            "endloses Scrollen mehr.",
+            "Bestehende Lesezeichen und die zuletzt geöffnete Ansicht "
+            "werden automatisch in den passenden neuen Bereich umgeleitet.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ia-konto-usermenu",
         released=date(2026, 5, 31),
         title="👤 Konto & Daten wandern ins Menü — schlankere Navigation",

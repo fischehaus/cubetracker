@@ -12,8 +12,11 @@ interface Props {
   email: string;
   displayName: string | null;
   isAdmin: boolean;
+  isTester: boolean;
   onOpenKonto: () => void;
   onOpenSettings: () => void;
+  onOpenAdmin: () => void;
+  onOpenTester: () => void;
   onOpenPatchNotes: () => void;
   onOpenRoadmap: () => void;
   onOpenFeatures: () => void;
@@ -25,8 +28,11 @@ export function UserMenu({
   email,
   displayName,
   isAdmin,
+  isTester,
   onOpenKonto,
   onOpenSettings,
+  onOpenAdmin,
+  onOpenTester,
   onOpenPatchNotes,
   onOpenRoadmap,
   onOpenFeatures,
@@ -122,6 +128,24 @@ export function UserMenu({
           <MenuItem onClick={() => run(onOpenSettings)} icon="⚙">
             {t("userMenu.settings")}
           </MenuItem>
+
+          {/* Rollen-Bereiche (W.ia-admin-bereich) — nur sichtbar für die
+              jeweilige Rolle. Admin > Tester: ein Admin sieht den Admin-
+              Eintrag (der die Tester-Werkzeuge mitenthält), keinen Tester-
+              Eintrag zusätzlich. */}
+          {(isAdmin || isTester) && (
+            <div className="border-t border-gray-700" />
+          )}
+          {isAdmin && (
+            <MenuItem onClick={() => run(onOpenAdmin)} icon="🛡">
+              {t("userMenu.admin")}
+            </MenuItem>
+          )}
+          {isTester && !isAdmin && (
+            <MenuItem onClick={() => run(onOpenTester)} icon="🧪">
+              {t("userMenu.tester")}
+            </MenuItem>
+          )}
           <MenuItem onClick={() => run(onOpenPatchNotes)} icon="📋">
             {t("userMenu.patchNotes")}
           </MenuItem>

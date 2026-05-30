@@ -25,12 +25,12 @@ export interface UserRead {
   email_verified: boolean;
   display_name: string | null;
   created_at: string;
-  /** Computed from ADMIN_EMAILS-Env-Var im Backend. Steuert ob die
-   *  Admin-Card im VerwaltungTab sichtbar ist. */
+  /** Computed from ADMIN_EMAILS-Env-Var im Backend. Steuert ob der
+   *  Admin-Bereich im UserMenu sichtbar ist (W.ia-admin-bereich). */
   is_admin: boolean;
   /** Phase W.tester-role-db: Tester-Rolle mit Zugriff auf Live-Tests
-   *  + Roadmap-Pflege. Wenn is_tester && !is_admin: Frontend zeigt
-   *  einen Tester-Tab statt Admin-Tab in der VerwaltungTab. */
+   *  + Roadmap-Pflege. Wenn is_tester && !is_admin: Frontend zeigt den
+   *  Tester-Bereich im UserMenu (W.ia-admin-bereich). */
   is_tester: boolean;
   /** Phase W.9: Opt-In für User-Suche per display_name. */
   is_discoverable: boolean;

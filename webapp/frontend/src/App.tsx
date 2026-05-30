@@ -65,7 +65,8 @@ import {
 import { TrainerTab } from "./components/TrainerTab";
 import { TrendsChart } from "./components/LazyCharts";
 import { PbProgressionCard } from "./components/LazyCharts";
-import { VerwaltungTab } from "./components/VerwaltungTab";
+import { AdminPanel } from "./components/AdminPanel";
+import { TesterPanel } from "./components/TesterPanel";
 import {
   KontoDatenView,
   type KontoSection,
@@ -93,10 +94,17 @@ export type StatistikSection = "overview" | "detail";
 const VALID_TABS: AppTab[] = [
   "timer",
   "statistik",
-  "verwaltung",
   "trainer",
   "community",
+  // Pseudo-Tabs (über UserMenu): müssen gültige Hash-/localStorage-Werte
+  // sein, damit Bookmarks (#admin) + Reload funktionieren. Der Rollen-Guard
+  // in MainLayout leitet unberechtigte Zugriffe um.
   "konto",
+  "admin",
+  "tester",
+  // verwaltung: toter Migrations-Durchgang (alter Bookmark/localStorage) —
+  // der Guard leitet sofort auf admin/tester/konto um.
+  "verwaltung",
 ];
 
 // Backward-Compat: alte URL-Hashes mappen auf die neue Struktur + setzen
@@ -793,10 +801,9 @@ function MainLayout() {
   // FeedbackUnreadToaster, OnboardingBanner) über den globalen
   // goto-konto-section-Listener sicher die richtige Sektion setzen.
   const [kontoSection, setKontoSection] = useState<KontoSection>("sessions");
-  // Auth früh holen — isStaff steuert die TabBar (Verwaltung nur Admin/
-  // Tester) + die Migration eines alten "verwaltung"-Tab-Zustands.
+  // Auth früh holen — steuert die rollensichtbaren UserMenu-Bereiche
+  // (Admin/Tester) + die Migration eines alten "verwaltung"-Tab-Zustands.
   const { user, logout } = useAuth();
-  const isStaff = (user?.is_admin ?? false) || (user?.is_tester ?? false);
 
   // Tab-Wahl persistieren — localStorage + URL-Hash, damit
   // Reload + Browser-Back beide funktionieren.
@@ -875,13 +882,26 @@ function MainLayout() {
       window.removeEventListener("cubetracker:goto-konto-section", onGotoKonto);
   }, []);
 
-  // Migration W.ia-konto-usermenu: ein normaler User kann noch einen alten
-  // "verwaltung"-Tab-Zustand haben (localStorage/Hash) — den Tab gibt es für
-  // ihn nicht mehr. Auf "konto" umleiten, sobald feststeht dass er kein
-  // Admin/Tester ist (user geladen). Admin/Tester behalten den Tab.
+  // Tab-Zugriffs-Guards (W.ia-admin-bereich), greifen sobald user geladen ist:
+  //  - "verwaltung" gibt es nicht mehr (Bestands-localStorage/Hash) → auf den
+  //    passenden Bereich umleiten (Admin→admin, Tester→tester, sonst konto).
+  //  - admin/tester sind rollengated → wer ohne Berechtigung dort landet
+  //    (alter Bookmark, manueller #admin-Hash), wird auf statistik geleitet,
+  //    sonst bliebe die Seite leer (kein Render-Block + TabBar ausgeblendet).
   useEffect(() => {
-    if (tab === "verwaltung" && user && !isStaff) setTab("konto");
-  }, [tab, user, isStaff]);
+    if (!user) return;
+    if (tab === "verwaltung") {
+      if (user.is_admin) setTab("admin");
+      else if (user.is_tester) setTab("tester");
+      else setTab("konto");
+    } else if (tab === "admin" && !user.is_admin) {
+      setTab("statistik");
+    } else if (tab === "tester" && !(user.is_tester && !user.is_admin)) {
+      // Ein Admin mit altem #tester-Zustand gehört in den Admin-Bereich
+      // (der die Tester-Werkzeuge mitenthält), nicht auf Statistik.
+      setTab(user.is_admin ? "admin" : "statistik");
+    }
+  }, [tab, user]);
 
   const { t } = useTranslation();
 
@@ -925,6 +945,7 @@ function MainLayout() {
                 email={user.email}
                 displayName={user.display_name}
                 isAdmin={user.is_admin}
+                isTester={user.is_tester}
                 onOpenKonto={() => setTab("konto")}
                 onOpenSettings={() => {
                   // Direktsprung zur Einstellungen-Sektion. KontoDatenView ist
@@ -932,6 +953,8 @@ function MainLayout() {
                   setKontoSection("settings");
                   setTab("konto");
                 }}
+                onOpenAdmin={() => setTab("admin")}
+                onOpenTester={() => setTab("tester")}
                 onOpenPatchNotes={() => setShowPatches(true)}
                 onOpenRoadmap={() => setShowRoadmap(true)}
                 onOpenFeatures={() => setShowFeatures(true)}
@@ -956,8 +979,8 @@ function MainLayout() {
             „konto" ist nicht in der Leiste, sonst wäre kein Tab aktiv
             hervorgehoben (verwirrend). KontoDatenView zeigt stattdessen
             einen eigenen Header mit Zurück-Button. */}
-        {tab !== "konto" && (
-          <TabBar current={tab} onChange={setTab} isStaff={isStaff} />
+        {tab !== "konto" && tab !== "admin" && tab !== "tester" && (
+          <TabBar current={tab} onChange={setTab} />
         )}
 
         {tab === "timer" && (
@@ -978,13 +1001,18 @@ function MainLayout() {
             initialSection={statistikInitial}
           />
         )}
-        {tab === "verwaltung" && isStaff && <VerwaltungTab />}
         {tab === "konto" && (
           <KontoDatenView
             section={kontoSection}
             onSectionChange={setKontoSection}
             onBack={() => setTab("statistik")}
           />
+        )}
+        {tab === "admin" && user?.is_admin && (
+          <AdminPanel onBack={() => setTab("statistik")} />
+        )}
+        {tab === "tester" && user?.is_tester && !user?.is_admin && (
+          <TesterPanel onBack={() => setTab("statistik")} />
         )}
         {tab === "trainer" && <TrainerTab />}
         {tab === "community" && (

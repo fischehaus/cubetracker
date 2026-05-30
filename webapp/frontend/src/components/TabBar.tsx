@@ -1,13 +1,15 @@
-// TabBar: Top-Level-Navigation zwischen den 5 Haupt-Modi der App.
+// TabBar: Top-Level-Navigation = der tägliche Cubing-Loop, 4 Flow-Tabs:
 // - TIMER:      Solving-Modus, Eingabe groß + zentriert
 // - STATISTIK:  Übersicht (Tagesform + Stats) + Detail (Charts + Solveliste).
-//               Vereint das frühere Dashboard + Analyse (W.ia-statistik-merge,
-//               2026-05-30) — Übersicht ist Default, Detail per Sub-Nav.
-// - VERWALTUNG: NUR Admin/Tester (W.ia-konto-usermenu, 2026-05-31) —
-//               Rollen-Werkzeuge. Normale User: „Konto & Daten" liegt jetzt
-//               im UserMenu (Pseudo-Tab „konto", erscheint NICHT in der Leiste).
+//               Vereint das frühere Dashboard + Analyse (W.ia-statistik-merge).
 // - TRAINER:    Personal Trainer — Erfolge + Daily Challenges
 // - COMMUNITY:  Freunde + Bestenliste
+//
+// Pseudo-Tabs (gültiges Routing, aber NICHT in der Leiste — nur über das
+// UserMenu erreichbar): konto (Konto & Daten, alle User), admin (nur
+// is_admin), tester (nur is_tester). „verwaltung" ist seit W.ia-admin-bereich
+// ein toter Migrations-Durchgang — alter Tab-Zustand wird in App.tsx
+// umgeleitet, nie gerendert.
 //
 // Mobile-first (2026-05-14): nutzt ScrollableTabBar — auf Phone
 // horizontal scrollbar, auf Desktop gleichmäßig verteilt.
@@ -18,12 +20,16 @@ import { ScrollableTabBar } from "./ScrollableTabBar";
 export type AppTab =
   | "timer"
   | "statistik"
-  | "verwaltung"
   | "trainer"
   | "community"
-  // Pseudo-Tab (W.ia-konto-usermenu): gültiger Routing-Zustand, aber NICHT
-  // in der TabBar — erreichbar nur über das UserMenu → „Konto & Daten".
-  | "konto";
+  // Pseudo-Tabs (W.ia-konto-usermenu / W.ia-admin-bereich): gültige Routing-
+  // Zustände, aber NICHT in der TabBar — erreichbar nur über das UserMenu.
+  | "konto" // Konto & Daten (alle User)
+  | "admin" // nur is_admin
+  | "tester" // nur is_tester && !is_admin
+  // toter Migrations-Durchgang: alter „verwaltung"-Tab-Zustand wird in
+  // App.tsx auf admin/tester/konto umgeleitet, nie gerendert.
+  | "verwaltung";
 
 interface TabDef {
   id: AppTab;
@@ -37,30 +43,25 @@ interface TabDef {
 const TAB_ICONS: Record<AppTab, string> = {
   timer: "⏱",
   statistik: "📊",
-  verwaltung: "⚙",
   trainer: "🏆",
   community: "🤝",
-  // konto erscheint nie in der Leiste — Eintrag nur für die Record-
-  // Vollständigkeit (TypeScript verlangt alle AppTab-Keys).
+  // Pseudo-Tabs erscheinen nie in der Leiste — Einträge nur für die
+  // Record-Vollständigkeit (TypeScript verlangt alle AppTab-Keys).
   konto: "👤",
+  admin: "🛡",
+  tester: "🧪",
+  verwaltung: "⚙",
 };
 
-// Haupt-Nav-Reihenfolge. Der Verwaltung-Tab ist seit W.ia-konto-usermenu
-// nur noch für Admin/Tester sichtbar; normale User bekommen die schlanke
-// 4-Tab-Leiste. „konto" ist ein Pseudo-Tab und nie in der Leiste.
-const BASE_TAB_ORDER: AppTab[] = ["timer", "statistik", "trainer", "community"];
-const STAFF_TAB_ORDER: AppTab[] = [
-  "timer",
-  "statistik",
-  "verwaltung",
-  "trainer",
-  "community",
-];
+// Haupt-Nav = 4 Flow-Tabs für ALLE (W.ia-admin-bereich): seit Admin/Tester
+// einen eigenen UserMenu-Bereich haben, ist auch der frühere Verwaltung-Tab
+// aus der Leiste verschwunden. Pseudo-Tabs (konto/admin/tester) tauchen hier
+// nie auf.
+const TAB_ORDER: AppTab[] = ["timer", "statistik", "trainer", "community"];
 
-export function useLocalizedTabs(isStaff: boolean): TabDef[] {
+export function useLocalizedTabs(): TabDef[] {
   const { t } = useTranslation();
-  const order = isStaff ? STAFF_TAB_ORDER : BASE_TAB_ORDER;
-  return order.map((id) => ({
+  return TAB_ORDER.map((id) => ({
     id,
     label: t(`tabs.${id}`),
     icon: TAB_ICONS[id],
@@ -71,13 +72,11 @@ export function useLocalizedTabs(isStaff: boolean): TabDef[] {
 interface Props {
   current: AppTab;
   onChange: (tab: AppTab) => void;
-  /** Admin/Tester sehen zusätzlich den Verwaltung-Tab. */
-  isStaff: boolean;
 }
 
-export function TabBar({ current, onChange, isStaff }: Props) {
+export function TabBar({ current, onChange }: Props) {
   const { t } = useTranslation();
-  const tabs = useLocalizedTabs(isStaff);
+  const tabs = useLocalizedTabs();
   return (
     <div className="mb-6">
       <ScrollableTabBar

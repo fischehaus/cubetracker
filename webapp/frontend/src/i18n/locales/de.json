@@ -33,6 +33,21 @@
     "title": "Konto & Daten",
     "back": "← Zurück zur App"
   },
+  "adminBereich": {
+    "title": "Admin",
+    "back": "← Zurück zur App",
+    "ariaSubTabs": "Admin-Bereiche",
+    "tab_stats": "Statistiken",
+    "tab_feedback": "Feedback",
+    "tab_livetests": "Live-Tests",
+    "tab_roadmap": "Roadmap",
+    "tab_users": "Nutzer",
+    "tab_announce": "Ankündigung"
+  },
+  "testerBereich": {
+    "title": "Tester",
+    "back": "← Zurück zur App"
+  },
   "timerTab": {
     "focusToggleOn": "🎯 Fokus aktivieren",
     "focusToggleOff": "🪟 Volle Ansicht",
@@ -101,6 +116,8 @@
   "userMenu": {
     "konto": "Konto & Daten",
     "settings": "Einstellungen",
+    "admin": "Admin",
+    "tester": "Tester",
     "patchNotes": "Patch Notes",
     "roadmap": "Roadmap (was kommt als nächstes?)",
     "features": "Was kann diese App?",
