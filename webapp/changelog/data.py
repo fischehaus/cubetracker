@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.pwa-manifest",
+        released=date(2026, 5, 30),
+        title="📲 App auf den Homescreen installierbar (PWA-Manifest)",
+        highlights=[
+            "Cubetracker lässt sich jetzt **als App auf den Homescreen "
+            "installieren** — der Browser zeigt auf Android Chrome/Edge "
+            "automatisch „Zum Startbildschirm hinzufügen\", auf iOS via "
+            "Teilen → „Zum Home-Bildschirm\". Einmal installiert startet "
+            "die App im standalone-Mode: Vollbild ohne Browser-Adresszeile, "
+            "fühlt sich an wie eine native App.",
+            "Theme- und Status-Bar-Farbe matchen das App-Design (purple). "
+            "Splash-Screen mit Cubetracker-Logo + dunklem Background. "
+            "Funktioniert mit allen Skin-Themes — der Skin lädt nach dem "
+            "Splash. Roadmap-Item „PWA-Setup (Phone-Homescreen-Install)\" "
+            "damit abgeschlossen.",
+            "Was NICHT enthalten ist (kann später nachgezogen werden, "
+            "ist als eigenes Item denkbar): Service-Worker für Offline-"
+            "Nutzung + Auto-Update-Toast „neue Version verfügbar\". "
+            "Aktuell braucht die App eine Internet-Verbindung wie die "
+            "normale Webseite — der Homescreen-Eintrag spart nur den "
+            "Browser-Tab und macht den App-Start direkt.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-card-tap",
         released=date(2026, 5, 30),
         title="📱 Timer-Display auf Phone tappbar",

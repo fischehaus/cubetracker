@@ -7,6 +7,15 @@
     <link rel="apple-touch-icon" href="/cubetracker-192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#7c3aed" />
+    <!-- PWA-Manifest (W.pwa-manifest, 2026-05-30) — Browser bietet
+         „Zum Homescreen hinzufuegen" an, App startet im standalone-Mode
+         (kein Browser-Chrome). -->
+    <link rel="manifest" href="/manifest.json" />
+    <!-- Apple-spezifischer Hint: iOS interpretiert manifest.json nicht
+         direkt, sondern braucht diesen Tag fuer den standalone-Mode. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Cubetracker" />
     <title>cubetracker</title>
   </head>
   <body>
