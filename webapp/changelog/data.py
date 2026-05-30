@@ -44,6 +44,23 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.design-system-foundation",
+        released=date(2026, 5, 30),
+        title="🧱 Design-System-Grundlage (UI-Primitive)",
+        highlights=[
+            "Start der UX-/Struktur-Überarbeitung: erste wiederverwendbare "
+            "UI-Bausteine (Card, CardTitle, Button, EmptyState) als eine "
+            "zentrale Quelle, statt überall kopierter Style-Strings. Das "
+            "ist die Grundlage, um die App nach und nach ruhiger + "
+            "konsistenter zu machen.",
+            "Erste sichtbare Migration: die Statistik-Karte nutzt jetzt "
+            "die neuen Bausteine — etwas ruhigere Überschrift + "
+            "aufgeräumterer Leer-Zustand. Die restlichen Karten ziehen "
+            "in den nächsten Wellen nach (Tab für Tab).",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-maxcontent",
         released=date(2026, 5, 30),
         title="🎨 Zwei Max-Content-Skins: Pixel Academy + Lofi Solver",

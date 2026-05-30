@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useStats } from "../lib/api";
 import { formatDate, formatTime } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle, EmptyState } from "./ui";
 
 interface Props {
   cubeType?: string;
@@ -58,26 +59,26 @@ export function StatsCard({ cubeType, sessionId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
-        {t("stats.loading")}
-      </div>
+      <Card>
+        <p className="text-gray-400">{t("stats.loading")}</p>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
-        {t("stats.errorPrefix", { message: error.message })}
-      </div>
+      <Card tone="danger">
+        <p className="text-red-300">
+          {t("stats.errorPrefix", { message: error.message })}
+        </p>
+      </Card>
     );
   }
   if (!data || data.count === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-2">
-          {t("stats.title")}
-        </h2>
-        <p className="text-base text-gray-500">{t("stats.noSolves")}</p>
-      </div>
+      <Card>
+        <CardTitle className="mb-2">{t("stats.title")}</CardTitle>
+        <EmptyState icon="📊" title={t("stats.noSolves")} />
+      </Card>
     );
   }
 
@@ -91,12 +92,10 @@ export function StatsCard({ cubeType, sessionId }: Props) {
       : t("stats.filterAllSolves");
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4 gap-2">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold text-gray-100">
-            {t("stats.title")}
-          </h2>
+          <CardTitle>{t("stats.title")}</CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("stats.title")}</p>
             <p>{t("stats.infoText")}</p>
@@ -175,6 +174,6 @@ export function StatsCard({ cubeType, sessionId }: Props) {
           highlight
         />
       </div>
-    </div>
+    </Card>
   );
 }
