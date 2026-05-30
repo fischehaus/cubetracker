@@ -1,12 +1,16 @@
 # Sichtbarkeits-Matrix — Wer sieht was?
 
-**Stand:** 2026-05-28
+**Stand:** 2026-05-31 (nach IA-Umbau W1–W3 — Navigation neu, Daten-
+Sichtbarkeit unverändert)
 **Geltungsbereich:** `webapp/` (cubetracker.de Multi-User-Web-Variante)
 **Single-Source:** Diese Datei ist die verbindliche Antwort auf "Wer
 sieht welche Daten?". Bei Konflikten zwischen Doku und Code gilt der
 Code — Diese Matrix muss dann nachgezogen werden.
-**Last-Audit-Commit:** `113aa70` (`docs(session): UX-Audit-Sprint +
-Mobile-Polish-Wellen dokumentieren`, 2026-05-28)
+**Last-Audit-Commit:** `7a86c40` (`feat(W.ia-admin-bereich): Admin +
+Tester eigener UserMenu-Bereich, Verwaltungs-Tab entfernt`, 2026-05-31).
+Der IA-Umbau (W1–W3) hat NUR die UI-Navigation verändert (Abschnitt 4);
+die Endpoint-/Feld-/Rollen-Sichtbarkeit (Abschnitte 2, 3, 5, 6) ist
+identisch geblieben.
 
 ---
 
@@ -31,10 +35,13 @@ eine accepted Friendship mit X existiert).
 
 **Tester vs. Admin:** Admin sieht alles, was Tester sieht (Tester-
 Privilegien sind eine Untermenge der Admin-Privilegien). Im Frontend
-sieht ein Tester `is_tester && !is_admin` einen eigenen Tester-Tab
-mit nur Live-Tests + Roadmap-Pflege; ein Admin sieht den Admin-Tab,
-der die Tester-Funktionen mit-enthält und zusätzlich Stats / User-
-Management / Feedback-Inbox / Announcements.
+(seit W.ia-admin-bereich, 2026-05-31) erreicht ein Tester `is_tester &&
+!is_admin` einen eigenen Tester-Bereich über das UserMenu (🧪) mit nur
+Live-Tests + Roadmap-Pflege; ein Admin erreicht den Admin-Bereich über
+das UserMenu (🛡), der die Tester-Funktionen mit-enthält und zusätzlich
+Stats / User-Management / Feedback-Inbox / Announcements. Beide Bereiche
+sind rollensichtbar (Render-Gate + UserMenu-Eintrag + Routing-Guard) und
+NICHT mehr in der Haupt-TabBar.
 
 **Auth-Dependencies im Code** (`webapp/auth/deps.py`,
 `webapp/api/admin.py`):
@@ -404,10 +411,19 @@ Endpoint-Probing möglich.
 ## 4. UI-Tabs / Panels pro Rolle
 
 Quelle: `webapp/frontend/src/components/TabBar.tsx`,
-`webapp/frontend/src/components/VerwaltungTab.tsx`,
+`webapp/frontend/src/components/UserMenu.tsx`,
+`webapp/frontend/src/components/KontoDatenView.tsx`,
 `webapp/frontend/src/components/AdminPanel.tsx`,
 `webapp/frontend/src/components/TesterPanel.tsx`,
 `webapp/frontend/src/pages/LoginPage.tsx`.
+
+**IA-Umbau (W1–W3, 2026-05-30/31):** Die Haupt-Navigation wurde von 6
+Tabs auf **4 Flow-Tabs** reduziert (Timer / Statistik / Training /
+Community). Dashboard + Analyse sind zum **Statistik**-Tab verschmolzen
+(Übersicht→Detail). „Konto & Daten" (ex-Verwaltung-Base), „Admin" und
+„Tester" sind aus der TabBar gelöst und nur noch über das **UserMenu**
+(oben rechts) erreichbar — rollensichtbar. Diese drei sind „Pseudo-Tabs":
+gültige Routing-Zustände (Hash/localStorage), aber nicht in der Leiste.
 
 ### 4.1 Anonym (nicht eingeloggt)
 
@@ -424,18 +440,17 @@ Quelle: `webapp/frontend/src/components/TabBar.tsx`,
 
 ### 4.2 User (eingeloggt, kein Admin/Tester)
 
-Top-Level-Tabs (`TabBar.tsx`):
+Top-Level-Tabs (`TabBar.tsx`) — **4 Flow-Tabs für alle Rollen**:
 
 | Tab | Inhalt |
 |-----|--------|
 | TIMER (⏱) | Solving-Modus, Eingabe groß + zentriert |
-| DASHBOARD (📊) | Live-Übersicht, Tagesform, Reminders |
-| ANALYSE (📈) | Charts + volle Solveliste (nur Auswertung) |
-| VERWALTUNG (⚙) | Sub-Tabs (siehe unten) |
+| STATISTIK (📊) | Übersicht (Tagesform/Reminders, ex-Dashboard) + Detail (Charts + volle Solveliste, ex-Analyse) per Sub-Nav |
 | TRAINER (🏆) | Achievements + Daily Challenges |
 | COMMUNITY (🤝) | Friends + Leaderboard |
 
-Verwaltung-Sub-Tabs (`VerwaltungTab.tsx`):
+„Konto & Daten" — über **UserMenu** (👤), KEIN Tab mehr
+(`KontoDatenView.tsx`, Sub-Nav identisch zur früheren Verwaltung):
 
 | Sub-Tab | Inhalt |
 |---------|--------|
@@ -447,7 +462,8 @@ Verwaltung-Sub-Tabs (`VerwaltungTab.tsx`):
 
 ### 4.3 Tester (`is_tester=true`, `is_admin=false`)
 
-Wie User, **plus** Sub-Tab `tester` (🧪) in Verwaltung:
+Wie User, **plus** ein eigener Tester-Bereich über das **UserMenu** (🧪,
+`TesterPanel.tsx`) — nicht in der TabBar, nur bei `is_tester && !is_admin`:
 - `AdminLiveTestsPanel` (volles CRUD außer Delete; Status PASS/FAIL/SKIP/open + Notiz)
 - `AdminRoadmapPanel` (volles CRUD inkl. Delete, da `require_admin_or_tester`)
 
@@ -461,8 +477,10 @@ Zusätzlich:
 
 ### 4.4 Admin (`is_admin=true`)
 
-Wie User, **plus** Sub-Tab `admin` (🛡) in Verwaltung. `AdminPanel`
-rendert sequenziell:
+Wie User, **plus** ein eigener Admin-Bereich über das **UserMenu** (🛡,
+`AdminPanel.tsx`) — nicht in der TabBar, nur bei `is_admin`. Seit
+W.ia-admin-bereich hat er eine eigene **Sub-Navigation** (6 Bereiche,
+vorher sequenziell gestapelt + langes Scrollen):
 
 1. `AdminStatsPanel` (Cluster-Stats, anonymisierte Aggregate)
 2. `AdminFeedbackInboxPanel` (alle Feedback-Items, Status setzen,
