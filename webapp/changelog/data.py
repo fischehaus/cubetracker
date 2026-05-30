@@ -44,6 +44,21 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-maxcontent",
+        released=date(2026, 5, 30),
+        title="🎨 Zwei Max-Content-Skins: Pixel Academy + Lofi Solver",
+        highlights=[
+            "Zwei neue, visuell reichere Theme-Varianten: **Pixel "
+            "Academy (Max Content)** und **Lofi Solver (Max Content)**. "
+            "Vollere Versionen der bestehenden Themes — mehr Szene-"
+            "Details, Atmosphäre, Stimmung. Optimiert für deckende Cards.",
+            "Die schlankeren Originale (Pixel Academy / Lofi Solver) "
+            "bleiben erhalten — die Max-Content-Varianten sind zusätzliche "
+            "Auswahl im Tab „Verwaltung → Aussehen\". Damit jetzt 10 "
+            "Hintergrund-Themen zur Wahl.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.pwa-offline",
         released=date(2026, 5, 30),
         title="📴 PWA Phase B: Offline-Start + Neue-Version-Hinweis",

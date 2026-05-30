@@ -264,6 +264,48 @@ export const SKIN_REGISTRY: Skin[] = [
       },
     ],
   },
+  {
+    // W.skin-maxcontent (2026-05-30). „Max Content Homepage Edition" —
+    // vollere/reichere Variante von Pixel Academy (mehr Bild-Details,
+    // opaque-card-optimiert). Eigener Slot neben dem schlankeren Original.
+    id: "pixel-academy-maxcontent",
+    labelKey: "skin.pixelAcademyMaxcontent.label",
+    descriptionKey: "skin.pixelAcademyMaxcontent.description",
+    preview: "/skins/pixel-academy-maxcontent/preview.webp",
+    position: "center center",
+    resolutions: [
+      { width: 1920, src: "/skins/pixel-academy-maxcontent/1920x1080.webp" },
+      { width: 2560, src: "/skins/pixel-academy-maxcontent/2560x1440.webp" },
+      { width: 3440, src: "/skins/pixel-academy-maxcontent/3440x1440.webp" },
+      { width: 3840, src: "/skins/pixel-academy-maxcontent/3840x1600.webp" },
+      {
+        width: 3840,
+        src: "/skins/pixel-academy-maxcontent/3840x1080-super.webp",
+        aspectRatio: "32:9",
+      },
+    ],
+  },
+  {
+    // W.skin-maxcontent (2026-05-30). „Max Content Homepage Edition" —
+    // vollere Lofi-Solver-Variante (Schreibtisch-Szene, Lampe, mehr
+    // Atmosphäre). Eigener Slot neben dem schlankeren Premium-Original.
+    id: "lofi-solver-maxcontent",
+    labelKey: "skin.lofiSolverMaxcontent.label",
+    descriptionKey: "skin.lofiSolverMaxcontent.description",
+    preview: "/skins/lofi-solver-maxcontent/preview.webp",
+    position: "center center",
+    resolutions: [
+      { width: 1920, src: "/skins/lofi-solver-maxcontent/1920x1080.webp" },
+      { width: 2560, src: "/skins/lofi-solver-maxcontent/2560x1440.webp" },
+      { width: 3440, src: "/skins/lofi-solver-maxcontent/3440x1440.webp" },
+      { width: 3840, src: "/skins/lofi-solver-maxcontent/3840x1600.webp" },
+      {
+        width: 3840,
+        src: "/skins/lofi-solver-maxcontent/3840x1080-super.webp",
+        aspectRatio: "32:9",
+      },
+    ],
+  },
 ];
 
 /** Default-Skin-ID, wenn localStorage leer ist. */

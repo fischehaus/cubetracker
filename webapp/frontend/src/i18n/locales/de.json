@@ -1561,6 +1561,14 @@
     "lofiSolverPremium": {
       "label": "Lofi Solver",
       "description": "Cinematic Rainy-Night-Vibe — entspannte Fokus-Atmosphäre"
+    },
+    "pixelAcademyMaxcontent": {
+      "label": "Pixel Academy (Max Content)",
+      "description": "Vollere Pixel-Art-Variante mit mehr Szene-Details und Stats-Atmosphäre"
+    },
+    "lofiSolverMaxcontent": {
+      "label": "Lofi Solver (Max Content)",
+      "description": "Reichere Lofi-Variante — Schreibtisch-Szene, warme Lampe, mehr Stimmung"
     }
   },
   "cardStyle": {

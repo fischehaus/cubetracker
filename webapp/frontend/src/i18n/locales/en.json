@@ -1561,6 +1561,14 @@
     "lofiSolverPremium": {
       "label": "Lofi Solver",
       "description": "Cinematic rainy-night vibes — cozy focus atmosphere"
+    },
+    "pixelAcademyMaxcontent": {
+      "label": "Pixel Academy (Max Content)",
+      "description": "Richer pixel-art variant with more scene detail and stats atmosphere"
+    },
+    "lofiSolverMaxcontent": {
+      "label": "Lofi Solver (Max Content)",
+      "description": "Richer lofi variant — desk scene, warm lamp, more atmosphere"
     }
   },
   "cardStyle": {
