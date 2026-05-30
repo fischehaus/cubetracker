@@ -5,8 +5,9 @@
 // Verhalten unverändert:
 // - Nur 1× pro Mount (dedupKey verhindert Doppel-Push wenn Query
 //   während desselben Mounts re-fetched).
-// - Klick triggert custom-Event `cubetracker:goto-verwaltung-section`
-//   (analog UserMenu) und springt zur MyFeedbackPanel-Sektion.
+// - Klick triggert custom-Event `cubetracker:goto-konto-section`
+//   (W.ia-konto-usermenu) und springt zur MyFeedbackPanel-Sektion
+//   (Konto & Daten → Daten).
 // - 6 Sekunden Auto-Dismiss.
 
 import { useEffect, useRef } from "react";
@@ -45,7 +46,7 @@ export function FeedbackUnreadToaster() {
         dedupKey: DEDUP_KEY,
         onClick: () => {
           window.dispatchEvent(
-            new CustomEvent("cubetracker:goto-verwaltung-section", {
+            new CustomEvent("cubetracker:goto-konto-section", {
               detail: { section: "daten" },
             }),
           );

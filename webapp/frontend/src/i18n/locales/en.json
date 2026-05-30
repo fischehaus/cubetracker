@@ -29,6 +29,10 @@
     "subTabDetail": "Details",
     "ariaLabel": "Statistics view: overview or details"
   },
+  "kontoView": {
+    "title": "Account & data",
+    "back": "← Back to app"
+  },
   "timerTab": {
     "focusToggleOn": "🎯 Enable focus",
     "focusToggleOff": "🪟 Full view",
@@ -95,7 +99,8 @@
     "footerGithubLink": "Source on GitHub"
   },
   "userMenu": {
-    "settings": "My Account & Settings",
+    "konto": "Account & data",
+    "settings": "Settings",
     "patchNotes": "Patch Notes",
     "roadmap": "Roadmap (what's coming next?)",
     "features": "What can this app do?",
@@ -136,13 +141,13 @@
   "wca": {
     "title": "WCA competitions",
     "infoTitle": "WCA competitions",
-    "infoBody1": "List of the next official WCA competitions near you, sorted by date. Distance is calculated from the postal code in your profile (Settings → Account, straight-line).",
+    "infoBody1": "List of the next official WCA competitions near you, sorted by date. Distance is calculated from the postal code in your profile (Account & data → Settings, straight-line).",
     "infoBody2": "Data comes directly from the official World Cube Association API. Click a competition name to open the WCA detail page with registration status, events, venue.",
     "maxLabel": "max",
     "maxDistanceAria": "Maximum distance",
     "loading": "Loading competitions from the WCA API …",
     "profileIncompleteTitle": "Profile incomplete",
-    "profileIncompleteBody": "For \"competitions near you\" to work, set postal code and country under Settings → Preferences → Account → Profile. Distance is calculated as a straight-line — your exact address stays private.",
+    "profileIncompleteBody": "For \"competitions near you\" to work, set postal code and country under Account & data → Settings → Account → Profile. Distance is calculated as a straight-line — your exact address stays private.",
     "profileIncompleteBackend": "Backend message: {{message}}",
     "errorTitle": "Could not load WCA competitions",
     "noCompetitions": "No WCA competitions within {{km}} km in the next {{months}} months.",
@@ -348,7 +353,7 @@
   },
   "reminders": {
     "title": "Reminders",
-    "infoEmpty": "Lists cubes you haven't touched for more than {{days}} days. Sorted: most-forgotten first. Considers all active hardware cubes (Settings → Hardware).",
+    "infoEmpty": "Lists cubes you haven't touched for more than {{days}} days. Sorted: most-forgotten first. Considers all active hardware cubes (Account & data → Hardware).",
     "infoActive": "Cubes you haven't touched for more than {{days}} days. Click a row to set your timer cube filter — quick jump into training.",
     "allFresh": "All cubes trained within the last {{days}} days. ✅",
     "cubeCountOne": "{{count}} cube",
@@ -829,7 +834,7 @@
     "analysisBullet8": "Average-PB markers in the solve list: small coloured dot on each ao5/ao12 value that was a Best-Avg at the time it was set (cyan for ao5, emerald for ao12, gold ★ for single PB)",
     "analysisBullet9": "Hardware performance comparison: which cube is faster for which type",
     "analysisBullet10": "Multi-cube compare: several cube types side-by-side in one card — see at a glance which event you favour and where you've improved the most",
-    "analysisBullet11": "Outlier handling in the admin tab: mark solves taken after a break or obviously misclicked as outliers — they don't count for ao5/ao12/PB but stay visible for history",
+    "analysisBullet11": "Outlier handling under Account & data: mark solves taken after a break or obviously misclicked as outliers — they don't count for ao5/ao12/PB but stay visible for history",
     "trainerTitle": "Trainer",
     "trainerBullet1": "Achievements: 30+ unlocks you collect along the way",
     "trainerBullet2": "Daily Challenges: a new small task every day",
@@ -1096,8 +1101,8 @@
     "githubCreateIssue": "🚀 Create issue",
     "githubBrowseIssues": "Browse existing issues",
     "errorUnknown": "Unknown error",
-    "appIntro": "Write directly in the app — your message lands in the admin inbox. As soon as someone has replied, you'll see it under \"Manage → My data → My feedback\" and get a small notification at next login.",
-    "appSuccessMessage": "✓ Feedback saved. Thanks! You'll see status + reply under \"Manage → My data → My feedback\".",
+    "appIntro": "Write directly in the app — your message lands in the admin inbox. As soon as someone has replied, you'll see it under \"Account & data → My data → My feedback\" and get a small notification at next login.",
+    "appSuccessMessage": "✓ Feedback saved. Thanks! You'll see status + reply under \"Account & data → My data → My feedback\".",
     "categoryLabel": "What's it about?",
     "typeGeneral": "💬 General feedback / question",
     "typeBug": "🐛 Bug — something doesn't work",
@@ -1365,7 +1370,7 @@
     "infoBody2": "Data is cached server-side for 6 hours so the WCA API stays responsive. Requires: WCA ID in account settings.",
     "loading": "Loading official WCA profile…",
     "emptyNoIdIntro": "You haven't set a WCA ID yet. If you've competed in official WCA competitions, enter your WCA ID in the account settings — your official PRs and recent competitions will show up here.",
-    "emptyNoIdHint": "Manage → Settings → Account → WCA ID.",
+    "emptyNoIdHint": "Account & data → Settings → Account → WCA ID.",
     "errorNotFound": "WCA ID \"{{id}}\" was not found in the WCA system.",
     "errorNotFoundHint": "Check spelling or correct the ID in account settings.",
     "errorGeneric": "WCA profile could not be loaded.",
@@ -1408,7 +1413,7 @@
   "feedbackToaster": {
     "titleSingle": "💬 You have a new reply to your feedback",
     "titleMulti": "💬 You have {{count}} new replies to your feedback",
-    "hint": "Click me → jumps to \"Manage → My data → My feedback\".",
+    "hint": "Click me → jumps to \"Account & data → My data → My feedback\".",
     "dismissAria": "Dismiss"
   },
   "testerPanel": {

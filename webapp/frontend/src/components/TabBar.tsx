@@ -3,7 +3,9 @@
 // - STATISTIK:  Übersicht (Tagesform + Stats) + Detail (Charts + Solveliste).
 //               Vereint das frühere Dashboard + Analyse (W.ia-statistik-merge,
 //               2026-05-30) — Übersicht ist Default, Detail per Sub-Nav.
-// - VERWALTUNG: Sessions, Hardware, Import, Outlier-Pflege (Daten-Pflege)
+// - VERWALTUNG: NUR Admin/Tester (W.ia-konto-usermenu, 2026-05-31) —
+//               Rollen-Werkzeuge. Normale User: „Konto & Daten" liegt jetzt
+//               im UserMenu (Pseudo-Tab „konto", erscheint NICHT in der Leiste).
 // - TRAINER:    Personal Trainer — Erfolge + Daily Challenges
 // - COMMUNITY:  Freunde + Bestenliste
 //
@@ -18,7 +20,10 @@ export type AppTab =
   | "statistik"
   | "verwaltung"
   | "trainer"
-  | "community";
+  | "community"
+  // Pseudo-Tab (W.ia-konto-usermenu): gültiger Routing-Zustand, aber NICHT
+  // in der TabBar — erreichbar nur über das UserMenu → „Konto & Daten".
+  | "konto";
 
 interface TabDef {
   id: AppTab;
@@ -35,9 +40,16 @@ const TAB_ICONS: Record<AppTab, string> = {
   verwaltung: "⚙",
   trainer: "🏆",
   community: "🤝",
+  // konto erscheint nie in der Leiste — Eintrag nur für die Record-
+  // Vollständigkeit (TypeScript verlangt alle AppTab-Keys).
+  konto: "👤",
 };
 
-const TAB_ORDER: AppTab[] = [
+// Haupt-Nav-Reihenfolge. Der Verwaltung-Tab ist seit W.ia-konto-usermenu
+// nur noch für Admin/Tester sichtbar; normale User bekommen die schlanke
+// 4-Tab-Leiste. „konto" ist ein Pseudo-Tab und nie in der Leiste.
+const BASE_TAB_ORDER: AppTab[] = ["timer", "statistik", "trainer", "community"];
+const STAFF_TAB_ORDER: AppTab[] = [
   "timer",
   "statistik",
   "verwaltung",
@@ -45,9 +57,10 @@ const TAB_ORDER: AppTab[] = [
   "community",
 ];
 
-export function useLocalizedTabs(): TabDef[] {
+export function useLocalizedTabs(isStaff: boolean): TabDef[] {
   const { t } = useTranslation();
-  return TAB_ORDER.map((id) => ({
+  const order = isStaff ? STAFF_TAB_ORDER : BASE_TAB_ORDER;
+  return order.map((id) => ({
     id,
     label: t(`tabs.${id}`),
     icon: TAB_ICONS[id],
@@ -58,11 +71,13 @@ export function useLocalizedTabs(): TabDef[] {
 interface Props {
   current: AppTab;
   onChange: (tab: AppTab) => void;
+  /** Admin/Tester sehen zusätzlich den Verwaltung-Tab. */
+  isStaff: boolean;
 }
 
-export function TabBar({ current, onChange }: Props) {
+export function TabBar({ current, onChange, isStaff }: Props) {
   const { t } = useTranslation();
-  const tabs = useLocalizedTabs();
+  const tabs = useLocalizedTabs(isStaff);
   return (
     <div className="mb-6">
       <ScrollableTabBar

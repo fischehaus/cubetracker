@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ia-konto-usermenu",
+        released=date(2026, 5, 31),
+        title="👤 Konto & Daten wandern ins Menü — schlankere Navigation",
+        highlights=[
+            "Sessions, Hardware, Backup/Import, Outlier-Pflege und "
+            "Einstellungen sind nicht mehr ein eigener Haupt-Tab "
+            "(Verwaltung), sondern liegen jetzt gebündelt unter Konto & "
+            "Daten im Menü oben rechts (das Avatar-Symbol). Die Haupt-"
+            "Navigation wird dadurch spürbar ruhiger.",
+            "Für normale Nutzer bleibt damit eine aufgeräumte Leiste mit "
+            "genau den täglich genutzten Bereichen: Timer, Statistik, "
+            "Training und Community. Admin und Tester behalten ihren "
+            "zusätzlichen Verwaltungs-Tab.",
+            "Es geht nichts verloren: wer den alten Verwaltung-Tab als "
+            "Lesezeichen gespeichert oder zuletzt offen hatte, landet "
+            "automatisch im neuen Konto-&-Daten-Bereich.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ia-statistik-merge",
         released=date(2026, 5, 30),
         title="📊 Dashboard + Analyse vereint: der neue Statistik-Tab",

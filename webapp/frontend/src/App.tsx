@@ -66,6 +66,10 @@ import { TrainerTab } from "./components/TrainerTab";
 import { TrendsChart } from "./components/LazyCharts";
 import { PbProgressionCard } from "./components/LazyCharts";
 import { VerwaltungTab } from "./components/VerwaltungTab";
+import {
+  KontoDatenView,
+  type KontoSection,
+} from "./components/KontoDatenView";
 import { WcaUpcomingCard } from "./components/WcaUpcomingCard";
 import { WcaProfileCard } from "./components/WcaProfileCard";
 import "./App.css";
@@ -92,6 +96,7 @@ const VALID_TABS: AppTab[] = [
   "verwaltung",
   "trainer",
   "community",
+  "konto",
 ];
 
 // Backward-Compat: alte URL-Hashes mappen auf die neue Struktur + setzen
@@ -783,6 +788,15 @@ function MainLayout() {
   const [statistikInitial] = useState<StatistikSection | undefined>(
     initial.statistikInitial,
   );
+  // Aktive Sektion der „Konto & Daten"-Ansicht (W.ia-konto-usermenu).
+  // CONTROLLED hier in MainLayout, damit Direkt-Sprünge (UserMenu,
+  // FeedbackUnreadToaster, OnboardingBanner) über den globalen
+  // goto-konto-section-Listener sicher die richtige Sektion setzen.
+  const [kontoSection, setKontoSection] = useState<KontoSection>("sessions");
+  // Auth früh holen — isStaff steuert die TabBar (Verwaltung nur Admin/
+  // Tester) + die Migration eines alten "verwaltung"-Tab-Zustands.
+  const { user, logout } = useAuth();
+  const isStaff = (user?.is_admin ?? false) || (user?.is_tester ?? false);
 
   // Tab-Wahl persistieren — localStorage + URL-Hash, damit
   // Reload + Browser-Back beide funktionieren.
@@ -820,7 +834,7 @@ function MainLayout() {
   // Custom-Event-Listener fuer „+ Feedback"-Buttons im AdminFeedback-
   // InboxPanel und TesterPanel. So koennen tief verschachtelte
   // Komponenten das zentrale FeedbackModal triggern ohne Props-Drilling.
-  // Pattern analog `cubetracker:goto-verwaltung-section` (UserMenu).
+  // Pattern analog `cubetracker:goto-konto-section` (W.ia-konto-usermenu).
   useEffect(() => {
     function onOpenFeedback() {
       setShowFeedback(true);
@@ -836,7 +850,39 @@ function MainLayout() {
       );
   }, []);
 
-  const { user, logout } = useAuth();
+  // W.ia-konto-usermenu (2026-05-31): globaler Listener für Sprünge in die
+  // „Konto & Daten"-Ansicht. MainLayout ist immer gemountet → kein Event-
+  // Timing-Problem (anders als beim früheren VerwaltungTab-lokalen Listener).
+  // Quellen: FeedbackUnreadToaster (→ daten), OnboardingBanner (→ daten/
+  // hardware), künftige Direkt-Links.
+  useEffect(() => {
+    function onGotoKonto(e: Event) {
+      const target = (e as CustomEvent<{ section?: string }>).detail?.section;
+      const valid: KontoSection[] = [
+        "sessions",
+        "hardware",
+        "daten",
+        "outliers",
+        "settings",
+      ];
+      setTab("konto");
+      if (target && (valid as string[]).includes(target)) {
+        setKontoSection(target as KontoSection);
+      }
+    }
+    window.addEventListener("cubetracker:goto-konto-section", onGotoKonto);
+    return () =>
+      window.removeEventListener("cubetracker:goto-konto-section", onGotoKonto);
+  }, []);
+
+  // Migration W.ia-konto-usermenu: ein normaler User kann noch einen alten
+  // "verwaltung"-Tab-Zustand haben (localStorage/Hash) — den Tab gibt es für
+  // ihn nicht mehr. Auf "konto" umleiten, sobald feststeht dass er kein
+  // Admin/Tester ist (user geladen). Admin/Tester behalten den Tab.
+  useEffect(() => {
+    if (tab === "verwaltung" && user && !isStaff) setTab("konto");
+  }, [tab, user, isStaff]);
+
   const { t } = useTranslation();
 
   return (
@@ -879,18 +925,12 @@ function MainLayout() {
                 email={user.email}
                 displayName={user.display_name}
                 isAdmin={user.is_admin}
+                onOpenKonto={() => setTab("konto")}
                 onOpenSettings={() => {
-                  setTab("verwaltung");
-                  // Event lässt VerwaltungTab zum Sub-Tab "settings" springen.
-                  // Sub-Tab-State lebt lokal, daher kein direkter Set-Pfad —
-                  // Event-Hook ist die kleinste invasive Lösung.
-                  setTimeout(() => {
-                    window.dispatchEvent(
-                      new CustomEvent("cubetracker:goto-verwaltung-section", {
-                        detail: { section: "settings" },
-                      }),
-                    );
-                  }, 0);
+                  // Direktsprung zur Einstellungen-Sektion. KontoDatenView ist
+                  // controlled → kein Event/setTimeout-Tanz mehr nötig.
+                  setKontoSection("settings");
+                  setTab("konto");
                 }}
                 onOpenPatchNotes={() => setShowPatches(true)}
                 onOpenRoadmap={() => setShowRoadmap(true)}
@@ -906,8 +946,8 @@ function MainLayout() {
           <div className="mb-4 rounded-lg bg-amber-500/10 border border-amber-500/30 px-4 py-3 text-sm text-amber-200">
             ⚠ Deine Email-Adresse ist noch nicht bestätigt. Wir haben dir
             eine Verifikations-Mail geschickt — prüfe deinen Posteingang
-            (auch Spam). Unter Verwaltung → Einstellungen kannst du die
-            Mail erneut senden.
+            (auch Spam). Unter „Konto & Daten" (Menü oben rechts) →
+            Einstellungen kannst du die Mail erneut senden.
           </div>
         )}
 
@@ -915,7 +955,13 @@ function MainLayout() {
 
         <OnboardingBanner onSwitchTab={setTab} />
 
-        <TabBar current={tab} onChange={setTab} />
+        {/* TabBar im „konto"-Pseudo-Tab ausblenden (W.ia-konto-usermenu):
+            „konto" ist nicht in der Leiste, sonst wäre kein Tab aktiv
+            hervorgehoben (verwirrend). KontoDatenView zeigt stattdessen
+            einen eigenen Header mit Zurück-Button. */}
+        {tab !== "konto" && (
+          <TabBar current={tab} onChange={setTab} isStaff={isStaff} />
+        )}
 
         {tab === "timer" && (
           <TimerTab
@@ -935,7 +981,14 @@ function MainLayout() {
             initialSection={statistikInitial}
           />
         )}
-        {tab === "verwaltung" && <VerwaltungTab />}
+        {tab === "verwaltung" && isStaff && <VerwaltungTab />}
+        {tab === "konto" && (
+          <KontoDatenView
+            section={kontoSection}
+            onSectionChange={setKontoSection}
+            onBack={() => setTab("statistik")}
+          />
+        )}
         {tab === "trainer" && <TrainerTab />}
         {tab === "community" && (
           <CommunityTab initialSection={communityInitial} />

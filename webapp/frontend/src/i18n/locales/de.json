@@ -29,6 +29,10 @@
     "subTabDetail": "Detail",
     "ariaLabel": "Statistik-Ansicht: Übersicht oder Detail"
   },
+  "kontoView": {
+    "title": "Konto & Daten",
+    "back": "← Zurück zur App"
+  },
   "timerTab": {
     "focusToggleOn": "🎯 Fokus aktivieren",
     "focusToggleOff": "🪟 Volle Ansicht",
@@ -95,7 +99,8 @@
     "footerGithubLink": "Quellcode auf GitHub"
   },
   "userMenu": {
-    "settings": "Mein Account & Einstellungen",
+    "konto": "Konto & Daten",
+    "settings": "Einstellungen",
     "patchNotes": "Patch Notes",
     "roadmap": "Roadmap (was kommt als nächstes?)",
     "features": "Was kann diese App?",
@@ -136,13 +141,13 @@
   "wca": {
     "title": "WCA-Turniere",
     "infoTitle": "WCA-Turniere",
-    "infoBody1": "Liste der nächsten offiziellen WCA-Wettkämpfe in deiner Nähe, sortiert nach Datum. Distanz wird basierend auf deiner Profil-PLZ (Verwaltung → Account) berechnet (Luftlinie).",
+    "infoBody1": "Liste der nächsten offiziellen WCA-Wettkämpfe in deiner Nähe, sortiert nach Datum. Distanz wird basierend auf deiner Profil-PLZ (Konto & Daten → Einstellungen → Account) berechnet (Luftlinie).",
     "infoBody2": "Daten kommen direkt von der offiziellen World Cube Association API. Klick auf den Turnier-Namen öffnet die WCA-Detailseite mit Anmelde-Status, Events, Venue.",
     "maxLabel": "max",
     "maxDistanceAria": "Maximale Distanz",
     "loading": "Lade Turniere von der WCA-API …",
     "profileIncompleteTitle": "Profil unvollständig",
-    "profileIncompleteBody": "Damit „Turniere in deiner Nähe\" funktioniert, setze Postleitzahl und Land unter Verwaltung → Einstellungen → Account → Profil. Die Distanz wird per Luftlinie berechnet, deine genaue Adresse bleibt privat.",
+    "profileIncompleteBody": "Damit „Turniere in deiner Nähe\" funktioniert, setze Postleitzahl und Land unter Konto & Daten → Einstellungen → Account → Profil. Die Distanz wird per Luftlinie berechnet, deine genaue Adresse bleibt privat.",
     "profileIncompleteBackend": "Genaue Backend-Meldung: {{message}}",
     "errorTitle": "Konnte WCA-Turniere nicht laden",
     "noCompetitions": "Keine WCA-Turniere innerhalb {{km}} km in den nächsten {{months}} Monaten.",
@@ -348,7 +353,7 @@
   },
   "reminders": {
     "title": "Reminders",
-    "infoEmpty": "Listet Cubes die du länger als {{days}} Tage nicht mehr angefasst hast. Sortiert: vergessenste oben. Bezieht sich auf alle aktiven Hardware-Cubes (Verwaltung → Hardware).",
+    "infoEmpty": "Listet Cubes die du länger als {{days}} Tage nicht mehr angefasst hast. Sortiert: vergessenste oben. Bezieht sich auf alle aktiven Hardware-Cubes (Konto & Daten → Hardware).",
     "infoActive": "Cubes die du länger als {{days}} Tage nicht mehr angefasst hast. Klick auf einen Eintrag setzt deinen Timer-Cube-Filter auf den Cube — direkter Sprung ins Training.",
     "allFresh": "Alle Cubes innerhalb der letzten {{days}} Tage trainiert. ✅",
     "cubeCountOne": "{{count}} Cube",
@@ -829,7 +834,7 @@
     "analysisBullet8": "Average-PB-Marker in der Solve-Liste: kleiner farbiger Punkt an jeder ao5/ao12-Zahl, die zum Zeitpunkt ihres Setzens ein Best-Avg war (cyan für ao5, emerald für ao12, gold ★ für Single-PB)",
     "analysisBullet9": "Hardware-Performance-Vergleich: welcher Cube ist schneller für welchen Type",
     "analysisBullet10": "Multi-Cube-Compare: mehrere Cube-Types nebeneinander in einer Karte — siehst auf einen Blick wer dein Lieblings-Event ist und wo du am meisten verbessert hast",
-    "analysisBullet11": "Outlier-Pflege im Verwaltung-Tab: Solves die nach Pause aufgenommen wurden oder offensichtlich verklickt waren als Outlier markieren — sie zählen nicht für ao5/ao12/PB sondern bleiben nur für Historie sichtbar",
+    "analysisBullet11": "Outlier-Pflege unter Konto & Daten: Solves die nach Pause aufgenommen wurden oder offensichtlich verklickt waren als Outlier markieren — sie zählen nicht für ao5/ao12/PB sondern bleiben nur für Historie sichtbar",
     "trainerTitle": "Trainer",
     "trainerBullet1": "Achievements: 30+ Erfolge die du nebenbei freischaltest",
     "trainerBullet2": "Daily Challenges: jeden Tag eine neue kleine Aufgabe",
@@ -1096,8 +1101,8 @@
     "githubCreateIssue": "🚀 Issue erstellen",
     "githubBrowseIssues": "Bestehende Issues anschauen",
     "errorUnknown": "Unbekannter Fehler",
-    "appIntro": "Schreib direkt in der App — deine Nachricht landet in der Admin-Inbox. Sobald jemand geantwortet hat, siehst du das Ergebnis in „Verwaltung → Meine Daten → Mein Feedback\" und bekommst beim nächsten Login einen kleinen Hinweis.",
-    "appSuccessMessage": "✓ Feedback gespeichert. Danke! Du siehst Status + Antwort unter „Verwaltung → Meine Daten → Mein Feedback\".",
+    "appIntro": "Schreib direkt in der App — deine Nachricht landet in der Admin-Inbox. Sobald jemand geantwortet hat, siehst du das Ergebnis in „Konto & Daten → Meine Daten → Mein Feedback\" und bekommst beim nächsten Login einen kleinen Hinweis.",
+    "appSuccessMessage": "✓ Feedback gespeichert. Danke! Du siehst Status + Antwort unter „Konto & Daten → Meine Daten → Mein Feedback\".",
     "categoryLabel": "Worum geht's?",
     "typeGeneral": "💬 Allgemeines Feedback / Frage",
     "typeBug": "🐛 Bug — etwas funktioniert nicht",
@@ -1365,7 +1370,7 @@
     "infoBody2": "Daten werden 6 Stunden serverseitig gecached, damit die WCA-API nicht überlastet wird. Voraussetzung: WCA-ID in den Account-Einstellungen.",
     "loading": "Lade offizielles WCA-Profil…",
     "emptyNoIdIntro": "Du hast noch keine WCA-ID hinterlegt. Wenn du an offiziellen WCA-Wettkämpfen teilgenommen hast, kannst du deine WCA-ID in den Account-Einstellungen eintragen — dann werden hier deine offiziellen PRs + letzten Wettkämpfe angezeigt.",
-    "emptyNoIdHint": "Verwaltung → Einstellungen → Account → WCA-ID.",
+    "emptyNoIdHint": "Konto & Daten → Einstellungen → Account → WCA-ID.",
     "errorNotFound": "WCA-ID „{{id}}\" wurde im WCA-System nicht gefunden.",
     "errorNotFoundHint": "Schreibweise prüfen oder ID in den Account-Einstellungen korrigieren.",
     "errorGeneric": "WCA-Profil konnte nicht geladen werden.",
@@ -1408,7 +1413,7 @@
   "feedbackToaster": {
     "titleSingle": "💬 Du hast eine neue Antwort auf dein Feedback",
     "titleMulti": "💬 Du hast {{count}} neue Antworten auf dein Feedback",
-    "hint": "Klick mich → springt zu „Verwaltung → Meine Daten → Mein Feedback\".",
+    "hint": "Klick mich → springt zu „Konto & Daten → Meine Daten → Mein Feedback\".",
     "dismissAria": "Schließen"
   },
   "testerPanel": {

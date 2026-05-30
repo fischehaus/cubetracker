@@ -12,6 +12,7 @@ interface Props {
   email: string;
   displayName: string | null;
   isAdmin: boolean;
+  onOpenKonto: () => void;
   onOpenSettings: () => void;
   onOpenPatchNotes: () => void;
   onOpenRoadmap: () => void;
@@ -24,6 +25,7 @@ export function UserMenu({
   email,
   displayName,
   isAdmin,
+  onOpenKonto,
   onOpenSettings,
   onOpenPatchNotes,
   onOpenRoadmap,
@@ -111,7 +113,12 @@ export function UserMenu({
             )}
           </div>
 
-          {/* Menu-Items */}
+          {/* Menu-Items — „Konto & Daten" (W.ia-konto-usermenu) ist der
+              Haupteinstieg in Sessions/Hardware/Backup/Outliers/Einstellungen;
+              „Einstellungen" bleibt als Direktsprung zur Settings-Sektion. */}
+          <MenuItem onClick={() => run(onOpenKonto)} icon="👤">
+            {t("userMenu.konto")}
+          </MenuItem>
           <MenuItem onClick={() => run(onOpenSettings)} icon="⚙">
             {t("userMenu.settings")}
           </MenuItem>

@@ -7,9 +7,9 @@
 // erneut leer wird (z.B. nach DB-Reset).
 //
 // Drei klare Pfade nach drin:
-//  1. csTimer-Datei laden    → Tab-Wechsel zu VERWALTUNG/Import
+//  1. csTimer-Datei laden    → Konto & Daten / Daten (Import)
 //  2. Ersten Solve eintragen → Tab-Wechsel zu TIMER
-//  3. Hardware-Liste laden   → Tab-Wechsel zu VERWALTUNG/Hardware
+//  3. Hardware-Liste laden   → Konto & Daten / Hardware
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +17,15 @@ import { useSolves } from "../lib/api";
 import type { AppTab } from "./TabBar";
 
 const STORAGE_KEY = "cubetracker.onboarding.dismissed";
+
+// Sprung in die „Konto & Daten"-Ansicht (W.ia-konto-usermenu) — der globale
+// Listener in App.tsx fängt das Event + setzt Tab + Sektion. „konto" ist ein
+// Pseudo-Tab, daher kein direkter onSwitchTab-Pfad.
+function gotoKonto(section: "daten" | "hardware") {
+  window.dispatchEvent(
+    new CustomEvent("cubetracker:goto-konto-section", { detail: { section } }),
+  );
+}
 
 interface Props {
   onSwitchTab: (tab: AppTab) => void;
@@ -62,7 +71,7 @@ export function OnboardingBanner({ onSwitchTab }: Props) {
           </p>
           <div className="flex gap-3 flex-wrap">
             <button
-              onClick={() => onSwitchTab("verwaltung")}
+              onClick={() => gotoKonto("daten")}
               className="rounded bg-purple-600 px-4 py-2 text-base text-white hover:bg-purple-700"
             >
               {t("onboarding.actionImport")}
@@ -74,7 +83,7 @@ export function OnboardingBanner({ onSwitchTab }: Props) {
               {t("onboarding.actionFirstSolve")}
             </button>
             <button
-              onClick={() => onSwitchTab("verwaltung")}
+              onClick={() => gotoKonto("hardware")}
               className="rounded bg-gray-700 px-4 py-2 text-base text-gray-100 hover:bg-gray-600"
             >
               {t("onboarding.actionHardware")}
