@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-readability",
+        released=date(2026, 5, 30),
+        title="🔍 Lesbarkeit auf Skin-Hintergründen verbessert",
+        highlights=[
+            "Bei aktivem Hintergrund-Skin (besonders Pixel Academy + "
+            "Algorithm Lab mit hellen Bereichen) konnte der freistehende "
+            "Footer-Text (Impressum / Datenschutz / Feedback / Roadmap-"
+            "Links) gegen den Hintergrund wegfließen. Jetzt: Text + Links "
+            "in helleren Tönen (gray-200 / gray-100 statt 400 / 300) "
+            "plus drop-shadow — Pattern wie LoginPage-Footer.",
+            "Die Versionsnummer-Pill oben rechts (Health-Badge) bleibt "
+            "grün/violett, ist jetzt aber deutlich deckender "
+            "(Hintergrund-Opacity 10 → 25%, Border 30 → 50%, plus "
+            "backdrop-blur). Dadurch hebt sie sich auch vor hellen "
+            "Skin-Bereichen stabil ab, ohne ihren Farb-Charakter zu "
+            "verlieren.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-pixel-academy-lofi",
         released=date(2026, 5, 30),
         title="🎨 Zwei neue Skins: Pixel Academy + Lofi Solver",

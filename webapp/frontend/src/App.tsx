@@ -149,9 +149,12 @@ function HealthBadge({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       className={
+        // W.skin-readability (2026-05-30): Opacity 10→25, Border 30→50,
+        // backdrop-blur — Pill bleibt grün/violett, ist aber gegen helle
+        // Skin-Hintergründe (Pixel Academy / Algorithm Lab) stabil lesbar.
         isProd
-          ? "text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded px-3 py-1.5 hover:bg-emerald-500/20 cursor-pointer transition-colors"
-          : "text-sm text-purple-300 bg-purple-500/10 border border-purple-500/30 rounded px-3 py-1.5 hover:bg-purple-500/20 cursor-pointer transition-colors"
+          ? "text-sm text-emerald-200 bg-emerald-500/25 border border-emerald-500/50 backdrop-blur-sm rounded px-3 py-1.5 hover:bg-emerald-500/35 cursor-pointer transition-colors"
+          : "text-sm text-purple-200 bg-purple-500/25 border border-purple-500/50 backdrop-blur-sm rounded px-3 py-1.5 hover:bg-purple-500/35 cursor-pointer transition-colors"
       }
       title={t("health.patchNotesTitle")}
     >
@@ -814,49 +817,55 @@ function MainLayout() {
           <CommunityTab initialSection={communityInitial} />
         )}
 
-        <footer className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-400">
+        {/* W.skin-readability (2026-05-30): text-gray-400/300 + drop-shadow
+            damit der Footer auf hellen Skin-Bereichen (Pixel Academy,
+            Algorithm Lab) lesbar bleibt. Pattern analog LoginPage-Footer
+            (der hatte das schon). Punkte (·) bleiben gray-500 (zurueck-
+            haltend, kein drop-shadow noetig — ist ein Glyph zwischen
+            Links, nicht informativ). */}
+        <footer className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-200 drop-shadow-md">
           <span>
             {t("footer.appName")} — {t("footer.tagline")}
           </span>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true" className="text-gray-500">·</span>
           <button
             type="button"
             onClick={() => setShowFeatures(true)}
-            className="text-gray-300 hover:text-gray-100 underline"
+            className="text-gray-100 hover:text-white underline drop-shadow-sm"
           >
             {t("footer.featuresLink")}
           </button>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true" className="text-gray-500">·</span>
           <button
             type="button"
             onClick={() => setShowRoadmap(true)}
-            className="text-gray-300 hover:text-gray-100 underline"
+            className="text-gray-100 hover:text-white underline drop-shadow-sm"
           >
             {t("footer.roadmapLink")}
           </button>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true" className="text-gray-500">·</span>
           <button
             type="button"
             onClick={() => setShowFeedback(true)}
-            className="text-gray-300 hover:text-gray-100 underline"
+            className="text-gray-100 hover:text-white underline drop-shadow-sm"
           >
             {t("footer.feedbackLink")}
           </button>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true" className="text-gray-500">·</span>
           <a
             href="/impressum"
-            className="text-gray-300 hover:text-gray-100 underline"
+            className="text-gray-100 hover:text-white underline drop-shadow-sm"
           >
             {t("footer.imprint")}
           </a>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true" className="text-gray-500">·</span>
           <a
             href="/datenschutz"
-            className="text-gray-300 hover:text-gray-100 underline"
+            className="text-gray-100 hover:text-white underline drop-shadow-sm"
           >
             {t("footer.privacy")}
           </a>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true" className="text-gray-500">·</span>
           <span>{t("footer.moreOptionsHint")}</span>
         </footer>
       </div>
