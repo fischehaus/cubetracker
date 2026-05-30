@@ -944,10 +944,7 @@ function MainLayout() {
 
         {user && !user.email_verified && (
           <div className="mb-4 rounded-lg bg-amber-500/10 border border-amber-500/30 px-4 py-3 text-sm text-amber-200">
-            ⚠ Deine Email-Adresse ist noch nicht bestätigt. Wir haben dir
-            eine Verifikations-Mail geschickt — prüfe deinen Posteingang
-            (auch Spam). Unter „Konto & Daten" (Menü oben rechts) →
-            Einstellungen kannst du die Mail erneut senden.
+            ⚠ {t("auth.emailNotVerifiedBanner")}
           </div>
         )}
 

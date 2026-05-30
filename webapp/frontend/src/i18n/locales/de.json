@@ -207,6 +207,7 @@
     "verifyToApp": "Zur App"
   },
   "auth": {
+    "emailNotVerifiedBanner": "Deine Email-Adresse ist noch nicht bestätigt. Wir haben dir eine Verifikations-Mail geschickt — prüfe deinen Posteingang (auch Spam). Unter Konto & Daten (Menü oben rechts) → Einstellungen kannst du die Mail erneut senden.",
     "welcomeBack": "Willkommen zurück.",
     "createAccount": "Account erstellen.",
     "forgotPassword": "Passwort vergessen.",

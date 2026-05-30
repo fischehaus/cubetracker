@@ -207,6 +207,7 @@
     "verifyToApp": "To the app"
   },
   "auth": {
+    "emailNotVerifiedBanner": "Your email address is not verified yet. We've sent you a verification email — check your inbox (including spam). You can resend it under Account & data (menu top right) → Settings.",
     "welcomeBack": "Welcome back.",
     "createAccount": "Create your account.",
     "forgotPassword": "Forgot your password.",
