@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { useSolves, type SolveListParams } from "../lib/api";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle, EmptyState } from "./ui";
 import { buildHistogram } from "../lib/histogram";
 import type { SolvePoint } from "../lib/rolling";
 
@@ -44,41 +45,39 @@ export function HistogramChart({ cubeType, sessionId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
+      <Card className="text-gray-400 text-base">
         {t("charts.histLoading")}
-      </div>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
+      <Card tone="danger" className="text-red-300 text-base">
         {t("stats.errorPrefix", { message: error.message })}
-      </div>
+      </Card>
     );
   }
   if (!solves || solves.length === 0 || data.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h3 className="text-2xl font-semibold text-gray-100 mb-2">
-          {t("charts.histTitle")}
-        </h3>
-        <p className="text-base text-gray-500">{t("charts.histEmpty")}</p>
-      </div>
+      <Card>
+        <CardTitle className="mb-2">{t("charts.histTitle")}</CardTitle>
+        <EmptyState title={t("charts.histEmpty")} />
+      </Card>
     );
   }
 
   const totalValid = data.reduce((sum, b) => sum + b.count, 0);
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4 gap-2">
         <div className="flex items-center gap-2">
-          <h3 className="text-2xl font-semibold text-gray-100">
+          <CardTitle>
             {t("charts.histTitle")}{" "}
             <span className="text-base text-gray-400">
               {t("charts.histValidCount", { count: totalValid })}
             </span>
-          </h3>
+          </CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("charts.histInfoTitle")}</p>
             <p>{t("charts.histInfoBody")}</p>
@@ -112,6 +111,6 @@ export function HistogramChart({ cubeType, sessionId }: Props) {
           <Bar dataKey="count" fill="#a855f7" />
         </BarChart>
       </ResponsiveContainer>
-    </div>
+    </Card>
   );
 }

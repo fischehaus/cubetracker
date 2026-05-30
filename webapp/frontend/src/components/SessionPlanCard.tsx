@@ -20,6 +20,7 @@ import { useSolves } from "../lib/api";
 import { formatTime } from "../lib/format";
 import type { Solve } from "../lib/types";
 import { InfoButton } from "./InfoButton";
+import { Button, Card } from "./ui";
 
 interface Props {
   cubeType: string;
@@ -87,7 +88,7 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
 
   if (!activeSet) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-4">
+      <Card padding="sm">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <div className="flex items-center gap-2">
@@ -133,15 +134,12 @@ export function SessionPlanCard({ cubeType, sessionId }: Props) {
                 ∞
               </button>
             </div>
-            <button
-              onClick={startSet}
-              className="rounded bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
-            >
+            <Button variant="primary" onClick={startSet}>
               {t("trainingSet.startButton")}
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -227,12 +225,9 @@ function SessionEndFeedback({
         <h2 className="text-2xl font-bold text-emerald-100">
           {t("trainingSet.completedTitle")}
         </h2>
-        <button
-          onClick={onClose}
-          className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-200 hover:bg-gray-600"
-        >
+        <Button variant="secondary" size="sm" onClick={onClose}>
           {t("trainingSet.close")}
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">

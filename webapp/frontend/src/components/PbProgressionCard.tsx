@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import { usePbHistory } from "../lib/api";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle, EmptyState } from "./ui";
 import { formatDate, formatTime } from "../lib/format";
 
 interface Props {
@@ -97,10 +98,10 @@ export function PbProgressionCard({ cubeType, sessionId }: Props) {
   const header = (
     <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
       <div className="flex items-center gap-2">
-        <h3 className="text-2xl font-semibold text-gray-100">
+        <CardTitle>
           {t("charts.pbProgTitle")}{" "}
           <span className="text-base text-gray-400">({countLabel})</span>
-        </h3>
+        </CardTitle>
         <InfoButton>
           <p className="font-medium mb-1">{t("charts.pbProgTitle")}</p>
           <p>{t("charts.pbProgInfoBody")}</p>
@@ -112,26 +113,26 @@ export function PbProgressionCard({ cubeType, sessionId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
+      <Card className="text-gray-400 text-base">
         {t("charts.pbProgLoading")}
-      </div>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
+      <Card tone="danger" className="text-red-300 text-base">
         {t("stats.errorPrefix", { message: error.message })}
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       {header}
       {chartData.length === 0 ? (
-        <p className="text-base text-gray-500">
-          {t("charts.pbProgEmpty", { metric: METRIC_LABEL[metric] })}
-        </p>
+        <EmptyState
+          title={t("charts.pbProgEmpty", { metric: METRIC_LABEL[metric] })}
+        />
       ) : (
         <ResponsiveContainer width="100%" height={320}>
           <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
@@ -183,6 +184,6 @@ export function PbProgressionCard({ cubeType, sessionId }: Props) {
           </LineChart>
         </ResponsiveContainer>
       )}
-    </div>
+    </Card>
   );
 }

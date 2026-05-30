@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useStatsByHardware, type HardwareCubeStats } from "../lib/api";
 import { formatTime } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle, EmptyState } from "./ui";
 
 interface Props {
   cubeType: string;
@@ -109,39 +110,35 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
 
   if (!cubeType) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-2">
-          {t("charts.hwTitle")}
-        </h2>
-        <p className="text-base text-gray-500">
-          {t("charts.hwNoCubeFilter")}
-        </p>
-      </div>
+      <Card>
+        <CardTitle className="mb-2">{t("charts.hwTitle")}</CardTitle>
+        <EmptyState title={t("charts.hwNoCubeFilter")} />
+      </Card>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-base text-gray-400">
+      <Card className="text-base text-gray-400">
         {t("charts.hwLoading")}
-      </div>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
+      <Card tone="danger" className="text-red-300 text-base">
         {t("charts.hwErrorPrefix", { message: error.message })}
-      </div>
+      </Card>
     );
   }
   if (!data || data.hardware.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-2">
+      <Card>
+        <CardTitle className="mb-2">
           {t("charts.hwTitleWithCube", { cube: cubeType })}
-        </h2>
-        <p className="text-base text-gray-500">{t("charts.hwEmpty")}</p>
-      </div>
+        </CardTitle>
+        <EmptyState title={t("charts.hwEmpty")} />
+      </Card>
     );
   }
 
@@ -152,13 +149,13 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
   );
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4 gap-2">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold text-gray-100">
+          <CardTitle>
             {t("charts.hwTitle")}{" "}
             <span className="text-base text-gray-400">({cubeType})</span>
-          </h2>
+          </CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("charts.hwTitle")}</p>
             <p>{t("charts.hwInfoBody")}</p>
@@ -261,6 +258,6 @@ export function HardwareCompareCard({ cubeType, sessionId }: Props) {
       </div>
 
       <p className="mt-3 text-xs text-gray-500">{t("charts.hwFooter")}</p>
-    </div>
+    </Card>
   );
 }

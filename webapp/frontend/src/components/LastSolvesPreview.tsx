@@ -33,6 +33,7 @@ import {
   type SortKey,
 } from "../lib/solve-sort";
 import { InfoButton } from "./InfoButton";
+import { Card, EmptyState } from "./ui";
 
 interface Props {
   cubeType: string;
@@ -240,7 +241,7 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
   return (
     <div className="space-y-4">
       {/* Live-Stats prominent: letzter Solve + ao5/ao12 + Form-Vergleich */}
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+      <Card>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base uppercase tracking-wide text-gray-500">
             {t("lastSolvesPreview.liveTitle", { cube: cubeType })}
@@ -450,10 +451,10 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
             </button>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Letzte X Solves — sortierbare Tabelle mit AO5/AO12 als Spalten */}
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+      <Card>
         <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <div className="flex items-center gap-2">
             <h3 className="text-base uppercase tracking-wide text-gray-500">
@@ -714,14 +715,15 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
             </table>
           </div>
         ) : (
-          <p className="text-base text-gray-500">
-            {t("lastSolvesPreview.noSolves", { cube: cubeType })}
-          </p>
+          <EmptyState
+            size="sm"
+            title={t("lastSolvesPreview.noSolves", { cube: cubeType })}
+          />
         )}
         <p className="mt-2 text-[10px] text-gray-600">
           {t("lastSolvesPreview.sortHint")}
         </p>
-      </div>
+      </Card>
     </div>
   );
 }

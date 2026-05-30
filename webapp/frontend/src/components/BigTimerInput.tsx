@@ -20,6 +20,7 @@ import { parseTimeInput } from "../lib/format";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
 import type { TimerPenalty } from "../hooks/useSpacebarTimer";
+import { Button, Card } from "./ui";
 
 interface Props {
   cubeType: string;
@@ -277,7 +278,7 @@ export function BigTimerInput({
   }
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       {spacebarMode ? (
         <SpacebarTimerCard
           enabled={true}
@@ -343,13 +344,14 @@ export function BigTimerInput({
             />
             {t("timer.dnfLabel")}
           </label>
-          <button
+          <Button
+            variant="primary"
+            size="lg"
             onClick={save}
             disabled={create.isPending}
-            className="rounded bg-purple-600 px-6 py-3 text-base font-medium text-white hover:bg-purple-700 disabled:opacity-50"
           >
             {create.isPending ? t("timer.saving") : t("timer.save")}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -437,6 +439,6 @@ export function BigTimerInput({
           {error}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

@@ -18,7 +18,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "../../lib/cn";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost";
-type Size = "sm" | "md";
+type Size = "sm" | "md" | "lg";
 
 const VARIANT: Record<Variant, string> = {
   // primary: gefüllt, aber nicht grell — purple-600 mit ruhigem Hover.
@@ -38,6 +38,9 @@ const VARIANT: Record<Variant, string> = {
 const SIZE: Record<Size, string> = {
   sm: "px-3 py-1.5 text-sm",
   md: "px-4 py-2 text-sm",
+  // lg: großzügiges Touch-Target (≥44px) für primäre CTAs wie den
+  // Timer-Save-Button. WCAG 2.5.5.
+  lg: "px-6 py-3 text-base",
 };
 
 export interface ButtonProps

@@ -22,6 +22,7 @@ import {
 } from "recharts";
 import { useSolves, type SolveListParams } from "../lib/api";
 import { InfoButton } from "./InfoButton";
+import { Button, Card, CardTitle, EmptyState } from "./ui";
 import { computeYDomain, parseSecondsToMs } from "../lib/chart-utils";
 import { formatTime } from "../lib/format";
 import { rollingAverages, type SolvePoint } from "../lib/rolling";
@@ -106,26 +107,24 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
+      <Card className="text-gray-400 text-base">
         {t("charts.trendsLoading")}
-      </div>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
+      <Card tone="danger" className="text-red-300 text-base">
         {t("stats.errorPrefix", { message: error.message })}
-      </div>
+      </Card>
     );
   }
   if (!solves || solves.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h3 className="text-2xl font-semibold text-gray-100 mb-2">
-          {t("charts.trendsTitle")}
-        </h3>
-        <p className="text-base text-gray-500">{t("charts.trendsEmpty")}</p>
-      </div>
+      <Card>
+        <CardTitle className="mb-2">{t("charts.trendsTitle")}</CardTitle>
+        <EmptyState title={t("charts.trendsEmpty")} />
+      </Card>
     );
   }
 
@@ -133,15 +132,15 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
   const isManual = manualMinMs !== null || manualMaxMs !== null;
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <h3 className="text-2xl font-semibold text-gray-100">
+          <CardTitle>
             {t("charts.trendsTitle")}{" "}
             <span className="text-base text-gray-400">
               {t("charts.trendsSolvesCount", { count: chartData.length })}
             </span>
-          </h3>
+          </CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("charts.trendsInfoTitle")}</p>
             <p>{t("charts.trendsInfoBody")}</p>
@@ -204,15 +203,17 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
           />
         </label>
         {isManual && (
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
+            className="rounded"
             onClick={() => {
               setManualMin("");
               setManualMax("");
             }}
-            className="rounded bg-gray-700 px-2 py-1 text-gray-300 hover:bg-gray-600"
           >
             {t("charts.trendsReset")}
-          </button>
+          </Button>
         )}
         <span className="text-gray-500 ml-1 text-xs">
           {t("charts.trendsRangeHint")}
@@ -286,6 +287,6 @@ export function TrendsChart({ cubeType, sessionId }: Props) {
           />
         </LineChart>
       </ResponsiveContainer>
-    </div>
+    </Card>
   );
 }

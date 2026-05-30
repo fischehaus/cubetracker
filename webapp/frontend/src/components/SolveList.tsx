@@ -37,6 +37,7 @@ import {
 } from "../lib/solve-sort";
 import type { Solve } from "../lib/types";
 import { InfoButton } from "./InfoButton";
+import { Card, CardTitle, EmptyState } from "./ui";
 import { SolveDetailModal } from "./SolveDetailModal";
 
 interface Props {
@@ -211,52 +212,55 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6 text-gray-400 text-base">
+      <Card className="text-gray-400 text-base">
         {t("solveList.loading")}
-      </div>
+      </Card>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-red-300 text-base">
+      <Card tone="danger" className="text-red-300 text-base">
         {t("solveList.errorPrefix", { message: error.message })}
-      </div>
+      </Card>
     );
   }
   if (!solves || solves.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-2">
-          {t("solveList.title")}
-        </h2>
-        <p className="text-base text-gray-400">
-          {cubeFilter
-            ? t("solveList.emptyWithFilter", { cube: cubeFilter })
-            : t("solveList.emptyNoFilter")}
-        </p>
-        {cubeFilter && (
-          <button
-            onClick={() => onCubeFilterChange("")}
-            className="mt-3 text-base text-purple-400 hover:text-purple-300"
-          >
-            {t("solveList.resetFilter")}
-          </button>
-        )}
-      </div>
+      <Card>
+        <CardTitle className="mb-2">{t("solveList.title")}</CardTitle>
+        <EmptyState
+          size="sm"
+          title={
+            cubeFilter
+              ? t("solveList.emptyWithFilter", { cube: cubeFilter })
+              : t("solveList.emptyNoFilter")
+          }
+          action={
+            cubeFilter ? (
+              <button
+                onClick={() => onCubeFilterChange("")}
+                className="text-base text-purple-400 hover:text-purple-300"
+              >
+                {t("solveList.resetFilter")}
+              </button>
+            ) : undefined
+          }
+        />
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold text-gray-100">
+          <CardTitle>
             {t("solveList.title")}{" "}
             <span className="text-base text-gray-400">
               ({solves.length}
               {cubeFilter && ` · ${cubeFilter}`})
             </span>
-          </h2>
+          </CardTitle>
           <InfoButton>
             <p className="font-medium mb-1">{t("solveList.infoTitle")}</p>
             <p>{t("solveList.infoBody")}</p>
@@ -705,7 +709,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
           onClose={() => setDetailSolve(null)}
         />
       )}
-    </div>
+    </Card>
   );
 }
 

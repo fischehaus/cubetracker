@@ -33,6 +33,7 @@ import {
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import { InfoButton } from "./InfoButton";
 import { ScrambleNet, isScrambleNetSupported } from "./ScrambleNet";
+import { Button, Card } from "./ui";
 
 interface Props {
   /** App-cube_type ("3x3", "Pyraminx", …) — bestimmt den Default. */
@@ -218,7 +219,7 @@ export function ScrambleCard({
         : [];
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
+    <Card padding="md">
       <div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500 uppercase tracking-wide">
@@ -378,20 +379,22 @@ export function ScrambleCard({
             style={{ fontSize: fontPx }}
           />
           <div className="flex flex-wrap items-center gap-2 text-sm">
-            <button
+            <Button
               type="button"
+              variant="primary"
+              size="sm"
               onClick={applyCustomScramble}
-              className="rounded bg-purple-600 px-3 py-1.5 text-white hover:bg-purple-700"
             >
               {t("scramble.editApply")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={cancelEdit}
-              className="rounded border border-gray-700 px-3 py-1.5 text-gray-300 hover:bg-gray-800"
             >
               {t("scramble.editCancel")}
-            </button>
+            </Button>
             <span className="text-xs text-gray-500">
               {t("scramble.editNoValidation")}
             </span>
@@ -436,7 +439,7 @@ export function ScrambleCard({
             {t("scramble.randomMoveWarning")}
           </p>
         )}
-    </div>
+    </Card>
   );
 }
 

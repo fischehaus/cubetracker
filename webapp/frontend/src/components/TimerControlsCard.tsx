@@ -27,6 +27,7 @@ import { COMMON_CUBE_TYPES } from "../lib/format";
 import { useAppSettings } from "../lib/settings";
 import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
 import { InfoButton } from "./InfoButton";
+import { Button, Card } from "./ui";
 
 interface Props {
   cubeType: string;
@@ -134,7 +135,7 @@ export function TimerControlsCard({
       : null;
 
   return (
-    <div className="rounded-lg border border-gray-700 bg-gray-900/50 p-5">
+    <Card padding="md">
       {/* Drei Selektoren — auf Phone untereinander, ab md drei Spalten */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Cube-Type */}
@@ -264,22 +265,22 @@ export function TimerControlsCard({
               className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
             />
           </label>
-          <button
+          <Button
+            variant="primary"
             onClick={createNewSession}
             disabled={createSession.isPending || !newSessionName.trim()}
-            className="text-base rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:opacity-50"
           >
             {t("timerControls.newSessionCreate")}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
             onClick={() => {
               setShowNewSessionForm(false);
               setNewSessionName("");
             }}
-            className="text-base rounded bg-gray-700 px-3 py-2 text-gray-300 hover:bg-gray-600"
           >
             {t("timerControls.newSessionCancel")}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -359,7 +360,7 @@ export function TimerControlsCard({
           jetzt in TimerTab direkt (App.tsx), nicht mehr hier — damit
           er auch im Fokus-Modus sichtbar ist (TimerControlsCard wird
           dort versteckt). */}
-    </div>
+    </Card>
   );
 }
 
