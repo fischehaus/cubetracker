@@ -24,6 +24,62 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-31 (Abend 2, nach /compact) — Timer-Polish + Skin-Header-Pills + „Angemeldet bleiben"
+
+> 4 weitere Wellen nach der Kompaktierung (User-Wünsche), alle getaggt +
+> live-verifiziert. QA wo wesentlich (Timer-State-Machine, Auth).
+
+- **`W.timer-keep-last-time`** (commit `d00f29d` + Fix `2b89913`, Tag) — die
+  gestoppte Zeit bleibt nach dem Solve groß stehen (statt sofort 0.00). Reset
+  erst bei **Löschen** ODER Start des **nächsten Solves/Inspection**. **+2/DNF
+  lassen die Zeit bewusst stehen** (User-Entscheidung → Fix-Commit). Quick-
+  Penalty-Leiste (+2/DNF/Löschen) jetzt auch im **Zen-Modus**. Opt-in-Hook-
+  Option `restartFromStopped` (Trainer/DrillCard unangetastet). QA: 3 SOLLTE
+  gefixt — `penaltyRef` statt penalty-in-Deps (vorbestehender Listener-Riss beim
+  WCA-Overrun), Warn-Refs-Reset im stopped-Restart, Zen-Layout `min-h-0`.
+  features-data `solvingBullet11`.
+- **`W.timer-controls-height`** (commit `2123f95`, internal) — Steuerleiste über
+  dem Timer höhen-einheitlich: Schriftgrößen-Card + Fokus + Zen alle h-10 (40px),
+  Stepper + Größen-Pille h-8 (32px) + flex-wrap fürs Phone. Reine Kosmetik.
+- **`W.skin-pseudo-header-pills`** (commit `7139152`, internal) — die 6 UserMenu-
+  Bereiche (Profil/Einstellungen/Nachrichten/Konto/Admin/Tester) hatten Titel +
+  „Zurück zur App" nackt auf dem Hintergrund (auf Skins kaum lesbar). Neue
+  geteilte **`PseudoViewHeader`**-Komponente: Titel als `bg-gray-900/60`-Pille
+  (Skin-CSS schaltet sie deckend), Zurück-Button `secondary` statt `ghost`.
+  −69 Zeilen Doppel-Markup. Audit: Flow-Tabs nutzen schon `SectionHeading`-Pille.
+- **`W.remember-me`** (commit `d97ab01`, Tag) — Login-Checkbox **„Angemeldet
+  bleiben"** (default an = Bestandsverhalten). AN → persistenter Refresh-Cookie
+  (30d) + localStorage; AUS → Session-Cookie + sessionStorage (Shared-Device,
+  kein Token bleibt liegen). **Plus Cold-Start-Refresh** (AuthContext-Init holt
+  über den HttpOnly-Cookie einen neuen Access-Token → „angemeldet bleiben" wirkt
+  jetzt wirklich bis 30d, auch in der PWA). Backend: `UserLogin.remember_me` +
+  `_set_refresh_cookie(persistent=…)` (max_age=None = Session). 2 neue pytest
+  (6/6 grün). QA Auth-streng: 1 KRITISCH (Account-Delete → `clearAccessToken()`)
+  + 3 SOLLTE (`tryRefresh` verwirft Session nur bei echtem 401/403 = übersteht
+  Netzwerk-Blips; race-freie Pref-Reihenfolge; Multi-Tab-Doku). features-data
+  `accountBullet10`.
+
+**Tagesbilanz 2026-05-31 gesamt: 11 Wellen live** (7 vor /compact + 4 danach).
+
+### 🔜 Offen für die nächste Session (frischester Stand — ersetzt die Restpläne unten)
+
+1. **Item 3 — Hardware aus kuratierter Liste** (letztes der 3 User-Items;
+   `COMMON_HARDWARE` analog `COMMON_CUBE_TYPES`; Frontend + ggf. Daten-Migration
+   der Bestands-Hardware). **Wahrscheinlich die nächste konkrete Arbeit.**
+2. **Phase B — öffentliches/teilbares Profil** (Roadmap P3.10, großer Brocken):
+   Schema `avatar_url`/`bio`/`profile_visibility` + Migration + `GET /profile/{id}`
+   mit Zugriffskontrolle + 3 Stufen (privat/Freunde/öffentlich = nur eingeloggt).
+   `ProfilView` + die Sichtbarkeits-Platzhalter sind die Blaupause.
+3. **Kleinkram offen:** (a) Intro-Texte der Pseudo-Bereiche (z.B. „So sehen dich
+   andere Cuber …") liegen noch nackt auf dem Skin — User-Nachfrage offen, Backing
+   anbieten. (b) Remember-me v2.x: Refresh rotiert den Cookie NICHT — bei Browsern
+   die Session-Cookies bei Inaktivität verwerfen könnte das früher ausloggen;
+   falls relevant, Persistenz im Refresh-Token-Claim mitführen.
+4. **Nachrichten-Hub** (P3, bei Community-Messaging) + **Variante A** (Voll-Sub-
+   Tab-Routing) + **Phase 6** (Render-Abbau, `feature/W-api-prefix`→`main`).
+
+---
+
 ## ✅ ERLEDIGT 2026-05-31 (Abend) — Feedback-Pipeline + Zen-Timer + Nachrichten-Bereich
 
 > Nach dem /abschluss noch 3 Wellen draufgesetzt (User: „es geht weiter"),
