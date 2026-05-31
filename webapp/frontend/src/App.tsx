@@ -371,13 +371,13 @@ function TimerTab({
   // TimerControlsCard weg, Layout einspaltig — Scramble + Timer-Display
   // + (TouchPad) bekommen den ganzen Bildschirm.
   const focusToggle = (
-    <div className="flex justify-end mb-2 gap-2 items-center">
+    <div className="flex flex-wrap justify-end mb-2 gap-2 items-center">
       {/* W.timer-display-size: A−/A+ Buttons rotieren timer_font_size
           durch 7 Stufen (sm → 4XL). Eigene Card mit Border, Label-Pill
           in der Mitte. v3 (W.timer-polish-pbs 2026-05-28): jetzt auch
           in der vollen Ansicht sichtbar (vorher nur Fokus-Modus, User-
           Wunsch). */}
-      <div className="inline-flex items-center gap-2 rounded-lg border border-purple-500/30 bg-gray-900/60 p-1.5 shadow-sm">
+      <div className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-purple-500/30 bg-gray-900/60 px-1.5 shadow-sm">
           <span
             className="text-[11px] text-purple-300/80 uppercase tracking-wider px-2"
             aria-hidden="true"
@@ -388,14 +388,14 @@ function TimerTab({
             type="button"
             onClick={() => bumpFontSize("down")}
             disabled={!canShrink}
-            className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-700 bg-gray-800 text-base font-semibold text-gray-200 hover:bg-purple-700/40 hover:text-white hover:border-purple-500/60 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800 disabled:hover:text-gray-200 disabled:hover:border-gray-700"
+            className="flex items-center justify-center h-8 w-8 rounded-md border border-gray-700 bg-gray-800 text-base font-semibold text-gray-200 hover:bg-purple-700/40 hover:text-white hover:border-purple-500/60 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800 disabled:hover:text-gray-200 disabled:hover:border-gray-700"
             title={t("timerTab.fontSizeShrinkTitle")}
             aria-label={t("timerTab.fontSizeShrinkAria")}
           >
             A−
           </button>
           <span
-            className="px-3 py-1 rounded-full bg-purple-600/30 border border-purple-500/40 text-purple-100 text-xs font-mono font-semibold min-w-[3.5rem] text-center"
+            className="inline-flex h-8 items-center justify-center px-3 rounded-full bg-purple-600/30 border border-purple-500/40 text-purple-100 text-xs font-mono font-semibold min-w-[3.5rem] text-center"
             aria-live="polite"
           >
             {settings.timer_font_size.toUpperCase()}
@@ -404,7 +404,7 @@ function TimerTab({
             type="button"
             onClick={() => bumpFontSize("up")}
             disabled={!canGrow}
-            className="flex items-center justify-center w-10 h-10 rounded-md border border-gray-700 bg-gray-800 text-base font-semibold text-gray-200 hover:bg-purple-700/40 hover:text-white hover:border-purple-500/60 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800 disabled:hover:text-gray-200 disabled:hover:border-gray-700"
+            className="flex items-center justify-center h-8 w-8 rounded-md border border-gray-700 bg-gray-800 text-base font-semibold text-gray-200 hover:bg-purple-700/40 hover:text-white hover:border-purple-500/60 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800 disabled:hover:text-gray-200 disabled:hover:border-gray-700"
             title={t("timerTab.fontSizeGrowTitle")}
             aria-label={t("timerTab.fontSizeGrowAria")}
           >
@@ -414,7 +414,7 @@ function TimerTab({
       <button
         type="button"
         onClick={() => setFocusMode((v) => !v)}
-        className={`text-xs rounded px-3 py-1.5 border transition-colors ${
+        className={`text-xs rounded h-10 inline-flex items-center px-3 border transition-colors ${
           focusMode
             ? "border-purple-500/50 bg-purple-600/30 text-purple-100 hover:bg-purple-600/50"
             : "border-gray-700 bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 hover:text-gray-100"
@@ -436,7 +436,7 @@ function TimerTab({
         <button
           type="button"
           onClick={() => setZenMode(true)}
-          className="text-xs rounded px-3 py-1.5 border border-gray-700 bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 hover:text-gray-100 transition-colors"
+          className="text-xs rounded h-10 inline-flex items-center px-3 border border-gray-700 bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 hover:text-gray-100 transition-colors"
           title={t("timerTab.zenToggleTitle")}
         >
           {t("timerTab.zenToggle")}

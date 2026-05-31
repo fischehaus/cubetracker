@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-controls-height",
+        released=date(2026, 5, 31),
+        title="Timer-Steuerleiste: einheitliche Button-Höhe",
+        highlights=[
+            "Kosmetik: Die Knöpfe über dem Timer (Schriftgröße A-/A+, "
+            "Größen-Pille, Fokus, Zen) haben jetzt alle dieselbe Höhe und "
+            "die Leiste bricht auf schmalen Phones sauber um statt zu "
+            "überlaufen.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-keep-last-time",
         released=date(2026, 5, 31),
         title="⏱ Zeit bleibt nach dem Solve stehen + Schnellkorrektur im Zen",
