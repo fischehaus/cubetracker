@@ -70,6 +70,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
       { key: "features.solvingBullet1", audience: "public" }, // WCA-Timer + 3 Modi (merged with 2)
       { key: "features.solvingBullet3", audience: "public" }, // Touch-Timer Phone
       { key: "features.solvingBullet10", audience: "public" }, // Zen-Vollbild-Modus
+      { key: "features.solvingBullet11", audience: "public" }, // Zeit bleibt stehen + Quick-Korrektur (auch Zen)
       { key: "features.solvingBullet4", audience: "public" }, // Scramble WCA + Inoffiziell
       { key: "features.solvingBullet5", audience: "public" }, // 2D-Cube-Net-Vorschau
       { key: "features.solvingBullet6", audience: "public" }, // Trainings-Sets + Sessions (merged with 8)

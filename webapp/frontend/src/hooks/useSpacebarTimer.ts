@@ -82,10 +82,20 @@ interface Options {
     penalty: TimerPenalty,
     splitTimesMs: number[] | null,
   ) => void;
+  /**
+   * W.timer-keep-last-time (2026-05-31): wenn true, startet ein Space-/Tap-
+   * Druck im `stopped`-State direkt den nächsten Solve, statt nichts zu tun.
+   * Der Hook putzt dabei Penalty/Splits/Zeit des letzten Solves. Damit kann
+   * der Caller die zuletzt gestoppte Zeit stehen lassen (kein reset() nach
+   * dem Save) — sie bleibt sichtbar, bis der User den nächsten Solve startet.
+   * Default false → bestehende Aufrufer (DrillCard) unverändert: dort resettet
+   * der Caller wie gehabt direkt nach dem Save.
+   */
+  restartFromStopped?: boolean;
 }
 
 export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
-  const { enabled, settings, onComplete } = opts;
+  const { enabled, settings, onComplete, restartFromStopped = false } = opts;
   const [state, setState] = useState<TimerState>("idle");
   const [displayMs, setDisplayMs] = useState(0);
   const [inspectionLeftMs, setInspectionLeftMs] = useState(0);
@@ -96,6 +106,16 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
 
   // Refs für state-machine — useRef vermeidet stale-closure in keydown-handler
   const stateRef = useRef<TimerState>("idle");
+  // W.timer-keep-last-time: Ref statt Closure, damit der keydown-Handler den
+  // aktuellen Wert sieht ohne neu zu subscriben.
+  const restartFromStoppedRef = useRef(restartFromStopped);
+  restartFromStoppedRef.current = restartFromStopped;
+  // QA W.timer-keep-last-time: penalty zusätzlich als Ref spiegeln (siehe
+  // Sync-Effect unten). Der keydown-Handler liest beim Stop penaltyRef.current,
+  // damit `penalty` NICHT in der Listener-Dep-Liste stehen muss — sonst würden
+  // die Listener bei jedem WCA-Overrun-Penalty-Tick neu subscriben und ein
+  // Keydown könnte im Re-Subscribe-Fenster verloren gehen.
+  const penaltyRef = useRef<TimerPenalty>("none");
   const inspectionStartRef = useRef<number>(0);
   const holdStartRef = useRef<number>(0);
   const runStartRef = useRef<number>(0);
@@ -116,6 +136,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
     setDisplayMs(0);
     setInspectionLeftMs(0);
     setPenalty("none");
+    penaltyRef.current = "none";
     setSplits([]);
     setPhaseIndex(0);
     splitsRef.current = [];
@@ -131,6 +152,13 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       tickIdRef.current = null;
     }
   }, []);
+
+  // QA W.timer-keep-last-time: penaltyRef synchron zum penalty-State halten,
+  // damit der keydown-Handler beim Stop den aktuellen Penalty liest, ohne dass
+  // `penalty` in der Listener-Dep-Liste steht.
+  useEffect(() => {
+    penaltyRef.current = penalty;
+  }, [penalty]);
 
   // RAF-tick für running + inspection countdown
   useEffect(() => {
@@ -239,7 +267,24 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
 
       const cur = stateRef.current;
 
-      if (cur === "idle") {
+      if (cur === "idle" || (restartFromStoppedRef.current && cur === "stopped")) {
+        // W.timer-keep-last-time: aus „stopped" kommend den letzten Solve-
+        // State putzen, damit der neue Solve frisch startet (Penalty/Splits/
+        // Zeit des Vorgängers nicht übernehmen). Die zuletzt gestoppte Zeit
+        // blieb bis zu diesem Druck sichtbar — jetzt geht sie auf 0.00 /
+        // Inspection (= „reset to 0.00 when next solve started").
+        if (cur === "stopped") {
+          setPenalty("none");
+          penaltyRef.current = "none";
+          setSplits([]);
+          setPhaseIndex(0);
+          splitsRef.current = [];
+          setDisplayMs(0);
+          // QA: Warn-Refs zurücksetzen, sonst spielt die nächste Inspection
+          // (direkt aus stopped gestartet) keine 8s/12s-Sounds.
+          playedWarn8Ref.current = false;
+          playedWarn12Ref.current = false;
+        }
         if (settings.inspection_enabled) {
           // Inspection starten
           inspectionStartRef.current = performance.now();
@@ -344,7 +389,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
               i === 0 ? v : v - finalCumulative[i - 1],
             )
           : null;
-        if (onComplete) onComplete(cumulativeMs, penalty, phaseDurations);
+        if (onComplete) onComplete(cumulativeMs, penaltyRef.current, phaseDurations);
         return;
       }
     }
@@ -389,7 +434,7 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       window.removeEventListener("keydown", handleDown);
       window.removeEventListener("keyup", handleUp);
     };
-  }, [enabled, settings, onComplete, penalty]);
+  }, [enabled, settings, onComplete]);
 
   return {
     state,

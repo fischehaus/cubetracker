@@ -66,6 +66,13 @@ interface Props {
    * undefined → no-op für bestehende Aufrufer.
    */
   onStateChange?: (state: TimerState) => void;
+  /**
+   * W.timer-keep-last-time (2026-05-31): an useSpacebarTimer durchgereicht —
+   * erlaubt den Restart direkt aus dem `stopped`-State (Timer-Tab lässt damit
+   * die letzte Zeit stehen). Default undefined → false. DrillCard lässt es
+   * weg → unverändert.
+   */
+  restartFromStopped?: boolean;
 }
 
 export function SpacebarTimerCard({
@@ -77,6 +84,7 @@ export function SpacebarTimerCard({
   fontSizeOverride,
   bare = false,
   onStateChange,
+  restartFromStopped,
 }: Props) {
   const { t } = useTranslation();
   const effectiveFontSize = fontSizeOverride ?? settings.timer_font_size;
@@ -84,6 +92,7 @@ export function SpacebarTimerCard({
     enabled,
     settings,
     onComplete: onSave,
+    restartFromStopped,
   });
   const isTouchDevice = useIsTouchDevice();
   // W.timer-card-tap (2026-05-30): User-Wunsch — auf Phone soll das

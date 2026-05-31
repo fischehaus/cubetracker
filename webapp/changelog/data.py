@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-keep-last-time",
+        released=date(2026, 5, 31),
+        title="⏱ Zeit bleibt nach dem Solve stehen + Schnellkorrektur im Zen",
+        highlights=[
+            "Im Spacebar-/Tap-Timer bleibt deine gestoppte Zeit jetzt groß "
+            "stehen, statt sofort auf 0.00 zu springen — bis du den nächsten "
+            "Solve startest (antippen/Leertaste) oder direkt unter der Zeit "
+            "+2, DNF oder Löschen wählst. So kannst du nach jedem Versuch in "
+            "Ruhe das Ergebnis lesen und korrigieren. Diese Schnellkorrektur-"
+            "Knöpfe erscheinen jetzt auch im Zen-Vollbild-Modus.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ia-nachrichten-bereich",
         released=date(2026, 5, 31),
         title="📬 Eigener Nachrichten-Bereich + Ungelesen-Badge",

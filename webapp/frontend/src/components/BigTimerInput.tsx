@@ -63,12 +63,17 @@ export function BigTimerInput({
   const [dnf, setDnf] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [settings] = useAppSettings();
-  // Reset-Counter für SpacebarTimerCard nach erfolgreichem Save
+  // W.timer-keep-last-time (2026-05-31): Reset-Counter für SpacebarTimerCard.
+  // Wird NICHT mehr nach dem Save gebumpt (die letzte Zeit bleibt stehen),
+  // sondern erst wenn der User per Quick-Button (+2 / DNF / Löschen) reagiert.
+  // Den nächsten Solve-Start resettet die Anzeige direkt im Hook
+  // (restartFromStopped) — kein Seed-Bump nötig.
   const [spacebarResetSeed, setSpacebarResetSeed] = useState(0);
-  // W.timer-zen-mode (QA): aktueller Timer-State im Zen-Overlay, um den
-  // Exit-× während eines laufenden Solves auszublenden (kein versehentliches
-  // Verwerfen einer Zeit).
-  const [zenTimerState, setZenTimerState] = useState<TimerState>("idle");
+  // Aktueller Timer-State (vom SpacebarTimerCard via onStateChange nach oben
+  // gemeldet). Steuert (a) das Ausblenden des Zen-Exit-× während eines
+  // laufenden Solves und (b) das Verstecken der Quick-Penalty-Leiste, sobald
+  // der nächste Solve startet (W.timer-keep-last-time).
+  const [spacebarState, setSpacebarState] = useState<TimerState>("idle");
   const spacebarMode = settings.spacebar_enabled;
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -103,6 +108,9 @@ export function BigTimerInput({
   useEffect(() => {
     setLastSavedSolve(null);
     setDeleteConfirm(false);
+    // W.timer-keep-last-time: Cube/Session-Wechsel → auch die stehengebliebene
+    // letzte Zeit verwerfen (sie gehörte zum alten Cube / der alten Session).
+    setSpacebarResetSeed((s) => s + 1);
   }, [cubeType, sessionId]);
 
   // QA-Fix M#8: Delete-Confirm nach 5s ohne 2. Klick wieder zurücksetzen,
@@ -165,6 +173,21 @@ export function BigTimerInput({
   useEffect(() => {
     setDeleteConfirm(false);
   }, [lastSavedSolve?.id]);
+
+  // W.timer-keep-last-time (2026-05-31): sobald ein neuer Solve startet
+  // (Inspection / Hold-ready / Running), die Quick-Penalty-Leiste des
+  // vorherigen Solves ausblenden — die letzte Zeit stand bis hierhin still,
+  // jetzt übernimmt der neue Solve die Anzeige.
+  useEffect(() => {
+    if (
+      spacebarState === "inspection" ||
+      spacebarState === "ready" ||
+      spacebarState === "running"
+    ) {
+      setLastSavedSolve(null);
+      setDeleteConfirm(false);
+    }
+  }, [spacebarState]);
 
   function save() {
     setError(null);
@@ -233,8 +256,10 @@ export function BigTimerInput({
       },
       {
         onSuccess: (savedSolve) => {
-          // Auto-Reset des SpacebarTimer + neuer Scramble
-          setSpacebarResetSeed((s) => s + 1);
+          // W.timer-keep-last-time: KEIN Auto-Reset mehr — die gestoppte Zeit
+          // bleibt sichtbar, bis der User reagiert (+2/DNF/Löschen) oder den
+          // nächsten Solve startet. Nur Quick-Penalty-Leiste setzen + neuen
+          // Scramble holen.
           setLastSavedSolve(savedSolve);
           onSolveSaved?.();
         },
@@ -256,7 +281,11 @@ export function BigTimerInput({
         payload: { plus_two: nextPlusTwo, dnf: false },
       },
       {
-        onSuccess: (updated) => setLastSavedSolve(updated),
+        onSuccess: (updated) => {
+          setLastSavedSolve(updated);
+          // W.timer-keep-last-time: Auswahl getroffen → Timer auf 0.00.
+          setSpacebarResetSeed((s) => s + 1);
+        },
       },
     );
   }
@@ -269,7 +298,11 @@ export function BigTimerInput({
         payload: { dnf: nextDnf, plus_two: false },
       },
       {
-        onSuccess: (updated) => setLastSavedSolve(updated),
+        onSuccess: (updated) => {
+          setLastSavedSolve(updated);
+          // W.timer-keep-last-time: Auswahl getroffen → Timer auf 0.00.
+          setSpacebarResetSeed((s) => s + 1);
+        },
       },
     );
   }
@@ -286,14 +319,96 @@ export function BigTimerInput({
       onSuccess: () => {
         setLastSavedSolve(null);
         setDeleteConfirm(false);
+        // W.timer-keep-last-time: gelöscht → Timer auf 0.00.
+        setSpacebarResetSeed((s) => s + 1);
       },
     });
   }
+
+  // W.timer-keep-last-time (2026-05-31): die Quick-Penalty-Leiste (+2 / DNF /
+  // Löschen / ausblenden) als wiederverwendbares Fragment — wird sowohl im
+  // normalen Timer-Card als auch im Zen-Vollbild gerendert (User-Wunsch: die
+  // Wahlmöglichkeiten müssen auch im Zen-Modus nach dem Solve erscheinen).
+  // Wirkt auf den zuletzt gespeicherten Solve (PATCH/DELETE); danach setzt der
+  // jeweilige Handler den Timer per spacebarResetSeed auf 0.00.
+  const quickButtons = lastSavedSolve ? (
+    <>
+      {/* QA-Fix H#2: cube_type ins Label, damit User auch über Cube-Wechsel
+          hinweg weiss, welcher Solve gerade bearbeitet wird. */}
+      <span className="text-gray-500">
+        {t("timer.lastSolve", { cube: lastSavedSolve.cube_type })}
+      </span>
+      <button
+        type="button"
+        onClick={toggleLastPlusTwo}
+        disabled={update.isPending || lastSavedSolve.dnf}
+        className={`rounded px-3 py-1.5 transition-colors ${
+          lastSavedSolve.plus_two
+            ? "bg-amber-600/40 text-amber-100 hover:bg-amber-600/60"
+            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+        } disabled:opacity-40 disabled:cursor-not-allowed`}
+        title={
+          lastSavedSolve.plus_two
+            ? t("timer.plusTwoRemove")
+            : lastSavedSolve.dnf
+            ? t("timer.plusTwoNotPossibleOnDnf")
+            : t("timer.plusTwoMark")
+        }
+      >
+        {lastSavedSolve.plus_two ? "✓ +2" : "+2"}
+      </button>
+      <button
+        type="button"
+        onClick={toggleLastDnf}
+        disabled={update.isPending}
+        className={`rounded px-3 py-1.5 transition-colors ${
+          lastSavedSolve.dnf
+            ? "bg-red-600/40 text-red-100 hover:bg-red-600/60"
+            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+        } disabled:opacity-40 disabled:cursor-not-allowed`}
+        title={
+          lastSavedSolve.dnf
+            ? t("timer.dnfRemove")
+            : lastSavedSolve.plus_two
+            ? t("timer.dnfMarkRemovesPlusTwo")
+            : t("timer.dnfMark")
+        }
+      >
+        {lastSavedSolve.dnf ? "✓ DNF" : "DNF"}
+      </button>
+      <button
+        type="button"
+        onClick={deleteLast}
+        disabled={del.isPending}
+        className={`rounded px-3 py-1.5 transition-colors ${
+          deleteConfirm
+            ? "bg-red-700 text-red-100 hover:bg-red-600 animate-pulse"
+            : "bg-gray-800 text-gray-400 hover:bg-red-900/40 hover:text-red-200"
+        } disabled:opacity-40`}
+        title={
+          deleteConfirm ? t("timer.deleteSecondClick") : t("timer.deleteLast")
+        }
+      >
+        {deleteConfirm ? t("timer.deleteConfirm") : t("timer.deleteIcon")}
+      </button>
+      <button
+        type="button"
+        onClick={() => setLastSavedSolve(null)}
+        className="rounded px-2 py-1.5 text-xs text-gray-500 hover:text-gray-300"
+        title={t("timer.hideQuickButtons")}
+      >
+        ↺
+      </button>
+    </>
+  ) : null;
 
   // W.timer-zen-mode (2026-05-31): Vollbild-Zen-Modus — nur Scramble + große
   // Zeit, Tap (Mobile) / Space (Desktop) tracket, sonst nichts. Reuse der
   // SELBEN SpacebarTimerCard-Instanz (KEIN zweiter useSpacebarTimer → kein
   // Doppel-Listener / Doppel-Save). Nur im Spacebar-Modus sinnvoll.
+  // INVARIANTE: Zen-Overlay und normales Card sind mutual exclusive (early
+  // return) — es darf IMMER nur EINE SpacebarTimerCard gleichzeitig gemountet
+  // sein, sonst doppelte keydown-Listener + Doppel-Save.
   if (spacebarMode && zen && onExitZen) {
     return (
       <div
@@ -305,7 +420,7 @@ export function BigTimerInput({
       >
         {/* Exit-× nur wenn kein Solve läuft — verhindert versehentliches
             Verwerfen einer laufenden Zeit (QA). */}
-        {(zenTimerState === "idle" || zenTimerState === "stopped") && (
+        {(spacebarState === "idle" || spacebarState === "stopped") && (
           <button
             type="button"
             onClick={onExitZen}
@@ -327,8 +442,10 @@ export function BigTimerInput({
           </div>
         </div>
         {/* Große Zeit — tap/space tracket. SpacebarTimerCard füllt im bare-
-            Modus die Fläche (großes Tap-Target). */}
-        <div className="flex flex-1 items-stretch px-4 pb-4">
+            Modus die Fläche (großes Tap-Target). min-h-0 → bei niedrigem
+            Viewport schrumpft die Zeit-Fläche, statt die Quick-Leiste darunter
+            zu überlagern (QA). */}
+        <div className="flex min-h-0 flex-1 items-stretch px-4 pb-4">
           <SpacebarTimerCard
             enabled={true}
             settings={settings}
@@ -336,9 +453,18 @@ export function BigTimerInput({
             onSave={saveFromSpacebar}
             resetSeed={spacebarResetSeed}
             bare
-            onStateChange={setZenTimerState}
+            onStateChange={setSpacebarState}
+            restartFromStopped
           />
         </div>
+        {/* W.timer-keep-last-time: Quick-Penalty-Leiste auch im Zen-Modus
+            (User-Wunsch) — erscheint nach dem Solve unter der großen Zeit.
+            Außerhalb des tappbaren Timer-Bereichs → kein Tap-Konflikt. */}
+        {quickButtons && (
+          <div className="flex flex-shrink-0 flex-wrap items-center justify-center gap-2 px-4 pb-6 text-sm">
+            {quickButtons}
+          </div>
+        )}
       </div>
     );
   }
@@ -352,6 +478,8 @@ export function BigTimerInput({
           phaseNames={settings.phase_names}
           onSave={saveFromSpacebar}
           resetSeed={spacebarResetSeed}
+          onStateChange={setSpacebarState}
+          restartFromStopped
         />
       ) : (
         <div>
@@ -421,82 +549,14 @@ export function BigTimerInput({
         </div>
       )}
 
-      {/* Penalty-Quick-Buttons (Phase W.penalty-quick, 2026-05-17):
-          erscheinen direkt nach dem Save unter dem Timer. Korrigieren
-          die Penalty oder löschen den Solve ohne den Weg über die
-          Letzte-Solves-Sidebar. Verschwinden wenn lastSavedSolve null
-          ist (= neuer Solve gestartet, anderer Cube gewählt, manueller
-          ↺-Klick). */}
-      {lastSavedSolve && (
-        <div className="mt-4 flex items-center justify-center gap-2 flex-wrap text-sm">
-          {/* QA-Fix H#2: cube_type ins Label, damit User auch über
-              Cube-Wechsel hinweg weiss, welcher Solve gerade bearbeitet wird. */}
-          <span className="text-gray-500">
-            {t("timer.lastSolve", { cube: lastSavedSolve.cube_type })}
-          </span>
-          <button
-            type="button"
-            onClick={toggleLastPlusTwo}
-            disabled={update.isPending || lastSavedSolve.dnf}
-            className={`rounded px-3 py-1.5 transition-colors ${
-              lastSavedSolve.plus_two
-                ? "bg-amber-600/40 text-amber-100 hover:bg-amber-600/60"
-                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-            } disabled:opacity-40 disabled:cursor-not-allowed`}
-            title={
-              lastSavedSolve.plus_two
-                ? t("timer.plusTwoRemove")
-                : lastSavedSolve.dnf
-                ? t("timer.plusTwoNotPossibleOnDnf")
-                : t("timer.plusTwoMark")
-            }
-          >
-            {lastSavedSolve.plus_two ? "✓ +2" : "+2"}
-          </button>
-          <button
-            type="button"
-            onClick={toggleLastDnf}
-            disabled={update.isPending}
-            className={`rounded px-3 py-1.5 transition-colors ${
-              lastSavedSolve.dnf
-                ? "bg-red-600/40 text-red-100 hover:bg-red-600/60"
-                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-            } disabled:opacity-40 disabled:cursor-not-allowed`}
-            title={
-              lastSavedSolve.dnf
-                ? t("timer.dnfRemove")
-                : lastSavedSolve.plus_two
-                ? t("timer.dnfMarkRemovesPlusTwo")
-                : t("timer.dnfMark")
-            }
-          >
-            {lastSavedSolve.dnf ? "✓ DNF" : "DNF"}
-          </button>
-          <button
-            type="button"
-            onClick={deleteLast}
-            disabled={del.isPending}
-            className={`rounded px-3 py-1.5 transition-colors ${
-              deleteConfirm
-                ? "bg-red-700 text-red-100 hover:bg-red-600 animate-pulse"
-                : "bg-gray-800 text-gray-400 hover:bg-red-900/40 hover:text-red-200"
-            } disabled:opacity-40`}
-            title={
-              deleteConfirm
-                ? t("timer.deleteSecondClick")
-                : t("timer.deleteLast")
-            }
-          >
-            {deleteConfirm ? t("timer.deleteConfirm") : t("timer.deleteIcon")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setLastSavedSolve(null)}
-            className="rounded px-2 py-1.5 text-xs text-gray-500 hover:text-gray-300"
-            title={t("timer.hideQuickButtons")}
-          >
-            ↺
-          </button>
+      {/* Penalty-Quick-Buttons (Phase W.penalty-quick, 2026-05-17;
+          W.timer-keep-last-time 2026-05-31): erscheinen direkt nach dem Save
+          unter dem Timer. Korrigieren die Penalty oder löschen den Solve ohne
+          den Weg über die Letzte-Solves-Sidebar. Identisches Fragment wie im
+          Zen-Overlay (siehe quickButtons). */}
+      {quickButtons && (
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm">
+          {quickButtons}
         </div>
       )}
 
