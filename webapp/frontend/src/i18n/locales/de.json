@@ -33,6 +33,19 @@
     "title": "Konto & Daten",
     "back": "← Zurück zur App"
   },
+  "profilView": {
+    "title": "Profil",
+    "back": "← Zurück zur App",
+    "intro": "So sehen dich andere Cuber. Hier verwaltest du deinen Namen, dein Land, deine WCA-ID — und bald, wer dein Profil sehen darf.",
+    "visibilityTitle": "Sichtbarkeit & Teilen",
+    "visibilitySoon": "Bald",
+    "visibilityIntro": "Bald bestimmst du selbst, wer dein Profil sieht:",
+    "visibilityL1": "Privat — nur du",
+    "visibilityL2": "Nur Freunde — deine bestätigten Freunde",
+    "visibilityL3": "Öffentlich — alle eingeloggten Cuber",
+    "visibilityShareNote": "Plus eine teilbare Solving-Card für deine Freunde.",
+    "visibilityCurrentNote": "Heute steuerst du das über die Auffindbarkeit oben — das 3-Stufen-Modell löst sie bald ab."
+  },
   "adminBereich": {
     "title": "Admin",
     "back": "← Zurück zur App",
@@ -114,6 +127,7 @@
     "footerGithubLink": "Quellcode auf GitHub"
   },
   "userMenu": {
+    "profil": "Profil",
     "konto": "Konto & Daten",
     "settings": "Einstellungen",
     "admin": "Admin",
@@ -1385,9 +1399,9 @@
     "infoBody2": "Daten werden 6 Stunden serverseitig gecached, damit die WCA-API nicht überlastet wird. Voraussetzung: WCA-ID in den Account-Einstellungen.",
     "loading": "Lade offizielles WCA-Profil…",
     "emptyNoIdIntro": "Du hast noch keine WCA-ID hinterlegt. Wenn du an offiziellen WCA-Wettkämpfen teilgenommen hast, kannst du deine WCA-ID in den Account-Einstellungen eintragen — dann werden hier deine offiziellen PRs + letzten Wettkämpfe angezeigt.",
-    "emptyNoIdHint": "Konto & Daten → Einstellungen → Account → WCA-ID.",
+    "emptyNoIdHint": "Trag deine WCA-ID oben in deinem Profil ein.",
     "errorNotFound": "WCA-ID „{{id}}\" wurde im WCA-System nicht gefunden.",
-    "errorNotFoundHint": "Schreibweise prüfen oder ID in den Account-Einstellungen korrigieren.",
+    "errorNotFoundHint": "Schreibweise prüfen oder ID oben in deinem Profil korrigieren.",
     "errorGeneric": "WCA-Profil konnte nicht geladen werden.",
     "serviceDownBanner": "Der WCA-Service ist derzeit nicht erreichbar — dein WCA-Profil und die offiziellen Records können vorübergehend fehlen oder veraltet sein.",
     "serviceDownDismiss": "Hinweis ausblenden",

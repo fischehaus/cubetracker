@@ -13,6 +13,7 @@ interface Props {
   displayName: string | null;
   isAdmin: boolean;
   isTester: boolean;
+  onOpenProfil: () => void;
   onOpenKonto: () => void;
   onOpenSettings: () => void;
   onOpenAdmin: () => void;
@@ -29,6 +30,7 @@ export function UserMenu({
   displayName,
   isAdmin,
   isTester,
+  onOpenProfil,
   onOpenKonto,
   onOpenSettings,
   onOpenAdmin,
@@ -122,7 +124,10 @@ export function UserMenu({
           {/* Menu-Items — „Konto & Daten" (W.ia-konto-usermenu) ist der
               Haupteinstieg in Sessions/Hardware/Backup/Outliers/Einstellungen;
               „Einstellungen" bleibt als Direktsprung zur Settings-Sektion. */}
-          <MenuItem onClick={() => run(onOpenKonto)} icon="👤">
+          <MenuItem onClick={() => run(onOpenProfil)} icon="👤">
+            {t("userMenu.profil")}
+          </MenuItem>
+          <MenuItem onClick={() => run(onOpenKonto)} icon="🗄">
             {t("userMenu.konto")}
           </MenuItem>
           <MenuItem onClick={() => run(onOpenSettings)} icon="⚙">

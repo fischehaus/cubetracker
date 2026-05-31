@@ -25,6 +25,7 @@ export type AppTab =
   // Pseudo-Tabs (W.ia-konto-usermenu / W.ia-admin-bereich): gültige Routing-
   // Zustände, aber NICHT in der TabBar — erreichbar nur über das UserMenu.
   | "konto" // Konto & Daten (alle User)
+  | "profil" // Profil (alle User) — nach außen gerichtete Identität
   | "admin" // nur is_admin
   | "tester" // nur is_tester && !is_admin
   // toter Migrations-Durchgang: alter „verwaltung"-Tab-Zustand wird in
@@ -47,7 +48,8 @@ const TAB_ICONS: Record<AppTab, string> = {
   community: "🤝",
   // Pseudo-Tabs erscheinen nie in der Leiste — Einträge nur für die
   // Record-Vollständigkeit (TypeScript verlangt alle AppTab-Keys).
-  konto: "👤",
+  konto: "🗄",
+  profil: "👤",
   admin: "🛡",
   tester: "🧪",
   verwaltung: "⚙",

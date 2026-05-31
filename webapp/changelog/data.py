@@ -44,6 +44,22 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ia-profil-bereich",
+        released=date(2026, 5, 31),
+        title="👤 Neuer Profil-Bereich",
+        highlights=[
+            "Im Menü oben rechts gibt es jetzt einen eigenen Bereich Profil — "
+            "hier wohnt deine nach außen gerichtete Identität an einem Ort: "
+            "Anzeigename, Land, deine WCA-ID samt offiziellem WCA-Profil "
+            "(Bestzeiten, Medaillen, Wettkämpfe) und die Auffindbarkeit für "
+            "Freunde. Vorher war das über die Einstellungen und das "
+            "Statistik-Dashboard verstreut.",
+            "Schon als Ausblick sichtbar: die kommende Sichtbarkeits-Steuerung "
+            "(privat / nur Freunde / öffentlich) und eine teilbare "
+            "Solving-Card — beides kommt in einem nächsten Schritt.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ia-nav-entdopplung",
         released=date(2026, 5, 31),
         title="🧹 Aufgeräumte Navigation: ein Ort pro Aktion",

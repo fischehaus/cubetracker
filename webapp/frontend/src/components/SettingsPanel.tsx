@@ -1,6 +1,7 @@
-// SettingsPanel (Phase 8.2 + W.8) — Sub-Tab in VERWALTUNG.
-// W.8: AccountSettingsPanel oben drüber gerendert (Profil + Passwort +
-// Email + Account-Löschen). Drunter dann die App-/Timer-/Drill-Settings.
+// SettingsPanel (Phase 8.2 + W.8) — „Einstellungen"-Subtab in Konto & Daten.
+// AccountSettingsPanel (seit W.ia-profil-bereich: NUR Sicherheit — Passwort/
+// Email/Account-Löschen; die Identitäts-Felder leben jetzt im Profil) oben,
+// darunter Aussehen/Skins + App-/Timer-/Drill-Settings.
 
 import { useTranslation } from "react-i18next";
 import { AccountSettingsPanel } from "./AccountSettingsPanel";
@@ -50,7 +51,8 @@ export function SettingsPanel() {
 
   return (
     <div className="space-y-4">
-      {/* W.8: Account-Settings (Profil, Passwort, Email, Account-Löschen) */}
+      {/* W.ia-profil-bereich: AccountSettingsPanel = nur noch Sicherheit
+          (Passwort/Email/Account-Löschen). Identität → Profil (UserMenu). */}
       <AccountSettingsPanel />
 
       {/* W.skin-cyberpunk-mvp: Skin-Picker (Background-Bilder).

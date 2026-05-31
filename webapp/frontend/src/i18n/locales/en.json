@@ -33,6 +33,19 @@
     "title": "Account & data",
     "back": "← Back to app"
   },
+  "profilView": {
+    "title": "Profile",
+    "back": "← Back to app",
+    "intro": "This is how other cubers see you. Manage your name, country and WCA ID here — and soon, who is allowed to see your profile.",
+    "visibilityTitle": "Visibility & sharing",
+    "visibilitySoon": "Soon",
+    "visibilityIntro": "Soon you'll decide who can see your profile:",
+    "visibilityL1": "Private — only you",
+    "visibilityL2": "Friends only — your accepted friends",
+    "visibilityL3": "Public — any signed-in cuber",
+    "visibilityShareNote": "Plus a shareable solving card for your friends.",
+    "visibilityCurrentNote": "For now you control this via the discoverability toggle above — the 3-level model will replace it soon."
+  },
   "adminBereich": {
     "title": "Admin",
     "back": "← Back to app",
@@ -114,6 +127,7 @@
     "footerGithubLink": "Source on GitHub"
   },
   "userMenu": {
+    "profil": "Profile",
     "konto": "Account & data",
     "settings": "Settings",
     "admin": "Admin",
@@ -1385,9 +1399,9 @@
     "infoBody2": "Data is cached server-side for 6 hours so the WCA API stays responsive. Requires: WCA ID in account settings.",
     "loading": "Loading official WCA profile…",
     "emptyNoIdIntro": "You haven't set a WCA ID yet. If you've competed in official WCA competitions, enter your WCA ID in the account settings — your official PRs and recent competitions will show up here.",
-    "emptyNoIdHint": "Account & data → Settings → Account → WCA ID.",
+    "emptyNoIdHint": "Add your WCA ID above in your profile.",
     "errorNotFound": "WCA ID \"{{id}}\" was not found in the WCA system.",
-    "errorNotFoundHint": "Check spelling or correct the ID in account settings.",
+    "errorNotFoundHint": "Check spelling or correct the ID above in your profile.",
     "errorGeneric": "WCA profile could not be loaded.",
     "serviceDownBanner": "The WCA service is currently unavailable — your WCA profile and official records may be temporarily missing or outdated.",
     "serviceDownDismiss": "Dismiss notice",

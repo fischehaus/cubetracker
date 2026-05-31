@@ -75,7 +75,7 @@ export function KontoDatenView({ section, onSectionChange, onBack }: Props) {
           machen klar, wo man ist und wie man zurück in die App kommt. */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-100">
-          <span aria-hidden="true">👤</span>
+          <span aria-hidden="true">🗄</span>
           {t("kontoView.title")}
         </h2>
         <Button variant="ghost" size="sm" onClick={onBack}>

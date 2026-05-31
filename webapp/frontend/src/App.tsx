@@ -71,7 +71,7 @@ import {
   type KontoSection,
 } from "./components/KontoDatenView";
 import { WcaUpcomingCard } from "./components/WcaUpcomingCard";
-import { WcaProfileCard } from "./components/WcaProfileCard";
+import { ProfilView } from "./components/ProfilView";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -99,6 +99,9 @@ const VALID_TABS: AppTab[] = [
   // sein, damit Bookmarks (#admin) + Reload funktionieren. Der Rollen-Guard
   // in MainLayout leitet unberechtigte Zugriffe um.
   "konto",
+  // profil (W.ia-profil-bereich): nach außen gerichtete Identität, auch nur
+  // über das UserMenu erreichbar. Für alle User — kein Rollen-Guard nötig.
+  "profil",
   "admin",
   "tester",
   // verwaltung: toter Migrations-Durchgang (alter Bookmark/localStorage) —
@@ -564,12 +567,12 @@ function DashboardTab({
       </DashboardSection>
 
       <DashboardSection title={t("dashboard.sectionWorld")} id="dash-welt">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <WcaProfileCard />
+        {/* W.ia-profil-bereich: WcaProfileCard ist ins „Profil" (UserMenu)
+            umgezogen — das offizielle WCA-Profil ist Identität, kein Dashboard-
+            Inhalt. Hier bleiben die discover-orientierten Welt-Karten:
+            kommende Turniere in der Nähe + News. */}
+        <div className="space-y-4">
           <WcaUpcomingCard />
-        </div>
-        {/* QA-Fix W.wca-profile-qa: NewsCard volle Breite statt halb-leerer Zeile. */}
-        <div className="mt-4">
           <NewsCard />
         </div>
       </DashboardSection>
@@ -977,6 +980,7 @@ function MainLayout() {
                 displayName={user.display_name}
                 isAdmin={user.is_admin}
                 isTester={user.is_tester}
+                onOpenProfil={() => setTab("profil")}
                 onOpenKonto={() => setTab("konto")}
                 onOpenSettings={() => {
                   // Direktsprung zur Einstellungen-Sektion. KontoDatenView ist
@@ -1010,9 +1014,10 @@ function MainLayout() {
             „konto" ist nicht in der Leiste, sonst wäre kein Tab aktiv
             hervorgehoben (verwirrend). KontoDatenView zeigt stattdessen
             einen eigenen Header mit Zurück-Button. */}
-        {tab !== "konto" && tab !== "admin" && tab !== "tester" && (
-          <TabBar current={tab} onChange={setTab} />
-        )}
+        {tab !== "konto" &&
+          tab !== "profil" &&
+          tab !== "admin" &&
+          tab !== "tester" && <TabBar current={tab} onChange={setTab} />}
 
         {tab === "timer" && (
           <TimerTab
@@ -1040,6 +1045,7 @@ function MainLayout() {
             onBack={() => setTab("statistik")}
           />
         )}
+        {tab === "profil" && <ProfilView onBack={() => setTab("statistik")} />}
         {tab === "admin" && user?.is_admin && (
           <AdminPanel onBack={() => setTab("statistik")} />
         )}
