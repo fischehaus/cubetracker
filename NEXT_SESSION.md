@@ -97,15 +97,26 @@ schreiben, der `stop-ntfy-notify.sh`-Hook pusht sie ans Topic `jjY2OjY`.
 
 ### 🔜 Offen für nächste Session(en)
 
-1. **Variante A — Voll-Sub-Tab-Routing** (User-Wunsch, zuerst nochmal
+1. **🆕 Frische User-Roadmap-Items (P1, im Admin-Panel angelegt 2026-05-31):**
+   - **„Konto & Daten / Einstellungen aufräumen"** — direktes Feedback auf
+     den IA-Umbau (W2). Der neue Konto-Bereich (`KontoDatenView`) + das
+     `SettingsPanel` sollen aufgeräumt werden. **Wahrscheinlich die nächste
+     konkrete Arbeit** — beim Start dieses Item + Feedback-Inbox klären.
+   - **„Roadmap-pflege"** — Roadmap-Items pflegen/aufräumen.
+   - „Überschriften fix im Dashboard" ist bereits **done**
+     (W.skin-readability-headings).
+   - ⚠️ Diese Items sind nur LIVE in der Admin-DB, NICHT im Code-Seed
+     `webapp/seeds/roadmap.py` — bei Bedarf dort aufnehmen (sonst
+     DB-Wipe-Verlust).
+2. **Variante A — Voll-Sub-Tab-Routing** (User-Wunsch, zuerst nochmal
    abwägen): alle 5 Sub-Systeme (Konto/Admin/Community/Trainer auch)
    bookmarkbar machen. Aufwand: 4 Komponenten → controlled + zentrale
    Hash-Sync in MainLayout. Realnutzen gering — deshalb in W5 bewusst
    schlank (nur Statistik). StatistikTab ist die Blaupause.
-2. **Workstream-1-Reste** (Design-System, nice-to-have): h3-Titel-
+3. **Workstream-1-Reste** (Design-System, nice-to-have): h3-Titel-
    Vereinheitlichung (farbige Icon-Titel), Button-Spezialfälle (segmented
    controls / Toggles), FilterBar-Konsolidierung (Audit-P10).
-3. **Phase 6** (~2026-06-05): Render-Abbau, DNS apex→Hetzner,
+4. **Phase 6** (~2026-06-05): Render-Abbau, DNS apex→Hetzner,
    `feature/W-api-prefix` → `main`, GitHub-Default → main.
 
 ---
