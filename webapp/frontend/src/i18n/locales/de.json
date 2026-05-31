@@ -46,6 +46,12 @@
     "visibilityShareNote": "Plus eine teilbare Solving-Card für deine Freunde.",
     "visibilityCurrentNote": "Heute steuerst du das über die Auffindbarkeit oben — das 3-Stufen-Modell löst sie bald ab."
   },
+  "einstellungenView": {
+    "title": "Einstellungen",
+    "back": "← Zurück zur App",
+    "groupAussehen": "Aussehen & Darstellung",
+    "groupTimer": "Timer & Eingabe"
+  },
   "adminBereich": {
     "title": "Admin",
     "back": "← Zurück zur App",
@@ -1271,7 +1277,7 @@
     "hardware": "Hardware",
     "daten": "Meine Daten",
     "outliers": "Outliers",
-    "settings": "Einstellungen",
+    "sicherheit": "Sicherheit",
     "admin": "Admin",
     "tester": "Tester",
     "formatHintTitle": "Welches Format hast du?",

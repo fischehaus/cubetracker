@@ -72,6 +72,7 @@ import {
 } from "./components/KontoDatenView";
 import { WcaUpcomingCard } from "./components/WcaUpcomingCard";
 import { ProfilView } from "./components/ProfilView";
+import { EinstellungenView } from "./components/EinstellungenView";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -102,6 +103,9 @@ const VALID_TABS: AppTab[] = [
   // profil (W.ia-profil-bereich): nach außen gerichtete Identität, auch nur
   // über das UserMenu erreichbar. Für alle User — kein Rollen-Guard nötig.
   "profil",
+  // einstellungen (W.ia-einstellungen-bereich): geräte-spezifische App-
+  // Präferenzen (Aussehen + Timer), eigener Bereich nur über UserMenu.
+  "einstellungen",
   "admin",
   "tester",
   // verwaltung: toter Migrations-Durchgang (alter Bookmark/localStorage) —
@@ -904,7 +908,7 @@ function MainLayout() {
         "hardware",
         "daten",
         "outliers",
-        "settings",
+        "sicherheit",
       ];
       setTab("konto");
       if (target && (valid as string[]).includes(target)) {
@@ -982,12 +986,7 @@ function MainLayout() {
                 isTester={user.is_tester}
                 onOpenProfil={() => setTab("profil")}
                 onOpenKonto={() => setTab("konto")}
-                onOpenSettings={() => {
-                  // Direktsprung zur Einstellungen-Sektion. KontoDatenView ist
-                  // controlled → kein Event/setTimeout-Tanz mehr nötig.
-                  setKontoSection("settings");
-                  setTab("konto");
-                }}
+                onOpenSettings={() => setTab("einstellungen")}
                 onOpenAdmin={() => setTab("admin")}
                 onOpenTester={() => setTab("tester")}
                 onOpenPatchNotes={() => setShowPatches(true)}
@@ -1016,6 +1015,7 @@ function MainLayout() {
             einen eigenen Header mit Zurück-Button. */}
         {tab !== "konto" &&
           tab !== "profil" &&
+          tab !== "einstellungen" &&
           tab !== "admin" &&
           tab !== "tester" && <TabBar current={tab} onChange={setTab} />}
 
@@ -1046,6 +1046,9 @@ function MainLayout() {
           />
         )}
         {tab === "profil" && <ProfilView onBack={() => setTab("statistik")} />}
+        {tab === "einstellungen" && (
+          <EinstellungenView onBack={() => setTab("statistik")} />
+        )}
         {tab === "admin" && user?.is_admin && (
           <AdminPanel onBack={() => setTab("statistik")} />
         )}

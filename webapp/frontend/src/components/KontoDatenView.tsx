@@ -1,8 +1,9 @@
 // KontoDatenView (W.ia-konto-usermenu, 2026-05-31): „Konto & Daten" —
 // erreichbar über das UserMenu oben rechts (KEIN Haupt-Tab mehr). Vereint
 // die früheren Verwaltung-Base-Sub-Tabs: Sessions, Hardware, Daten
-// (Backup/Import/Export + eigenes Feedback), Outlier-Pflege, Einstellungen
-// (inkl. Aussehen/Skins).
+// (Backup/Import/Export + eigenes Feedback), Outlier-Pflege, Sicherheit
+// (Email/Passwort/Account-Löschen). Die App-/Aussehen-Einstellungen leben
+// seit W.ia-einstellungen-bereich im eigenen „Einstellungen"-Bereich (UserMenu).
 //
 // CONTROLLED: section + onSectionChange leben in App.tsx (MainLayout, immer
 // gemountet). So funktionieren Direkt-Sprünge von überall (UserMenu →
@@ -27,14 +28,14 @@ import { MyFeedbackPanel } from "./MyFeedbackPanel";
 import { OutlierCard } from "./OutlierCard";
 import { ScrollableTabBar } from "./ScrollableTabBar";
 import { SessionList } from "./SessionList";
-import { SettingsPanel } from "./SettingsPanel";
+import { AccountSettingsPanel } from "./AccountSettingsPanel";
 
 export type KontoSection =
   | "sessions"
   | "hardware"
   | "daten"
   | "outliers"
-  | "settings";
+  | "sicherheit";
 
 // Reihenfolge + Icons sprach-unabhängig; Labels via t() zur Render-Zeit.
 const SUB_TAB_ICONS: Record<KontoSection, string> = {
@@ -42,7 +43,7 @@ const SUB_TAB_ICONS: Record<KontoSection, string> = {
   hardware: "🧊",
   daten: "📥",
   outliers: "⚠",
-  settings: "⚙",
+  sicherheit: "🔐",
 };
 
 const SUB_TAB_ORDER: KontoSection[] = [
@@ -50,7 +51,7 @@ const SUB_TAB_ORDER: KontoSection[] = [
   "hardware",
   "daten",
   "outliers",
-  "settings",
+  "sicherheit",
 ];
 
 interface Props {
@@ -131,7 +132,7 @@ export function KontoDatenView({ section, onSectionChange, onBack }: Props) {
         </div>
       )}
       {section === "outliers" && <OutlierCard />}
-      {section === "settings" && <SettingsPanel />}
+      {section === "sicherheit" && <AccountSettingsPanel />}
     </div>
   );
 }

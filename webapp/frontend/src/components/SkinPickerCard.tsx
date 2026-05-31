@@ -1,7 +1,7 @@
 // SkinPickerCard (W.skin-cyberpunk-mvp).
 //
-// Section im SettingsPanel: User waehlt Background-Skin per Klick auf
-// eine der Radio-Cards. Sofort-Apply (kein Save-Button).
+// Section in EinstellungenView (Gruppe Aussehen): User waehlt Background-Skin
+// per Klick auf eine der Radio-Cards. Sofort-Apply (kein Save-Button).
 //
 // UI:
 //   - Grid mit ein Preview-Tile pro verfuegbarem Skin

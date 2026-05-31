@@ -44,6 +44,21 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ia-einstellungen-bereich",
+        released=date(2026, 5, 31),
+        title="⚙ Einstellungen sind jetzt ein eigener Bereich",
+        highlights=[
+            "Die App-Einstellungen haben jetzt einen eigenen Platz im Menü "
+            "oben rechts (vorher steckten sie als Unterpunkt in Konto & "
+            "Daten). Übersichtlich in zwei Gruppen sortiert: Aussehen & "
+            "Darstellung (Skin, Schriftgrößen, Scramble-Bild) und Timer & "
+            "Eingabe (Leertaste, Inspektion, Multi-Phasen-Splits).",
+            "Konto & Daten ist im Gegenzug schlanker: der frühere "
+            "Einstellungen-Reiter heißt jetzt Sicherheit und enthält genau "
+            "das Konto-Thema (Email, Passwort, Account löschen).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ia-profil-bereich",
         released=date(2026, 5, 31),
         title="👤 Neuer Profil-Bereich",
