@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ia-app-shell",
+        released=date(2026, 5, 31),
+        title="📱 App-Feeling: feste Navi-Leiste unten + schlanke Kopfzeile",
+        highlights=[
+            "Auf dem Phone gibt es jetzt eine feste Navigationsleiste am "
+            "unteren Rand (Timer, Statistik, Training, Community) — immer "
+            "mit dem Daumen erreichbar, wie in einer echten App. Die "
+            "Kopfzeile oben ist schlanker geworden und bleibt beim Scrollen "
+            "stehen, sodass Version und das Menü oben rechts immer in "
+            "Reichweite sind.",
+            "Auf dem Desktop bleibt die gewohnte Tab-Leiste oben.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ia-einstellungen-bereich",
         released=date(2026, 5, 31),
         title="⚙ Einstellungen sind jetzt ein eigener Bereich",

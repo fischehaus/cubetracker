@@ -73,6 +73,7 @@ import {
 import { WcaUpcomingCard } from "./components/WcaUpcomingCard";
 import { ProfilView } from "./components/ProfilView";
 import { EinstellungenView } from "./components/EinstellungenView";
+import { BottomNav } from "./components/BottomNav";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -943,19 +944,33 @@ function MainLayout() {
 
   const { t } = useTranslation();
 
+  // W.ia-app-shell: in den Pseudo-Tabs (über UserMenu erreicht, eigener
+  // Zurück-Button) werden BEIDE Haupt-Navigationen ausgeblendet — die
+  // Desktop-Top-Leiste UND die mobile Bottom-Nav.
+  const isPseudoView =
+    tab === "konto" ||
+    tab === "profil" ||
+    tab === "einstellungen" ||
+    tab === "admin" ||
+    tab === "tester" ||
+    // verwaltung = toter Migrations-Durchgang; verhindert kurzes Aufblitzen
+    // von Top-TabBar + BottomNav, bevor der Guard weiterleitet.
+    tab === "verwaltung";
+
   return (
     // Container-Padding mobile-first: p-3 auf Phone (24px waren zu viel
     // auf 360px-Screens), p-6 ab md.
-    <div className="min-h-screen p-3 md:p-6">
-      <div className="mx-auto max-w-7xl">
-        <header className="cubetracker-app-header flex items-center justify-between mb-6 gap-4 flex-wrap">
+    <div className="min-h-screen flex flex-col">
+      {/* W.ia-app-shell: schlanke STICKY App-Bar — bleibt beim Scrollen oben,
+          full-width Hintergrund, Inhalt in max-w-7xl zentriert. */}
+      <header className="sticky top-0 z-40 border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm">
+        <div className="cubetracker-app-header mx-auto max-w-7xl px-3 md:px-6 h-14 flex items-center justify-between gap-4">
           {/* Volles Logo (mit Schriftzug + Tagline) ersetzt den separaten
               H1+Untertitel. Klick führt zurück zum Default-Tab. Logo
               enthält den App-Namen, daher visuell-doppelt wenn man's
               danebenstellen würde. H1 mit sr-only für Screenreader + SEO.
-              Höhe responsiv gestaffelt: das Logo ist ~2.56:1 breit, bei
-              h-40 wären das 410px — sprengt jeden Phone-Screen. Daher
-              h-16 (Phone) → h-28 (sm) → h-52 (md+, User-Wunsch 2.5x). */}
+              In der sticky App-Bar bewusst klein (h-9..h-11) gehalten — das
+              große Hero-Logo lebt nur noch auf der Login-Seite. W.ia-app-shell. */}
           <button
             type="button"
             onClick={() => setTab("statistik")}
@@ -967,7 +982,7 @@ function MainLayout() {
               src="/cubetracker-logo.png"
               alt=""
               aria-hidden="true"
-              className="h-16 sm:h-28 md:h-52 w-auto group-hover:opacity-90 transition-opacity"
+              className="h-9 sm:h-10 md:h-11 w-auto group-hover:opacity-90 transition-opacity"
             />
           </button>
           <div className="flex items-center gap-3">
@@ -997,8 +1012,10 @@ function MainLayout() {
               />
             )}
           </div>
-        </header>
+        </div>
+      </header>
 
+      <main className="flex-1 w-full mx-auto max-w-7xl px-3 md:px-6 py-4 md:py-6 pb-28 md:pb-10">
         {user && !user.email_verified && (
           <div className="mb-4 rounded-lg bg-amber-500/10 border border-amber-500/30 px-4 py-3 text-sm text-amber-200">
             ⚠ {t("auth.emailNotVerifiedBanner")}
@@ -1009,15 +1026,14 @@ function MainLayout() {
 
         <OnboardingBanner onSwitchTab={setTab} />
 
-        {/* TabBar im „konto"-Pseudo-Tab ausblenden (W.ia-konto-usermenu):
-            „konto" ist nicht in der Leiste, sonst wäre kein Tab aktiv
-            hervorgehoben (verwirrend). KontoDatenView zeigt stattdessen
-            einen eigenen Header mit Zurück-Button. */}
-        {tab !== "konto" &&
-          tab !== "profil" &&
-          tab !== "einstellungen" &&
-          tab !== "admin" &&
-          tab !== "tester" && <TabBar current={tab} onChange={setTab} />}
+        {/* Top-Nav: nur Desktop (md+). Auf dem Phone übernimmt die fixe
+            BottomNav (W.ia-app-shell). In den Pseudo-Tabs ganz ausgeblendet
+            — die haben eigene Header mit Zurück-Button. */}
+        {!isPseudoView && (
+          <div className="hidden md:block">
+            <TabBar current={tab} onChange={setTab} />
+          </div>
+        )}
 
         {tab === "timer" && (
           <TimerTab
@@ -1087,7 +1103,11 @@ function MainLayout() {
           <span aria-hidden="true" className="text-gray-500">·</span>
           <span>{t("footer.moreOptionsHint")}</span>
         </footer>
-      </div>
+      </main>
+
+      {/* W.ia-app-shell: fixe Bottom-Nav für Phones (<md). In den Pseudo-Tabs
+          ausgeblendet (eigener Zurück-Button), auf Desktop via md:hidden weg. */}
+      {!isPseudoView && <BottomNav current={tab} onChange={setTab} />}
 
       {/* Globale Toaster + Modals — bleiben auf jedem Tab sichtbar.
           Die 3 Spezial-Toaster sind seit W.toast-manager (2026-05-30)

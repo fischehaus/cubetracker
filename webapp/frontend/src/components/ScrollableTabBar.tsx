@@ -55,6 +55,7 @@ export function ScrollableTabBar({
         return (
           <button
             key={t.id}
+            type="button"
             onClick={() => onChange(t.id)}
             aria-current={active ? "page" : undefined}
             title={t.description}
