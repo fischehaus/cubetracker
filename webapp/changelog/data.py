@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-zen-mode",
+        released=date(2026, 5, 31),
+        title="🧘 Zen-Modus für den Timer",
+        highlights=[
+            "Neuer Vollbild-Zen-Modus im Timer-Tab (Knopf 🧘 Zen oben rechts): "
+            "nur der Scramble und eine sehr große Zeit, sonst nichts — keine "
+            "Karten, keine Knöpfe. Antippen (Phone) oder Leertaste (Desktop) "
+            "startet und stoppt wie gewohnt, inklusive Inspektion und +2/DNF. "
+            "Das × oben rechts beendet den Modus — und ist nur sichtbar, wenn "
+            "gerade kein Solve läuft, damit du keine Zeit aus Versehen "
+            "verwirfst.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feedback-roadmap-pipeline",
         released=date(2026, 5, 31),
         title="🗺 Feedback-Inbox → Roadmap-Pipeline (Admin)",

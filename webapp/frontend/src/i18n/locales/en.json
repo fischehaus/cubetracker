@@ -69,6 +69,9 @@
   },
   "timerTab": {
     "focusToggleOn": "🎯 Enable focus",
+    "zenToggle": "🧘 Zen",
+    "zenToggleTitle": "Full-screen zen mode: just scramble + the big timer, nothing else. Tap/spacebar starts and stops. × top-right exits.",
+    "zenExit": "Exit zen mode",
     "focusToggleOff": "🪟 Full view",
     "focusToggleOnTitle": "Hide the live card, recent solves and sub-cards. Scramble and timer display take the whole screen. Stays active after reload.",
     "focusToggleOffTitle": "Back to the full view with live card, recent solves and sub-cards.",
@@ -853,6 +856,7 @@
     "solvingTitle": "Solving",
     "solvingBullet1": "WCA-compliant timer with three modes selectable in the timer tab: text input for desktop, spacebar-WCA for competition training (inspection + penalty +2/DNF), spacebar-pragmatic for relaxed training. WCA-compliant 15s inspection with voice or beep alerts.",
     "solvingBullet3": "Touch timer for phones: tap + hold replaces the space key",
+    "solvingBullet10": "Zen mode: full-screen with just the scramble + a big timer, tap/spacebar to start & stop — zero distraction",
     "solvingBullet4": "Scramble generator for all WCA cubes (2x2 to 7x7, Pyraminx, Skewb, Square-1, Megaminx, Clock) PLUS unofficial ones (Ivy, Gear, Redi, Master Pyraminx, Master Skewb, FTO) — picker right in the scramble card",
     "solvingBullet5": "2D cube net preview directly below the 3x3 scramble: at a glance you see what the cube must look like after applying — perfect for verifying you executed the scramble correctly (toggleable in settings)",
     "solvingBullet6": "Structured training: sessions group your solving (e.g. OH, PLL drills, cold solves) and training sets plan batches of 5/12/25/50/100 solves with set statistics + coaching feedback at the end.",

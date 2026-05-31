@@ -69,6 +69,9 @@
   },
   "timerTab": {
     "focusToggleOn": "🎯 Fokus aktivieren",
+    "zenToggle": "🧘 Zen",
+    "zenToggleTitle": "Vollbild-Zen-Modus: nur Scramble + große Zeit, sonst nichts. Tippen/Leertaste startet und stoppt. × oben rechts beendet.",
+    "zenExit": "Zen-Modus beenden",
     "focusToggleOff": "🪟 Volle Ansicht",
     "focusToggleOnTitle": "Live + Letzte Solves + Sub-Cards ausblenden. Scramble + Timer-Display nehmen den ganzen Bildschirm ein. Bleibt auch nach Reload aktiv.",
     "focusToggleOffTitle": "Zurück zur vollen Ansicht mit Live-Karte, letzten Solves und Sub-Cards.",
@@ -853,6 +856,7 @@
     "solvingTitle": "Solving",
     "solvingBullet1": "WCA-konformer Timer mit drei Modi direkt im Timer-Tab wählbar: Text-Eingabe für Desktop, Spacebar-WCA für Wettkampf-Training (Inspection + Penalty +2/DNF), Spacebar-Pragmatisch für entspanntes Training. Inspection 15s WCA-konform mit Voice- oder Beep-Alerts.",
     "solvingBullet3": "Touch-Timer für Phone: Tippen + Halten ersetzt die Space-Taste",
+    "solvingBullet10": "Zen-Modus: Vollbild nur mit Scramble + großer Zeit, antippen/Leertaste startet & stoppt — null Ablenkung",
     "solvingBullet4": "Scramble-Generator für alle WCA-Cubes (2x2 bis 7x7, Pyraminx, Skewb, Square-1, Megaminx, Clock) PLUS Inoffizielle (Ivy, Gear, Redi, Master Pyraminx, Master Skewb, FTO) — Picker direkt in der Scramble-Karte",
     "solvingBullet5": "2D-Cube-Net-Vorschau direkt unter dem 3x3-Scramble: siehst auf einen Blick wie der Cube nach Anwendung aussehen muss — ideal zum Verifizieren ob du den Scramble korrekt ausgeführt hast (in den Einstellungen abschaltbar)",
     "solvingBullet6": "Strukturiertes Training: Sessions gruppieren das Solving (z.B. OH, PLL-Drills, Cold-Solves) und Trainings-Sets planen Stapel von 5/12/25/50/100 Solves mit Set-Statistik + Coaching-Feedback am Ende.",

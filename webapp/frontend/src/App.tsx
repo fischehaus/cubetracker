@@ -307,6 +307,9 @@ function TimerTab({
   //              damit ScrambleCard re-generiert
   const [currentScramble, setCurrentScramble] = useState<string>("");
   const [regenSeed, setRegenSeed] = useState(0);
+  // W.timer-zen-mode (2026-05-31): Vollbild-Zen-Modus (nur Scramble + große
+  // Zeit, Tap/Space tracket). Wird an BigTimerInput durchgereicht.
+  const [zenMode, setZenMode] = useState(false);
 
   // Session-Override: wenn die gewählte Session einen scramble_type
   // setzt (Phase 8b — z.B. "pll" oder "oll"), nutzt ScrambleCard den
@@ -321,6 +324,11 @@ function TimerTab({
   // im Fokus-Modus die timer_font_size rotieren koennen.
   const [settings, setSettings] = useAppSettings();
   const showTouchPad = settings.spacebar_enabled;
+  // W.timer-zen-mode (QA): Zen schließen wenn der Spacebar-Modus deaktiviert
+  // wird — sonst öffnet es beim Wieder-Aktivieren überraschend sofort.
+  useEffect(() => {
+    if (!settings.spacebar_enabled) setZenMode(false);
+  }, [settings.spacebar_enabled]);
   // Stufen-Rotation fuer A−/A+ im Fokus-Modus.
   const fontSizeIdx = TIMER_FONT_SIZE_ORDER.indexOf(settings.timer_font_size);
   const canShrink = fontSizeIdx > 0;
@@ -418,6 +426,18 @@ function TimerTab({
           ? t("timerTab.focusToggleOff")
           : t("timerTab.focusToggleOn")}
       </button>
+      {/* W.timer-zen-mode: Zen startet den Vollbild-Modus. Nur im Spacebar-
+          Modus sinnvoll (Text-Mode hat nichts zu tracken). */}
+      {settings.spacebar_enabled && (
+        <button
+          type="button"
+          onClick={() => setZenMode(true)}
+          className="text-xs rounded px-3 py-1.5 border border-gray-700 bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 hover:text-gray-100 transition-colors"
+          title={t("timerTab.zenToggleTitle")}
+        >
+          {t("timerTab.zenToggle")}
+        </button>
+      )}
     </div>
   );
 
@@ -460,6 +480,8 @@ function TimerTab({
             hardwareId={timerHardwareId}
             scramble={currentScramble}
             onSolveSaved={() => setRegenSeed((s) => s + 1)}
+            zen={zenMode}
+            onExitZen={() => setZenMode(false)}
           />
           {/* W.pre-demo-fixes (2026-05-29): SmartCubeConnect-Block liegt
               direkt unter dem Timer-Display — auch im Fokus-Modus sichtbar.
@@ -469,7 +491,7 @@ function TimerTab({
           {/* TouchTimerPad rendert auf Desktop immer null — auf Phone nur
               sichtbar wenn Spacebar-Modus aktiv ist (Text-Mode = Soft-Tastatur,
               da gibt es nichts zu triggern). */}
-          {showTouchPad && <TouchTimerPad />}
+          {showTouchPad && !zenMode && <TouchTimerPad />}
           {!focusMode && (
             <TimerControlsCard
               cubeType={timerCubeType}

@@ -19,7 +19,7 @@ import type { Solve } from "../lib/types";
 import { parseTimeInput } from "../lib/format";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
-import type { TimerPenalty } from "../hooks/useSpacebarTimer";
+import type { TimerPenalty, TimerState } from "../hooks/useSpacebarTimer";
 import { Button, Card } from "./ui";
 
 interface Props {
@@ -39,6 +39,13 @@ interface Props {
    * (Auto-Next).
    */
   onSolveSaved?: () => void;
+  /**
+   * W.timer-zen-mode: wenn true (nur in Spacebar-Modus wirksam), rendert der
+   * Timer als Vollbild-Zen-Overlay (nur Scramble + große Zeit). `onExitZen`
+   * schließt es. Steuerung liegt im TimerTab.
+   */
+  zen?: boolean;
+  onExitZen?: () => void;
 }
 
 export function BigTimerInput({
@@ -47,6 +54,8 @@ export function BigTimerInput({
   hardwareId,
   scramble,
   onSolveSaved,
+  zen = false,
+  onExitZen,
 }: Props) {
   const { t } = useTranslation();
   const [timeStr, setTimeStr] = useState("");
@@ -56,6 +65,10 @@ export function BigTimerInput({
   const [settings] = useAppSettings();
   // Reset-Counter für SpacebarTimerCard nach erfolgreichem Save
   const [spacebarResetSeed, setSpacebarResetSeed] = useState(0);
+  // W.timer-zen-mode (QA): aktueller Timer-State im Zen-Overlay, um den
+  // Exit-× während eines laufenden Solves auszublenden (kein versehentliches
+  // Verwerfen einer Zeit).
+  const [zenTimerState, setZenTimerState] = useState<TimerState>("idle");
   const spacebarMode = settings.spacebar_enabled;
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -275,6 +288,59 @@ export function BigTimerInput({
         setDeleteConfirm(false);
       },
     });
+  }
+
+  // W.timer-zen-mode (2026-05-31): Vollbild-Zen-Modus — nur Scramble + große
+  // Zeit, Tap (Mobile) / Space (Desktop) tracket, sonst nichts. Reuse der
+  // SELBEN SpacebarTimerCard-Instanz (KEIN zweiter useSpacebarTimer → kein
+  // Doppel-Listener / Doppel-Save). Nur im Spacebar-Modus sinnvoll.
+  if (spacebarMode && zen && onExitZen) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex flex-col bg-gray-950"
+        style={{
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
+        {/* Exit-× nur wenn kein Solve läuft — verhindert versehentliches
+            Verwerfen einer laufenden Zeit (QA). */}
+        {(zenTimerState === "idle" || zenTimerState === "stopped") && (
+          <button
+            type="button"
+            onClick={onExitZen}
+            aria-label={t("timerTab.zenExit")}
+            className="absolute top-3 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full text-3xl leading-none text-gray-500 hover:bg-gray-800/60 hover:text-gray-200"
+          >
+            ×
+          </button>
+        )}
+        {/* Scramble oben */}
+        <div className="px-4 pt-16 text-center">
+          <div
+            className="mx-auto max-w-3xl break-words font-mono text-gray-300"
+            style={{
+              fontSize: TIMER_FONT_SCALE[settings.timer_font_size].scramble,
+            }}
+          >
+            {scramble && scramble.trim() !== "" ? scramble : "—"}
+          </div>
+        </div>
+        {/* Große Zeit — tap/space tracket. SpacebarTimerCard füllt im bare-
+            Modus die Fläche (großes Tap-Target). */}
+        <div className="flex flex-1 items-stretch px-4 pb-4">
+          <SpacebarTimerCard
+            enabled={true}
+            settings={settings}
+            phaseNames={settings.phase_names}
+            onSave={saveFromSpacebar}
+            resetSeed={spacebarResetSeed}
+            bare
+            onStateChange={setZenTimerState}
+          />
+        </div>
+      </div>
+    );
   }
 
   return (

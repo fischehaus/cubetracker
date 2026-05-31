@@ -53,6 +53,19 @@ interface Props {
    * timer_font_size. Wenn null/undefined → settings.timer_font_size.
    */
   fontSizeOverride?: TimerFontSize | null;
+  /**
+   * W.timer-zen-mode (2026-05-31): „bare" rendert NUR die große Zeit
+   * (state-gefärbt) ohne Card-Rahmen, Hint-Zeile und Splits — für den
+   * Zen-Vollbild-Modus. Default false → bestehende Aufrufer (TimerTab
+   * normal, DrillCard) bleiben unverändert.
+   */
+  bare?: boolean;
+  /**
+   * W.timer-zen-mode (QA): meldet State-Wechsel nach oben — das Zen-Overlay
+   * blendet damit den Exit-× während eines laufenden Solves aus. Default
+   * undefined → no-op für bestehende Aufrufer.
+   */
+  onStateChange?: (state: TimerState) => void;
 }
 
 export function SpacebarTimerCard({
@@ -62,6 +75,8 @@ export function SpacebarTimerCard({
   onSave,
   resetSeed,
   fontSizeOverride,
+  bare = false,
+  onStateChange,
 }: Props) {
   const { t } = useTranslation();
   const effectiveFontSize = fontSizeOverride ?? settings.timer_font_size;
@@ -114,16 +129,28 @@ export function SpacebarTimerCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetSeed]);
 
+  // W.timer-zen-mode (QA): State nach oben melden (Exit-×-Gating im Zen-Overlay).
+  useEffect(() => {
+    onStateChange?.(timer.state);
+  }, [timer.state, onStateChange]);
+
   const totalPhases = settings.splits_enabled
     ? Math.max(1, phaseNames.length)
     : 1;
 
   return (
     <div
-      className={`${cardClass(timer.state)}${tapTimer ? " cursor-pointer select-none touch-none" : ""}`}
+      className={
+        bare
+          ? `w-full h-full flex flex-col items-center justify-center text-center${
+              tapTimer ? " cursor-pointer select-none touch-none" : ""
+            }`
+          : `${cardClass(timer.state)}${tapTimer ? " cursor-pointer select-none touch-none" : ""}`
+      }
       {...tapProps}
     >
-      {/* Top: state-Hint + ggf. phase indicator */}
+      {/* Top: state-Hint + Phase + Penalty — im bare/Zen-Modus ausgeblendet */}
+      {!bare && (
       <div className="flex items-center justify-between mb-2 gap-2 text-sm">
         <div className={hintClass(timer.state)}>
           {hintLabel(
@@ -157,6 +184,7 @@ export function SpacebarTimerCard({
           </span>
         )}
       </div>
+      )}
 
       {/* Mitte: großer Timer */}
       <div
@@ -175,8 +203,21 @@ export function SpacebarTimerCard({
         )}
       </div>
 
+      {/* Zen/bare: minimaler Penalty-Indikator (DNF/+2) statt der Top-Zeile */}
+      {bare && timer.penalty !== "none" && (
+        <div
+          className={`mt-3 rounded px-2 py-0.5 text-sm font-bold ${
+            timer.penalty === "DNF"
+              ? "bg-red-600 text-white"
+              : "bg-amber-600 text-white"
+          }`}
+        >
+          {timer.penalty}
+        </div>
+      )}
+
       {/* Unten: splits-Liste oder Hint */}
-      {timer.splits.length > 0 && timer.state === "running" && (
+      {!bare && timer.splits.length > 0 && timer.state === "running" && (
         <div className="mt-2 text-center text-sm font-mono text-gray-300">
           {timer.splits.map((s, i) => (
             <span key={i} className="mx-1">
@@ -185,7 +226,7 @@ export function SpacebarTimerCard({
           ))}
         </div>
       )}
-      {timer.state === "stopped" && timer.splits.length > 0 && (
+      {!bare && timer.state === "stopped" && timer.splits.length > 0 && (
         <div className="mt-2 text-center text-sm font-mono text-gray-300 space-x-3">
           {timer.splits.map((s, i) => (
             <span key={i}>
