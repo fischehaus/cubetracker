@@ -49,6 +49,7 @@ from db.models import (
 from db.schemas import (
     FeedbackMessageAdminUpdate,
     FeedbackMessageRead,
+    FeedbackToRoadmapRequest,
     LiveTestCreate,
     LiveTestRead,
     LiveTestUpdate,
@@ -1184,3 +1185,88 @@ def admin_delete_feedback(
     )
     db.delete(msg)
     db.commit()
+
+
+@router.post(
+    "/feedback/{feedback_id}/to-roadmap",
+    status_code=status.HTTP_201_CREATED,
+)
+@limiter.limit(ADMIN_LIMIT)
+def feedback_to_roadmap(
+    request: Request,
+    feedback_id: int,
+    payload: FeedbackToRoadmapRequest,
+    admin: User = Depends(require_admin),
+    db: OrmSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Aus einem Feedback-Item atomar ein Roadmap-Item erzeugen
+    (W.feedback-roadmap-pipeline, 2026-05-31).
+
+    Macht in EINER Transaktion:
+      1. Roadmap-Item anlegen (mit source_feedback_id-Rücklink; sort_order
+         ans Phasen-Ende wenn nicht gesetzt — analog create_roadmap_item).
+      2. Feedback-Status setzen (Default in_progress).
+      3. Optional eine Admin-Antwort schreiben (analog admin_update_feedback:
+         setzt admin_response_at + by).
+
+    So landet der präzisierte Wunsch auf der Roadmap, die das Tooling
+    (roadmap-fetch.py) ohnehin ausliest — direkter Auftrags-Flow.
+    """
+    msg = db.get(FeedbackMessage, feedback_id)
+    if msg is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Feedback-Item nicht gefunden.",
+        )
+
+    # sort_order: explizit oder ans Phasen-Ende (max + 10).
+    if payload.sort_order is not None:
+        sort_order = payload.sort_order
+    else:
+        max_so = (
+            db.execute(
+                select(func.coalesce(func.max(RoadmapItem.sort_order), 0)).where(
+                    RoadmapItem.phase_id == payload.phase_id
+                )
+            ).scalar()
+            or 0
+        )
+        sort_order = int(max_so) + 10
+
+    item = RoadmapItem(
+        phase_id=payload.phase_id,
+        sort_order=sort_order,
+        title_de=payload.title_de.strip(),
+        title_en=payload.title_en.strip(),
+        note_de=(payload.note_de.strip() if payload.note_de else None),
+        note_en=(payload.note_en.strip() if payload.note_en else None),
+        effort=(payload.effort.strip() if payload.effort else None),
+        # Aus Feedback erzeugte Items starten immer „active" — bewusst kein
+        # status-Feld im Schema (anders als create_roadmap_item).
+        status="active",
+        internal=payload.internal,
+        source_feedback_id=msg.id,
+    )
+    db.add(item)
+
+    # Feedback aktualisieren: Status + optionale Antwort (analog dem
+    # Feedback-PATCH). Beides in derselben Transaktion wie das Item.
+    msg.status = payload.feedback_status
+    if payload.admin_response is not None:
+        resp = payload.admin_response.strip() or None
+        msg.admin_response = resp
+        if resp is not None:
+            msg.admin_response_at = datetime.now(UTC)
+            msg.admin_response_by_user_id = admin.id
+
+    db.commit()
+    db.refresh(item)
+    logger.info(
+        "[ADMIN] %s converted feedback %s -> roadmap-item %s (phase=%s, '%s')",
+        admin.email,
+        msg.id,
+        item.id,
+        item.phase_id,
+        item.title_de[:50],
+    )
+    return RoadmapItemRead.model_validate(item).model_dump(mode="json")

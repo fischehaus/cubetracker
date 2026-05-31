@@ -603,6 +603,14 @@ class RoadmapItem(Base):
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
+    # Provenienz (W.feedback-roadmap-pipeline, 2026-05-31): wenn das Item aus
+    # einem Feedback-Item erzeugt wurde, zeigt das auf dessen id. Nullable;
+    # bei Hard-Delete des Feedbacks SET NULL (DB-Constraint nur auf frischen
+    # DBs via create_all — auf Bestands-Postgres ergänzt die Mini-Migration
+    # nur die Spalte; Provenienz ist best-effort).
+    source_feedback_id: Mapped[int | None] = mapped_column(
+        ForeignKey("feedback_messages.id", ondelete="SET NULL"), nullable=True
+    )
 
     __table_args__ = (
         # Sort-Index für die Standard-Query "alle items pro phase, sortiert".

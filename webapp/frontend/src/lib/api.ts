@@ -1999,6 +1999,8 @@ export interface RoadmapItem {
   internal: boolean;
   created_at: string;
   updated_at: string;
+  /** W.feedback-roadmap-pipeline: Rücklink zum Ursprungs-Feedback (oder null). */
+  source_feedback_id?: number | null;
 }
 
 export interface RoadmapResponse {
@@ -2118,6 +2120,43 @@ export function useAdminReorderRoadmap(): UseMutationResult<
       return r.data;
     },
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.roadmap.all() });
+    },
+  });
+}
+
+// W.feedback-roadmap-pipeline (2026-05-31): aus einem Feedback-Item atomar
+// ein Roadmap-Item erzeugen (+ Feedback-Status setzen + optionale Antwort).
+export interface FeedbackToRoadmapInput {
+  phase_id: string;
+  title_de: string;
+  title_en: string;
+  note_de?: string | null;
+  note_en?: string | null;
+  effort?: string | null;
+  internal?: boolean;
+  sort_order?: number | null;
+  feedback_status?: FeedbackStatus;
+  admin_response?: string | null;
+}
+
+export function useAdminFeedbackToRoadmap(): UseMutationResult<
+  RoadmapItem,
+  Error,
+  { feedbackId: number; input: FeedbackToRoadmapInput }
+> {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ feedbackId, input }) => {
+      const r = await api.post<RoadmapItem>(
+        `/admin/feedback/${feedbackId}/to-roadmap`,
+        input,
+      );
+      return r.data;
+    },
+    onSuccess: () => {
+      // Beide Domains: Feedback-Liste (Status geändert) + Roadmap (neues Item).
+      qc.invalidateQueries({ queryKey: qk.feedback.admin.all() });
       qc.invalidateQueries({ queryKey: qk.roadmap.all() });
     },
   });

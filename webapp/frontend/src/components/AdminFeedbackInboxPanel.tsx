@@ -29,6 +29,7 @@ import {
 } from "../lib/api";
 import { getIntlLocale } from "../lib/format";
 import { InfoButton } from "./InfoButton";
+import { FeedbackToRoadmapModal } from "./FeedbackToRoadmapModal";
 
 type StatusFilter = "all" | FeedbackStatus;
 type CategoryFilter = "all" | FeedbackCategory;
@@ -62,6 +63,12 @@ export function AdminFeedbackInboxPanel() {
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  // W.feedback-roadmap-pipeline: welches Feedback wird gerade in ein
+  // Roadmap-Item umgewandelt (null = Modal zu). Liegt im Panel, damit das
+  // Modal einmal über der ganzen Inbox liegt.
+  const [roadmapForMsg, setRoadmapForMsg] = useState<FeedbackMessage | null>(
+    null,
+  );
 
   const { data, isLoading, error } = useAdminFeedbackMessages(true, {
     status: statusFilter,
@@ -258,9 +265,16 @@ export function AdminFeedbackInboxPanel() {
               updateBusy={updateMut.isPending && updatingId === msg.id}
               deleteBusy={deleteMut.isPending && deletingId === msg.id}
               fmtDateTime={fmtDateTime}
+              onConvertToRoadmap={() => setRoadmapForMsg(msg)}
             />
           ))}
         </ul>
+      )}
+      {roadmapForMsg && (
+        <FeedbackToRoadmapModal
+          msg={roadmapForMsg}
+          onClose={() => setRoadmapForMsg(null)}
+        />
       )}
     </div>
   );
@@ -276,6 +290,7 @@ function InboxRow({
   onToggleExpand,
   onUpdate,
   onDelete,
+  onConvertToRoadmap,
   updateBusy,
   deleteBusy,
   fmtDateTime,
@@ -285,6 +300,7 @@ function InboxRow({
   onToggleExpand: () => void;
   onUpdate: (patch: { status?: FeedbackStatus; admin_response?: string | null }) => void;
   onDelete: () => void;
+  onConvertToRoadmap: () => void;
   updateBusy: boolean;
   deleteBusy: boolean;
   fmtDateTime: (iso: string) => string;
@@ -423,6 +439,13 @@ function InboxRow({
             : hasResponse
               ? t("adminFeedback.editReply")
               : t("adminFeedback.addReply")}
+        </button>
+        <button
+          onClick={onConvertToRoadmap}
+          className="text-xs rounded bg-gray-700 px-2 py-1 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100"
+          title={t("adminFeedback.toRoadmapTitle")}
+        >
+          {t("adminFeedback.toRoadmapButton")}
         </button>
         <button
           onClick={onDelete}

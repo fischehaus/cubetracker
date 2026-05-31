@@ -44,6 +44,22 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feedback-roadmap-pipeline",
+        released=date(2026, 5, 31),
+        title="🗺 Feedback-Inbox → Roadmap-Pipeline (Admin)",
+        highlights=[
+            "Admin-Workflow: In der Feedback-Inbox gibt es pro Nachricht jetzt "
+            "einen Knopf, der das Feedback direkt auf die Roadmap übernimmt. "
+            "Er öffnet einen Editor, vorbefüllt mit dem User-Text — "
+            "Titel/Beschreibung präzisieren, Phase + Sichtbarkeit + optionale "
+            "Antwort an den User wählen, speichern. Das legt atomar ein "
+            "Roadmap-Item an (mit Rücklink zum Ursprungs-Feedback), setzt den "
+            "Feedback-Status und schreibt die Antwort. So wird aus einem "
+            "User-Wunsch direkt ein Entwicklungs-Auftrag.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ia-app-shell",
         released=date(2026, 5, 31),
         title="📱 App-Feeling: feste Navi-Leiste unten + schlanke Kopfzeile",

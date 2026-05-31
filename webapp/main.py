@@ -119,6 +119,11 @@ async def lifespan(app: FastAPI):
                 # Indexe sind im Modell deklariert, hier auch nur defensive.
                 "CREATE INDEX IF NOT EXISTS ix_roadmap_items_phase_id ON roadmap_items (phase_id)",
                 "CREATE INDEX IF NOT EXISTS ix_roadmap_phase_order ON roadmap_items (phase_id, sort_order)",
+                # Phase W.feedback-roadmap-pipeline (2026-05-31): Provenienz-
+                # Link von einem Roadmap-Item zum Ursprungs-Feedback. Nullable;
+                # die FK-Constraint lebt nur auf frischen DBs (create_all aus
+                # dem Modell) — hier auf Bestands-Postgres nur die Spalte.
+                "ALTER TABLE roadmap_items ADD COLUMN IF NOT EXISTS source_feedback_id INTEGER",
             ]
             with engine.begin() as conn:
                 for sql in migrations:

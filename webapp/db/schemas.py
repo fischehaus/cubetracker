@@ -424,6 +424,8 @@ class RoadmapItemRead(BaseModel):
     internal: bool
     created_at: datetime
     updated_at: datetime
+    # W.feedback-roadmap-pipeline: Rücklink zum Ursprungs-Feedback (oder None).
+    source_feedback_id: int | None = None
 
 
 class RoadmapItemCreate(BaseModel):
@@ -441,6 +443,32 @@ class RoadmapItemCreate(BaseModel):
     # Optional: wenn nicht gesetzt, hängt das Item ans Ende der Phase
     # (sort_order = max(existing) + 10).
     sort_order: int | None = None
+
+
+class FeedbackToRoadmapRequest(BaseModel):
+    """Payload für POST /admin/feedback/{id}/to-roadmap
+    (W.feedback-roadmap-pipeline, 2026-05-31).
+
+    Erzeugt aus einem Feedback-Item atomar ein Roadmap-Item (mit
+    source_feedback_id-Rücklink) UND aktualisiert das Feedback: setzt den
+    Status (Default „in_progress") und schreibt optional eine Admin-Antwort
+    an den User. Die Roadmap-Felder spiegeln RoadmapItemCreate (ohne status —
+    aus Feedback erzeugte Items sind immer active).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    # Roadmap-Item-Felder (analog RoadmapItemCreate)
+    phase_id: RoadmapPhaseIdLiteral
+    title_de: str = Field(min_length=1, max_length=256)
+    title_en: str = Field(min_length=1, max_length=256)
+    note_de: str | None = Field(default=None, max_length=2000)
+    note_en: str | None = Field(default=None, max_length=2000)
+    effort: str | None = Field(default=None, max_length=64)
+    internal: bool = False
+    sort_order: int | None = None
+    # Feedback-Handling
+    feedback_status: FeedbackStatusLiteral = "in_progress"
+    admin_response: str | None = Field(default=None, min_length=1, max_length=4000)
 
 
 class RoadmapItemUpdate(BaseModel):
