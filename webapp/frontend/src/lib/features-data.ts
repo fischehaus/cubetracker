@@ -152,6 +152,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
     titleKey: "features.accountTitle",
     icon: "🔒",
     bullets: [
+      { key: "features.accountBullet10", audience: "public" }, // Angemeldet bleiben / Session-only
       { key: "features.accountBullet7", audience: "public" }, // 8 Hintergrund-Themen + Card-Stil
       { key: "features.accountBullet9", audience: "expanded" }, // Roadmap + Patch-Notes-Modal
       { key: "features.accountBullet5", audience: "expanded" }, // DSGVO-Account-Löschung

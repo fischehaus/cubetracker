@@ -38,15 +38,56 @@ const API_BASE =
   (import.meta.env.DEV ? "http://localhost:8000/api" : "/api");
 
 const ACCESS_TOKEN_KEY = "cubetracker_access_token";
+// W.remember-me (2026-05-31): „angemeldet bleiben"-Praeferenz.
+//   "0" → Session-only: Access-Token in sessionStorage (weg beim Tab/Browser-
+//         Schliessen), Refresh-Cookie als Session-Cookie (Backend). So bleibt
+//         nach dem Schliessen KEIN gueltiger Token liegen (Shared-Device).
+//   sonst (inkl. fehlend) → persistent: Access-Token in localStorage. Default
+//         haelt das Bestandsverhalten + Bestands-User (Token liegt schon dort).
+const REMEMBER_KEY = "cubetracker_remember";
+// Marker dass es (mal) eine Session gab — gated den Cold-Start-Refresh, damit
+// anonyme Besucher keinen unnoetigen /auth/refresh-Call ausloesen.
+const SESSION_HINT_KEY = "cubetracker_session";
+
+function rememberPersistent(): boolean {
+  return localStorage.getItem(REMEMBER_KEY) !== "0";
+}
+
+/** „Angemeldet bleiben"-Wahl setzen. MUSS vor setAccessToken laufen, weil
+ *  setAccessToken anhand der Praeferenz die Storage waehlt. */
+export function setRememberPreference(persistent: boolean): void {
+  localStorage.setItem(REMEMBER_KEY, persistent ? "1" : "0");
+}
+
+/** Gab es in diesem Browser schon mal eine eingeloggte Session? Liegt bewusst
+ *  in localStorage (per-Browser, NICHT per-Tab): so faellt auch ein zweiter Tab
+ *  einer Session-only-Anmeldung in den Cold-Start-Refresh-Pfad und wird
+ *  eingeloggt, obwohl sein sessionStorage (Access-Token) leer ist. */
+export function hasSessionHint(): boolean {
+  return localStorage.getItem(SESSION_HINT_KEY) === "1";
+}
 
 export function getAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  return rememberPersistent()
+    ? localStorage.getItem(ACCESS_TOKEN_KEY)
+    : sessionStorage.getItem(ACCESS_TOKEN_KEY);
 }
 export function setAccessToken(token: string): void {
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  localStorage.setItem(SESSION_HINT_KEY, "1");
+  // In die durch die Praeferenz bestimmte Storage schreiben, die jeweils
+  // andere putzen (kein doppelter / verwaister Token).
+  if (rememberPersistent()) {
+    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  } else {
+    sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+  }
 }
 export function clearAccessToken(): void {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(SESSION_HINT_KEY);
 }
 
 export const api = axios.create({
@@ -77,14 +118,31 @@ async function tryRefresh(): Promise<string | null> {
       );
       setAccessToken(r.data.access_token);
       return r.data.access_token;
-    } catch {
-      clearAccessToken();
+    } catch (err) {
+      // W.remember-me (QA): nur bei echter Ablehnung (401/403 = Refresh-Cookie
+      // abgelaufen/revoked) die Session verwerfen. Bei Netzwerk-/Timeout-Fehlern
+      // (kein `response`) Token + Session-Hint STEHEN lassen, damit Reconnect /
+      // Reload die „angemeldet bleiben"-Session retten kann, statt sie wegen
+      // eines kurzen Aussetzers dauerhaft zu verlieren.
+      const status = (err as AxiosError)?.response?.status;
+      if (status === 401 || status === 403) clearAccessToken();
       return null;
     } finally {
       refreshPromise = null;
     }
   })();
   return refreshPromise;
+}
+
+/**
+ * W.remember-me: expliziter Refresh fuer den Cold-Start (AuthContext-Init).
+ * Der Response-Interceptor refresht bei /auth/*-Requests bewusst NICHT (Loop-
+ * Schutz), darum braucht der Init-Pfad diesen direkten Weg ueber den HttpOnly-
+ * Refresh-Cookie. So wirkt „angemeldet bleiben" auch nach Ablauf des kurzen
+ * Access-Tokens (bis zu 30 Tage). Liefert den neuen Access-Token oder null.
+ */
+export async function refreshAccessToken(): Promise<string | null> {
+  return tryRefresh();
 }
 
 type RetriedConfig = AxiosRequestConfig & { _retried?: boolean };
@@ -2325,7 +2383,11 @@ export function useDeleteAccount(): UseMutationResult<void, Error, void> {
       // QA-Fix W.danger-zone-qa: window.location.replace statt href —
       // History-Eintrag wird ersetzt, der User kann nicht via Back-Button
       // zur Old-Account-Seite zurueck.
-      localStorage.removeItem("cubetracker_access_token");
+      // W.remember-me (QA): clearAccessToken() statt direktem removeItem —
+      // putzt BEIDE Storages (local + session) + den Session-Hint. Sonst bliebe
+      // bei Session-only-Anmeldung der sessionStorage-Token nach dem Loeschen
+      // liegen.
+      clearAccessToken();
       window.location.replace("/");
     },
   });

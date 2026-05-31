@@ -119,18 +119,30 @@ def _dummy_hash() -> str:
     return hash_password("dummy-for-timing-attack-defense")
 
 
-def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
+def _set_refresh_cookie(
+    response: Response, refresh_token: str, *, persistent: bool = True
+) -> None:
     """Setzt den Refresh-Token als HttpOnly-Cookie.
 
     - HttpOnly: JavaScript kann nicht draufzugreifen (XSS-sicher)
     - Secure: nur über HTTPS übertragen (in Prod)
     - SameSite=lax: kein CSRF aus Drittanbieter-Sites
     - Path=/auth: nur an Auth-Endpoints geschickt (kleiner Angriffsvektor)
+    - persistent (W.remember-me): True → Max-Age gesetzt, Cookie ueberlebt
+      Browser-Neustart („angemeldet bleiben"). False → kein Max-Age =
+      Session-Cookie, beim Browser-Schliessen weg.
+
+    Hinweis: /auth/refresh setzt den Cookie NICHT neu (keine Rotation) — die
+    persistent-Wahl vom Login bleibt also ueber die ganze Session erhalten.
     """
     response.set_cookie(
         key=REFRESH_COOKIE_NAME,
         value=refresh_token,
-        max_age=int(timedelta(days=JWT_REFRESH_EXPIRE_DAYS).total_seconds()),
+        max_age=(
+            int(timedelta(days=JWT_REFRESH_EXPIRE_DAYS).total_seconds())
+            if persistent
+            else None
+        ),
         httponly=True,
         secure=IS_PROD,
         samesite="lax",
@@ -243,7 +255,7 @@ def login(
 
     access = create_token(user.id, "access", token_version=user.token_version)
     refresh = create_token(user.id, "refresh", token_version=user.token_version)
-    _set_refresh_cookie(response, refresh)
+    _set_refresh_cookie(response, refresh, persistent=payload.remember_me)
 
     # Auto-Refresh-Hook (Phase W.auto-refresh, 2026-05-16): nach erfolgreichem
     # Login die News + WCA-Caches im Hintergrund warm halten. Bei warmen Caches

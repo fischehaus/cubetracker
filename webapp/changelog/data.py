@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.remember-me",
+        released=date(2026, 5, 31),
+        title="🔐 Angemeldet bleiben",
+        highlights=[
+            "Neu am Login: eine Checkbox Angemeldet bleiben (standardmäßig "
+            "aktiv). Angehakt bleibst du über Browser-Neustarts hinweg "
+            "eingeloggt — bis zu 30 Tage, und auch in der zum Homescreen "
+            "hinzugefügten App. Hakst du sie ab, gilt die Anmeldung nur für die "
+            "aktuelle Sitzung und endet automatisch beim Schließen des Browsers "
+            "— praktisch an einem geteilten Gerät. Bei einer Sitzungs-Anmeldung "
+            "bleibt danach kein gültiger Zugang im Gerät liegen.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.skin-pseudo-header-pills",
         released=date(2026, 5, 31),
         title="Lesbare Köpfe in Profil / Einstellungen / Nachrichten & Co.",

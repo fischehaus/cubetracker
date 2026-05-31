@@ -47,6 +47,9 @@ export function LoginPage() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // W.remember-me: „angemeldet bleiben" — default an (Bestandsverhalten:
+  // persistente Session). Aus → Session-only (Logout beim Browser-Schliessen).
+  const [rememberMe, setRememberMe] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -59,9 +62,9 @@ export function LoginPage() {
     setBusy(true);
     try {
       if (mode === "login") {
-        await login(email, password);
+        await login(email, password, rememberMe);
       } else if (mode === "register") {
-        await register(email, password);
+        await register(email, password, rememberMe);
       } else {
         await api.post("/auth/forgot-password", { email });
         setInfo(t("auth.forgotInfo"));
@@ -155,6 +158,20 @@ export function LoginPage() {
                 </p>
               )}
             </div>
+          )}
+
+          {/* W.remember-me: „angemeldet bleiben" — persistente vs Session-
+              Anmeldung. Default an. Gilt auch fuer die installierte App (PWA). */}
+          {mode !== "forgot" && (
+            <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="accent-purple-500 w-4 h-4"
+              />
+              {t("auth.rememberMe")}
+            </label>
           )}
 
           {error && (

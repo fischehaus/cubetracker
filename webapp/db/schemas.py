@@ -30,6 +30,12 @@ class UserLogin(BaseModel):
 
     email: EmailStr
     password: str
+    # W.remember-me (2026-05-31): „angemeldet bleiben". True → persistenter
+    # Refresh-Cookie (Max-Age = JWT_REFRESH_EXPIRE_DAYS), ueberlebt Browser-
+    # Neustart. False → Session-Cookie (kein Max-Age), weg beim Schliessen des
+    # Browsers. Default True = Bestandsverhalten (Clients ohne das Feld bleiben
+    # angemeldet).
+    remember_me: bool = True
 
 
 class UserRead(BaseModel):

@@ -16,7 +16,15 @@ import {
   type ReactNode,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { api, clearAccessToken, getAccessToken, setAccessToken } from "../lib/api";
+import {
+  api,
+  clearAccessToken,
+  getAccessToken,
+  hasSessionHint,
+  refreshAccessToken,
+  setAccessToken,
+  setRememberPreference,
+} from "../lib/api";
 
 export interface UserRead {
   id: number;
@@ -47,8 +55,12 @@ export interface AuthState {
   user: UserRead | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe: boolean) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    rememberMe: boolean,
+  ) => Promise<void>;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
 }
@@ -65,8 +77,20 @@ async function apiRegister(email: string, password: string): Promise<UserRead> {
   return r.data;
 }
 
-async function apiLogin(email: string, password: string): Promise<UserRead> {
-  const r = await api.post<AccessTokenOnly>("/auth/login", { email, password });
+async function apiLogin(
+  email: string,
+  password: string,
+  rememberMe: boolean,
+): Promise<UserRead> {
+  const r = await api.post<AccessTokenOnly>("/auth/login", {
+    email,
+    password,
+    remember_me: rememberMe,
+  });
+  // QA: Storage-Praeferenz unmittelbar VOR setAccessToken setzen (synchron →
+  // race-frei gegen parallele Logins in anderen Tabs). Sie steuert local- vs
+  // sessionStorage; remember_me ging oben schon ans Backend (Cookie-Persistenz).
+  setRememberPreference(rememberMe);
   setAccessToken(r.data.access_token);
   const me = await api.get<UserRead>("/auth/me");
   return me.data;
@@ -96,17 +120,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // das. Quelle: Sub-Agent-QA-Review Admin-Card.
   const qc = useQueryClient();
 
-  // Beim App-Start: wenn ein Access-Token im Storage liegt, /auth/me probieren.
+  // Beim App-Start: Session wiederherstellen. Reihenfolge:
+  //   1. Access-Token im Storage? → /auth/me damit probieren.
+  //   2. Kein/abgelaufener Token, aber „angemeldet bleiben" (Session-Hint)? →
+  //      ueber den HttpOnly-Refresh-Cookie einen neuen Access-Token holen.
+  //      W.remember-me: so wirkt „angemeldet bleiben" ueber die 15-min-Access-
+  //      Token-Grenze hinaus (bis zu 30 Tage / Browser-Neustart / PWA-Relaunch).
+  //   3. Nichts davon → Login-Page (kein Request fuer anonyme Besucher).
   useEffect(() => {
     let cancelled = false;
     async function init() {
       const token = getAccessToken();
-      if (!token) {
+      if (!token && !hasSessionHint()) {
         setIsLoading(false);
         return;
       }
       try {
-        const me = await apiMe();
+        let me: UserRead | null = null;
+        if (token) {
+          try {
+            me = await apiMe();
+          } catch {
+            me = null; // wahrscheinlich abgelaufen → unten ueber Refresh-Cookie
+          }
+        }
+        if (!me) {
+          const fresh = await refreshAccessToken();
+          if (fresh) me = await apiMe();
+        }
         if (!cancelled) setUser(me);
       } catch {
         if (!cancelled) setUser(null);
@@ -149,19 +190,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string, rememberMe: boolean) => {
       qc.clear();
-      const me = await apiLogin(email, password);
+      const me = await apiLogin(email, password, rememberMe);
       setUser(me);
     },
     [qc],
   );
 
   const register = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string, rememberMe: boolean) => {
       qc.clear();
       await apiRegister(email, password);
-      const me = await apiLogin(email, password);
+      const me = await apiLogin(email, password, rememberMe);
       setUser(me);
     },
     [qc],
