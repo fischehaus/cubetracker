@@ -49,10 +49,11 @@ PATCH_NOTES: list[PatchNote] = [
         title="⏱ Zeit bleibt nach dem Solve stehen + Schnellkorrektur im Zen",
         highlights=[
             "Im Spacebar-/Tap-Timer bleibt deine gestoppte Zeit jetzt groß "
-            "stehen, statt sofort auf 0.00 zu springen — bis du den nächsten "
-            "Solve startest (antippen/Leertaste) oder direkt unter der Zeit "
-            "+2, DNF oder Löschen wählst. So kannst du nach jedem Versuch in "
-            "Ruhe das Ergebnis lesen und korrigieren. Diese Schnellkorrektur-"
+            "stehen, statt sofort auf 0.00 zu springen — sie verschwindet erst, "
+            "wenn du den nächsten Solve startest (antippen/Leertaste) oder den "
+            "Solve löschst. +2 und DNF korrigierst du direkt unter der Zeit, "
+            "ohne dass sie ausgeblendet wird. So kannst du nach jedem Versuch "
+            "in Ruhe das Ergebnis lesen und korrigieren — die Schnellkorrektur-"
             "Knöpfe erscheinen jetzt auch im Zen-Vollbild-Modus.",
         ],
     ),

@@ -64,10 +64,10 @@ export function BigTimerInput({
   const [error, setError] = useState<string | null>(null);
   const [settings] = useAppSettings();
   // W.timer-keep-last-time (2026-05-31): Reset-Counter für SpacebarTimerCard.
-  // Wird NICHT mehr nach dem Save gebumpt (die letzte Zeit bleibt stehen),
-  // sondern erst wenn der User per Quick-Button (+2 / DNF / Löschen) reagiert.
-  // Den nächsten Solve-Start resettet die Anzeige direkt im Hook
-  // (restartFromStopped) — kein Seed-Bump nötig.
+  // Wird NICHT mehr nach dem Save gebumpt (die letzte Zeit bleibt stehen).
+  // Bump nur noch beim Löschen eines Solves + bei Cube/Session-Wechsel.
+  // +2/DNF lassen die Zeit bewusst stehen (User-Wunsch); den nächsten
+  // Solve-Start resettet die Anzeige direkt im Hook (restartFromStopped).
   const [spacebarResetSeed, setSpacebarResetSeed] = useState(0);
   // Aktueller Timer-State (vom SpacebarTimerCard via onStateChange nach oben
   // gemeldet). Steuert (a) das Ausblenden des Zen-Exit-× während eines
@@ -281,11 +281,9 @@ export function BigTimerInput({
         payload: { plus_two: nextPlusTwo, dnf: false },
       },
       {
-        onSuccess: (updated) => {
-          setLastSavedSolve(updated);
-          // W.timer-keep-last-time: Auswahl getroffen → Timer auf 0.00.
-          setSpacebarResetSeed((s) => s + 1);
-        },
+        // W.timer-keep-last-time: +2 lässt die Zeit stehen — nur Löschen /
+        // nächster Solve resetten auf 0.00 (User-Wunsch).
+        onSuccess: (updated) => setLastSavedSolve(updated),
       },
     );
   }
@@ -298,11 +296,9 @@ export function BigTimerInput({
         payload: { dnf: nextDnf, plus_two: false },
       },
       {
-        onSuccess: (updated) => {
-          setLastSavedSolve(updated);
-          // W.timer-keep-last-time: Auswahl getroffen → Timer auf 0.00.
-          setSpacebarResetSeed((s) => s + 1);
-        },
+        // W.timer-keep-last-time: DNF lässt die Zeit stehen — nur Löschen /
+        // nächster Solve resetten auf 0.00 (User-Wunsch).
+        onSuccess: (updated) => setLastSavedSolve(updated),
       },
     );
   }
