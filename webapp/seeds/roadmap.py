@@ -92,6 +92,95 @@ ROADMAP_SEED: list[dict[str, Any]] = [
         "internal": True,
     },
     # ============================================================
+    # 2026-05-31: drei User-Ideen (vom Admin) — zunaechst intern;
+    # Admin schaltet bei Bedarf via Panel auf oeffentlich.
+    # ============================================================
+    {
+        "phase_id": "P1",
+        "title_de": "Feedback-Inbox → Roadmap-Pipeline (Wunsch als Auftrag)",
+        "title_en": "Feedback inbox → roadmap pipeline (turn a wish into a task)",
+        "note_de": (
+            "Aus einem Feedback-Item in der Admin-Inbox direkt ein Roadmap-"
+            "Item erzeugen. Ein Button '→ Auf die Roadmap' oeffnet einen "
+            "Editor, vorbefuellt mit dem User-Text; der Admin praezisiert + "
+            "editiert Titel und Beschreibung, waehlt Phase + Prioritaet "
+            "(sort_order) + Sichtbarkeit (intern/oeffentlich) und speichert. "
+            "Das erzeugt ein roadmap_item mit Rueck-Link (source_feedback_id) "
+            "zur Herkunft, markiert das Feedback als 'in Roadmap uebernommen' "
+            "und kann dem User automatisch antworten. Da das Tooling die "
+            "Roadmap ohnehin ausliest (roadmap-fetch.py / Session-Start), "
+            "landet der praezisierte Auftrag direkt im Entwickler-Workflow. "
+            "Umsetzung: Endpoint POST /admin/feedback/{id}/to-roadmap; Schema "
+            "roadmap_items.source_feedback_id (nullable FK) + feedback.status-"
+            "Erweiterung; Frontend Button + Modal in der Feedback-Inbox."
+        ),
+        "note_en": (
+            "Turn an admin-inbox feedback item directly into a roadmap item. "
+            "A '→ Add to roadmap' button opens an editor pre-filled with the "
+            "user's text; the admin refines title and description, picks phase "
+            "+ priority (sort_order) + visibility (internal/public) and saves. "
+            "This creates a roadmap_item with a back-link (source_feedback_id) "
+            "to its origin, marks the feedback as 'added to roadmap' and can "
+            "auto-reply to the user. Since the tooling reads the roadmap "
+            "anyway (roadmap-fetch.py / session start), the refined task lands "
+            "straight in the developer workflow. Build: endpoint POST "
+            "/admin/feedback/{id}/to-roadmap; schema roadmap_items."
+            "source_feedback_id (nullable FK) + feedback.status; frontend "
+            "button + modal in the feedback inbox."
+        ),
+        "effort": None,
+        "internal": True,
+    },
+    {
+        "phase_id": "P1",
+        "title_de": "Minimalistischer Timer-Modus (Zen: nur Scramble + Timer)",
+        "title_en": "Minimalist timer mode (Zen: scramble + timer only)",
+        "note_de": (
+            "Per zusaetzlichem Klick ein extrem reduzierter Vollbild-Modus: "
+            "nur der Scramble oben und ein sehr grosser Timer, sonst nichts "
+            "(keine Buttons, keine Cards). Die Zeit wird per Tippen/Klick auf "
+            "die grosse Zeit selbst getrackt (Start/Stop) — kein separater "
+            "Button. Baut auf dem bestehenden Fokus-Modus + TouchTimerPad/"
+            "touch-timer.ts auf, geht aber einen Schritt weiter (alles ausser "
+            "Scramble + Timer ausgeblendet). Zen-/Distraction-free-Modus."
+        ),
+        "note_en": (
+            "An extra click opens an extremely reduced full-screen mode: only "
+            "the scramble at the top and a very large timer, nothing else (no "
+            "buttons, no cards). Time is tracked by tapping/clicking the large "
+            "timer itself (start/stop) — no separate button. Builds on the "
+            "existing focus mode + TouchTimerPad/touch-timer.ts but goes one "
+            "step further (everything except scramble + timer hidden). A "
+            "zen / distraction-free mode."
+        ),
+        "effort": None,
+        "internal": True,
+    },
+    {
+        "phase_id": "P1",
+        "title_de": "Hardware aus kuratierter Liste (statt Freitext)",
+        "title_en": "Hardware from a curated list (instead of free text)",
+        "note_de": (
+            "Die Hardware/Cube-Modelle sollen kuenftig aus einer fest "
+            "hinterlegten, kuratierten Liste bekannter Cubes gewaehlt werden "
+            "(z.B. GAN 12, MoYu RS3M, ...) statt als Freitext eingegeben. "
+            "Vorteile: konsistente Daten fuer Hardware-Vergleich + Stats-by-"
+            "Hardware, sauberere UX, Anschluss an Smart-Cube (P4). Technisch "
+            "analog zu COMMON_CUBE_TYPES eine COMMON_HARDWARE-Liste; Freitext "
+            "ggf. als Fallback 'Sonstige'."
+        ),
+        "note_en": (
+            "Hardware/cube models should be chosen from a hard-coded, curated "
+            "list of known cubes (e.g. GAN 12, MoYu RS3M, ...) instead of free "
+            "text. Benefits: consistent data for hardware comparison + stats-"
+            "by-hardware, cleaner UX, ties into the smart cube (P4). "
+            "Technically a COMMON_HARDWARE list analogous to COMMON_CUBE_TYPES; "
+            "free text as an optional 'Other' fallback."
+        ),
+        "effort": None,
+        "internal": True,
+    },
+    # ============================================================
     # P3 — Multi-User-USP (August 2026)
     # ============================================================
     {
