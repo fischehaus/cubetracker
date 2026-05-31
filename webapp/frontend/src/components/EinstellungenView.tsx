@@ -10,7 +10,7 @@
 // dabei NICHT mitgezogen — die lebt jetzt in Konto & Daten → Sicherheit.
 
 import { useTranslation } from "react-i18next";
-import { Button } from "./ui";
+import { PseudoViewHeader } from "./PseudoViewHeader";
 import { InfoButton } from "./InfoButton";
 import { SkinPickerCard } from "./SkinPickerCard";
 import {
@@ -62,17 +62,14 @@ export function EinstellungenView({ onBack }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Kontext-Header: „einstellungen" ist ein Pseudo-Tab ohne Eintrag in der
-          Haupt-Leiste. Titel + Zurück-Button machen klar, wo man ist. */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-100">
-          <span aria-hidden="true">⚙</span>
-          {t("einstellungenView.title")}
-        </h2>
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          {t("einstellungenView.back")}
-        </Button>
-      </div>
+      {/* Kontext-Header (PseudoViewHeader): Pseudo-Tab ohne Eintrag in der
+          Haupt-Leiste; Pillen-Backing für Lesbarkeit auf Skin-Hintergründen. */}
+      <PseudoViewHeader
+        icon="⚙"
+        title={t("einstellungenView.title")}
+        backLabel={t("einstellungenView.back")}
+        onBack={onBack}
+      />
 
       {/* ===================== GRUPPE: AUSSEHEN ===================== */}
       <GroupHeader>{t("einstellungenView.groupAussehen")}</GroupHeader>

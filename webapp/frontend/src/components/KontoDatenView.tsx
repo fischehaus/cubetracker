@@ -17,7 +17,7 @@
 // Tab, bis W.ia-admin-bereich sie in einen eigenen Bereich zieht.
 
 import { useTranslation } from "react-i18next";
-import { Button } from "./ui";
+import { PseudoViewHeader } from "./PseudoViewHeader";
 import { BackupPanel } from "./BackupPanel";
 import { CsTimerExportPanel } from "./CsTimerExportPanel";
 import { DangerZoneCard } from "./DangerZoneCard";
@@ -70,18 +70,14 @@ export function KontoDatenView({ section, onSectionChange, onBack }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Kontext-Header: „konto" ist ein Pseudo-Tab ohne Eintrag in der
-          Haupt-Leiste (die ist hier ausgeblendet). Titel + Zurück-Button
-          machen klar, wo man ist und wie man zurück in die App kommt. */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-100">
-          <span aria-hidden="true">🗄</span>
-          {t("kontoView.title")}
-        </h2>
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          {t("kontoView.back")}
-        </Button>
-      </div>
+      {/* Kontext-Header (PseudoViewHeader): Pseudo-Tab ohne Eintrag in der
+          Haupt-Leiste; Pillen-Backing für Lesbarkeit auf Skin-Hintergründen. */}
+      <PseudoViewHeader
+        icon="🗄"
+        title={t("kontoView.title")}
+        backLabel={t("kontoView.back")}
+        onBack={onBack}
+      />
 
       {/* Sub-Tab-Bar — mobile-first scrollbar */}
       <ScrollableTabBar

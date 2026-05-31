@@ -15,7 +15,7 @@ import { AdminRoadmapPanel } from "./AdminRoadmapPanel";
 import { AdminStatsPanel } from "./AdminStatsPanel";
 import { AdminUsersPanel } from "./AdminUsersPanel";
 import { ScrollableTabBar } from "./ScrollableTabBar";
-import { Button } from "./ui";
+import { PseudoViewHeader } from "./PseudoViewHeader";
 
 type AdminSection =
   | "stats"
@@ -60,17 +60,14 @@ export function AdminPanel({ onBack }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Kontext-Header (analog Konto & Daten): Admin ist ein Pseudo-Tab
-          ohne Eintrag in der Haupt-Leiste — Titel + Zurück-Weg. */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-100">
-          <span aria-hidden="true">🛡</span>
-          {t("adminBereich.title")}
-        </h2>
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          {t("adminBereich.back")}
-        </Button>
-      </div>
+      {/* Kontext-Header (PseudoViewHeader): Pseudo-Tab ohne Eintrag in der
+          Haupt-Leiste; Pillen-Backing für Lesbarkeit auf Skin-Hintergründen. */}
+      <PseudoViewHeader
+        icon="🛡"
+        title={t("adminBereich.title")}
+        backLabel={t("adminBereich.back")}
+        onBack={onBack}
+      />
 
       <ScrollableTabBar
         tabs={tabs}

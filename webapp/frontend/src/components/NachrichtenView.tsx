@@ -11,7 +11,7 @@
 // sortiert nach Team vs. Freunde.
 
 import { useTranslation } from "react-i18next";
-import { Button } from "./ui";
+import { PseudoViewHeader } from "./PseudoViewHeader";
 import { MyFeedbackPanel } from "./MyFeedbackPanel";
 
 interface Props {
@@ -23,15 +23,12 @@ export function NachrichtenView({ onBack }: Props) {
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-100">
-          <span aria-hidden="true">📬</span>
-          {t("nachrichtenView.title")}
-        </h2>
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          {t("nachrichtenView.back")}
-        </Button>
-      </div>
+      <PseudoViewHeader
+        icon="📬"
+        title={t("nachrichtenView.title")}
+        backLabel={t("nachrichtenView.back")}
+        onBack={onBack}
+      />
       <p className="text-sm text-gray-400 max-w-2xl">
         {t("nachrichtenView.intro")}
       </p>

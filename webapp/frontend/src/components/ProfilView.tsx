@@ -19,7 +19,7 @@ import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
 import { qk } from "../lib/queryKeys";
 import { COUNTRIES } from "../lib/countries";
-import { Button } from "./ui";
+import { PseudoViewHeader } from "./PseudoViewHeader";
 import { WcaProfileCard } from "./WcaProfileCard";
 import {
   Card,
@@ -41,15 +41,12 @@ export function ProfilView({ onBack }: Props) {
           ohne Eintrag in der Haupt-Leiste (die ist hier ausgeblendet). Titel +
           Zurück-Button machen klar, wo man ist und wie man zurück in die App
           kommt. */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-100">
-          <span aria-hidden="true">👤</span>
-          {t("profilView.title")}
-        </h2>
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          {t("profilView.back")}
-        </Button>
-      </div>
+      <PseudoViewHeader
+        icon="👤"
+        title={t("profilView.title")}
+        backLabel={t("profilView.back")}
+        onBack={onBack}
+      />
       <p className="text-sm text-gray-400 max-w-2xl">{t("profilView.intro")}</p>
 
       <ProfileSection />

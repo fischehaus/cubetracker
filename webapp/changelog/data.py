@@ -44,6 +44,21 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.skin-pseudo-header-pills",
+        released=date(2026, 5, 31),
+        title="Lesbare Köpfe in Profil / Einstellungen / Nachrichten & Co.",
+        highlights=[
+            "Die Bereiche aus dem Menü oben rechts (Profil, Einstellungen, "
+            "Nachrichten, Konto & Daten, Admin, Tester) haben oben einen Titel "
+            "und einen Zurück-zur-App-Knopf, die bisher direkt auf dem "
+            "Hintergrund lagen — bei aktivem Skin-Bild teils kaum lesbar. Beide "
+            "bekommen jetzt ein dezentes Pillen-Backing (gemeinsame Komponente), "
+            "das bei aktivem Skin auf deckend dunkel schaltet und so überall "
+            "lesbar bleibt.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-controls-height",
         released=date(2026, 5, 31),
         title="Timer-Steuerleiste: einheitliche Button-Höhe",

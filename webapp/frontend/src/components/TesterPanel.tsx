@@ -20,7 +20,7 @@
 import { useTranslation } from "react-i18next";
 import { AdminLiveTestsPanel } from "./AdminLiveTestsPanel";
 import { AdminRoadmapPanel } from "./AdminRoadmapPanel";
-import { Button } from "./ui";
+import { PseudoViewHeader } from "./PseudoViewHeader";
 
 interface Props {
   /** Zurück in die App (Statistik-Tab) — Tester ist kein Haupt-Tab. */
@@ -31,17 +31,14 @@ export function TesterPanel({ onBack }: Props) {
   const { t } = useTranslation();
   return (
     <div className="space-y-4">
-      {/* Kontext-Header (analog Konto & Daten / Admin): Tester ist ein
-          Pseudo-Tab ohne Eintrag in der Haupt-Leiste. */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-100">
-          <span aria-hidden="true">🧪</span>
-          {t("testerBereich.title")}
-        </h2>
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          {t("testerBereich.back")}
-        </Button>
-      </div>
+      {/* Kontext-Header (PseudoViewHeader): Pseudo-Tab ohne Eintrag in der
+          Haupt-Leiste; Pillen-Backing für Lesbarkeit auf Skin-Hintergründen. */}
+      <PseudoViewHeader
+        icon="🧪"
+        title={t("testerBereich.title")}
+        backLabel={t("testerBereich.back")}
+        onBack={onBack}
+      />
 
       {/* W.feedback-admin-tester-improvements (2026-05-28):
           „+ Feedback"-Button prominent oben. Beim Testen findet der
