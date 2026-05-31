@@ -24,6 +24,78 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-31 (Forts.) — Profil/Einstellungen/Konto-Bereiche + App-Shell
+
+> Aufbauend auf dem IA-Umbau (W1–W6, Block darunter): tieferes Struktur-
+> Refactoring von „Konto & Daten" + „Einstellungen" (User-P1-Item „aufräumen"
+> → **jetzt DONE**, im Admin auf done gesetzt) + App-Shell-Modernisierung.
+> **3 Wellen, alle getaggt + live-verifiziert, QA je 0 KRITISCH.**
+
+**3-Bereiche-Schnitt (User-Entscheidung „3 bereiche"):** statt 2 UserMenu-
+Bereichen (Konto & Daten + Einstellungen, wobei „Einstellungen" nur ein
+Deep-Link in Konto war) jetzt DREI saubere Bereiche:
+- 👤 **Profil** (`W.ia-profil-bereich`, commit `c89dd44`) — nach außen
+  gerichtete Identität: Name/Land/WCA-ID + offizielles WCA-Profil
+  (`WcaProfileCard` aus dem Statistik-Dashboard hierher) + Auffindbarkeit +
+  Sichtbarkeits-Platzhalter (für Phase B). Neue `ProfilView`.
+- ⚙ **Einstellungen** (`W.ia-einstellungen-bereich`, commit `596e643`) —
+  eigener Bereich, Geräte-Präferenzen gruppiert „Aussehen | Timer & Eingabe".
+  `SettingsPanel` aufgelöst → neue `EinstellungenView`. UserMenu-„Einstellungen"
+  zeigt jetzt auf den echten Bereich (Deep-Link-Duplikat weg).
+- 🗄 **Konto & Daten** — schlanker: Sessions/Hardware/Daten/Outliers + neuer
+  **Sicherheit**-Subtab (Email/Passwort/Account, = der Rest von
+  `AccountSettingsPanel`).
+
+**App-Shell (`W.ia-app-shell`, commit `6641ec3`, User delegierte die
+Entscheidung an mich):** schlanke **sticky App-Bar** oben (Logo bar-klein
+h-9..h-11; Hero-Logo nur noch auf Login) + **fixe Bottom-Nav auf dem Phone**
+(4 Flow-Tabs, safe-area-aware, bewusst KEIN Hamburger). Desktop behält die
+Top-Leiste (`hidden md:block`). Neuer `BottomNav` + `isPseudoView`-Helper.
+
+**Architektur-Notizen:**
+- `AccountSettingsPanel` gesplittet: Identität (→Profil) + Sicherheit (→Konto);
+  geteilte Form-Helfer in neuer `components/accountForm.tsx`.
+- Gefahrenzonen **bewusst NICHT vereint** (User „gut so"): Account-Löschung
+  unter Sicherheit, Daten-Reset (`DangerZoneCard`) unter Daten — je im
+  logischen Zuhause.
+- Pseudo-Tabs jetzt: `konto/profil/einstellungen/admin/tester` (+`verwaltung`
+  tot). Routing-Muster wie gehabt (VALID_TABS + Render-Gate + TabBar-Hide).
+
+**Neue Roadmap-Items (Seed `webapp/seeds/roadmap.py`, P1, `internal=True`,
+commit `5773b6e`) — gehen beim nächsten Backend-Deploy live, Admin schaltet
+bei Bedarf auf öffentlich:**
+1. **Feedback-Inbox → Roadmap-Pipeline** — Admin macht aus einem Feedback-Item
+   per Klick ein Roadmap-Item (Editor vorbefüllt mit User-Text, Phase/Prio/
+   Sichtbarkeit, `source_feedback_id`-Rücklink, optional Auto-Reply). **Konzept
+   steht ausführlich in der `note_de`.** Bau: Endpoint
+   `POST /admin/feedback/{id}/to-roadmap` + Schema-Spalte + Button/Modal.
+2. **Minimalistischer Timer-Modus (Zen)** — nur Scramble + großer Timer, kein
+   Button, Tap-auf-die-Zeit trackt. Baut auf Fokus-Modus + `touch-timer.ts`.
+3. **Hardware aus kuratierter Liste** statt Freitext (`COMMON_HARDWARE` analog
+   `COMMON_CUBE_TYPES`; Freitext ggf. als „Sonstige"-Fallback).
+
+### 🔜 Offen für die nächste Session
+
+1. **Logo-Größe prüfen** (User reviewt live): in der App jetzt klein
+   (`h-9 sm:h-10 md:h-11` im App.tsx-Header), passend zur sticky Bar. Falls dem
+   User zu klein → 1-Zeilen-Tweak. (Berührt seinen früheren „Logo groß"-Wunsch.)
+2. **Phase B — öffentliches/teilbares Profil** (Roadmap **P3.10**, der große
+   nächste Brocken): Schema `avatar_url`/`bio`/`profile_visibility` +
+   Mini-Migration (lifespan) + Backup/Export mitziehen; Endpoint
+   `GET /profile/{id}` mit Zugriffskontrolle; **3 Sichtbarkeits-Stufen
+   (privat / nur Freunde / öffentlich), wobei „öffentlich" = nur eingeloggte
+   Nutzer** (User-Entscheidung, KEIN anonymer Web-Link → permissions-matrix);
+   Read-only-Profilansicht + In-App-Teilen; Freund-Namen klickbar → Profil.
+   `ProfilView` + die Sichtbarkeits-Platzhalter sind die Blaupause. Eigene,
+   frische Session (Schema-Migration + Tests).
+3. **Die 3 neuen Roadmap-Items** (Feedback-Pipeline / Zen-Timer / Hardware-Liste)
+   — falls der User eins priorisiert.
+4. **Variante A** (Voll-Sub-Tab-Routing alle Sub-Systeme) + **Workstream-1-Reste**
+   (Design-System: h3-Titel, FilterBar, Button-Spezialfälle) + **Phase 6**
+   (Render-Abbau, DNS apex→Hetzner, `feature/W-api-prefix`→`main`).
+
+---
+
 ## ✅ ERLEDIGT 2026-05-31 — Große UX-/Struktur-Überarbeitung (IA-Umbau W1–W6 KOMPLETT)
 
 > **Wichtigste offene Arbeit.** Referenz-Dokumente (PFLICHT-Lesen bei
