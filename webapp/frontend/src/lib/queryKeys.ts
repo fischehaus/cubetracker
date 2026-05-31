@@ -124,6 +124,11 @@ export const qk = {
   // Tab refetchen und umgekehrt.
   // =====================================================================
   feedback: {
+    // WICHTIG (QA W.ia-nachrichten-bereich): alle user.*-Keys beginnen mit
+    // ["my-feedback-domain"] (= all()). So trifft invalidateQueries(
+    // qk.feedback.user.all()) per Prefix-Match BEIDE Unterkeys (list + unread)
+    // — z.B. markSeen aktualisiert damit auch das Unread-Badge. Neue
+    // user.*-Keys MUESSEN diesen Prefix behalten.
     user: {
       all: () => ["my-feedback-domain"] as const,
       list: () => ["my-feedback-domain", "list"] as const,

@@ -52,6 +52,11 @@
     "groupAussehen": "Aussehen & Darstellung",
     "groupTimer": "Timer & Eingabe"
   },
+  "nachrichtenView": {
+    "title": "Nachrichten",
+    "back": "← Zurück zur App",
+    "intro": "Antworten des Teams auf dein Feedback. Künftig findest du hier auch Nachrichten aus der Community."
+  },
   "adminBereich": {
     "title": "Admin",
     "back": "← Zurück zur App",
@@ -139,6 +144,8 @@
     "profil": "Profil",
     "konto": "Konto & Daten",
     "settings": "Einstellungen",
+    "nachrichten": "Nachrichten",
+    "unreadAria": "{{count}} ungelesene Antwort(en) vom Team",
     "admin": "Admin",
     "tester": "Tester",
     "patchNotes": "Patch Notes",

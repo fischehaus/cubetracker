@@ -13,7 +13,10 @@ interface Props {
   displayName: string | null;
   isAdmin: boolean;
   isTester: boolean;
+  /** Ungelesene Team-Antworten — Badge am Avatar + am Nachrichten-Eintrag. */
+  unreadCount: number;
   onOpenProfil: () => void;
+  onOpenNachrichten: () => void;
   onOpenKonto: () => void;
   onOpenSettings: () => void;
   onOpenAdmin: () => void;
@@ -30,7 +33,9 @@ export function UserMenu({
   displayName,
   isAdmin,
   isTester,
+  unreadCount,
   onOpenProfil,
+  onOpenNachrichten,
   onOpenKonto,
   onOpenSettings,
   onOpenAdmin,
@@ -88,10 +93,15 @@ export function UserMenu({
         className="flex items-center gap-2 rounded-full bg-gray-800/60 hover:bg-gray-700/80 transition-colors px-2 py-1 border border-gray-700"
       >
         <span
-          className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-600/40 text-purple-100 text-sm font-semibold"
+          className="relative inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-600/40 text-purple-100 text-sm font-semibold"
           aria-hidden="true"
         >
           {displayInitial}
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[1rem] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </span>
         <span className="hidden md:inline text-sm text-gray-300 pr-1 max-w-[180px] truncate">
           {displayName || email}
@@ -99,6 +109,11 @@ export function UserMenu({
         <span aria-hidden="true" className="text-gray-500 pr-1">
           ▾
         </span>
+        {unreadCount > 0 && (
+          <span className="sr-only">
+            {t("userMenu.unreadAria", { count: unreadCount })}
+          </span>
+        )}
       </button>
 
       {open && (
@@ -132,6 +147,15 @@ export function UserMenu({
           </MenuItem>
           <MenuItem onClick={() => run(onOpenSettings)} icon="⚙">
             {t("userMenu.settings")}
+          </MenuItem>
+          {/* W.ia-nachrichten-bereich: eigener Bereich für die Kommunikation
+              mit dem Team (heute: Feedback-Antworten). Badge = ungelesen. */}
+          <MenuItem
+            onClick={() => run(onOpenNachrichten)}
+            icon="📬"
+            badge={unreadCount}
+          >
+            {t("userMenu.nachrichten")}
           </MenuItem>
 
           {/* Rollen-Bereiche (W.ia-admin-bereich) — nur sichtbar für die
@@ -228,11 +252,13 @@ function MenuItem({
   children,
   onClick,
   danger,
+  badge,
 }: {
   icon: string;
   children: React.ReactNode;
   onClick: () => void;
   danger?: boolean;
+  badge?: number;
 }) {
   return (
     <button
@@ -248,7 +274,12 @@ function MenuItem({
       <span aria-hidden="true" className="w-5 text-base">
         {icon}
       </span>
-      <span>{children}</span>
+      <span className="flex-1">{children}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className="ml-auto min-w-[1.25rem] px-1.5 h-5 flex items-center justify-center rounded-full bg-red-500 text-white text-[11px] font-bold">
+          {badge > 9 ? "9+" : badge}
+        </span>
+      )}
     </button>
   );
 }

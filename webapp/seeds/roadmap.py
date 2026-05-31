@@ -184,6 +184,31 @@ ROADMAP_SEED: list[dict[str, Any]] = [
     # P3 — Multi-User-USP (August 2026)
     # ============================================================
     {
+        # W.ia-nachrichten-bereich (2026-05-31): aus der User-Diskussion zur
+        # Platzierung von „Mein Feedback" entstanden.
+        "phase_id": "P3",
+        "title_de": "Nachrichten-Hub (Team-Antworten + Community-Messages vereint)",
+        "title_en": "Messages hub (team replies + community messages unified)",
+        "note_de": (
+            "Der Nachrichten-Bereich (UserMenu) haelt heute nur die Team-"
+            "Antworten auf Feedback (MyFeedbackPanel). Wenn ein Community-"
+            "Kommunikations-Feature kommt (Friend-Nachrichten / Activity), "
+            "sollen beide hier vereint werden — sortiert/getrennt nach Team "
+            "vs. Freunde. Dann ggf. zu einem eigenen Top-Level-Bereich "
+            "graduieren. Ungelesen-Badge am UserMenu-Avatar existiert bereits."
+        ),
+        "note_en": (
+            "The Messages area (user menu) today only holds the team replies "
+            "to feedback (MyFeedbackPanel). Once a community communication "
+            "feature lands (friend messages / activity), both should be "
+            "unified here — sorted/separated into Team vs. Friends. May then "
+            "graduate to its own top-level area. The unread badge on the "
+            "user-menu avatar already exists."
+        ),
+        "effort": None,
+        "internal": True,
+    },
+    {
         "phase_id": "P3",
         "title_de": "Activity-Feed: was haben Freunde zuletzt gemacht",
         "title_en": "Activity feed: what have friends been up to",

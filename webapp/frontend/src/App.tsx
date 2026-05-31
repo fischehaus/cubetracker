@@ -38,7 +38,7 @@ import { TouchTimerPad } from "./components/TouchTimerPad";
 import { SmartCubeConnect } from "./components/SmartCubeConnect";
 import { useSmartCube } from "./hooks/useSmartCube";
 import { useAppSettings } from "./lib/settings";
-import { useSessions } from "./lib/api";
+import { useMyFeedbackUnreadCount, useSessions } from "./lib/api";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
 import { HistogramChart } from "./components/LazyCharts";
 import { LastSolvesPreview } from "./components/LastSolvesPreview";
@@ -73,6 +73,7 @@ import {
 import { WcaUpcomingCard } from "./components/WcaUpcomingCard";
 import { ProfilView } from "./components/ProfilView";
 import { EinstellungenView } from "./components/EinstellungenView";
+import { NachrichtenView } from "./components/NachrichtenView";
 import { BottomNav } from "./components/BottomNav";
 import "./App.css";
 
@@ -107,6 +108,9 @@ const VALID_TABS: AppTab[] = [
   // einstellungen (W.ia-einstellungen-bereich): geräte-spezifische App-
   // Präferenzen (Aussehen + Timer), eigener Bereich nur über UserMenu.
   "einstellungen",
+  // nachrichten (W.ia-nachrichten-bereich): Kommunikation mit dem Team
+  // (Feedback-Antworten), eigener Bereich nur über UserMenu. Für alle User.
+  "nachrichten",
   "admin",
   "tester",
   // verwaltung: toter Migrations-Durchgang (alter Bookmark/localStorage) —
@@ -849,6 +853,10 @@ function MainLayout() {
   // Auth früh holen — steuert die rollensichtbaren UserMenu-Bereiche
   // (Admin/Tester) + die Migration eines alten "verwaltung"-Tab-Zustands.
   const { user, logout } = useAuth();
+  // W.ia-nachrichten-bereich: ungelesene Team-Antworten fürs UserMenu-Badge.
+  // Gleicher Query wie der FeedbackUnreadToaster → React-Query dedupt (1 Fetch).
+  const { data: fbUnread } = useMyFeedbackUnreadCount(!!user);
+  const unreadFeedback = fbUnread?.unread_count ?? 0;
 
   // Tab-Wahl persistieren — localStorage + URL-Hash, damit
   // Reload + Browser-Back beide funktionieren.
@@ -943,6 +951,20 @@ function MainLayout() {
       window.removeEventListener("cubetracker:goto-konto-section", onGotoKonto);
   }, []);
 
+  // W.ia-nachrichten-bereich: Sprung in den Nachrichten-Bereich (Klick auf den
+  // FeedbackUnreadToaster). MainLayout ist immer gemountet → kein Timing-Tanz.
+  useEffect(() => {
+    function onGotoNachrichten() {
+      setTab("nachrichten");
+    }
+    window.addEventListener("cubetracker:goto-nachrichten", onGotoNachrichten);
+    return () =>
+      window.removeEventListener(
+        "cubetracker:goto-nachrichten",
+        onGotoNachrichten,
+      );
+  }, []);
+
   // Tab-Zugriffs-Guards (W.ia-admin-bereich), greifen sobald user geladen ist:
   //  - "verwaltung" gibt es nicht mehr (Bestands-localStorage/Hash) → auf den
   //    passenden Bereich umleiten (Admin→admin, Tester→tester, sonst konto).
@@ -973,6 +995,7 @@ function MainLayout() {
     tab === "konto" ||
     tab === "profil" ||
     tab === "einstellungen" ||
+    tab === "nachrichten" ||
     tab === "admin" ||
     tab === "tester" ||
     // verwaltung = toter Migrations-Durchgang; verhindert kurzes Aufblitzen
@@ -1021,7 +1044,9 @@ function MainLayout() {
                 displayName={user.display_name}
                 isAdmin={user.is_admin}
                 isTester={user.is_tester}
+                unreadCount={unreadFeedback}
                 onOpenProfil={() => setTab("profil")}
+                onOpenNachrichten={() => setTab("nachrichten")}
                 onOpenKonto={() => setTab("konto")}
                 onOpenSettings={() => setTab("einstellungen")}
                 onOpenAdmin={() => setTab("admin")}
@@ -1086,6 +1111,9 @@ function MainLayout() {
         {tab === "profil" && <ProfilView onBack={() => setTab("statistik")} />}
         {tab === "einstellungen" && (
           <EinstellungenView onBack={() => setTab("statistik")} />
+        )}
+        {tab === "nachrichten" && (
+          <NachrichtenView onBack={() => setTab("statistik")} />
         )}
         {tab === "admin" && user?.is_admin && (
           <AdminPanel onBack={() => setTab("statistik")} />

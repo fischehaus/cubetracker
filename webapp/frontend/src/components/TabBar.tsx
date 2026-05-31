@@ -27,6 +27,7 @@ export type AppTab =
   | "konto" // Konto & Daten (alle User)
   | "profil" // Profil (alle User) — nach außen gerichtete Identität
   | "einstellungen" // Einstellungen (alle User) — Geräte-Präferenzen
+  | "nachrichten" // Nachrichten (alle User) — Kommunikation mit dem Team
   | "admin" // nur is_admin
   | "tester" // nur is_tester && !is_admin
   // toter Migrations-Durchgang: alter „verwaltung"-Tab-Zustand wird in
@@ -52,6 +53,7 @@ const TAB_ICONS: Record<AppTab, string> = {
   konto: "🗄",
   profil: "👤",
   einstellungen: "⚙",
+  nachrichten: "📬",
   admin: "🛡",
   tester: "🧪",
   verwaltung: "🔀",

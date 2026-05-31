@@ -5,9 +5,9 @@
 // Verhalten unverändert:
 // - Nur 1× pro Mount (dedupKey verhindert Doppel-Push wenn Query
 //   während desselben Mounts re-fetched).
-// - Klick triggert custom-Event `cubetracker:goto-konto-section`
-//   (W.ia-konto-usermenu) und springt zur MyFeedbackPanel-Sektion
-//   (Konto & Daten → Daten).
+// - Klick triggert custom-Event `cubetracker:goto-nachrichten`
+//   (W.ia-nachrichten-bereich) und öffnet den Nachrichten-Bereich
+//   (UserMenu → Nachrichten) mit der MyFeedbackPanel.
 // - 6 Sekunden Auto-Dismiss.
 
 import { useEffect, useRef } from "react";
@@ -45,11 +45,9 @@ export function FeedbackUnreadToaster() {
         position: "TR",
         dedupKey: DEDUP_KEY,
         onClick: () => {
-          window.dispatchEvent(
-            new CustomEvent("cubetracker:goto-konto-section", {
-              detail: { section: "daten" },
-            }),
-          );
+          // W.ia-nachrichten-bereich: „Mein Feedback" lebt jetzt im eigenen
+          // Nachrichten-Bereich, nicht mehr in Konto & Daten → Daten.
+          window.dispatchEvent(new CustomEvent("cubetracker:goto-nachrichten"));
         },
       },
     );

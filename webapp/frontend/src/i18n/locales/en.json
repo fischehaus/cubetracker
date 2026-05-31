@@ -52,6 +52,11 @@
     "groupAussehen": "Appearance & display",
     "groupTimer": "Timer & input"
   },
+  "nachrichtenView": {
+    "title": "Messages",
+    "back": "← Back to app",
+    "intro": "Replies from the team to your feedback. Soon you'll also find messages from the community here."
+  },
   "adminBereich": {
     "title": "Admin",
     "back": "← Back to app",
@@ -139,6 +144,8 @@
     "profil": "Profile",
     "konto": "Account & data",
     "settings": "Settings",
+    "nachrichten": "Messages",
+    "unreadAria": "{{count}} unread reply/replies from the team",
     "admin": "Admin",
     "tester": "Tester",
     "patchNotes": "Patch Notes",

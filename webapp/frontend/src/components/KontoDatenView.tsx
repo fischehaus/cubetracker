@@ -24,7 +24,6 @@ import { DangerZoneCard } from "./DangerZoneCard";
 import { HardwareList } from "./HardwareList";
 import { ImportPanel } from "./ImportPanel";
 import { MeineDatenCard } from "./MeineDatenCard";
-import { MyFeedbackPanel } from "./MyFeedbackPanel";
 import { OutlierCard } from "./OutlierCard";
 import { ScrollableTabBar } from "./ScrollableTabBar";
 import { SessionList } from "./SessionList";
@@ -101,10 +100,9 @@ export function KontoDatenView({ section, onSectionChange, onBack }: Props) {
         <div className="space-y-4">
           {/* Roadmap #6: Ownership-Botschaft + prominenter Backup-Download oben */}
           <MeineDatenCard />
-          {/* W.feedback-user-view: eigene Feedback-Items + Admin-Antworten.
-              Direkt nach Ownership-Card weil thematisch ähnlich („was passiert
-              mit meinen Daten / Anfragen?"). */}
-          <MyFeedbackPanel />
+          {/* W.ia-nachrichten-bereich: „Mein Feedback" ist in den eigenen
+              Nachrichten-Bereich (UserMenu → 📬 Nachrichten) umgezogen — es ist
+              Kommunikation mit dem Team, keine Daten-Verwaltung. */}
           {/* Orientierungs-Hilfe: zwei verschiedene JSON-Formate
               im Spiel (Cubetracker-Backup vs csTimer-Export).
               User-Verwirrung-Potenzial hoch -> klarer Aufmacher. */}

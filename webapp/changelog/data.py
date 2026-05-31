@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ia-nachrichten-bereich",
+        released=date(2026, 5, 31),
+        title="📬 Eigener Nachrichten-Bereich + Ungelesen-Badge",
+        highlights=[
+            "Die Antworten des Teams auf dein Feedback haben jetzt einen "
+            "eigenen Bereich Nachrichten im Menü oben rechts (vorher unter "
+            "Konto & Daten versteckt) — denn das ist Kommunikation, keine "
+            "Daten-Verwaltung. Neu: ein rotes Zähler-Badge am Avatar oben "
+            "rechts zeigt ungelesene Antworten, auch ohne das Menü zu öffnen. "
+            "Hier sollen später auch Community-Nachrichten landen.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-zen-mode",
         released=date(2026, 5, 31),
         title="🧘 Zen-Modus für den Timer",
