@@ -24,6 +24,54 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-05-31 (Abend) — Feedback-Pipeline + Zen-Timer + Nachrichten-Bereich
+
+> Nach dem /abschluss noch 3 Wellen draufgesetzt (User: „es geht weiter"),
+> alle getaggt + live-verifiziert, QA je 0 KRITISCH (nach Fixes).
+
+- **`W.feedback-roadmap-pipeline`** (commit `d9d467f`) — Admin macht in der
+  Feedback-Inbox per „🗺 Auf die Roadmap"-Button aus einem Feedback ein
+  Roadmap-Item: atomarer Endpoint `POST /admin/feedback/{id}/to-roadmap` +
+  Schema-Spalte `roadmap_items.source_feedback_id` (Mini-Migration) +
+  `FeedbackToRoadmapModal` (Editor, vorbefüllt) + Feedback-Status/Auto-Reply +
+  4 pytest-Tests. Patch-Note `internal=True` (Admin-only). Roadmap-Item
+  „Feedback-Inbox → Roadmap-Pipeline" → **done**.
+- **`W.timer-zen-mode`** (commit `9004b82`) — Vollbild-Zen-Timer (Knopf „🧘 Zen"
+  im Timer-Tab): nur Scramble + große Zeit, Tap/Leertaste tracket. EINE
+  Timer-Instanz (neues `bare`-Prop auf `SpacebarTimerCard`, kein zweiter
+  `useSpacebarTimer` → kein Doppel-Save). QA: 2 KRITISCH gefixt (TouchTimerPad
+  hinterm Overlay ausblenden; Exit-× nur wenn kein Solve läuft, via
+  `onStateChange`). features-data `solvingBullet10`. Roadmap-Item „Zen-Timer"
+  → **done**.
+- **`W.ia-nachrichten-bereich`** (commit `1c470f0`) — aus der User-Frage „passt
+  Mein Feedback in Meine Daten?": „Mein Feedback" (Team-Antworten) zieht in
+  einen **eigenen Bereich 📬 Nachrichten** (UserMenu, raus aus Konto & Daten →
+  Daten — es ist Kommunikation, keine Daten). **Unread-Badge am UserMenu-Avatar**
+  (rot, `useMyFeedbackUnreadCount`) schließt die Discoverability-Lücke; Toaster
+  zeigt jetzt auf `nachrichten`. Roadmap-Seed „Nachrichten-Hub" (P3) für die
+  spätere Vereinigung mit Community-Messages.
+
+**Tagesbilanz 2026-05-31: 7 Wellen live** (Profil, Einstellungen, App-Shell,
+Feedback-Pipeline, Zen, Nachrichten-Bereich) + 5 Roadmap-Seed-Items.
+
+### 🔜 Offen für die nächste Session (frischester Stand — ersetzt die Restpläne unten)
+
+1. **Item 3 — Hardware aus kuratierter Liste** (das letzte der 3 neuen
+   User-Items; bewusst vertagt): Cubes aus fester `COMMON_HARDWARE`-Liste statt
+   Freitext; Frontend + ggf. Daten-Migration der Bestands-Hardware. Note im Seed.
+2. **Logo-Größe prüfen** (User-Review offen): App-Bar-Logo jetzt klein
+   (`h-9 sm:h-10 md:h-11` im App.tsx-Header). Falls zu klein → 1-Zeilen-Tweak.
+3. **Phase B — öffentliches/teilbares Profil** (Roadmap P3.10, großer Brocken):
+   Schema `avatar_url`/`bio`/`profile_visibility` + Migration + Backup/Export +
+   `GET /profile/{id}` mit Zugriffskontrolle + 3 Stufen (privat/Freunde/
+   öffentlich = **nur eingeloggt**) + Read-only-Ansicht. `ProfilView` = Blaupause.
+4. **Nachrichten-Hub** (Roadmap P3): wenn Community-Messaging kommt, Team- +
+   Friend-Nachrichten im Nachrichten-Bereich vereinen (Badge existiert schon).
+5. **Variante A** (Voll-Sub-Tab-Routing) + **Workstream-1-Reste** (Design-System)
+   + **Phase 6** (Render-Abbau, `feature/W-api-prefix`→`main`).
+
+---
+
 ## ✅ ERLEDIGT 2026-05-31 (Forts.) — Profil/Einstellungen/Konto-Bereiche + App-Shell
 
 > Aufbauend auf dem IA-Umbau (W1–W6, Block darunter): tieferes Struktur-
