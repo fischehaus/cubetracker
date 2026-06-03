@@ -24,6 +24,63 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-03 — Hold-to-Inspect (Touch) + Intro-Backing + Deploy-Postmortem
+
+> Session-Fortsetzung nach dem 31.05.-Abschluss. 2 Wellen + eine wichtige
+> Deploy-Lesson. Alle live-verifiziert (Bundle-Check!), QA wo wesentlich.
+
+- **`W.hold-to-inspect`** (commit `3672589`, Fix `52e7fc0`, Tag
+  `v2.0.0-alpha.W.hold-to-inspect`) — User-Wunsch: am **Touch** (Phone/Tablet)
+  startet die **Inspektion** nicht mehr per Antippen, sondern per **0,5 Sek.
+  Halten** (verhindert versehentliche Starts). Desktop-Spacebar unverändert
+  (Sofort-Start, WCA-Standard). Der bisher tote `holding`-State umgewidmet zur
+  Vor-Inspektion-Halte-Phase (lila + `animate-pulse` als Feedback, idle-Hint
+  touch-aware). Neue Hook-Opt `holdToStartInspection` (gated auf `isTouchDevice`
+  in SpacebarTimerCard), `INSPECTION_HOLD_MS=500`. **QA (State-Machine-streng):
+  2 KRITISCH gefixt** — (1) Zen-Exit-× jetzt auch im `holding` sichtbar; (2)
+  Hold-Timeout überlebt Listener-Re-Subscribes: `onComplete` (saveFromSpacebar)
+  ist pro Render neu → der idle→holding-Wechsel triggert ein Re-Subscribe → der
+  Effect-Cleanup hätte den laufenden Hold gekillt (= Dauerhänger in „holding").
+  Fix: Timeout NUR in reset()/handleUp/Unmount räumen, NICHT im Listener-Cleanup.
+  Verworfen: „Doppel-Dispatch"-Verdacht (stateRef synchron → 2. keydown no-op).
+  User-Tuning 1000→500 ms (Fix-Commit).
+- **`W.skin-pseudo-header-pills` (Intro-Nachzug)** (commit `828686e`) — die
+  Beschreibungstexte unter den Pseudo-Bereich-Titeln (Profil, Nachrichten) lagen
+  auf Skins nackt auf dem Hintergrund. `PseudoViewHeader` bekam eine optionale
+  `intro`-Prop mit `bg-gray-900/50`-Backing (Skin-CSS schaltet deckend). User
+  bestätigt: „Text unter Profil ist jetzt lesbar."
+
+### ⚠️ DEPLOY-LESSON (wichtig — kostete heute eine Debug-Runde)
+Bei einem Commit der **Backend (changelog) UND Frontend** anfasst, deployt
+Coolify **manchmal nur EINE App** (Monorepo-Dedup). Heute: `3672589`
+(hold-to-inspect) → Backend ging live (Health-Version flippte auf
+`hold-to-inspect`), **Frontend-Bundle blieb aber alt** → der User testete den
+alten Timer-Code („reagiert noch aufs Tippen"). Die GitHub-Action lief grün (9s,
+beide Deploy-Calls), Coolify verwarf den Frontend-Build trotzdem.
+**→ Deploy-Verify IMMER beidseitig: Health-Version UND Bundle-Hash müssen
+flippen.** Fix bei halbem Deploy: **frontend-only Folge-Push** (re-triggert nur
+das Frontend, keine Backend-Kollision) ODER `gh workflow run deploy.yml` (beide).
+Heute mit dem Intro-Nachzug als frontend-only Push gelöst.
+
+### 🔜 Offen für die nächste Session (frischester Stand — ersetzt die Restpläne unten)
+1. **🟡 Patch-Note-Korrektur (Backend, 1 Zeile):** der public PatchNote
+   `W.hold-to-inspect` in `webapp/changelog/data.py` sagt noch „wenn du eine
+   Sekunde lang hältst" — ist aber 0,5 s. Beim nächsten Backend-Anlass auf „kurz
+   hältst" o.ä. korrigieren (bewusst NICHT mit dem 0,5s-Frontend-Push gemischt,
+   um den Coolify-Dedup zu vermeiden).
+2. **Hardware aus kuratierter Liste** (Roadmap P1, letztes der 3 User-P1-Items)
+   — `COMMON_HARDWARE` analog `COMMON_CUBE_TYPES`; Frontend + ggf. Daten-Migration
+   der Bestands-Hardware. Berührt das Hardware-Backend-Modell → dort die
+   Patch-Note (1) gleich mitkorrigieren. **Wahrscheinlich die nächste Arbeit.**
+3. **Solve-Liste-Virtualisierung** (P1, ~3h, react-window) + **Ranking/Level**
+   (P1, groß, eigenes Item) + **Phase B öffentliches Profil** (P3.10) bleiben offen.
+
+**Roadmap-Pflege heute:** „Backend-Test-Suite einführen" auf done gesetzt (war
+stale-aktiv). 3 live-only Items (2 done + 1 Meta) bewusst NICHT geseedet
+(Verlust bei DB-Wipe harmlos).
+
+---
+
 ## ✅ ERLEDIGT 2026-05-31 (Abend 2, nach /compact) — Timer-Polish + Skin-Header-Pills + „Angemeldet bleiben"
 
 > 4 weitere Wellen nach der Kompaktierung (User-Wünsche), alle getaggt +
