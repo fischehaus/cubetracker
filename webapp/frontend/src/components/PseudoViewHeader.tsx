@@ -26,18 +26,37 @@ interface Props {
   backLabel: string;
   /** Zurück in die App — die Pseudo-Bereiche haben keine Haupt-TabBar. */
   onBack: () => void;
+  /**
+   * Optionaler Einleitungstext unter dem Titel. Bekommt ein dezentes Backing
+   * (bg-gray-900/50 → von der Skin-CSS auf deckend geschaltet), damit er auf
+   * Skin-Hintergründen lesbar bleibt statt nackt drauf zu liegen.
+   */
+  intro?: string;
 }
 
-export function PseudoViewHeader({ icon, title, backLabel, onBack }: Props) {
+export function PseudoViewHeader({
+  icon,
+  title,
+  backLabel,
+  onBack,
+  intro,
+}: Props) {
   return (
-    <div className="flex items-center justify-between gap-3 flex-wrap">
-      <h2 className="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900/60 px-3 py-1.5 text-lg font-semibold text-gray-100 shadow-sm">
-        <span aria-hidden="true">{icon}</span>
-        {title}
-      </h2>
-      <Button variant="secondary" size="sm" onClick={onBack}>
-        {backLabel}
-      </Button>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <h2 className="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-900/60 px-3 py-1.5 text-lg font-semibold text-gray-100 shadow-sm">
+          <span aria-hidden="true">{icon}</span>
+          {title}
+        </h2>
+        <Button variant="secondary" size="sm" onClick={onBack}>
+          {backLabel}
+        </Button>
+      </div>
+      {intro && (
+        <p className="max-w-2xl rounded-lg bg-gray-900/50 px-3 py-2 text-sm text-gray-300">
+          {intro}
+        </p>
+      )}
     </div>
   );
 }

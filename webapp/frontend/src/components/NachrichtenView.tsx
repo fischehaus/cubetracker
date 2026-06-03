@@ -28,10 +28,8 @@ export function NachrichtenView({ onBack }: Props) {
         title={t("nachrichtenView.title")}
         backLabel={t("nachrichtenView.back")}
         onBack={onBack}
+        intro={t("nachrichtenView.intro")}
       />
-      <p className="text-sm text-gray-400 max-w-2xl">
-        {t("nachrichtenView.intro")}
-      </p>
       <MyFeedbackPanel />
     </div>
   );

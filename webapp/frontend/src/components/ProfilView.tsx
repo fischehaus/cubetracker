@@ -46,8 +46,8 @@ export function ProfilView({ onBack }: Props) {
         title={t("profilView.title")}
         backLabel={t("profilView.back")}
         onBack={onBack}
+        intro={t("profilView.intro")}
       />
-      <p className="text-sm text-gray-400 max-w-2xl">{t("profilView.intro")}</p>
 
       <ProfileSection />
       <WcaProfileCard />
