@@ -416,7 +416,9 @@ export function BigTimerInput({
       >
         {/* Exit-× nur wenn kein Solve läuft — verhindert versehentliches
             Verwerfen einer laufenden Zeit (QA). */}
-        {(spacebarState === "idle" || spacebarState === "stopped") && (
+        {(spacebarState === "idle" ||
+          spacebarState === "stopped" ||
+          spacebarState === "holding") && (
           <button
             type="button"
             onClick={onExitZen}

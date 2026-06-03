@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.hold-to-inspect",
+        released=date(2026, 6, 3),
+        title="⏱ Inspektion am Phone: Halten statt Antippen",
+        highlights=[
+            "Auf dem Phone/Tablet startet die Inspektion jetzt nicht mehr durch "
+            "ein kurzes Antippen des Timers oder des Tap-Knopfs, sondern erst "
+            "wenn du eine Sekunde lang hältst — versehentliche Berührungen lösen "
+            "so keine Inspektion mehr aus. Während du hältst, färbt sich der "
+            "Timer lila und pulst; sobald die Inspektion startet, machst du wie "
+            "gewohnt weiter. Am Desktop bleibt die Leertaste unverändert "
+            "(sofortiger Start, WCA-Standard).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.remember-me",
         released=date(2026, 5, 31),
         title="🔐 Angemeldet bleiben",

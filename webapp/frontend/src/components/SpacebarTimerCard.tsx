@@ -88,13 +88,16 @@ export function SpacebarTimerCard({
 }: Props) {
   const { t } = useTranslation();
   const effectiveFontSize = fontSizeOverride ?? settings.timer_font_size;
+  const isTouchDevice = useIsTouchDevice();
   const timer = useSpacebarTimer({
     enabled,
     settings,
     onComplete: onSave,
     restartFromStopped,
+    // W.hold-to-inspect: auf Touch startet die Inspektion per 1s-Halten statt
+    // Tap (Desktop-Spacebar bleibt Sofort-Start).
+    holdToStartInspection: isTouchDevice,
   });
-  const isTouchDevice = useIsTouchDevice();
   // W.timer-card-tap (2026-05-30): User-Wunsch — auf Phone soll das
   // Timer-Display selbst tappbar sein (statt nur der separate
   // TouchTimerPad-Button darunter). Pattern identisch zum Pad: Pointer-
@@ -166,6 +169,7 @@ export function SpacebarTimerCard({
             timer.state,
             settings.inspection_enabled,
             settings.inspection_mode,
+            isTouchDevice,
             t,
           )}
         </div>
@@ -197,7 +201,9 @@ export function SpacebarTimerCard({
 
       {/* Mitte: großer Timer */}
       <div
-        className={`text-center font-mono ${timerColorClass(timer.state)}`}
+        className={`text-center font-mono ${timerColorClass(timer.state)}${
+          bare && timer.state === "holding" ? " animate-pulse" : ""
+        }`}
         style={{
           fontSize: TIMER_FONT_SCALE[effectiveFontSize].timer,
           lineHeight: 1,
@@ -267,6 +273,9 @@ function cardClass(state: TimerState): string {
       return `${base} border-emerald-500/60 bg-emerald-500/10`;
     case "inspection":
       return `${base} border-blue-500/60 bg-blue-500/10`;
+    case "holding":
+      // W.hold-to-inspect: Vor-Inspektion-Hold — pulsierend „lädt", bis 1s um ist.
+      return `${base} border-purple-500/60 bg-purple-500/10 animate-pulse`;
     case "stopped":
       return `${base} border-gray-500/60 bg-gray-500/10`;
     default:
@@ -282,6 +291,8 @@ function timerColorClass(state: TimerState): string {
       return "text-emerald-200";
     case "inspection":
       return "text-blue-200";
+    case "holding":
+      return "text-purple-200";
     case "stopped":
       return "text-gray-100";
     default:
@@ -297,6 +308,8 @@ function hintClass(state: TimerState): string {
       return "text-emerald-300";
     case "inspection":
       return "text-blue-300";
+    case "holding":
+      return "text-purple-300";
     case "stopped":
       return "text-gray-400";
     default:
@@ -308,17 +321,22 @@ function hintLabel(
   state: TimerState,
   inspectionEnabled: boolean,
   inspectionMode: "wca" | "pragmatic",
+  holdToInspect: boolean,
   t: (key: string) => string,
 ): string {
   switch (state) {
     case "idle":
       return inspectionEnabled
-        ? t("spacebarTimer.hintIdleWithInsp")
+        ? holdToInspect
+          ? t("spacebarTimer.hintIdleHoldInsp")
+          : t("spacebarTimer.hintIdleWithInsp")
         : t("spacebarTimer.hintIdleNoInsp");
     case "inspection":
       return inspectionMode === "wca"
         ? t("spacebarTimer.hintInspectionWca")
         : t("spacebarTimer.hintInspectionPragmatic");
+    case "holding":
+      return t("spacebarTimer.hintHolding");
     case "ready":
       return t("spacebarTimer.hintReady");
     case "running":

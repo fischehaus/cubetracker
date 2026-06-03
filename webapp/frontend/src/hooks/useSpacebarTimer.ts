@@ -92,10 +92,28 @@ interface Options {
    * der Caller wie gehabt direkt nach dem Save.
    */
   restartFromStopped?: boolean;
+  /**
+   * W.hold-to-inspect (2026-06-03): wenn true, startet die Inspektion am
+   * idle/stopped-State NICHT per Tap, sondern erst nach ~1s Halten (kurzer Tap
+   * = nichts → verhindert versehentliche Inspektions-Starts). Gedacht für Touch
+   * (Tap auf Timer/Button); Desktop-Spacebar lässt es false → Sofort-Start
+   * (WCA-Standard). Greift nur wenn settings.inspection_enabled. Default false.
+   */
+  holdToStartInspection?: boolean;
 }
 
+// W.hold-to-inspect: Haltedauer (ms) am idle/stopped-State, ab der die
+// Inspektion startet (Touch). Darunter = Tap, löst nichts aus.
+const INSPECTION_HOLD_MS = 1000;
+
 export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
-  const { enabled, settings, onComplete, restartFromStopped = false } = opts;
+  const {
+    enabled,
+    settings,
+    onComplete,
+    restartFromStopped = false,
+    holdToStartInspection = false,
+  } = opts;
   const [state, setState] = useState<TimerState>("idle");
   const [displayMs, setDisplayMs] = useState(0);
   const [inspectionLeftMs, setInspectionLeftMs] = useState(0);
@@ -110,6 +128,12 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
   // aktuellen Wert sieht ohne neu zu subscriben.
   const restartFromStoppedRef = useRef(restartFromStopped);
   restartFromStoppedRef.current = restartFromStopped;
+  // W.hold-to-inspect: Ref-Spiegel + Timer für den Vor-Inspektion-Hold.
+  const holdToStartInspectionRef = useRef(holdToStartInspection);
+  holdToStartInspectionRef.current = holdToStartInspection;
+  const inspectionHoldTimeoutRef = useRef<number | null>(null);
+  // Aus welchem State der Hold startete (idle/stopped) — für Abbruch-Restore.
+  const holdOriginRef = useRef<TimerState>("idle");
   // QA W.timer-keep-last-time: penalty zusätzlich als Ref spiegeln (siehe
   // Sync-Effect unten). Der keydown-Handler liest beim Stop penaltyRef.current,
   // damit `penalty` NICHT in der Listener-Dep-Liste stehen muss — sonst würden
@@ -147,6 +171,11 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       window.clearTimeout(pendingSingleTapTimeoutRef.current);
       pendingSingleTapTimeoutRef.current = null;
     }
+    if (inspectionHoldTimeoutRef.current !== null) {
+      window.clearTimeout(inspectionHoldTimeoutRef.current);
+      inspectionHoldTimeoutRef.current = null;
+    }
+    holdOriginRef.current = "idle";
     if (tickIdRef.current !== null) {
       cancelAnimationFrame(tickIdRef.current);
       tickIdRef.current = null;
@@ -268,6 +297,40 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       const cur = stateRef.current;
 
       if (cur === "idle" || (restartFromStoppedRef.current && cur === "stopped")) {
+        // W.hold-to-inspect (2026-06-03, Touch): Inspektion startet NICHT per
+        // Tap, sondern erst nach INSPECTION_HOLD_MS Halten. Kurzer Tap → nichts.
+        // Cleanup (falls aus stopped) + State-Wechsel passieren ERST wenn der
+        // Hold durchläuft (im Timeout) — so bleibt die zuletzt gestoppte Zeit
+        // während des Haltens stehen und ein abgebrochener Tap verändert nichts.
+        // Nur Touch + Inspektion-an; Desktop / Inspektion-aus → Sofort-Pfad unten.
+        if (settings.inspection_enabled && holdToStartInspectionRef.current) {
+          holdOriginRef.current = cur === "stopped" ? "stopped" : "idle";
+          stateRef.current = "holding";
+          setState("holding");
+          if (inspectionHoldTimeoutRef.current !== null) {
+            window.clearTimeout(inspectionHoldTimeoutRef.current);
+          }
+          inspectionHoldTimeoutRef.current = window.setTimeout(() => {
+            inspectionHoldTimeoutRef.current = null;
+            if (stateRef.current !== "holding") return;
+            if (holdOriginRef.current === "stopped") {
+              // Vorgänger-Solve putzen (analog Sofort-Pfad unten).
+              setPenalty("none");
+              penaltyRef.current = "none";
+              setSplits([]);
+              setPhaseIndex(0);
+              splitsRef.current = [];
+              setDisplayMs(0);
+            }
+            inspectionStartRef.current = performance.now();
+            playedWarn8Ref.current = false;
+            playedWarn12Ref.current = false;
+            stateRef.current = "inspection";
+            setState("inspection");
+            setInspectionLeftMs(settings.inspection_seconds * 1000);
+          }, INSPECTION_HOLD_MS);
+          return;
+        }
         // W.timer-keep-last-time: aus „stopped" kommend den letzten Solve-
         // State putzen, damit der neue Solve frisch startet (Penalty/Splits/
         // Zeit des Vorgängers nicht übernehmen). Die zuletzt gestoppte Zeit
@@ -419,11 +482,17 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       }
 
       if (cur === "holding") {
-        // (Nicht im aktuellen Flow benutzt — wir gehen ready → running direkt)
-        runStartRef.current = performance.now();
-        stateRef.current = "running";
-        setState("running");
-        setDisplayMs(0);
+        // W.hold-to-inspect: Vor-Inspektion-Hold vor Ablauf der 1s losgelassen
+        // = Tap statt Halten → Timer abbrechen, zurück zum Ausgangs-State
+        // (idle/stopped), KEINE Inspektion. (Ist der Timeout schon gefeuert,
+        // sind wir nicht mehr in „holding" und landen hier nicht.)
+        if (inspectionHoldTimeoutRef.current !== null) {
+          window.clearTimeout(inspectionHoldTimeoutRef.current);
+          inspectionHoldTimeoutRef.current = null;
+        }
+        const origin = holdOriginRef.current;
+        stateRef.current = origin;
+        setState(origin);
         return;
       }
     }
@@ -435,6 +504,22 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
       window.removeEventListener("keyup", handleUp);
     };
   }, [enabled, settings, onComplete]);
+
+  // W.hold-to-inspect (QA KRITISCH): den Vor-Inspektion-Hold-Timeout NUR beim
+  // Unmount räumen — NICHT im Listener-Effect-Cleanup oben. Der re-subscribet
+  // bei jedem onComplete-/settings-Wechsel (onComplete = saveFromSpacebar ist
+  // pro Render neu), u.a. genau auf dem idle→holding-Render. Würde der Cleanup
+  // den Timeout killen, bliebe der Timer in „holding" hängen. reset() +
+  // handleUp(holding) sind die regulären Abbruch-Stellen; der Timeout überlebt
+  // Re-Subscribes (wie pendingSingleTapTimeoutRef).
+  useEffect(() => {
+    return () => {
+      if (inspectionHoldTimeoutRef.current !== null) {
+        window.clearTimeout(inspectionHoldTimeoutRef.current);
+        inspectionHoldTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     state,
