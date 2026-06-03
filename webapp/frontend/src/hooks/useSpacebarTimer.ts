@@ -104,7 +104,8 @@ interface Options {
 
 // W.hold-to-inspect: Haltedauer (ms) am idle/stopped-State, ab der die
 // Inspektion startet (Touch). Darunter = Tap, löst nichts aus.
-const INSPECTION_HOLD_MS = 1000;
+// 2026-06-03: User-Wunsch 1000 → 500 ms (schneller, weniger „träge").
+const INSPECTION_HOLD_MS = 500;
 
 export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
   const {
