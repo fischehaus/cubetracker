@@ -511,8 +511,36 @@ ROADMAP_SEED: list[dict[str, Any]] = [
         "phase_id": "P6",
         "title_de": "Stackmat-Hardware-Input (USB/Audio)",
         "title_en": "Stackmat hardware input (USB/audio)",
-        "note_de": None,
-        "note_en": None,
+        "note_de": (
+            "Externe Timer-Hardware an Cubetracker anbinden. Befund 2026-06-06 "
+            "(User-Anfrage MoYu Cube AI Timer MF9141): GAN Smart Timer ist der "
+            "saubere drahtlose Weg — dokumentierte Web-Bluetooth-GATT (Service "
+            "fff0 / Char fff5), und die schon eingebundene Library "
+            "gan-web-bluetooth kann GAN-Timer mit. Der MoYu-Timer dagegen hat "
+            "proprietaeres BLE (spricht nur mit MoYus WCU-App) — KEINE offene "
+            "Wireless-Anbindung; csTimer bindet ihn nur per Audio/Stackmat an "
+            "(appendBitMoyu in hardware/stackmat.js) und das unzuverlaessig "
+            "(cs0x7f/cstimer Issue 164: verzoegerter Start, Doppel-Zaehlen). "
+            "QiYi-Timer ist verschluesselt (nur Audio-Kabel). Plan: GAN-Timer "
+            "drahtlos zuerst (wenig Aufwand), generischer Stackmat-Audio-Input "
+            "(Web Audio API) als Breitband-Loesung; MoYu drahtlos nur via "
+            "Reverse-Engineering (BLE-Mitschnitt, Sackgassen-Risiko Verschluesselung)."
+        ),
+        "note_en": (
+            "Connect external timer hardware to Cubetracker. Findings 2026-06-06 "
+            "(user asked about the MoYu Cube AI Timer MF9141): the GAN Smart "
+            "Timer is the clean wireless path — documented Web Bluetooth GATT "
+            "(service fff0 / char fff5), and our already-bundled gan-web-bluetooth "
+            "library supports GAN timers. The MoYu timer however uses a "
+            "proprietary BLE protocol (talks only to the MoYu WCU app) — no open "
+            "wireless path; csTimer only connects it via audio/Stackmat "
+            "(appendBitMoyu in hardware/stackmat.js) and unreliably "
+            "(cs0x7f/cstimer issue 164: delayed start, double counting). QiYi "
+            "timers are encrypted (cable only). Plan: GAN timer wireless first "
+            "(low effort), a generic Stackmat audio input (Web Audio API) as the "
+            "broad solution; MoYu wireless only via reverse engineering (BLE "
+            "capture, dead-end risk from encryption)."
+        ),
         "effort": "1-2 Wochen",
         "internal": False,
     },
