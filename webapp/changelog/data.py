@@ -44,6 +44,21 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-stats-ux",
+        released=date(2026, 6, 6),
+        title="🧩 Timer: Scramble je Solve + Session-Übernahme in die Statistik",
+        highlights=[
+            "Timer-Tab, Liste der letzten Solves: jeder vergangene Solve hat jetzt "
+            "ein ⓘ — ein Klick zeigt das Detail inklusive des kompletten Scrambles "
+            "(plus Datum, Mo3/AO5/AO12, Hardware/Session, Notiz), genau wie im "
+            "Analyse-Tab.",
+            "Wechsel vom Timer in die Statistik: die Übersicht übernimmt jetzt "
+            "automatisch die Session, die du im Timer zuletzt eingestellt hattest "
+            "— kein erneutes Auswählen. Danach kannst du die Session in der "
+            "Statistik weiterhin frei umstellen.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.feedback-unread-fix",
         released=date(2026, 6, 6),
         title="🔔 Nachrichten-Zähler verschwindet jetzt zuverlässig",
