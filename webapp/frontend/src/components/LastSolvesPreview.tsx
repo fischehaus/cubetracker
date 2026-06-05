@@ -284,6 +284,19 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                 <span className="text-gray-600 text-3xl">–</span>
               )}
             </div>
+            {/* W.single-pb-live (User-Wunsch): Single-PB (beste Einzelzeit fuer
+                Cube/Session) direkt unter dem letzten Solve — gleiche Optik wie
+                die PB-Subzeilen bei ao5/ao12/ao100, gold wenn der letzte Solve
+                selbst der PB ist. */}
+            {stats?.best_ms != null && (
+              <div
+                className={`text-xs font-mono mt-0.5 ${
+                  isLastPb ? "text-yellow-300" : "text-gray-500"
+                }`}
+              >
+                PB {formatTime(stats.best_ms)}
+              </div>
+            )}
           </div>
 
           {/* 2x2-Grid mit den 4 aktuellen Averages. Mo3 wird clientseitig
