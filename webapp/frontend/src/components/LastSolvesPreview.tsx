@@ -33,7 +33,9 @@ import {
   type SortKey,
 } from "../lib/solve-sort";
 import { InfoButton } from "./InfoButton";
+import { SolveDetailModal } from "./SolveDetailModal";
 import { Card, EmptyState } from "./ui";
+import type { Solve } from "../lib/types";
 
 interface Props {
   cubeType: string;
@@ -82,6 +84,9 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
   const [tableSize, setTableSize] = useState<number>(20);
   const [sortKey, setSortKey] = useState<SortKey>("num");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  // W.timer-solve-scramble (User-Wunsch): ⓘ pro Solve öffnet das Detail-Modal
+  // (voller Scramble + Kontext), analog zur SolveList im Analyse-Tab.
+  const [detailSolve, setDetailSolve] = useState<Solve | null>(null);
 
   // Wir laden max(windowSize, tableSize + AO_LOOKBACK) — eine Query reicht
   // für beide Use-Cases (Form-Vergleich + Tabelle).
@@ -690,7 +695,15 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
                           {row.ao100 !== null ? formatTime(row.ao100) : "–"}
                         </td>
                       )}
-                      <td className="py-1.5 pr-0 text-right">
+                      <td className="py-1.5 pr-0 text-right whitespace-nowrap">
+                        <button
+                          onClick={() => setDetailSolve(s)}
+                          className="text-xs rounded bg-gray-800 px-1.5 py-0.5 text-gray-500 hover:bg-purple-700/40 hover:text-purple-100 mr-1"
+                          title={t("lastSolvesPreview.detailRowTitle")}
+                          aria-label={t("lastSolvesPreview.detailRowTitle")}
+                        >
+                          ⓘ
+                        </button>
                         <button
                           onClick={() => {
                             if (
@@ -724,6 +737,15 @@ export function LastSolvesPreview({ cubeType, sessionId }: Props) {
           {t("lastSolvesPreview.sortHint")}
         </p>
       </Card>
+      {detailSolve && (
+        <SolveDetailModal
+          solve={detailSolve}
+          ao5={ao5Map.get(detailSolve.id) ?? null}
+          ao12={ao12Map.get(detailSolve.id) ?? null}
+          isPb={detailSolve.id === bestSolveId}
+          onClose={() => setDetailSolve(null)}
+        />
+      )}
     </div>
   );
 }

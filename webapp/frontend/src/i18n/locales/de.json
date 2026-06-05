@@ -643,6 +643,7 @@
     "ao12PbOldTitle": "War mal AO12-Bestwert",
     "noSolves": "Noch keine Solves für {{cube}}. Tipp eine Zeit rechts ein.",
     "sortHint": "Klick auf Spaltenkopf zum Sortieren.",
+    "detailRowTitle": "Details + Scramble ansehen",
     "deleteRowTitle": "Solve löschen",
     "deleteRowConfirm": "Solve {{time}} löschen?",
     "colNumber": "#",

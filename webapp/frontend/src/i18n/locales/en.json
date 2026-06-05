@@ -643,6 +643,7 @@
     "ao12PbOldTitle": "Was an AO12 PB",
     "noSolves": "No solves for {{cube}} yet. Type a time on the right.",
     "sortHint": "Click a column header to sort.",
+    "detailRowTitle": "View details + scramble",
     "deleteRowTitle": "Delete solve",
     "deleteRowConfirm": "Delete solve {{time}}?",
     "colNumber": "#",

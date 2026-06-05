@@ -274,9 +274,13 @@ const TIMER_FONT_SIZE_ORDER: (
 function TimerTab({
   timerCubeType,
   setTimerCubeType,
+  timerSessionId,
+  setTimerSessionId,
 }: {
   timerCubeType: string;
   setTimerCubeType: (s: string) => void;
+  timerSessionId: number | null;
+  setTimerSessionId: (id: number | null) => void;
 }) {
   const { t } = useTranslation();
   // TIMER hat keine externe Filter-Leiste — Cube/Session/Hardware
@@ -285,7 +289,6 @@ function TimerTab({
   // die Controls UNTER dem TouchPad als eigene Karte leben können ohne
   // dass die Hardware-Auswahl mit dem Save-Pfad in BigTimerInput auseinander
   // fallt.
-  const [timerSessionId, setTimerSessionId] = useState<number | null>(null);
   const [timerHardwareId, setTimerHardwareId] = useState<number | null>(null);
   // W.timer-focus-mode: blendet Live-/Letzte-Solves + SessionPlan +
   // TimerControlsCard aus, damit Scramble + Timer-Display den ganzen
@@ -811,6 +814,10 @@ function MainLayout() {
   // Bewusst NICHT geteilt zwischen Tabs (Dashboard- und Analyse-Filter
   // sind unabhängig).
   const [timerCubeType, setTimerCubeType] = useState<string>("3x3");
+  // W.session-carryover: Timer-Session in MainLayout gehoben (vorher lokal in
+  // TimerTab), damit sie beim Tab-Wechsel an die Statistik-Übersicht übergeben
+  // werden kann.
+  const [timerSessionId, setTimerSessionId] = useState<number | null>(null);
   const [dashboardSessionId, setDashboardSessionId] = useState<number | null>(
     null
   );
@@ -857,6 +864,17 @@ function MainLayout() {
   // Gleicher Query wie der FeedbackUnreadToaster → React-Query dedupt (1 Fetch).
   const { data: fbUnread } = useMyFeedbackUnreadCount(!!user);
   const unreadFeedback = fbUnread?.unread_count ?? 0;
+
+  // W.session-carryover (User-Wunsch): Beim Wechsel Timer -> Statistik die im
+  // Timer zuletzt aktive Session in die Statistik-Übersicht übernehmen. Danach
+  // bleibt die Statistik-Session unabhängig (frei änderbar). Greift bei
+  // explizitem Nav-Klick (TabBar/BottomNav).
+  function handleTabChange(next: AppTab) {
+    if (tab === "timer" && next === "statistik") {
+      setDashboardSessionId(timerSessionId);
+    }
+    setTab(next);
+  }
 
   // Tab-Wahl persistieren — localStorage + URL-Hash, damit
   // Reload + Browser-Back beide funktionieren.
@@ -1078,7 +1096,7 @@ function MainLayout() {
             — die haben eigene Header mit Zurück-Button. */}
         {!isPseudoView && (
           <div className="hidden md:block">
-            <TabBar current={tab} onChange={setTab} />
+            <TabBar current={tab} onChange={handleTabChange} />
           </div>
         )}
 
@@ -1086,6 +1104,8 @@ function MainLayout() {
           <TimerTab
             timerCubeType={timerCubeType}
             setTimerCubeType={setTimerCubeType}
+            timerSessionId={timerSessionId}
+            setTimerSessionId={setTimerSessionId}
           />
         )}
         {tab === "statistik" && (
@@ -1157,7 +1177,7 @@ function MainLayout() {
 
       {/* W.ia-app-shell: fixe Bottom-Nav für Phones (<md). In den Pseudo-Tabs
           ausgeblendet (eigener Zurück-Button), auf Desktop via md:hidden weg. */}
-      {!isPseudoView && <BottomNav current={tab} onChange={setTab} />}
+      {!isPseudoView && <BottomNav current={tab} onChange={handleTabChange} />}
 
       {/* Globale Toaster + Modals — bleiben auf jedem Tab sichtbar.
           Die 3 Spezial-Toaster sind seit W.toast-manager (2026-05-30)
