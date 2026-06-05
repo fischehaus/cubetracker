@@ -105,6 +105,8 @@ interface Options {
 // W.hold-to-inspect: Haltedauer (ms) am idle/stopped-State, ab der die
 // Inspektion startet (Touch). Darunter = Tap, löst nichts aus.
 // 2026-06-03: User-Wunsch 1000 → 500 ms (schneller, weniger „träge").
+// W.inspection-hold-config: nur noch Fallback-Default — der eigentliche Wert
+// kommt jetzt aus settings.inspection_hold_ms (UI-Regler in EinstellungenView).
 const INSPECTION_HOLD_MS = 500;
 
 export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
@@ -305,6 +307,16 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
         // während des Haltens stehen und ein abgebrochener Tap verändert nichts.
         // Nur Touch + Inspektion-an; Desktop / Inspektion-aus → Sofort-Pfad unten.
         if (settings.inspection_enabled && holdToStartInspectionRef.current) {
+          // W.inspection-hold-config (QA-SOLLTE): Settings-Snapshot VOR dem
+          // Timeout — der Callback nutzt konsistent denselben Stand, und ein
+          // korrupter localStorage-Wert (String/NaN/0) faellt sauber auf den
+          // Default zurueck statt setTimeout(fn, 0) = ungewollter Sofort-Start.
+          const inspSecSnapshot = settings.inspection_seconds;
+          const holdMsRaw = Number(settings.inspection_hold_ms);
+          const holdMs =
+            Number.isFinite(holdMsRaw) && holdMsRaw >= 100
+              ? holdMsRaw
+              : INSPECTION_HOLD_MS;
           holdOriginRef.current = cur === "stopped" ? "stopped" : "idle";
           stateRef.current = "holding";
           setState("holding");
@@ -328,8 +340,8 @@ export function useSpacebarTimer(opts: Options): SpacebarTimerResult {
             playedWarn12Ref.current = false;
             stateRef.current = "inspection";
             setState("inspection");
-            setInspectionLeftMs(settings.inspection_seconds * 1000);
-          }, INSPECTION_HOLD_MS);
+            setInspectionLeftMs(inspSecSnapshot * 1000);
+          }, holdMs);
           return;
         }
         // W.timer-keep-last-time: aus „stopped" kommend den letzten Solve-

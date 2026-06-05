@@ -75,6 +75,14 @@ export interface AppSettings {
   inspection_audio_mode: InspectionAudioMode;
   /** Hold-Time in ms bevor „go" (grün) wird. WCA-Empfehlung 550ms. */
   hold_time_ms: number;
+  /**
+   * W.inspection-hold-config: Touch-Hold-Dauer in ms — so lange muss man am
+   * Phone/Tablet den Timer/Knopf gedrückt halten, damit die Inspektion startet
+   * (verhindert versehentliche Starts durch bloßes Antippen). NICHT zu
+   * verwechseln mit hold_time_ms (WCA-Hold am Ende der Inspektion bis grün).
+   * Nur am Touch wirksam — die Desktop-Leertaste startet die Inspektion sofort.
+   */
+  inspection_hold_ms: number;
   /** Multi-Phase-Splits aktiviert (Variante A). 1 = klassisch ohne splits. */
   splits_enabled: boolean;
   /**
@@ -111,6 +119,7 @@ export const SETTINGS_DEFAULTS: AppSettings = {
   sound_enabled: true,
   inspection_audio_mode: "beep",
   hold_time_ms: 550,
+  inspection_hold_ms: 500,
   splits_enabled: false,
   phase_names: ["Cross", "F2L", "OLL", "PLL"], // 3x3-CFOP default
   timer_font_size: "xxl",

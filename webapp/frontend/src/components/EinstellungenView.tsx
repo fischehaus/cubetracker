@@ -12,6 +12,7 @@
 import { useTranslation } from "react-i18next";
 import { PseudoViewHeader } from "./PseudoViewHeader";
 import { InfoButton } from "./InfoButton";
+import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
 import { SkinPickerCard } from "./SkinPickerCard";
 import {
   FONT_SIZE_LABELS,
@@ -30,6 +31,10 @@ interface Props {
 export function EinstellungenView({ onBack }: Props) {
   const { t } = useTranslation();
   const [settings, setSettings] = useAppSettings();
+  // W.inspection-hold-config: der Hold-Dauer-Regler wirkt nur am Touch
+  // (Desktop-Leertaste startet die Inspektion sofort) — auf Nicht-Touch
+  // ausblenden statt einen wirkungslosen Regler zu zeigen.
+  const isTouch = useIsTouchDevice();
 
   function updatePhaseCount(n: number) {
     const clamped = Math.max(1, Math.min(MAX_PHASES, n));
@@ -213,6 +218,18 @@ export function EinstellungenView({ onBack }: Props) {
             onChange={(v) => setSettings({ ...settings, inspection_seconds: v })}
             disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
           />
+          {isTouch && (
+            <NumberField
+              label={t("settingsPanel.inspectionHoldLabel")}
+              hint={t("settingsPanel.inspectionHoldHint")}
+              value={settings.inspection_hold_ms}
+              min={200}
+              max={1500}
+              step={100}
+              onChange={(v) => setSettings({ ...settings, inspection_hold_ms: v })}
+              disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
+            />
+          )}
           <Toggle
             label={t("settingsPanel.inspectionSoundLabel")}
             hint={t("settingsPanel.inspectionSoundHint")}
