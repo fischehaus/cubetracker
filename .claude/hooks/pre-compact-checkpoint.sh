@@ -61,10 +61,12 @@ out=".tmp/last-compact-checkpoint.md"
   echo '```'
 } > "$out" 2>/dev/null || exit 0
 
-# Reminder in den Kontext geben (best effort; falls PreCompact additionalContext
-# unterstuetzt, sieht Claude diesen Hinweis nach der Kompaktierung).
-msg="PreCompact-Checkpoint nach .tmp/last-compact-checkpoint.md geschrieben. Nach der Kompaktierung: dieses File + NEXT_SESSION.md lesen, um den Stand zu rekonstruieren."
-escaped="$(printf '%s' "$msg" | sed 's/\\/\\\\/g; s/"/\\"/g')"
-printf '{"hookSpecificOutput":{"hookEventName":"PreCompact","additionalContext":"%s"}}\n' "$escaped" 2>/dev/null || true
+# Fix 2026-06-06: KEINE stdout-Ausgabe mehr. PreCompact unterstuetzt KEIN
+# hookSpecificOutput/additionalContext (nur UserPromptSubmit/PostToolUse/
+# PostToolBatch tun das). Der fruehere JSON-printf hat bei JEDEM /compact einen
+# "Hook JSON output validation failed"-Fehler erzeugt (der File-Write oben lief
+# trotzdem, aber die Meldung markierte den Hook als failed + verunsicherte).
+# Leere stdout-Ausgabe = valide. Der Resume-Hinweis ("Checkpoint + NEXT_SESSION
+# lesen") steht ohnehin in CLAUDE.md + wird vom SessionStart-Hook gezeigt.
 
 exit 0
