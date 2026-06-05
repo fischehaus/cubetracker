@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.inspection-hold-config",
+        released=date(2026, 6, 5),
+        title="⏱ Inspektions-Halten: Dauer einstellbar",
+        highlights=[
+            "Am Phone/Tablet startet die Inspektion durch kurzes Gedrückthalten "
+            "des Timers/Knopfs (statt Antippen). Wie lange du halten musst, kannst "
+            "du jetzt selbst festlegen: in den Einstellungen unter Timer & Eingabe "
+            "gibt es den Regler Halten bis Inspektion (200 bis 1500 ms, Standard "
+            "500 = 0,5 s). Kürzer = schneller los, länger = noch weniger "
+            "versehentliche Starts. Der Regler erscheint nur auf Touch-Geräten — "
+            "am Desktop startet die Leertaste die Inspektion unverändert sofort.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.hold-to-inspect",
         released=date(2026, 6, 3),
         title="⏱ Inspektion am Phone: Halten statt Antippen",
