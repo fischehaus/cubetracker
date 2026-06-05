@@ -24,6 +24,76 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-05/06 — 6 Wellen + MoYu-Timer-Recherche + Roadmap-Pflege-Korrektur
+
+> Langer Sprint (über Mitternacht). Alle Wellen **Split-Deploy** (Frontend +
+> Backend getrennt committet → kein Coolify-Monorepo-Dedup) und **beidseitig
+> live-verifiziert** (Bundle-Hash UND Health-Version, meist beim 1. Versuch).
+> QA-Sub-Agent wo wesentlich.
+
+**Wellen (Reihenfolge):**
+1. **`W.inspection-hold-config`** (FE `13870d9` + BE `0af684e`, Tag) — Hold-to-
+   Inspect-Haltedauer am **Touch einstellbar** (Regler in EinstellungenView →
+   Timer & Eingabe → Inspection, 200–1500 ms, Default 500; touch-gated via
+   `useIsTouchDevice`). Neues Feld `settings.inspection_hold_ms` (localStorage,
+   kein Schema). QA: 2 SOLLTE (Settings-Snapshot vor Hold-Timeout +
+   `Number.isFinite`-Guard gegen korrupten localStorage).
+2. **`W.roadmap-tab-archive`** (FE `22cb600` + BE `8c1a423` intern, Tag) —
+   Admin-Roadmap-Tab: **Archiv-Ansicht** (Umschalter Aktiv/Archiv/Alle, Default
+   Aktiv → erledigte auto-archiviert) + **Jump-to-Top/Bottom-Pfeile** (⏫⏬) +
+   Reorder funktioniert jetzt auch in der Aktiv-Ansicht (`buildFullOrder` hängt
+   versteckte Items hinten an → Public-View bleibt konsistent). Setzt Roadmap-
+   Item **id=38 „Tab Roadmap-pflege Anpassungen"** um. UI-Relabel done→„Archiviert"
+   (kein Schema-Change). QA: 2 SOLLTE + 1 NICE.
+3. **`W.feedback-unread-fix`** (FE `7414cbc` + BE `55d5ddb`, Tag) — **User-Report**:
+   Nachrichten-Badge blieb bei 1 hängen. Ursache: „gelesen" wurde nur beim
+   Aufklappen gesetzt, die Antwort war aber für ungelesene Items schon inline
+   sichtbar → Lesen ohne Klick. Fix: **mark-on-open** aller ungelesenen +
+   `wasUnreadIds`-Snapshot (hält die grüne „neu"-Hervorhebung den Besuch lang).
+4. **`W.timer-stats-ux`** (FE `0178788` + BE `6cc99c4`, Tag) — 2 User-Wünsche:
+   (a) **Scramble-ⓘ** pro vergangenem Solve im Timer-Tab (LastSolvesPreview →
+   öffnet `SolveDetailModal` mit vollem Scramble); (b) **Session-Übernahme
+   Timer→Statistik** (`timerSessionId` von TimerTab nach MainLayout gehoben +
+   `handleTabChange`-Wrapper an TabBar/BottomNav; Nebeneffekt: Timer-Session
+   bleibt jetzt über Tab-Wechsel erhalten).
+5. **`W.single-pb-live`** (FE `8aa94f2` + BE `85c0fbc`, Tag) — **Roadmap-#1**:
+   **Single-PB** (`stats.best_ms`) in der LIVE-Karte unter „Letzter Solve", gold
+   wenn der letzte Solve der PB ist. Eine Zeile, kein Backend/i18n.
+
+**Außerdem:**
+- **⚠️ Roadmap-Pflege-Korrektur (Lesson):** „Roadmap-pflege" wurde von mir
+  **verfrüht auf done** gesetzt (Titel wörtlich als „Daten pflegen" gelesen statt
+  die note_de). User korrigierte → der echte Auftrag war id=38 (= jetzt als
+  `W.roadmap-tab-archive` gebaut). **Lesson: bei Roadmap-Items IMMER die note_de
+  lesen, nie nur den Titel.**
+- **W.hold-to-inspect-Patch-Note** 1s→0,5s korrigiert (`3f2857a`, docs).
+- **MoYu-Timer-Recherche** (User hat MoYu **Cube AI Timer MF9141**): drahtlos
+  **KEIN offener Weg** — proprietäres BLE (spricht nur mit MoYus WCU-App);
+  csTimer bindet MoYu-Timer nur per **Audio/Stackmat** an (`appendBitMoyu`) +
+  buggy (cstimer#164). **GAN Smart Timer** wäre der saubere BLE-Weg (unsere
+  `gan-web-bluetooth`-Lib kann GAN-Timer mit). Befund im Seed festgehalten
+  (`2a1a5a3`, Note des Items „Stackmat-Hardware-Input"). User-Entscheidung: nur
+  festhalten, NICHT bauen. ⚠️ Live-Roadmap-Note wird vom Seed NICHT auto-
+  aktualisiert (bootstrap = INSERT-only) → bei Bedarf via Admin-UI nachziehen.
+
+**Roadmap-Items auf done gesetzt:** Roadmap-pflege · Tab Roadmap-pflege
+Anpassungen (id=38) · einstellbare Zeit beim draufdrücken · single pb neben dem
+timer · Backend-Test-Suite (am 03.06.).
+
+### 🔜 Restplan (frischester Stand — ersetzt alle unten)
+Offene **P1** (deine Roadmap-Reihenfolge = Priorität): **Activity-Feed** (~3 T) ·
+**Public-Profile als teilbare Solving-Card** (~2 T) · **Ranking/Level** (groß,
+eigene Session) · **Solve-Liste virtualisieren** (~3 h, ⚡ schneller Win) ·
+**Hardware aus kuratierter Liste**. — Danach **P3** (Online-Battle, Friend-
+Challenges, Nachrichten-Hub), **P4** (Trainer-Subsets, BLE Smart Cube GAN/MoYu,
+3D-Vis cubing.js, Reconstruction), **P5** (PLL-Bilder — ⚠️ wartet auf deine 21
+PNGs; Cookieless-Analytics; News-Quellen; Gear/Redi/Skewb-Solver), **P6**
+(Alembic, csTimer-Solver vendoren, Metronom, **Stackmat/BLE-Timer** = MoYu-Befund,
+FMC, Multi-BLD/BLD-Helper, Virtual-Cube-Input, VRC-Replay, Gruppen/Coaching).
+**MAINTENANCE** zuletzt 2026-05-26 → in ~2 Wochen fällig.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-03 — Hold-to-Inspect (Touch) + Intro-Backing + Deploy-Postmortem
 
 > Session-Fortsetzung nach dem 31.05.-Abschluss. 2 Wellen + eine wichtige
