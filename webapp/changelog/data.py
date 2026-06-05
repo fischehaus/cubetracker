@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.feedback-unread-fix",
+        released=date(2026, 6, 6),
+        title="🔔 Nachrichten-Zähler verschwindet jetzt zuverlässig",
+        highlights=[
+            "Der rote Zähler am Profil-Knopf (ungelesene Team-Antworten) blieb "
+            "manchmal auf 1 stehen, obwohl alle Nachrichten gelesen waren — weil "
+            "der Gelesen-Status nur beim Aufklappen gesetzt wurde, die Antwort "
+            "aber schon vorher sichtbar war. Jetzt gilt: sobald du den Nachrichten-Bereich "
+            "öffnest, werden die angezeigten Antworten als gelesen markiert und "
+            "der Zähler verschwindet zuverlässig. Welche neu waren, bleibt für "
+            "den Besuch grün hervorgehoben.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.roadmap-tab-archive",
         released=date(2026, 6, 5),
         title="🗂 Admin-Roadmap: Archiv-Ansicht + Sortier-Pfeile",
