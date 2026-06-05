@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.single-pb-live",
+        released=date(2026, 6, 6),
+        title="🏅 Single-PB direkt am Timer",
+        highlights=[
+            "Im Timer-Tab zeigt die LIVE-Karte jetzt deinen Single-PB (beste "
+            "Einzelzeit) direkt unter dem letzten Solve — passend zum gewählten "
+            "Cube und zur gewählten Session. Liegt dein letzter Solve auf "
+            "PB-Niveau, leuchtet die Anzeige gold. So hast du deine Bestmarke "
+            "beim Lösen immer im Blick, genau wie schon bei AO5/AO12/AO100.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-stats-ux",
         released=date(2026, 6, 6),
         title="🧩 Timer: Scramble je Solve + Session-Übernahme in die Statistik",
