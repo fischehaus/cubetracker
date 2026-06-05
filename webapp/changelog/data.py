@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.roadmap-tab-archive",
+        released=date(2026, 6, 5),
+        title="🗂 Admin-Roadmap: Archiv-Ansicht + Sortier-Pfeile",
+        highlights=[
+            "Admin-Tab Roadmap: erledigte Items wandern jetzt automatisch ins "
+            "Archiv — die Standard-Ansicht zeigt nur noch Aktive, per Umschalter "
+            "Aktiv / Archiv / Alle. Neue Sortier-Pfeile pro Item (ganz nach oben "
+            "/ ganz nach unten, zusätzlich zu Schritt hoch/runter), und das "
+            "Sortieren funktioniert jetzt auch in der Aktiv-Ansicht.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.inspection-hold-config",
         released=date(2026, 6, 5),
         title="⏱ Inspektions-Halten: Dauer einstellbar",
