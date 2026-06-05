@@ -50,7 +50,7 @@ PATCH_NOTES: list[PatchNote] = [
         highlights=[
             "Auf dem Phone/Tablet startet die Inspektion jetzt nicht mehr durch "
             "ein kurzes Antippen des Timers oder des Tap-Knopfs, sondern erst "
-            "wenn du eine Sekunde lang hältst — versehentliche Berührungen lösen "
+            "wenn du ihn kurz gedrückt hältst — versehentliche Berührungen lösen "
             "so keine Inspektion mehr aus. Während du hältst, färbt sich der "
             "Timer lila und pulst; sobald die Inspektion startet, machst du wie "
             "gewohnt weiter. Am Desktop bleibt die Leertaste unverändert "
