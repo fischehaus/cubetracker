@@ -9,7 +9,7 @@
 // Liegt in der Verwaltung → Meine Daten Sektion (zwischen MeineDatenCard
 // und dem Format-Hint-Block).
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useMarkFeedbackResponseSeen,
@@ -65,25 +65,30 @@ export function MyFeedbackPanel() {
     }
   };
 
-  // Wenn der User ein Item mit ungelesener Antwort aufklappt → als
-  // gelesen markieren (Server-Update). Idempotent — wenn schon
-  // gelesen, kein Re-Update.
+  // W.feedback-unread-fix (2026-06-05): Ungelesene Antworten werden in diesem
+  // Bereich bereits OHNE Aufklappen angezeigt (siehe MyFeedbackRow: expanded ||
+  // wasUnread) — der User liest sie also ohne Klick. Frueher wurde „gelesen"
+  // NUR beim Aufklappen gesetzt → wer nur las (statt klickte), bei dem blieb
+  // das Unread-Badge haengen (typisch: letzte Nachricht bleibt bei 1).
   //
-  // QA-Fix W.tester-feedback-qa: nur auf expandedId-Change feuern, NICHT
-  // auf messages-Change. Sonst wird beim 60s-Refetch alle 60s erneut
-  // markSeen gefeuert solange ein Item aufgeklappt ist (Backend ist
-  // idempotent, aber unnoetiger Traffic). messages-Stand wird via
-  // Closure beim expandedId-Change ausgewertet — das ist gewollt
-  // weil danach ohnehin invalidiert wird.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Fix: ALLE ungelesenen Antworten als gelesen markieren, sobald der Bereich
+  // sie zeigt (= beim Oeffnen). Die „neu"-Hervorhebung (gruener Punkt + Badge +
+  // inline-Antwort) bleibt fuer DIESEN Besuch erhalten via wasUnreadIds-
+  // Snapshot — entkoppelt vom Server-seen-Status, der durch markSeen gleich auf
+  // „gesehen" kippt. Beim naechsten Oeffnen sind die Items nicht mehr neu.
+  const [wasUnreadIds, setWasUnreadIds] = useState<Set<number>>(new Set());
+  const markedRef = useRef(false);
   useEffect(() => {
-    if (expandedId === null) return;
-    const item = messages.find((m) => m.id === expandedId);
-    if (!item) return;
-    if (item.admin_response && !item.user_seen_response_at) {
-      markSeen.mutate({ id: expandedId });
-    }
-  }, [expandedId]);
+    if (markedRef.current || messages.length === 0) return;
+    markedRef.current = true;
+    const unread = messages.filter(
+      (m) => m.admin_response && !m.user_seen_response_at,
+    );
+    if (unread.length === 0) return;
+    setWasUnreadIds(new Set(unread.map((m) => m.id)));
+    unread.forEach((m) => markSeen.mutate({ id: m.id }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
 
   if (isLoading) {
     return (
@@ -123,6 +128,7 @@ export function MyFeedbackPanel() {
             <MyFeedbackRow
               key={msg.id}
               msg={msg}
+              wasUnread={wasUnreadIds.has(msg.id)}
               expanded={expandedId === msg.id}
               onToggleExpand={() =>
                 setExpandedId(expandedId === msg.id ? null : msg.id)
@@ -138,11 +144,13 @@ export function MyFeedbackPanel() {
 
 function MyFeedbackRow({
   msg,
+  wasUnread,
   expanded,
   onToggleExpand,
   fmtDateTime,
 }: {
   msg: FeedbackMessage;
+  wasUnread: boolean;
   expanded: boolean;
   onToggleExpand: () => void;
   fmtDateTime: (iso: string) => string;
@@ -151,7 +159,11 @@ function MyFeedbackRow({
   const catIcon = CATEGORY_ICONS[msg.category as FeedbackCategory] ?? "📝";
   const statusColors = STATUS_COLORS[msg.status as FeedbackStatus] ?? STATUS_COLORS.new;
   const hasResponse = !!msg.admin_response;
-  const unread = hasResponse && !msg.user_seen_response_at;
+  // W.feedback-unread-fix: Hervorhebung + Inline-Antwort aus dem Snapshot
+  // (wasUnread, beim Oeffnen erfasst), NICHT aus dem Server-seen-Status — der
+  // kippt durch das mark-on-open sofort auf „gesehen", die Markierung soll aber
+  // diesen Besuch sichtbar bleiben.
+  const unread = hasResponse && wasUnread;
 
   return (
     <li
