@@ -50,7 +50,9 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
   const reorderMut = useAdminReorderRoadmap();
 
   const [phaseFilter, setPhaseFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  // W.roadmap-tab-archive: Default-Ansicht = "active" → erledigte (= archivierte)
+  // Items sind automatisch aus der Hauptliste ("automatisch archivieren").
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [visFilter, setVisFilter] = useState<VisibilityFilter>("all");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -64,12 +66,35 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
 
   const items = data?.items ?? [];
 
-  // Reorder (▲/▼) nur erlauben wenn KEIN Status-/Sichtbarkeits-Filter aktiv
-  // ist — sonst wuerde die Phase nur anhand der sichtbaren Items neu
-  // nummeriert und versteckte Items verwuerfeln. phaseFilter ist okay
-  // (innerhalb einer Phase bleiben alle Items sichtbar).
+  // W.roadmap-tab-archive: Reorder-Payload immer ueber die VOLLE Phase bilden —
+  // sichtbare Items in neuer Reihenfolge, der Rest (archivierte / per Filter
+  // versteckte) dahinter in bisheriger Ordnung. So bleibt die oeffentliche
+  // Roadmap konsistent (aktiv zuerst, erledigte sinken ans Phasenende) und
+  // Sortieren ist auch in der Aktiv-Ansicht sicher.
+  function buildFullOrder(phaseId: string, newVisibleOrder: RoadmapItem[]): number[] {
+    const visibleIds = new Set(newVisibleOrder.map((x) => x.id));
+    const rest = items
+      .filter((it) => it.phase_id === phaseId && !visibleIds.has(it.id))
+      .sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
+    return [...newVisibleOrder.map((x) => x.id), ...rest.map((x) => x.id)];
+  }
+  function applyReorder(phaseId: string, newVisibleOrder: RoadmapItem[]) {
+    // QA-NICE: Doppelklick-Schutz — kein zweiter Reorder waehrend einer laeuft
+    // (disabled-Attribut greift erst nach dem Re-Render, sub-50ms-Doppelklick
+    // wuerde sonst zwei Mutationen abfeuern).
+    if (reorderMut.isPending) return;
+    reorderMut.mutate({
+      phase_id: phaseId,
+      ordered_ids: buildFullOrder(phaseId, newVisibleOrder),
+    });
+  }
+
+  // Reorder (▲▼⏫⏬) erlaubt in Aktiv + Alle, solange KEIN Sichtbarkeits-Filter
+  // aktiv ist (sonst wuerden internal/public-versteckte Items verschoben). Im
+  // Archiv (statusFilter="done") wird bewusst nicht sortiert. Sicher dank
+  // buildFullOrder (versteckte Items bleiben in relativer Ordnung erhalten).
   const reorderEnabled =
-    !readOnly && statusFilter === "all" && visFilter === "all";
+    !readOnly && visFilter === "all" && statusFilter !== "done";
 
   const filteredItems = useMemo(() => {
     return items.filter((it) => {
@@ -168,18 +193,28 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-1.5">
-          {t("adminRoadmap.filterStatusLabel")}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="rounded border border-gray-600 bg-gray-800 px-2 py-1 text-gray-100 focus:border-purple-500 focus:outline-none"
-          >
-            <option value="all">{t("adminRoadmap.filterAll")}</option>
-            <option value="active">{t("adminRoadmap.filterActive")}</option>
-            <option value="done">{t("adminRoadmap.filterDone")}</option>
-          </select>
-        </label>
+        <div className="flex items-center gap-1.5">
+          <span>{t("adminRoadmap.filterStatusLabel")}</span>
+          <div className="inline-flex gap-0.5 rounded border border-gray-700 bg-gray-800 p-0.5">
+            {(["active", "done", "all"] as StatusFilter[]).map((v) => (
+              <button
+                key={v}
+                onClick={() => setStatusFilter(v)}
+                className={`rounded px-2 py-0.5 text-xs font-medium transition ${
+                  statusFilter === v
+                    ? "bg-purple-600 text-white"
+                    : "text-gray-300 hover:bg-gray-700"
+                }`}
+              >
+                {v === "active"
+                  ? t("adminRoadmap.filterActive")
+                  : v === "done"
+                    ? t("adminRoadmap.filterDone")
+                    : t("adminRoadmap.filterAll")}
+              </button>
+            ))}
+          </div>
+        </div>
         <label className="flex items-center gap-1.5">
           {t("adminRoadmap.filterVisibilityLabel")}
           <select
@@ -195,7 +230,7 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
       </div>
 
       {/* Reorder-Hinweis: ▲▼ brauchen die ungefilterte Phasen-Sicht */}
-      {!readOnly && !reorderEnabled && (
+      {!readOnly && !reorderEnabled && statusFilter !== "done" && (
         <p className="text-xs text-gray-500 italic">
           {t("adminRoadmap.reorderFilterHint")}
         </p>
@@ -216,7 +251,9 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
         <p className="text-sm text-gray-500 italic">
           {items.length === 0
             ? t("adminRoadmap.emptyState")
-            : t("adminRoadmap.emptyStateFiltered")}
+            : statusFilter === "done" && phaseFilter === "all"
+              ? t("adminRoadmap.archiveEmpty")
+              : t("adminRoadmap.emptyStateFiltered")}
         </p>
       ) : (
         <div className="space-y-5">
@@ -297,27 +334,38 @@ export function AdminRoadmapPanel({ readOnly = false }: { readOnly?: boolean } =
                       canMoveDown={reorderEnabled && idx < phaseItems.length - 1}
                       reorderBusy={reorderMut.isPending}
                       onMoveUp={() => {
-                        // Guard (QA-SOLLTE): nur ausführen wenn Reorder
-                        // erlaubt + nicht am oberen Rand. Verhindert einen
-                        // Reorder mit gefiltertem Array bei manuell
-                        // ent-disabletem Button (Defense-in-Depth).
+                        // Guard (QA-SOLLTE): nur ausführen wenn Reorder erlaubt
+                        // + nicht am Rand (Defense-in-Depth). applyReorder baut
+                        // die volle Phase (buildFullOrder) → Public-View bleibt
+                        // konsistent.
                         if (!reorderEnabled || idx <= 0) return;
                         const arr = [...phaseItems];
                         [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
-                        reorderMut.mutate({
-                          phase_id: phase.id,
-                          ordered_ids: arr.map((x) => x.id),
-                        });
+                        applyReorder(phase.id, arr);
                       }}
                       onMoveDown={() => {
                         if (!reorderEnabled || idx >= phaseItems.length - 1)
                           return;
                         const arr = [...phaseItems];
                         [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
-                        reorderMut.mutate({
-                          phase_id: phase.id,
-                          ordered_ids: arr.map((x) => x.id),
-                        });
+                        applyReorder(phase.id, arr);
+                      }}
+                      onMoveTop={() => {
+                        // W.roadmap-tab-archive: ganz an den Phasen-Anfang.
+                        if (!reorderEnabled || idx <= 0) return;
+                        const arr = [...phaseItems];
+                        const [moved] = arr.splice(idx, 1);
+                        arr.unshift(moved);
+                        applyReorder(phase.id, arr);
+                      }}
+                      onMoveBottom={() => {
+                        // W.roadmap-tab-archive: ganz ans Phasen-Ende.
+                        if (!reorderEnabled || idx >= phaseItems.length - 1)
+                          return;
+                        const arr = [...phaseItems];
+                        const [moved] = arr.splice(idx, 1);
+                        arr.push(moved);
+                        applyReorder(phase.id, arr);
                       }}
                     />
                   ))}
@@ -496,6 +544,8 @@ function ItemRow({
   canMoveDown,
   onMoveUp,
   onMoveDown,
+  onMoveTop,
+  onMoveBottom,
   reorderBusy,
 }: {
   item: RoadmapItem;
@@ -514,6 +564,8 @@ function ItemRow({
   canMoveDown: boolean;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  onMoveTop: () => void;
+  onMoveBottom: () => void;
   reorderBusy: boolean;
 }) {
   const { t } = useTranslation();
@@ -565,6 +617,15 @@ function ItemRow({
                   Status-/Sichtbarkeits-Filter aktiv ist (dann canMove*=false). */}
               <div className="flex gap-0.5">
                 <button
+                  onClick={onMoveTop}
+                  disabled={!canMoveUp || reorderBusy}
+                  aria-label={t("adminRoadmap.moveTopTitle")}
+                  title={t("adminRoadmap.moveTopTitle")}
+                  className="text-xs rounded bg-gray-700 px-1.5 py-1 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  ⏫
+                </button>
+                <button
                   onClick={onMoveUp}
                   disabled={!canMoveUp || reorderBusy}
                   aria-label={t("adminRoadmap.moveUpTitle")}
@@ -581,6 +642,15 @@ function ItemRow({
                   className="text-xs rounded bg-gray-700 px-1.5 py-1 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   ▼
+                </button>
+                <button
+                  onClick={onMoveBottom}
+                  disabled={!canMoveDown || reorderBusy}
+                  aria-label={t("adminRoadmap.moveBottomTitle")}
+                  title={t("adminRoadmap.moveBottomTitle")}
+                  className="text-xs rounded bg-gray-700 px-1.5 py-1 text-gray-200 hover:bg-purple-700/40 hover:text-purple-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  ⏬
                 </button>
               </div>
               {/* Quick-Toggle: Visibility (public/internal). 1-Klick-Toggle,
