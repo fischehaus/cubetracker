@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.solvelist-virtual",
+        released=date(2026, 6, 7),
+        title="⚡ Flüssigeres Scrollen in der Solve-Liste (Handy)",
+        highlights=[
+            "Die Solve-Liste rendert auf dem Handy jetzt nur noch die gerade "
+            "sichtbaren Einträge (Virtualisierung). Dadurch ruckeln das Öffnen "
+            "und Scrollen langer Listen (500/1000/„Alle“ Solves) auf älteren "
+            "Geräten nicht mehr — am Tisch (Desktop-Tabelle) war das nie ein "
+            "Problem und bleibt unverändert.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.wca-on-card",
         released=date(2026, 6, 6),
         title="🏆 WCA-Profil auf der Solving-Card",
