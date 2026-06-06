@@ -24,6 +24,37 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-06 (Fortsetzung nach Kompaktierung) — Big-Cube-Scrambles 8×8–11×11
+
+**`W.big-cube-scramble`** (FE `0834b05` + BE `48ac0b1`, Tag
+`v2.0.0-alpha.W.big-cube-scramble`) — Auslöser war die User-Frage „gibt es schon
+einen 11×11-Scramble?" → nein, die App ging bei NxN nur bis 7×7 (größtes
+WCA-Event). Recherche am csTimer-Source (cs0x7f/cstimer via `gh api`): csTimer
+kann 2×2–11×11; der Big-Cube-Generator ist `mega()` (scramble.js) + die
+Move-Tabellen `args[]` (megascramble.js) — **pures Random-Move, kein Solver** →
+1:1 in TypeScript nachgebaut. Umgesetzt:
+- `generateBigCubeScramble()` + `BIG_CUBE_SPECS` (888/999/101010/111111,
+  SiGN-Notation, 120 Züge) in `lib/scramble.ts`; Early-Return in
+  `generateScramble` (pure → kein Vendor-Chunk).
+- Neue Cube-Typen `8x8/9x9/10x10/11x11` in `COMMON_CUBE_TYPES` (propagiert in
+  alle Cube-Picker/Filter — cube_type ist freier String, kein Schema/Backup-Impact).
+- Dritte Scramble-Picker-Kategorie **„Big Cubes"** in `ScrambleCard.tsx`
+  (categoryFor/setCategory/typesInCategory + 3. Toggle-Button + bigCubeNote).
+- i18n (categoryBig, bigCubeNote, solvingBullet4 erweitert), 11 neue Vitest-Tests.
+- QA (qa-reviewer): **safe, keine KRITISCH/SOLLTE**; 3 NICE mitgenommen
+  (Terminierungs-Kommentar, Same-Axis-Positiv-Test, `setCategory("unofficial")`-
+  Asymmetrie als Pre-Existing-Fix). 69 Tests grün, tsc+build clean.
+- Beidseitig **live-verifiziert**: Bundle `index-ddbU43_q.js` + Health-Version +
+  Changelog-Endpoint + Live-Bundle-Content (`111111`/`Big Cubes`).
+- ⚠️ **Kein Roadmap-Item** (spontaner User-Wunsch). Falls gewünscht: via Admin-UI
+  als erledigtes Item nachtragen (Seed = INSERT-only, zieht nicht auto nach).
+
+ScrambleNet (2D-Netz) ist auf 3×3/OH/3BLD begrenzt (`isScrambleNetSupported`) →
+große Cubes zeigen korrekt kein Netz, kein Toggle. Random-State-Solver für große
+Cubes ist bewusst NICHT gebaut (auch WCA scrambelt ab 6×6 per Random-Move).
+
+---
+
 ## ✅ ERLEDIGT 2026-06-05/06 — 6 Wellen + MoYu-Timer-Recherche + Roadmap-Pflege-Korrektur
 
 > Langer Sprint (über Mitternacht). Alle Wellen **Split-Deploy** (Frontend +
