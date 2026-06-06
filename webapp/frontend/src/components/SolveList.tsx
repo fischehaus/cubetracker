@@ -7,8 +7,9 @@
 // Edit-Mode, Enter speichert, Esc bricht ab. Cube-Type bleibt
 // read-only (Änderungen seltener; ggf. später via Edit-Dialog).
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   useDeleteSolve,
   useHardware,
@@ -23,11 +24,7 @@ import {
   formatTime,
   parseTimeInput,
 } from "../lib/format";
-import {
-  rollingAverages,
-  rollingMeans,
-  type SolvePoint,
-} from "../lib/rolling";
+import { rollingAverages, rollingMeans, type SolvePoint } from "../lib/rolling";
 import {
   nextSortState,
   sortIndicator,
@@ -63,7 +60,11 @@ const LIMIT_VALUES: { value: number; label: string | null }[] = [
 // Nur Zeit-Inline-Edit bleibt in der Tabelle.
 type EditingState = { solveId: number; field: "time" } | null;
 
-export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) {
+export function SolveList({
+  sessionId,
+  cubeFilter,
+  onCubeFilterChange,
+}: Props) {
   const { t } = useTranslation();
   // W.solvelist-scroll-cap (2026-05-29): Default 50 statt 100 — „max 50
   // sichtbar". Die Liste lebt in einer höhenbegrenzten Scrollbox (siehe
@@ -181,7 +182,32 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
       ao100: ao100Map.get(s.id) ?? null,
     }));
     return sortSolveRows(rows, sortKey, sortDir);
-  }, [solves, stats?.count, mo3Map, ao5Map, ao12Map, ao100Map, sortKey, sortDir]);
+  }, [
+    solves,
+    stats?.count,
+    mo3Map,
+    ao5Map,
+    ao12Map,
+    ao100Map,
+    sortKey,
+    sortDir,
+  ]);
+
+  // W.solvelist-virtual (2026-06-07): die Mobile-Card-Liste wird
+  // virtualisiert — nur sichtbare Cards landen im DOM, kein Mount-Jank bei
+  // grossen Limits (500/1000/„Alle") auf alten Phones. Dynamische Höhe per
+  // measureElement (Cards variieren: ao5/ao12-Zeile + Aktionen sind bedingt).
+  // Hook MUSS vor den Early-Returns laufen (Rules of Hooks) — bei leerer
+  // Liste ist count=0, harmlos. Desktop-Tabelle bleibt un-virtualisiert.
+  const cardScrollRef = useRef<HTMLDivElement>(null);
+  const cardVirtualizer = useVirtualizer({
+    count: sortedDisplay.length,
+    getScrollElement: () => cardScrollRef.current,
+    // ~120px Start-Estimate (Card ohne ao5/ao12-Zeile); measureElement
+    // korrigiert die echte Höhe on-demand — der Wert ist nicht kritisch.
+    estimateSize: () => 120,
+    overscan: 8,
+  });
 
   // Edit-Mode starten — nur noch Zeit, Notiz lebt im Detail-Modal.
   function startEdit(solveId: number, initial: string) {
@@ -212,9 +238,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
 
   if (isLoading) {
     return (
-      <Card className="text-gray-400 text-base">
-        {t("solveList.loading")}
-      </Card>
+      <Card className="text-gray-400 text-base">{t("solveList.loading")}</Card>
     );
   }
   if (error) {
@@ -288,148 +312,189 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
         </div>
       )}
 
-      {/* Mobile-Card-View (W.ux-demo-polish, 2026-05-28):
+      {/* Mobile-Card-View (W.ux-demo-polish, 2026-05-28; virtualisiert
+          W.solvelist-virtual, 2026-06-07):
           - Auf Phone (< md) Tabelle versteckt, stattdessen Card pro Solve.
+          - Virtualisiert via @tanstack/react-virtual → nur sichtbare Cards
+            landen im DOM (kein Mount-Jank bei grossen Limits 500/1000/„Alle"
+            auf alten Phones). Dynamische Höhe per measureElement (Cards
+            variieren: ao5/ao12-Zeile + Aktionen sind bedingt). Der Abstand
+            (vorher space-y-2) sitzt jetzt als pb-2 IM gemessenen Wrapper,
+            damit er in der gemessenen Höhe enthalten ist.
           - Card-Click öffnet SolveDetailModal (statt Inline-Edit).
           - Aktions-Buttons (+2/DNF/🗑) per stopPropagation isoliert.
           - Tabelle weiterhin für md+ (siehe darunter). */}
-      <div className="md:hidden space-y-2 mb-3 max-h-[70vh] overflow-y-auto pr-1">
-        {sortedDisplay.map((row) => {
-          const s = row.solve;
-          const isBest = s.id === bestSolveId;
-          const isOldPb = !isBest && pbSolveIds.has(s.id);
-          return (
-            <div
-              key={s.id}
-              className={`rounded border ${
-                isBest
-                  ? "border-yellow-500/40 bg-yellow-500/5"
-                  : "border-gray-800 bg-gray-900/40"
-              } p-3 cursor-pointer hover:bg-gray-800/50`}
-              onClick={() => setDetailSolve(s)}
-              // W.ux-demo-polish-qa (QA-SOLLTE WCAG 2.1.1): Tastatur-
-              // Aktivierung der Card. role="button" + tabIndex=0 ohne
-              // onKeyDown war Verstoss — die Card war fokussierbar
-              // aber nicht aktivierbar. Echtes <button> geht nicht weil
-              // verschachtelte <button>-Aktionen invalid waeren.
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setDetailSolve(s);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-            >
-              <div className="flex items-baseline justify-between gap-2 text-xs text-gray-500">
-                <span className="font-mono">#{row.solveNumber}</span>
-                <span>{formatDate(s.timestamp)}</span>
-              </div>
-              <div className="flex items-baseline justify-between gap-2 mt-1">
-                <div className="font-mono text-xl">
-                  {isBest && (
-                    <span className="text-yellow-300 text-base mr-1">★</span>
-                  )}
-                  {isOldPb && (
-                    <span className="text-yellow-600/80 text-base mr-1">☆</span>
-                  )}
-                  <span
-                    className={
-                      isBest
-                        ? "text-yellow-300 font-semibold"
-                        : isOldPb
-                          ? "text-yellow-500/90"
-                          : "text-gray-100"
-                    }
-                  >
-                    {formatSolveTime(s)}
-                  </span>
-                </div>
-                <span className="text-sm text-gray-400">{s.cube_type}</span>
-              </div>
-              {(row.ao5 !== null || row.ao12 !== null) && (
-                <div className="flex gap-3 text-xs font-mono mt-1.5">
-                  {row.ao5 !== null && (
-                    <span
-                      className={
-                        ao5PbSolveIds.has(s.id)
-                          ? "text-cyan-300"
-                          : "text-gray-500"
-                      }
-                    >
-                      {ao5PbSolveIds.has(s.id) && (
-                        <span className="text-cyan-400 mr-1">●</span>
-                      )}
-                      ao5 {formatTime(row.ao5)}
-                    </span>
-                  )}
-                  {row.ao12 !== null && (
-                    <span
-                      className={
-                        ao12PbSolveIds.has(s.id)
-                          ? "text-emerald-300"
-                          : "text-gray-500"
-                      }
-                    >
-                      {ao12PbSolveIds.has(s.id) && (
-                        <span className="text-emerald-400 mr-1">●</span>
-                      )}
-                      ao12 {formatTime(row.ao12)}
-                    </span>
-                  )}
-                </div>
-              )}
+      <div
+        ref={cardScrollRef}
+        className="md:hidden mb-3 max-h-[70vh] overflow-y-auto pr-1"
+      >
+        <div
+          style={{
+            height: `${cardVirtualizer.getTotalSize()}px`,
+            position: "relative",
+            width: "100%",
+          }}
+        >
+          {cardVirtualizer.getVirtualItems().map((vItem) => {
+            const row = sortedDisplay[vItem.index];
+            const s = row.solve;
+            const isBest = s.id === bestSolveId;
+            const isOldPb = !isBest && pbSolveIds.has(s.id);
+            return (
               <div
-                className="flex gap-2 mt-2"
-                onClick={(e) => e.stopPropagation()}
-                // W.ux-demo-polish-qa (QA-SOLLTE): Keyboard-Event auch
-                // stoppen — sonst triggert Enter auf einem Aktions-
-                // Button gleichzeitig den Card-onKeyDown (Detail-Modal).
-                onKeyDown={(e) => e.stopPropagation()}
+                key={s.id}
+                data-index={vItem.index}
+                ref={cardVirtualizer.measureElement}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${vItem.start}px)`,
+                }}
+                className="pb-2"
               >
-                {!s.dnf && (
-                  <button
-                    onClick={() =>
-                      update.mutate({
-                        id: s.id,
-                        payload: { plus_two: !s.plus_two },
-                      })
+                <div
+                  className={`rounded border ${
+                    isBest
+                      ? "border-yellow-500/40 bg-yellow-500/5"
+                      : "border-gray-800 bg-gray-900/40"
+                  } p-3 cursor-pointer hover:bg-gray-800/50`}
+                  onClick={() => setDetailSolve(s)}
+                  // W.ux-demo-polish-qa (QA-SOLLTE WCAG 2.1.1): Tastatur-
+                  // Aktivierung der Card. role="button" + tabIndex=0 ohne
+                  // onKeyDown war Verstoss — die Card war fokussierbar
+                  // aber nicht aktivierbar. Echtes <button> geht nicht weil
+                  // verschachtelte <button>-Aktionen invalid waeren.
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setDetailSolve(s);
                     }
-                    className={`text-sm rounded px-3 py-1.5 ${
-                      s.plus_two
-                        ? "bg-yellow-600/30 text-yellow-300"
-                        : "bg-gray-700 text-gray-300"
-                    }`}
-                  >
-                    +2
-                  </button>
-                )}
-                <button
-                  onClick={() =>
-                    update.mutate({ id: s.id, payload: { dnf: !s.dnf } })
-                  }
-                  className={`text-sm rounded px-3 py-1.5 ${
-                    s.dnf
-                      ? "bg-red-600/30 text-red-300"
-                      : "bg-gray-700 text-gray-300"
-                  }`}
-                >
-                  DNF
-                </button>
-                <button
-                  onClick={() => {
-                    if (confirm(t("solveList.deleteConfirm")))
-                      del.mutate(s.id);
                   }}
-                  className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-300 hover:bg-red-700/50 ml-auto"
-                  aria-label={t("solveList.deleteTitle")}
+                  role="button"
+                  tabIndex={0}
                 >
-                  🗑
-                </button>
+                  <div className="flex items-baseline justify-between gap-2 text-xs text-gray-500">
+                    <span className="font-mono">#{row.solveNumber}</span>
+                    <span>{formatDate(s.timestamp)}</span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-2 mt-1">
+                    <div className="font-mono text-xl">
+                      {isBest && (
+                        <span className="text-yellow-300 text-base mr-1">
+                          ★
+                        </span>
+                      )}
+                      {isOldPb && (
+                        <span className="text-yellow-600/80 text-base mr-1">
+                          ☆
+                        </span>
+                      )}
+                      <span
+                        className={
+                          isBest
+                            ? "text-yellow-300 font-semibold"
+                            : isOldPb
+                              ? "text-yellow-500/90"
+                              : "text-gray-100"
+                        }
+                      >
+                        {formatSolveTime(s)}
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-400">{s.cube_type}</span>
+                  </div>
+                  {(row.ao5 !== null || row.ao12 !== null) && (
+                    <div className="flex gap-3 text-xs font-mono mt-1.5">
+                      {row.ao5 !== null && (
+                        <span
+                          className={
+                            ao5PbSolveIds.has(s.id)
+                              ? "text-cyan-300"
+                              : "text-gray-500"
+                          }
+                        >
+                          {ao5PbSolveIds.has(s.id) && (
+                            <span className="text-cyan-400 mr-1">●</span>
+                          )}
+                          ao5 {formatTime(row.ao5)}
+                        </span>
+                      )}
+                      {row.ao12 !== null && (
+                        <span
+                          className={
+                            ao12PbSolveIds.has(s.id)
+                              ? "text-emerald-300"
+                              : "text-gray-500"
+                          }
+                        >
+                          {ao12PbSolveIds.has(s.id) && (
+                            <span className="text-emerald-400 mr-1">●</span>
+                          )}
+                          ao12 {formatTime(row.ao12)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <div
+                    className="flex gap-2 mt-2"
+                    onClick={(e) => e.stopPropagation()}
+                    // W.ux-demo-polish-qa (QA-SOLLTE): Keyboard-Event auch
+                    // stoppen — sonst triggert Enter auf einem Aktions-
+                    // Button gleichzeitig den Card-onKeyDown (Detail-Modal).
+                    onKeyDown={(e) => e.stopPropagation()}
+                  >
+                    {!s.dnf && (
+                      <button
+                        onClick={() =>
+                          update.mutate({
+                            id: s.id,
+                            payload: { plus_two: !s.plus_two },
+                          })
+                        }
+                        className={`text-sm rounded px-3 py-1.5 ${
+                          s.plus_two
+                            ? "bg-yellow-600/30 text-yellow-300"
+                            : "bg-gray-700 text-gray-300"
+                        }`}
+                      >
+                        +2
+                      </button>
+                    )}
+                    <button
+                      onClick={() =>
+                        update.mutate({ id: s.id, payload: { dnf: !s.dnf } })
+                      }
+                      className={`text-sm rounded px-3 py-1.5 ${
+                        s.dnf
+                          ? "bg-red-600/30 text-red-300"
+                          : "bg-gray-700 text-gray-300"
+                      }`}
+                    >
+                      DNF
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(t("solveList.deleteConfirm")))
+                          del.mutate(s.id, {
+                            // W.solvelist-virtual: nach dem Löschen schrumpft
+                            // die Liste → Measure-Cache des Virtualizers neu
+                            // aufbauen, sonst kurzes Höhen-Flackern der Cards.
+                            onSuccess: () => cardVirtualizer.measure(),
+                          });
+                      }}
+                      className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-300 hover:bg-red-700/50 ml-auto"
+                      aria-label={t("solveList.deleteTitle")}
+                    >
+                      🗑
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Desktop-Tabelle (md+). W.solvelist-scroll-cap: höhenbegrenzte
@@ -537,9 +602,7 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                           date: formatDate(s.timestamp),
                         })}
                         className="cursor-pointer"
-                        onClick={() =>
-                          startEdit(s.id, formatTime(s.time_ms))
-                        }
+                        onClick={() => startEdit(s.id, formatTime(s.time_ms))}
                       >
                         {isBest && (
                           <span
@@ -683,7 +746,8 @@ export function SolveList({ sessionId, cubeFilter, onCubeFilterChange }: Props) 
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm(t("solveList.deleteConfirm"))) del.mutate(s.id);
+                        if (confirm(t("solveList.deleteConfirm")))
+                          del.mutate(s.id);
                       }}
                       className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
                       title={t("solveList.deleteTitle")}
