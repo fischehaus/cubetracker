@@ -179,6 +179,16 @@ danach gelöscht). So weiß der User **wann + wofür** er zurückkommen soll.
 Gilt auch nach Kompaktierung/Modell-Wechsel — diese Zeile ist die
 Erinnerung, die die Gewohnheit überlebt.
 
+**Klickbare Fragen (`AskUserQuestion`) pingen separat (W.ntfy-ask-question,
+2026-06-06):** Der Stop-Hook feuert NUR am Turn-Ende — `AskUserQuestion` ist
+aber ein Tool-Call mitten im Turn (der Turn endet nicht) → pingte früher
+nicht. Jetzt feuert `pre-ask-question-ntfy.sh` (PreToolUse-Matcher
+`AskUserQuestion`) direkt beim Stellen der Frage: nutzt
+`.tmp/last-ntfy-message.txt` falls vorhanden, sonst baut er den Push-Body
+automatisch aus Fragetext + Option-Labels. Für klickbare Fragen musst du also
+NICHTS mehr vorab schreiben (für eine reichere Nachricht kannst du es weiter).
+Prosa-Fragen + „fertig" laufen unverändert über den Stop-Hook.
+
 **Roadmap-Abruf (`/roadmap` + Session-Start):** die Live-Roadmap (inkl.
 interner Items) wird via `.claude/hooks/roadmap-fetch.py` geholt. Zwei
 Auth-Pfade:
