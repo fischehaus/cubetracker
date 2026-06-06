@@ -7,9 +7,12 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  BIG_CUBE_SCRAMBLE_TYPES,
+  BIG_CUBE_SPECS,
   cubeTypeToScrambowType,
   CUSTOM_PUZZLE_SPECS,
   defaultScrambleTypeForCube,
+  generateBigCubeScramble,
   generateCustomScramble,
   generateScramble,
   isAlgTrainerSubset,
@@ -26,6 +29,12 @@ describe("cubeTypeToScrambowType", () => {
     expect(cubeTypeToScrambowType("5x5")).toBe("555");
     expect(cubeTypeToScrambowType("6x6")).toBe("666");
     expect(cubeTypeToScrambowType("7x7")).toBe("777");
+  });
+  it("maps big cubes 8x8-11x11", () => {
+    expect(cubeTypeToScrambowType("8x8")).toBe("888");
+    expect(cubeTypeToScrambowType("9x9")).toBe("999");
+    expect(cubeTypeToScrambowType("10x10")).toBe("101010");
+    expect(cubeTypeToScrambowType("11x11")).toBe("111111");
   });
   it("maps non-NxN events", () => {
     expect(cubeTypeToScrambowType("Pyraminx")).toBe("pyraminx");
@@ -204,6 +213,96 @@ describe("Random-Move-Fallback dino/floppy/tower (W.random-move-fallback, 2026-0
       expect((await generateScramble(type)).length).toBeGreaterThan(0);
     });
   }
+});
+
+describe("Big Cubes 8x8-11x11 (W.big-cube-scramble, 2026-06-06)", () => {
+  // csTimer-kompatibler Random-Move-Generator (megascramble.js `mega`).
+  // Geprüft: Move-Anzahl (120), gültige Layer-Tokens, und die csTimer-Kern-
+  // Invariante „keine zwei direkt aufeinanderfolgenden Moves auf derselben
+  // Ebene" (parallele Layer derselben Achse, z.B. „U D", sind aber erlaubt —
+  // anders als beim flachen no-repeat-base-Filter der kleinen Custom-Puzzles).
+  const codes = ["888", "999", "101010", "111111"];
+  const baseOf = (m: string) => m.replace(/(2|')$/, "");
+
+  for (const code of codes) {
+    const spec = BIG_CUBE_SPECS[code];
+
+    it(`"${code}" hat eine Spec mit 3 Achsen + length 120`, () => {
+      expect(spec).toBeDefined();
+      expect(spec.axes.length).toBe(3);
+      expect(spec.length).toBe(120);
+    });
+
+    it(`"${code}" erzeugt genau ${BIG_CUBE_SPECS[code].length} Moves`, () => {
+      const moves = generateBigCubeScramble(spec).split(/\s+/).filter(Boolean);
+      expect(moves.length).toBe(spec.length);
+    });
+
+    it(`"${code}" nutzt nur gültige Layer-Tokens`, () => {
+      const validBases = new Set(spec.axes.flat());
+      const moves = generateBigCubeScramble(spec).split(/\s+/).filter(Boolean);
+      for (const m of moves) {
+        expect(validBases.has(baseOf(m)), `"${m}" -> Base unbekannt`).toBe(true);
+      }
+    });
+
+    it(`"${code}" wiederholt nie dieselbe Ebene direkt (csTimer-Invariante)`, () => {
+      for (let iter = 0; iter < 30; iter++) {
+        const moves = generateBigCubeScramble(spec).split(/\s+/).filter(Boolean);
+        for (let j = 1; j < moves.length; j++) {
+          expect(
+            baseOf(moves[j]),
+            `Move ${j} (${moves[j]}) == Vorgänger ${moves[j - 1]}`,
+          ).not.toBe(baseOf(moves[j - 1]));
+        }
+      }
+    });
+
+    it(`"${code}" via generateScramble liefert 120-Move-Scramble`, async () => {
+      const moves = (await generateScramble(code))
+        .split(/\s+/)
+        .filter(Boolean);
+      expect(moves.length).toBe(120);
+    });
+  }
+
+  it("erlaubt parallele Layer derselben Achse direkt nacheinander (z.B. U D)", () => {
+    // Gegenprobe zur Invariante: der Generator erzwingt KEINE Achsen-
+    // Abwechslung — nur „nicht dieselbe Ebene zweimal". Über viele Moves
+    // müssen same-axis-Paare auftreten, sonst filtert er zu aggressiv
+    // (= falsch gegenüber csTimer). QA-NICE W.big-cube-scramble.
+    const spec = BIG_CUBE_SPECS["111111"];
+    const axisOf = (base: string) =>
+      spec.axes.findIndex((grp) => grp.includes(base));
+    let sameAxisPairs = 0;
+    for (let iter = 0; iter < 20; iter++) {
+      const moves = generateBigCubeScramble(spec).split(/\s+/).filter(Boolean);
+      for (let j = 1; j < moves.length; j++) {
+        if (axisOf(baseOf(moves[j])) === axisOf(baseOf(moves[j - 1]))) {
+          sameAxisPairs++;
+        }
+      }
+    }
+    expect(sameAxisPairs).toBeGreaterThan(0);
+  });
+
+  it("BIG_CUBE_SCRAMBLE_TYPES listet 8x8-11x11 mit passenden Codes", () => {
+    expect(BIG_CUBE_SCRAMBLE_TYPES.map((t) => t.code)).toEqual([
+      "888",
+      "999",
+      "101010",
+      "111111",
+    ]);
+  });
+
+  it("resolveScrambleTypeOverride akzeptiert Big-Cube-Codes", () => {
+    expect(resolveScrambleTypeOverride("111111")).toBe("111111");
+    expect(resolveScrambleTypeOverride("888")).toBe("888");
+  });
+
+  it("defaultScrambleTypeForCube mappt 11x11 -> 111111", () => {
+    expect(defaultScrambleTypeForCube("11x11")).toBe("111111");
+  });
 });
 
 describe("Scramble-Type-Listen + Helpers", () => {

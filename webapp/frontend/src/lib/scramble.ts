@@ -149,6 +149,16 @@ export function cubeTypeToScrambowType(cubeType: string): string {
       return "666";
     case "7x7":
       return "777";
+    // Big Cubes (W.big-cube-scramble, 2026-06-06) — keine WCA-Events, eigener
+    // csTimer-kompatibler Random-Move-Generator (BIG_CUBE_SPECS).
+    case "8x8":
+      return "888";
+    case "9x9":
+      return "999";
+    case "10x10":
+      return "101010";
+    case "11x11":
+      return "111111";
     case "OH":
       return "333";
     case "3BLD":
@@ -262,6 +272,7 @@ export function resolveScrambleTypeOverride(raw: string): string | null {
   //    Whitelist statt Blackbox.
   const known = new Set([
     ...WCA_SCRAMBLE_TYPES.map((t) => t.code),
+    ...BIG_CUBE_SCRAMBLE_TYPES.map((t) => t.code),
     ...UNOFFICIAL_SCRAMBLE_TYPES.map((t) => t.code),
     "fto",
     ...ALG_TRAINER_SUBSETS,
@@ -298,6 +309,21 @@ export const WCA_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
   { code: "square-1", label: "Square-1" },
   { code: "megaminx", label: "Megaminx" },
   { code: "clock", label: "Clock" },
+];
+
+/**
+ * Big Cubes 8x8–11x11 (Welle W.big-cube-scramble, 2026-06-06). KEINE
+ * WCA-Events (WCA endet bei 7x7), aber „ernste" NxN-Cubes — daher eine
+ * eigene Picker-Kategorie statt sie zu den Spaß-Puzzles zu werfen. Scramble
+ * = csTimer-kompatibler Random-Move-Generator (BIG_CUBE_SPECS), SiGN-
+ * Notation. Random-Move IST der Standard für große Cubes (auch WCA 6x6/7x7
+ * sind random-move, nicht random-state) — also kein Qualitätsverlust.
+ */
+export const BIG_CUBE_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
+  { code: "888", label: "8x8" },
+  { code: "999", label: "9x9" },
+  { code: "101010", label: "10x10" },
+  { code: "111111", label: "11x11" },
 ];
 
 /**
@@ -453,6 +479,100 @@ export function generateCustomScramble(
   return moves.join(" ");
 }
 
+/** csTimer-Suffixe für NxN-Moves: keine / 180° / CCW. */
+const CUBE_SUFFIXES = ["", "2", "'"];
+
+/**
+ * Big-Cube-Spec (8x8–11x11). 1:1 aus csTimers `megascramble.js` `args[]`:
+ * `axes` = die drei Achsen-Gruppen (U/D-, R/L-, F/B-Achse), jede mit ihren
+ * Layer-Moves in SiGN-Notation (z.B. "u" = 2. Ebene, "3u" = 3. Ebene …).
+ * `length` = csTimer-Default-Move-Count (alle vier Größen: 120).
+ */
+interface BigCubeSpec {
+  axes: string[][];
+  length: number;
+}
+
+/**
+ * Achsen-Move-Tabellen exakt aus csTimer (`megascramble.js`, GPL-v3). Die
+ * SiGN-Notation skaliert mit N: 8x8 hat innere Layer bis 4er-Tiefe, 11x11
+ * bis 5er-Tiefe (bei 11 = 2·5+1 ist die 6. Ebene die fixe Mittelschicht).
+ */
+export const BIG_CUBE_SPECS: Record<string, BigCubeSpec> = {
+  // 8x8x8 (SiGN)
+  "888": {
+    axes: [
+      ["U", "D", "u", "d", "3u", "3d", "4u"],
+      ["R", "L", "r", "l", "3r", "3l", "4r"],
+      ["F", "B", "f", "b", "3f", "3b", "4f"],
+    ],
+    length: 120,
+  },
+  // 9x9x9 (SiGN)
+  "999": {
+    axes: [
+      ["U", "D", "u", "d", "3u", "3d", "4u", "4d"],
+      ["R", "L", "r", "l", "3r", "3l", "4r", "4l"],
+      ["F", "B", "f", "b", "3f", "3b", "4f", "4b"],
+    ],
+    length: 120,
+  },
+  // 10x10x10 (SiGN)
+  "101010": {
+    axes: [
+      ["U", "D", "u", "d", "3u", "3d", "4u", "4d", "5u"],
+      ["R", "L", "r", "l", "3r", "3l", "4r", "4l", "5r"],
+      ["F", "B", "f", "b", "3f", "3b", "4f", "4b", "5f"],
+    ],
+    length: 120,
+  },
+  // 11x11x11 (SiGN)
+  "111111": {
+    axes: [
+      ["U", "D", "u", "d", "3u", "3d", "4u", "4d", "5u", "5d"],
+      ["R", "L", "r", "l", "3r", "3l", "4r", "4l", "5r", "5l"],
+      ["F", "B", "f", "b", "3f", "3b", "4f", "4b", "5f", "5b"],
+    ],
+    length: 120,
+  },
+};
+
+/**
+ * Big-Cube-Scramble (8x8–11x11) — exakte Nachbildung von csTimers `mega()`
+ * (scramble.js). Pro Move: zufällige Achse + zufällige Ebene; bei
+ * Achsenwechsel wird die „in diesem Achsen-Lauf schon benutzte Ebenen"-
+ * Bitmaske zurückgesetzt. Folge: dieselbe Achse darf direkt aufeinander
+ * folgen, aber NICHT dieselbe Ebene zweimal (parallele Layer wie „U D"
+ * sind legal + nicht redundant; „u u" würde sich kombinieren → verboten).
+ *
+ * Pure (Math.random reicht für Scrambles) — kein Vendor-Chunk nötig.
+ */
+export function generateBigCubeScramble(spec: BigCubeSpec): string {
+  const { axes, length } = spec;
+  const out: string[] = [];
+  let lastAxis = -1;
+  let usedLayers = 0; // Bitmaske der seit dem letzten Achsenwechsel belegten Ebenen
+  for (let i = 0; i < length; i++) {
+    let axis: number;
+    let layer: number;
+    // Terminierungs-Garantie: bei Achsenwechsel wird usedLayers=0 VOR dem
+    // while-Check gesetzt → jeder Versuch hat P(exit) ≥ 2/3 (3 Achsen,
+    // Achsenwechsel = sofortiger Ausstieg). Kein Hängen möglich, selbst wenn
+    // alle Ebenen der aktuellen Achse erschöpft sind (QA W.big-cube-scramble).
+    do {
+      axis = Math.floor(Math.random() * axes.length);
+      layer = Math.floor(Math.random() * axes[axis].length);
+      if (axis !== lastAxis) {
+        usedLayers = 0;
+        lastAxis = axis;
+      }
+    } while (((usedLayers >> layer) & 1) !== 0);
+    usedLayers |= 1 << layer;
+    out.push(axes[axis][layer] + pick(CUBE_SUFFIXES));
+  }
+  return out.join(" ");
+}
+
 /**
  * Liste der Custom-Puzzles, die einen Random-State-Scrambler haben
  * (= WCA-Quality, im Sinne von "korrekte Mindest-Distanz garantiert").
@@ -493,6 +613,12 @@ export function isWcaQualityCustomPuzzle(code: string): boolean {
  * blockieren soll.
  */
 export async function generateScramble(typeOverride: string): Promise<string> {
+  // 0) Big-Cubes (8x8–11x11, W.big-cube-scramble): csTimer-kompatibler
+  //    Random-Move-Generator, pure (kein Vendor). Früher Return — spart den
+  //    Vendor-Chunk-Load für große Cubes komplett.
+  if (typeOverride in BIG_CUBE_SPECS) {
+    return generateBigCubeScramble(BIG_CUBE_SPECS[typeOverride]);
+  }
   // W.cstimer-dynamic-import (2026-05-30): vorher war diese Funktion
   // synchron mit top-level Vendor-Imports. Jetzt lazy — die ersten 3
   // Stufen brauchen die Vendor-Funktionen, also wird der Vendor-Chunk

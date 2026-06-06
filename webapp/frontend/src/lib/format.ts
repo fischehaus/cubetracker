@@ -148,6 +148,12 @@ export const COMMON_CUBE_TYPES = [
   "5x5",
   "6x6",
   "7x7",
+  // Big Cubes (W.big-cube-scramble, 2026-06-06) — keine WCA-Events, aber
+  // gängige große NxN-Cubes; csTimer-kompatibler Random-Move-Scramble.
+  "8x8",
+  "9x9",
+  "10x10",
+  "11x11",
   "OH",
   "3BLD",
   "Pyraminx",

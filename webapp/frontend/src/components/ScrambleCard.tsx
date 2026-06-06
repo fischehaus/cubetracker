@@ -20,6 +20,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  BIG_CUBE_SCRAMBLE_TYPES,
   cubeTypeToScrambowType,
   defaultScrambleTypeForCube,
   generateScramble,
@@ -53,7 +54,7 @@ interface Props {
   onScrambleGenerated: (scramble: string) => void;
 }
 
-type Category = "wca" | "unofficial";
+type Category = "wca" | "big" | "unofficial";
 
 /**
  * Hilfs-Funktion: in welcher Picker-Kategorie ist der Code?
@@ -66,6 +67,7 @@ type Category = "wca" | "unofficial";
  */
 function categoryFor(code: string): Category | null {
   if (WCA_SCRAMBLE_TYPES.some((t) => t.code === code)) return "wca";
+  if (BIG_CUBE_SCRAMBLE_TYPES.some((t) => t.code === code)) return "big";
   if (UNOFFICIAL_SCRAMBLE_TYPES.some((t) => t.code === code)) return "unofficial";
   return null;
 }
@@ -74,6 +76,7 @@ function categoryFor(code: string): Category | null {
 function labelFor(code: string): string {
   const all: ScrambleTypeInfo[] = [
     ...WCA_SCRAMBLE_TYPES,
+    ...BIG_CUBE_SCRAMBLE_TYPES,
     ...UNOFFICIAL_SCRAMBLE_TYPES,
   ];
   return all.find((t) => t.code === code)?.label ?? code;
@@ -199,12 +202,21 @@ export function ScrambleCard({
    *  Kategorie ODER auf den Cube-Default, falls dieser zur Ziel-Kategorie
    *  passt (z.B. WCA-Toggle bei 3x3-Cube → 333 statt 222). */
   function setCategory(cat: Category) {
+    // Wenn der Cube-Default schon in die Ziel-Kategorie fällt, ihn behalten
+    // (z.B. „11x11"-Cube + Big-Toggle → 111111 statt 8x8). Sonst der erste
+    // Eintrag der Kategorie.
+    const cubeDefault = defaultScrambleTypeForCube(cubeType);
+    const defaultMatches = categoryFor(cubeDefault) === cat;
     if (cat === "wca") {
-      const cubeDefault = defaultScrambleTypeForCube(cubeType);
-      const defaultIsWca = categoryFor(cubeDefault) === "wca";
-      setUserPickedType(defaultIsWca ? cubeDefault : WCA_SCRAMBLE_TYPES[0].code);
+      setUserPickedType(defaultMatches ? cubeDefault : WCA_SCRAMBLE_TYPES[0].code);
+    } else if (cat === "big") {
+      setUserPickedType(
+        defaultMatches ? cubeDefault : BIG_CUBE_SCRAMBLE_TYPES[0].code,
+      );
     } else {
-      setUserPickedType(UNOFFICIAL_SCRAMBLE_TYPES[0].code);
+      setUserPickedType(
+        defaultMatches ? cubeDefault : UNOFFICIAL_SCRAMBLE_TYPES[0].code,
+      );
     }
   }
 
@@ -214,9 +226,11 @@ export function ScrambleCard({
   const typesInCategory: ScrambleTypeInfo[] =
     effectiveCategory === "wca"
       ? WCA_SCRAMBLE_TYPES
-      : effectiveCategory === "unofficial"
-        ? UNOFFICIAL_SCRAMBLE_TYPES
-        : [];
+      : effectiveCategory === "big"
+        ? BIG_CUBE_SCRAMBLE_TYPES
+        : effectiveCategory === "unofficial"
+          ? UNOFFICIAL_SCRAMBLE_TYPES
+          : [];
 
   return (
     <Card padding="md">
@@ -302,6 +316,12 @@ export function ScrambleCard({
             onClick={() => setCategory("wca")}
           >
             {t("scramble.categoryWca")}
+          </CategoryButton>
+          <CategoryButton
+            active={effectiveCategory === "big"}
+            onClick={() => setCategory("big")}
+          >
+            {t("scramble.categoryBig")}
           </CategoryButton>
           <CategoryButton
             active={effectiveCategory === "unofficial"}
@@ -439,6 +459,11 @@ export function ScrambleCard({
             {t("scramble.randomMoveWarning")}
           </p>
         )}
+      {effectiveCategory === "big" && (
+        <p className="mt-3 text-[11px] text-gray-500">
+          {t("scramble.bigCubeNote")}
+        </p>
+      )}
     </Card>
   );
 }
