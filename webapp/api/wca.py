@@ -226,7 +226,7 @@ _WCA_ID_RE = re.compile(r"^[12][0-9]{3}[A-Z]{4}[0-9]{2}$")
 
 
 @router.get("/profile/{wca_id}")
-@limiter.limit("30/minute")
+@limiter.limit("10/minute")  # konservativer als /me (anonym + externer Upstream)
 async def public_wca_profile(request: Request, wca_id: str) -> dict[str, Any]:
     """Öffentliches WCA-Profil per WCA-ID — ANONYM (für die teilbare Solving-
     Card / Friend-Profil-Card).
