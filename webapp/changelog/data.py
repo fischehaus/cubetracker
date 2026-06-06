@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.big-cube-scramble",
+        released=date(2026, 6, 6),
+        title="🧩 Big Cubes: Scrambles für 8x8 bis 11x11",
+        highlights=[
+            "Neu im Scramble-Picker (Timer-Tab): die Kategorie Big Cubes mit "
+            "8x8, 9x9, 10x10 und 11x11. Du kannst jetzt auch große Würfel mit "
+            "korrekten, zufälligen Scrambles lösen und timen — die Notation ist "
+            "identisch zu csTimer (SiGN-Stil mit u, 3u, 4u … für die inneren "
+            "Ebenen), ein 11x11-Scramble hat 120 Züge. Die vier Größen tauchen "
+            "außerdem überall als Cube-Typ auf, wo du Cubes auswählst oder "
+            "filterst.",
+            "Große Cubes werden — wie offiziell auch ab 6x6 — immer per "
+            "Random-Move gemischt (kein Random-State-Solver). Das ist der "
+            "übliche Standard und kein Wettkampf-Nachteil.",
+        ],
+        commit="0834b05",
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.single-pb-live",
         released=date(2026, 6, 6),
         title="🏅 Single-PB direkt am Timer",
