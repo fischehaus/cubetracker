@@ -24,6 +24,39 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-07 (Forts.) — Fokus-Trap für alle Modals (a11y)
+
+**`W.modal-focus-trap`** (FE `9ef74a2` + BE `00a0c69`, Tag
+`v2.0.0-alpha.W.modal-focus-trap`) — der gespawnte a11y-Task aus der
+Friend-Profil-QA, vom User per „mach das jetzt" gezogen.
+- **Neuer Hook `src/hooks/useFocusTrap.ts`:** Fokus beim Öffnen in den Dialog
+  (respektiert vorhandenes `autoFocus`), Tab/Shift+Tab zyklisch im Dialog
+  gefangen, **Esc schließt** (via onEscape — Pflicht, sonst Tastatur-Falle
+  WCAG 2.1.2), Fokus-Restore an den Öffner beim Schließen. Öffner wird im
+  **ersten Render** erfasst (vor Commit/autoFocus), `onEscape` via Latest-Ref
+  (kein Effekt-Neuaufbau). **Modul-Level-Trap-Stack** → bei gestapelten Modals
+  reagiert nur der oberste auf Tab/Esc.
+- **Verdrahtet in 12 Dialogen:** FriendProfileModal, SolveDetailModal,
+  RoadmapModal, FeedbackModal, FeedbackToRoadmapModal (5 dedizierte) +
+  PatchNotesModal, FeaturesModal (App.tsx), LoginFeaturesModal (LoginPage),
+  ConfirmDeleteDialog, MailUserDialog (AdminUsersPanel), CreateDialog
+  (AdminLiveTestsPanel), ModalOverlay (SessionList, geteilt). Lokale
+  Esc-`useEffect`s in FriendProfile+SolveDetail entfernt (jetzt im Hook);
+  Roadmap/Feedback/FeedbackToRoadmap hatten vorher GAR kein Esc → neu.
+- **Bewusst NICHT:** BigTimerInput-Zen (Vollbild-Modus, kein Dialog).
+- QA (qa-reviewer): **safe, kein KRITISCH**. Trap-Stack als SOLLTE-Fix
+  eingebaut. SOLLTE „StrictMode openerRef doppelt" als **Non-Issue verworfen**
+  (Refs überleben StrictModes Effect-Doppel-Invoke; Render-Capture ist
+  geguardet). `confirm()` in SolveDetailModal = vorbestehende Schuld, out of
+  scope. tsc+build grün; `tsc -b` fing einen Null-Check (function-decl
+  onKeyDown → Arrow, damit Narrowing erhalten).
+- **Kein `features-data.ts`-Bullet** → `fix(...)`-Commit (a11y-Plumbing, kein
+  Marketing-Feature); Patch-Note public (Tastatur-/Screenreader-User spüren's).
+- ⏭️ Offen-NICE: `visibility:hidden`-Filter im Hook (latent, kein aktuelles
+  Modal nutzt es); `confirm()`→Inline-Confirm in SolveDetailModal.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-07 — Solve-Liste virtualisieren (Mobile-Cards)
 
 **`W.solvelist-virtual`** (FE `2346366` + BE `d148a1c`, Tag
