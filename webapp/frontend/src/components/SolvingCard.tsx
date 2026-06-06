@@ -134,18 +134,24 @@ export function SolvingCard({ profile }: { profile: PublicProfile }) {
           <h2 className="text-sm uppercase tracking-wide text-gray-500 mb-3">
             {t("publicProfile.recentPbsTitle")}
           </h2>
-          <ul className="space-y-1.5">
-            {profile.recent_pbs.map((pb, i) => (
-              <li
-                key={`${pb.at}-${i}`}
-                className="flex items-center justify-between text-sm"
-              >
-                <span className="text-gray-300">{pb.cube_type}</span>
-                <span className="font-mono text-yellow-300">{formatTime(pb.time_ms)}</span>
-                <span className="text-xs text-gray-500">{dateFmt(pb.at)}</span>
-              </li>
-            ))}
-          </ul>
+          {/* Tabelle statt flex-justify-between → Zeit + Datum stehen in
+              ausgerichteten Spalten (rechtsbündig), wie die Bests-Tabelle oben.
+              Mit flex „schwamm" die Zeit je nach Cube-Namens-Breite. */}
+          <table className="w-full text-sm">
+            <tbody>
+              {profile.recent_pbs.map((pb, i) => (
+                <tr key={`${pb.at}-${i}`}>
+                  <td className="py-1 pr-3 text-gray-300 w-full">{pb.cube_type}</td>
+                  <td className="py-1 px-2 text-right font-mono text-yellow-300 whitespace-nowrap">
+                    {formatTime(pb.time_ms)}
+                  </td>
+                  <td className="py-1 pl-3 text-right text-xs text-gray-500 whitespace-nowrap">
+                    {dateFmt(pb.at)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </Card>
       )}
     </div>
