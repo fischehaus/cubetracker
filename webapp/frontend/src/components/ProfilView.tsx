@@ -5,12 +5,11 @@
 //    Display-Name, PLZ, Land, WCA-ID, Auffindbarkeit)
 //  - das offizielle WCA-Profil (früher im Statistik-Dashboard „Speedcubing-Welt")
 //
-// Vorbereitet für Phase B (öffentliches, teilbares Profil, Roadmap P3.10):
-// Sichtbarkeits-Platzhalter unten — 3 Stufen privat / nur Freunde / öffentlich
-// (= alle eingeloggten Nutzer, KEIN anonymer Web-Link, User-Entscheidung
-// 2026-05-31). Aktuell funktional ist nur die Auffindbarkeits-Toggle in der
-// Profil-Sektion (Such-Discoverability); das volle 3-Stufen-Modell + die
-// teilbare Solving-Card kommen mit Phase B.
+// W.public-profile (2026-06-06): die teilbare öffentliche Solving-Card ist
+// jetzt gebaut — Opt-In-Toggle + Teilen-Link in PublicProfileSection unten.
+// Anonym erreichbar unter /u/<slug> (User-Entscheidung 2026-06-06, ersetzt die
+// frühere „nur eingeloggte Nutzer / kein Web-Link"-Idee). Die Card zeigt nur
+// Aggregate (PBs pro Cube, Counts, Achievements) — nie Email/PLZ/Einzel-Solves.
 
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -51,7 +50,7 @@ export function ProfilView({ onBack }: Props) {
 
       <ProfileSection />
       <WcaProfileCard />
-      <VisibilityPlaceholder />
+      <PublicProfileSection />
     </div>
   );
 }
@@ -377,28 +376,107 @@ function DiscoverabilitySection() {
 }
 
 // ============================================================
-// Sichtbarkeit & Teilen — Platzhalter für Phase B (Roadmap P3.10)
+// Öffentliche Solving-Card — Opt-In + Teilen-Link (W.public-profile)
 // ============================================================
 
-function VisibilityPlaceholder() {
+function PublicProfileSection() {
   const { t } = useTranslation();
+  const { user, refreshMe } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  if (!user) return null;
+
+  const enabled = user.public_profile_enabled;
+  const relPath = user.public_slug ? `/u/${user.public_slug}` : null;
+  const shareUrl = relPath ? `${window.location.origin}${relPath}` : null;
+  const hasName = !!user.display_name?.trim();
+
+  async function toggle(next: boolean) {
+    setBusy(true);
+    setInfo(null);
+    setError(null);
+    try {
+      await api.patch("/auth/me", { public_profile_enabled: next });
+      await refreshMe();
+      setInfo(
+        next
+          ? t("publicProfileSettings.okEnabled")
+          : t("publicProfileSettings.okDisabled"),
+      );
+    } catch (err) {
+      setError(extractErrorMessage(err, t));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function copyLink() {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard-API kann blockiert sein (kein HTTPS / Permission) — der
+      // Link ist trotzdem als Text sichtbar + anklickbar.
+    }
+  }
+
   return (
-    <Card title={t("profilView.visibilityTitle")}>
-      <span className="inline-block rounded bg-purple-500/20 border border-purple-500/40 px-2 py-0.5 text-[11px] font-medium text-purple-200 mb-2">
-        {t("profilView.visibilitySoon")}
-      </span>
-      <p className="text-sm text-gray-400">{t("profilView.visibilityIntro")}</p>
-      <ul className="mt-2 space-y-1 text-sm text-gray-300 list-disc list-inside">
-        <li>{t("profilView.visibilityL1")}</li>
-        <li>{t("profilView.visibilityL2")}</li>
-        <li>{t("profilView.visibilityL3")}</li>
-      </ul>
-      <p className="mt-2 text-xs text-gray-500">
-        {t("profilView.visibilityShareNote")}
-      </p>
+    <Card title={t("publicProfileSettings.title")}>
+      <p className="text-sm text-gray-400">{t("publicProfileSettings.intro")}</p>
       <p className="mt-1 text-xs text-gray-500">
-        {t("profilView.visibilityCurrentNote")}
+        {t("publicProfileSettings.privacyNote")}
       </p>
+
+      <label className="mt-3 flex items-center gap-2 text-sm text-gray-200">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(e) => void toggle(e.target.checked)}
+          disabled={busy}
+          className="accent-purple-500 w-4 h-4"
+        />
+        {t("publicProfileSettings.toggleLabel")}
+      </label>
+
+      {enabled && shareUrl && relPath && (
+        <div className="mt-3 space-y-2">
+          <div className="text-xs text-gray-400">
+            {t("publicProfileSettings.shareLabel")}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href={relPath}
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono text-sm text-purple-300 hover:text-purple-200 underline break-all"
+            >
+              {shareUrl}
+            </a>
+            <button
+              type="button"
+              onClick={() => void copyLink()}
+              className="text-xs rounded border border-gray-600 px-2 py-1 text-gray-300 hover:bg-gray-800"
+            >
+              {copied
+                ? t("publicProfileSettings.copied")
+                : t("publicProfileSettings.copy")}
+            </button>
+          </div>
+          {!hasName && (
+            <p className="text-xs text-amber-300">
+              {t("publicProfileSettings.noNameHint")}
+            </p>
+          )}
+        </div>
+      )}
+
+      {info && <FeedbackOk text={info} />}
+      {error && <FeedbackErr text={error} />}
     </Card>
   );
 }

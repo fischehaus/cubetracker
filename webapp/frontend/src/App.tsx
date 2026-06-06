@@ -16,6 +16,7 @@ import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { ImpressumPage } from "./pages/ImpressumPage";
 import { DatenschutzPage } from "./pages/DatenschutzPage";
+import { PublicProfilePage } from "./pages/PublicProfilePage";
 import { api } from "./lib/api";
 import { qk } from "./lib/queryKeys";
 import { AchievementsMiniCard } from "./components/AchievementsMiniCard";
@@ -1264,6 +1265,13 @@ function AuthGuard() {
   }
   if (pathname === "/datenschutz") {
     return <DatenschutzPage />;
+  }
+  // W.public-profile (2026-06-06): anonyme, teilbare Solving-Card unter
+  // /u/<slug>. Vor dem Login-Check → ohne Account erreichbar (nginx liefert
+  // index.html als SPA-Fallback für den Deep-Link).
+  if (pathname.startsWith("/u/")) {
+    const slug = decodeURIComponent(pathname.slice(3)).replace(/\/+$/, "");
+    return <PublicProfilePage slug={slug} />;
   }
 
   if (isLoading) {

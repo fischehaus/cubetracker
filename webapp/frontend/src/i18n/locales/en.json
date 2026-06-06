@@ -354,6 +354,38 @@
     "netAriaLabel": "2D cube net for scramble: {{scramble}}",
     "netSolvedFallback": "solved"
   },
+  "publicProfile": {
+    "loading": "Loading profile…",
+    "notFoundTitle": "Profile not found",
+    "notFoundBody": "This profile does not exist or is not public.",
+    "toApp": "To the app",
+    "anonymousCuber": "Cuber",
+    "memberSince": "Member since {{date}}",
+    "wcaBadgeTitle": "Open official WCA profile",
+    "totalSolves": "Total solves",
+    "achievements": "Achievements",
+    "cubeTypes": "Cube types",
+    "bestsTitle": "Personal bests per cube",
+    "noSolves": "No solves yet.",
+    "colCube": "Cube",
+    "colSingle": "Single",
+    "colCount": "Solves",
+    "bestsHint": "Single + best averages (Ao5/Ao12/Ao100) per cube type.",
+    "recentPbsTitle": "Recent personal bests",
+    "madeWith": "Made with"
+  },
+  "publicProfileSettings": {
+    "title": "Public profile",
+    "intro": "Share a public solving card with your best times — via a link that even logged-out visitors can open.",
+    "privacyNote": "Off by default. The card shows only aggregates (bests/averages per cube, solve count, achievements) — never email, postal code or individual solves.",
+    "toggleLabel": "Enable public profile",
+    "okEnabled": "Public profile enabled.",
+    "okDisabled": "Public profile disabled.",
+    "shareLabel": "Your shareable link:",
+    "copy": "Copy",
+    "copied": "Copied ✓",
+    "noNameHint": "Tip: set a display name above — otherwise the card shows no name."
+  },
   "filters": {
     "label": "Filter",
     "cube": "Cube",
@@ -928,6 +960,7 @@
     "modalFooter": "Multi-user web variant, actively under construction. Data lives in a Postgres DB, no tracking, no ad code.",
     "worldBullet8": "Postal code + country in profile (optional) — feeds the WCA tournament search on the dashboard. Used exclusively for distance calculation, never shared",
     "communityBullet4": "Direct line to the admin: feedback modal with bug / feature-request categories and a reply workflow. When the admin replies, a discreet toaster pops up on your next login and takes you to the response",
+    "communityBullet5": "Public profile: share a solving card with your best times via a link — opt-in, viewable without login, shows aggregates only (never email/postal code/individual solves)",
     "showMore": "Show more — all detail features",
     "showFewer": "Show fewer — just the essentials"
   },

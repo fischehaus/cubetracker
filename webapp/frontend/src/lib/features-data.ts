@@ -93,6 +93,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
     bullets: [
       { key: "features.communityBullet1", audience: "public" }, // Freunde-System
       { key: "features.communityBullet3", audience: "public" }, // Bestenliste vs Freunde
+      { key: "features.communityBullet5", audience: "public" }, // Öffentliche teilbare Solving-Card (W.public-profile)
       { key: "features.communityBullet4", audience: "public" }, // Feedback-Workflow (ex-accountBullet8)
       { key: "features.communityBullet2", audience: "internal" }, // Privacy-Opt-In (Trust-Block-Material)
     ],

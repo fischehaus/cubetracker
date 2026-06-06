@@ -1274,6 +1274,58 @@ interface AdminUsersResponse {
   count: number;
 }
 
+// ============================================================
+// Public-Profile (W.public-profile, 2026-06-06) — anonyme, teilbare
+// Solving-Card. GET /api/public/profile/{slug} braucht KEIN Login
+// (axios schickt ohne Token einfach keinen Auth-Header).
+// ============================================================
+
+export interface PublicCubeStat {
+  cube_type: string;
+  count: number;
+  best_ms: number | null;
+  best_ao5: number | null;
+  best_ao12: number | null;
+  best_ao100: number | null;
+  current_ao5: number | null;
+  last_solve_at: string | null;
+}
+
+export interface PublicPb {
+  cube_type: string;
+  time_ms: number;
+  at: string;
+}
+
+export interface PublicProfile {
+  slug: string;
+  display_name: string | null;
+  country_iso2: string | null;
+  member_since: string;
+  wca_id: string | null;
+  total_solves: number;
+  total_valid: number;
+  achievements_unlocked: number;
+  cubes: PublicCubeStat[];
+  recent_pbs: PublicPb[];
+}
+
+export function usePublicProfile(slug: string): UseQueryResult<PublicProfile> {
+  return useQuery({
+    queryKey: ["public-profile", slug],
+    queryFn: async () => {
+      const r = await api.get<PublicProfile>(
+        `/public/profile/${encodeURIComponent(slug)}`,
+      );
+      return r.data;
+    },
+    enabled: slug.length > 0,
+    // 404 (kein/privates Profil) ist ein erwarteter Endzustand → kein Retry.
+    retry: false,
+    staleTime: 60_000,
+  });
+}
+
 export function useAdminUsers(enabled: boolean): UseQueryResult<AdminUsersResponse> {
   return useQuery({
     queryKey: qk.admin.users(),

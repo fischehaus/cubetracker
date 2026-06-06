@@ -49,6 +49,12 @@ export interface UserRead {
   country_iso2: string | null;
   /** Phase W.wca-profile-light: offizielle WCA-ID (Format „2024SMIT01"). */
   wca_id: string | null;
+  /** Phase W.public-profile (2026-06-06): Opt-In für die öffentliche,
+   *  teilbare Solving-Card unter /u/<public_slug>. Default false. */
+  public_profile_enabled: boolean;
+  /** Slug für den öffentlichen Link. Null bis zum ersten Aktivieren
+   *  (Server generiert ihn dann aus dem display_name, danach stabil). */
+  public_slug: string | null;
 }
 
 export interface AuthState {

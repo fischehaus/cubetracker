@@ -320,6 +320,26 @@ export function DatenschutzPage() {
           Art. 6 Abs. 1 lit. a (Einwilligung) bzw. lit. b DSGVO.
         </p>
 
+        <Sub>Öffentliches Profil (optional)</Sub>
+        <p>
+          Sie können optional ein öffentliches Profil aktivieren (eine teilbare
+          „Solving-Card"). Ist diese Funktion eingeschaltet (Opt-in,
+          standardmäßig <strong className="text-gray-200">aus</strong>), ist
+          unter einem Link der Form{" "}
+          <code className="text-gray-200">/u/&lt;name&gt;</code> eine Seite{" "}
+          <strong className="text-gray-200">ohne Login öffentlich</strong>{" "}
+          abrufbar. Sie zeigt ausschließlich aggregierte Daten: Ihren
+          Anzeigenamen, optional Land und WCA-ID, Ihre Bestzeiten und
+          Durchschnitte pro Würfel, die Anzahl Ihrer Solves und Achievements
+          sowie Ihre letzten persönlichen Bestzeiten. Es werden{" "}
+          <strong className="text-gray-200">
+            keine E-Mail-Adresse, keine Postleitzahl und keine einzelnen Solves
+          </strong>{" "}
+          veröffentlicht. Sie können das öffentliche Profil jederzeit wieder
+          deaktivieren. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO
+          (Einwilligung).
+        </p>
+
         <Sub>E-Mail-Versand (Resend)</Sub>
         <p>
           Für den Versand von Verifizierungs- und Passwort-Reset-Mails sowie für

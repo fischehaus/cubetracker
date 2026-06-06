@@ -354,6 +354,38 @@
     "netAriaLabel": "2D-Cube-Net nach Scramble: {{scramble}}",
     "netSolvedFallback": "gelöst"
   },
+  "publicProfile": {
+    "loading": "Profil wird geladen…",
+    "notFoundTitle": "Profil nicht gefunden",
+    "notFoundBody": "Dieses Profil existiert nicht oder ist nicht öffentlich.",
+    "toApp": "Zur App",
+    "anonymousCuber": "Cuber",
+    "memberSince": "Mitglied seit {{date}}",
+    "wcaBadgeTitle": "Offizielles WCA-Profil öffnen",
+    "totalSolves": "Solves gesamt",
+    "achievements": "Achievements",
+    "cubeTypes": "Cube-Typen",
+    "bestsTitle": "Bestzeiten pro Cube",
+    "noSolves": "Noch keine Solves.",
+    "colCube": "Cube",
+    "colSingle": "Single",
+    "colCount": "Solves",
+    "bestsHint": "Single + beste Averages (Ao5/Ao12/Ao100) pro Cube-Typ.",
+    "recentPbsTitle": "Letzte persönliche Bestzeiten",
+    "madeWith": "Erstellt mit"
+  },
+  "publicProfileSettings": {
+    "title": "Öffentliches Profil",
+    "intro": "Teile eine öffentliche Solving-Card mit deinen Bestzeiten — über einen Link, den auch Nicht-Eingeloggte öffnen können.",
+    "privacyNote": "Standardmäßig aus. Die Card zeigt nur Aggregate (Bestzeiten/Averages pro Cube, Anzahl Solves, Achievements) — niemals Email, PLZ oder einzelne Solves.",
+    "toggleLabel": "Öffentliches Profil aktivieren",
+    "okEnabled": "Öffentliches Profil aktiviert.",
+    "okDisabled": "Öffentliches Profil deaktiviert.",
+    "shareLabel": "Dein teilbarer Link:",
+    "copy": "Kopieren",
+    "copied": "Kopiert ✓",
+    "noNameHint": "Tipp: Setze oben einen Anzeigenamen — sonst erscheint die Card ohne Namen."
+  },
   "filters": {
     "label": "Filter",
     "cube": "Cube",
@@ -928,6 +960,7 @@
     "modalFooter": "Multi-User-Web-Variante, aktiv im Aufbau. Daten leben in einer Postgres-DB, kein Tracking, kein Werbe-Code.",
     "worldBullet8": "Postleitzahl + Land im Profil (optional) — speist die WCA-Turniere-Suche im Dashboard. Wird ausschließlich für Distanz-Berechnung genutzt, nie weitergegeben",
     "communityBullet4": "Direkter Draht zum Admin: Feedback-Modal mit Bug-/Wunsch-Kategorien und Antwort-Workflow. Wenn der Admin antwortet, springt beim nächsten Login ein dezenter Toaster auf und führt dich zu der Antwort",
+    "communityBullet5": "Öffentliches Profil: teile eine Solving-Card mit deinen Bestzeiten über einen Link — opt-in, ohne Login abrufbar, zeigt nur Aggregate (nie Email/PLZ/Einzel-Solves)",
     "showMore": "Mehr anzeigen — alle Detail-Features",
     "showFewer": "Weniger anzeigen — nur die wichtigsten"
   },
