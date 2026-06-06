@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.friend-profile",
+        released=date(2026, 6, 6),
+        title="👥 Freundes-Profil: Solving-Card per Klick auf den Namen",
+        highlights=[
+            "In Community → Freunde kannst du jetzt auf den Namen eines Freundes "
+            "klicken und seine Solving-Card sehen: Bestzeiten und Schnitte pro "
+            "Würfel, Solve- und Achievement-Zahlen, letzte persönliche Bestzeiten. "
+            "Das geht für alle akzeptierten Freunde — unabhängig davon, ob sie ihr "
+            "öffentliches Profil aktiviert haben.",
+            "Wie schon in der Bestenliste werden nur Aggregate gezeigt — niemals "
+            "E-Mail-Adresse oder einzelne Solves.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.public-profile",
         released=date(2026, 6, 6),
         title="🔗 Öffentliches Profil: teilbare Solving-Card",

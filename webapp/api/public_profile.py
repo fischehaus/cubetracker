@@ -84,8 +84,14 @@ def _aware(ts: datetime) -> datetime:
     return ts.replace(tzinfo=UTC) if ts.tzinfo is None else ts
 
 
-def _build_public_profile(db: OrmSession, user: User) -> PublicProfileRead:
-    """Komponiert die Card aus den Solves der Profil-user_id (nur Aggregate)."""
+def build_public_profile_card(db: OrmSession, user: User) -> PublicProfileRead:
+    """Komponiert die Card aus den Solves der Profil-user_id (nur Aggregate).
+
+    Wiederverwendbar: der anonyme /public/profile/{slug}-Endpoint nutzt sie
+    ebenso wie der authentifizierte Friend-Endpoint (api/friends.py). Sie selbst
+    macht KEINE Berechtigungsprüfung — der Aufrufer entscheidet, ob der
+    angefragte User sichtbar ist (opt-in-public bzw. accepted-friend).
+    """
     rows = db.scalars(
         select(Solve)
         .where(Solve.user_id == user.id)
@@ -188,4 +194,4 @@ def get_public_profile(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found"
         )
-    return _build_public_profile(db, user)
+    return build_public_profile_card(db, user)

@@ -38,6 +38,7 @@ from auth.deps import get_current_user
 from auth.rate_limit import limiter
 from db.database import get_db
 from db.models import Friendship, User
+from db.schemas import PublicProfileRead
 from friends.service import (
     FriendsServiceError,
     accept_request,
@@ -234,6 +235,52 @@ def get_friends_list(
             for fs in groups["outgoing_pending"]
         ],
     )
+
+
+@router.get("/{user_id}/profile", response_model=PublicProfileRead)
+@limiter.limit(SEARCH_LIMIT)
+def get_friend_profile(
+    request: Request,
+    user_id: int,
+    current_user: User = Depends(get_current_user),
+    db: OrmSession = Depends(get_db),
+) -> PublicProfileRead:
+    """Solving-Card eines akzeptierten Freundes (oder von sich selbst).
+
+    Im Gegensatz zum anonymen /public/profile/{slug} ist KEIN öffentliches
+    Opt-in nötig — eine accepted Friendship genügt (Freunde sehen via
+    Leaderboard ohnehin schon Aggregate). Liefert dieselben Aggregate wie die
+    öffentliche Card (nie Email/PLZ/Einzel-Solves). Generischer 404, wenn keine
+    accepted Friendship besteht oder der User inaktiv ist — kein Existence-Leak.
+    """
+    # Existenz + aktiv zuerst (gilt für ALLE Pfade, auch Self) → ein 404-Guard.
+    target = db.get(User, user_id)
+    if target is None or not target.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found"
+        )
+    # Fremdes Profil: nur mit accepted Friendship (beide Richtungen prüfen).
+    # Self (user_id == current_user.id) ist immer erlaubt.
+    if user_id != current_user.id:
+        is_friend = db.scalar(
+            select(Friendship.id).where(
+                Friendship.status == "accepted",
+                or_(
+                    (Friendship.requester_id == current_user.id)
+                    & (Friendship.target_id == user_id),
+                    (Friendship.target_id == current_user.id)
+                    & (Friendship.requester_id == user_id),
+                ),
+            )
+        )
+        if is_friend is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found"
+            )
+    # Lokaler Import (Cross-API), Konvention wie auth.py — kein Import-Zyklus.
+    from api.public_profile import build_public_profile_card
+
+    return build_public_profile_card(db, target)
 
 
 @router.get("/search", response_model=FriendSearchResponse)
