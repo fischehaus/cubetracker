@@ -24,6 +24,40 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-06 (Forts.) — Public-Profile + ntfy-Fix für klickbare Fragen
+
+**`W.public-profile`** (BE `049260c` + FE `e59cc34`, Tag
+`v2.0.0-alpha.W.public-profile`) — **Roadmap-P1-#2** „Public-Profile als teilbare
+Solving-Card". Anonyme, opt-in öffentliche Card unter **/u/&lt;slug&gt;**:
+- **Backend:** neuer **anonymer** Endpoint `GET /api/public/profile/{slug}`
+  (rate-limited 60/min; generischer 404 bei unbekannt/privat/inaktiv → kein
+  Existence-Leak). Liefert NUR Aggregate (Single/Avg-PBs pro Cube, Counts,
+  Achievements, letzte PB-Events) — nie Email/PLZ/Einzel-Solves. `compute_stats`
+  wiederverwendet (nicht an current_user gekoppelt). Opt-in via PATCH /auth/me
+  (`public_profile_enabled`); `public_slug` aus display_name generiert (ä/ö/ü/ß
+  transliteriert, **stabil ab Aktivierung** → geteilte Links bleiben gültig,
+  race-sicherer IntegrityError-Fallback auf id-Suffix). Neue User-Spalten +
+  Mini-Migration + partieller Unique-Index. **8 pytest-Tests** (tests/test_public_profile.py).
+- **Frontend:** `PublicProfilePage` (Route im AuthGuard VOR dem Login-Gate,
+  nginx-SPA-Fallback), Opt-in-Toggle + Teilen-Link mit Copy-Button in ProfilView
+  (ersetzt den Phase-B-Platzhalter), `usePublicProfile`-Hook, i18n de/en.
+- **Erster anonymer User-Daten-Endpoint** → `docs/permissions-matrix.md` +
+  Datenschutz-Seite nachgezogen, Marketing-Bullet `communityBullet5`.
+- QA (qa-reviewer): **safe, kein KRITISCH**; 2 SOLLTE direkt gefixt (Rate-Limit +
+  Slug-Race). Beidseitig live-verifiziert (Health-Version + FE-Bundle
+  `index-BlgZFmx4.js` + funktionaler 404). Roadmap-Item auf **done**.
+- ⚠️ Bewusste Scope-Grenze: WCA-Badge = **Link** zum offiziellen WCA-Profil (kein
+  neuer WCA-Proxy-Endpoint). Live-WCA-Daten auf der Card = spätere Option.
+
+**`W.ntfy-ask-question`** (`1bafa3a`, chore) — ntfy-Push jetzt **auch bei
+klickbaren Fragen** (`AskUserQuestion`): neuer PreToolUse-Hook
+`pre-ask-question-ntfy.sh`. Vorher pingte nur Prosa/„fertig" (Stop-Hook am
+Turn-Ende); AskUserQuestion ist ein Tool-Call mitten im Turn → Stop feuerte nie.
+Nutzt `.tmp/last-ntfy-message.txt` falls da, sonst auto aus Fragetext + Optionen.
+Live im echten Flow getestet (User bestätigte sofortigen Push).
+
+---
+
 ## ✅ ERLEDIGT 2026-06-06 (Fortsetzung nach Kompaktierung) — Big-Cube-Scrambles 8×8–11×11
 
 **`W.big-cube-scramble`** (FE `0834b05` + BE `48ac0b1`, Tag
