@@ -24,6 +24,32 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-06 (Forts.) — Friend-Profil (Card per Klick auf Namen)
+
+**`W.friend-profile`** (BE `81baba8` + FE `c2ba62f`, Tag
+`v2.0.0-alpha.W.friend-profile`) — User-Wunsch: Klick auf einen Freundes-Namen
+(Community → Freunde-Liste) zeigt dessen Solving-Card, **ohne** dass der Freund
+das anonyme öffentliche Profil aktiviert hat.
+- **Backend:** neuer **authentifizierter** Endpoint
+  `GET /api/friends/{user_id}/profile` — nur accepted-Friends (beide Richtungen
+  geprüft) oder self; generischer 404 sonst (non-friend/pending/inaktiv);
+  rate-limited 60/min. Reuse von `build_public_profile_card` (ex
+  `_build_public_profile`, jetzt geteilter, auth-neutraler Composer — der Caller
+  gated). Identische Aggregate wie die öffentliche Card (nie Email/Einzel-Solves).
+- **Frontend:** `SolvingCard` aus PublicProfilePage extrahiert (DRY → geteilt mit
+  der anonymen Seite), `FriendProfileModal` (`useFriendProfile`-Hook, Esc/Backdrop,
+  aria-labelledby), klickbare Namen NUR in der accepted-Friends-Liste (pending
+  bleibt nicht-klickbar → kann nicht 404en).
+- 6 neue Tests (beide Friendship-Richtungen, non-friend/pending→404, self→200,
+  no-auth→401); test_public_profile.py 14 grün. QA: **safe, kein KRITISCH**
+  (is_active-Reorder + Reverse-Test + aria-labelledby mitgenommen). Beidseitig
+  live-verifiziert (Health-Version + Bundle `index-D9cLjQDS.js` + funktionaler
+  401). Kein Roadmap-Item (Verfeinerung des Public-Profile).
+- ⏭️ Bekanntes app-weites a11y-Item (nicht in dieser Welle): kein Focus-Trap in
+  den Modals (gilt für ALLE App-Modals, nicht nur dieses) → eigener a11y-Pass.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-06 (Forts.) — Public-Profile + ntfy-Fix für klickbare Fragen
 
 **`W.public-profile`** (BE `049260c` + FE `e59cc34`, Tag
