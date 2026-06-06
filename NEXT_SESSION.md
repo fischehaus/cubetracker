@@ -24,6 +24,40 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-07 — Solve-Liste virtualisieren (Mobile-Cards)
+
+**`W.solvelist-virtual`** (FE `2346366` + BE `d148a1c`, Tag
+`v2.0.0-alpha.W.solvelist-virtual`) — Quick-Win aus dem P1-Restplan. Nach
+Plan-Vorlage hat der User **nur die Mobile-Card-Liste** gewählt (risikoarme
+Hälfte, ~1h); die Desktop-Tabelle bleibt bewusst unangetastet.
+- **Frontend:** `SolveList.tsx` — die `md:hidden` Card-Liste rendert via
+  **`@tanstack/react-virtual`** (v3.14.2, neue Dep) nur noch sichtbare Cards
+  (dynamische Höhe per `measureElement` + `data-index`, absolute
+  `translateY`, overscan 8). Der frühere `space-y-2`-Abstand sitzt jetzt als
+  `pb-2` IM gemessenen Wrapper (landet so in der gemessenen Höhe). Hook läuft
+  VOR den Early-Returns (Rules of Hooks; count=0 bei leerer Liste harmlos).
+  → kein Mount-Jank mehr bei Limit 500/1000/„Alle" auf alten Phones.
+- **Desktop-Tabelle (`hidden md:block`) unverändert** — Browser packen 1000
+  `<tr>` mühelos, der Jank lebte nur auf dem Phone. Voll-Virtualisierung der
+  Tabelle (→ Grid + ARIA + feste Spalten, da Virtualisierung das Auto-
+  Spalten-Sizing killt) wäre der Regressions-Hotspot → **bewusst
+  zurückgestellt** bis echter Desktop-Jank gemeldet wird.
+- QA (qa-reviewer): **safe, kein KRITISCH**. 2 SOLLTE bewertet: `measure()`
+  nach Delete gegen kurzes Höhen-Flackern **eingebaut**; das box-sizing-
+  „Finding" als Non-Issue **verworfen** (getBoundingClientRect liefert die
+  Border-Box inkl. `pb-2` ohnehin, da keine explizite `height` gesetzt ist).
+- **Keine neuen Tests:** das Projekt hat KEINEN Component-Test-Harness (alle 10
+  Vitest-Files sind reine `lib/*.test.ts`, Node-Env). Ein `@testing-library`-
+  Setup für einen Rendering-Swap mit vetteter Library wäre unverhältnismäßig.
+  Verifikation: tsc (exit 0) + build (Bundle `index-Bqe8_t7c.js`) + QA +
+  beidseitige Live-Verifikation (Health-Version + Bundle-Hash, 1. Versuch).
+- **Kein `features-data.ts`-Bullet** (Perf-Optimierung, kein neues User-
+  Feature) → `perf(...)`-Commit statt `feat(...)`; Patch-Note trotzdem public
+  (User spüren das flüssigere Scrollen).
+- ⏭️ Offen: Desktop-Tabellen-Virtualisierung (s.o.), nur falls je nötig.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-06 (Forts.) — WCA-Profil auf der Card + PB-Align-Fix
 
 **`W.wca-on-card`** (BE `d1e1583` + FE `e5e36dd`, Tag `v2.0.0-alpha.W.wca-on-card`)
