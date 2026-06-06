@@ -105,6 +105,7 @@ export function WcaProfileBody({ data }: { data: WcaPersonProfile }) {
             alt={data.name ?? data.wca_id}
             className="w-12 h-12 rounded-full border border-gray-700 bg-gray-800 object-cover"
             loading="lazy"
+            referrerPolicy="no-referrer"
           />
         ) : (
           <div className="w-12 h-12 rounded-full border border-gray-700 bg-gray-800 flex items-center justify-center text-gray-500 text-xl">

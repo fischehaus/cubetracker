@@ -148,7 +148,7 @@ export function SolvingCard({ profile }: { profile: PublicProfile }) {
           <table className="w-full text-sm">
             <tbody>
               {profile.recent_pbs.map((pb, i) => (
-                <tr key={`${pb.at}-${i}`}>
+                <tr key={`${pb.cube_type}-${pb.at}-${i}`}>
                   <td className="py-1 pr-3 text-gray-300 w-full">{pb.cube_type}</td>
                   <td className="py-1 px-2 text-right font-mono text-yellow-300 whitespace-nowrap">
                     {formatTime(pb.time_ms)}
