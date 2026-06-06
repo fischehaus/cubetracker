@@ -8,7 +8,7 @@
 // Status und schreibt die Antwort. Das Item landet auf der Roadmap, die das
 // Dev-Tooling (roadmap-fetch.py) ohnehin ausliest — direkter Auftrags-Flow.
 
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useAdminFeedbackToRoadmap,
@@ -16,6 +16,7 @@ import {
   type FeedbackStatus,
 } from "../lib/api";
 import { toast } from "../lib/toast";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 const PHASES = ["P1", "P2", "P3", "P4", "P5", "P6"] as const;
 
@@ -44,6 +45,9 @@ interface Props {
 export function FeedbackToRoadmapModal({ msg, onClose }: Props) {
   const { t } = useTranslation();
   const mut = useAdminFeedbackToRoadmap();
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
 
   const prefillTitle = firstLine(msg.message);
   const [phaseId, setPhaseId] = useState("P1");
@@ -104,6 +108,7 @@ export function FeedbackToRoadmapModal({ msg, onClose }: Props) {
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-2xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >

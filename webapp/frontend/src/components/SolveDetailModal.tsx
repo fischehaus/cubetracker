@@ -9,7 +9,7 @@
 //
 // Schliessen: Klick auf Backdrop, Esc, X-Button oben rechts.
 
-import { useEffect } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useDeleteSolve,
@@ -19,6 +19,7 @@ import {
 } from "../lib/api";
 import { formatDate, formatSolveTime, formatTime } from "../lib/format";
 import type { Solve } from "../lib/types";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface Props {
   solve: Solve;
@@ -45,14 +46,9 @@ export function SolveDetailModal({ solve, ao5, ao12, isPb, onClose }: Props) {
       ? sessions?.find((s) => s.id === solve.session_id)?.name ?? "—"
       : null;
 
-  // Esc-Key schliesst Modal
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
 
   return (
     <div
@@ -60,6 +56,7 @@ export function SolveDetailModal({ solve, ao5, ao12, isPb, onClose }: Props) {
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="rounded-lg border border-gray-700 bg-gray-900 p-4 md:p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >

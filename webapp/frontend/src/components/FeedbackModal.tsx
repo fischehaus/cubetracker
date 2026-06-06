@@ -11,7 +11,7 @@
 // Anonyme User (kein eingeloggter User, z.B. Login-Seite-Footer)
 // sehen NUR den GitHub-Mode — die App-Inbox ist user-gebunden.
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { AxiosError } from "axios";
 import { useAuth } from "../auth/AuthContext";
@@ -19,6 +19,7 @@ import {
   useCreateFeedbackMessage,
   type FeedbackCategory,
 } from "../lib/api";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface Props {
   onClose: () => void;
@@ -35,6 +36,9 @@ export function FeedbackModal({ onClose }: Props) {
   const [mode, setMode] = useState<"github" | "app">(
     isLoggedIn ? "app" : "github",
   );
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
 
   return (
     <div
@@ -42,6 +46,7 @@ export function FeedbackModal({ onClose }: Props) {
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-2xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8"
         onClick={(e) => e.stopPropagation()}
       >

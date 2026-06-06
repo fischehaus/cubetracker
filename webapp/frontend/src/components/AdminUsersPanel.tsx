@@ -11,7 +11,8 @@
 // blenden die Knoepfe sowieso aus damit der Fehler erst gar nicht
 // kommt).
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import { useAuth } from "../auth/AuthContext";
 import { InfoButton } from "./InfoButton";
 import {
@@ -376,6 +377,9 @@ function ConfirmDeleteDialog({
   const del = useAdminDeleteUser();
   const expected = `DELETE_USER_${user.id}`;
   const canDelete = typed === expected && !del.isPending;
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
 
   return (
     <div
@@ -383,6 +387,7 @@ function ConfirmDeleteDialog({
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-md rounded-lg border border-red-500/40 bg-gray-900 p-6 space-y-3"
         onClick={(e) => e.stopPropagation()}
       >
@@ -451,6 +456,9 @@ function MailUserDialog({
   const send = useAdminSendEmail();
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
 
   const submit = () => {
     if (!subject.trim() || !body.trim()) return;
@@ -472,6 +480,7 @@ function MailUserDialog({
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-xl rounded-lg border border-purple-500/40 bg-gray-900 p-6 space-y-3"
         onClick={(e) => e.stopPropagation()}
       >

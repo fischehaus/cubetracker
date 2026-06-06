@@ -15,7 +15,7 @@
 //
 // Trigger: Footer-Link + UserMenu (unverändert).
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useRoadmap, type RoadmapItem } from "../lib/api";
 import {
@@ -23,6 +23,7 @@ import {
   ROADMAP_PHASES_META,
   type RoadmapPhaseMeta,
 } from "../lib/roadmap-phases";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface Props {
   onClose: () => void;
@@ -31,6 +32,9 @@ interface Props {
 export function RoadmapModal({ onClose }: Props) {
   const { t, i18n } = useTranslation();
   const { data, isLoading, error } = useRoadmap();
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
 
   // Items nach phase_id gruppieren — pro Phase sortiert nach sort_order
   // (kommt schon sortiert vom Backend, aber defensive nochmal hier).
@@ -52,6 +56,7 @@ export function RoadmapModal({ onClose }: Props) {
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8"
         onClick={(e) => e.stopPropagation()}
       >

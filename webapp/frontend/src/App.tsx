@@ -8,6 +8,7 @@
 // Header zeigt nur noch Title + Backend-Badge.
 
 import { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "./hooks/useFocusTrap";
 import { useTranslation } from "react-i18next";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
@@ -224,12 +225,16 @@ function HealthBadge({ onClick }: { onClick: () => void }) {
 
 function PatchNotesModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8"
         onClick={(e) => e.stopPropagation()}
       >
@@ -1208,12 +1213,16 @@ function FeaturesModal({ onClose }: { onClose: () => void }) {
   // W.feature-curation (2026-05-29): Toggle zwischen kuratierter
   // Public-Sicht (Default) und Expanded-Sicht (+ Detail-Bullets).
   const [showExpanded, setShowExpanded] = useState(false);
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8"
         onClick={(e) => e.stopPropagation()}
       >

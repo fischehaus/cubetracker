@@ -9,7 +9,8 @@
 //   verschieben' — vermeidet versehentlichen Daten-Verlust
 // - Mergen mit Modal: Ziel-Session auswählen, Solves wandern + Notes appended
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import { useTranslation } from "react-i18next";
 import {
   useCreateSession,
@@ -422,12 +423,16 @@ function ModalOverlay({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="rounded-lg border border-gray-700 bg-gray-900 p-6 max-w-md w-[90%] shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >

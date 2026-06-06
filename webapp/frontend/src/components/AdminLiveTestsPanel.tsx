@@ -9,7 +9,8 @@
 // Phase 3 (kommt noch): bei FAIL + Notiz wird automatisch ein GitHub-
 // Issue erstellt damit die nächste Welle den Fix aufnehmen kann.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import { useAuth } from "../auth/AuthContext";
 import { InfoButton } from "./InfoButton";
 import {
@@ -410,6 +411,9 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [relatedPhase, setRelatedPhase] = useState("");
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
 
   const submit = () => {
     if (!title.trim() || !description.trim()) return;
@@ -431,6 +435,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-xl rounded-lg border border-purple-500/40 bg-gray-900 p-6 space-y-3"
         onClick={(e) => e.stopPropagation()}
       >

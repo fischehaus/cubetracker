@@ -13,7 +13,8 @@
  * Trust + Feature lebten frueher rechts neben dem Login als lange Spalten.
  * Jetzt zentriert + kompakt, damit der Eye-Anchor klar auf Login bleibt.
  */
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { api } from "../lib/api";
@@ -305,12 +306,16 @@ function LoginFeaturesModal({
 }) {
   const { t } = useTranslation();
   const [showExpanded, setShowExpanded] = useState(false);
+  // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, onClose);
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-3xl rounded-lg border border-purple-500/40 bg-gray-900 p-4 md:p-6 mt-8 mb-8"
         onClick={(e) => e.stopPropagation()}
       >
