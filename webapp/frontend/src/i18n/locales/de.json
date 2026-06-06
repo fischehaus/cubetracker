@@ -386,6 +386,11 @@
     "copied": "Kopiert ✓",
     "noNameHint": "Tipp: Setze oben einen Anzeigenamen — sonst erscheint die Card ohne Namen."
   },
+  "friendProfile": {
+    "title": "Profil von {{name}}",
+    "close": "Schließen",
+    "errorBody": "Profil konnte nicht geladen werden."
+  },
   "filters": {
     "label": "Filter",
     "cube": "Cube",
@@ -925,7 +930,7 @@
     "trainerBullet2": "Daily Challenges: jeden Tag eine neue kleine Aufgabe",
     "trainerBullet3": "Algs-Trainer für PLL + OLL mit Selbst-Test-Modus — OLL mit allen 57 Visualisierungen (PLL-Bilder folgen)",
     "communityTitle": "Community",
-    "communityBullet1": "Freunde-System: User per Display-Name oder Email finden, Anfragen schicken/annehmen",
+    "communityBullet1": "Freunde-System: User per Display-Name oder Email finden, Anfragen schicken/annehmen, Profil + Bestzeiten eines Freundes per Klick auf den Namen ansehen",
     "communityBullet2": "Privacy-Opt-In: nur wer „Auffindbar\" aktiviert ist per Display-Name findbar",
     "communityBullet3": "Bestenliste: vergleich deine Best Single / AO5 / AO12 mit deinen Freunden",
     "hardwareTitle": "Hardware-Inventar",
@@ -1141,7 +1146,8 @@
     "listEmpty": "Noch keine Freunde. Such oben nach Display-Name oder Email.",
     "unfriendConfirm": "Freundschaft mit {{name}} wirklich beenden?",
     "unfriendFallback": "diesem User",
-    "unfriendButton": "Entfreunden"
+    "unfriendButton": "Entfreunden",
+    "viewProfileTitle": "Profil ansehen"
   },
   "sessionSwitcher": {
     "loading": "Sessions werden geladen …",

@@ -13,6 +13,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
+import { FriendProfileModal } from "./FriendProfileModal";
 import { InfoButton } from "./InfoButton";
 import { Card, EmptyState } from "./ui";
 import {
@@ -31,6 +32,11 @@ export function FriendsTab() {
   const { user, isAuthenticated } = useAuth();
   const enabled = isAuthenticated;
   const { data, isLoading } = useFriendsList(enabled);
+  // W.friend-profile: ausgewählter Freund für die Profil-Card (Modal).
+  const [profileTarget, setProfileTarget] = useState<{
+    id: number;
+    name: string | null;
+  } | null>(null);
 
   if (!isAuthenticated || !user) {
     return null;
@@ -52,7 +58,15 @@ export function FriendsTab() {
       <FriendsListCard
         items={data?.friends ?? []}
         isLoading={isLoading}
+        onViewProfile={(id, name) => setProfileTarget({ id, name })}
       />
+      {profileTarget && (
+        <FriendProfileModal
+          userId={profileTarget.id}
+          name={profileTarget.name}
+          onClose={() => setProfileTarget(null)}
+        />
+      )}
     </div>
   );
 }
@@ -560,9 +574,11 @@ function PendingOutgoingCard({ items }: { items: Friendship[] }) {
 function FriendsListCard({
   items,
   isLoading,
+  onViewProfile,
 }: {
   items: Friendship[];
   isLoading: boolean;
+  onViewProfile: (id: number, name: string | null) => void;
 }) {
   const { t } = useTranslation();
   const remove = useRemoveFriendship();
@@ -584,13 +600,18 @@ function FriendsListCard({
             className="flex items-center justify-between gap-2 rounded bg-gray-800/40 px-3 py-2"
           >
             <div className="flex items-baseline gap-2">
-              <span className="text-sm font-medium text-gray-100">
+              <button
+                type="button"
+                onClick={() => onViewProfile(fs.other.id, fs.other.display_name)}
+                className="text-sm font-medium text-gray-100 hover:text-purple-300 hover:underline text-left"
+                title={t("friends.viewProfileTitle")}
+              >
                 {fs.other.display_name || (
                   <span className="italic text-gray-500">
                     {t("friends.noName")}
                   </span>
                 )}
-              </span>
+              </button>
               {fs.other.email && (
                 <span className="text-xs text-gray-500 font-mono">
                   {fs.other.email}

@@ -1326,6 +1326,25 @@ export function usePublicProfile(slug: string): UseQueryResult<PublicProfile> {
   });
 }
 
+/**
+ * Friend-Profil (authentifiziert) — Solving-Card eines akzeptierten Freundes.
+ * Anders als usePublicProfile braucht der Ziel-User KEIN öffentliches Opt-in;
+ * eine accepted Friendship genügt (Backend prüft das). 404 = kein Freund /
+ * inaktiv → kein Retry.
+ */
+export function useFriendProfile(userId: number): UseQueryResult<PublicProfile> {
+  return useQuery({
+    queryKey: ["friend-profile", userId],
+    queryFn: async () => {
+      const r = await api.get<PublicProfile>(`/friends/${userId}/profile`);
+      return r.data;
+    },
+    enabled: userId > 0,
+    retry: false,
+    staleTime: 60_000,
+  });
+}
+
 export function useAdminUsers(enabled: boolean): UseQueryResult<AdminUsersResponse> {
   return useQuery({
     queryKey: qk.admin.users(),
