@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.modal-focus-trap",
+        released=date(2026, 6, 7),
+        title="⌨️ Barrierefreie Dialoge: Fokus bleibt im Pop-up, Esc schließt",
+        highlights=[
+            "Alle Pop-up-Dialoge (Patch Notes, Roadmap, Feedback, Solve-Details, "
+            "Freundes-Profil, Admin-Dialoge u.a.) sind jetzt tastaturfest: der "
+            "Tastatur-Fokus bleibt im offenen Dialog gefangen, Esc schließt ihn "
+            "überall, und nach dem Schließen springt der Fokus zurück zum "
+            "auslösenden Element. Bessere Bedienung per Tastatur und mit "
+            "Screenreadern (WCAG).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.solvelist-virtual",
         released=date(2026, 6, 7),
         title="⚡ Flüssigeres Scrollen in der Solve-Liste (Handy)",
