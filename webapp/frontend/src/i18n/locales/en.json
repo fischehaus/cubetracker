@@ -372,6 +372,9 @@
     "colCount": "Solves",
     "bestsHint": "Single + best averages (Ao5/Ao12/Ao100) per cube type.",
     "recentPbsTitle": "Recent personal bests",
+    "wcaSectionTitle": "Official WCA profile",
+    "wcaLoading": "Loading WCA profile…",
+    "wcaError": "WCA profile currently unavailable.",
     "madeWith": "Made with"
   },
   "publicProfileSettings": {
@@ -965,7 +968,7 @@
     "modalFooter": "Multi-user web variant, actively under construction. Data lives in a Postgres DB, no tracking, no ad code.",
     "worldBullet8": "Postal code + country in profile (optional) — feeds the WCA tournament search on the dashboard. Used exclusively for distance calculation, never shared",
     "communityBullet4": "Direct line to the admin: feedback modal with bug / feature-request categories and a reply workflow. When the admin replies, a discreet toaster pops up on your next login and takes you to the response",
-    "communityBullet5": "Public profile: share a solving card with your best times via a link — opt-in, viewable without login, shows aggregates only (never email/postal code/individual solves)",
+    "communityBullet5": "Public profile: share a solving card with your best times via a link — opt-in, viewable without login, shows aggregates only (never email/postal code/individual solves), incl. official WCA profile if linked",
     "showMore": "Show more — all detail features",
     "showFewer": "Show fewer — just the essentials"
   },

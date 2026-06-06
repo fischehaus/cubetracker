@@ -11,8 +11,13 @@
 
 import { useTranslation } from "react-i18next";
 import { formatTime } from "../lib/format";
-import type { PublicCubeStat, PublicProfile } from "../lib/api";
+import {
+  usePublicWcaProfile,
+  type PublicCubeStat,
+  type PublicProfile,
+} from "../lib/api";
 import { Card } from "./ui";
+import { WcaProfileBody } from "./WcaProfileBody";
 
 /** ISO-3166-alpha-2 → Flaggen-Emoji (Regional-Indicator-Symbole). */
 function flagEmoji(iso2: string | null): string {
@@ -29,6 +34,9 @@ function fmt(ms: number | null): string {
 
 export function SolvingCard({ profile }: { profile: PublicProfile }) {
   const { t, i18n } = useTranslation();
+  // Öffentliches WCA-Profil (anonymer Proxy) — nur aktiv, wenn eine WCA-ID
+  // hinterlegt ist. Lädt unabhängig von der Card (eigene Lade-/Fehler-States).
+  const wca = usePublicWcaProfile(profile.wca_id);
 
   const dateFmt = (iso: string): string => {
     try {
@@ -152,6 +160,22 @@ export function SolvingCard({ profile }: { profile: PublicProfile }) {
               ))}
             </tbody>
           </table>
+        </Card>
+      )}
+
+      {/* Offizielles WCA-Profil (PRs/Wettkämpfe) — nur wenn WCA-ID gesetzt. */}
+      {profile.wca_id && (
+        <Card padding="md">
+          <h2 className="text-sm uppercase tracking-wide text-gray-500 mb-3">
+            {t("publicProfile.wcaSectionTitle")}
+          </h2>
+          {wca.isLoading && (
+            <p className="text-sm text-gray-400">{t("publicProfile.wcaLoading")}</p>
+          )}
+          {wca.isError && (
+            <p className="text-sm text-gray-500">{t("publicProfile.wcaError")}</p>
+          )}
+          {wca.data && <WcaProfileBody data={wca.data} />}
         </Card>
       )}
     </div>

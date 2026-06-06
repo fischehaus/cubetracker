@@ -2034,6 +2034,29 @@ export function useMyWcaProfile(
   });
 }
 
+/**
+ * Öffentliches WCA-Profil per WCA-ID (anonym) — für die Solving-Card
+ * (PublicProfilePage + FriendProfileModal). Anders als useMyWcaProfile nutzt es
+ * den anonymen /wca/profile/{wca_id}-Proxy (WCA-Person-Daten sind ohnehin
+ * öffentlich). 404/503 ohne Retry.
+ */
+export function usePublicWcaProfile(
+  wcaId: string | null,
+): UseQueryResult<WcaPersonProfile> {
+  return useQuery({
+    queryKey: ["public-wca-profile", wcaId],
+    queryFn: async () => {
+      const r = await api.get<WcaPersonProfile>(
+        `/wca/profile/${encodeURIComponent(wcaId as string)}`,
+      );
+      return r.data;
+    },
+    enabled: !!wcaId,
+    staleTime: 6 * 60 * 60_000, // 6h
+    retry: false,
+  });
+}
+
 // ============================================================
 // Speedcubing-News (Phase W.news)
 // ============================================================
