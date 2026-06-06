@@ -24,6 +24,32 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-06 (Forts.) — WCA-Profil auf der Card + PB-Align-Fix
+
+**`W.wca-on-card`** (BE `d1e1583` + FE `e5e36dd`, Tag `v2.0.0-alpha.W.wca-on-card`)
+— User-Wunsch: die Solving-Card zeigt jetzt auch das **offizielle WCA-Profil**
+(Personal Records pro Event, Medaillen, WR/CR/NR-Ränge, letzte Wettkämpfe), nicht
+nur das Badge.
+- **Backend:** neuer **anonymer** Proxy `GET /api/wca/profile/{wca_id}`
+  (rate-limited 30/min, 6h-Cache via `fetch_person` wiederverwendet, Format-Guard
+  → malformed ID = 404 VOR dem WCA-Call, kein Hammering). WCA-Person-Daten sind
+  ohnehin öffentlich (worldcubeassociation.org).
+- **Frontend:** `WcaProfileBody` aus `WcaProfileCard` extrahiert (DRY → eigenes
+  Profil + Solving-Card teilen das Rendering), `usePublicWcaProfile`-Hook,
+  WCA-Sektion in `SolvingCard` (wirkt auf /u/<slug> + Friend-Modal).
+- 53 Tests + Format-Guard-Test grün. Bewusst Self-Review statt vollem QA-Agent
+  (niedrigeres Risiko: Proxy öffentlicher Daten + UI-Reuse, keine User-Daten/Auth).
+  Live-verifiziert (Health + Bundle `index-B5IOIeFC.js` + funktionaler 404).
+- ⚠️ Erweitert die anonyme Angriffsfläche um den WCA-Proxy — bewusst akzeptiert
+  (öffentliche Daten, rate-limited, Format-Guard). Falls Missbrauch: Limit senken.
+
+**`style(W.friend-profile)`** (`d2e707c`) — „Letzte persönliche Bestzeiten" als
+Tabelle ausgerichtet (Zeit/Datum rechtsbündig statt flex-justify-between, das die
+Zeit je nach Cube-Namens-Breite verschoben hat). User-Report. Wirkt über
+`SolvingCard` auf beide Stellen.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-06 (Forts.) — Friend-Profil (Card per Klick auf Namen)
 
 **`W.friend-profile`** (BE `81baba8` + FE `c2ba62f`, Tag
