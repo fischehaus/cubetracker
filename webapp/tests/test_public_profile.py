@@ -207,3 +207,12 @@ def test_self_can_view_own_profile_via_friend_endpoint(
 def test_friend_profile_requires_auth(client, make_user) -> None:
     a, _ha = make_user()
     assert client.get(f"/api/friends/{a.id}/profile").status_code == 401
+
+
+def test_public_wca_profile_rejects_malformed_id(client) -> None:
+    # Format-Guard im /wca/profile/{wca_id}-Proxy: ungültige IDs → 404 OHNE
+    # WCA-API-Call (kein Hammering des offenen Endpoints). Gültig formatierte
+    # IDs würden die externe WCA-API treffen → hier bewusst nicht getestet.
+    assert client.get("/api/wca/profile/not-a-valid-id").status_code == 404
+    assert client.get("/api/wca/profile/333").status_code == 404
+    assert client.get("/api/wca/profile/2024TOOLONG99").status_code == 404

@@ -17,6 +17,7 @@ GET /wca/competitions/upcoming
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
@@ -216,5 +217,41 @@ async def my_wca_profile(
                 "Bitte Schreibweise prüfen — Format: 4 Ziffern Jahr + "
                 "4 Großbuchstaben + 2 Ziffern (z.B. '2024SMIT01')."
             ),
+        )
+    return profile
+
+
+# WCA-ID-Format: 4 Ziffern Jahr + 4 Großbuchstaben + 2 Ziffern.
+_WCA_ID_RE = re.compile(r"^[12][0-9]{3}[A-Z]{4}[0-9]{2}$")
+
+
+@router.get("/profile/{wca_id}")
+@limiter.limit("30/minute")
+async def public_wca_profile(request: Request, wca_id: str) -> dict[str, Any]:
+    """Öffentliches WCA-Profil per WCA-ID — ANONYM (für die teilbare Solving-
+    Card / Friend-Profil-Card).
+
+    Dünner Proxy auf die offizielle WCA-API; deren Person-Daten sind ohnehin
+    öffentlich (worldcubeassociation.org/persons/{id}). Rate-limited + 6h-
+    Backend-Cache (in fetch_person). Malformed IDs werden VOR dem WCA-Call mit
+    404 abgewiesen → kein Hammering der WCA-API über den offenen Endpoint.
+
+    404 bei ungültiger/unbekannter ID, 503 bei WCA-API-Ausfall.
+    """
+    norm = (wca_id or "").strip().upper()
+    if not _WCA_ID_RE.match(norm):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="WCA-ID not found"
+        )
+    try:
+        profile = await fetch_person(norm)
+    except WcaApiError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"WCA-API nicht erreichbar: {e}",
+        ) from e
+    if profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="WCA-ID not found"
         )
     return profile

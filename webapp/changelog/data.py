@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.wca-on-card",
+        released=date(2026, 6, 6),
+        title="🏆 WCA-Profil auf der Solving-Card",
+        highlights=[
+            "Die teilbare Solving-Card (öffentliches Profil unter /u/… und das "
+            "Freundes-Profil) zeigt jetzt auch das offizielle WCA-Profil mit an: "
+            "Personal Records pro Event, Medaillen, Rekord-Ränge (WR/CR/NR) und "
+            "die letzten Wettkämpfe — live aus der WCA-API, sobald der Cuber eine "
+            "WCA-ID hinterlegt hat.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.friend-profile",
         released=date(2026, 6, 6),
         title="👥 Freundes-Profil: Solving-Card per Klick auf den Namen",
