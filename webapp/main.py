@@ -29,6 +29,7 @@ from api import hardware as hardware_api
 from api import import_cstimer as import_api
 from api import leaderboard as leaderboard_api
 from api import news as news_api
+from api import public_profile as public_profile_api
 from api import roadmap as roadmap_api
 from api import sessions as sessions_api
 from api import solves as solves_api
@@ -124,6 +125,12 @@ async def lifespan(app: FastAPI):
                 # die FK-Constraint lebt nur auf frischen DBs (create_all aus
                 # dem Modell) — hier auf Bestands-Postgres nur die Spalte.
                 "ALTER TABLE roadmap_items ADD COLUMN IF NOT EXISTS source_feedback_id INTEGER",
+                # Phase W.public-profile (2026-06-06): Opt-In öffentliche
+                # Solving-Card. Zwei Spalten + partieller Unique-Index auf den
+                # Slug (mehrere NULLs erlaubt, Slugs eindeutig wo gesetzt).
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS public_profile_enabled BOOLEAN NOT NULL DEFAULT FALSE",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS public_slug VARCHAR(64)",
+                "CREATE UNIQUE INDEX IF NOT EXISTS ix_users_public_slug ON users (public_slug) WHERE public_slug IS NOT NULL",
             ]
             with engine.begin() as conn:
                 for sql in migrations:
@@ -307,6 +314,7 @@ api_router.include_router(wca_api.router)
 api_router.include_router(news_api.router)
 api_router.include_router(feedback_api.router)
 api_router.include_router(roadmap_api.router)
+api_router.include_router(public_profile_api.router)
 app.include_router(api_router)
 
 

@@ -385,6 +385,10 @@ def update_me(
         "postal_code",
         "country_iso2",
         "wca_id",
+        # Phase W.public-profile (2026-06-06): Opt-In für die öffentliche
+        # Solving-Card. Nur der Toggle ist hier setzbar; den Slug erzeugt der
+        # Server (unten) beim ersten Aktivieren.
+        "public_profile_enabled",
     }
     data = payload.model_dump(exclude_unset=True)
     for key, value in data.items():
@@ -396,8 +400,28 @@ def update_me(
             elif key == "wca_id" and isinstance(value, str):
                 value = value.strip().upper() or None
             setattr(current_user, key, value)
+    # Feld-Updates zuerst committen (immer erfolgreich).
     db.commit()
     db.refresh(current_user)
+    # Phase W.public-profile: beim ERSTEN Aktivieren einen stabilen Slug aus
+    # dem display_name erzeugen (bleibt danach erhalten, auch wenn der Name
+    # später geändert wird → geteilte Links bleiben gültig). Eigener Commit mit
+    # Retry: eine seltene Slug-Kollision (zwei gleiche display_names aktivieren
+    # gleichzeitig) würde sonst in einem 500 enden → Fallback auf den garantiert
+    # eindeutigen id-Suffix-Slug.
+    if current_user.public_profile_enabled and not current_user.public_slug:
+        from sqlalchemy.exc import IntegrityError
+
+        from api.public_profile import generate_public_slug, slug_with_id_suffix
+
+        try:
+            current_user.public_slug = generate_public_slug(db, current_user)
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            current_user.public_slug = slug_with_id_suffix(current_user)
+            db.commit()
+        db.refresh(current_user)
     return current_user
 
 

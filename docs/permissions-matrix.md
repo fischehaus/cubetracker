@@ -1,7 +1,8 @@
 # Sichtbarkeits-Matrix — Wer sieht was?
 
-**Stand:** 2026-05-31 (nach IA-Umbau W1–W3 — Navigation neu, Daten-
-Sichtbarkeit unverändert)
+**Stand:** 2026-06-06 (W.public-profile — ERSTER anonymer User-Daten-
+Endpoint: opt-in öffentliche Solving-Card unter /u/<slug>. Davor: 2026-05-31
+IA-Umbau, Navigation neu, Daten-Sichtbarkeit unverändert.)
 **Geltungsbereich:** `webapp/` (cubetracker.de Multi-User-Web-Variante)
 **Single-Source:** Diese Datei ist die verbindliche Antwort auf "Wer
 sieht welche Daten?". Bei Konflikten zwischen Doku und Code gilt der
@@ -79,6 +80,8 @@ Legende:
 | `country_iso2` | string(2) nullable | ✗ | ✓ | ✗ | ✗ | ✗ | Nur in `UserRead` für Self. |
 | `wca_id` | string(10) nullable | ✗ | ✓ | ✗ | ✗ | ✗ | Nur in `UserRead` für Self. Beim Setzen wird das offizielle WCA-Profil daraus geladen (siehe Punkt 6). |
 | `is_discoverable` | bool | ✗ | ✓ | ✗ | ✗ | ✗ | Opt-In für User-Suche per Display-Name. Self sieht's; sonst nicht im Output. |
+| `public_profile_enabled` | bool | ✗ | ✓ | ✗ | ✗ | ✗ | Opt-In für die öffentliche Solving-Card (W.public-profile). Default False. Self via `UserRead`. Das Feld selbst ist NICHT in `PublicProfileRead` — anon merkt es nur indirekt: nur bei `True` liefert `/public/profile/{slug}` Daten, sonst 404. |
+| `public_slug` | string(64) nullable unique | ⚠ | ✓ | ✗ | ✗ | ✗ | URL-Slug für `/u/<slug>`. Wird beim ersten Aktivieren aus `display_name` generiert (ä/ö/ü/ß transliteriert) + bleibt danach stabil. Self via `UserRead`; anon kennt ihn als Teil der geteilten URL (wird in `PublicProfileRead.slug` zurückgegeben). |
 | `token_version` | int | ✗ | ✗ | ✗ | ✗ | ✗ | Reines Server-Internum (JWT-Revocation). Nirgends im API-Output. |
 | `is_admin` | bool | ✗ | ✓ | ✗ | ✗ | ✓ | Self sieht's via `UserRead` (Frontend nutzt es um Admin-Tab zu zeigen). Admin sieht es bei anderen Usern via `AdminUser`. |
 | `is_tester` | bool | ✗ | ✓ | ✗ | ✗ | ✓ | Analog zu `is_admin`. |
@@ -116,6 +119,12 @@ Legende:
 | `alg_case` | string nullable | ✗ | ✓ | ✗ | ✗ | ✗ | – |
 | `split_times_ms` | text nullable | ✗ | ✓ | ✗ | ✗ | ✗ | JSON-Array als String. |
 | `effective_time_ms` (computed) | int | ✗ | ✓ | ✗ | ✗ | ✗ | Property aus `time_ms + plus_two`. |
+
+**W.public-profile (2026-06-06):** Hat der Owner die öffentliche Card
+aktiviert (`public_profile_enabled=True`), werden **Aggregate** seiner Solves
+(Single/Avg-PBs pro Cube, Counts, die letzten PB-Events mit Zeit + Datum) auch
+an **anonym** ausgeliefert. Weiterhin NICHT: Scrambles, Notizen, Solve-IDs,
+Sessions, Hardware, normale (Nicht-PB-)Einzelzeiten. Siehe Abschnitt 3.19.
 
 ### 2.4 `hardware`
 
@@ -406,6 +415,17 @@ Endpoint-Probing möglich.
 |---------|------|------|
 | GET | `/api/health` | – (anon) — liefert `app`, `version`, `mode`. Keine User-Daten. |
 
+### 3.19 Public-Profile (`webapp/api/public_profile.py`, W.public-profile)
+
+| Methode | Pfad | Auth | Scope / Privacy |
+|---------|------|------|-----------------|
+| GET | `/public/profile/{slug}` | – (anon) | **Opt-in**: liefert nur für User mit `public_profile_enabled=True` + `is_active=True`. Sonst generischer **404** (kein Existence-/Enumeration-Leak — derselbe Fehler für „Slug unbekannt" / „Card privat" / „User inaktiv"). Response = `PublicProfileRead`: `display_name`, `country_iso2`, `member_since`, `wca_id`, Aggregat-Stats pro Cube, Achievement-Count, letzte PB-Events. **Niemals** Email, PLZ, Solve-IDs, Scrambles, Notizen, Sessions, Hardware. |
+
+Der **einzige** Endpoint, der User-Daten an **anonym** ausliefert — bewusst
+eng gehalten (strikt opt-in, nur Aggregate, generischer 404). Der Toggle läuft
+über `PATCH /auth/me` (`public_profile_enabled`); der Slug wird serverseitig
+beim ersten Aktivieren generiert und ist NICHT user-editierbar.
+
 ---
 
 ## 4. UI-Tabs / Panels pro Rolle
@@ -437,6 +457,8 @@ gültige Routing-Zustände (Hash/localStorage), aber nicht in der Leiste.
 | `GET /api/changelog` | Liefert öffentliche Patch-Notes (Non-Internals). |
 | `GET /api/roadmap` | Liefert öffentliche Roadmap (Non-Internals). |
 | `GET /api/health` | Anonymer Health-Check. |
+| `/u/<slug>` | Öffentliche, teilbare Solving-Card (W.public-profile) — anonym, kein Login. SPA-Route (nginx-Fallback), nur sichtbar wenn der Owner sie aktiviert hat. |
+| `GET /api/public/profile/<slug>` | Backend-Daten für die Card — nur opt-in User, sonst generischer 404. Nur Aggregate. |
 
 ### 4.2 User (eingeloggt, kein Admin/Tester)
 

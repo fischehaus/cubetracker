@@ -65,6 +65,11 @@ class UserRead(BaseModel):
     country_iso2: str | None = None
     # Phase W.wca-profile-light (2026-05-28): offizielle WCA-ID.
     wca_id: str | None = None
+    # Phase W.public-profile (2026-06-06): Opt-In öffentliche Solving-Card.
+    # Self sieht beide Felder (Toggle-State + den generierten Slug für den
+    # Teilen-Link). Nur in UserRead (self), nicht an andere ausgeliefert.
+    public_profile_enabled: bool = False
+    public_slug: str | None = None
 
 
 class UserUpdate(BaseModel):
@@ -91,6 +96,47 @@ class UserUpdate(BaseModel):
     wca_id: str | None = Field(
         default=None, max_length=10, pattern=r"^([12][0-9]{3}[A-Za-z]{4}[0-9]{2})?$"
     )
+    # Phase W.public-profile (2026-06-06): Opt-In für die öffentliche Card.
+    # Nur der Toggle ist user-setzbar; der Slug wird serverseitig generiert
+    # (beim ersten Aktivieren) und ist NICHT über dieses Schema änderbar.
+    public_profile_enabled: bool | None = Field(default=None)
+
+
+class PublicCubeStat(BaseModel):
+    """Aggregat-Stats pro Cube-Type für die öffentliche Solving-Card."""
+
+    cube_type: str
+    count: int
+    best_ms: int | None
+    best_ao5: int | None
+    best_ao12: int | None
+    best_ao100: int | None
+    current_ao5: int | None
+    last_solve_at: str | None
+
+
+class PublicPb(BaseModel):
+    """Ein einzelner Single-PB-Eintrag für die „letzte PBs"-Sektion."""
+
+    cube_type: str
+    time_ms: int
+    at: str
+
+
+class PublicProfileRead(BaseModel):
+    """Öffentliche Solving-Card (anonym lesbar, opt-in). NUR Aggregate —
+    niemals Email/PLZ/Einzel-Solves/Sessions/Hardware."""
+
+    slug: str
+    display_name: str | None
+    country_iso2: str | None
+    member_since: datetime
+    wca_id: str | None
+    total_solves: int
+    total_valid: int
+    achievements_unlocked: int
+    cubes: list[PublicCubeStat]
+    recent_pbs: list[PublicPb]
 
 
 class PasswordChange(BaseModel):

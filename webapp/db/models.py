@@ -81,6 +81,19 @@ class User(Base):
     # Privacy-Schutz. Friend-Request per exakter Email umgeht diese Sperre
     # bewusst NICHT — nur per ID/User-Suche-Result-Klick anfragbar.
     is_discoverable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Phase W.public-profile (2026-06-06): Opt-In für eine öffentliche,
+    # teilbare Solving-Card unter /u/<public_slug>. Default False = niemand
+    # ist ohne expliziten Klick öffentlich (privacy-by-default; das ist der
+    # ERSTE anonym-lesbare User-Daten-Endpoint der App). public_slug wird beim
+    # ersten Aktivieren aus dem display_name generiert und bleibt danach stabil,
+    # damit geteilte Links gültig bleiben. Die Card zeigt NUR Aggregate
+    # (Single/Avg-PBs pro Cube), nie Email/PLZ/Einzel-Solves.
+    public_profile_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+    public_slug: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, unique=True
+    )
     # Token-Revocation: jeder ausgegebene JWT enthält das aktuelle token_version
     # in seinen Claims. Wird die Spalte hochgezählt (Logout, Password-Change),
     # invalidiert das alle bestehenden Tokens dieses Users sofort.

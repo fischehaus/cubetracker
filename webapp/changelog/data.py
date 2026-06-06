@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.public-profile",
+        released=date(2026, 6, 6),
+        title="🔗 Öffentliches Profil: teilbare Solving-Card",
+        highlights=[
+            "Du kannst jetzt ein öffentliches Profil aktivieren (Profil → "
+            "Öffentliches Profil) — eine teilbare Solving-Card unter einem Link "
+            "wie cubetracker.de/u/dein-name, den auch Leute ohne Account öffnen "
+            "können. Sie zeigt deinen Anzeigenamen, optional Land + WCA-Profil, "
+            "deine Bestzeiten und Schnitte (Single/Ao5/Ao12/Ao100) pro Würfel, "
+            "deine Solve- und Achievement-Zahlen sowie deine letzten "
+            "persönlichen Bestzeiten.",
+            "Streng opt-in: standardmäßig aus. Niemand sieht etwas, bis du es "
+            "aktivierst — und selbst dann nur Aggregate, niemals deine "
+            "E-Mail-Adresse, Postleitzahl oder einzelne Solves. Den Link kannst "
+            "du per Knopf kopieren; das öffentliche Profil ist jederzeit wieder "
+            "abschaltbar.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.big-cube-scramble",
         released=date(2026, 6, 6),
         title="🧩 Big Cubes: Scrambles für 8x8 bis 11x11",
