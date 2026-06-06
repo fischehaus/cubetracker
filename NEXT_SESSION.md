@@ -37,9 +37,14 @@ nur das Badge.
 - **Frontend:** `WcaProfileBody` aus `WcaProfileCard` extrahiert (DRY → eigenes
   Profil + Solving-Card teilen das Rendering), `usePublicWcaProfile`-Hook,
   WCA-Sektion in `SolvingCard` (wirkt auf /u/<slug> + Friend-Modal).
-- 53 Tests + Format-Guard-Test grün. Bewusst Self-Review statt vollem QA-Agent
-  (niedrigeres Risiko: Proxy öffentlicher Daten + UI-Reuse, keine User-Daten/Auth).
-  Live-verifiziert (Health + Bundle `index-B5IOIeFC.js` + funktionaler 404).
+- 53 Tests + Format-Guard-Test grün. Beim Bau Self-Review; **danach voller
+  qa-reviewer auf User-Wunsch → safe, kein KRITISCH** (SSRF sauber via
+  Regex-Guard + hardcodierte URL, Privacy sauber, Refactor regressionsfrei). 3
+  SOLLTE gefixt als `chore` (`57d5e28` BE + `01dfb42` FE): Avatar
+  `referrerPolicy=no-referrer`, anonymer WCA-Proxy Rate-Limit 30→10/min,
+  recent_pbs React-Key kollisionssicher. Final live-verifiziert (Bundle
+  `index-DrZ1rSrj.js`). 2 NICE bewusst offen (qk-Helper-Konsistenz, respx-Mock-
+  Test für den WCA-200-Happy-Path).
 - ⚠️ Erweitert die anonyme Angriffsfläche um den WCA-Proxy — bewusst akzeptiert
   (öffentliche Daten, rate-limited, Format-Guard). Falls Missbrauch: Limit senken.
 
