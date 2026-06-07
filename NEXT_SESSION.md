@@ -24,25 +24,25 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-06-07 (Forts.) — Timer-Schrift bleibt in der Karte (kein Überlauf)
+## ❌ ZURÜCKGEROLLT 2026-06-07 — Timer-Schrift-Clamp (Ansatz untauglich)
 
-**`W.timer-font-clamp`** (FE `d603d61` + BE `3b03687`, Tag
-`v2.0.0-alpha.W.timer-font-clamp`) — User-Report: bei großer Timer-Schriftgröße
-ragte die Zeit auf dem Handy seitlich aus der Karte.
-- **`settings.ts`:** `TIMER_FONT_SCALE[*].timer` nutzt jetzt `min(<rem>, 18cqw)`
-  statt fixer rem-Werte (xxxxl war 15rem = 240px → breiter als ein Phone). `cqw`
-  = Container-Query-Breite; ohne Container fällt es laut Spec auf den Viewport
-  zurück (nie schlechter als vw).
-- **`SpacebarTimerCard.tsx`:** Root-div bekommt `containerType: "inline-size"`
-  → cqw ist die KARTEN-Breite (greift damit auch in schmalen Desktop-Karten,
-  nicht nur per vw auf dem Handy). Auf breiten Karten gewinnt der rem-Wert →
-  gewählte Größe bleibt exakt erhalten; erst wenn sie nicht mehr passt, deckelt cqw.
-- Scramble unverändert (umbricht mehrzeilig, ragt nie raus). Reiner CSS-Clamp,
-  keine Logik. Kein Sub-Agent-QA (UI-Polish) — Self-Review + Live-Visual.
-  tsc+build grün (Bundle `index-ROdzORJd.js`). `fix`-Commit, Patch-Note public.
-- ⏭️ BigTimerInput-Manual-Input nutzt denselben Scale (cqw→Viewport-Fallback);
-  ein `<input>` clippt ohnehin horizontal → kein Karten-Überlauf. Falls je nötig,
-  dort auch `container-type` setzen.
+**`W.timer-font-clamp` wurde auf User-Wunsch komplett zurückgerollt** („das geht
+so nicht"). Revert: FE `04121ce` (revert `d603d61`) + BE `8cef4d3` (revert
+`3b03687`); Tag `v2.0.0-alpha.W.timer-font-clamp` gelöscht (lokal+remote);
+Version wieder `W.password-toggle`, FE-Bundle wieder `index-CfE1h3aO.js`.
+- **Was versucht wurde:** `TIMER_FONT_SCALE[*].timer` = `min(<rem>, 18cqw)` +
+  `containerType: "inline-size"` auf dem SpacebarTimerCard-Root, damit die Zeit
+  nie breiter als die Karte wird.
+- **Warum raus:** User-Befund „geht so nicht" — der cqw-Deckel war unpassend
+  (vermutlich Timer wird zu klein / unschön, oder container-type-Layout-
+  Nebenwirkung). **Nicht im Detail diagnostiziert** — beim nächsten Anlauf
+  ZUERST klären, was genau störte (zu klein? Manual-Input/Zen/Trainer auch
+  betroffen?), idealerweise an einem Screenshot.
+- **Ausgangsproblem bleibt OFFEN:** bei großer Schrift ragt die Timer-Zeit auf
+  dem Handy aus der Karte. Alternativen fürs nächste Mal: Schriftgrößen-Stufen
+  am Touch deckeln (kleinere Max-Stufe statt fluidem Clamp) · fluider Clamp mit
+  großzügigerem Cap · shrink-to-fit per JS-Messung. **Erst Optik mit User
+  abstimmen, dann bauen.**
 
 ---
 
