@@ -37,11 +37,15 @@ Commits sind.
   bewusst KEINE Events. ~3 Tage in 3 Wellen (BE / FE / Polish+QA).
 - **Entscheidung gesetzt:** Feed zeigt **nur Freunde** (nicht die eigenen Events).
 - **Event-Umfang offen** → wird per **Nutzer-Fragebogen** erhoben (User-Wunsch).
-  Fragebogen als Word-Datei gebaut:
-  `.tmp/Cubetracker-Fragebogen-Activity-Feed.docx` (Build-Skript:
-  `.tmp/docx-build/build.cjs`; beides gitignored). Geht per Mail an Testuser
-  (auch Nicht-Nutzer). **User lädt Ergebnisse später hoch** → dann Event-Umfang
-  finalisieren (Single-PB/Ao5-Ao12/Achievements/Meilensteine/…) und bauen.
+  Fragebogen **fertig + visuell verifiziert** (5 Seiten, 2 Bewertungs-Matrizen,
+  Teil 1–4): `.tmp/Cubetracker-Fragebogen-Activity-Feed.docx` (zum Ausfüllen) +
+  `.tmp/Cubetracker-Fragebogen-Activity-Feed.pdf` (Vorschau); Build-Skript
+  `.tmp/docx-build/build.cjs` (alles gitignored — bei .tmp-Wipe via build.cjs neu
+  bauen). **LibreOffice am 2026-06-07 nachinstalliert** → docx→PDF/Bild-Rendering
+  geht jetzt (LibreOffice headless mit `-env:UserInstallation` + PyMuPDF via pip).
+  Geht per Mail an Testuser (auch Nicht-Nutzer). **User lädt Ergebnisse später
+  hoch** → dann Event-Umfang finalisieren (Single-PB/Ao5-Ao12/Achievements/
+  Meilensteine/…) und bauen.
 - ⚠️ Privacy: erstes „Freunde sehen Einzel-PB-Events"-Teilen → `permissions-matrix.md`
   bei Bau mit-aktualisieren.
 
