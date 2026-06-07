@@ -54,6 +54,25 @@ Workflow-Patterns ab (`gh api repos/cs0x7f/*`, `npm test`, `python -c`,
 `git tag`, etc.). **Deny-Liste** schützt gegen `rm -rf /*`, force-push
 auf main, `.git/**`-Edits.
 
+## Tooling-Autonomie (User-Anweisung 2026-06-07, verbindlich)
+
+**Installiere selbstständig, was du für die Aufgabe brauchst** — Dependencies,
+CLI-Tools, System-Software. Nicht vorher fragen, einfach installieren und
+weitermachen (der User hat das ausdrücklich angewiesen). Auf Windows:
+`winget` ist da (z.B. `winget install --id <Pkg> -e --silent
+--accept-package-agreements --accept-source-agreements --disable-interactivity`),
+npm-Deps via `npm install` (kein UAC nötig). Bei System-Installs ggf. Sandbox
+aus (`dangerouslyDisableSandbox`).
+
+⚠️ **Lesson 2026-06-07 (UAC):** `winget --silent` umgeht die Windows-UAC-Abfrage
+NICHT — ein System-Install wartet im Hintergrund UNSICHTBAR auf den UAC-Klick des
+Users (sieht aus wie „hängt", kein Output, msiexec läuft mit eingefrorenem
+Speicher). Darum bei System-Installs dem User VORHER sagen: „gleich kommt eine
+UAC-Abfrage, bitte bestätigen" — nicht blind im Hintergrund warten. Und einen
+fremden/SYSTEM-Install-Prozess NICHT hart killen (Safety-Block + Installer-State-
+Risiko). (LibreOffice am 2026-06-07 so nachinstalliert — fürs docx→PDF/Bild-
+Rendering im docx-Skill via LibreOffice + PyMuPDF.)
+
 ## Code-Disziplin
 
 → Siehe `.claude/rules/discipline.md` — wird automatisch geladen bei
