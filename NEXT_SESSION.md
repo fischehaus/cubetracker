@@ -24,6 +24,29 @@ Commits sind.
 
 ---
 
+## 🔜 IN ARBEIT / WARTET AUF INPUT — Activity-Feed (P1, Community)
+
+**Status:** geplant + Anforderungs-Erhebung läuft. **NICHT gebaut.**
+- **Plan steht** (Konversation 2026-06-07): Push-Event-Modell — neue Tabelle
+  `activity_events`, Events werden beim Solve-Save erzeugt (PB-Erkennung +
+  Achievement-Unlock passieren dort schon: `solves.py:_set_post_mutation_headers`
+  → `_detect_pbs_for_user` / `run_achievement_check`). Lesen via
+  `GET /api/activity/feed` (nur akzeptierte Freunde). Opt-in-Flag
+  `activity_feed_enabled` am User (default aus, wie public_profile). Frontend:
+  neuer Community-Sub-Tab „Aktivität" + `useActivityFeed`. CSV-Import erzeugt
+  bewusst KEINE Events. ~3 Tage in 3 Wellen (BE / FE / Polish+QA).
+- **Entscheidung gesetzt:** Feed zeigt **nur Freunde** (nicht die eigenen Events).
+- **Event-Umfang offen** → wird per **Nutzer-Fragebogen** erhoben (User-Wunsch).
+  Fragebogen als Word-Datei gebaut:
+  `.tmp/Cubetracker-Fragebogen-Activity-Feed.docx` (Build-Skript:
+  `.tmp/docx-build/build.cjs`; beides gitignored). Geht per Mail an Testuser
+  (auch Nicht-Nutzer). **User lädt Ergebnisse später hoch** → dann Event-Umfang
+  finalisieren (Single-PB/Ao5-Ao12/Achievements/Meilensteine/…) und bauen.
+- ⚠️ Privacy: erstes „Freunde sehen Einzel-PB-Events"-Teilen → `permissions-matrix.md`
+  bei Bau mit-aktualisieren.
+
+---
+
 ## ❌ ZURÜCKGEROLLT 2026-06-07 — Timer-Schrift-Clamp (Ansatz untauglich)
 
 **`W.timer-font-clamp` wurde auf User-Wunsch komplett zurückgerollt** („das geht
