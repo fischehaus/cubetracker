@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-font-clamp",
+        released=date(2026, 6, 7),
+        title="📐 Timer-Schrift bleibt jetzt in der Karte",
+        highlights=[
+            "Bei sehr großer Timer-Schrift ragte die Zeit auf schmalen "
+            "Bildschirmen (z.B. am Handy) seitlich aus der Karte heraus. Jetzt "
+            "wird die Schrift automatisch so weit begrenzt, dass sie immer in "
+            "die Karte passt — auf breiten Bildschirmen bleibt die gewählte "
+            "Größe voll erhalten.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.password-toggle",
         released=date(2026, 6, 7),
         title="👁 Passwort beim Login einblendbar",
