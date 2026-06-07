@@ -5,6 +5,8 @@
     "close": "Close",
     "delete": "Delete",
     "edit": "Edit",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "loading": "Loading …",
     "error": "Error",
     "language": "Language",

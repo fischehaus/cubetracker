@@ -21,6 +21,7 @@ import { api } from "../lib/api";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { LoginPageBackgroundLayer } from "../components/LoginPageBackgroundLayer";
 import { FeatureListPanel } from "../components/FeatureListPanel";
+import { PasswordInput } from "../components/PasswordInput";
 import { useFeatures } from "../lib/features-data";
 
 type Mode = "login" | "register" | "forgot";
@@ -142,8 +143,7 @@ export function LoginPage() {
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 {t("auth.password")}
               </label>
-              <input
-                type="password"
+              <PasswordInput
                 required
                 minLength={8}
                 autoComplete={
@@ -151,7 +151,7 @@ export function LoginPage() {
                 }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full rounded-lg border border-gray-600 bg-gray-900 text-gray-100 pl-3 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               {mode === "register" && (
                 <p className="text-xs text-gray-500 mt-1">

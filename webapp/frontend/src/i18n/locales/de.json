@@ -5,6 +5,8 @@
     "close": "Schließen",
     "delete": "Löschen",
     "edit": "Bearbeiten",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
     "loading": "Lädt …",
     "error": "Fehler",
     "language": "Sprache",
