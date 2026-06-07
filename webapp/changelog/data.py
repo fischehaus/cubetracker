@@ -44,6 +44,17 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.password-toggle",
+        released=date(2026, 6, 7),
+        title="👁 Passwort beim Login einblendbar",
+        highlights=[
+            "Beim Login und beim Registrieren kannst du das Passwort jetzt per "
+            "Klick auf das Augen-Symbol im Eingabefeld kurz im Klartext anzeigen "
+            "lassen — praktisch gegen Tippfehler. Per Tastatur und mit "
+            "Screenreader bedienbar.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.confirm-dialog",
         released=date(2026, 6, 7),
         title="🗑️ Schönere Lösch-Bestätigung statt grauem Browser-Dialog",
