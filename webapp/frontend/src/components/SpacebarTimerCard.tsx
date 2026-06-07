@@ -159,6 +159,10 @@ export function SpacebarTimerCard({
             }`
           : `${cardClass(timer.state)}${tapTimer ? " cursor-pointer select-none touch-none" : ""}`
       }
+      // W.timer-font-clamp: macht den Card-Root zur Container-Query-Box →
+      // die Timer-Größe (min(rem, 18cqw)) ist an die KARTEN-Breite gedeckelt,
+      // nicht an den Viewport (greift auch in schmalen Karten auf Desktop).
+      style={{ containerType: "inline-size" }}
       {...tapProps}
     >
       {/* Top: state-Hint + Phase + Penalty — im bare/Zen-Modus ausgeblendet */}

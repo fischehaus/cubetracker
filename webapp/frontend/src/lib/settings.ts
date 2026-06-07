@@ -131,15 +131,25 @@ export const SETTINGS_DEFAULTS: AppSettings = {
  * Tailwind-style font-size + line-height pro TimerFontSize-Stufe.
  * Wird vom ScrambleCard, BigTimerInput, SpacebarTimerCard inline
  * gesetzt — wir vermeiden CSS-Variables für Build-Einfachheit.
+ *
+ * W.timer-font-clamp (2026-06-08): die Timer-Größe ist mit `min(rem, 18cqw)`
+ * gedeckelt, damit die große Zeit NIE breiter wird als ihre Karte (vorher
+ * ragte z.B. xxxxl=15rem auf dem Handy seitlich aus der Karte). `cqw` ist
+ * relativ zur nächsten Container-Query-Box — der Timer-Card-Root setzt dafür
+ * `containerType: "inline-size"`. Fehlt ein Container, fällt `cqw` laut Spec
+ * auf den (Small-)Viewport zurück, ist also nie schlechter als `vw`. Auf
+ * breiten Karten gewinnt der rem-Wert → die gewählte Größe bleibt dort exakt
+ * erhalten; erst wenn sie nicht mehr passt, greift der cqw-Deckel.
+ * Scramble bleibt ungedeckelt (umbricht mehrzeilig statt rauszuragen).
  */
 export const TIMER_FONT_SCALE: Record<TimerFontSize, { timer: string; scramble: string }> = {
-  sm: { timer: "3rem", scramble: "1rem" },
-  md: { timer: "4rem", scramble: "1.125rem" },
-  lg: { timer: "5rem", scramble: "1.25rem" },
-  xl: { timer: "6.5rem", scramble: "1.5rem" },
-  xxl: { timer: "8rem", scramble: "1.875rem" },
-  xxxl: { timer: "11rem", scramble: "2.25rem" },
-  xxxxl: { timer: "15rem", scramble: "2.75rem" },
+  sm: { timer: "min(3rem, 18cqw)", scramble: "1rem" },
+  md: { timer: "min(4rem, 18cqw)", scramble: "1.125rem" },
+  lg: { timer: "min(5rem, 18cqw)", scramble: "1.25rem" },
+  xl: { timer: "min(6.5rem, 18cqw)", scramble: "1.5rem" },
+  xxl: { timer: "min(8rem, 18cqw)", scramble: "1.875rem" },
+  xxxl: { timer: "min(11rem, 18cqw)", scramble: "2.25rem" },
+  xxxxl: { timer: "min(15rem, 18cqw)", scramble: "2.75rem" },
 };
 
 export const FONT_SIZE_LABELS: Record<TimerFontSize, string> = {
