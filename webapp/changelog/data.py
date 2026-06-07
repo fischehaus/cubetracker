@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.confirm-dialog",
+        released=date(2026, 6, 7),
+        title="🗑️ Schönere Lösch-Bestätigung statt grauem Browser-Dialog",
+        highlights=[
+            "Das Löschen einer Zeit (in der Solve-Liste und im Solve-Detail) "
+            "wird jetzt mit einem eingebetteten Dialog im App-Design bestätigt "
+            "statt mit dem grauen Browser-Pop-up. Das funktioniert zuverlässiger "
+            "auf dem Handy, ist per Tastatur und mit Screenreadern bedienbar "
+            "(Esc bricht ab, der Fokus bleibt im Dialog) und sieht überall "
+            "gleich aus.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.modal-focus-trap",
         released=date(2026, 6, 7),
         title="⌨️ Barrierefreie Dialoge: Fokus bleibt im Pop-up, Esc schließt",
