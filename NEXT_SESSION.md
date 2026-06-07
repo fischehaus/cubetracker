@@ -24,6 +24,32 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-08 — Passwort-Einblenden beim Login (Auge-Toggle)
+
+**`W.password-toggle`** (FE `6b3cdae` + BE `84965aa`, Tag
+`v2.0.0-alpha.W.password-toggle`) — User-Wunsch: beim Login das Passwort per
+Augen-Symbol anzeigen können.
+- **Neu `src/components/PasswordInput.tsx`:** wiederverwendbares Passwort-Feld
+  mit Auge-Toggle (input + Button, `type` password↔text, SVG eye/eye-off,
+  `aria-label`/`aria-pressed`, `type="button"` → kein Form-Submit). Reicht alle
+  Input-Props durch. **Achtung:** `cn` ist KEIN tailwind-merge → das className
+  wird unverändert durchgereicht, der Caller muss rechts Platz lassen (`pr-10`
+  statt `px-3`), sonst Padding-Kollision.
+- **LoginPage:** das eine Passwort-Feld (Login + Register via `mode`) nutzt jetzt
+  `PasswordInput`; className `px-3` → `pl-3 pr-10`.
+- i18n `common.showPassword`/`hidePassword` (de+en) — wiederverwendbar.
+- **Kein Sub-Agent-QA** (laut discipline.md UI-Polish, kein Auth-*Logik*-Change)
+  → Self-Review: type=button (kein Submit), autoComplete/value/onChange
+  unverändert (Autofill/PW-Manager intakt, lädt als type=password), a11y ok.
+  tsc+build grün (Bundle `index-CfE1h3aO.js`).
+- **Bewusster Skip features-data.ts:** Login-Micro-UX ist kein App-Capability-
+  Marketing-Bullet (Liste = Tracking/Stats/Multi-Cube …) → würde verwässern.
+  `feat`-Commit, Patch-Note public. Kein Drift.
+- ⏭️ PasswordInput kann später auch in „Passwort ändern" (AccountSettings/
+  Sicherheit) + Registrieren-Confirm genutzt werden, falls gewünscht.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-07 (Forts.) — confirm() → In-App-Dialog beim Solve-Löschen
 
 **`W.confirm-dialog`** (FE `ad477d7` + BE `fe5d3fd`, Tag
