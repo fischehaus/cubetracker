@@ -24,7 +24,29 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-06-08 — Passwort-Einblenden beim Login (Auge-Toggle)
+## ✅ ERLEDIGT 2026-06-07 (Forts.) — Timer-Schrift bleibt in der Karte (kein Überlauf)
+
+**`W.timer-font-clamp`** (FE `d603d61` + BE `3b03687`, Tag
+`v2.0.0-alpha.W.timer-font-clamp`) — User-Report: bei großer Timer-Schriftgröße
+ragte die Zeit auf dem Handy seitlich aus der Karte.
+- **`settings.ts`:** `TIMER_FONT_SCALE[*].timer` nutzt jetzt `min(<rem>, 18cqw)`
+  statt fixer rem-Werte (xxxxl war 15rem = 240px → breiter als ein Phone). `cqw`
+  = Container-Query-Breite; ohne Container fällt es laut Spec auf den Viewport
+  zurück (nie schlechter als vw).
+- **`SpacebarTimerCard.tsx`:** Root-div bekommt `containerType: "inline-size"`
+  → cqw ist die KARTEN-Breite (greift damit auch in schmalen Desktop-Karten,
+  nicht nur per vw auf dem Handy). Auf breiten Karten gewinnt der rem-Wert →
+  gewählte Größe bleibt exakt erhalten; erst wenn sie nicht mehr passt, deckelt cqw.
+- Scramble unverändert (umbricht mehrzeilig, ragt nie raus). Reiner CSS-Clamp,
+  keine Logik. Kein Sub-Agent-QA (UI-Polish) — Self-Review + Live-Visual.
+  tsc+build grün (Bundle `index-ROdzORJd.js`). `fix`-Commit, Patch-Note public.
+- ⏭️ BigTimerInput-Manual-Input nutzt denselben Scale (cqw→Viewport-Fallback);
+  ein `<input>` clippt ohnehin horizontal → kein Karten-Überlauf. Falls je nötig,
+  dort auch `container-type` setzen.
+
+---
+
+## ✅ ERLEDIGT 2026-06-07 (Forts.) — Passwort-Einblenden beim Login (Auge-Toggle)
 
 **`W.password-toggle`** (FE `6b3cdae` + BE `84965aa`, Tag
 `v2.0.0-alpha.W.password-toggle`) — User-Wunsch: beim Login das Passwort per
