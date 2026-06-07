@@ -24,6 +24,39 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-07 (Forts.) — confirm() → In-App-Dialog beim Solve-Löschen
+
+**`W.confirm-dialog`** (FE `ad477d7` + BE `fe5d3fd`, Tag
+`v2.0.0-alpha.W.confirm-dialog`) — der aus der Focus-Trap-QA gespawnte Task,
+vom User gezogen. Ersetzt das native `window.confirm()` beim Solve-Löschen
+durch eine barrierefreie In-App-Komponente.
+- **Neu `src/components/ConfirmDialog.tsx`:** geteilter Bestätigungs-Dialog —
+  `useFocusTrap` (Tab/Esc/Restore), `role="alertdialog"`, `useId`-aria, ui/Button
+  (secondary „Abbrechen" + danger „Löschen"), `z-[60]` (über z-50-Modals →
+  Confirm-über-Modal), `busy`-Prop sperrt Buttons+Esc+Backdrop während der
+  Mutation. Erst-Fokus = Abbrechen (sicher bei destruktiv). Reuse i18n
+  `common.cancel`/`common.delete` → **keine neuen Keys**.
+- **SolveDetailModal:** `confirm()` raus → `confirmDelete`-State, ConfirmDialog
+  als **Fragment-Sibling** (nicht verschachtelt → kein Backdrop-Bubble),
+  `busy={del.isPending}`, `onConfirm` löscht + `onSuccess: onClose`.
+- **SolveList:** `confirm()` in Mobile+Desktop raus → ein `pendingDelete`-State,
+  beide Lösch-Buttons öffnen den Dialog, EIN ConfirmDialog. `measure()` nach
+  Delete (Virtualizer) erhalten. **QA-Fix:** `busy` + `setPendingDelete(null)`
+  erst in `onSuccess` → kein stiller Fail / keine Doppel-Mutation bei Fehler
+  (Dialog bleibt offen → Retry).
+- QA (qa-reviewer): zuerst „NEIN as-is" (SolveList silent-fail+Doppel-Mutation)
+  → **beide gefixt**, dann safe. `role=alertdialog` als SOLLTE-3 mitgenommen.
+  Bewusst vertagt: Fokus-Restore nach Listen-Delete (Opener-Zeile weg → Fokus
+  auf body; QA: kein PR-Fix nötig) + `createPortal` (alle App-Modals rendern
+  ohne Portal = konsistentes Muster). tsc+build grün (Bundle `index-D8uHT_pH.js`).
+- `fix(...)`-Commit (UX/a11y, kein Marketing-Feature) → kein features-data-Bullet;
+  Patch-Note public.
+- ⏭️ Weitere `confirm()`-Stellen (HardwareList, AlgTrainer, Admin-Feedback/Roadmap,
+  BigTimer hat schon 2-Klick) sind NICHT Teil dieser Welle — bei Bedarf später
+  auf denselben ConfirmDialog ziehen.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-07 (Forts.) — Fokus-Trap für alle Modals (a11y)
 
 **`W.modal-focus-trap`** (FE `9ef74a2` + BE `00a0c69`, Tag
