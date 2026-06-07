@@ -36,6 +36,7 @@ import type { Solve } from "../lib/types";
 import { InfoButton } from "./InfoButton";
 import { Card, CardTitle, EmptyState } from "./ui";
 import { SolveDetailModal } from "./SolveDetailModal";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 interface Props {
   sessionId: number | null; // null = alle Sessions
@@ -76,6 +77,8 @@ export function SolveList({
   const [editError, setEditError] = useState<string | null>(null);
   // Solve, der gerade im Detail-Modal angezeigt wird (Phase L-3b)
   const [detailSolve, setDetailSolve] = useState<Solve | null>(null);
+  // Solve, für den die In-App-Löschbestätigung (ConfirmDialog) offen ist.
+  const [pendingDelete, setPendingDelete] = useState<Solve | null>(null);
   // Sortierung: Default # desc (API liefert eh DESC, das spiegelt
   // chronologisch die neuesten oben).
   const [sortKey, setSortKey] = useState<SortKey>("num");
@@ -475,15 +478,7 @@ export function SolveList({
                       DNF
                     </button>
                     <button
-                      onClick={() => {
-                        if (confirm(t("solveList.deleteConfirm")))
-                          del.mutate(s.id, {
-                            // W.solvelist-virtual: nach dem Löschen schrumpft
-                            // die Liste → Measure-Cache des Virtualizers neu
-                            // aufbauen, sonst kurzes Höhen-Flackern der Cards.
-                            onSuccess: () => cardVirtualizer.measure(),
-                          });
-                      }}
+                      onClick={() => setPendingDelete(s)}
                       className="text-sm rounded bg-gray-700 px-3 py-1.5 text-gray-300 hover:bg-red-700/50 ml-auto"
                       aria-label={t("solveList.deleteTitle")}
                     >
@@ -745,10 +740,7 @@ export function SolveList({
                       DNF
                     </button>
                     <button
-                      onClick={() => {
-                        if (confirm(t("solveList.deleteConfirm")))
-                          del.mutate(s.id);
-                      }}
+                      onClick={() => setPendingDelete(s)}
                       className="text-sm rounded bg-gray-700 px-2.5 py-1.5 text-gray-300 hover:bg-red-700/50 hover:text-red-200"
                       title={t("solveList.deleteTitle")}
                     >
@@ -771,6 +763,27 @@ export function SolveList({
           ao12={ao12Map.get(detailSolve.id) ?? null}
           isPb={detailSolve.id === bestSolveId}
           onClose={() => setDetailSolve(null)}
+        />
+      )}
+
+      {pendingDelete && (
+        <ConfirmDialog
+          message={t("solveList.deleteConfirm")}
+          busy={del.isPending}
+          onConfirm={() =>
+            del.mutate(pendingDelete.id, {
+              onSuccess: () => {
+                // Nach dem Löschen schrumpft die Liste → Measure-Cache des
+                // Mobile-Virtualizers neu aufbauen (kein Höhen-Flackern).
+                cardVirtualizer.measure();
+                setPendingDelete(null);
+              },
+              // Bei Fehler bleibt der Dialog offen (pendingDelete noch
+              // gesetzt) → der User sieht, dass nichts gelöscht wurde, und
+              // kann erneut bestätigen. Kein stiller Verlust.
+            })
+          }
+          onClose={() => setPendingDelete(null)}
         />
       )}
     </Card>
