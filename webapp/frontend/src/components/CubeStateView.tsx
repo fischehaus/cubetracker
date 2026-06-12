@@ -1,12 +1,13 @@
 // CubeStateView (Phase 8.3.1) — zeigt das visuelle Cube-State-Diagramm
 // für einen Algorithmus-Case (OLL/PLL).
 //
-// Aktuell: nur OLL hat Bilder (von User generiert). PLL kommt später.
-// Bei unbekannten/fehlenden Cases zeigt der Component dezent „kein
-// Diagramm verfügbar".
+// Seit W.alg-diagrams-v2 (2026-06-13) haben OLL UND PLL Bilder
+// (User-generiert via scripts/render_*.py). Bei unbekannten/fehlenden
+// Cases zeigt der Component dezent „kein Diagramm verfügbar".
 
 import { useTranslation } from "react-i18next";
 import { getOllImage } from "../lib/oll-images";
+import { getPllImage } from "../lib/pll-images";
 
 interface Props {
   /** Case-ID wie "OLL-1", "OLL-21", "PLL-T", ... */
@@ -19,8 +20,11 @@ interface Props {
 
 export function CubeStateView({ caseId, size = "small", alt }: Props) {
   const { t } = useTranslation();
-  // Aktuell nur OLL — PLL gibt null zurück und wir zeigen Placeholder.
-  const url = caseId.startsWith("OLL-") ? getOllImage(caseId) : null;
+  const url = caseId.startsWith("OLL-")
+    ? getOllImage(caseId)
+    : caseId.startsWith("PLL-")
+      ? getPllImage(caseId)
+      : null;
 
   const dims =
     size === "large"
