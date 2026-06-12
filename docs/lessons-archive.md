@@ -9,7 +9,24 @@ Konsequenz (was wurde im Setup geändert).
 
 ---
 
-## 2026-05-26 — Auto-Mode-Classifier: Doku-Drift vs. funktionale Hook-Änderung
+## 2026-06-13 — Stop-Hook-Endlosschleife: additionalContext + dauerhaft dirty Tree
+
+**Event:** Der `stop-mini-check.sh`-Stop-Hook (gedacht als 1×-pro-Session-
+Backstop via `"once": true` in settings.json) feuerte nach JEDEM Turn-Ende —
+das `once`-Flag wird vom Harness nicht honoriert. Weil sein
+`additionalContext`-Output Claude jedes Mal neu aufweckt (Antwort-Pflicht →
+Turn-Ende → Hook → …), entstand eine sich selbst erhaltende Schleife aus
+Filler-Antworten („Warte auf dich" / „–"), sobald der Working-Tree DAUERHAFT
+dirty war (externe PLL/OLL-Render-Arbeit des Users, ~80 Dateien). Der User
+sah eine Kolonne identischer Mini-Antworten im Chat.
+
+**Konsequenz:** Einmal-Logik direkt im Hook implementiert — Marker-Datei
+`.tmp/stop-mini-check-<session_id>.done` (session_id aus dem Stop-Event-JSON
+auf stdin), Marker wird NUR gesetzt wenn wirklich gemeldet wurde. Verifiziert
+mit 3 Läufen (melden / stumm / neue Session meldet). Generelle Regel: ein
+Stop-Hook, der Kontext emittiert, MUSS selbst dafür sorgen, dass er bei
+unverändertem Zustand nicht erneut feuert — sonst Schleife. Plus
+Verhaltens-Memory: Wartezustand einmal melden, danach Minimal-Zeichen.
 
 **Event:** Beim Volltext-Audit des Methodik-Systems sollten 12 Edits in 7 Files
 durchgezogen werden — davon 9 in `.claude/*` (Self-Modification-Kategorie laut
