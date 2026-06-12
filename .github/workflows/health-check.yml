@@ -1,0 +1,53 @@
+# Live-Health-Monitoring (W.ops-hardening, 2026-06-12).
+#
+# Problem davor: NIEMAND ueberwachte cubetracker.de — ein naechtlicher
+# Ausfall waere erst beim naechsten manuellen Besuch aufgefallen.
+#
+# Loesung: alle ~10 Minuten Frontend (200) + /api/health ("status":"ok")
+# pruefen, 3 Versuche mit 30s Abstand gegen transiente Blips. Schlaegt
+# alles fehl -> ntfy-Push aufs bestehende Topic (GH-Secret NTFY_TOPIC,
+# bewusst NICHT im Klartext — das Repo ist public).
+#
+# Hinweise:
+#   - schedule-Workflows laufen auf dem GitHub-DEFAULT-Branch
+#     (= feature/W-api-prefix seit 2026-05-27).
+#   - Solange die App down ist, kommt ca. alle 10 Minuten ein Push —
+#     bewusst so (Erinnerung statt Einmal-Alarm).
+#   - GitHub kann Cron-Laeufe um einige Minuten verzoegern; fuer
+#     Hobby-Monitoring voellig ok.
+name: Health-Check (Live)
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Frontend + API-Health pruefen (3 Versuche)
+        run: |
+          for i in 1 2 3; do
+            FE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://www.cubetracker.de/ || echo 000)
+            HEALTH=$(curl -fsS --max-time 15 https://www.cubetracker.de/api/health || echo '')
+            if [ "$FE" = "200" ] && echo "$HEALTH" | grep -q '"status":"ok"'; then
+              echo "Gesund (Versuch $i): FE=$FE HEALTH=$HEALTH"
+              exit 0
+            fi
+            echo "Versuch $i fehlgeschlagen: FE=$FE HEALTH=$HEALTH"
+            if [ "$i" -lt 3 ]; then sleep 30; fi
+          done
+          echo "FE_CODE=$FE" >> "$GITHUB_ENV"
+          exit 1
+
+      - name: ntfy-Alarm senden
+        if: failure()
+        run: |
+          curl -s --max-time 15 \
+            -H "Title: cubetracker.de DOWN" \
+            -H "Priority: high" \
+            -H "Tags: rotating_light" \
+            -d "Health-Check 3x fehlgeschlagen (Frontend-HTTP: ${FE_CODE:-?}). Coolify pruefen: Frontend + Backend Status / Logs. Health: https://www.cubetracker.de/api/health" \
+            "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
