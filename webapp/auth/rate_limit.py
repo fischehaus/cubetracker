@@ -9,10 +9,15 @@ Strategie:
 
 Limitierung der Limitierung:
 - In-Memory-Store: überlebt keinen Server-Restart, nicht multi-process-fest
-  (Render Free-Tier läuft als 1 Worker, daher OK)
-- IP-basiert: hinter Proxy/CDN muss X-Forwarded-For ausgewertet werden,
-  Render setzt das automatisch — `get_remote_address` liest es korrekt
-- Später (~bezahlter Plan, Multi-Worker): Redis-Backend via storage_uri
+  (1 Uvicorn-Worker auf Coolify, daher OK)
+- IP-basiert: `get_remote_address` liest NUR `request.client.host` und wertet
+  X-Forwarded-For NICHT selbst aus (QA-Befund 2026-06-12 — die frühere
+  Behauptung hier war falsch). Hinter Traefik+nginx wäre der Key sonst für
+  ALLE Besucher die Proxy-IP. Fix: uvicorn läuft mit `--proxy-headers
+  --forwarded-allow-ips=<private Ranges>` (webapp/Dockerfile) — die
+  ProxyHeadersMiddleware ersetzt request.client durch die echte Client-IP
+  aus der XFF-Kette (von rechts gelesen, gespoofte Einträge ignoriert).
+- Später (~Multi-Worker): Redis-Backend via storage_uri
 """
 
 from __future__ import annotations

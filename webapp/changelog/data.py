@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.ops-hardening",
+        released=date(2026, 6, 12),
+        title="🛡️ Stabilität & Sicherheit unter der Haube",
+        highlights=[
+            "Schnellere Wiederbesuche: der Browser darf die App-Dateien jetzt "
+            "richtig zwischenspeichern — nach dem ersten Besuch lädt die App "
+            "spürbar schneller.",
+            "Schutznetz gegen weiße Seiten: bei einem unerwarteten Fehler oder "
+            "direkt nach einem App-Update erscheint ein Hinweis mit "
+            "Neu-laden-Knopf statt eines leeren Bildschirms.",
+            "Härtere Sicherheits-Einstellungen im Browser (u.a. "
+            "Content-Security-Policy) und ein korrigierter Brute-Force-Schutz "
+            "beim Login.",
+            "Die App wird jetzt rund um die Uhr automatisch überwacht — bei "
+            "einem Ausfall wird der Betreiber sofort benachrichtigt. Und vor "
+            "jedem Update laufen ab sofort automatisch alle Tests.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.password-toggle",
         released=date(2026, 6, 7),
         title="👁 Passwort beim Login einblendbar",
