@@ -54,16 +54,18 @@ Coolify-API nur HTTP (Token im Klartext) — braucht Instanz-Domain mit TLS.
 Live-verifiziert: Header + Caching aktiv, App rendert unter CSP ohne
 Violations (Chrome-Check), Health = W.ops-hardening, Bundle index-K3VKeVCj.js.
 
-## Welle B — Substanz (je 1–3 Tage, OFFEN)
+## Welle B — Substanz
 
-6. Solve-POST-Hot-Path: PB-Detection per SELECT MIN() statt Doppel-compute_stats
-7. Tests: Ownership (PATCH/DELETE cross-user), csTimer-Import, Ao5/Ao12-calc
-   (alte Desktop-Tests als Vorlage portieren)
-8. Stats-Endpoints auf SQL-Aggregation (/stats/temporal lädt ALLE Solves für
-   „heute+Woche" — eine WHERE-Zeile)
-9. Off-Site-Backup (Backblaze/S3) + dokumentierte Restore-Probe
-10. permissions-matrix nachziehen + confirm()-Rest (5 Dateien) + A11y-Bundle
-    (lang-Attribut, role=dialog, prefers-reduced-motion)
+6. ✅ ERLEDIGT 2026-06-13 (W.solve-hotpath): Solve-POST-Hot-Path — Tupel-Query
+   + gezielte Windows statt 2× compute_stats (Rechenkern 5,9×), Achievement-
+   Snapshot auf SQL-MIN + Tupel-Chrono.
+7. ✅ ERLEDIGT 2026-06-13 (W.core-tests): 25 Tests Ownership/Import/calc +
+   14 Pinning-Tests (W.solve-hotpath). Suite: 92.
+8. ✅ ERLEDIGT 2026-06-13 (W.solve-hotpath): /stats/temporal lädt nur noch
+   ~laufende Woche (WHERE + 2-Tage-Puffer).
+9. ❌ OFFEN: Off-Site-Backup (Backblaze/S3) + dokumentierte Restore-Probe
+10. ❌ OFFEN: permissions-matrix nachziehen + confirm()-Rest (5 Dateien) +
+    A11y-Bundle (lang-Attribut, role=dialog, prefers-reduced-motion)
 
 ## Welle C — Strategisch (OFFEN)
 

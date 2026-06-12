@@ -24,6 +24,44 @@ Commits sind.
 
 ---
 
+## ⏳ EXTERN IN ARBEIT — PLL/OLL-Diagramm-Neurender (NICHT anfassen!)
+
+Im Working-Tree liegen ~78 modifizierte PNGs (`webapp/frontend/src/assets/pll/`
++ `oll/`) + 2 gelöschte Hilfs-Collagen — **der User erzeugt gerade extern neue
+Diagramm-Dateien** (Render-Skripte in `scripts/`, untracked). Stand 2026-06-13:
+NICHT committen, NICHT verwerfen, bei eigenen Commits nur gezielt per
+Datei-Pfad stagen. Wenn der User „Diagramme fertig" meldet → als eigene Welle
+shippen (vorher Sichtprüfung Vorher/Nachher, die Spiegelungs-Frage aus dem
+Bildvergleich 2026-06-12 klären).
+
+---
+
+## ✅ ERLEDIGT 2026-06-13 — Welle B Teil 1+2: W.core-tests + W.solve-hotpath
+
+**`W.core-tests`** (Commit `74d6828`, Tag `v2.0.0-alpha.W.core-tests`,
+Patch-Note internal): 25 neue Tests — Ownership (cross-user PATCH/DELETE → 404,
+fremde session/hardware → 400), csTimer-Import (+2 = Flag/Roh-Zeit bleibt,
+Idempotenz, Fehlerpfade), stats/calc (WCA-Trimmed-Mean handgerechnet,
+DNF-Regeln). Suite damals: 78.
+
+**`W.solve-hotpath`** (Commit `1271fd2`, Tag `v2.0.0-alpha.W.solve-hotpath`,
+LIVE verifiziert): der heißeste Pfad (jeder Timer-Stop) entschärft —
+- `_detect_pbs_for_user`: Tupel-Query + best_average_window(5/12) statt
+  2× compute_stats → Rechenkern 5,9× schneller (758→128 ms bei 10k Solves)
+- `_build_snapshot`: best_per_cube als SQL-MIN (case für +2), Chrono-Load
+  als Tupel-Query → beide ORM-Voll-Scans weg
+- `/stats/temporal`: lädt nur noch ~laufende Woche (WHERE + 2-Tage-Puffer,
+  exakter Schnitt in Python) statt ALLER Solves
+- **Methodik:** 14 Pinning-Tests VOR dem Umbau geschrieben (PB-Header,
+  Achievement-Snapshot, temporal), danach weiter grün → Semantik bitidentisch
+  (Konfetti-Verhalten unverändert). QA: kein KRITISCH. Suite jetzt: **92**.
+
+**🔜 Welle B Rest (offen):** Off-Site-Backup (#9) · permissions-matrix-Drift +
+confirm()-Rest + A11y-Bundle (#10). Welle C: user_cube_stats-Aggregat (#11),
+Alembic (#12), Sentry (#13). Details: `docs/app-analyse-2026-06-12.md`.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-12 — App-Analyse (Fable-5-Test) + W.ops-hardening (Welle A)
 
 **App-Analyse:** 6 parallele Agenten, Gesamtnote 7,1/10, voller Report in
