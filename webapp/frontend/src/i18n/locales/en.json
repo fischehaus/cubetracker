@@ -13,6 +13,13 @@
     "languageDe": "German",
     "languageEn": "English"
   },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "body": "An unexpected error interrupted the display. Your data is safe — please reload the page.",
+    "chunkTitle": "New version available",
+    "chunkBody": "The app was just updated — your browser still loaded an old version. Reloading once fixes this.",
+    "reload": "Reload"
+  },
   "tabs": {
     "statistik": "Statistics",
     "timer": "Timer",

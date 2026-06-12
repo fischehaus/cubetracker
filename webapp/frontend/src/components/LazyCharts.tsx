@@ -12,6 +12,7 @@
 
 import { lazy, Suspense, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 const ActivityChartLazy = lazy(() =>
   import("./ActivityChart").then((m) => ({ default: m.ActivityChart })),
@@ -36,19 +37,27 @@ function ChartFallback() {
   );
 }
 
+// ErrorBoundary compact um jede Suspense (W.ops-hardening): schlägt der
+// Chunk-Load fehl (typisch: Tab war über einen Deploy hinweg offen, alte
+// Chunks existieren nicht mehr), fällt nur die Chart-Karte mit Reload-
+// Hinweis aus — nicht die ganze Seite.
 export function ActivityChart(props: ComponentProps<typeof ActivityChartLazy>) {
   return (
-    <Suspense fallback={<ChartFallback />}>
-      <ActivityChartLazy {...props} />
-    </Suspense>
+    <ErrorBoundary compact>
+      <Suspense fallback={<ChartFallback />}>
+        <ActivityChartLazy {...props} />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
 export function TrendsChart(props: ComponentProps<typeof TrendsChartLazy>) {
   return (
-    <Suspense fallback={<ChartFallback />}>
-      <TrendsChartLazy {...props} />
-    </Suspense>
+    <ErrorBoundary compact>
+      <Suspense fallback={<ChartFallback />}>
+        <TrendsChartLazy {...props} />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
@@ -56,9 +65,11 @@ export function HistogramChart(
   props: ComponentProps<typeof HistogramChartLazy>,
 ) {
   return (
-    <Suspense fallback={<ChartFallback />}>
-      <HistogramChartLazy {...props} />
-    </Suspense>
+    <ErrorBoundary compact>
+      <Suspense fallback={<ChartFallback />}>
+        <HistogramChartLazy {...props} />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
@@ -66,8 +77,10 @@ export function PbProgressionCard(
   props: ComponentProps<typeof PbProgressionCardLazy>,
 ) {
   return (
-    <Suspense fallback={<ChartFallback />}>
-      <PbProgressionCardLazy {...props} />
-    </Suspense>
+    <ErrorBoundary compact>
+      <Suspense fallback={<ChartFallback />}>
+        <PbProgressionCardLazy {...props} />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

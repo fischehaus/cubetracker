@@ -13,6 +13,13 @@
     "languageDe": "Deutsch",
     "languageEn": "Englisch"
   },
+  "errorBoundary": {
+    "title": "Hier ist etwas schiefgelaufen",
+    "body": "Ein unerwarteter Fehler hat die Anzeige unterbrochen. Deine Daten sind sicher — bitte lade die Seite neu.",
+    "chunkTitle": "Neue Version verfügbar",
+    "chunkBody": "Die App wurde gerade aktualisiert — dein Browser hat noch eine alte Version geladen. Einmal neu laden behebt das.",
+    "reload": "Neu laden"
+  },
   "tabs": {
     "statistik": "Statistik",
     "timer": "Timer",
