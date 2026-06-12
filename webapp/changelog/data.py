@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.core-tests",
+        released=date(2026, 6, 13),
+        title="🧪 Kern-Logik testabgesichert (intern)",
+        highlights=[
+            "25 neue Backend-Tests pinnen die wichtigsten Invarianten fest: "
+            "Solve-Ownership (fremde Solves/Sessions/Hardware unerreichbar), "
+            "csTimer-Import (Penalty-Mapping, Idempotenz bei Re-Import, "
+            "Fehlerpfade) und die WCA-Statistik-Berechnung (Ao5/Ao12-Trimmed-"
+            "Mean, DNF-Regeln, +2-Handling). Suite: 78 Tests, läuft vor jedem "
+            "Deploy im CI-Gate.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.ops-hardening",
         released=date(2026, 6, 12),
         title="🛡️ Stabilität & Sicherheit unter der Haube",
