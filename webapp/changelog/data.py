@@ -46,11 +46,13 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.alg-diagrams-v2",
         released=date(2026, 6, 13),
-        title="🎨 Neue PLL- und OLL-Diagramme im Trainer",
+        title="🎨 PLL-Diagramme im Trainer — und alle OLL neu gezeichnet",
         highlights=[
-            "Alle 15 PLL- und 63 OLL-Fall-Diagramme im Algorithmus-Trainer "
-            "wurden neu gezeichnet — sauberere Darstellung der Pfeile und "
-            "Seitenflächen, damit du die Fälle schneller erkennst.",
+            "Alle 21 PLL-Fälle zeigen im Algorithmus-Trainer jetzt erstmals "
+            "ein Diagramm (Permutations-Pfeile + Seitenflächen) — vorher gab "
+            "es dort nur einen Platzhalter.",
+            "Die 57 OLL-Diagramme wurden komplett neu gezeichnet: sauberere "
+            "Darstellung, damit du die Fälle schneller erkennst.",
         ],
     ),
     PatchNote(
