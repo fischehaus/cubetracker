@@ -187,14 +187,17 @@ proaktiv auf, bevor du dich verabschiedest.
 unpushed Commits. Greift als Backup falls der User vergisst `/abschluss`
 aufzurufen.
 
-**ntfy-Push bei Fragen (User-Wunsch 2026-05-31, verbindlich):** Der
-`stop-ntfy-notify.sh`-Hook pingt bei JEDEM Turn-Ende das Topic `jjY2OjY`
-(mechanischer git-Fallback, wenn keine Override-Datei da ist). **Wenn du
-dem User eine Frage stellst oder auf seine Entscheidung/Rückkehr wartest:**
-schreib VOR dem Turn-Ende eine aussagekräftige „du bist dran"-Nachricht
-nach `.tmp/last-ntfy-message.txt` (optional Title in
+**ntfy-Push: IMMER aussagekräftig (User-Wunsch 2026-05-31, verschärft
+2026-06-12, verbindlich):** Der `stop-ntfy-notify.sh`-Hook pingt bei JEDEM
+Turn-Ende das Topic `jjY2OjY` (mechanischer git-Fallback, wenn keine
+Override-Datei da ist). **Schreib VOR JEDEM Turn-Ende** eine aussagekräftige
+Nachricht nach `.tmp/last-ntfy-message.txt` (optional Title in
 `.tmp/last-ntfy-title.txt`) — der Hook nutzt sie als Push-Body (Single-Use,
-danach gelöscht). So weiß der User **wann + wofür** er zurückkommen soll.
+danach gelöscht). Inhalt: (1) was passiert ist / gerade läuft, (2) ob der
+User gebraucht wird oder nicht, (3) was als Nächstes kommt. Beispiele:
+„CI + Deploy laufen, ~5 min, nichts zu tun" · „Welle live + verifiziert ✅,
+du bist dran: …". Der git-Fallback („N uncommitted Dateien") darf praktisch
+nie mehr feuern — er sagt dem User nichts (User-Feedback 2026-06-12).
 Gilt auch nach Kompaktierung/Modell-Wechsel — diese Zeile ist die
 Erinnerung, die die Gewohnheit überlebt.
 

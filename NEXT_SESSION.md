@@ -24,6 +24,35 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-12 — App-Analyse (Fable-5-Test) + W.ops-hardening (Welle A)
+
+**App-Analyse:** 6 parallele Agenten, Gesamtnote 7,1/10, voller Report in
+`docs/app-analyse-2026-06-12.md` (Noten, Befunde, Welle-B/C-Backlog).
+
+**`W.ops-hardening`** (Tag `v2.0.0-alpha.W.ops-hardening`, 3 Split-Commits
+`02a2c37` Workflows / `f8427bd` BE / `2a46374` FE) — Welle A komplett:
+- **CI-Test-Gate:** deploy.yml hat jetzt test-Job (pytest 53 + tsc + vitest
+  192), Deploys nur bei grün. Erster Gate-Lauf in CI verifiziert.
+- **Live-Monitoring:** health-check.yml (Cron */10min, 3 Retries, ntfy-Push
+  via GH-Secret `NTFY_TOPIC` — Repo ist PUBLIC, Topic nicht im Klartext!).
+- **Rate-Limit-Proxy-Fix:** uvicorn --proxy-headers + RFC-1918-Ranges
+  (vorher keyte der Limiter ALLE Besucher auf die Proxy-IP = Login-DoS-Hebel).
+- **nginx-Header:** CSP/HSTS/nosniff/etc. als Snippet
+  (`nginx-security-headers.conf`, add_header-Vererbungsfalle beachtet!) +
+  Cache-Control (assets 1J immutable, index.html+sw.js no-cache).
+- **ErrorBoundary:** Root (main.tsx) + compact um Lazy-Charts,
+  Chunk-Load-Erkennung mit Reload-Hinweis, i18n errorBoundary.*.
+- Live-verifiziert: Header aktiv, App rendert unter CSP ohne Violations
+  (Chrome-Konsole geprüft), Health = W.ops-hardening, Bundle index-K3VKeVCj.js.
+- ⚠️ Coolify-API weiter HTTP (kein TLS auf :8000) — für HTTPS braucht die
+  Coolify-Instanz eine Domain mit Let's Encrypt, dann deploy.yml umstellen.
+
+**🔜 Nächste Kandidaten:** Welle B aus der Analyse (Solve-POST-Hot-Path,
+Ownership-/Import-Tests, /stats/temporal-WHERE, Off-Site-Backup,
+Matrix-Drift) — siehe `docs/app-analyse-2026-06-12.md`.
+
+---
+
 ## 🔜 IN ARBEIT / WARTET AUF INPUT — Activity-Feed (P1, Community)
 
 **Status:** geplant + Anforderungs-Erhebung läuft. **NICHT gebaut.**
