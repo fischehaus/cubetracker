@@ -44,6 +44,16 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.alg-diagrams-v2",
+        released=date(2026, 6, 13),
+        title="🎨 Neue PLL- und OLL-Diagramme im Trainer",
+        highlights=[
+            "Alle 15 PLL- und 63 OLL-Fall-Diagramme im Algorithmus-Trainer "
+            "wurden neu gezeichnet — sauberere Darstellung der Pfeile und "
+            "Seitenflächen, damit du die Fälle schneller erkennst.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.solve-hotpath",
         released=date(2026, 6, 13),
         title="⚡ Solve-Speichern deutlich schneller",
