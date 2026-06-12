@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.solve-hotpath",
+        released=date(2026, 6, 13),
+        title="⚡ Solve-Speichern deutlich schneller",
+        highlights=[
+            "Das Eintragen eines Solves ist jetzt spürbar schneller — vor "
+            "allem bei großen Solve-Historien. Die PB-Erkennung und der "
+            "Achievement-Check nach jedem Timer-Stop rechnen nur noch das, "
+            "was sie wirklich brauchen (im Rechenkern rund 6× schneller bei "
+            "10.000 Solves).",
+            "Auch die Heute/Diese-Woche-Karte lädt jetzt nur noch die "
+            "aktuelle Woche aus der Datenbank statt deiner kompletten "
+            "Historie.",
+            "An der PB-Erkennung selbst ändert sich nichts — wann Konfetti "
+            "kommt, ist bit-genau gleich geblieben (mit 14 neuen Tests "
+            "festgeschrieben).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.core-tests",
         released=date(2026, 6, 13),
         title="🧪 Kern-Logik testabgesichert (intern)",

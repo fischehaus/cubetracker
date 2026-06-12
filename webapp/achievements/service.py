@@ -9,7 +9,7 @@ from __future__ import annotations
 import math
 from datetime import date, timedelta
 
-from sqlalchemy import distinct, func, select
+from sqlalchemy import case, distinct, func, select
 from sqlalchemy.orm import Session as OrmSession
 
 from db.models import Achievement, Hardware, Solve
@@ -40,14 +40,20 @@ def _build_snapshot(db: OrmSession, user_id: int) -> AchievementInput:
     ).all()
     solves_per_cube: dict[str, int] = {r[0]: int(r[1]) for r in rows}
 
-    best_per_cube: dict[str, int] = {}
-    for s in db.scalars(
-        select(Solve).where(Solve.user_id == user_id).where(Solve.dnf.is_(False))
-    ).all():
-        eff = s.time_ms + (2000 if s.plus_two else 0)
-        cur = best_per_cube.get(s.cube_type)
-        if cur is None or eff < cur:
-            best_per_cube[s.cube_type] = eff
+    # W.solve-hotpath (2026-06-13): vorher voller ORM-Load ALLER validen
+    # Solves nur für ein Minimum pro Cube — jetzt SQL-Aggregat über den
+    # vorhandenen Index. Effektive Zeit = time_ms + 2000 bei +2 (identisch
+    # zur alten Python-Schleife, festgepinnt in test_achievement_snapshot).
+    # SA-2.0-Syntax: ein (when, result)-Tupel pro Positional-Arg — KEIN
+    # Listenwrapper (das alte 1.x-Muster case([...]) wirft in 2.0 TypeError).
+    eff_expr = Solve.time_ms + case((Solve.plus_two.is_(True), 2000), else_=0)
+    best_rows = db.execute(
+        select(Solve.cube_type, func.min(eff_expr))
+        .where(Solve.user_id == user_id)
+        .where(Solve.dnf.is_(False))
+        .group_by(Solve.cube_type)
+    ).all()
+    best_per_cube: dict[str, int] = {r[0]: int(r[1]) for r in best_rows}
 
     distinct_cubes = (
         db.scalar(
@@ -90,24 +96,27 @@ def _build_snapshot(db: OrmSession, user_id: int) -> AchievementInput:
     max_consec_3x3_100 = _longest_consecutive_day_streak(days_with_3x3_100plus)
     max_solve_streak = _longest_consecutive_day_streak(all_active_days)
 
+    # W.solve-hotpath (2026-06-13): Tupel-Query statt zweitem vollen
+    # ORM-Load (Scramble-/Notes-Texte werden für die Pattern-Erkennung
+    # nicht gebraucht — die Hydration war der teure Teil).
     pattern_results = []
-    all_solves_chrono = list(
-        db.scalars(
-            select(Solve).where(Solve.user_id == user_id).order_by(Solve.timestamp.asc())
-        ).all()
-    )
+    chrono_rows = db.execute(
+        select(Solve.timestamp, Solve.cube_type, Solve.dnf, Solve.plus_two, Solve.time_ms)
+        .where(Solve.user_id == user_id)
+        .order_by(Solve.timestamp.asc())
+    ).all()
     by_cube_chrono: dict[str, list[ChronoSolve]] = {}
-    for s in all_solves_chrono:
-        if s.timestamp is None:
+    for ts, cube_type, dnf, plus_two, time_ms in chrono_rows:
+        if ts is None:
             continue
-        eff = math.inf if s.dnf else float(s.time_ms + (2000 if s.plus_two else 0))
-        by_cube_chrono.setdefault(s.cube_type, []).append(
+        eff = math.inf if dnf else float(time_ms + (2000 if plus_two else 0))
+        by_cube_chrono.setdefault(cube_type, []).append(
             ChronoSolve(
-                day=s.timestamp.date(),
+                day=ts.date(),
                 effective_ms=eff,
-                dnf=s.dnf,
-                plus_two=s.plus_two,
-                time_ms=s.time_ms,
+                dnf=dnf,
+                plus_two=plus_two,
+                time_ms=time_ms,
             )
         )
     for chrono_solves in by_cube_chrono.values():

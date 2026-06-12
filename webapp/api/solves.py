@@ -30,7 +30,7 @@ from challenges.service import update_today_progress_for_solve
 from db.database import get_db
 from db.models import Hardware, Session as DbSession, Solve, User
 from db.schemas import SolveCreate, SolveRead, SolveUpdate
-from stats.calc import SolvePoint, compute_stats
+from stats.calc import SolvePoint, best_average_window
 
 router = APIRouter(prefix="/solves", tags=["solves"])
 
@@ -38,47 +38,50 @@ router = APIRouter(prefix="/solves", tags=["solves"])
 def _detect_pbs_for_user(db: OrmSession, user_id: int, solve: Solve) -> list[str]:
     """Liefert Liste der PB-Typen die DIESER Solve gerade gesetzt hat.
     Mogliche Typen: 'single', 'ao5', 'ao12'. Nur eigene Solves zählen.
+
+    Performance (W.solve-hotpath, 2026-06-13): Das hier läuft bei JEDEM
+    Timer-Stop. Vorher: voller ORM-Load (inkl. Scramble-/Notes-Text) +
+    2× compute_stats — das rechnet zusätzlich ao100-Windows und drei
+    PB-Progressionen, die hier niemand braucht. Jetzt: 4-Spalten-Tupel-
+    Query + gezielt best_ao5/ao12. Semantik bitidentisch — festgepinnt
+    in tests/test_pb_detection.py. Der verbleibende O(n)-Scan fällt erst
+    mit der user_cube_stats-Aggregat-Tabelle (Analyse Welle C #11).
     """
-    rows = db.scalars(
-        select(Solve)
+    rows = db.execute(
+        select(Solve.id, Solve.time_ms, Solve.dnf, Solve.plus_two)
         .where(Solve.user_id == user_id)
         .where(Solve.cube_type == solve.cube_type)
         .order_by(Solve.timestamp.asc())
     ).all()
-    if len(rows) < 1:
+    if not rows:
         return []
 
     points_with = [
-        SolvePoint(time_ms=s.time_ms, dnf=s.dnf, plus_two=s.plus_two, solve_id=s.id) for s in rows
+        SolvePoint(time_ms=r.time_ms, dnf=r.dnf, plus_two=r.plus_two, solve_id=r.id)
+        for r in rows
     ]
-    stats_with = compute_stats(points_with)
     points_without = [p for p in points_with if p.solve_id != solve.id]
-    stats_without = compute_stats(points_without) if points_without else None
 
     pbs: list[str] = []
     if not solve.dnf:
         eff = solve.time_ms + (2000 if solve.plus_two else 0)
-        is_best = stats_with.best_ms is not None and eff == stats_with.best_ms
-        improved_single = (
-            stats_without is None
-            or stats_without.best_ms is None
-            or eff < stats_without.best_ms
-        )
+        valid_with = [p.effective_ms for p in points_with if not p.dnf]
+        valid_without = [p.effective_ms for p in points_without if not p.dnf]
+        best_with = int(min(valid_with)) if valid_with else None
+        best_without = int(min(valid_without)) if valid_without else None
+        is_best = best_with is not None and eff == best_with
+        improved_single = best_without is None or eff < best_without
         if is_best and improved_single:
             pbs.append("single")
 
-    if stats_with.best_ao5 is not None and (
-        stats_without is None
-        or stats_without.best_ao5 is None
-        or stats_with.best_ao5 < stats_without.best_ao5
-    ):
+    ao5_with = best_average_window(points_with, 5)
+    ao5_without = best_average_window(points_without, 5)
+    if ao5_with is not None and (ao5_without is None or ao5_with < ao5_without):
         pbs.append("ao5")
 
-    if stats_with.best_ao12 is not None and (
-        stats_without is None
-        or stats_without.best_ao12 is None
-        or stats_with.best_ao12 < stats_without.best_ao12
-    ):
+    ao12_with = best_average_window(points_with, 12)
+    ao12_without = best_average_window(points_without, 12)
+    if ao12_with is not None and (ao12_without is None or ao12_with < ao12_without):
         pbs.append("ao12")
 
     return pbs

@@ -24,7 +24,7 @@ from sqlalchemy.orm import load_only
 from auth.deps import get_current_user
 from db.database import get_db
 from db.models import Hardware, Session as DbSession, Solve, User
-from stats.calc import SolvePoint, compute_stats, pb_history
+from stats.calc import SolvePoint, average_of_n, compute_stats, pb_history
 
 router = APIRouter(prefix="/stats", tags=["stats"])
 
@@ -332,16 +332,30 @@ def get_temporal_stats(
     today_start = datetime(now.year, now.month, now.day, tzinfo=UTC)
     week_start = today_start - timedelta(days=today_start.weekday())
 
+    # W.solve-hotpath (2026-06-13): vorher lud der Endpoint ALLE Solves
+    # aller Zeiten als volle ORM-Objekte, um „heute + diese Woche" zu
+    # zählen. Jetzt: DB-Vorfilter auf ~die laufende Woche (2 Tage Puffer
+    # gegen tz-Interpretations-Unterschiede Postgres-aware vs SQLite-naiv;
+    # der EXAKTE Schnitt passiert wie bisher in Python via to_aware) +
+    # 6-Spalten-Tupel-Query statt ORM-Hydration.
     stmt = (
-        select(Solve)
+        select(
+            Solve.id,
+            Solve.time_ms,
+            Solve.dnf,
+            Solve.plus_two,
+            Solve.cube_type,
+            Solve.timestamp,
+        )
         .where(Solve.user_id == current_user.id)
+        .where(Solve.timestamp >= week_start - timedelta(days=2))
         .order_by(Solve.timestamp.asc())
     )
     if session_id is not None:
         stmt = stmt.where(Solve.session_id == session_id)
-    rows = db.scalars(stmt).all()
+    rows = db.execute(stmt).all()
 
-    def aggregate(filtered: list[Solve]) -> dict[str, Any]:
+    def aggregate(filtered: list[Any]) -> dict[str, Any]:
         per_cube: dict[str, int] = {}
         for s in filtered:
             per_cube[s.cube_type] = per_cube.get(s.cube_type, 0) + 1
@@ -353,7 +367,9 @@ def get_temporal_stats(
         ]
         valid = [p for p in points if not p.dnf]
         mean_ms = round(sum(p.effective_ms for p in valid) / len(valid)) if valid else None
-        current_ao5_total = compute_stats(points).current_ao5
+        # Identisch zu compute_stats(points).current_ao5 — aber ohne die
+        # ungenutzten Sliding-Windows/Progressionen mitzurechnen.
+        current_ao5_total = average_of_n(points[-5:]) if len(points) >= 5 else None
         return {
             "count": len(filtered),
             "count_per_cube": per_cube,
