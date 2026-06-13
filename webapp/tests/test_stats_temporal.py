@@ -28,8 +28,12 @@ def test_temporal_counts_today_and_excludes_old(client: TestClient, make_user) -
     now = datetime.now(UTC)
 
     # Zwei Solves heute, einer vor 30 Tagen (sicher außerhalb jeder Woche).
-    _post(client, headers, 12000, now - timedelta(minutes=10))
-    _post(client, headers, 13000, now - timedelta(minutes=5))
+    # Mitternachts-Falle (CI-Fail 2026-06-13 00:05 UTC): `now - 10min` ist
+    # kurz nach UTC-Mitternacht GESTERN → Sekunden in die ZUKUNFT datieren.
+    # Der Endpoint filtert nur >= today_start (keine Obergrenze), damit sind
+    # now+Sekunden zu jeder Uhrzeit garantiert „heute".
+    _post(client, headers, 12000, now + timedelta(seconds=1))
+    _post(client, headers, 13000, now + timedelta(seconds=2))
     _post(client, headers, 99000, now - timedelta(days=30))
 
     r = client.get("/api/stats/temporal", headers=headers)
@@ -86,8 +90,9 @@ def test_temporal_ao5_from_todays_solves(client: TestClient, make_user) -> None:
 
     # 5 Solves heute: current_ao5 = getrimmtes Mittel der letzten 5
     # = mean(12,13,14) = 13.0s (11 und 15 getrimmt).
+    # now+Sekunden statt now-Minuten — Mitternachts-sicher (s. Test oben).
     for i, t in enumerate([11000, 12000, 13000, 14000, 15000]):
-        _post(client, headers, t, now - timedelta(minutes=10 - i))
+        _post(client, headers, t, now + timedelta(seconds=i + 1))
 
     r = client.get("/api/stats/temporal", headers=headers)
     assert r.status_code == 200
