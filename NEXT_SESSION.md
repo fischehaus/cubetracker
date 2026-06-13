@@ -24,6 +24,25 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-13 (Forts. 2) — W.oll-scramble-fix: OLL-17 + Winkel-Variation
+
+**`W.oll-scramble-fix`** (FE `7829d20` + BE `9618e62`, Tag gesetzt, live
+verifiziert) — User-beauftragtes QA-Audit der OLL-Scrambles per
+Würfel-Simulation gegen Pixel-dekodierte Diagramme:
+- **KRITISCH gefixt:** OLL-17-Alg hatte gespiegelte S-Konvention → Trainer-
+  Scramble zerstörte F2L. Ein-Token-Fix (S↔S'), simulativ bewiesen.
+- **AUF-Fix:** Präfix-AUF war für OLL wirkungslos (0/171 Muster-Änderungen)
+  → jetzt Suffix (163/171); PLL behält Präfix.
+- **Dauerschutz:** `webapp/tests/test_alg_cases.py` (161 Tests) — Sticker-
+  Simulator parst algs.ts LIVE, prüft F2L-Invariante aller 78 Algs im
+  CI-Gate (mit 24-Orientierungs-Normalisierung für unbalancierte
+  Rotationen à la PLL-V). Suite: **253**.
+- 📋 Offen (User-Entscheidung, kein Druck): 15 OLL-Diagramme zeigen ihren
+  Fall um 90/180/270° verdreht ggü. dem Scramble (Liste im Chat 2026-06-13
+  bzw. via `.tmp/qa-oll/verify_oll.py` reproduzierbar). Empfehlung: lassen.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-13 (Forts.) — W.alg-diagrams-v2: PLL/OLL-Diagramme
 
 **`W.alg-diagrams-v2`** (Tag auf `7ee563e`; Commits `9690532` Assets /
