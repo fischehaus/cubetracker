@@ -24,15 +24,24 @@ Commits sind.
 
 ---
 
-## ⏳ EXTERN IN ARBEIT — PLL/OLL-Diagramm-Neurender (NICHT anfassen!)
+## ✅ ERLEDIGT 2026-06-13 (Forts.) — W.alg-diagrams-v2: PLL/OLL-Diagramme
 
-Im Working-Tree liegen ~78 modifizierte PNGs (`webapp/frontend/src/assets/pll/`
-+ `oll/`) + 2 gelöschte Hilfs-Collagen — **der User erzeugt gerade extern neue
-Diagramm-Dateien** (Render-Skripte in `scripts/`, untracked). Stand 2026-06-13:
-NICHT committen, NICHT verwerfen, bei eigenen Commits nur gezielt per
-Datei-Pfad stagen. Wenn der User „Diagramme fertig" meldet → als eigene Welle
-shippen (vorher Sichtprüfung Vorher/Nachher, die Spiegelungs-Frage aus dem
-Bildvergleich 2026-06-12 klären).
+**`W.alg-diagrams-v2`** (Tag auf `7ee563e`; Commits `9690532` Assets /
+`2d9857e`+`7ee563e` Patch-Note / `3a340e9` PLL-Verdrahtung / `cadd14f`
+QA-Hygiene / `9cd9a44` Flake-Fix) — die extern gerenderten Diagramme des
+Users sind übernommen UND erstmals sichtbar:
+- 78 neu gerenderte PNGs (21 PLL + 57 OLL), 2 Hilfs-Collagen gelöscht.
+- **Kern-Befund:** PLL-Bilder waren NIE eingebunden (offenes 8.3.2-TODO,
+  CubeStateView zeigte ∅) → neue `lib/pll-images.ts` (21 Imports, Keys
+  exakt = algs.ts case_ids) + CubeStateView-Verdrahtung. Live verifiziert
+  (Bundle referenziert PLL_*, Asset HTTP 200).
+- QA: kein KRITISCH; Hygiene gefixt (stale Kommentare, .dockerignore NEU,
+  `oll/bak/` gitignored).
+- **Lesson Mitternachts-Flake:** CI-Lauf um 00:05 UTC kippte die neuen
+  temporal-Tests (`now - 10min` = gestern). Test-Gate hat korrekt den
+  Deploy gestoppt — erster echter Fang. Fix: Test-Timestamps Sekunden in
+  die ZUKUNFT (Endpoint hat keine Obergrenze). Regel: Tests nie relativ
+  in die Vergangenheit datieren, wenn „heute" geprüft wird.
 
 ---
 
