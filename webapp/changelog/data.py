@@ -44,6 +44,25 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.oll-scramble-fix",
+        released=date(2026, 6, 13),
+        title="🧩 Trainer: OLL-17-Scramble repariert + echte Winkel-Variation",
+        highlights=[
+            "Der Übungs-Scramble für OLL 17 (Cross) hat bisher die unteren "
+            "zwei Ebenen mit zerwürfelt — der Algorithmus stammte aus einer "
+            "Quelle mit gespiegelter S-Notation. Jetzt korrigiert und per "
+            "Würfel-Simulation gegen das Diagramm verifiziert.",
+            "Die zufällige Anwinkelung beim OLL-Training greift jetzt "
+            "wirklich: vorher stand jeder OLL-Fall immer im exakt gleichen "
+            "Winkel vor dir, jetzt variiert er — so lernst du die Erkennung "
+            "aus allen Richtungen.",
+            "Unter der Haube simulieren neue Tests bei jedem Update alle 78 "
+            "Trainer-Algorithmen auf einem virtuellen Würfel und stellen "
+            "sicher, dass kein Scramble je wieder mehr als die oberste "
+            "Ebene anfasst.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.alg-diagrams-v2",
         released=date(2026, 6, 13),
         title="🎨 PLL-Diagramme im Trainer — und alle OLL neu gezeichnet",
