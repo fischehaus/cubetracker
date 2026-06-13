@@ -6,8 +6,10 @@
 // als invertierten Algorithmus — klassische speedcubing-praxis.
 //
 // Datenquelle: WCA-/Speedsolving-Standard-Algorithmen. Format-Konvention:
-//   case_id   = "PLL-Tperm" | "OLL-21" — wird in solves.alg_case
+//   case_id   = "PLL-T" | "OLL-21" — wird in solves.alg_case
 //               gespeichert und ist beim Trainer-modus auto-getagged.
+//               (QA 2026-06-13: Format ist OHNE "perm"-Suffix — wer auf
+//               solves.alg_case filtert, nutzt exakt diese IDs.)
 //   name      = User-sichtbarer Name ("T-perm")
 //   alg       = Standard-WCA-notation, soll von rechts nach links auf
 //               einem gelösten cube angewendet werden.
@@ -17,7 +19,7 @@
 export type AlgSubsetId = "pll" | "oll";
 
 export interface AlgCase {
-  id: string; // z.B. "PLL-Tperm" — landet in solves.alg_case
+  id: string; // z.B. "PLL-T" — landet in solves.alg_case
   name: string; // z.B. "T-perm"
   alg: string; // Standard-Algorithmus
 }

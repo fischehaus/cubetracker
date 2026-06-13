@@ -7,7 +7,7 @@
 // Bild-Quelle: User-generierte OLL-Icons (Konvention: 9 Top-Stickers
 // + 12 Side-Indicators, gelb=oriented, grau=not). Dark-Theme-konform.
 //
-// PLL-Bilder fehlen aktuell — siehe Phase 8.3.2 (TODO).
+// PLL-Bilder: siehe pll-images.ts (W.alg-diagrams-v2, 2026-06-13 — 8.3.2-TODO erledigt).
 
 import oll01 from '../assets/oll/OLL_01.png';
 import oll02 from '../assets/oll/OLL_02.png';

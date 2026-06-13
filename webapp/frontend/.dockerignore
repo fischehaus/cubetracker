@@ -1,0 +1,6 @@
+# Build-Context schlank halten (QA W.alg-diagrams-v2, 2026-06-13).
+# Der Coolify-Build laeuft `npm install && npm run build` frisch aus Source —
+# lokale Artefakte und Render-Backups haben im Context nichts verloren.
+dist/
+node_modules/
+src/assets/oll/bak/
