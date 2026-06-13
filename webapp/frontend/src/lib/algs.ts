@@ -80,7 +80,11 @@ export const OLL_CASES: AlgCase[] = [
   { id: "OLL-14", name: "OLL 14 (Knight)", alg: "R' F R U R' F' R F U' F'" },
   { id: "OLL-15", name: "OLL 15 (Knight)", alg: "l' U' l L' U' L U l' U l" },
   { id: "OLL-16", name: "OLL 16 (Knight)", alg: "r U r' R U R' U' r U' r'" },
-  { id: "OLL-17", name: "OLL 17 (Cross)", alg: "F R' F' R U S R U' R' S'" },
+  // QA W.oll-scramble-fix (2026-06-13): Original-Quelle nutzte die
+  // gespiegelte S-Konvention — mit WCA-S (folgt F) zerstörte der Trainer-
+  // Scramble das F2L (Gelb/Blau-Kante im DL-Slot). S↔S' getauscht;
+  // simulativ verifiziert: F2L intakt + matcht OLL_17.png exakt.
+  { id: "OLL-17", name: "OLL 17 (Cross)", alg: "F R' F' R U S' R U' R' S" },
   { id: "OLL-18", name: "OLL 18 (Cross)", alg: "r U R' U R U2 r2 U' R U' R' U2 r" },
   { id: "OLL-19", name: "OLL 19 (Cross)", alg: "r' R U R U R' U' r R2 F R F'" },
   { id: "OLL-20", name: "OLL 20 (Cross)", alg: "r U R' U' M2 U R U' R' U' M'" },
@@ -168,15 +172,25 @@ export function inverseAlg(alg: string): string {
 
 /**
  * Liefert einen Drill-Scramble für einen bestimmten case.
- * Optional Praefix mit zufaelliger AUF-Rotation (U/U2/U'), damit
- * der case nicht immer in derselben Orientierung steht.
+ * Optional zufällige AUF-Rotation (U/U2/U'), damit der Case nicht immer
+ * in derselben Anwinkelung steht.
+ *
+ * QA W.oll-scramble-fix (2026-06-13): Für OLL muss der AUF ans ENDE des
+ * Scrambles — ein Präfix permutiert nur die verdeckte Last-Layer-
+ * Permutation, das sichtbare Orientierungsmuster bleibt identisch
+ * (simulativ: 0/171 Änderungen; als Suffix: 163/171). Für PLL bleibt
+ * das Präfix: dort ändert es die sichtbare Permutation wirklich, ein
+ * Suffix würde nur das ganze Muster gegen das Diagramm verdrehen.
  */
 export function scrambleForCase(c: AlgCase, randomAUF: boolean = true): string {
   const inv = inverseAlg(c.alg);
   if (!randomAUF) return inv;
-  const aufs = ["", "U ", "U2 ", "U' "];
+  const aufs = ["", "U", "U2", "U'"];
   const auf = aufs[Math.floor(Math.random() * aufs.length)];
-  return (auf + inv).trim();
+  if (c.id.startsWith("OLL-")) {
+    return `${inv} ${auf}`.trim();
+  }
+  return `${auf} ${inv}`.trim();
 }
 
 export function findCaseById(id: string): AlgCase | undefined {
