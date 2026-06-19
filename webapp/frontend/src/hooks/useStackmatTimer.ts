@@ -30,6 +30,12 @@ export type StackmatStatus =
   | "listening"
   | "error";
 
+/** Auswählbares Audio-Eingabegerät (W.stackmat-diag). */
+export interface AudioInputDevice {
+  deviceId: string;
+  label: string;
+}
+
 export interface StackmatState {
   status: StackmatStatus;
   /** true, sobald in den letzten ~1.5s ein gültiges Paket ankam. */
@@ -40,6 +46,13 @@ export interface StackmatState {
   liveMs: number;
   /** Zuletzt abgeschlossener + gespeicherter Solve (ms). */
   lastSolveMs: number | null;
+  /** Aktueller Eingangs-Pegel 0..1 (Peak, W.stackmat-diag) — zeigt, ob
+   *  überhaupt Audio ankommt (= richtiges Eingabegerät?). */
+  inputLevel: number;
+  /** Verfügbare Audio-Eingänge (erst nach erteilter Mic-Permission mit Labels). */
+  devices: AudioInputDevice[];
+  /** Aktuell genutztes Eingabegerät (deviceId) oder null = System-Default. */
+  deviceId: string | null;
   errorMessage: string | null;
 }
 
@@ -49,6 +62,9 @@ const INITIAL: StackmatState = {
   phase: "idle",
   liveMs: 0,
   lastSolveMs: null,
+  inputLevel: 0,
+  devices: [],
+  deviceId: null,
   errorMessage: null,
 };
 
@@ -77,6 +93,12 @@ export function useStackmatTimer() {
   // setState-Closure-Guard verhinderte nur den State-Write, nicht die async-
   // Fortsetzung. teardown() setzt das Flag zurück.
   const connectingRef = useRef(false);
+  // Diagnose (W.stackmat-diag): Peak-Pegel des letzten Audio-Blocks +
+  // Zähler/Ring der zuletzt dekodierten Roh-Bytes (für das Konsolen-Log,
+  // wenn zwar Audio kommt aber kein gültiges Frame validiert).
+  const peakRef = useRef<number>(0);
+  const rawByteCountRef = useRef<number>(0);
+  const rawSampleRef = useRef<string>("");
 
   const isSupported =
     typeof navigator !== "undefined" &&
@@ -120,7 +142,7 @@ export function useStackmatTimer() {
     setState(INITIAL);
   }, [teardown]);
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (deviceId?: string | null) => {
     if (!isSupported) {
       setState((s) => ({
         ...s,
@@ -129,20 +151,31 @@ export function useStackmatTimer() {
       }));
       return;
     }
-    // Ref-Guard: bereits am Verbinden/Verbunden → no-op (verhindert parallele
+    // Ref-Guard: läuft schon ein connect()? → no-op (verhindert parallele
     // getUserMedia-Aufrufe, die der setState-Guard allein nicht abfängt).
     if (connectingRef.current) return;
+    // Bestehende Session räumen — erlaubt Geräte-Wechsel im laufenden Betrieb
+    // (teardown ist no-op wenn nichts offen ist). Setzt connectingRef auf false,
+    // daher direkt danach wieder true.
+    teardown();
     connectingRef.current = true;
-    setState({ ...INITIAL, status: "connecting" });
+    peakRef.current = 0;
+    rawByteCountRef.current = 0;
+    rawSampleRef.current = "";
+    setState({ ...INITIAL, status: "connecting", deviceId: deviceId ?? null });
     try {
+      // W.stackmat-diag: optionale Geräte-Wahl (häufigste Fehlerquelle: Windows
+      // nimmt das eingebaute Mik statt des Line-/Mic-Eingangs mit dem Kabel).
+      const audioConstraints: MediaTrackConstraints = {
+        // KRITISCH: alle DSP-Stufen aus — sie zerstören das Serien-Signal.
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        channelCount: 1,
+      };
+      if (deviceId) audioConstraints.deviceId = { exact: deviceId };
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          // KRITISCH: alle DSP-Stufen aus — sie zerstören das Serien-Signal.
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-          channelCount: 1,
-        },
+        audio: audioConstraints,
         video: false,
       });
       // disconnect() während des Permission-Dialogs? Dann ist connectingRef
@@ -153,6 +186,23 @@ export function useStackmatTimer() {
         return;
       }
       streamRef.current = stream;
+
+      // Geräte-Liste holen (Labels gibt es erst NACH erteilter Permission).
+      let devices: AudioInputDevice[] = [];
+      try {
+        const all = await navigator.mediaDevices.enumerateDevices();
+        devices = all
+          .filter((d) => d.kind === "audioinput")
+          .map((d, i) => ({
+            deviceId: d.deviceId,
+            label: d.label || `Eingang ${i + 1}`,
+          }));
+      } catch {
+        /* enumerate kann fehlschlagen — Geräte-Wahl dann eben leer */
+      }
+      // Welches Gerät nutzt der Stream tatsächlich? (für die Dropdown-Auswahl)
+      const activeId =
+        deviceId ?? stream.getAudioTracks()[0]?.getSettings().deviceId ?? null;
 
       const Ctor: AudioContextCtor =
         (window as unknown as { AudioContext?: AudioContextCtor }).AudioContext ??
@@ -193,8 +243,16 @@ export function useStackmatTimer() {
       });
       trackerRef.current = tracker;
 
-      const decoder = new StackmatDualDecoder(ctx.sampleRate, (p) =>
-        tracker.onPacket(p),
+      const decoder = new StackmatDualDecoder(
+        ctx.sampleRate,
+        (p) => tracker.onPacket(p),
+        // Diagnose: jedes dekodierte Roh-Byte zählen + die letzten ~24 Zeichen
+        // sammeln (zeigt im Log, ob UART-Bytes ankommen, falls kein Frame passt).
+        (ch) => {
+          rawByteCountRef.current++;
+          const r = rawSampleRef.current + ch;
+          rawSampleRef.current = r.length > 24 ? r.slice(-24) : r;
+        },
       );
       decoderRef.current = decoder;
 
@@ -206,6 +264,13 @@ export function useStackmatTimer() {
       const processor = ctx.createScriptProcessor(4096, 1, 1);
       processor.onaudioprocess = (e: AudioProcessingEvent) => {
         const input = e.inputBuffer.getChannelData(0);
+        // Peak-Pegel für die Diagnose-Anzeige (zeigt, ob Audio ankommt).
+        let peak = 0;
+        for (let i = 0; i < input.length; i++) {
+          const a = input[i] < 0 ? -input[i] : input[i];
+          if (a > peak) peak = a;
+        }
+        if (peak > peakRef.current) peakRef.current = peak;
         decoderRef.current?.push(input);
       };
       processorRef.current = processor;
@@ -219,7 +284,16 @@ export function useStackmatTimer() {
       processor.connect(sink);
       sink.connect(ctx.destination);
 
-      setState((s) => ({ ...s, status: "listening", errorMessage: null }));
+      // Erfolgreich verbunden → in-flight-Guard freigeben (sonst würde ein
+      // Geräte-Wechsel am `if (connectingRef.current) return` abprallen).
+      connectingRef.current = false;
+      setState((s) => ({
+        ...s,
+        status: "listening",
+        errorMessage: null,
+        devices,
+        deviceId: activeId,
+      }));
     } catch (err: unknown) {
       teardown();
       const name = err instanceof Error ? err.name : "";
@@ -236,16 +310,36 @@ export function useStackmatTimer() {
     }
   }, [isSupported, teardown]);
 
-  // hasSignal nach ~1.5s ohne gültiges Paket zurücksetzen (Kabel ab / Timer
-  // aus). Leichtgewichtiges Intervall statt RAF.
+  // Pegel-Anzeige + hasSignal-Reset + Diagnose-Log. Ein gemeinsames Intervall
+  // (4×/s für einen flüssigen Pegel-Balken). hasSignal fällt nach ~1.5s ohne
+  // gültiges Paket zurück (Kabel ab / Timer aus).
   useEffect(() => {
     if (state.status !== "listening") return;
+    let ticks = 0;
     const id = window.setInterval(() => {
+      const peak = peakRef.current;
+      peakRef.current = 0; // pro Fenster neu messen (Balken decayed)
       const stale = performance.now() - lastPacketAtRef.current > 1500;
-      setState((s) =>
-        s.hasSignal && stale ? { ...s, hasSignal: false } : s,
-      );
-    }, 1000);
+      setState((s) => {
+        const level = Math.round(peak * 1000) / 1000;
+        const nextSignal = stale ? false : s.hasSignal;
+        if (s.inputLevel === level && s.hasSignal === nextSignal) return s;
+        return { ...s, inputLevel: level, hasSignal: nextSignal };
+      });
+      // Diagnose-Log ~alle 2s, solange Audio läuft aber (noch) kein gültiges
+      // Frame ankam — gibt dem User etwas zum Kopieren für die Ferndiagnose.
+      ticks++;
+      if (stale && ticks % 8 === 0) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[Stackmat-Diag] Pegel=${peak.toFixed(3)} ` +
+            `Roh-Bytes=${rawByteCountRef.current} ` +
+            `zuletzt=${JSON.stringify(rawSampleRef.current)} ` +
+            `(Pegel~0 → falsches Eingabegerät; Pegel>0 aber 0 Bytes → kein ` +
+            `1200-Baud-Signal; Bytes aber kein Solve → Protokoll-Variante)`,
+        );
+      }
+    }, 250);
     return () => window.clearInterval(id);
   }, [state.status]);
 

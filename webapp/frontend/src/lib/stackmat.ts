@@ -102,10 +102,19 @@ export class StackmatDecoder {
   private level = 1; // hysteretischer Pegel (start: idle high)
   private readonly centerAlpha: number;
   private readonly scaleAlpha: number;
+  private readonly onByte?: (char: string) => void;
 
-  constructor(sampleRate: number, onPacket: (p: StackmatPacket) => void) {
+  constructor(
+    sampleRate: number,
+    onPacket: (p: StackmatPacket) => void,
+    onByte?: (char: string) => void,
+  ) {
     this.bitLen = sampleRate / STACKMAT_BAUD;
     this.onPacket = onPacket;
+    // onByte (optional): feuert pro dekodiertem Roh-Zeichen VOR der Checksum-
+    // Prüfung — nur für Diagnose (W.stackmat-diag): zeigt, ob überhaupt
+    // UART-Bytes ankommen, auch wenn das Frame-Layout/Checksum (noch) nicht passt.
+    this.onByte = onByte;
     // EMA über ~50 ms — folgt DC-Drift, ignoriert die 1200-Baud-Modulation.
     this.centerAlpha = 1 / Math.max(1, sampleRate * 0.05);
     this.scaleAlpha = 1 / Math.max(1, sampleRate * 0.05);
@@ -201,7 +210,9 @@ export class StackmatDecoder {
   private appendByte(byte: number): void {
     // Steuerzeichen (CR/LF) trennen Frames sauber — sie lösen den Sync-Versuch
     // unten ohnehin aus (kein gültiger status), wir brauchen sie nicht extra.
-    this.line += String.fromCharCode(byte & 0x7f);
+    const ch = String.fromCharCode(byte & 0x7f);
+    this.onByte?.(ch);
+    this.line += ch;
     while (this.line.length >= 7) {
       const cand = this.line.slice(0, 7);
       const p = parseStackmatFrame(cand);
@@ -229,9 +240,21 @@ export class StackmatDualDecoder {
   private readonly a: StackmatDecoder;
   private readonly b: StackmatDecoder;
 
-  constructor(sampleRate: number, onPacket: (p: StackmatPacket) => void) {
-    this.a = new StackmatDecoder(sampleRate, onPacket);
-    this.b = new StackmatDecoder(sampleRate, onPacket);
+  constructor(
+    sampleRate: number,
+    onPacket: (p: StackmatPacket) => void,
+    onByte?: (char: string, polarity: "normal" | "inverted") => void,
+  ) {
+    this.a = new StackmatDecoder(
+      sampleRate,
+      onPacket,
+      onByte ? (c) => onByte(c, "normal") : undefined,
+    );
+    this.b = new StackmatDecoder(
+      sampleRate,
+      onPacket,
+      onByte ? (c) => onByte(c, "inverted") : undefined,
+    );
   }
 
   push(samples: Float32Array | number[]): void {

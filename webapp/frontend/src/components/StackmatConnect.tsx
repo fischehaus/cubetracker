@@ -11,13 +11,29 @@ import { InfoButton } from "./InfoButton";
 
 interface Props {
   state: StackmatState;
-  connect: () => void | Promise<void>;
+  connect: (deviceId?: string | null) => void | Promise<void>;
   disconnect: () => void | Promise<void>;
   isSupported: boolean;
 }
 
 function fmt(ms: number): string {
   return (ms / 1000).toFixed(2);
+}
+
+/** Live-Pegel-Balken (W.stackmat-diag) — zeigt, ob Audio ankommt. */
+function LevelMeter({ level }: { level: number }) {
+  // Wurzel-Skalierung: kleine Signale sichtbarer machen.
+  const pct = Math.min(100, Math.round(Math.sqrt(level) * 100));
+  const color =
+    pct > 4 ? "bg-emerald-400" : "bg-gray-600";
+  return (
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-700/60">
+      <div
+        className={`h-full ${color} transition-[width] duration-150`}
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
 }
 
 export function StackmatConnect({
@@ -101,6 +117,36 @@ export function StackmatConnect({
               {t("stackmat.savedNote")}
             </span>
           </div>
+        )}
+
+        {/* Pegel-Balken (W.stackmat-diag): sofort sichtbar, ob Audio ankommt. */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-[10px] text-gray-400">
+            <span>{t("stackmat.levelLabel")}</span>
+            {state.inputLevel < 0.01 && (
+              <span className="text-amber-300">{t("stackmat.levelNone")}</span>
+            )}
+          </div>
+          <LevelMeter level={state.inputLevel} />
+        </div>
+
+        {/* Geräte-Auswahl — die häufigste Fehlerquelle ist das falsche
+            Eingabegerät. Nur zeigen wenn es mehr als eines gibt. */}
+        {state.devices.length > 1 && (
+          <label className="block text-[11px] text-gray-400">
+            {t("stackmat.deviceLabel")}
+            <select
+              value={state.deviceId ?? ""}
+              onChange={(e) => void connect(e.target.value || null)}
+              className="mt-1 w-full rounded border border-gray-600 bg-gray-800 px-2 py-1.5 text-xs text-gray-100 focus:border-purple-500 focus:outline-none"
+            >
+              {state.devices.map((d) => (
+                <option key={d.deviceId} value={d.deviceId}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </label>
         )}
 
         {!state.hasSignal && (
