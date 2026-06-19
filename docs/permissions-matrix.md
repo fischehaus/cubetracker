@@ -765,6 +765,24 @@ Der Browser fragt den User explizit nach Bluetooth-Erlaubnis pro
 Pairing-Vorgang; nach Tab-Close oder Disconnect ist die Verbindung
 weg.
 
+### Mikrofon-Audio (Stackmat-Timer-Anbindung) — kein Server-Roundtrip
+
+Phase W.stackmat (2026-06-13) liest das Signal eines Stackmat-/Speed-Stacks-
+Timers über die Klinkenbuchse via `getUserMedia(audio)` + Web Audio
+(`lib/stackmat.ts`, `hooks/useStackmatTimer.ts`).
+
+| Aspekt | Wer sieht / wo lebt das Datum |
+|---|---|
+| **Mikrofon-Permission** | Browser-native Permission-Prompt pro Verbindung. Voraussetzung: `Permissions-Policy: microphone=(self)` (nginx) + HTTPS. |
+| **Audio-Samples** | Werden **ausschließlich lokal im Browser** dekodiert (Float32 → UART-Decode → Zeit-Zahl). **Kein Audio-Byte** geht ans Backend, in Logs oder an Dritte. Keine Aufnahme, kein Speichern des Audios. |
+| **Solve-Time** | Nur die dekodierte Zahl geht wie bei manueller Eingabe an `POST /solves`. Der Timer ist ein Eingabe-Pfad, kein neuer Datenkanal. |
+| **Lebensdauer** | MediaStream-Tracks werden bei Disconnect/Unmount gestoppt, AudioContext geschlossen — Mikrofon-Indicator des Browsers erlischt. |
+| **Browser-Constraint** | Web Audio + getUserMedia in allen aktuellen Browsern (Chrome/Edge/Firefox/Safari) über HTTPS. Ohne Mic-Permission → Hinweis statt Signal. |
+
+**Trust-Block-Kompatibilität:** „Kein Tracking, keine Drittanbieter-Cookies"
+bleibt korrekt — der Mikrofon-Zugriff dient rein der lokalen Signal-Dekodierung
+und verlässt das Gerät nie.
+
 ---
 
 ## 9. Bekannte Privacy-by-Design-Spots

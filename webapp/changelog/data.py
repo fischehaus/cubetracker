@@ -44,6 +44,23 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.stackmat",
+        released=date(2026, 6, 13),
+        title="⏱️ Stackmat-Timer per Kabel anbinden",
+        highlights=[
+            "Neu im Timer-Tab: einen Speed-Stacks-/StackMat-Timer (Gen3/4/5) "
+            "über die Klinkenbuchse verbinden. Du brauchst das Stackmat-"
+            "Datenkabel vom Timer zum Mikrofon-/Line-In-Eingang deines Geräts.",
+            "Nach „Stackmat verbinden\" und der Mikrofon-Freigabe erscheint "
+            "„Signal OK\" — jeder Solve am Timer wird dann automatisch "
+            "gespeichert (Cube/Session/Hardware wie eingestellt). +2/DNF kannst "
+            "du danach mit den Schnell-Knöpfen korrigieren.",
+            "Die Zeit kommt direkt vom Timer (kein Abtippen, keine "
+            "Hand-Ungenauigkeit). Funktioniert in Chrome/Edge/Firefox/Safari "
+            "über HTTPS.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.oll-scramble-fix",
         released=date(2026, 6, 13),
         title="🧩 Trainer: OLL-17-Scramble repariert + echte Winkel-Variation",
