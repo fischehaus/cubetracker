@@ -9,6 +9,39 @@ Konsequenz (was wurde im Setup geändert).
 
 ---
 
+## 2026-06-19 — Ungepinnte Dependency-Drift bricht CI (FastAPI 0.137) + Frontend-Deploy-Lag
+
+**Event (W.stackmat):** Nach dem Push einer reinen Frontend-Welle (+ Patch-Note)
+wurde der CI-Test-Gate rot — `test_api_prefix` fand keine `/api`-Routen mehr.
+Ursache war NICHT der Wellen-Code: FastAPI war seit dem letzten grünen Lauf (6
+Tage) von 0.136 → 0.137 gesprungen (frische CI-`pip install`, lokal noch 0.136).
+FastAPI 0.137 legt mit `include_router` keine flachen `APIRoute`-Objekte mehr in
+`app.routes`, sondern einen `_IncludedRouter`-Wrapper ohne `.path` — der flache
+Test-Scan sah die Sub-Routen nicht mehr (Laufzeit-Routing + alle echten API-Tests
+blieben grün). **Diagnose-Methode:** frisches venv mit `pip install ./webapp[dev]`
+gebaut = exakte CI-Resolution (fastapi 0.137.2 / starlette 1.3.1), Bruch
+reproduziert. **Fix:** Test auf `app.openapi()["paths"]` umgestellt (stabiler
+öffentlicher Vertrag statt FastAPI-Internas), in beiden venvs verifiziert (253
+passed im CI-venv).
+
+**Zwei Lessons:**
+1. **Ungepinnte Backend-Deps + frische CI-Resolution = latente Zeitbombe.** Das
+   Gate hat den Bruch korrekt VOR dem Deploy gefangen (Prod blieb stabil) — aber
+   jeder beliebige Push an dem Tag wäre rot gewesen. Tests sollten nicht an
+   Framework-Internas (`app.routes`-Shape) hängen; gegen öffentliche Verträge
+   (OpenAPI) prüfen. Optional künftig: Backend-Deps pinnen (Analyse Welle C).
+2. **Frontend-Deploy-Lag nach rot-gegatetem Push.** Backend ging live
+   (`W.stackmat`), Frontend NICHT — die FE-Commits steckten in den rot-gegateten
+   Pushes (kein Deploy bei `needs: test`-Fail), und der grüne Folge-Push (Test-
+   Fix) berührte nur `webapp/tests/` → deploy.yml triggerte nur Backend. Heißt:
+   ein grüner Push deployt nur die Apps, deren Pfade ER ändert — frühere, nie
+   deployte FE-Änderungen bleiben hängen. **Fix:** `gh workflow run deploy.yml`
+   (workflow_dispatch deployt FE+BE). **Genau dafür** prüft `/abschluss` Check 9
+   das Live-Bundle gegen einen neuen String. Immer verifizieren, dass BEIDE Apps
+   den erwarteten Stand zeigen, nicht nur die Health-Version.
+
+---
+
 ## 2026-06-13 — Stop-Hook-Endlosschleife: additionalContext + dauerhaft dirty Tree
 
 **Event:** Der `stop-mini-check.sh`-Stop-Hook (gedacht als 1×-pro-Session-

@@ -24,6 +24,33 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-19 — W.stackmat: Stackmat-Timer per Klinke (Audio)
+
+**`W.stackmat`** (Tag gesetzt; FE `950daba` / BE+Patch-Note `0349dc3` /
+Test-Fix `c9dfffd`; live nach manuellem Dual-Deploy). Neuer Hardware-Eingang
+neben Smart-Cube — User-Wunsch (G5 + Kabel vorhanden):
+- `lib/stackmat.ts` (pur, 17 Tests): UART-1200baud-Decoder (adaptiver
+  Schwellwert, self-syncing, **checksum-gated = fail-safe**), DualDecoder
+  (beide Polaritäten), SolveTracker (genau 1 Solve/Lauf), Encoder für Tests.
+- `hooks/useStackmatTimer.ts`: getUserMedia(audio, EC/NS/AGC AUS) +
+  ScriptProcessor → CustomEvent `cubetracker:stackmat-solve`; `BigTimerInput`
+  speichert via `useCreateSolve` (wie Smart-Cube). connectingRef-Guard gegen
+  Race/Zombie-Stream (QA).
+- `StackmatConnect.tsx` + App-Block; nginx `microphone=(self)`; i18n
+  `stackmat.*`; permissions-matrix-Eintrag (Audio nur lokal, kein Byte ans BE).
+- **Live verifiziert:** FE-Bundle `index-Brt0WH7J.js`, Header `microphone=(self)`,
+  `stackmat-solve` im Bundle, Health `W.stackmat`.
+- ⏳ **WARTET AUF HARDWARE-TEST des Users (G5 + Kabel):** Der Audio-Pfad ist
+  ohne Gerät nicht final verifizierbar. Fail-safe-Design fängt
+  Polaritäts-/Protokoll-Abweichungen ab (→ „kein Signal" statt Falschzeit).
+  Wenn „kein Signal": Browser-Konsolen-Log vom User holen, Decoder gezielt
+  nachjustieren (Frame-Layout/Status-Alphabet der G5-Generation).
+- **2 Lessons** (siehe `docs/lessons-archive.md` 2026-06-19): FastAPI-0.137-
+  Dep-Drift brach `test_api_prefix` (→ jetzt OpenAPI-basiert) · Frontend-
+  Deploy-Lag nach rot-gegatetem Push (→ `gh workflow run deploy.yml`).
+
+---
+
 ## ✅ ERLEDIGT 2026-06-13 (Forts. 2) — W.oll-scramble-fix: OLL-17 + Winkel-Variation
 
 **`W.oll-scramble-fix`** (FE `7829d20` + BE `9618e62`, Tag gesetzt, live
