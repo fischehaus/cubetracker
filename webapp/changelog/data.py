@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.stackmat-diag",
+        released=date(2026, 6, 13),
+        title="⏱️ Stackmat-Anbindung: Pegel-Anzeige + Geräte-Auswahl",
+        highlights=[
+            "Wenn der Stackmat „wartet auf Signal\" anzeigt, hilft jetzt eine "
+            "Diagnose: ein Live-Pegel-Balken zeigt sofort, ob überhaupt Audio "
+            "ankommt, und du kannst das richtige Audio-Eingabegerät wählen "
+            "(häufigste Ursache: der Browser hört auf dem eingebauten Mikrofon "
+            "statt auf dem Eingang mit dem Kabel).",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.stackmat",
         released=date(2026, 6, 13),
         title="⏱️ Stackmat-Timer per Kabel anbinden",
