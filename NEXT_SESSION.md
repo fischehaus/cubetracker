@@ -40,11 +40,17 @@ neben Smart-Cube — User-Wunsch (G5 + Kabel vorhanden):
   `stackmat.*`; permissions-matrix-Eintrag (Audio nur lokal, kein Byte ans BE).
 - **Live verifiziert:** FE-Bundle `index-Brt0WH7J.js`, Header `microphone=(self)`,
   `stackmat-solve` im Bundle, Health `W.stackmat`.
-- ⏳ **WARTET AUF HARDWARE-TEST des Users (G5 + Kabel):** Der Audio-Pfad ist
-  ohne Gerät nicht final verifizierbar. Fail-safe-Design fängt
-  Polaritäts-/Protokoll-Abweichungen ab (→ „kein Signal" statt Falschzeit).
-  Wenn „kein Signal": Browser-Konsolen-Log vom User holen, Decoder gezielt
-  nachjustieren (Frame-Layout/Status-Alphabet der G5-Generation).
+- ✅ **AM ECHTEN G5 VERIFIZIERT (2026-06-19):** 6.04s-Solve live erkannt +
+  automatisch gespeichert (sogar als PB). Weg dahin: W.stackmat-diag
+  (Pegel-Balken + Geräte-Auswahl + Hex-Diagnose-Log + „Diagnose kopieren"-
+  Button) → User schickte Hardware-Mitschnitt → **W.stackmat-g5**: G5 sendet
+  die Zeit als rohe ms-Ziffern OHNE Status-Char ("07944"+Checksum'X' → 7944ms),
+  nicht M:SS.CC wie Gen3/4. parseStackmatFrame erkennt jetzt beide Formate,
+  appendByte trenner-basiert (CR/LF) für variable Frame-Längen. 23 stackmat-
+  Tests inkl. echter Geräte-Bytes.
+- 🔧 Optionaler Tidy-Up später: das 2s-Konsolen-Diagnose-Log (nur aktiv wenn
+  KEIN Signal) könnte hinter einen Debug-Toggle — harmlos, da bei aktivem
+  Signal stumm. Pegel-Balken + Geräte-Auswahl bleiben (nützlich fürs Setup).
 - **2 Lessons** (siehe `docs/lessons-archive.md` 2026-06-19): FastAPI-0.137-
   Dep-Drift brach `test_api_prefix` (→ jetzt OpenAPI-basiert) · Frontend-
   Deploy-Lag nach rot-gegatetem Push (→ `gh workflow run deploy.yml`).
