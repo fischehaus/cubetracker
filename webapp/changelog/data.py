@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.stackmat-g5",
+        released=date(2026, 6, 13),
+        title="⏱️ Stackmat: Speed-Stacks-G5-Format unterstützt",
+        highlights=[
+            "Der G5-Timer (Speed Stacks Gen5) sendet seine Zeit in einem "
+            "anderen Format als die älteren Gen3/4 (reine Millisekunden, ohne "
+            "Status-Zeichen) — das hat die Erkennung blockiert. Anhand eines "
+            "echten Geräte-Mitschnitts entschlüsselt und eingebaut: G5-Zeiten "
+            "werden jetzt korrekt erkannt und automatisch gespeichert.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.stackmat-diag",
         released=date(2026, 6, 13),
         title="⏱️ Stackmat-Anbindung: Pegel-Anzeige + Geräte-Auswahl",
