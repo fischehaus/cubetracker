@@ -39,26 +39,61 @@ export interface StackmatPacket {
 // Frame-Parser (status + 5 Ziffern + checksum)
 // ======================================================================
 
+/** Quersumme der ASCII-Ziffern (für die Checksum = Σ Ziffern + 64). */
+function sumDigits(digits: string): number {
+  let s = 0;
+  for (let i = 0; i < digits.length; i++) s += digits.charCodeAt(i) - 48;
+  return s;
+}
+
 /**
- * Parst genau 7 Zeichen (status + 5 Ziffern + checksum) zu einem Paket.
- * Liefert null wenn Format ODER Checksum nicht stimmen (fail-safe).
+ * Parst einen Frame (Inhalt zwischen den CR/LF-Trennern, OHNE Trenner) zu
+ * einem Paket. Unterstützt zwei Generationen — Checksum ist in beiden
+ * `Σ Ziffern + 64`. Liefert null wenn Format ODER Checksum nicht stimmen
+ * (fail-safe: falsche Polarität / Fremd-Protokoll → kein Paket).
+ *
+ *  - **G5 / Speed-Stacks-Gen5** (am Gerät verifiziert 2026-06-19): nur Ziffern
+ *    + Checksum, KEIN Status-Char. Die Ziffern sind die Zeit in
+ *    MILLISEKUNDEN: "07944" + 'X'(=24+64) → 7944 ms = 7.944 s. 5 Ziffern (bis
+ *    99.999 s) oder 6 (bis ~16 min).
+ *  - **Gen3/4** (klassisch): [status A-Z/space][5 Ziffern M SS CC][checksum].
  */
 export function parseStackmatFrame(chars: string): StackmatPacket | null {
-  if (chars.length !== 7) return null;
-  const status = chars[0];
-  // Status: Großbuchstabe oder Leerzeichen (running). Alles andere = unsync.
-  if (!/^[A-Z ]$/.test(status)) return null;
-  const digits = chars.slice(1, 6);
-  if (!/^[0-9]{5}$/.test(digits)) return null;
-  const d = [0, 1, 2, 3, 4].map((i) => digits.charCodeAt(i) - 48);
-  const sum = d[0] + d[1] + d[2] + d[3] + d[4];
-  if (chars.charCodeAt(6) !== sum + 64) return null;
+  if (chars.length < 6 || chars.length > 7) return null;
+  const checksum = chars.charCodeAt(chars.length - 1);
+  const body = chars.slice(0, chars.length - 1); // alles außer Checksum
 
-  const sec = d[1] * 10 + d[2];
-  const hund = d[3] * 10 + d[4];
-  if (sec > 59 || hund > 99) return null;
-  const timeMs = d[0] * 60000 + sec * 1000 + hund * 10;
-  return { status, timeMs, raw: chars };
+  // G5: reiner Ziffern-Body (5 oder 6) ohne Status. Zeit = Ziffern als ms.
+  if (/^[0-9]+$/.test(body)) {
+    if (checksum !== sumDigits(body) + 64) return null;
+    const timeMs = parseInt(body, 10);
+    if (timeMs > 60 * 60 * 1000) return null; // > 1 h = unplausibel
+    return { status: " ", timeMs, raw: chars };
+  }
+
+  // Gen3/4: status + 5 Ziffern + Checksum (genau 7 Zeichen).
+  if (body.length === 6 && /^[A-Z ][0-9]{5}$/.test(body)) {
+    const digits = body.slice(1);
+    if (checksum !== sumDigits(digits) + 64) return null;
+    const d = [0, 1, 2, 3, 4].map((i) => digits.charCodeAt(i) - 48);
+    const sec = d[1] * 10 + d[2];
+    const hund = d[3] * 10 + d[4];
+    if (sec > 59 || hund > 99) return null;
+    const timeMs = d[0] * 60000 + sec * 1000 + hund * 10;
+    return { status: body[0], timeMs, raw: chars };
+  }
+  return null;
+}
+
+/**
+ * Baut einen G5-Frame: Zeit als Millisekunden-Ziffern (min. 5-stellig, null-
+ * gepolstert) + Checksum, KEIN Status-Char. Gegenstück zur G5-Erkennung in
+ * parseStackmatFrame (am Gerät verifiziert). Für Tests + Encoder.
+ */
+export function buildStackmatFrameG5(timeMs: number): string {
+  const clamped = Math.max(0, Math.min(Math.round(timeMs), 60 * 60 * 1000));
+  const digits = String(clamped).padStart(5, "0");
+  return digits + String.fromCharCode(sumDigits(digits) + 64);
 }
 
 /**
@@ -206,26 +241,26 @@ export class StackmatDecoder {
     return byte;
   }
 
-  /** Sammelt Zeichen + extrahiert selbst-synchronisierend gültige Frames. */
+  /** Sammelt Zeichen bis zum CR/LF-Trenner, parst dann den Frame.
+   *  Trenner-basiert (statt Sliding-Window), weil der Frame variabel lang ist
+   *  (G5 6 Zeichen, Gen3/4 7) — die Länge des Laufs zwischen den Trennern sagt
+   *  dem Parser, welches Format vorliegt. Beide Stackmat-Generationen senden
+   *  zuverlässig CR+LF (0x0D 0x0A) am Frame-Ende. */
   private appendByte(byte: number): void {
-    // Steuerzeichen (CR/LF) trennen Frames sauber — sie lösen den Sync-Versuch
-    // unten ohnehin aus (kein gültiger status), wir brauchen sie nicht extra.
-    const ch = String.fromCharCode(byte & 0x7f);
-    this.onByte?.(ch);
-    this.line += ch;
-    while (this.line.length >= 7) {
-      const cand = this.line.slice(0, 7);
-      const p = parseStackmatFrame(cand);
-      if (p) {
-        this.onPacket(p);
-        this.line = this.line.slice(7);
-      } else {
-        // Ein Zeichen abwerfen und neu ausrichten.
-        this.line = this.line.slice(1);
+    const code = byte & 0x7f;
+    this.onByte?.(String.fromCharCode(code));
+    if (code === 0x0a || code === 0x0d) {
+      if (this.line.length >= 6) {
+        const p = parseStackmatFrame(this.line);
+        if (p) this.onPacket(p);
       }
+      this.line = "";
+      return;
     }
-    // Memory-Schranke falls nie ein gültiger Frame kommt (falsche Polarität).
-    if (this.line.length > 32) this.line = this.line.slice(-16);
+    this.line += String.fromCharCode(code);
+    // Ein Frame ist max. 7 Zeichen — läuft es über (verpasster Trenner),
+    // hinten beschneiden statt unbegrenzt wachsen zu lassen.
+    if (this.line.length > 8) this.line = this.line.slice(-8);
   }
 }
 

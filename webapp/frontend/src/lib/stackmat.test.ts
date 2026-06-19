@@ -11,6 +11,7 @@ import {
   StackmatSolveTracker,
   parseStackmatFrame,
   buildStackmatFrame,
+  buildStackmatFrameG5,
   encodeStackmatFrame,
   encodeStackmatBytes,
   type StackmatPacket,
@@ -54,6 +55,34 @@ describe("buildStackmatFrame / parseStackmatFrame", () => {
 
   it("weist falsche Checksum ab (fail-safe)", () => {
     expect(parseStackmatFrame("S01234K")).toBeNull(); // 'K' statt 'J'
+  });
+
+  it("G5: echte Geräte-Bytes '07944'+'X' → 7944 ms (7.944 s), kein Status", () => {
+    // Verifiziert am echten G5 (2026-06-19): Anzeige 7.944 s.
+    // Quersumme 0+7+9+4+4=24, +64=88=0x58='X'.
+    const p = parseStackmatFrame("07944X");
+    expect(p).not.toBeNull();
+    expect(p!.timeMs).toBe(7944);
+    expect(p!.status).toBe(" ");
+  });
+
+  it("G5: buildStackmatFrameG5 ist roundtrip-fähig", () => {
+    for (const ms of [0, 7944, 12340, 82490, 99999]) {
+      const frame = buildStackmatFrameG5(ms);
+      const p = parseStackmatFrame(frame);
+      expect(p, `parse ${ms}`).not.toBeNull();
+      expect(p!.timeMs).toBe(ms);
+    }
+  });
+
+  it("G5: 6-stellige ms (>99.999 s) werden geparst", () => {
+    const frame = buildStackmatFrameG5(125450); // 2:05.450
+    expect(frame.length).toBe(7); // 6 Ziffern + Checksum
+    expect(parseStackmatFrame(frame)!.timeMs).toBe(125450);
+  });
+
+  it("G5: falsche Checksum am Ziffern-Frame → null", () => {
+    expect(parseStackmatFrame("07944Y")).toBeNull(); // 'Y' statt 'X'
   });
 
   it("weist falsche Länge / Nicht-Ziffern / falschen Status ab", () => {
@@ -102,6 +131,43 @@ describe("StackmatDecoder Encoder→Decoder-Roundtrip", () => {
     const packets = collectPackets(signal, sampleRate, 1000);
     // Alle gültigen Frames müssen ankommen, in Reihenfolge.
     expect(packets.map((p) => p.timeMs)).toEqual(times);
+  });
+
+  it("G5: Audio-Roundtrip eines Ziffern-Frames (kein Status) @ 48000Hz", () => {
+    const sampleRate = 48000;
+    // Frame wie das echte G5: 5 ms-Ziffern + Checksum, Trenner CR+LF.
+    const frame = buildStackmatFrameG5(7944) + "\r\n";
+    const bytes = [...frame].map((c) => c.charCodeAt(0));
+    const signal = encodeStackmatBytes(bytes, { sampleRate });
+    const packets = collectPackets(signal, sampleRate);
+    expect(packets.length).toBeGreaterThanOrEqual(1);
+    expect(packets[0].timeMs).toBe(7944);
+  });
+
+  it("G5: kompletter Solve-Lauf (Audio → Tracker) = genau 1 Solve", () => {
+    const sampleRate = 44100;
+    // G5 sendet keine '0'-Reset-Frames im Capture; Lauf: laufende (steigende)
+    // Zeiten → eingefrorene Endzeit. Tracker erkennt Stop per Stabilität.
+    const msSeq = [1230, 4560, 7944, 7944, 7944, 7944];
+    const parts = msSeq.map((ms) => {
+      const f = buildStackmatFrameG5(ms) + "\r\n";
+      return encodeStackmatBytes([...f].map((c) => c.charCodeAt(0)), { sampleRate });
+    });
+    const total = parts.reduce((a, p) => a + p.length, 0);
+    const signal = new Float32Array(total);
+    let off = 0;
+    for (const p of parts) {
+      signal.set(p, off);
+      off += p.length;
+    }
+    const solves: number[] = [];
+    const tracker = new StackmatSolveTracker({ onSolve: (ms) => solves.push(ms) });
+    const dec = new StackmatDualDecoder(sampleRate, (p) => tracker.onPacket(p));
+    const chunk = 2048;
+    for (let i = 0; i < signal.length; i += chunk) {
+      dec.push(signal.subarray(i, Math.min(i + chunk, signal.length)));
+    }
+    expect(solves).toEqual([7944]);
   });
 
   it("liefert KEINE Pakete bei reinem Rauschen (fail-safe)", () => {
