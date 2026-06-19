@@ -1,11 +1,16 @@
 # Backup-Strategie
 
-> **Stand 2026-05-25 (Hetzner-live):** Die App läuft auf Hetzner Cloud +
+> **Stand 2026-06-19 (Hetzner-live):** Die App läuft auf Hetzner Cloud +
 > Coolify. Aktive Backups: **(A) Coolify Daily-DB-Backup** (täglicher pg_dump
-> on-server) + **(B) Hetzner Server-Backup** (VM-Snapshots, gebucht). Die
-> GitHub-Actions/Render-Anleitung weiter unten ist **Legacy** — sie sichert die
-> alte Render-DB und ist nur noch bis zum Render-Abbau (~2026-06-05) relevant.
-> Off-Site-S3-Sync ist optional und noch offen.
+> on-server) + **(B) Hetzner Server-Backup** (VM-Snapshots, gebucht).
+> **Der Legacy-GitHub-Actions-Workflow (`db-backup.yml`) wurde am 2026-06-19
+> entfernt** — er sicherte die längst abgebaute Render-DB und scheiterte
+> seitdem täglich (Render-DB nicht mehr erreichbar → Fehler-Mails). Die
+> Setup-/Restore-Anleitung unten bleibt als generische pg_dump/pg_restore-
+> Referenz stehen. Off-Site-S3/Backblaze-Sync der Coolify-Dumps ist weiter
+> **offen** (Welle B #9) — aktuell liegen A+B beide auf demselben Server.
+> Hinweis: das tote GitHub-Secret `DATABASE_URL_PROD` (Render-URL) kann
+> gelöscht werden, ist aber harmlos.
 
 Schutz-Ebenen — von Anwender- bis Disaster-Recovery:
 
@@ -21,14 +26,17 @@ Schutz-Ebenen — von Anwender- bis Disaster-Recovery:
 4. **Off-Site (offen)** — S3/Backblaze-Sync der Coolify-Dumps wäre die nächste
    Härtung (aktuell liegen alle Backups auf demselben Server → Restrisiko).
 
-5. **Legacy: Daily pg_dump via GitHub-Actions** (unten dokumentiert) — sicherte
-   die Render-DB als GitHub-Artifact. Läuft bis Render-Abbau, dann obsolet.
+5. ~~**Legacy: Daily pg_dump via GitHub-Actions**~~ — **ENTFERNT 2026-06-19.**
+   Sicherte die Render-DB als GitHub-Artifact; nach dem Render-Abbau nur noch
+   täglich fehlgeschlagen. Workflow-Datei `db-backup.yml` gelöscht.
 
-## Setup Daily-Backup via GitHub-Actions — LEGACY (sichert die Render-DB)
+## Setup Daily-Backup via GitHub-Actions — ENTFERNT (sicherte die Render-DB)
 
-> ⚠️ **Legacy seit der Hetzner-Migration.** Dieser Workflow sichert noch die
-> alte Render-DB und wird mit dem Render-Abbau (~2026-06-05) abgeschaltet. Die
-> Live-DB auf Hetzner wird stattdessen vom Coolify-Daily-Backup gesichert.
+> ⚠️ **Entfernt 2026-06-19** (Workflow `db-backup.yml` gelöscht). Sicherte die
+> alte Render-DB, die seit der Hetzner-Migration nicht mehr existiert — der
+> Cron scheiterte täglich. Die Live-DB auf Hetzner wird vom Coolify-Daily-
+> Backup + Hetzner-VM-Snapshots gesichert. Die folgende Anleitung bleibt als
+> generische pg_dump/pg_restore-Referenz (z.B. für ein künftiges Off-Site-Sync).
 
 GitHub Actions kann nicht ohne den DB-Connection-String. Den setzt du
 selbst als Repo-Secret (kein Push moeglich, Security):
