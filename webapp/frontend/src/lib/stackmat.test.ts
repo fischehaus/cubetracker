@@ -14,6 +14,7 @@ import {
   buildStackmatFrameG5,
   encodeStackmatFrame,
   encodeStackmatBytes,
+  truncateToWcaCentiseconds,
   type StackmatPacket,
 } from "./stackmat";
 
@@ -144,11 +145,13 @@ describe("StackmatDecoder Encoder→Decoder-Roundtrip", () => {
     expect(packets[0].timeMs).toBe(7944);
   });
 
-  it("G5: kompletter Solve-Lauf (Audio → Tracker) = genau 1 Solve", () => {
+  it("G5: kompletter Solve-Lauf (Audio → Tracker) = genau 1 Solve, WCA-abgeschnitten", () => {
     const sampleRate = 44100;
     // G5 sendet keine '0'-Reset-Frames im Capture; Lauf: laufende (steigende)
     // Zeiten → eingefrorene Endzeit. Tracker erkennt Stop per Stabilität.
-    const msSeq = [1230, 4560, 7944, 7944, 7944, 7944];
+    // Endzeit 7946 ms roh → 7940 ms (WCA: dritte Nachkommastelle abgeschnitten,
+    // NICHT auf 7950 gerundet). Beweist die Trunkierung über den Audio-Pfad.
+    const msSeq = [1230, 4560, 7946, 7946, 7946, 7946];
     const parts = msSeq.map((ms) => {
       const f = buildStackmatFrameG5(ms) + "\r\n";
       return encodeStackmatBytes([...f].map((c) => c.charCodeAt(0)), { sampleRate });
@@ -167,7 +170,7 @@ describe("StackmatDecoder Encoder→Decoder-Roundtrip", () => {
     for (let i = 0; i < signal.length; i += chunk) {
       dec.push(signal.subarray(i, Math.min(i + chunk, signal.length)));
     }
-    expect(solves).toEqual([7944]);
+    expect(solves).toEqual([7940]);
   });
 
   it("liefert KEINE Pakete bei reinem Rauschen (fail-safe)", () => {
@@ -248,6 +251,45 @@ describe("StackmatSolveTracker", () => {
       ["I", 0],
     ]);
     expect(solves).toEqual([6000, 7500]);
+  });
+
+  it("schneidet die emittierte Solve-Zeit WCA-konform auf Hundertstel ab", () => {
+    // Roh 7946 ms (echte G5-Millisekunden) → 7940 ms (7.94 s), NICHT 7950
+    // (7.95 s). Beweist: Trunkierung, kein Runden. Die interne Stop-Erkennung
+    // läuft trotzdem auf den rohen ms (sonst Fehl-Stop in derselben Hundertstel).
+    const solves = feed([
+      ["I", 0],
+      [" ", 1000],
+      [" ", 7946],
+      [" ", 7946],
+      [" ", 7946],
+      [" ", 7946],
+    ]);
+    expect(solves).toEqual([7940]);
+  });
+});
+
+describe("truncateToWcaCentiseconds (WCA: Hundertstel abschneiden, nicht runden)", () => {
+  it("verwirft die dritte Nachkommastelle statt zu runden", () => {
+    expect(truncateToWcaCentiseconds(7944)).toBe(7940);
+    expect(truncateToWcaCentiseconds(7946)).toBe(7940); // NICHT 7950
+    expect(truncateToWcaCentiseconds(7949)).toBe(7940); // NICHT 7950
+    expect(truncateToWcaCentiseconds(7940)).toBe(7940);
+    expect(truncateToWcaCentiseconds(7950)).toBe(7950);
+    expect(truncateToWcaCentiseconds(12345)).toBe(12340);
+    expect(truncateToWcaCentiseconds(999)).toBe(990);
+  });
+
+  it("ist idempotent (bereits abgeschnittene Zeit bleibt unverändert)", () => {
+    const once = truncateToWcaCentiseconds(7946);
+    expect(truncateToWcaCentiseconds(once)).toBe(once);
+  });
+
+  it("Randfälle: 0 / negativ / nicht-endlich → 0", () => {
+    expect(truncateToWcaCentiseconds(0)).toBe(0);
+    expect(truncateToWcaCentiseconds(-5)).toBe(0);
+    expect(truncateToWcaCentiseconds(Number.NaN)).toBe(0);
+    expect(truncateToWcaCentiseconds(Number.POSITIVE_INFINITY)).toBe(0);
   });
 });
 

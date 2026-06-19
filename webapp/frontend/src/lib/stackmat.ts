@@ -312,10 +312,25 @@ export class StackmatDualDecoder {
 export type StackmatTimerPhase = "idle" | "running" | "stopped";
 
 export interface StackmatTrackerEvents {
-  /** Solve abgeschlossen (genau einmal pro Lauf). timeMs = finale Zeit. */
+  /** Solve abgeschlossen (genau einmal pro Lauf). timeMs = finale Zeit,
+   *  WCA-konform auf Hundertstel abgeschnitten (truncateToWcaCentiseconds). */
   onSolve: (timeMs: number) => void;
-  /** Optional: Phasen-/Zeit-Update für die Live-Anzeige. */
+  /** Optional: Phasen-/Zeit-Update für die Live-Anzeige (ebenfalls auf
+   *  Hundertstel abgeschnitten — zeigt Hundertstel wie ein echtes
+   *  Stackmat-Display). */
   onChange?: (phase: StackmatTimerPhase, timeMs: number) => void;
+}
+
+/**
+ * Schneidet eine Zeit (ms) WCA-konform auf Hundertstelsekunden ab: die dritte
+ * Nachkommastelle wird VERWORFEN, NICHT gerundet (WCA-Regel — nur die ersten
+ * zwei Nachkommastellen zählen). Der G5 liefert echte Millisekunden, z.B.
+ * 7946 ms → 7.94 s (= 7940 ms), NICHT 7.95 s. Gen3/4 senden bereits Hundertstel
+ * (Vielfache von 10 ms) → hier ein No-Op. Reines Math.floor, kein Runden.
+ */
+export function truncateToWcaCentiseconds(ms: number): number {
+  if (!Number.isFinite(ms) || ms <= 0) return 0;
+  return Math.floor(ms / 10) * 10;
 }
 
 /**
@@ -329,6 +344,11 @@ export interface StackmatTrackerEvents {
  *     danach gesperrt bis zum nächsten Reset
  * So wird eine stehengebliebene Altzeit beim Verbinden NICHT als Solve
  * gewertet (running muss zuvor echt gelaufen sein).
+ *
+ * WCA-Präzision: die nach außen gegebene Zeit (onSolve + onChange) wird auf
+ * Hundertstel ABGESCHNITTEN, nicht gerundet. Die interne Lauf-/Stop-Erkennung
+ * vergleicht weiter die ROHEN Millisekunden — sonst zählten zwei ms in derselben
+ * Hundertstel als „eingefroren" und lösten einen Fehl-Stop mitten im Solve aus.
  */
 export class StackmatSolveTracker {
   private readonly events: StackmatTrackerEvents;
@@ -371,7 +391,11 @@ export class StackmatSolveTracker {
       this.lastTime = timeMs;
       this.stable = 0;
       if (status !== "S") this.running = true;
-      this.events.onChange?.(this.running ? "running" : "stopped", timeMs);
+      // Vergleich oben auf ROHEN ms — nach außen die WCA-abgeschnittene Zeit.
+      this.events.onChange?.(
+        this.running ? "running" : "stopped",
+        truncateToWcaCentiseconds(timeMs),
+      );
       return;
     }
 
@@ -381,8 +405,9 @@ export class StackmatSolveTracker {
     if (this.running && stopped && !this.emitted && timeMs > 0) {
       this.emitted = true;
       this.running = false;
-      this.events.onChange?.("stopped", timeMs);
-      this.events.onSolve(timeMs);
+      const finalMs = truncateToWcaCentiseconds(timeMs);
+      this.events.onChange?.("stopped", finalMs);
+      this.events.onSolve(finalMs);
     }
   }
 }
