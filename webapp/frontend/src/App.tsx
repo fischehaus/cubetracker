@@ -39,6 +39,8 @@ import { TimerControlsCard } from "./components/TimerControlsCard";
 import { TouchTimerPad } from "./components/TouchTimerPad";
 import { SmartCubeConnect } from "./components/SmartCubeConnect";
 import { useSmartCube } from "./hooks/useSmartCube";
+import { StackmatConnect } from "./components/StackmatConnect";
+import { useStackmatTimer } from "./hooks/useStackmatTimer";
 import { useAppSettings } from "./lib/settings";
 import { useMyFeedbackUnreadCount, useSessions } from "./lib/api";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
@@ -501,6 +503,10 @@ function TimerTab({
               User-Wunsch: wer im Fokus solven will, soll den Verbindungs-
               Status + Move-Counter weiter sehen koennen. */}
           <SmartCubeConnectBlock />
+          {/* W.stackmat (2026-06-13): Stackmat-/Speed-Stacks-Timer per
+              Klinkenkabel (Audio-Signal). Eigener Block direkt unter dem
+              Smart-Cube — beide Hardware-Eingänge an einer Stelle. */}
+          <StackmatConnectBlock />
           {/* TouchTimerPad rendert auf Desktop immer null — auf Phone nur
               sichtbar wenn Spacebar-Modus aktiv ist (Text-Mode = Soft-Tastatur,
               da gibt es nichts zu triggern). */}
@@ -544,6 +550,20 @@ function SmartCubeConnectBlock() {
       disconnect={disconnect}
       prepareForSolve={prepareForSolve}
       stopSolve={stopSolve}
+      isSupported={isSupported}
+    />
+  );
+}
+
+// W.stackmat (2026-06-13): eigener Block, damit der useStackmatTimer-Hook
+// (Audio-Pakete ~10/s) nur diesen Teilbaum re-rendert, nicht den ganzen Tab.
+function StackmatConnectBlock() {
+  const { state, connect, disconnect, isSupported } = useStackmatTimer();
+  return (
+    <StackmatConnect
+      state={state}
+      connect={connect}
+      disconnect={disconnect}
       isSupported={isSupported}
     />
   );

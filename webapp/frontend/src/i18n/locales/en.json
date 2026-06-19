@@ -95,6 +95,25 @@
     "fontSizeShrinkAria": "Shrink time display",
     "fontSizeGrowAria": "Grow time display"
   },
+  "stackmat": {
+    "headerTitle": "Stackmat timer (cable)",
+    "infoBody": "Connects a Speed Stacks / StackMat timer (Gen3/4/5) through the headphone jack. You need the Stackmat data cable from the timer's jack to your device's microphone / line-in input.\n\nAfter \"Connect\", allow microphone access. Once the cable is plugged in and the timer is on, \"Signal OK\" appears. Every solve on the timer is then saved automatically.\n\nTip: turn microphone volume up and disable microphone effects (noise suppression) on your device.",
+    "connectButton": "⏱️ Connect Stackmat",
+    "connectHint": "Jack cable timer → mic / line-in, then connect + allow microphone.",
+    "connectingLabel": "Waiting for microphone permission …",
+    "connectedTitle": "Stackmat connected",
+    "signalOk": "Signal OK",
+    "signalWaiting": "waiting for signal …",
+    "noSignalHint": "No valid signal yet. Check: cable plugged into mic/line-in, timer on, microphone volume up, audio effects off.",
+    "autoSaveNote": "Solves from the timer are saved automatically.",
+    "savedNote": "saved",
+    "disconnectButton": "Disconnect",
+    "retryButton": "Connect again",
+    "unsupportedTitle": "Audio input unavailable",
+    "unsupportedBody": "Your browser doesn't support microphone capture (Web Audio). Stackmat support needs a recent Chrome/Edge/Firefox/Safari over HTTPS.",
+    "permissionDenied": "Microphone access denied. Allow access in your browser settings (lock icon in the address bar) and connect again.",
+    "genericError": "Failed to connect to the audio input. Check whether another program is using the microphone."
+  },
   "smartCube": {
     "headerTitle": "Smart cube (Bluetooth)",
     "infoBody": "Connects a GAN smart cube (e.g. GAN i4, GAN 12/14 ui, MoYu AI 2023) via the Web Bluetooth API. The current MVP wave only proves the connection works and detects moves. Automatic solve tracking (timer starts/stops with the cube) comes in a follow-up wave. Browser constraint: Chrome / Edge / Brave / Opera (Desktop + Android). Safari and Firefox lack Web Bluetooth.",
@@ -950,6 +969,7 @@
     "hardwareBullet3": "Bulk actions per cube type (activate / deactivate / delete)",
     "hardwareBullet4": "Add your own cubes + rename freely",
     "hardwareBullet5": "Pair GAN i4 smart cube (Web Bluetooth, Chrome on Windows/Mac/Android) — live move counter in the timer tab, auto-solve detection in development",
+    "hardwareBullet6": "Connect a Stackmat / Speed Stacks timer (Gen3/4/5) via the jack cable — times are taken straight from the timer and saved automatically",
     "worldTitle": "Speedcubing world",
     "worldBullet1": "WCA tournaments near you: list of upcoming official competitions with distance calculation (straight line) based on your postal code + country from your profile",
     "worldBullet2": "DACH bonus: users in DE/AT/CH automatically also see tournaments from direct neighbouring countries (DE users e.g. AT, CH, NL, BE, LU, FR, DK, PL, CZ)",

@@ -103,6 +103,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
     icon: "🧊",
     bullets: [
       { key: "features.hardwareBullet5", audience: "public" }, // GAN i4 Smart-Cube
+      { key: "features.hardwareBullet6", audience: "public" }, // W.stackmat: Stackmat-Timer per Kabel
       { key: "features.hardwareBullet1", audience: "public" }, // 30 Cubes + Markieren (merged with 2)
       { key: "features.hardwareBullet4", audience: "expanded" }, // Eigene Cubes anlegen
       { key: "features.hardwareBullet3", audience: "internal" }, // Bulk-Aktionen

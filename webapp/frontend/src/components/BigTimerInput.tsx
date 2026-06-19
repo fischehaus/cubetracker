@@ -133,10 +133,6 @@ export function BigTimerInput({
       if (!detail || typeof detail.time_ms !== "number") return;
       // Direkter Save-Pfad — analog saveFromSpacebar ohne Penalty
       // (Cube-State ist immer „solved", also weder +2 noch DNF).
-      // eslint-disable-next-line no-console
-      console.log(
-        `[BigTimerInput] Smart-Cube-Solve empfangen: ${detail.time_ms} ms`,
-      );
       create.mutate(
         {
           time_ms: detail.time_ms,
@@ -166,6 +162,44 @@ export function BigTimerInput({
         "cubetracker:smart-cube-solve",
         onSmartCubeSolve,
       );
+  }, [cubeType, sessionId, hardwareId, scramble, create, onSolveSaved, t]);
+
+  // W.stackmat (2026-06-13): Listener fuer Stackmat-Solves (Audio-Timer ueber
+  // Klinke). useStackmatTimer emittiert `cubetracker:stackmat-solve` mit
+  // { time_ms } sobald ein Solve abgeschlossen ist. Direkter Save-Pfad analog
+  // Smart-Cube — der Stackmat liefert keine Penalty-Info (weder +2 noch DNF),
+  // der User kann nachträglich über die Quick-Penalty-Leiste korrigieren.
+  useEffect(() => {
+    function onStackmatSolve(e: Event) {
+      const ce = e as CustomEvent<{ time_ms: number }>;
+      const detail = ce.detail;
+      if (!detail || typeof detail.time_ms !== "number") return;
+      create.mutate(
+        {
+          time_ms: detail.time_ms,
+          cube_type: cubeType,
+          plus_two: false,
+          dnf: false,
+          session_id: sessionId,
+          hardware_id: hardwareId,
+          scramble: scramble && scramble.trim() !== "" ? scramble : null,
+        },
+        {
+          onSuccess: (savedSolve) => {
+            setTimeStr("");
+            setPlusTwo(false);
+            setDnf(false);
+            setLastSavedSolve(savedSolve);
+            onSolveSaved?.();
+          },
+          onError: (err) =>
+            setError(t("timer.errorPrefix", { message: err.message })),
+        },
+      );
+    }
+    window.addEventListener("cubetracker:stackmat-solve", onStackmatSolve);
+    return () =>
+      window.removeEventListener("cubetracker:stackmat-solve", onStackmatSolve);
   }, [cubeType, sessionId, hardwareId, scramble, create, onSolveSaved, t]);
 
   // Confirm beim Wechsel auf einen neuen Solve oder beim Ausblenden
