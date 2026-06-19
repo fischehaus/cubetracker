@@ -94,11 +94,15 @@ export function useStackmatTimer() {
   // Fortsetzung. teardown() setzt das Flag zurück.
   const connectingRef = useRef(false);
   // Diagnose (W.stackmat-diag): Peak-Pegel des letzten Audio-Blocks +
-  // Zähler/Ring der zuletzt dekodierten Roh-Bytes (für das Konsolen-Log,
-  // wenn zwar Audio kommt aber kein gültiges Frame validiert).
+  // Ring der zuletzt dekodierten Roh-Byte-CODES je Polarität (Hex-Dump fürs
+  // Konsolen-Log → erlaubt Ferndiagnose des exakten Frame-Formats, wenn Audio
+  // ankommt aber kein Frame mit meiner angenommenen Checksum validiert).
   const peakRef = useRef<number>(0);
   const rawByteCountRef = useRef<number>(0);
-  const rawSampleRef = useRef<string>("");
+  const rawHexRef = useRef<{ normal: number[]; inverted: number[] }>({
+    normal: [],
+    inverted: [],
+  });
 
   const isSupported =
     typeof navigator !== "undefined" &&
@@ -161,7 +165,7 @@ export function useStackmatTimer() {
     connectingRef.current = true;
     peakRef.current = 0;
     rawByteCountRef.current = 0;
-    rawSampleRef.current = "";
+    rawHexRef.current = { normal: [], inverted: [] };
     setState({ ...INITIAL, status: "connecting", deviceId: deviceId ?? null });
     try {
       // W.stackmat-diag: optionale Geräte-Wahl (häufigste Fehlerquelle: Windows
@@ -246,12 +250,14 @@ export function useStackmatTimer() {
       const decoder = new StackmatDualDecoder(
         ctx.sampleRate,
         (p) => tracker.onPacket(p),
-        // Diagnose: jedes dekodierte Roh-Byte zählen + die letzten ~24 Zeichen
-        // sammeln (zeigt im Log, ob UART-Bytes ankommen, falls kein Frame passt).
-        (ch) => {
+        // Diagnose: jedes dekodierte Roh-Byte zählen + die letzten ~60 Byte-
+        // CODES je Polarität als Ring halten (Hex-Dump im Log → exaktes
+        // Frame-Format remote analysierbar).
+        (ch, polarity) => {
           rawByteCountRef.current++;
-          const r = rawSampleRef.current + ch;
-          rawSampleRef.current = r.length > 24 ? r.slice(-24) : r;
+          const arr = rawHexRef.current[polarity];
+          arr.push(ch.charCodeAt(0) & 0xff);
+          if (arr.length > 60) arr.shift();
         },
       );
       decoderRef.current = decoder;
@@ -330,13 +336,14 @@ export function useStackmatTimer() {
       // Frame ankam — gibt dem User etwas zum Kopieren für die Ferndiagnose.
       ticks++;
       if (stale && ticks % 8 === 0) {
+        const hex = (a: number[]) =>
+          a.map((b) => b.toString(16).padStart(2, "0")).join(" ");
         // eslint-disable-next-line no-console
         console.log(
-          `[Stackmat-Diag] Pegel=${peak.toFixed(3)} ` +
-            `Roh-Bytes=${rawByteCountRef.current} ` +
-            `zuletzt=${JSON.stringify(rawSampleRef.current)} ` +
-            `(Pegel~0 → falsches Eingabegerät; Pegel>0 aber 0 Bytes → kein ` +
-            `1200-Baud-Signal; Bytes aber kein Solve → Protokoll-Variante)`,
+          `[Stackmat-Diag] Pegel=${peak.toFixed(3)} Roh-Bytes=${rawByteCountRef.current}\n` +
+            `  normal:   ${hex(rawHexRef.current.normal)}\n` +
+            `  inverted: ${hex(rawHexRef.current.inverted)}\n` +
+            `  (Hex der zuletzt dekodierten Bytes je Polaritaet — fuers Format-Debugging)`,
         );
       }
     }, 250);
