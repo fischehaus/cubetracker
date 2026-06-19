@@ -355,5 +355,21 @@ export function useStackmatTimer() {
     return () => teardown();
   }, [teardown]);
 
-  return { state, connect, disconnect, isSupported };
+  // Diagnose-Snapshot als Text (W.stackmat-diag) — für den „Diagnose
+  // kopieren"-Button. Liest die Refs zum Klick-Zeitpunkt (frisch), damit der
+  // User nicht im Konsolen-Log nach der richtigen Zeile suchen muss.
+  const getDiagnostics = useCallback((): string => {
+    const hex = (a: number[]) =>
+      a.map((b) => b.toString(16).padStart(2, "0")).join(" ");
+    const r = rawHexRef.current;
+    return [
+      "Stackmat-Diagnose",
+      `Pegel(letzt)=${state.inputLevel}  Roh-Bytes=${rawByteCountRef.current}  ` +
+        `SampleRate=${ctxRef.current?.sampleRate ?? "?"}  Signal=${state.hasSignal}`,
+      `normal:   ${hex(r.normal)}`,
+      `inverted: ${hex(r.inverted)}`,
+    ].join("\n");
+  }, [state.inputLevel, state.hasSignal]);
+
+  return { state, connect, disconnect, isSupported, getDiagnostics };
 }

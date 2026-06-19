@@ -5,6 +5,7 @@
 // Muster). Zustände: disconnected → connecting → listening (mit Live-Signal +
 // Zeit) → error. Beim Solve speichert BigTimerInput automatisch (Event).
 
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { StackmatState } from "../hooks/useStackmatTimer";
 import { InfoButton } from "./InfoButton";
@@ -14,6 +15,8 @@ interface Props {
   connect: (deviceId?: string | null) => void | Promise<void>;
   disconnect: () => void | Promise<void>;
   isSupported: boolean;
+  /** Liefert den Diagnose-Snapshot als Text (für „Diagnose kopieren"). */
+  getDiagnostics: () => string;
 }
 
 function fmt(ms: number): string {
@@ -41,8 +44,25 @@ export function StackmatConnect({
   connect,
   disconnect,
   isSupported,
+  getDiagnostics,
 }: Props) {
   const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  async function copyDiag() {
+    const text = getDiagnostics();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 3000);
+    } catch {
+      // Clipboard-API blockiert (selten) → Fallback: in die Konsole, der
+      // User kann es von dort kopieren.
+      // eslint-disable-next-line no-console
+      console.log(text);
+      window.alert(t("stackmat.copyDiagFallback"));
+    }
+  }
 
   if (!isSupported) {
     return (
@@ -150,9 +170,20 @@ export function StackmatConnect({
         )}
 
         {!state.hasSignal && (
-          <p className="text-[11px] text-emerald-200/70 leading-snug">
-            {t("stackmat.noSignalHint")}
-          </p>
+          <>
+            <p className="text-[11px] text-emerald-200/70 leading-snug">
+              {t("stackmat.noSignalHint")}
+            </p>
+            {/* Ein-Klick-Diagnose statt Konsolen-Suche (W.stackmat-diag): nimmt
+                den aktuellen Roh-Byte-Mitschnitt in die Zwischenablage. */}
+            <button
+              type="button"
+              onClick={() => void copyDiag()}
+              className="w-full rounded-lg border border-gray-600 bg-gray-800/60 px-3 py-2 text-xs font-medium text-gray-200 hover:bg-gray-700 active:scale-[0.98] transition-all"
+            >
+              {copied ? t("stackmat.copyDiagDone") : t("stackmat.copyDiag")}
+            </button>
+          </>
         )}
         <p className="text-[10px] text-emerald-200/60 italic">
           {t("stackmat.autoSaveNote")}

@@ -558,13 +558,15 @@ function SmartCubeConnectBlock() {
 // W.stackmat (2026-06-13): eigener Block, damit der useStackmatTimer-Hook
 // (Audio-Pakete ~10/s) nur diesen Teilbaum re-rendert, nicht den ganzen Tab.
 function StackmatConnectBlock() {
-  const { state, connect, disconnect, isSupported } = useStackmatTimer();
+  const { state, connect, disconnect, isSupported, getDiagnostics } =
+    useStackmatTimer();
   return (
     <StackmatConnect
       state={state}
       connect={connect}
       disconnect={disconnect}
       isSupported={isSupported}
+      getDiagnostics={getDiagnostics}
     />
   );
 }
