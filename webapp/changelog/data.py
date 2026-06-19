@@ -44,6 +44,21 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.stackmat-wca-trunc",
+        released=date(2026, 6, 20),
+        title="⏱️ Stackmat G5: Zeiten WCA-konform (Hundertstel abschneiden statt runden)",
+        highlights=[
+            "Der G5-Timer liefert die Zeit in Tausendstelsekunden. Bisher wurde "
+            "die gespeicherte Zeit daraus auf Hundertstel GERUNDET (7.946 s → "
+            "7.95 s). Nach WCA-Regel zählen aber nur die ersten zwei "
+            "Nachkommastellen — die dritte wird ABGESCHNITTEN, nicht gerundet: "
+            "7.946 s ist offiziell 7.94 s. Genau so speichert die App jetzt. "
+            "Live-Anzeige und gespeicherte Zeit sind damit identisch und "
+            "WCA-konform; Gen3/4-Timer senden ohnehin schon Hundertstel und "
+            "sind nicht betroffen.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.stackmat-g5",
         released=date(2026, 6, 13),
         title="⏱️ Stackmat: Speed-Stacks-G5-Format unterstützt",
