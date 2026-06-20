@@ -328,9 +328,16 @@ export function EinstellungenView({ onBack }: Props) {
 // ============================================================
 
 function GroupHeader({ children }: { children: React.ReactNode }) {
+  // Pillen-Backing analog PseudoViewHeader (W.einstellungen-groupheader-pille):
+  // die Gruppen-Header liegen direkt auf dem Seiten-/Skin-Hintergrund (nicht in
+  // einer Card) — nackter purple-Text war auf manchen Skins kaum lesbar
+  // (User-Befund). bg-gray-900/60 wird von der Skin-CSS auf deckend dunkel
+  // geschaltet (gilt für Nicht-Button-Elemente) → auf jedem Skin lesbar.
   return (
-    <h3 className="text-xs font-semibold uppercase tracking-wide text-purple-300/80 mt-1">
-      {children}
+    <h3 className="mt-1">
+      <span className="inline-flex items-center rounded-lg border border-gray-700 bg-gray-900/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-purple-300/80 shadow-sm">
+        {children}
+      </span>
     </h3>
   );
 }
