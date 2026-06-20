@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-input-source",
+        released=date(2026, 6, 20),
+        title="Fundament: Timer-Eingabequelle als Geräte-Setting",
+        highlights=[
+            "Internes Fundament für den kommenden Stackmat-Timer-Modus: ein "
+            "neues Geräte-Setting (timer_input_source) bestimmt künftig, welche "
+            "Quelle das große Timer-Display speist. Noch ohne sichtbare Wirkung "
+            "— Vorbereitung für „Stackmat live im großen Timer\".",
+        ],
+        internal=True,
+    ),
+    PatchNote(
+        version="2.0.0-alpha.W.einstellungen-groupheader-pille",
+        released=date(2026, 6, 20),
+        title="Einstellungen: Gruppen-Überschriften besser lesbar",
+        highlights=[
+            "Die Gruppen-Überschriften in den Einstellungen (z.B. „Timer & "
+            "Eingabe\") lagen nackt auf dem Seiten-Hintergrund und waren auf "
+            "manchen Skins schwer lesbar. Sie bekommen jetzt dasselbe "
+            "Pillen-Backing wie der Bereichs-Titel — auf jedem Skin gut lesbar.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.stackmat-wca-trunc",
         released=date(2026, 6, 20),
         title="⏱️ Stackmat G5: Zeiten WCA-konform (Hundertstel abschneiden statt runden)",
