@@ -52,6 +52,19 @@ export type TimerFontSize =
  */
 export type InspectionAudioMode = "beep" | "de" | "en" | "off";
 
+/**
+ * Eingabequelle für das GROSSE Timer-Display im Timer-Tab
+ * (W.timer-input-source, Fundament für W.stackmat-live-timer).
+ *   "keyboard" — Tastatur/Spacebar (Status-Quo). BEWUSST orthogonal zu
+ *                spacebar_enabled, damit ein Rückwechsel die Tastatur-Vorliebe
+ *                (Text vs. Spacebar-WCA/pragmatisch) nicht verliert.
+ *   "stackmat" — Stackmat-Audio-Timer ersetzt das große Display (Echtzeit) und
+ *                ist die alleinige Auto-Save-Quelle.
+ * Smart-Cube hat KEINEN eigenen Wert — er füttert nur den Auto-Save (Listener
+ * in BigTimerInput), daher genügen zwei Werte.
+ */
+export type TimerInputSource = "keyboard" | "stackmat";
+
 export interface AppSettings {
   /** Spacebar-Timer aktiviert (statt Tastatur-Eingabe). */
   spacebar_enabled: boolean;
@@ -109,6 +122,13 @@ export interface AppSettings {
    * nicht durch das Setting beeinflusst.
    */
   show_scramble_image: boolean;
+  /**
+   * W.timer-input-source: welche Eingabequelle das große Timer-Display im
+   * Timer-Tab speist. Default "keyboard". Vorrang-Regel: "stackmat" ersetzt das
+   * Display + ist die alleinige Auto-Save-Quelle; "keyboard" lässt die
+   * bestehende spacebar_enabled-Verzweigung unverändert greifen.
+   */
+  timer_input_source: TimerInputSource;
 }
 
 export const SETTINGS_DEFAULTS: AppSettings = {
@@ -125,6 +145,7 @@ export const SETTINGS_DEFAULTS: AppSettings = {
   timer_font_size: "xxl",
   drill_font_size: "xxl",
   show_scramble_image: true,
+  timer_input_source: "keyboard",
 };
 
 /**
@@ -183,7 +204,12 @@ export function loadSettings(): AppSettings {
       return SETTINGS_DEFAULTS;
     }
     const parsed = JSON.parse(raw) as Partial<AppSettings>;
-    return { ...SETTINGS_DEFAULTS, ...parsed };
+    const merged = { ...SETTINGS_DEFAULTS, ...parsed };
+    // Defensiv gegen korrupte/fremde Werte (der Spread merged blind, kein
+    // Enum-Guard): ein unerwarteter timer_input_source fällt auf "keyboard".
+    merged.timer_input_source =
+      merged.timer_input_source === "stackmat" ? "stackmat" : "keyboard";
+    return merged;
   } catch {
     return SETTINGS_DEFAULTS;
   }
