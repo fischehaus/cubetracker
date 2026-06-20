@@ -24,6 +24,33 @@ Commits sind.
 
 ---
 
+## ✅ ERLEDIGT 2026-06-20 — WCA-Trunkierung + Stackmat-Umzug (Quick-Wins) + Plan
+
+**WCA-Trunkierung G5** (`W.stackmat-wca-trunc`, Tag, live + verifiziert): G5-Zeiten
+werden auf Hundertstel ABGESCHNITTEN statt gerundet (7.946 s = 7.94 s, nicht 7.95).
+Trunkierung im `StackmatSolveTracker` an der Emit-Grenze; interne Lauf-/Stop-
+Erkennung bleibt auf rohen ms (sonst Fehl-Stop). +4 diskriminierende Tests.
+
+**Stackmat-Umzug — Design-Panel gelaufen, Quick-Wins live, Rest PAUSIERT:**
+Vorhaben — Verbindungs-Karten (Smart-Cube + Stackmat) aus dem Timer-Tab in die
+Einstellungen, + Stackmat als Timer-Modus mit Echtzeit-Display am großen Timer
+(wie csTimer). 10-Agenten-Design-Panel → **`docs/stackmat-settings-redesign-plan.md`**
+ist der vollständige, resume-bereite Plan (Architektur: Modul-Singleton-Stores +
+`useSyncExternalStore` nach `toast.ts`-Vorbild; 7 Stages; 2 KRITISCH-Fixes;
+User-Entscheidungen).
+- ✅ Stage 0 `W.einstellungen-groupheader-pille` (live): GroupHeader-Pille → Lesbarkeit auf Skins.
+- ✅ Stage 1 `W.timer-input-source` (live): Settings-Feld `keyboard`/`stackmat` (Fundament, +5 Tests).
+- ⏳ **Stage 2-6 offen — PAUSIERT (User 2026-06-20):** Stage 2 (Hardware-Singleton-
+  Stores, Verbindung überlebt Tab-Wechsel) ist der riskante Kern; Go-Live braucht
+  **Test am echten G5 + GAN** (nicht automatisierbar). **Nächste Session:**
+  `docs/stackmat-settings-redesign-plan.md` lesen → bei Stage 2 weitermachen →
+  User mit G5 + GAN bereithalten.
+
+**Doku-Drift gemerkt:** `CLAUDE.md` Tech-Stack sagt „React 18" — installiert ist
+**19.2.5** (verifiziert). Bei Gelegenheit korrigieren.
+
+---
+
 ## ✅ ERLEDIGT 2026-06-19 — W.stackmat: Stackmat-Timer per Klinke (Audio)
 
 **`W.stackmat`** (Tag gesetzt; FE `950daba` / BE+Patch-Note `0349dc3` /
