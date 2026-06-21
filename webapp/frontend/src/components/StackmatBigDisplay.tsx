@@ -30,24 +30,26 @@ export function StackmatBigDisplay({
   const liveMs = stackmatStore.useStackmatStore((s) => s.liveMs);
   const lastSolveMs = stackmatStore.useStackmatStore((s) => s.lastSolveMs);
 
-  // W.stackmat-live-clock (2026-06-20, User-Idee): der Stackmat liefert die
-  // Laufzeit nicht flüssig (oft erst die Endzeit) — also läuft während „running"
-  // eine LOKALE Uhr (requestAnimationFrame, 60fps), beim Start an der zuletzt
-  // gemeldeten Stackmat-Zeit verankert und danach unabhängig vom Datentakt.
-  // NACH dem Solve zeigen + speichern wir NICHT diese lokale Messung, sondern
-  // die vom Stackmat übermittelte Endzeit (lastSolveMs) — die ist hardware-genau.
+  // W.stackmat-live-clock (2026-06-20, User-Idee; verfeinert nach csTimer-
+  // Vorbild): während „running" läuft eine LOKALE Uhr (requestAnimationFrame,
+  // 60fps). NACH dem Solve zeigen + speichern wir NICHT die lokale Messung,
+  // sondern die vom Stackmat übermittelte Endzeit (lastSolveMs, hardware-genau).
   const [renderMs, setRenderMs] = useState(0);
   const anchorRef = useRef<number | null>(null);
-  const liveMsRef = useRef(liveMs);
-  liveMsRef.current = liveMs;
+
+  // Re-Sync nach csTimer-Vorbild: bei JEDEM Stackmat-Paket den lokalen Anker
+  // ans Gerät nachziehen (anchor = jetzt − Geräte-Zeit; csTimer:
+  // `startTime = now − hardTime`, ~10×/s). So bleibt die Uhr exakt am Gerät,
+  // und rAF glättet die Frames dazwischen auf 60fps — kein Ruckeln, kein
+  // Endsprung, weil die Endzeit unten ohnehin aus dem Gerät kommt.
   useEffect(() => {
-    if (phase !== "running") {
-      anchorRef.current = null;
-      return;
-    }
-    // Anker = jetzt minus zuletzt gemeldete Stackmat-Zeit; ab da unabhängig.
-    anchorRef.current = performance.now() - liveMsRef.current;
-    setRenderMs(liveMsRef.current); // sofort den Startwert zeigen (kein Stale-Frame)
+    anchorRef.current =
+      phase === "running" ? performance.now() - liveMs : null;
+  }, [phase, liveMs]);
+
+  // rAF-Loop: glatte 60fps-Anzeige aus dem (laufend re-syncten) Anker.
+  useEffect(() => {
+    if (phase !== "running") return;
     let raf = 0;
     const loop = () => {
       if (anchorRef.current != null) {
