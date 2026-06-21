@@ -38,9 +38,10 @@ import { SessionPlanCard } from "./components/SessionPlanCard";
 import { TimerControlsCard } from "./components/TimerControlsCard";
 import { TouchTimerPad } from "./components/TouchTimerPad";
 import { SmartCubeConnect } from "./components/SmartCubeConnect";
-import { useSmartCube } from "./hooks/useSmartCube";
+import * as smartCubeStore from "./lib/smartCubeStore";
 import { StackmatConnect } from "./components/StackmatConnect";
-import { useStackmatTimer } from "./hooks/useStackmatTimer";
+import * as stackmatStore from "./lib/stackmatStore";
+import { StackmatWorker, SmartCubeWorker } from "./components/HardwareWorkers";
 import { useAppSettings } from "./lib/settings";
 import { useMyFeedbackUnreadCount, useSessions } from "./lib/api";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
@@ -535,38 +536,36 @@ function TimerTab({
   );
 }
 
-// W.gan-cube-auto-time-v2: Wrapper damit der useSmartCube-Hook in
-// TimerTab nicht die ganze Card bei jedem MOVE-Event re-rendert —
-// nur dieser Block re-rendert. W.smart-cube-position-restore
-// (2026-05-28): Position wieder unter TimerControlsCard, im Fokus-
-// Modus damit ausgeblendet (vor-Demo-Polish).
+// W.hardware-singleton-store (2026-06-20): die Karte liest jetzt NUR den
+// Modul-Store (kein eigener Hook-Aufruf). Der einzige Hook-Owner ist
+// <SmartCubeWorker/> in MainLayout — so überlebt die Verbindung den
+// Tab-Wechsel. Selektor `s => s` ist ref-stabil zwischen echten Änderungen
+// (Store spiegelt die Hook-Guards) → re-rendert nur bei echten State-Changes.
 function SmartCubeConnectBlock() {
-  const { state, connect, disconnect, prepareForSolve, stopSolve, isSupported } =
-    useSmartCube();
+  const state = smartCubeStore.useSmartCubeStore((s) => s);
   return (
     <SmartCubeConnect
       state={state}
-      connect={connect}
-      disconnect={disconnect}
-      prepareForSolve={prepareForSolve}
-      stopSolve={stopSolve}
-      isSupported={isSupported}
+      connect={smartCubeStore.connect}
+      disconnect={smartCubeStore.disconnect}
+      prepareForSolve={smartCubeStore.prepareForSolve}
+      stopSolve={smartCubeStore.stopSolve}
+      isSupported={smartCubeStore.isSupported}
     />
   );
 }
 
-// W.stackmat (2026-06-13): eigener Block, damit der useStackmatTimer-Hook
-// (Audio-Pakete ~10/s) nur diesen Teilbaum re-rendert, nicht den ganzen Tab.
+// W.hardware-singleton-store: analog — Karte liest den Store, der einzige
+// Hook-Owner ist <StackmatWorker/> in MainLayout.
 function StackmatConnectBlock() {
-  const { state, connect, disconnect, isSupported, getDiagnostics } =
-    useStackmatTimer();
+  const state = stackmatStore.useStackmatStore((s) => s);
   return (
     <StackmatConnect
       state={state}
-      connect={connect}
-      disconnect={disconnect}
-      isSupported={isSupported}
-      getDiagnostics={getDiagnostics}
+      connect={stackmatStore.connect}
+      disconnect={stackmatStore.disconnect}
+      isSupported={stackmatStore.isSupported}
+      getDiagnostics={stackmatStore.getDiagnostics}
     />
   );
 }
@@ -1206,6 +1205,14 @@ function MainLayout() {
       {/* W.ia-app-shell: fixe Bottom-Nav für Phones (<md). In den Pseudo-Tabs
           ausgeblendet (eigener Zurück-Button), auf Desktop via md:hidden weg. */}
       {!isPseudoView && <BottomNav current={tab} onChange={handleTabChange} />}
+
+      {/* W.hardware-singleton-store (2026-06-20): unsichtbare Hook-Owner für
+          Stackmat + Smart-Cube. Hier (MainLayout, über der Tab-Umschaltung)
+          gemountet → die Verbindung überlebt den Tab-Wechsel und wird beim
+          Logout (MainLayout unmountet) sauber abgebaut. Alle Karten lesen den
+          Store. Null-rendering, kein Layout-Impact. */}
+      <StackmatWorker />
+      <SmartCubeWorker />
 
       {/* Globale Toaster + Modals — bleiben auf jedem Tab sichtbar.
           Die 3 Spezial-Toaster sind seit W.toast-manager (2026-05-30)
