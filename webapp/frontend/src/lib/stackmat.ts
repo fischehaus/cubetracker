@@ -383,6 +383,21 @@ export class StackmatSolveTracker {
     const { status, timeMs } = p;
 
     if (status === "I" || timeMs === 0) {
+      // G5-Stop (am Gerät verifiziert 2026-06-20): der Lauf endet mit einem
+      // 'I'/idle-Frame, das die ENDZEIT trägt (status 'I' + Zeit > 0), NICHT mit
+      // einem 'S'-Status. War vorher ein Lauf aktiv → das ist das Solve-Ende:
+      // genau einmal emittieren, die idle-Zeit IST die Endzeit.
+      if (this.running && !this.emitted && timeMs > 0) {
+        this.emitted = true;
+        this.running = false;
+        this.lastTime = 0;
+        this.stable = 0;
+        const finalMs = truncateToWcaCentiseconds(timeMs);
+        this.events.onChange?.("stopped", finalMs);
+        this.events.onSolve(finalMs);
+        return;
+      }
+      // Sonst: echtes idle / Reset auf 0.
       if (this.running || this.emitted) {
         this.running = false;
         this.emitted = false;

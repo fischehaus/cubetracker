@@ -233,6 +233,30 @@ describe("StackmatSolveTracker", () => {
     expect(solves).toEqual([9990]);
   });
 
+  it("G5-Stop per idle: Lauf ' ' → 'I' mit Endzeit emittiert die Endzeit", () => {
+    // Echtes G5-Verhalten (2026-06-20): der Stop kommt als idle-Frame mit der
+    // Endzeit (status 'I' + Zeit > 0), NICHT als 'S'. Frames zwischen dem
+    // letzten Lauf-Frame (5438) und der Endzeit (5630) wurden verpasst → die
+    // idle-Zeit ist maßgeblich.
+    const solves = feed([
+      ["I", 0],
+      [" ", 1000],
+      [" ", 5438],
+      ["I", 5630],
+      ["I", 5630],
+    ]);
+    expect(solves).toEqual([5630]);
+  });
+
+  it("idle mit Zeit 0 (echter Reset) emittiert NICHTS", () => {
+    const solves = feed([
+      ["I", 0],
+      [" ", 2000],
+      ["I", 0], // Reset auf 0 → kein Solve
+    ]);
+    expect(solves).toEqual([]);
+  });
+
   it("wertet eine beim Verbinden stehende Altzeit NICHT als Solve", () => {
     // Direkt eingefrorene Zeit ohne vorheriges running → kein Solve.
     const solves = feed([

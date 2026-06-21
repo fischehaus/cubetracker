@@ -2,20 +2,20 @@
 // (W.stackmat-live-timer, 2026-06-20).
 //
 // Ersetzt im Timer-Tab den Spacebar-/Text-Timer, wenn timer_input_source ===
-// "stackmat". Zeigt die vom Stackmat gemeldete Zeit: laufend → liveMs, beim
-// Stopp die eingefrorene Endzeit (lastSolveMs), die auch gespeichert wird.
-// Auto-Save läuft unverändert über den `cubetracker:stackmat-solve`-Listener
-// in BigTimerInput.
+// "stackmat". Während des Solves läuft eine lokale 60fps-Uhr; beim Stopp die vom
+// Stackmat übermittelte Endzeit (lastSolveMs), die auch gespeichert wird.
 //
-// HINWEIS (2026-06-20): Eine lokale 60fps-Uhr fürs flüssige Mitlaufen wurde
-// wieder entfernt — der getestete G5 streamt die Laufzeit offenbar NICHT
-// während des Solves (sendet die Zeit erst danach), wodurch die Uhr zur
-// falschen Zeit (nach dem Solve) lief. Ob überhaupt laufende Frames ankommen,
-// klärt das Diagnose-Log (W.stackmat-frame-diag).
+// W.stackmat-live-clock-v2 (2026-06-20): am echten G5 verifiziert, dass er die
+// Laufzeit streamt (status ' ' + steigende ms, ~10/s, aber stufig). Die lokale
+// Uhr wird bei JEDEM Paket ans Gerät re-synct (csTimer-Methode:
+// anchor = now − Geräte-Zeit) und glättet die Frames dazwischen auf 60fps. Der
+// frühere „Uhr lief nach dem Solve"-Effekt ist weg, seit der Decoder den
+// 'I'-Stop korrekt als Solve-Ende liest (stackmat.ts).
 //
 // Liest den Singleton-Store mit PRIMITIV-Selektoren → nur diese Blatt-
 // Komponente re-rendert, nicht der ganze Timer-Tab.
 
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as stackmatStore from "../lib/stackmatStore";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
@@ -31,10 +31,30 @@ export function StackmatBigDisplay({
   const status = stackmatStore.useStackmatStore((s) => s.status);
   const phase = stackmatStore.useStackmatStore((s) => s.phase);
   const hasSignal = stackmatStore.useStackmatStore((s) => s.hasSignal);
-  // Laufend → die vom Stackmat gemeldete Zeit; sonst die eingefrorene Endzeit.
-  const displayMs = stackmatStore.useStackmatStore((s) =>
-    s.phase === "running" ? s.liveMs : (s.lastSolveMs ?? 0),
-  );
+  const liveMs = stackmatStore.useStackmatStore((s) => s.liveMs);
+  const lastSolveMs = stackmatStore.useStackmatStore((s) => s.lastSolveMs);
+
+  // Lokale 60fps-Uhr, bei jedem Paket ans Gerät re-synct (csTimer-Methode).
+  const [renderMs, setRenderMs] = useState(0);
+  const anchorRef = useRef<number | null>(null);
+  useEffect(() => {
+    anchorRef.current = phase === "running" ? performance.now() - liveMs : null;
+  }, [phase, liveMs]);
+  useEffect(() => {
+    if (phase !== "running") return;
+    let raf = 0;
+    const loop = () => {
+      if (anchorRef.current != null) {
+        setRenderMs(performance.now() - anchorRef.current);
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [phase]);
+
+  // laufend → lokale 60fps-Uhr; sonst → die eingefrorene Stackmat-Endzeit.
+  const displayMs = phase === "running" ? renderMs : (lastSolveMs ?? 0);
 
   // Nicht verbunden → Hinweis-Link in die Einstellungen (F5). Kein stilles
   // 0.00-Display.
