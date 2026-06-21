@@ -170,21 +170,20 @@ export function StackmatConnect({
         )}
 
         {!state.hasSignal && (
-          <>
-            <p className="text-[11px] text-emerald-200/70 leading-snug">
-              {t("stackmat.noSignalHint")}
-            </p>
-            {/* Ein-Klick-Diagnose statt Konsolen-Suche (W.stackmat-diag): nimmt
-                den aktuellen Roh-Byte-Mitschnitt in die Zwischenablage. */}
-            <button
-              type="button"
-              onClick={() => void copyDiag()}
-              className="w-full rounded-lg border border-gray-600 bg-gray-800/60 px-3 py-2 text-xs font-medium text-gray-200 hover:bg-gray-700 active:scale-[0.98] transition-all"
-            >
-              {copied ? t("stackmat.copyDiagDone") : t("stackmat.copyDiag")}
-            </button>
-          </>
+          <p className="text-[11px] text-emerald-200/70 leading-snug">
+            {t("stackmat.noSignalHint")}
+          </p>
         )}
+        {/* W.stackmat-frame-diag: Diagnose IMMER verfügbar (nicht nur bei „kein
+            Signal") — für „läuft die Zeit nicht live mit?" einfach einen Solve
+            machen und dann hier klicken; das Log zeigt die Frame-Sequenz. */}
+        <button
+          type="button"
+          onClick={() => void copyDiag()}
+          className="w-full rounded-lg border border-gray-600 bg-gray-800/60 px-3 py-2 text-xs font-medium text-gray-200 hover:bg-gray-700 active:scale-[0.98] transition-all"
+        >
+          {copied ? t("stackmat.copyDiagDone") : t("stackmat.copyDiag")}
+        </button>
         <p className="text-[10px] text-emerald-200/60 italic">
           {t("stackmat.autoSaveNote")}
         </p>

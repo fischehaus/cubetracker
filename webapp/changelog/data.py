@@ -46,14 +46,15 @@ PATCH_NOTES: list[PatchNote] = [
     PatchNote(
         version="2.0.0-alpha.W.stackmat-live-clock",
         released=date(2026, 6, 20),
-        title="⏱️ Stackmat: Zeit läuft jetzt flüssig in Echtzeit mit",
+        title="Stackmat-Echtzeit-Anzeige: lokale Uhr versucht + zurückgenommen (Diagnose)",
         highlights=[
-            "Im Stackmat-Modus läuft die große Zeit jetzt während des Solves "
-            "flüssig in Echtzeit mit (eine lokale 60-fps-Uhr ab dem Start) — "
-            "vorher sprang sie, weil der Timer die Laufzeit nicht flüssig "
-            "überträgt. Nach dem Solve wird weiterhin die exakte, vom Stackmat "
-            "übermittelte Endzeit angezeigt und gespeichert.",
+            "Versuch, die Stackmat-Zeit im Timer-Modus per lokaler 60-fps-Uhr "
+            "flüssig mitlaufen zu lassen — wieder entfernt, weil der getestete "
+            "G5 die Laufzeit offenbar nicht streamt (sendet die Zeit erst nach "
+            "dem Solve), wodurch die Uhr zur falschen Zeit lief. Stattdessen ein "
+            "Frame-Diagnose-Log eingebaut, um zu klären, ob laufende Daten kommen.",
         ],
+        internal=True,
     ),
     PatchNote(
         version="2.0.0-alpha.W.timer-save-speed",

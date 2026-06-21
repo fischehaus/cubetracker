@@ -103,6 +103,11 @@ export function useStackmatTimer() {
     normal: [],
     inverted: [],
   });
+  // W.stackmat-frame-diag (2026-06-20): Ring der zuletzt DEKODIERTEN Pakete
+  // (Zeit + Status) — zeigt, ob der Stackmat die Laufzeit WÄHREND des Solves
+  // streamt (steigende ms) oder erst danach sendet. Antwort auf „Echtzeit läuft
+  // nicht mit". Cap ~400 (≈40 s bei 10/s).
+  const packetLogRef = useRef<{ ms: number; st: string }[]>([]);
 
   const isSupported =
     typeof navigator !== "undefined" &&
@@ -166,6 +171,7 @@ export function useStackmatTimer() {
     peakRef.current = 0;
     rawByteCountRef.current = 0;
     rawHexRef.current = { normal: [], inverted: [] };
+    packetLogRef.current = [];
     setState({ ...INITIAL, status: "connecting", deviceId: deviceId ?? null });
     try {
       // W.stackmat-diag: optionale Geräte-Wahl (häufigste Fehlerquelle: Windows
@@ -249,7 +255,14 @@ export function useStackmatTimer() {
 
       const decoder = new StackmatDualDecoder(
         ctx.sampleRate,
-        (p) => tracker.onPacket(p),
+        (p) => {
+          // W.stackmat-frame-diag: jedes dekodierte Paket protokollieren (für
+          // die Stream-vs-nur-Endzeit-Diagnose), dann normal an den Tracker.
+          const log = packetLogRef.current;
+          log.push({ ms: p.timeMs, st: p.status });
+          if (log.length > 400) log.shift();
+          tracker.onPacket(p);
+        },
         // Diagnose: jedes dekodierte Roh-Byte zählen + die letzten ~60 Byte-
         // CODES je Polarität als Ring halten (Hex-Dump im Log → exaktes
         // Frame-Format remote analysierbar).
@@ -362,10 +375,32 @@ export function useStackmatTimer() {
     const hex = (a: number[]) =>
       a.map((b) => b.toString(16).padStart(2, "0")).join(" ");
     const r = rawHexRef.current;
+    // W.stackmat-frame-diag: dekodierte Pakete zu Läufen gleicher (ms,status)
+    // zusammenfassen — so sieht man sofort, ob die Zeit während des Solves
+    // STEIGT (Stream) oder erst am Ende als ein Wert auftaucht. xN ≈ N·100 ms.
+    const log = packetLogRef.current;
+    const runs: string[] = [];
+    let pMs: number | null = null;
+    let pSt = "";
+    let n = 0;
+    for (const e of log) {
+      if (e.ms === pMs && e.st === pSt) {
+        n++;
+      } else {
+        if (pMs !== null) runs.push(`ms=${pMs} st='${pSt}' x${n}`);
+        pMs = e.ms;
+        pSt = e.st;
+        n = 1;
+      }
+    }
+    if (pMs !== null) runs.push(`ms=${pMs} st='${pSt}' x${n}`);
     return [
       "Stackmat-Diagnose",
       `Pegel(letzt)=${state.inputLevel}  Roh-Bytes=${rawByteCountRef.current}  ` +
         `SampleRate=${ctxRef.current?.sampleRate ?? "?"}  Signal=${state.hasSignal}`,
+      `Pakete=${log.length}`,
+      "Paket-Laeufe (neueste Solve-Sequenz, xN ~ N*100ms):",
+      ...runs.slice(-50),
       `normal:   ${hex(r.normal)}`,
       `inverted: ${hex(r.inverted)}`,
     ].join("\n");

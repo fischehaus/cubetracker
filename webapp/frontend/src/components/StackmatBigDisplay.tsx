@@ -2,16 +2,20 @@
 // (W.stackmat-live-timer, 2026-06-20).
 //
 // Ersetzt im Timer-Tab den Spacebar-/Text-Timer, wenn timer_input_source ===
-// "stackmat". Zeigt die Zeit in Echtzeit: während des Solves läuft eine LOKALE
-// 60fps-Uhr (W.stackmat-live-clock — der Stackmat streamt die Laufzeit nicht
-// flüssig genug), beim Stopp die vom Stackmat übermittelte Endzeit
-// (lastSolveMs), die auch gespeichert wird. Auto-Save läuft unverändert über
-// den `cubetracker:stackmat-solve`-Listener in BigTimerInput.
+// "stackmat". Zeigt die vom Stackmat gemeldete Zeit: laufend → liveMs, beim
+// Stopp die eingefrorene Endzeit (lastSolveMs), die auch gespeichert wird.
+// Auto-Save läuft unverändert über den `cubetracker:stackmat-solve`-Listener
+// in BigTimerInput.
+//
+// HINWEIS (2026-06-20): Eine lokale 60fps-Uhr fürs flüssige Mitlaufen wurde
+// wieder entfernt — der getestete G5 streamt die Laufzeit offenbar NICHT
+// während des Solves (sendet die Zeit erst danach), wodurch die Uhr zur
+// falschen Zeit (nach dem Solve) lief. Ob überhaupt laufende Frames ankommen,
+// klärt das Diagnose-Log (W.stackmat-frame-diag).
 //
 // Liest den Singleton-Store mit PRIMITIV-Selektoren → nur diese Blatt-
 // Komponente re-rendert, nicht der ganze Timer-Tab.
 
-import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as stackmatStore from "../lib/stackmatStore";
 import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
@@ -27,42 +31,10 @@ export function StackmatBigDisplay({
   const status = stackmatStore.useStackmatStore((s) => s.status);
   const phase = stackmatStore.useStackmatStore((s) => s.phase);
   const hasSignal = stackmatStore.useStackmatStore((s) => s.hasSignal);
-  const liveMs = stackmatStore.useStackmatStore((s) => s.liveMs);
-  const lastSolveMs = stackmatStore.useStackmatStore((s) => s.lastSolveMs);
-
-  // W.stackmat-live-clock (2026-06-20, User-Idee; verfeinert nach csTimer-
-  // Vorbild): während „running" läuft eine LOKALE Uhr (requestAnimationFrame,
-  // 60fps). NACH dem Solve zeigen + speichern wir NICHT die lokale Messung,
-  // sondern die vom Stackmat übermittelte Endzeit (lastSolveMs, hardware-genau).
-  const [renderMs, setRenderMs] = useState(0);
-  const anchorRef = useRef<number | null>(null);
-
-  // Re-Sync nach csTimer-Vorbild: bei JEDEM Stackmat-Paket den lokalen Anker
-  // ans Gerät nachziehen (anchor = jetzt − Geräte-Zeit; csTimer:
-  // `startTime = now − hardTime`, ~10×/s). So bleibt die Uhr exakt am Gerät,
-  // und rAF glättet die Frames dazwischen auf 60fps — kein Ruckeln, kein
-  // Endsprung, weil die Endzeit unten ohnehin aus dem Gerät kommt.
-  useEffect(() => {
-    anchorRef.current =
-      phase === "running" ? performance.now() - liveMs : null;
-  }, [phase, liveMs]);
-
-  // rAF-Loop: glatte 60fps-Anzeige aus dem (laufend re-syncten) Anker.
-  useEffect(() => {
-    if (phase !== "running") return;
-    let raf = 0;
-    const loop = () => {
-      if (anchorRef.current != null) {
-        setRenderMs(performance.now() - anchorRef.current);
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [phase]);
-
-  // laufend → lokale 60fps-Uhr; sonst → die eingefrorene Stackmat-Endzeit.
-  const displayMs = phase === "running" ? renderMs : (lastSolveMs ?? 0);
+  // Laufend → die vom Stackmat gemeldete Zeit; sonst die eingefrorene Endzeit.
+  const displayMs = stackmatStore.useStackmatStore((s) =>
+    s.phase === "running" ? s.liveMs : (s.lastSolveMs ?? 0),
+  );
 
   // Nicht verbunden → Hinweis-Link in die Einstellungen (F5). Kein stilles
   // 0.00-Display.
