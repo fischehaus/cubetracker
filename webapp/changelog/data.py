@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.hardware-in-einstellungen",
+        released=date(2026, 6, 20),
+        title="🎛️ Hardware-Verwaltung in den Einstellungen — Verbindung bleibt beim Tab-Wechsel",
+        highlights=[
+            "Die Verbindungs-Karten für Stackmat-Timer und Smart-Cube sind aus "
+            "dem Timer-Tab in die Einstellungen (neue Gruppe „Geräte\") "
+            "gewandert — der Timer-Tab bleibt aufgeräumt. Wichtig: die "
+            "Verbindung bleibt jetzt beim Tab-Wechsel bestehen (vorher wurde "
+            "sie getrennt, sobald man den Timer-Tab verließ). Die "
+            "Smart-Cube-Solve-Steuerung (Bereit / Solve fertig) bleibt im "
+            "Timer-Tab, wo man sie beim Solven braucht.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.hardware-singleton-store",
         released=date(2026, 6, 20),
         title="Architektur: Hardware-Verbindungen überleben den Tab-Wechsel",
