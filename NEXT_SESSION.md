@@ -24,27 +24,30 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-06-20 — WCA-Trunkierung + Stackmat-Umzug (Quick-Wins) + Plan
+## ✅ ERLEDIGT 2026-06-20 — WCA-Trunkierung + Stackmat-Umzug (Stages 0–5 live)
 
 **WCA-Trunkierung G5** (`W.stackmat-wca-trunc`, Tag, live + verifiziert): G5-Zeiten
 werden auf Hundertstel ABGESCHNITTEN statt gerundet (7.946 s = 7.94 s, nicht 7.95).
 Trunkierung im `StackmatSolveTracker` an der Emit-Grenze; interne Lauf-/Stop-
 Erkennung bleibt auf rohen ms (sonst Fehl-Stop). +4 diskriminierende Tests.
 
-**Stackmat-Umzug — Design-Panel gelaufen, Quick-Wins live, Rest PAUSIERT:**
-Vorhaben — Verbindungs-Karten (Smart-Cube + Stackmat) aus dem Timer-Tab in die
-Einstellungen, + Stackmat als Timer-Modus mit Echtzeit-Display am großen Timer
-(wie csTimer). 10-Agenten-Design-Panel → **`docs/stackmat-settings-redesign-plan.md`**
-ist der vollständige, resume-bereite Plan (Architektur: Modul-Singleton-Stores +
-`useSyncExternalStore` nach `toast.ts`-Vorbild; 7 Stages; 2 KRITISCH-Fixes;
-User-Entscheidungen).
-- ✅ Stage 0 `W.einstellungen-groupheader-pille` (live): GroupHeader-Pille → Lesbarkeit auf Skins.
-- ✅ Stage 1 `W.timer-input-source` (live): Settings-Feld `keyboard`/`stackmat` (Fundament, +5 Tests).
-- ⏳ **Stage 2-6 offen — PAUSIERT (User 2026-06-20):** Stage 2 (Hardware-Singleton-
-  Stores, Verbindung überlebt Tab-Wechsel) ist der riskante Kern; Go-Live braucht
-  **Test am echten G5 + GAN** (nicht automatisierbar). **Nächste Session:**
-  `docs/stackmat-settings-redesign-plan.md` lesen → bei Stage 2 weitermachen →
-  User mit G5 + GAN bereithalten.
+**Stackmat-Umzug — Stages 0–5 LIVE:** Verbindungs-Karten (Smart-Cube + Stackmat)
+aus dem Timer-Tab in die Einstellungen, + Stackmat als Timer-Modus mit Echtzeit-
+Display am großen Timer (wie csTimer). 10-Agenten-Design-Panel →
+**`docs/stackmat-settings-redesign-plan.md`** ist der vollständige Plan (Architektur:
+Modul-Singleton-Stores + `useSyncExternalStore` nach `toast.ts`-Vorbild; **Worker-
+Variante = Hardware-Hooks unangetastet**).
+- ✅ Stage 0 `W.einstellungen-groupheader-pille`: GroupHeader-Pille (Lesbarkeit).
+- ✅ Stage 1 `W.timer-input-source`: Settings-Feld `keyboard`/`stackmat` (Fundament).
+- ✅ Stage 2 `W.hardware-singleton-store`: Verbindung überlebt Tab-Wechsel — **am echten G5 verifiziert** (User: „hat alles geklappt").
+- ✅ Stage 3 `W.hardware-in-einstellungen`: Karten in Einstellungen → Gruppe „Geräte"; Smart-Cube-Solve-Steuerung (Bereit/Fertig) bleibt im Timer-Tab.
+- ✅ Stage 4+5 `W.stackmat-live-timer`: Stackmat-Modus + Auto-Engage + Echtzeit-Display + Auto-Save-Gating. QA kein KRITISCH. **G5-Live-Test bewusst verschoben** (User).
+- ✅ Stage 6 (Logout-Disconnect): strukturell durch die Worker-Variante erledigt (Logout → MainLayout-Unmount → Hook-Cleanup trennt Mic/BLE). Kein Extra-Code.
+
+**Offen / nächste Session:**
+- **G5-Live-Verifikation** des Live-Timers (Echtzeit-Hochzählen, Auto-Engage, Einfrieren + Save) — User testet, wenn Hardware + Zeit da.
+- **Folge-Polish (SOLLTE/NICE aus QA):** Fokus-Modus-Escape aus dem Stackmat-Modus; Hinweis-Link → Direkt-Scroll zur Geräte-Sektion; optional `track.onended` (Mic-Verlust). Details im Plan-Doc.
+- **Produktfrage offen:** Zen-Pille nur im Spacebar-Modus sichtbar (per-Gerät-localStorage-Default: Touch=Spacebar→sichtbar, Desktop=Text→keine Pille). Soll Zen im Text-Modus / Desktop-Default anders? (Mattis-Befund 2026-06-20: Zen am Handy sichtbar, am Desktop nicht — **erwartetes Verhalten, kein Bug**; Fix für Mattis: Desktop → Spacebar-Modus wählen.)
 
 **Doku-Drift gemerkt:** `CLAUDE.md` Tech-Stack sagt „React 18" — installiert ist
 **19.2.5** (verifiziert). Bei Gelegenheit korrigieren.

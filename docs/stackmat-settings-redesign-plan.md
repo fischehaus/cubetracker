@@ -11,16 +11,19 @@
 |---|---|---|
 | 0 | GroupHeader-Pille (Lesbarkeit Einstellungen-Überschriften) | ✅ **live** — Tag `v2.0.0-alpha.W.einstellungen-groupheader-pille` |
 | 1 | Settings-Feld `timer_input_source` (Fundament) | ✅ **live** — Tag `v2.0.0-alpha.W.timer-input-source` |
-| 2 | Hardware-Singleton-Stores + Hook-Adapter (Architektur-Kern) | ⏳ offen — **QA-Pflicht + G5/GAN-Live-Test** |
-| 3 | Karten → Einstellungen + Hinweis-Link im Timer (F1+F5) | ⏳ offen |
-| 4 | Auto-Save-Quellen entkoppeln (KRITISCH-Fix #1) | ⏳ offen — **QA-Pflicht** |
-| 5 | Stackmat-Modus-Button + Auto-Engage + großes Live-Display (F3+F4) | ⏳ offen — **QA-Pflicht + G5-Live** |
-| 6 | Logout-Disconnect (KRITISCH-Fix #2, Datenschutz) | ⏳ offen — **QA-Pflicht** |
+| 2 | Hardware-Singleton-Stores + Hook-Adapter (Architektur-Kern) | ✅ **live + am echten G5 verifiziert** — Tag `v2.0.0-alpha.W.hardware-singleton-store` (Worker-Variante: Hooks unangetastet) |
+| 3 | Karten → Einstellungen; Smart-Cube-Solve-Steuerung bleibt im Timer | ✅ **live** — Tag `v2.0.0-alpha.W.hardware-in-einstellungen` |
+| 4 | Auto-Save-Quellen entkoppeln (KRITISCH-Fix #1) | ✅ **live** (mit Stage 5 gebündelt — Gating allein wäre Regression) |
+| 5 | Stackmat-Modus + Auto-Engage + großes Live-Display (F3+F4+F5) | ✅ **live** — Tag `v2.0.0-alpha.W.stackmat-live-timer`; **G5-Live-Test bewusst verschoben** (User) |
+| 6 | Logout-Disconnect (KRITISCH-Fix #2) | ✅ **strukturell erledigt durch die Worker-Variante** — Logout unmountet MainLayout → Hook-Cleanup trennt Mic/BLE (Stage-2-QA bestätigt). Kein Extra-Code nötig. |
 
-**Pausiert nach Stage 1** (User-Entscheidung 2026-06-20): Stage 2 ist die große,
-riskante Etappe und ihr Go-Live braucht zwingend den Test am echten **G5 + GAN**
-(Verbindung muss den Tab-Wechsel überstehen — nicht automatisierbar). Fortsetzen,
-wenn der User Hardware + Zeit hat.
+**Feature im Kern fertig + live (Stages 0–6).** Offen nur noch:
+- **Live-Verifikation am echten G5** (Echtzeit-Hochzählen, Auto-Engage, Einfrieren + Save) — vom User bewusst auf später verschoben. Logik ist stark unit-getestet (236 grün), aber die echte Anzeige am Gerät ist nicht automatisierbar.
+- **Folge-Polish (SOLLTE/NICE aus der Stage-4/5-QA):**
+  (a) Im **Fokus-Modus** fehlt ein Weg zurück aus dem Stackmat-Modus (TimerControlsCard ist dort ausgeblendet) → kleiner „← Tastatur"-Escape-Button.
+  (b) Der Hinweis-Link öffnet die Einstellungen oben statt zur **Geräte-Sektion** zu scrollen (analog zum `konto-section`-Sprung-Pattern).
+  (c) Kein `track.onended`-Handler → Mic-Verlust mitten im Solve friert die Anzeige ein statt einen Fehler zu zeigen (Hook bliebe sonst unangetastet — abwägen; `hasSignal` fällt nach ~1.5s auf „Warte auf Signal").
+- **Produktfrage offen (User 2026-06-20):** Zen-Pille ist nur im Spacebar-Modus sichtbar (per-Gerät-localStorage-Default: Touch=Spacebar→Zen sichtbar, Desktop=Text→keine Zen-Pille). Soll Zen auch im Text-Modus sichtbar sein, oder der Desktop per Default in den Spacebar-Modus?
 
 ## User-Entscheidungen (verbindlich)
 
