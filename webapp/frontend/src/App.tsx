@@ -340,11 +340,17 @@ function TimerTab({
   // im Fokus-Modus die timer_font_size rotieren koennen.
   const [settings, setSettings] = useAppSettings();
   const showTouchPad = settings.spacebar_enabled;
-  // W.timer-zen-mode (QA): Zen schließen wenn der Spacebar-Modus deaktiviert
-  // wird — sonst öffnet es beim Wieder-Aktivieren überraschend sofort.
+  // W.timer-zen-mode (QA): Zen schließen, wenn WEDER Spacebar- NOCH Stackmat-
+  // Modus aktiv ist — sonst öffnet es beim Wieder-Aktivieren überraschend sofort.
+  // W.stackmat-zen (2026-06-20): im Stackmat-Modus ist Zen erlaubt (Live-Zeit).
   useEffect(() => {
-    if (!settings.spacebar_enabled) setZenMode(false);
-  }, [settings.spacebar_enabled]);
+    if (
+      !settings.spacebar_enabled &&
+      settings.timer_input_source !== "stackmat"
+    ) {
+      setZenMode(false);
+    }
+  }, [settings.spacebar_enabled, settings.timer_input_source]);
   // Stufen-Rotation fuer A−/A+ im Fokus-Modus.
   const fontSizeIdx = TIMER_FONT_SIZE_ORDER.indexOf(settings.timer_font_size);
   const canShrink = fontSizeIdx > 0;
@@ -442,9 +448,11 @@ function TimerTab({
           ? t("timerTab.focusToggleOff")
           : t("timerTab.focusToggleOn")}
       </button>
-      {/* W.timer-zen-mode: Zen startet den Vollbild-Modus. Nur im Spacebar-
-          Modus sinnvoll (Text-Mode hat nichts zu tracken). */}
-      {settings.spacebar_enabled && (
+      {/* W.timer-zen-mode: Zen startet den Vollbild-Modus. Spacebar- ODER
+          Stackmat-Modus (W.stackmat-zen) — beide haben eine Zeit zum Anzeigen;
+          Text-Mode hat nichts zu tracken. */}
+      {(settings.spacebar_enabled ||
+        settings.timer_input_source === "stackmat") && (
         <button
           type="button"
           onClick={() => setZenMode(true)}

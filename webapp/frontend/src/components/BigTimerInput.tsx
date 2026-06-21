@@ -470,11 +470,51 @@ export function BigTimerInput({
   ) : null;
 
   // W.stackmat-live-timer (2026-06-20): im Stackmat-Modus ersetzt das Live-
-  // Display den Spacebar-/Text-Timer. Höher priorisiert als Zen/Spacebar — Zen
-  // ist im Stackmat-Modus nicht sinnvoll und wird übersprungen. Der Auto-Save
-  // läuft über den (gateten) Stackmat-Listener oben; die Quick-Penalty-Leiste
-  // erscheint nach dem Save wie gewohnt.
+  // Display den Spacebar-/Text-Timer. Höher priorisiert als der Spacebar-Zweig.
+  // Der Auto-Save läuft über den (gateten) Stackmat-Listener oben; die
+  // Quick-Penalty-Leiste erscheint nach dem Save wie gewohnt.
   if (settings.timer_input_source === "stackmat") {
+    // W.stackmat-zen (2026-06-20): Vollbild-Zen auch für den Stackmat — Scramble
+    // oben, große Live-Zeit mittig, Quick-Leiste unten. Der Stackmat treibt die
+    // Zeit (kein keydown), darum ist das Exit-× immer verfügbar.
+    if (zen && onExitZen) {
+      return (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-gray-950"
+          style={{
+            paddingTop: "env(safe-area-inset-top)",
+            paddingBottom: "env(safe-area-inset-bottom)",
+          }}
+        >
+          <button
+            type="button"
+            onClick={onExitZen}
+            aria-label={t("timerTab.zenExit")}
+            className="absolute top-3 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full text-3xl leading-none text-gray-500 hover:bg-gray-800/60 hover:text-gray-200"
+          >
+            ×
+          </button>
+          <div className="px-4 pt-16 text-center">
+            <div
+              className="mx-auto max-w-3xl break-words font-mono text-gray-300"
+              style={{
+                fontSize: TIMER_FONT_SCALE[settings.timer_font_size].scramble,
+              }}
+            >
+              {scramble && scramble.trim() !== "" ? scramble : "—"}
+            </div>
+          </div>
+          <div className="flex min-h-0 flex-1 items-center justify-center px-4 pb-4">
+            <StackmatBigDisplay onOpenSettings={onOpenSettings} />
+          </div>
+          {quickButtons && (
+            <div className="flex flex-shrink-0 flex-wrap items-center justify-center gap-2 px-4 pb-6 text-sm">
+              {quickButtons}
+            </div>
+          )}
+        </div>
+      );
+    }
     return (
       <Card>
         <StackmatBigDisplay onOpenSettings={onOpenSettings} />
