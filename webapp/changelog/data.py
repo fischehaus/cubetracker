@@ -44,6 +44,30 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.timer-save-speed",
+        released=date(2026, 6, 20),
+        title="⚡ Schnelleres Speichern — die Zeit erscheint sofort in der Übersicht",
+        highlights=[
+            "Nach einem Solve stand die Zeit bisher erst nach ein paar Sekunden "
+            "in der Solve-Übersicht (das Speichern prüft im Hintergrund PBs + "
+            "Achievements und lädt die Liste neu). Jetzt erscheint der Solve "
+            "sofort und wird im Hintergrund bestätigt — fühlt sich instant an. "
+            "Gilt für alle Eingabe-Arten (Tastatur, Spacebar, Smart-Cube, "
+            "Stackmat).",
+        ],
+    ),
+    PatchNote(
+        version="2.0.0-alpha.W.stackmat-zen",
+        released=date(2026, 6, 20),
+        title="🧘 Zen-Modus jetzt auch im Stackmat-Modus",
+        highlights=[
+            "Der Vollbild-Zen-Modus (nur Scramble + große Zeit) lässt sich jetzt "
+            "auch im Stackmat-Timer-Modus starten — die Stackmat-Zeit läuft dann "
+            "groß und ablenkungsfrei im Vollbild. Vorher war Zen nur im "
+            "Spacebar-Modus verfügbar.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.stackmat-live-timer",
         released=date(2026, 6, 20),
         title="⏱️ Stackmat als Timer-Modus — Zeit läuft live im großen Timer",
