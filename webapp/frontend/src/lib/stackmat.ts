@@ -11,14 +11,15 @@
 // gegen echte Hardware testen, also testen wir gegen ein selbst erzeugtes,
 // protokoll-konformes Signal.
 //
-// Frame-Format (status + 5 Ziffern + Checksum, danach CR/LF):
-//   [status][min][sec10][sec1][cs10][cs1][checksum]
+// Frame-Format (status + 5 ODER 6 Ziffern + Checksum, danach CR/LF) — standard
+// Stackmat, csTimer-kompatibel, am echten G5 verifiziert (2026-06-20):
+//   [status][min][sec10][sec1][...frac][checksum]
 //   status:   Zustands-Char ('I'=reset/idle, ' '=running, 'S'=stopped,
-//             'A'/'L'/'R'/'C'=Hände/Start). Wir verlassen uns NICHT allein
-//             auf das Alphabet (variiert je Generation) — die Stop-Erkennung
-//             hat einen Zeit-Stabilitäts-Fallback.
-//   Zeit:     min*60000 + (sec10*10+sec1)*1000 + (cs10*10+cs1)*10
-//   checksum: 64 + Summe der 5 Ziffern (= '@'..'m', immer druckbar)
+//             'A'/'L'/'R'/'C'=Hände/Start). Die Stop-Erkennung hat zusätzlich
+//             einen Zeit-Stabilitäts-Fallback (für Geräte ohne sauberes 'S').
+//   Ziffern:  5 = Hundertstel (M SS CC, Gen3/4) ODER 6 = Millisekunden
+//             (M SS CCC, G5/Gen5). Echtes Beispiel: "I005801N" = 0:05.801.
+//   checksum: 64 + Summe der Ziffern (immer druckbar)
 //
 // SICHERHEIT: jedes Paket wird per Checksum + Zeichen-Plausibilität validiert.
 // Bei falscher Signal-Polarität / fremdem Protokoll validiert schlicht nichts
@@ -31,7 +32,7 @@ export interface StackmatPacket {
   status: string;
   /** Dekodierte Zeit in Millisekunden. */
   timeMs: number;
-  /** Die 7 rohen Frame-Zeichen (status+5 Ziffern+checksum). */
+  /** Die rohen Frame-Zeichen (status + 5/6 Ziffern + checksum, 7–8 Zeichen). */
   raw: string;
 }
 
@@ -47,53 +48,61 @@ function sumDigits(digits: string): number {
 }
 
 /**
- * Parst einen Frame (Inhalt zwischen den CR/LF-Trennern, OHNE Trenner) zu
- * einem Paket. Unterstützt zwei Generationen — Checksum ist in beiden
- * `Σ Ziffern + 64`. Liefert null wenn Format ODER Checksum nicht stimmen
- * (fail-safe: falsche Polarität / Fremd-Protokoll → kein Paket).
+ * Parst einen Frame (Inhalt zwischen den CR/LF-Trennern, OHNE Trenner) zum
+ * Paket. Standard-Stackmat-Format (csTimer-kompatibel, am echten G5 verifiziert
+ * 2026-06-20):
  *
- *  - **G5 / Speed-Stacks-Gen5** (am Gerät verifiziert 2026-06-19): nur Ziffern
- *    + Checksum, KEIN Status-Char. Die Ziffern sind die Zeit in
- *    MILLISEKUNDEN: "07944" + 'X'(=24+64) → 7944 ms = 7.944 s. 5 Ziffern (bis
- *    99.999 s) oder 6 (bis ~16 min).
- *  - **Gen3/4** (klassisch): [status A-Z/space][5 Ziffern M SS CC][checksum].
+ *   [status][Ziffern][checksum]
+ *   status:   1 Zeichen [A-Z ] — ' '=läuft, 'S'=Stop, 'I'=idle/Reset,
+ *             'A'/'L'/'R'/'C'=Hände/Start (Generations-abhängig).
+ *   Ziffern:  5 (Hundertstel: M SS CC) ODER 6 (Millisekunden: M SS CCC).
+ *   checksum: 64 + Σ Ziffern (immer druckbar).
+ *
+ * Echtes G5-Beispiel: "I005801N" → status 'I', 0:05.801 = 5801 ms (Quersumme
+ * 14, +64 = 78 = 'N'). 6 Ziffern = ms-Auflösung (G5/Gen5), 5 = Hundertstel
+ * (Gen3/4). Liefert null bei Format-/Checksum-Fehler (fail-safe: falsche
+ * Polarität / verrutschtes Fragment / Fremd-Protokoll → kein Paket).
  */
 export function parseStackmatFrame(chars: string): StackmatPacket | null {
-  if (chars.length < 6 || chars.length > 7) return null;
+  // status(1) + 5..6 Ziffern + checksum(1) = 7 oder 8 Zeichen.
+  if (chars.length < 7 || chars.length > 8) return null;
+  const status = chars[0];
+  if (!/^[A-Z ]$/.test(status)) return null;
+  const digits = chars.slice(1, -1); // zwischen Status und Checksum
+  if (!/^[0-9]{5,6}$/.test(digits)) return null;
   const checksum = chars.charCodeAt(chars.length - 1);
-  const body = chars.slice(0, chars.length - 1); // alles außer Checksum
-
-  // G5: reiner Ziffern-Body (5 oder 6) ohne Status. Zeit = Ziffern als ms.
-  if (/^[0-9]+$/.test(body)) {
-    if (checksum !== sumDigits(body) + 64) return null;
-    const timeMs = parseInt(body, 10);
-    if (timeMs > 60 * 60 * 1000) return null; // > 1 h = unplausibel
-    return { status: " ", timeMs, raw: chars };
-  }
-
-  // Gen3/4: status + 5 Ziffern + Checksum (genau 7 Zeichen).
-  if (body.length === 6 && /^[A-Z ][0-9]{5}$/.test(body)) {
-    const digits = body.slice(1);
-    if (checksum !== sumDigits(digits) + 64) return null;
-    const d = [0, 1, 2, 3, 4].map((i) => digits.charCodeAt(i) - 48);
-    const sec = d[1] * 10 + d[2];
-    const hund = d[3] * 10 + d[4];
-    if (sec > 59 || hund > 99) return null;
-    const timeMs = d[0] * 60000 + sec * 1000 + hund * 10;
-    return { status: body[0], timeMs, raw: chars };
-  }
-  return null;
+  if (checksum !== sumDigits(digits) + 64) return null;
+  const d = (i: number): number => digits.charCodeAt(i) - 48;
+  const min = d(0);
+  const sec = d(1) * 10 + d(2);
+  if (sec > 59) return null;
+  // 6 Ziffern → Millisekunden (M SS CCC); 5 Ziffern → Hundertstel (M SS CC).
+  const frac =
+    digits.length === 6
+      ? d(3) * 100 + d(4) * 10 + d(5)
+      : (d(3) * 10 + d(4)) * 10;
+  const timeMs = min * 60000 + sec * 1000 + frac;
+  if (timeMs > 60 * 60 * 1000) return null; // > 1 h = unplausibel
+  return { status, timeMs, raw: chars };
 }
 
 /**
- * Baut einen G5-Frame: Zeit als Millisekunden-Ziffern (min. 5-stellig, null-
- * gepolstert) + Checksum, KEIN Status-Char. Gegenstück zur G5-Erkennung in
- * parseStackmatFrame (am Gerät verifiziert). Für Tests + Encoder.
+ * Baut einen G5-/ms-Frame: status + 6 Ziffern (M SS CCC, Millisekunden) +
+ * Checksum. Gegenstück zur 6-Ziffern-Erkennung in parseStackmatFrame (am echten
+ * G5 verifiziert: "I005801N" = idle, 5.801 s). Für Tests + den Encoder.
  */
-export function buildStackmatFrameG5(timeMs: number): string {
-  const clamped = Math.max(0, Math.min(Math.round(timeMs), 60 * 60 * 1000));
-  const digits = String(clamped).padStart(5, "0");
-  return digits + String.fromCharCode(sumDigits(digits) + 64);
+export function buildStackmatFrameG5(status: string, timeMs: number): string {
+  const clamped = Math.max(
+    0,
+    Math.min(Math.round(timeMs), 9 * 60000 + 59 * 1000 + 999),
+  );
+  const min = Math.floor(clamped / 60000);
+  const rem = clamped % 60000;
+  const sec = Math.floor(rem / 1000);
+  const ms = rem % 1000;
+  const digits =
+    String(min) + String(sec).padStart(2, "0") + String(ms).padStart(3, "0");
+  return status + digits + String.fromCharCode(sumDigits(digits) + 64);
 }
 
 /**

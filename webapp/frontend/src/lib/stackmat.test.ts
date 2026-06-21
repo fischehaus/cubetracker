@@ -58,32 +58,40 @@ describe("buildStackmatFrame / parseStackmatFrame", () => {
     expect(parseStackmatFrame("S01234K")).toBeNull(); // 'K' statt 'J'
   });
 
-  it("G5: echte Geräte-Bytes '07944'+'X' → 7944 ms (7.944 s), kein Status", () => {
-    // Verifiziert am echten G5 (2026-06-19): Anzeige 7.944 s.
-    // Quersumme 0+7+9+4+4=24, +64=88=0x58='X'.
-    const p = parseStackmatFrame("07944X");
+  it("echtes G5-Frame 'I005801N' → status 'I', 5.801 s (M:SS:CCC)", () => {
+    // Realer Geräte-Mitschnitt 2026-06-20 (idle-Frame hält die letzte Zeit).
+    // Quersumme 0+0+5+8+0+1=14, +64=78=0x4e='N'. 005801 = 0:05.801.
+    const p = parseStackmatFrame("I005801N");
+    expect(p).not.toBeNull();
+    expect(p!.timeMs).toBe(5801);
+    expect(p!.status).toBe("I");
+  });
+
+  it("G5 6-Ziffern-ms-Frame mit Status ' ' (läuft): 7.944 s", () => {
+    // 007944 = 0:07.944. Quersumme 0+0+7+9+4+4=24, +64=88='X'. ' ' = läuft.
+    const p = parseStackmatFrame(" 007944X");
     expect(p).not.toBeNull();
     expect(p!.timeMs).toBe(7944);
     expect(p!.status).toBe(" ");
   });
 
-  it("G5: buildStackmatFrameG5 ist roundtrip-fähig", () => {
+  it("G5: buildStackmatFrameG5 ist roundtrip-fähig (ms-genau)", () => {
     for (const ms of [0, 7944, 12340, 82490, 99999]) {
-      const frame = buildStackmatFrameG5(ms);
+      const frame = buildStackmatFrameG5(" ", ms);
       const p = parseStackmatFrame(frame);
       expect(p, `parse ${ms}`).not.toBeNull();
-      expect(p!.timeMs).toBe(ms);
+      expect(p!.timeMs).toBe(ms); // 6 Ziffern = ms-genau, keine Trunkierung
     }
   });
 
   it("G5: 6-stellige ms (>99.999 s) werden geparst", () => {
-    const frame = buildStackmatFrameG5(125450); // 2:05.450
-    expect(frame.length).toBe(7); // 6 Ziffern + Checksum
+    const frame = buildStackmatFrameG5("S", 125450); // 2:05.450
+    expect(frame.length).toBe(8); // status + 6 Ziffern + Checksum
     expect(parseStackmatFrame(frame)!.timeMs).toBe(125450);
   });
 
-  it("G5: falsche Checksum am Ziffern-Frame → null", () => {
-    expect(parseStackmatFrame("07944Y")).toBeNull(); // 'Y' statt 'X'
+  it("G5: falsche Checksum am ms-Frame → null", () => {
+    expect(parseStackmatFrame(" 007944Y")).toBeNull(); // 'Y' statt 'X'
   });
 
   it("weist falsche Länge / Nicht-Ziffern / falschen Status ab", () => {
@@ -134,10 +142,10 @@ describe("StackmatDecoder Encoder→Decoder-Roundtrip", () => {
     expect(packets.map((p) => p.timeMs)).toEqual(times);
   });
 
-  it("G5: Audio-Roundtrip eines Ziffern-Frames (kein Status) @ 48000Hz", () => {
+  it("G5: Audio-Roundtrip eines ms-Frames (status + 6 Ziffern) @ 48000Hz", () => {
     const sampleRate = 48000;
-    // Frame wie das echte G5: 5 ms-Ziffern + Checksum, Trenner CR+LF.
-    const frame = buildStackmatFrameG5(7944) + "\r\n";
+    // Frame wie das echte G5: status ' ' + 6 ms-Ziffern + Checksum, Trenner CR+LF.
+    const frame = buildStackmatFrameG5(" ", 7944) + "\r\n";
     const bytes = [...frame].map((c) => c.charCodeAt(0));
     const signal = encodeStackmatBytes(bytes, { sampleRate });
     const packets = collectPackets(signal, sampleRate);
@@ -153,7 +161,7 @@ describe("StackmatDecoder Encoder→Decoder-Roundtrip", () => {
     // NICHT auf 7950 gerundet). Beweist die Trunkierung über den Audio-Pfad.
     const msSeq = [1230, 4560, 7946, 7946, 7946, 7946];
     const parts = msSeq.map((ms) => {
-      const f = buildStackmatFrameG5(ms) + "\r\n";
+      const f = buildStackmatFrameG5(" ", ms) + "\r\n";
       return encodeStackmatBytes([...f].map((c) => c.charCodeAt(0)), { sampleRate });
     });
     const total = parts.reduce((a, p) => a + p.length, 0);
