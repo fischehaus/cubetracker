@@ -345,14 +345,20 @@ export function truncateToWcaCentiseconds(ms: number): number {
 /**
  * Verfolgt die Stackmat-Pakete und feuert genau EIN onSolve pro Lauf.
  *
- * Logik (generations-robust, primär über den Zeit-Wert statt das Status-
- * Alphabet):
- *   - Zeit 0 / status 'I'      → idle (reset; erlaubt den nächsten Solve)
- *   - Zeit ändert sich         → running
- *   - Zeit eingefroren (>0) und (status 'S' ODER N stabile Pakete) → solve,
- *     danach gesperrt bis zum nächsten Reset
- * So wird eine stehengebliebene Altzeit beim Verbinden NICHT als Solve
- * gewertet (running muss zuvor echt gelaufen sein).
+ * Logik (am echten G5 verifiziert 2026-06-20):
+ *   - Status ' ' (Leerzeichen) → LÄUFT. Das ist das EINZIGE Lauf-Status; alle
+ *     anderen (I/H/A/C/L/R/S) = idle / Hände-am-Pad / Stop. Wichtig: sonst
+ *     lösen die Status-Zucken der gehaltenen Endzeit NACH dem Solve immer
+ *     wieder neue „Läufe" (und damit Doppel-Speichern) aus.
+ *   - Lauf → Nicht-Lauf-Status mit Zeit > 0 → SOLVE-ENDE (der G5 stoppt per
+ *     'I'-Frame mit der Endzeit; Gen3/4 per 'S'). Genau EINMAL emittieren.
+ *   - Lauf mit Status ' ' aber eingefrorener Zeit ≥ N Pakete → Stop-Fallback
+ *     (Generationen, die den Status beim Stop nicht wechseln).
+ *   - Zeit 0 → idle/Reset (erlaubt den nächsten Solve).
+ *   - Gehaltene Endzeit (Zeit > 0, kein Lauf) → stehen lassen, NICHT erneut
+ *     emittieren.
+ * Eine stehengebliebene Altzeit beim Verbinden wird NICHT gewertet (es muss
+ * zuvor ein echter Lauf — Status ' ' — gelaufen sein).
  *
  * WCA-Präzision: die nach außen gegebene Zeit (onSolve + onChange) wird auf
  * Hundertstel ABGESCHNITTEN, nicht gerundet. Die interne Lauf-/Stop-Erkennung
@@ -381,58 +387,60 @@ export class StackmatSolveTracker {
 
   onPacket(p: StackmatPacket): void {
     const { status, timeMs } = p;
+    const truncated = truncateToWcaCentiseconds(timeMs);
 
-    if (status === "I" || timeMs === 0) {
-      // G5-Stop (am Gerät verifiziert 2026-06-20): der Lauf endet mit einem
-      // 'I'/idle-Frame, das die ENDZEIT trägt (status 'I' + Zeit > 0), NICHT mit
-      // einem 'S'-Status. War vorher ein Lauf aktiv → das ist das Solve-Ende:
-      // genau einmal emittieren, die idle-Zeit IST die Endzeit.
-      if (this.running && !this.emitted && timeMs > 0) {
-        this.emitted = true;
-        this.running = false;
-        this.lastTime = 0;
+    // Status ' ' (Leerzeichen) = LÄUFT. Alle anderen Status (I/H/A/C/L/R/S) =
+    // idle / Hände-am-Pad / Stop — NICHT als Lauf werten (sonst lösen die
+    // Status-Zucken der gehaltenen Endzeit nach dem Solve neue Läufe aus →
+    // Doppel-Speichern, am echten G5 beobachtet 2026-06-20).
+    if (status === " ") {
+      this.running = true;
+      if (timeMs !== this.lastTime) {
+        // Zeit steigt → der Lauf läuft. (Vergleich auf ROHEN ms, nach außen
+        // die WCA-abgeschnittene Zeit.)
+        this.lastTime = timeMs;
         this.stable = 0;
-        const finalMs = truncateToWcaCentiseconds(timeMs);
-        this.events.onChange?.("stopped", finalMs);
-        this.events.onSolve(finalMs);
-        return;
-      }
-      // Sonst: echtes idle / Reset auf 0.
-      if (this.running || this.emitted) {
-        this.running = false;
         this.emitted = false;
-        this.lastTime = 0;
-        this.stable = 0;
+        this.events.onChange?.("running", truncated);
+      } else {
+        // Status ' ' aber Zeit eingefroren → Stop-Fallback für Generationen,
+        // die den Status beim Stop NICHT wechseln (der G5 wechselt auf 'I').
+        this.stable++;
+        if (!this.emitted && this.stable >= this.stablePackets && timeMs > 0) {
+          this.emitted = true;
+          this.running = false;
+          this.events.onChange?.("stopped", truncated);
+          this.events.onSolve(truncated);
+        }
       }
+      return;
+    }
+
+    // Nicht-Lauf-Status. Übergang Lauf → Nicht-Lauf mit Zeit > 0 = Solve-Ende
+    // (G5: 'I' mit Endzeit; Gen3/4: 'S'). Genau EINMAL.
+    if (this.running && !this.emitted && timeMs > 0) {
+      this.emitted = true;
+      this.running = false;
+      this.lastTime = timeMs;
+      this.events.onChange?.("stopped", truncated);
+      this.events.onSolve(truncated);
+      return;
+    }
+
+    // Reset auf 0 → idle, nächsten Solve erlauben.
+    if (timeMs === 0) {
+      this.running = false;
+      this.emitted = false;
+      this.lastTime = 0;
+      this.stable = 0;
       this.events.onChange?.("idle", 0);
       return;
     }
 
-    if (timeMs !== this.lastTime) {
-      // Zeit hat sich geändert. Ob das „läuft" heißt, entscheidet der Status:
-      // ' ' (oder unbekannt) = die Uhr läuft; 'S' = eine eingefrorene Altzeit,
-      // die beim Verbinden erstmals gesehen wird (KEIN Lauf → nicht werten).
-      this.lastTime = timeMs;
-      this.stable = 0;
-      if (status !== "S") this.running = true;
-      // Vergleich oben auf ROHEN ms — nach außen die WCA-abgeschnittene Zeit.
-      this.events.onChange?.(
-        this.running ? "running" : "stopped",
-        truncateToWcaCentiseconds(timeMs),
-      );
-      return;
-    }
-
-    // Zeit eingefroren.
-    this.stable++;
-    const stopped = status === "S" || this.stable >= this.stablePackets;
-    if (this.running && stopped && !this.emitted && timeMs > 0) {
-      this.emitted = true;
-      this.running = false;
-      const finalMs = truncateToWcaCentiseconds(timeMs);
-      this.events.onChange?.("stopped", finalMs);
-      this.events.onSolve(finalMs);
-    }
+    // Gehaltene Endzeit (Zeit > 0, kein Lauf / schon emittiert): stehen lassen,
+    // NICHT erneut emittieren. onChange hält hasSignal + zeigt die Endzeit.
+    this.running = false;
+    this.events.onChange?.("stopped", truncated);
   }
 }
 

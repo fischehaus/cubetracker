@@ -257,6 +257,26 @@ describe("StackmatSolveTracker", () => {
     expect(solves).toEqual([]);
   });
 
+  it("G5: gehaltene Endzeit mit Status-Zucken (I/H/A) speichert nur EINMAL", () => {
+    // Echtes G5-Verhalten (2026-06-20): nach dem Solve hält der Timer die
+    // Endzeit (6290) und sendet sie mit wechselndem Status I/H/A. Das darf NICHT
+    // jedes Mal neu speichern (Bug: alle ~2 s ein Solve).
+    const solves = feed([
+      ["I", 0],
+      [" ", 1000],
+      [" ", 6250],
+      ["I", 6290], // Stop
+      ["H", 6290], // Status-Zucken — KEIN neuer Lauf
+      ["I", 6290],
+      ["A", 6290],
+      ["I", 6290],
+      ["H", 6290],
+      ["I", 6290],
+      ["I", 0], // Reset
+    ]);
+    expect(solves).toEqual([6290]);
+  });
+
   it("wertet eine beim Verbinden stehende Altzeit NICHT als Solve", () => {
     // Direkt eingefrorene Zeit ohne vorheriges running → kein Solve.
     const solves = feed([
