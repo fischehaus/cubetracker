@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.stackmat-idle-stop",
+        released=date(2026, 6, 20),
+        title="⏱️ Stackmat-Live-Timer läuft flüssig mit + speichert zuverlässig",
+        highlights=[
+            "Mit dem korrigierten Decoder zeigt sich: der G5 streamt die "
+            "Laufzeit wirklich — die Zeit läuft jetzt im großen Timer flüssig "
+            "mit (lokale 60-fps-Uhr, laufend ans Gerät nachgezogen wie bei "
+            "csTimer). Außerdem signalisiert der G5 das Solve-Ende per "
+            "idle-Frame statt per Stop-Status; das wird jetzt korrekt als "
+            "Solve-Ende erkannt und die Endzeit zuverlässig gespeichert.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.stackmat-frame-fix",
         released=date(2026, 6, 20),
         title="⏱️ Stackmat: Frame-Dekodierung korrigiert (Status-Zeichen + ms-Auflösung)",
