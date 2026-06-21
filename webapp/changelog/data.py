@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.hardware-singleton-store",
+        released=date(2026, 6, 20),
+        title="Architektur: Hardware-Verbindungen überleben den Tab-Wechsel",
+        highlights=[
+            "Interner Umbau (Fundament für den Stackmat-Timer-Modus): die "
+            "Verbindung zu Stackmat-Timer und Smart-Cube lebt jetzt in einem "
+            "App-weiten Store statt nur im Timer-Tab. Dadurch bleibt sie beim "
+            "Tab-Wechsel bestehen und wird beim Abmelden sauber getrennt. Noch "
+            "ohne sichtbare Änderung — Vorbereitung dafür, den Stackmat als "
+            "Timer-Modus mit Echtzeit-Anzeige zu nutzen.",
+        ],
+        internal=True,
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.timer-input-source",
         released=date(2026, 6, 20),
         title="Fundament: Timer-Eingabequelle als Geräte-Setting",
