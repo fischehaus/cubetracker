@@ -19,6 +19,7 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 import { qk } from "./queryKeys";
+import { buildOptimisticSolve, solveListMatches } from "./solveOptimistic";
 import type {
   AchievementItem,
   ChallengeItem,
@@ -287,22 +288,74 @@ export function useSolves(params: SolveListParams = {}): UseQueryResult<Solve[]>
   });
 }
 
-export function useCreateSolve(): UseMutationResult<Solve, Error, SolveCreate> {
+// W.timer-save-speed (2026-06-20): Context fürs optimistische Einfügen — die
+// vorherigen Stände der betroffenen list-Queries (für Rollback bei Fehler).
+type CreateSolveContext = {
+  previous: ReadonlyArray<readonly [readonly unknown[], Solve[] | undefined]>;
+};
+
+// Monoton fallende Temp-id für optimistische Solves — garantiert eindeutig
+// (auch bei zwei Saves im selben Millisekunden-Tick, QA) und immer negativ,
+// kollidiert also nie mit echten Server-ids (positiv, auto-increment ab 1).
+let nextTempSolveId = -1;
+
+export function useCreateSolve(): UseMutationResult<
+  Solve,
+  Error,
+  SolveCreate,
+  CreateSolveContext
+> {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: SolveCreate): Promise<Solve> => {
       const r = await api.post<Solve>("/solves", payload);
       return r.data;
     },
+    // W.timer-save-speed: optimistisch SOFORT einfügen, damit die Zeit ohne
+    // Verzögerung in der Solve-Übersicht steht. Sonst wartet der User auf den
+    // POST (synchroner PB-Scan + Achievement-Check im Backend) PLUS das Refetch
+    // der (bis zu 50k Zeilen großen) Solves-Liste. Der Temp-Solve (negative id)
+    // wird beim onSuccess-Invalidate durch die echten Serverdaten ersetzt.
+    onMutate: async (payload: SolveCreate): Promise<CreateSolveContext> => {
+      // Laufende Solve-Refetches abbrechen, sonst überschreiben sie die Optimistik.
+      await qc.cancelQueries({ queryKey: qk.solves.all() });
+      const optimistic = buildOptimisticSolve(
+        payload,
+        nextTempSolveId--,
+        new Date().toISOString(),
+      );
+      const matched = qc
+        .getQueryCache()
+        .findAll({ queryKey: qk.solves.all() })
+        .filter((query) => solveListMatches(query.queryKey, payload));
+      const previous = matched.map(
+        (query) =>
+          [query.queryKey, qc.getQueryData<Solve[]>(query.queryKey)] as const,
+      );
+      for (const query of matched) {
+        qc.setQueryData<Solve[]>(query.queryKey, (old) =>
+          old ? [optimistic, ...old] : old,
+        );
+      }
+      return { previous };
+    },
+    onError: (_err, _payload, context) => {
+      // Rollback: betroffene Listen auf ihren vorherigen Stand zurücksetzen.
+      // War der Cache vorher leer (undefined, z.B. GC'd während unmounted), den
+      // optimistischen Eintrag ENTFERNEN statt undefined zu schreiben (QA).
+      for (const [key, data] of context?.previous ?? []) {
+        if (data !== undefined) qc.setQueryData(key, data);
+        else qc.removeQueries({ queryKey: key });
+      }
+    },
     onSuccess: () => {
       // Solve-Mutation → Domain-Prefix-Invalidation (W.cache-invalidation-prefix):
       //   qk.solves.all() deckt: list + alle Stats-Varianten (overall/by-cube/
       //   by-session/by-hardware/temporal/activity/by-alg-case) + pb-history +
-      //   recent-pbs in einem Schlag ab. Neuer Stats-Key unter qk.solves wird
-      //   automatisch mit-invalidiert — kein Drift mehr durch vergessene Listen.
+      //   recent-pbs in einem Schlag ab. Ersetzt zugleich den optimistischen
+      //   Temp-Solve durch die echten Serverdaten.
       //   suggestAll() refresht "zuletzt benutzt"-Listen unabhängig vom cubeType.
-      //   leaderboard.all() (🆕 vs. vor Refactor): ohne dies blieb das eigene
-      //   Ranking nach Solve-Eintrag bis Tab-Wechsel stale.
+      //   leaderboard.all(): ohne dies blieb das eigene Ranking bis Tab-Wechsel stale.
       qc.invalidateQueries({ queryKey: qk.solves.all() });
       qc.invalidateQueries({ queryKey: qk.sessions.suggestAll() });
       qc.invalidateQueries({ queryKey: qk.hardware.suggestAll() });
