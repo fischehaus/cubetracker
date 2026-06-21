@@ -5,7 +5,13 @@
 // Clamp gegen korrupte/fremde Werte. happy-dom liefert window.localStorage.
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { loadSettings, saveSettings, SETTINGS_DEFAULTS } from "./settings";
+import {
+  loadSettings,
+  saveSettings,
+  SETTINGS_DEFAULTS,
+  shouldSaveFromStackmat,
+  shouldSaveFromSmartCube,
+} from "./settings";
 
 const STORAGE_KEY = "cubetracker.settings.v1";
 
@@ -47,5 +53,22 @@ describe("loadSettings — timer_input_source (W.timer-input-source)", () => {
 
   it("SETTINGS_DEFAULTS hat das Feld als 'keyboard'", () => {
     expect(SETTINGS_DEFAULTS.timer_input_source).toBe("keyboard");
+  });
+});
+
+describe("Auto-Save-Gating (W.timer-autosave-gating)", () => {
+  it("Stackmat speichert NUR im Stackmat-Modus", () => {
+    expect(shouldSaveFromStackmat("stackmat")).toBe(true);
+    expect(shouldSaveFromStackmat("keyboard")).toBe(false);
+  });
+
+  it("Smart-Cube speichert in jedem Modus AUSSER Stackmat", () => {
+    expect(shouldSaveFromSmartCube("keyboard")).toBe(true);
+    expect(shouldSaveFromSmartCube("stackmat")).toBe(false);
+  });
+
+  it("im Stackmat-Modus ist genau EINE Quelle aktiv (Stackmat, nicht Smart-Cube)", () => {
+    expect(shouldSaveFromStackmat("stackmat")).toBe(true);
+    expect(shouldSaveFromSmartCube("stackmat")).toBe(false);
   });
 });

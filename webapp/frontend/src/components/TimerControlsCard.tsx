@@ -50,6 +50,9 @@ export function TimerControlsCard({
   const [settings, setSettings] = useAppSettings();
   const isTouchDevice = useIsTouchDevice();
   const spacebarMode = settings.spacebar_enabled;
+  // W.stackmat-live-timer: Stackmat-Modus (orthogonal zu spacebar_enabled —
+  // beim Rückwechsel bleibt die Tastatur-Vorliebe erhalten).
+  const stackmatMode = settings.timer_input_source === "stackmat";
 
   // „User hat in diesem Cube manuell gewählt" → wenn ja, kein Auto-Suggest-
   // Override mehr. Reset bei Cube-Wechsel, sodass der nächste Cube wieder
@@ -306,47 +309,76 @@ export function TimerControlsCard({
               <strong>{t("timerControls.modeInfoWcaLabel")}</strong>{" "}
               {t("timerControls.modeInfoWcaBody")}
             </p>
-            <p>
+            <p className="mb-2">
               <strong>{t("timerControls.modeInfoPragmaticLabel")}</strong>{" "}
               {t("timerControls.modeInfoPragmaticBody")}
+            </p>
+            <p>
+              <strong>{t("timerControls.modeInfoStackmatLabel")}</strong>{" "}
+              {t("timerControls.modeInfoStackmatBody")}
             </p>
           </InfoButton>
         </div>
         <div className="flex flex-wrap gap-1.5">
+          {/* Die drei Tastatur-Modi setzen zusätzlich timer_input_source auf
+              "keyboard" (verlassen den Stackmat-Modus); active erst wenn NICHT
+              Stackmat-Modus, damit im Stackmat-Modus nur dessen Knopf leuchtet. */}
           <ModeButton
-            active={!spacebarMode}
+            active={!stackmatMode && !spacebarMode}
             onClick={() =>
-              setSettings({ ...settings, spacebar_enabled: false })
+              setSettings({
+                ...settings,
+                spacebar_enabled: false,
+                timer_input_source: "keyboard",
+              })
             }
           >
             {t("timerControls.modeText")}
           </ModeButton>
           <ModeButton
-            active={spacebarMode && settings.inspection_mode === "wca"}
+            active={
+              !stackmatMode && spacebarMode && settings.inspection_mode === "wca"
+            }
             onClick={() =>
               setSettings({
                 ...settings,
                 spacebar_enabled: true,
                 inspection_mode: "wca",
+                timer_input_source: "keyboard",
               })
             }
           >
             {t("timerControls.modeWca")}
           </ModeButton>
           <ModeButton
-            active={spacebarMode && settings.inspection_mode === "pragmatic"}
+            active={
+              !stackmatMode &&
+              spacebarMode &&
+              settings.inspection_mode === "pragmatic"
+            }
             onClick={() =>
               setSettings({
                 ...settings,
                 spacebar_enabled: true,
                 inspection_mode: "pragmatic",
+                timer_input_source: "keyboard",
               })
             }
           >
             {t("timerControls.modePragmatic")}
           </ModeButton>
+          {/* W.stackmat-live-timer: setzt den Stackmat als Eingabequelle. Beim
+              Verbinden schaltet StackmatAutoEngage ihn ohnehin automatisch. */}
+          <ModeButton
+            active={stackmatMode}
+            onClick={() =>
+              setSettings({ ...settings, timer_input_source: "stackmat" })
+            }
+          >
+            {t("timerControls.modeStackmat")}
+          </ModeButton>
         </div>
-        {!spacebarMode && (
+        {!spacebarMode && !stackmatMode && (
           <p className="mt-2 text-xs text-gray-500">
             {t("timerControls.tipPrefix")}{" "}
             {isTouchDevice

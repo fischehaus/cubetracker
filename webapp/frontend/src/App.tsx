@@ -38,6 +38,7 @@ import { SessionPlanCard } from "./components/SessionPlanCard";
 import { TimerControlsCard } from "./components/TimerControlsCard";
 import { TouchTimerPad } from "./components/TouchTimerPad";
 import { StackmatWorker, SmartCubeWorker } from "./components/HardwareWorkers";
+import { StackmatAutoEngage } from "./components/StackmatAutoEngage";
 import { SmartCubeSolveControls } from "./components/SmartCubeSolveControls";
 import { useAppSettings } from "./lib/settings";
 import { useMyFeedbackUnreadCount, useSessions } from "./lib/api";
@@ -282,11 +283,13 @@ function TimerTab({
   setTimerCubeType,
   timerSessionId,
   setTimerSessionId,
+  onOpenSettings,
 }: {
   timerCubeType: string;
   setTimerCubeType: (s: string) => void;
   timerSessionId: number | null;
   setTimerSessionId: (id: number | null) => void;
+  onOpenSettings: () => void;
 }) {
   const { t } = useTranslation();
   // TIMER hat keine externe Filter-Leiste — Cube/Session/Hardware
@@ -495,6 +498,7 @@ function TimerTab({
             onSolveSaved={() => setRegenSeed((s) => s + 1)}
             zen={zenMode}
             onExitZen={() => setZenMode(false)}
+            onOpenSettings={onOpenSettings}
           />
           {/* W.hardware-in-einstellungen (2026-06-20): die Verbindungs-Karten
               (Stackmat + Smart-Cube) sind in die Einstellungen gewandert. Im
@@ -1093,6 +1097,7 @@ function MainLayout() {
             setTimerCubeType={setTimerCubeType}
             timerSessionId={timerSessionId}
             setTimerSessionId={setTimerSessionId}
+            onOpenSettings={() => setTab("einstellungen")}
           />
         )}
         {tab === "statistik" && (
@@ -1173,6 +1178,9 @@ function MainLayout() {
           Store. Null-rendering, kein Layout-Impact. */}
       <StackmatWorker />
       <SmartCubeWorker />
+      {/* W.stackmat-live-timer: schaltet bei frischem Stackmat-Connect den
+          Timer-Modus automatisch auf „stackmat" (über Tabs hinweg). */}
+      <StackmatAutoEngage />
 
       {/* Globale Toaster + Modals — bleiben auf jedem Tab sichtbar.
           Die 3 Spezial-Toaster sind seit W.toast-manager (2026-05-30)

@@ -149,6 +149,22 @@ export const SETTINGS_DEFAULTS: AppSettings = {
 };
 
 /**
+ * W.timer-autosave-gating: genau EINE Auto-Save-Quelle je aktiver Eingabe-
+ * quelle. Verhindert (a) dass ein physisch verbundener Stackmat im
+ * Tastatur-/Spacebar-Modus „Geister-Solves" speichert (Matte angestoßen) und
+ * (b) Doppel-Saves wenn Stackmat + Smart-Cube gleichzeitig verbunden sind.
+ *   - Stackmat speichert NUR im Stackmat-Modus.
+ *   - Smart-Cube speichert in jedem Modus AUSSER Stackmat (dort hat der
+ *     Stackmat Vorrang — das Feld ist bewusst 2-wertig).
+ */
+export function shouldSaveFromStackmat(source: TimerInputSource): boolean {
+  return source === "stackmat";
+}
+export function shouldSaveFromSmartCube(source: TimerInputSource): boolean {
+  return source !== "stackmat";
+}
+
+/**
  * Tailwind-style font-size + line-height pro TimerFontSize-Stufe.
  * Wird vom ScrambleCard, BigTimerInput, SpacebarTimerCard inline
  * gesetzt — wir vermeiden CSS-Variables für Build-Einfachheit.

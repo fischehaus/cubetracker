@@ -17,8 +17,14 @@ import { useTranslation } from "react-i18next";
 import { useCreateSolve, useDeleteSolve, useUpdateSolve } from "../lib/api";
 import type { Solve } from "../lib/types";
 import { parseTimeInput } from "../lib/format";
-import { TIMER_FONT_SCALE, useAppSettings } from "../lib/settings";
+import {
+  TIMER_FONT_SCALE,
+  useAppSettings,
+  shouldSaveFromStackmat,
+  shouldSaveFromSmartCube,
+} from "../lib/settings";
 import { SpacebarTimerCard } from "./SpacebarTimerCard";
+import { StackmatBigDisplay } from "./StackmatBigDisplay";
 import type { TimerPenalty, TimerState } from "../hooks/useSpacebarTimer";
 import { Button, Card } from "./ui";
 
@@ -46,6 +52,11 @@ interface Props {
    */
   zen?: boolean;
   onExitZen?: () => void;
+  /**
+   * W.stackmat-live-timer: öffnet die Einstellungen — für den „in Einstellungen
+   * verbinden"-Hinweis im Stackmat-Modus, wenn (noch) nichts verbunden ist.
+   */
+  onOpenSettings?: () => void;
 }
 
 export function BigTimerInput({
@@ -56,6 +67,7 @@ export function BigTimerInput({
   onSolveSaved,
   zen = false,
   onExitZen,
+  onOpenSettings,
 }: Props) {
   const { t } = useTranslation();
   const [timeStr, setTimeStr] = useState("");
@@ -131,6 +143,9 @@ export function BigTimerInput({
       const ce = e as CustomEvent<{ time_ms: number; moves: number }>;
       const detail = ce.detail;
       if (!detail || typeof detail.time_ms !== "number") return;
+      // W.timer-autosave-gating: im Stackmat-Modus hat der Stackmat Vorrang —
+      // der Smart-Cube speichert dann NICHT (sonst Doppel-Save bei beidem aktiv).
+      if (!shouldSaveFromSmartCube(settings.timer_input_source)) return;
       // Direkter Save-Pfad — analog saveFromSpacebar ohne Penalty
       // (Cube-State ist immer „solved", also weder +2 noch DNF).
       create.mutate(
@@ -162,7 +177,16 @@ export function BigTimerInput({
         "cubetracker:smart-cube-solve",
         onSmartCubeSolve,
       );
-  }, [cubeType, sessionId, hardwareId, scramble, create, onSolveSaved, t]);
+  }, [
+    cubeType,
+    sessionId,
+    hardwareId,
+    scramble,
+    create,
+    onSolveSaved,
+    t,
+    settings.timer_input_source,
+  ]);
 
   // W.stackmat (2026-06-13): Listener fuer Stackmat-Solves (Audio-Timer ueber
   // Klinke). useStackmatTimer emittiert `cubetracker:stackmat-solve` mit
@@ -174,6 +198,10 @@ export function BigTimerInput({
       const ce = e as CustomEvent<{ time_ms: number }>;
       const detail = ce.detail;
       if (!detail || typeof detail.time_ms !== "number") return;
+      // W.timer-autosave-gating: nur im Stackmat-Modus speichern — sonst würde
+      // ein verbundener Stackmat im Tastatur-/Spacebar-Modus „Geister-Solves"
+      // anlegen (Matte angestoßen, obwohl per Tastatur gesolvt wird).
+      if (!shouldSaveFromStackmat(settings.timer_input_source)) return;
       create.mutate(
         {
           time_ms: detail.time_ms,
@@ -200,7 +228,16 @@ export function BigTimerInput({
     window.addEventListener("cubetracker:stackmat-solve", onStackmatSolve);
     return () =>
       window.removeEventListener("cubetracker:stackmat-solve", onStackmatSolve);
-  }, [cubeType, sessionId, hardwareId, scramble, create, onSolveSaved, t]);
+  }, [
+    cubeType,
+    sessionId,
+    hardwareId,
+    scramble,
+    create,
+    onSolveSaved,
+    t,
+    settings.timer_input_source,
+  ]);
 
   // Confirm beim Wechsel auf einen neuen Solve oder beim Ausblenden
   // wieder zurücknehmen.
@@ -431,6 +468,29 @@ export function BigTimerInput({
       </button>
     </>
   ) : null;
+
+  // W.stackmat-live-timer (2026-06-20): im Stackmat-Modus ersetzt das Live-
+  // Display den Spacebar-/Text-Timer. Höher priorisiert als Zen/Spacebar — Zen
+  // ist im Stackmat-Modus nicht sinnvoll und wird übersprungen. Der Auto-Save
+  // läuft über den (gateten) Stackmat-Listener oben; die Quick-Penalty-Leiste
+  // erscheint nach dem Save wie gewohnt.
+  if (settings.timer_input_source === "stackmat") {
+    return (
+      <Card>
+        <StackmatBigDisplay onOpenSettings={onOpenSettings} />
+        {quickButtons && (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm">
+            {quickButtons}
+          </div>
+        )}
+        {error && (
+          <div className="mt-4 rounded border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm text-red-300 text-center">
+            {error}
+          </div>
+        )}
+      </Card>
+    );
+  }
 
   // W.timer-zen-mode (2026-05-31): Vollbild-Zen-Modus — nur Scramble + große
   // Zeit, Tap (Mobile) / Space (Desktop) tracket, sonst nichts. Reuse der
