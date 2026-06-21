@@ -133,111 +133,82 @@ export function BigTimerInput({
     return () => clearTimeout(t);
   }, [deleteConfirm]);
 
-  // W.gan-cube-auto-time (2026-05-28): Listener fuer Smart-Cube-Solves.
-  // useSmartCube emittiert `cubetracker:smart-cube-solve` mit
-  // { time_ms, moves } sobald der Cube von „solving" auf „solved"
-  // springt. Wir speichern direkt — analog Spacebar-Mode der ohne
-  // expliziten Save-Klick funktioniert.
+  // W.gan-cube-auto-time + W.stackmat: Auto-Save für Hardware-Solves.
+  // useSmartCube/useStackmatTimer feuern `cubetracker:smart-cube-solve` /
+  // `cubetracker:stackmat-solve` (je mit { time_ms }) bei Solve-Ende; wir
+  // speichern direkt (analog Spacebar-Mode ohne expliziten Save-Klick).
+  //
+  // QA (2026-06-20): die Listener werden EINMAL registriert (deps []), NICHT
+  // bei jedem Render neu — onSolveSaved/create/scramble ändern sich ständig,
+  // sonst riss der Listener pro Render kurz ab (theoretisches verlorenes Event).
+  // Die jeweils aktuelle Save-Logik hängt an saveFromEventRef (jeden Render
+  // frisch gesetzt); die stabilen Listener lesen sie zum Event-Zeitpunkt.
+  const saveFromEventRef = useRef<
+    (timeMs: number, source: "stackmat" | "smartcube") => void
+  >(() => {});
+  saveFromEventRef.current = (timeMs, source) => {
+    // Gating (W.timer-autosave-gating): genau EINE Quelle je Modus — im
+    // Stackmat-Modus speichert nur der Stackmat, sonst nur der Smart-Cube
+    // (kein Doppel-/Geister-Save).
+    if (
+      source === "stackmat" &&
+      !shouldSaveFromStackmat(settings.timer_input_source)
+    ) {
+      return;
+    }
+    if (
+      source === "smartcube" &&
+      !shouldSaveFromSmartCube(settings.timer_input_source)
+    ) {
+      return;
+    }
+    // Hardware liefert keine Penalty-Info (Cube „solved" / Stackmat-Stop) →
+    // weder +2 noch DNF; nachträglich über die Quick-Penalty-Leiste korrigierbar.
+    create.mutate(
+      {
+        time_ms: timeMs,
+        cube_type: cubeType,
+        plus_two: false,
+        dnf: false,
+        session_id: sessionId,
+        hardware_id: hardwareId,
+        scramble: scramble && scramble.trim() !== "" ? scramble : null,
+      },
+      {
+        onSuccess: (savedSolve) => {
+          setTimeStr("");
+          setPlusTwo(false);
+          setDnf(false);
+          setLastSavedSolve(savedSolve);
+          onSolveSaved?.();
+        },
+        onError: (err) =>
+          setError(t("timer.errorPrefix", { message: err.message })),
+      },
+    );
+  };
+
   useEffect(() => {
     function onSmartCubeSolve(e: Event) {
-      const ce = e as CustomEvent<{ time_ms: number; moves: number }>;
-      const detail = ce.detail;
+      const detail = (e as CustomEvent<{ time_ms: number }>).detail;
       if (!detail || typeof detail.time_ms !== "number") return;
-      // W.timer-autosave-gating: im Stackmat-Modus hat der Stackmat Vorrang —
-      // der Smart-Cube speichert dann NICHT (sonst Doppel-Save bei beidem aktiv).
-      if (!shouldSaveFromSmartCube(settings.timer_input_source)) return;
-      // Direkter Save-Pfad — analog saveFromSpacebar ohne Penalty
-      // (Cube-State ist immer „solved", also weder +2 noch DNF).
-      create.mutate(
-        {
-          time_ms: detail.time_ms,
-          cube_type: cubeType,
-          plus_two: false,
-          dnf: false,
-          session_id: sessionId,
-          hardware_id: hardwareId,
-          scramble: scramble && scramble.trim() !== "" ? scramble : null,
-        },
-        {
-          onSuccess: (savedSolve) => {
-            setTimeStr("");
-            setPlusTwo(false);
-            setDnf(false);
-            setLastSavedSolve(savedSolve);
-            onSolveSaved?.();
-          },
-          onError: (err) =>
-            setError(t("timer.errorPrefix", { message: err.message })),
-        },
-      );
+      saveFromEventRef.current(detail.time_ms, "smartcube");
+    }
+    function onStackmatSolve(e: Event) {
+      const detail = (e as CustomEvent<{ time_ms: number }>).detail;
+      if (!detail || typeof detail.time_ms !== "number") return;
+      saveFromEventRef.current(detail.time_ms, "stackmat");
     }
     window.addEventListener("cubetracker:smart-cube-solve", onSmartCubeSolve);
-    return () =>
+    window.addEventListener("cubetracker:stackmat-solve", onStackmatSolve);
+    return () => {
       window.removeEventListener(
         "cubetracker:smart-cube-solve",
         onSmartCubeSolve,
       );
-  }, [
-    cubeType,
-    sessionId,
-    hardwareId,
-    scramble,
-    create,
-    onSolveSaved,
-    t,
-    settings.timer_input_source,
-  ]);
-
-  // W.stackmat (2026-06-13): Listener fuer Stackmat-Solves (Audio-Timer ueber
-  // Klinke). useStackmatTimer emittiert `cubetracker:stackmat-solve` mit
-  // { time_ms } sobald ein Solve abgeschlossen ist. Direkter Save-Pfad analog
-  // Smart-Cube — der Stackmat liefert keine Penalty-Info (weder +2 noch DNF),
-  // der User kann nachträglich über die Quick-Penalty-Leiste korrigieren.
-  useEffect(() => {
-    function onStackmatSolve(e: Event) {
-      const ce = e as CustomEvent<{ time_ms: number }>;
-      const detail = ce.detail;
-      if (!detail || typeof detail.time_ms !== "number") return;
-      // W.timer-autosave-gating: nur im Stackmat-Modus speichern — sonst würde
-      // ein verbundener Stackmat im Tastatur-/Spacebar-Modus „Geister-Solves"
-      // anlegen (Matte angestoßen, obwohl per Tastatur gesolvt wird).
-      if (!shouldSaveFromStackmat(settings.timer_input_source)) return;
-      create.mutate(
-        {
-          time_ms: detail.time_ms,
-          cube_type: cubeType,
-          plus_two: false,
-          dnf: false,
-          session_id: sessionId,
-          hardware_id: hardwareId,
-          scramble: scramble && scramble.trim() !== "" ? scramble : null,
-        },
-        {
-          onSuccess: (savedSolve) => {
-            setTimeStr("");
-            setPlusTwo(false);
-            setDnf(false);
-            setLastSavedSolve(savedSolve);
-            onSolveSaved?.();
-          },
-          onError: (err) =>
-            setError(t("timer.errorPrefix", { message: err.message })),
-        },
-      );
-    }
-    window.addEventListener("cubetracker:stackmat-solve", onStackmatSolve);
-    return () =>
       window.removeEventListener("cubetracker:stackmat-solve", onStackmatSolve);
-  }, [
-    cubeType,
-    sessionId,
-    hardwareId,
-    scramble,
-    create,
-    onSolveSaved,
-    t,
-    settings.timer_input_source,
-  ]);
+    };
+  }, []);
 
   // Confirm beim Wechsel auf einen neuen Solve oder beim Ausblenden
   // wieder zurücknehmen.

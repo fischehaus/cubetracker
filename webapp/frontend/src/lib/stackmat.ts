@@ -114,7 +114,7 @@ export function buildStackmatFrame(status: string, timeMs: number): string {
   const min = Math.floor(clamped / 60000);
   const rem = clamped % 60000;
   const sec = Math.floor(rem / 1000);
-  const hund = Math.round((rem % 1000) / 10);
+  const hund = Math.floor((rem % 1000) / 10); // WCA-konsistent: abschneiden
   const d = [min, Math.floor(sec / 10), sec % 10, Math.floor(hund / 10), hund % 10];
   const sum = d.reduce((a, b) => a + b, 0);
   return status + d.join("") + String.fromCharCode(sum + 64);
@@ -259,7 +259,10 @@ export class StackmatDecoder {
     const code = byte & 0x7f;
     this.onByte?.(String.fromCharCode(code));
     if (code === 0x0a || code === 0x0d) {
-      if (this.line.length >= 6) {
+      // >= 7 = Minimum eines gültigen Frames (status + 5 Ziffern + checksum) —
+      // deckt sich mit dem Längen-Check in parseStackmatFrame (QA: vorher >= 6,
+      // off-by-one zum Parser-Minimum).
+      if (this.line.length >= 7) {
         const p = parseStackmatFrame(this.line);
         if (p) this.onPacket(p);
       }
