@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.stackmat-live-timer",
+        released=date(2026, 6, 20),
+        title="⏱️ Stackmat als Timer-Modus — Zeit läuft live im großen Timer",
+        highlights=[
+            "Der Stackmat ist jetzt ein eigener Timer-Modus: sobald du ihn "
+            "verbindest, schaltet der Timer automatisch darauf um und die Zeit "
+            "läuft in Echtzeit im großen Timer mit (wie csTimer) — beim Stopp "
+            "wird sie automatisch gespeichert. Im Timer-Modus-Picker kannst du "
+            "jederzeit zwischen Tastatur/Spacebar und Stackmat wechseln. Damit "
+            "sich nichts doppelt speichert, ist sauber geregelt, welche Quelle "
+            "wann speichert.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.hardware-in-einstellungen",
         released=date(2026, 6, 20),
         title="🎛️ Hardware-Verwaltung in den Einstellungen — Verbindung bleibt beim Tab-Wechsel",
