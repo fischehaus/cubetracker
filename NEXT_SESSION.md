@@ -24,30 +24,34 @@ Commits sind.
 
 ---
 
-## ✅ ERLEDIGT 2026-06-20 — WCA-Trunkierung + Stackmat-Umzug (Stages 0–5 live)
+## ✅ ERLEDIGT 2026-06-20 — Stackmat-Umzug KOMPLETT + Live-Timer am echten G5 verifiziert
 
-**WCA-Trunkierung G5** (`W.stackmat-wca-trunc`, Tag, live + verifiziert): G5-Zeiten
-werden auf Hundertstel ABGESCHNITTEN statt gerundet (7.946 s = 7.94 s, nicht 7.95).
-Trunkierung im `StackmatSolveTracker` an der Emit-Grenze; interne Lauf-/Stop-
-Erkennung bleibt auf rohen ms (sonst Fehl-Stop). +4 diskriminierende Tests.
+**WCA-Trunkierung G5** (`W.stackmat-wca-trunc`): G5-Zeiten auf Hundertstel
+ABGESCHNITTEN statt gerundet (7.946 s = 7.94 s). Trunkierung im Tracker an der
+Emit-Grenze; interne Erkennung auf rohen ms.
 
-**Stackmat-Umzug — Stages 0–5 LIVE:** Verbindungs-Karten (Smart-Cube + Stackmat)
-aus dem Timer-Tab in die Einstellungen, + Stackmat als Timer-Modus mit Echtzeit-
-Display am großen Timer (wie csTimer). 10-Agenten-Design-Panel →
-**`docs/stackmat-settings-redesign-plan.md`** ist der vollständige Plan (Architektur:
-Modul-Singleton-Stores + `useSyncExternalStore` nach `toast.ts`-Vorbild; **Worker-
-Variante = Hardware-Hooks unangetastet**).
+**Stackmat-Umzug (10-Agenten-Design-Panel → `docs/stackmat-settings-redesign-plan.md`),
+Stages 0–6 live:**
 - ✅ Stage 0 `W.einstellungen-groupheader-pille`: GroupHeader-Pille (Lesbarkeit).
 - ✅ Stage 1 `W.timer-input-source`: Settings-Feld `keyboard`/`stackmat` (Fundament).
-- ✅ Stage 2 `W.hardware-singleton-store`: Verbindung überlebt Tab-Wechsel — **am echten G5 verifiziert** (User: „hat alles geklappt").
-- ✅ Stage 3 `W.hardware-in-einstellungen`: Karten in Einstellungen → Gruppe „Geräte"; Smart-Cube-Solve-Steuerung (Bereit/Fertig) bleibt im Timer-Tab.
-- ✅ Stage 4+5 `W.stackmat-live-timer`: Stackmat-Modus + Auto-Engage + Echtzeit-Display + Auto-Save-Gating. QA kein KRITISCH. **G5-Live-Test bewusst verschoben** (User).
-- ✅ Stage 6 (Logout-Disconnect): strukturell durch die Worker-Variante erledigt (Logout → MainLayout-Unmount → Hook-Cleanup trennt Mic/BLE). Kein Extra-Code.
+- ✅ Stage 2 `W.hardware-singleton-store`: Verbindung überlebt Tab-Wechsel (Worker-Variante, Hooks unangetastet) — am echten G5 verifiziert.
+- ✅ Stage 3 `W.hardware-in-einstellungen`: Karten in Einstellungen → „Geräte"; Smart-Cube-Solve-Steuerung bleibt im Timer-Tab.
+- ✅ Stage 4+5 `W.stackmat-live-timer`: Stackmat-Modus + Auto-Engage + Auto-Save-Gating.
+- ✅ Stage 6 (Logout-Disconnect): strukturell durch die Worker-Variante.
 
-**Offen / nächste Session:**
-- **G5-Live-Verifikation** des Live-Timers (Echtzeit-Hochzählen, Auto-Engage, Einfrieren + Save) — User testet, wenn Hardware + Zeit da.
-- **Folge-Polish (SOLLTE/NICE aus QA):** Fokus-Modus-Escape aus dem Stackmat-Modus; Hinweis-Link → Direkt-Scroll zur Geräte-Sektion; optional `track.onended` (Mic-Verlust). Details im Plan-Doc.
-- **Produktfrage offen:** Zen-Pille nur im Spacebar-Modus sichtbar (per-Gerät-localStorage-Default: Touch=Spacebar→sichtbar, Desktop=Text→keine Pille). Soll Zen im Text-Modus / Desktop-Default anders? (Mattis-Befund 2026-06-20: Zen am Handy sichtbar, am Desktop nicht — **erwartetes Verhalten, kein Bug**; Fix für Mattis: Desktop → Spacebar-Modus wählen.)
+**+ Folge-Wellen + Live-Timer-Saga (am echten G5 durchdebuggt + verifiziert):**
+- ✅ `W.timer-save-speed`: optimistisches Einfügen — Solve erscheint SOFORT in der Übersicht (vorher Sekunden wg. PB-Scan + Voll-Refetch). Pure Helper `lib/solveOptimistic.ts` (10 Tests).
+- ✅ `W.stackmat-zen`: Zen-Vollbild-Modus auch im Stackmat-Modus.
+- ✅ `W.stackmat-frame-fix` (**Kern-Erkenntnis**): unser Decoder las das G5-Frame falsch („raw ms ohne Status"). Echtes Format = standard/csTimer: `[status][5 od. 6 Ziffern][checksum]` (z.B. `I005801N` = idle, 5.801 s). Jetzt korrekt → Status-Zeichen + Lauf-Stream verfügbar.
+- ✅ `W.stackmat-live-clock`: lokale 60fps-Uhr, bei jedem Paket ans Gerät re-synct (csTimer-Methode) → flüssige Echtzeit-Anzeige.
+- ✅ `W.stackmat-idle-stop`: der G5 stoppt per `'I'`-Frame mit Endzeit (nicht `'S'`) → wird jetzt als Solve-Ende erkannt + gespeichert. **Nur Status `' '` = läuft** (sonst lösten die I/H/A-Zucken der gehaltenen Endzeit Doppel-Speichern aus, ~alle 2 s — gefixt). QA-Pass kein KRITISCH; Save-Listener stabil (einmalig) registriert.
+- **Live verifiziert am echten G5 (User 2026-06-20):** Zeit läuft flüssig mit + wird genau einmal gespeichert. **Feature komplett.**
+
+**Offen / nächste Session (alles NICE-to-have):**
+- **Polish:** Fokus-Modus-Escape aus dem Stackmat-Modus; Hinweis-Link → Direkt-Scroll zur Geräte-Sektion (Details im Plan-Doc).
+- **Aufräumen:** User hat ein paar Duplikat-Solves aus den Zwischen-Tests in der Liste — ggf. Aufräum-Hilfe anbieten.
+- **Produktfrage (Mattis):** Zen-Pille nur im Spacebar-Modus sichtbar (per-Gerät-Default: Touch=Spacebar→sichtbar, Desktop=Text→keine). Erwartetes Verhalten, kein Bug; Fix für Mattis: Desktop → Spacebar-Modus. Offen, ob Desktop-Default / Text-Modus-Zen geändert werden soll.
+- **Doku-Drift:** `CLAUDE.md` Tech-Stack sagt „React 18" — installiert ist **19.2.5**.
 
 **Doku-Drift gemerkt:** `CLAUDE.md` Tech-Stack sagt „React 18" — installiert ist
 **19.2.5** (verifiziert). Bei Gelegenheit korrigieren.
