@@ -44,6 +44,21 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.stackmat-frame-fix",
+        released=date(2026, 6, 20),
+        title="⏱️ Stackmat: Frame-Dekodierung korrigiert (Status-Zeichen + ms-Auflösung)",
+        highlights=[
+            "Der Stackmat-Decoder hat das Frame-Format des G5 falsch "
+            "interpretiert (Status-Zeichen verworfen, nur verrutschte Fragmente "
+            "erwischt) — dadurch ging die Information „läuft gerade\" verloren und "
+            "die meisten Frames fielen durch. Jetzt liest die App das echte, "
+            "csTimer-kompatible Standardformat (Status + Zeit in Hundertstel "
+            "oder Millisekunden) sauber. Macht die Verbindung robuster und "
+            "schafft die Voraussetzung für die Echtzeit-Anzeige während des "
+            "Solves.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.stackmat-live-clock",
         released=date(2026, 6, 20),
         title="Stackmat-Echtzeit-Anzeige: lokale Uhr versucht + zurückgenommen (Diagnose)",
