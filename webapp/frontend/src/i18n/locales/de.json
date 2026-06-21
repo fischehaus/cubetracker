@@ -59,7 +59,8 @@
     "title": "Einstellungen",
     "back": "← Zurück zur App",
     "groupAussehen": "Aussehen & Darstellung",
-    "groupTimer": "Timer & Eingabe"
+    "groupTimer": "Timer & Eingabe",
+    "groupGeraete": "Geräte"
   },
   "nachrichtenView": {
     "title": "Nachrichten",

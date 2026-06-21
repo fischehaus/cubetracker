@@ -37,11 +37,8 @@ import { ScrambleCard } from "./components/ScrambleCard";
 import { SessionPlanCard } from "./components/SessionPlanCard";
 import { TimerControlsCard } from "./components/TimerControlsCard";
 import { TouchTimerPad } from "./components/TouchTimerPad";
-import { SmartCubeConnect } from "./components/SmartCubeConnect";
-import * as smartCubeStore from "./lib/smartCubeStore";
-import { StackmatConnect } from "./components/StackmatConnect";
-import * as stackmatStore from "./lib/stackmatStore";
 import { StackmatWorker, SmartCubeWorker } from "./components/HardwareWorkers";
+import { SmartCubeSolveControls } from "./components/SmartCubeSolveControls";
 import { useAppSettings } from "./lib/settings";
 import { useMyFeedbackUnreadCount, useSessions } from "./lib/api";
 import { HardwareCompareCard } from "./components/HardwareCompareCard";
@@ -499,15 +496,12 @@ function TimerTab({
             zen={zenMode}
             onExitZen={() => setZenMode(false)}
           />
-          {/* W.pre-demo-fixes (2026-05-29): SmartCubeConnect-Block liegt
-              direkt unter dem Timer-Display — auch im Fokus-Modus sichtbar.
-              User-Wunsch: wer im Fokus solven will, soll den Verbindungs-
-              Status + Move-Counter weiter sehen koennen. */}
-          <SmartCubeConnectBlock />
-          {/* W.stackmat (2026-06-13): Stackmat-/Speed-Stacks-Timer per
-              Klinkenkabel (Audio-Signal). Eigener Block direkt unter dem
-              Smart-Cube — beide Hardware-Eingänge an einer Stelle. */}
-          <StackmatConnectBlock />
+          {/* W.hardware-in-einstellungen (2026-06-20): die Verbindungs-Karten
+              (Stackmat + Smart-Cube) sind in die Einstellungen gewandert. Im
+              Timer-Tab bleibt nur die Smart-Cube-Solve-Steuerung (Bereit /
+              Solve fertig) — sichtbar NUR wenn ein Cube verbunden ist. Der
+              Stackmat bekommt seinen Live-Timer-Modus in einer Folge-Etappe. */}
+          <SmartCubeSolveControls />
           {/* TouchTimerPad rendert auf Desktop immer null — auf Phone nur
               sichtbar wenn Spacebar-Modus aktiv ist (Text-Mode = Soft-Tastatur,
               da gibt es nichts zu triggern). */}
@@ -533,40 +527,6 @@ function TimerTab({
         )}
       </div>
     </div>
-  );
-}
-
-// W.hardware-singleton-store (2026-06-20): die Karte liest jetzt NUR den
-// Modul-Store (kein eigener Hook-Aufruf). Der einzige Hook-Owner ist
-// <SmartCubeWorker/> in MainLayout — so überlebt die Verbindung den
-// Tab-Wechsel. Selektor `s => s` ist ref-stabil zwischen echten Änderungen
-// (Store spiegelt die Hook-Guards) → re-rendert nur bei echten State-Changes.
-function SmartCubeConnectBlock() {
-  const state = smartCubeStore.useSmartCubeStore((s) => s);
-  return (
-    <SmartCubeConnect
-      state={state}
-      connect={smartCubeStore.connect}
-      disconnect={smartCubeStore.disconnect}
-      prepareForSolve={smartCubeStore.prepareForSolve}
-      stopSolve={smartCubeStore.stopSolve}
-      isSupported={smartCubeStore.isSupported}
-    />
-  );
-}
-
-// W.hardware-singleton-store: analog — Karte liest den Store, der einzige
-// Hook-Owner ist <StackmatWorker/> in MainLayout.
-function StackmatConnectBlock() {
-  const state = stackmatStore.useStackmatStore((s) => s);
-  return (
-    <StackmatConnect
-      state={state}
-      connect={stackmatStore.connect}
-      disconnect={stackmatStore.disconnect}
-      isSupported={stackmatStore.isSupported}
-      getDiagnostics={stackmatStore.getDiagnostics}
-    />
   );
 }
 

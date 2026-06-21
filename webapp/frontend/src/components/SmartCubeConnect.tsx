@@ -23,17 +23,18 @@ interface Props {
   state: SmartCubeState;
   connect: () => void | Promise<void>;
   disconnect: () => void | Promise<void>;
-  prepareForSolve: () => void;
-  stopSolve: () => void;
   isSupported: boolean;
 }
 
+// W.hardware-in-einstellungen (2026-06-20): diese Karte managt NUR die
+// Verbindung (verbinden / Status / trennen) und lebt jetzt in den
+// Einstellungen. Die solve-zeitliche Steuerung (Bereit / Solve fertig) wurde
+// herausgelöst nach SmartCubeSolveControls, das im Timer-Tab bleibt — dort
+// braucht man sie beim Solven (User-Entscheidung).
 export function SmartCubeConnect({
   state,
   connect,
   disconnect,
-  prepareForSolve,
-  stopSolve,
   isSupported,
 }: Props) {
   const { t } = useTranslation();
@@ -55,33 +56,14 @@ export function SmartCubeConnect({
   }
 
   if (state.status === "connected") {
-    // W.gan-cube-auto-time-v2 State-Farben:
-    //   idle    — gruen (Cube verbunden, User scrambelt)
-    //   ready   — blau (User hat „Bereit" geklickt, wartet auf 1. Move)
-    //   solving — amber (Solve laeuft)
-    //   solved  — gold (Solve fertig, gespeichert)
-    const solveColor =
-      state.solveState === "ready"
-        ? "border-blue-500/40 bg-blue-500/5"
-        : state.solveState === "solving"
-          ? "border-amber-500/40 bg-amber-500/5"
-          : state.solveState === "solved"
-            ? "border-yellow-500/50 bg-yellow-500/10"
-            : "border-emerald-500/40 bg-emerald-500/5";
-    const dotColor =
-      state.solveState === "ready"
-        ? "bg-blue-400"
-        : state.solveState === "solving"
-          ? "bg-amber-400"
-          : state.solveState === "solved"
-            ? "bg-yellow-400"
-            : "bg-emerald-400";
+    // Reine Verbindungs-Ansicht (Solve-Steuerung lebt in SmartCubeSolveControls
+    // im Timer-Tab). Border immer grün = „verbunden".
     return (
-      <div className={`rounded-lg border p-3 space-y-2 ${solveColor}`}>
+      <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/5 p-3 space-y-2">
         <div className="flex items-baseline justify-between gap-2 flex-wrap">
           <div className="flex items-baseline gap-2">
             <span
-              className={`inline-block w-2 h-2 rounded-full animate-pulse ${dotColor}`}
+              className="inline-block w-2 h-2 rounded-full animate-pulse bg-emerald-400"
               aria-hidden="true"
             />
             <span className="text-sm font-medium text-emerald-100">
@@ -101,72 +83,6 @@ export function SmartCubeConnect({
             {t("smartCube.disconnectButton")}
           </button>
         </div>
-
-        {/* W.gan-cube-auto-time-v2: User-Flow-Buttons je nach State. */}
-        {state.solveState === "idle" && (
-          <button
-            type="button"
-            onClick={prepareForSolve}
-            className="w-full rounded-lg border border-blue-500/40 bg-blue-600/30 px-3 py-2.5 text-sm font-medium text-blue-100 hover:bg-blue-600/50 hover:border-blue-500/60 active:scale-[0.98] transition-all"
-            title={t("smartCube.readyButtonTitle")}
-          >
-            {t("smartCube.readyButton")}
-          </button>
-        )}
-        {state.solveState === "ready" && (
-          <div className="text-sm text-blue-100 flex items-center gap-2 bg-blue-500/10 rounded px-2 py-1.5">
-            <span className="text-base">👋</span>
-            <span>{t("smartCube.readyLabel")}</span>
-          </div>
-        )}
-        {state.solveState === "solving" && (
-          <>
-            <div className="text-sm text-amber-200 font-mono flex items-center gap-2">
-              <span>⏱</span>
-              <span>{t("smartCube.solvingLabel")}</span>
-              <span className="text-amber-100">
-                ({state.solveMoveCount} {t("smartCube.movesShort")})
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={stopSolve}
-              className="w-full rounded-lg border border-amber-500/40 bg-amber-600/30 px-3 py-2 text-sm font-medium text-amber-100 hover:bg-amber-600/50 transition-all"
-              title={t("smartCube.stopButtonTitle")}
-            >
-              {t("smartCube.stopButton")}
-            </button>
-          </>
-        )}
-        {state.solveState === "solved" &&
-          state.lastSolveTimeMs !== null && (
-            <div className="text-sm text-yellow-200 font-mono flex items-baseline gap-3 flex-wrap">
-              <span className="text-base">✓</span>
-              <span className="text-yellow-100 text-2xl font-bold">
-                {(state.lastSolveTimeMs / 1000).toFixed(2)}s
-              </span>
-              <span className="text-yellow-300/80">
-                ({state.lastSolveMoves} {t("smartCube.movesShort")})
-              </span>
-            </div>
-          )}
-
-        {state.lastMove !== null && state.solveState === "idle" && (
-          // W.gan-cube-mvp-qa (NICE): aria-live="off" explizit, damit
-          // Screen-Reader nicht jeden Move ansagt.
-          <div
-            className="text-xs text-emerald-300/80 font-mono"
-            aria-live="off"
-          >
-            {t("smartCube.lastMoveLabel")}{" "}
-            <span className="text-emerald-100 font-semibold">
-              {state.lastMove}
-            </span>
-            <span className="text-gray-500 ml-2">
-              ({t("smartCube.moveCountLabel", { count: state.moveCount })})
-            </span>
-          </div>
-        )}
         <p className="text-[10px] text-emerald-200/60 italic">
           {t("smartCube.autoTimeNote")}
         </p>

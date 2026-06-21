@@ -15,6 +15,10 @@ import { InfoButton } from "./InfoButton";
 import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
 import { SkinPickerCard } from "./SkinPickerCard";
 import {
+  StackmatConnectCard,
+  SmartCubeConnectCard,
+} from "./HardwareConnectCards";
+import {
   FONT_SIZE_LABELS,
   SETTINGS_DEFAULTS,
   type TimerFontSize,
@@ -309,6 +313,17 @@ export function EinstellungenView({ onBack }: Props) {
             </div>
           </div>
         </Section>
+      </div>
+
+      {/* ================= GRUPPE: GERÄTE ================= */}
+      {/* W.hardware-in-einstellungen (2026-06-20): die Verbindungs-Karten für
+          Stackmat-Timer + Smart-Cube leben jetzt hier statt im Timer-Tab. Die
+          Verbindung selbst hält ein Worker in MainLayout → sie überlebt den
+          Tab-Wechsel zurück in den Timer-Tab (zum Solven). */}
+      <GroupHeader>{t("einstellungenView.groupGeraete")}</GroupHeader>
+      <div className="space-y-4">
+        <StackmatConnectCard />
+        <SmartCubeConnectCard />
       </div>
 
       <div className="flex justify-end pt-2">

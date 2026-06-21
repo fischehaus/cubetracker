@@ -59,7 +59,8 @@
     "title": "Settings",
     "back": "← Back to app",
     "groupAussehen": "Appearance & display",
-    "groupTimer": "Timer & input"
+    "groupTimer": "Timer & input",
+    "groupGeraete": "Devices"
   },
   "nachrichtenView": {
     "title": "Messages",
