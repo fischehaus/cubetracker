@@ -50,6 +50,7 @@ describe("csTimer-Vendor-Module", () => {
     expect(hasCstimerScramble("ivyso")).toBe(true);
     expect(hasCstimerScramble("133")).toBe(true); // Floppy Cube
     expect(hasCstimerScramble("223")).toBe(true); // Tower Cube
+    expect(hasCstimerScramble("ftoso")).toBe(true); // FTO (W.fto-random-state)
     // Diese Types existieren NICHT (utilscramble/megaminx wurden entfernt
     // im QA-Fix 2026-05-17 weil broken). Kommen bei Solver-Vendoring zurueck.
     expect(hasCstimerScramble("heli")).toBe(false);
@@ -105,6 +106,17 @@ describe("csTimer-Vendor-Module", () => {
 
   it("getCstimerScramble('223') (Tower) liefert validen Scramble-String", () => {
     const s = getCstimerScramble("223");
+    expect(typeof s).toBe("string");
+    expect(s?.length ?? 0).toBeGreaterThan(0);
+    expect(s!).toMatch(VALID_SCRAMBLE_CHARS);
+  });
+
+  // GATE (W.fto-random-state): vendored ftocta.js + scramble_fto.js. Wenn das
+  // hier non-empty + valide liefert, laedt + loest die ganze FTO-Kette (Solver
+  // + Pruning-Tabellen) — erst dann wird FTO in scramble.ts auf csTimer
+  // umgeschaltet. Liefert es leer/null, bleibt FTO bei scrambow (random-move).
+  it("getCstimerScramble('ftoso') (FTO) liefert validen Scramble-String", () => {
+    const s = getCstimerScramble("ftoso");
     expect(typeof s).toBe("string");
     expect(s?.length ?? 0).toBeGreaterThan(0);
     expect(s!).toMatch(VALID_SCRAMBLE_CHARS);

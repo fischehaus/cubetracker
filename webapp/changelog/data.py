@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.fto-random-state",
+        released=date(2026, 6, 29),
+        title="🔺 FTO-Scrambles jetzt in WCA-Qualität (Random-State)",
+        highlights=[
+            "FTO (Face-Turning Octahedron) bekommt jetzt echte Random-State-"
+            "Scrambles statt nur zufälliger Züge — gerechnet von csTimers "
+            "FTO-Solver, den wir dafür eingebunden haben. Damit sind "
+            "FTO-Scrambles gleichwertig zu den offiziellen WCA-Cubes, und der "
+            "Hinweis auf zufällige Züge entfällt. Fällt der Solver einmal aus, "
+            "greift automatisch der bisherige Generator als Fallback.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.fto-cstimer-roundtrip",
         released=date(2026, 6, 29),
         title="🔺 FTO beim csTimer-Import/-Export korrekt zugeordnet",

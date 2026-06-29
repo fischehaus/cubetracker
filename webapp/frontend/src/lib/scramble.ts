@@ -119,6 +119,10 @@ const APP_TO_CSTIMER: Record<string, string> = {
   dino: "dinoso",
   floppy: "133",
   tower: "223",
+  // FTO (W.fto-random-state, 2026-06-29): csTimer-Random-State via vendored
+  // ftocta.js + scramble_fto.js (self-contained, nur mathlib-Dep). Bei leerem
+  // Ergebnis faellt generateScramble auf scrambow (random-move) zurueck.
+  fto: "ftoso",
   // ENTFERNT (QA-Fix 2026-05-17): helicopter/gigaminx/bicube/bandaged_square/
   // square_2/curvy_copter/diamond/megaminx waren im ersten Push enthalten,
   // returnen aber leerstring/null weil src/js/solver/ + weitere lib-Files
@@ -595,6 +599,8 @@ const RANDOM_STATE_PUZZLES = new Set<string>([
   "dino",
   "floppy",
   "tower",
+  // Phase W.fto-random-state (2026-06-29): FTO via vendored ftocta.js.
+  "fto",
   // 7 weitere (heli/giga/etc.) sind raus seit QA-Fix — brauchen solver/-Files.
 ]);
 

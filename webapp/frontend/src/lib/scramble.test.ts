@@ -173,9 +173,9 @@ describe("generateScramble — custom puzzles (Welle 3, 2026-05-16)", () => {
     });
   }
 
-  it("fto (scrambow-unterstützt) produces non-empty scramble", async () => {
-    // FTO ist von scrambow supportiert — wir routen es zu scrambow,
-    // nicht zu unserem Custom-Generator.
+  it("fto (csTimer random-state) produces non-empty scramble", async () => {
+    // FTO läuft jetzt über csTimer-Random-State (APP_TO_CSTIMER fto→ftoso,
+    // vendored ftocta.js); bei leerem csTimer-Ergebnis Fallback auf scrambow.
     const s = await generateScramble("fto");
     expect(s.length).toBeGreaterThan(0);
   });

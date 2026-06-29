@@ -28,6 +28,8 @@
 //   Skewb:          "skbso"   (WCA random-state)
 //                   "skbo"    (random-moves)
 //   Master Skewb:   "mskbso"  (random-state)
+//   FTO:            "ftoso"   (random-state; + ftol3t/ftol4t/ftotcp/ftoedge/
+//                              ftocent/ftocorn Trainer-Subsets, ungenutzt)
 //
 // Diese Liste basiert auf der `scrMgr.reg(...)`-Aufrufe in den
 // puzzle-Modulen. Erfasst beim Port 2026-05-17 — wenn csTimer-Upstream
@@ -44,6 +46,12 @@ import "./skewb.js"; // Skewb + Ivy
 import "./mgmlsll.js"; // Megaminx-LSLL (Trainer-Subsets, derzeit nicht in UI)
 import "./1x3x3.js"; // Floppy Cube
 import "./2x2x3.js"; // Tower Cube
+// FTO (W.fto-random-state, 2026-06-29): self-contained — ftocta.js (Solver,
+// einzige Dep ist mathlib) + scramble_fto.js. Anders als die 7 entfernten
+// Cubes braucht FTO KEIN grouplib/poly3dlib. Solver MUSS vor dem Scramble-
+// Modul geladen werden (scramble_fto.js referenziert window.ftosolver).
+import "./ftocta.js";
+import "./scramble_fto.js";
 
 // NICHT mehr geladen (Phase W.cstimer-more-puzzles-qa, 2026-05-17):
 //   - megaminx.js → braucht solver/megaminx.js (32KB), liefert sonst null

@@ -447,14 +447,13 @@ export function ScrambleCard({
       )}
 
       {/* Disclaimer NUR für Custom-Puzzles ohne Random-State-Solver
-          (Phase W.ivy-rs, 2026-05-17): Ivy hat seit jetzt einen
-          Eigenbau-Solver (29.160-State-Lookup-Table). FTO über scrambow.
-          Gear/Redi/Master Pyra/Skewb laufen weiter über Random-Move
-          (kommen schrittweise auf Random-State, wenn das Konzept hier
-          stabil ist). */}
+          (Phase W.ivy-rs, 2026-05-17; FTO ergänzt W.fto-random-state
+          2026-06-29): Ivy + FTO haben jetzt Random-State (Eigenbau-Solver
+          bzw. vendored csTimer ftocta.js), ebenso Gear/Redi/Master Pyra/
+          Dino/Floppy/Tower. Nur noch Master Skewb läuft über Random-Move —
+          isWcaQualityCustomPuzzle steuert die Anzeige automatisch. */}
       {effectiveCategory === "unofficial" &&
-        !isWcaQualityCustomPuzzle(effectiveType) &&
-        effectiveType !== "fto" && (
+        !isWcaQualityCustomPuzzle(effectiveType) && (
           <p className="mt-3 text-[11px] text-amber-300/70">
             {t("scramble.randomMoveWarning")}
           </p>
