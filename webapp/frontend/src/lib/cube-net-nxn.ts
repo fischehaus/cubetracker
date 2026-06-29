@@ -181,7 +181,11 @@ export function applyMoveNxn(state: NxnState, n: number, move: string): NxnState
   return state;
 }
 
-/** Solved → Scramble anwenden. Tokens per Whitespace gesplittet. */
+/**
+ * Solved → Scramble anwenden. Tokens per Whitespace gesplittet. Gibt einen
+ * frischen State zurück (intern wird ein neuer solvedNxn mutiert) — der
+ * Aufrufer übergibt also keinen eigenen State.
+ */
 export function applyScrambleNxn(n: number, scramble: string): NxnState {
   const state = solvedNxn(n);
   for (const tok of scramble.split(/\s+/)) {

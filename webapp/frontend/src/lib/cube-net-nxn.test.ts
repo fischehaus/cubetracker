@@ -35,7 +35,7 @@ function randomNxnScramble(n: number, len: number): string {
     const f = FACE_LETTERS[Math.floor(Math.random() * 6)];
     const mod = MODS[Math.floor(Math.random() * 3)];
     if (n >= 4 && Math.random() < 0.5) {
-      const maxWide = n >= 6 ? 3 : 2;
+      const maxWide = n >= 5 ? 3 : 2;
       const layers = 2 + Math.floor(Math.random() * (maxWide - 1)); // 2..maxWide
       out.push((layers === 2 ? "" : String(layers)) + f + "w" + mod);
     } else {
@@ -136,6 +136,34 @@ describe("cube-net-nxn: Wide-Move-Tiefe + Parser", () => {
       applyMoveNxn(state, 5, tok);
       expect(state).toEqual(solvedNxn(5));
     }
+  });
+});
+
+describe("cube-net-nxn: bekannte Single-Move-States (4x4, handverifiziert)", () => {
+  // Diese Tests prüfen die Strip-Mappings gegen VON HAND aus der Cube-Mechanik
+  // abgeleitete Soll-Zustände (unabhängig vom Code) — schliesst die Lücke, die
+  // reine Invarianten (selbst-aufhebende Bugs) offen lassen. Jeder Move startet
+  // vom gelösten 4x4 und exerziert d=0 UND d=1 (Wide). Idx = row*4 + col.
+
+  it("Uw: L obere 2 Reihen → F-Farbe (U dreht F→L)", () => {
+    const st = solvedNxn(4);
+    applyMoveNxn(st, 4, "Uw");
+    for (let i = 0; i < 8; i++) expect(st.L[i]).toBe("F"); // Reihen 0+1
+    for (let i = 8; i < 16; i++) expect(st.L[i]).toBe("L"); // Reihen 2+3 unberührt
+  });
+
+  it("Fw: R linke 2 Spalten → U-Farbe (F dreht U→R)", () => {
+    const st = solvedNxn(4);
+    applyMoveNxn(st, 4, "Fw");
+    for (const i of [0, 4, 8, 12, 1, 5, 9, 13]) expect(st.R[i]).toBe("U"); // Spalte 0+1
+    for (const i of [2, 6, 10, 14, 3, 7, 11, 15]) expect(st.R[i]).toBe("R"); // Spalte 2+3
+  });
+
+  it("Bw: L linke 2 Spalten → U-Farbe (B dreht U→L)", () => {
+    const st = solvedNxn(4);
+    applyMoveNxn(st, 4, "Bw");
+    for (const i of [0, 4, 8, 12, 1, 5, 9, 13]) expect(st.L[i]).toBe("U"); // Spalte 0+1
+    for (const i of [2, 6, 10, 14, 3, 7, 11, 15]) expect(st.L[i]).toBe("L"); // Spalte 2+3
   });
 });
 

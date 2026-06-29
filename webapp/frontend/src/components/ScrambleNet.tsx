@@ -52,10 +52,12 @@ export function isScrambleNetSupported(cubeType: string): boolean {
   return THREE_BY_THREE.has(cubeType) || cubeType in NXN_BY_TYPE;
 }
 
-/** Sticker-Größe je N, sodass die Gesamtbreite ~konstant bleibt (3x3 = 18px).
- *  Clamp [7,20] — 7x7 wäre sonst zu breit, 2x2 zu klobig. */
-function nxnStickerPx(n: number): number {
-  return Math.max(7, Math.min(20, Math.round(54 / n)));
+/** Sticker-Größe je N, sodass die Gesamtbreite ~konstant bleibt: `base` ist
+ *  die 3x3-Sticker-Größe (3 Faces breit) → bei NxN auf n Faces umgerechnet.
+ *  So wirkt ein Caller-Override (`stickerPx`-Prop) auch im NxN-Pfad. Clamp
+ *  [7,28] — 7x7 wäre sonst zu breit. */
+function nxnStickerPx(n: number, base: number): number {
+  return Math.max(7, Math.min(28, Math.round((base * 3) / n)));
 }
 
 export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
@@ -68,7 +70,7 @@ export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
       const n = NXN_BY_TYPE[cubeType];
       if (n) {
         return renderScrambleNxnSvg(n, scramble || "", {
-          stickerPx: nxnStickerPx(n),
+          stickerPx: nxnStickerPx(n, stickerPx),
         });
       }
       return null;
