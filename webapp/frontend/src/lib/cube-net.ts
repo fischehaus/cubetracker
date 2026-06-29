@@ -257,7 +257,7 @@ export function cloneState(s: CubeState): CubeState {
 // ============================================================
 
 /** Standard-Farben pro Color (WCA-Standard für 3x3). */
-const COLOR_HEX: Record<Color, string> = {
+export const COLOR_HEX: Record<Color, string> = {
   U: "#f8f8f8", // weiss
   D: "#f8d62b", // gelb (yellow)
   F: "#1da647", // grün (green)
@@ -267,8 +267,8 @@ const COLOR_HEX: Record<Color, string> = {
 };
 
 /** Hintergrund + Stroke für das SVG-Frame. */
-const SVG_BG = "#1f2937"; // tailwind gray-800-ish, passt zur App
-const STICKER_STROKE = "#0d1117"; // dark border zwischen Stickern
+export const SVG_BG = "#1f2937"; // tailwind gray-800-ish, passt zur App
+export const STICKER_STROKE = "#0d1117"; // dark border zwischen Stickern
 
 interface RenderOptions {
   /** Sticker-Kantenlaenge in px. Default 18. */

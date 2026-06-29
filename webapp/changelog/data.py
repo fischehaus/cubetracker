@@ -44,6 +44,17 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.scramble-net-nxn",
+        released=date(2026, 6, 29),
+        title="🟦 2D-Scramble-Vorschau jetzt auch für 2x2 und 4x4–7x7",
+        highlights=[
+            "Die 2D-Cube-Net-Vorschau unter dem Scramble (zeigt, wie der Cube "
+            "nach Anwendung aussehen muss) gab es bisher nur für 3x3. Jetzt "
+            "rendert sie auch für 2x2 und 4x4 bis 7x7 — inklusive der "
+            "Wide-Moves der großen Cubes. In den Einstellungen abschaltbar.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.fto-random-state",
         released=date(2026, 6, 29),
         title="🔺 FTO-Scrambles jetzt in WCA-Qualität (Random-State)",

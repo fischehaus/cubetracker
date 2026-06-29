@@ -1,10 +1,11 @@
-// ScrambleNet (Phase W.scramble-image, 2026-05-17) — React-Wrapper um
-// cube-net.ts. Rendert das 2D-Cross-Layout-Bild für einen 3x3-Scramble.
+// ScrambleNet (Phase W.scramble-image, 2026-05-17; NxN ergänzt
+// W.scramble-net-nxn 2026-06-29) — React-Wrapper um die Cube-Net-Renderer.
+// Rendert das 2D-Cross-Layout-Bild für einen Scramble.
 //
-// Bewusst gehalten:
-//   - Nur 3x3 (cubeType "3x3"). Andere Cubes → nichts rendern (kein
-//     misleading-Bild, kein Crash). Wenn später 2x2/4x4-Support kommt,
-//     hier dispatchen.
+// Dispatch nach cubeType:
+//   - 3x3/OH/3BLD → cube-net.ts (getesteter 3x3-Renderer, unverändert)
+//   - 2x2/4x4/5x5/6x6/7x7 → cube-net-nxn.ts (generischer NxN-Renderer)
+//   - alles andere (Pyraminx/Skewb/Sq1/Mega/Clock) → null (andere Geometrie)
 //   - useMemo cached das SVG pro (scramble, stickerPx) — bei jedem Re-
 //     Render der ScrambleCard ohne Scramble-Änderung kein erneutes Parsen.
 //   - SVG via dangerouslySetInnerHTML — der String ist 100% von uns
@@ -15,6 +16,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { renderScrambleSvg } from "../lib/cube-net";
+import { renderScrambleNxnSvg } from "../lib/cube-net-nxn";
 
 interface Props {
   /** Der Scramble-String. Leer / null → solved-Cube wird gerendert. */
@@ -25,11 +27,20 @@ interface Props {
   stickerPx?: number;
 }
 
-/** Akzeptierte Cube-Types für dieses Modul. Aktuell 3x3 + alle Cube-Types
- *  die mechanisch 3x3-Scrambles nutzen (OH = One-Handed, 3BLD = Blindfold
- *  3x3) — QA-Fix #5 vom 2026-05-17.
- *  Andere („Pyraminx", "4x4", ...) → return null, ScrambleCard zeigt nichts. */
-const SUPPORTED_TYPES = new Set(["3x3", "OH", "3BLD"]);
+/** 3x3-Familie: eigener (getesteter) 3x3-Renderer aus cube-net.ts.
+ *  OH = One-Handed, 3BLD = Blindfold — mechanisch 3x3-Scrambles. */
+const THREE_BY_THREE = new Set(["3x3", "OH", "3BLD"]);
+
+/** Weitere NxN-Cubes (W.scramble-net-nxn, 2026-06-29) → generischer Renderer
+ *  cube-net-nxn.ts. Pyraminx/Skewb/Square-1/Megaminx/Clock haben andere
+ *  Geometrie → kein Net. */
+const NXN_BY_TYPE: Record<string, number> = {
+  "2x2": 2,
+  "4x4": 4,
+  "5x5": 5,
+  "6x6": 6,
+  "7x7": 7,
+};
 
 /**
  * Public-Helper: weiss der Aufrufer (z.B. ScrambleCard), ob für diesen
@@ -38,15 +49,29 @@ const SUPPORTED_TYPES = new Set(["3x3", "OH", "3BLD"]);
  * sonst wäre er irreführend ("Toggle tut nichts").
  */
 export function isScrambleNetSupported(cubeType: string): boolean {
-  return SUPPORTED_TYPES.has(cubeType);
+  return THREE_BY_THREE.has(cubeType) || cubeType in NXN_BY_TYPE;
+}
+
+/** Sticker-Größe je N, sodass die Gesamtbreite ~konstant bleibt (3x3 = 18px).
+ *  Clamp [7,20] — 7x7 wäre sonst zu breit, 2x2 zu klobig. */
+function nxnStickerPx(n: number): number {
+  return Math.max(7, Math.min(20, Math.round(54 / n)));
 }
 
 export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
   const { t } = useTranslation();
   const svgString = useMemo(() => {
-    if (!SUPPORTED_TYPES.has(cubeType)) return null;
     try {
-      return renderScrambleSvg(scramble || "", { stickerPx });
+      if (THREE_BY_THREE.has(cubeType)) {
+        return renderScrambleSvg(scramble || "", { stickerPx });
+      }
+      const n = NXN_BY_TYPE[cubeType];
+      if (n) {
+        return renderScrambleNxnSvg(n, scramble || "", {
+          stickerPx: nxnStickerPx(n),
+        });
+      }
+      return null;
     } catch {
       // Defensive — wenn der Render-Pfad crasht (sollte nicht, aber),
       // zeigen wir lieber nichts als die ganze ScrambleCard zu killen.

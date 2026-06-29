@@ -950,7 +950,7 @@
     "solvingBullet10": "Zen mode: full-screen with just the scramble + a big timer, tap/spacebar to start & stop — zero distraction",
     "solvingBullet11": "After every solve the time stays on the display until you start the next one — correct +2, DNF or delete right under the timer, now in Zen mode too",
     "solvingBullet4": "Scramble generator for all WCA cubes (2x2 to 7x7, Pyraminx, Skewb, Square-1, Megaminx, Clock), big cubes (8x8 to 11x11) PLUS unofficial ones (Ivy, Gear, Redi, Master Pyraminx, Master Skewb, FTO) — picker right in the scramble card",
-    "solvingBullet5": "2D cube net preview directly below the 3x3 scramble: at a glance you see what the cube must look like after applying — perfect for verifying you executed the scramble correctly (toggleable in settings)",
+    "solvingBullet5": "2D cube net preview directly below the scramble (2x2, 3x3 and 4x4–7x7): at a glance you see what the cube must look like after applying — perfect for verifying you executed the scramble correctly (toggleable in settings)",
     "solvingBullet6": "Structured training: sessions group your solving (e.g. OH, PLL drills, cold solves) and training sets plan batches of 5/12/25/50/100 solves with set statistics + coaching feedback at the end.",
     "solvingBullet7": "Auto-preselect: the most-used hardware for the current cube is suggested",
     "solvingBullet9": "Voice alerts during inspection: at 8s and 12s the app says 'eight'/'twelve' (DE or EN) instead of just a beep — mode is per-device (beep / voice DE / voice EN / off)",

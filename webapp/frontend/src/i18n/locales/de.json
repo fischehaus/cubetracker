@@ -950,7 +950,7 @@
     "solvingBullet10": "Zen-Modus: Vollbild nur mit Scramble + großer Zeit, antippen/Leertaste startet & stoppt — null Ablenkung",
     "solvingBullet11": "Nach jedem Solve bleibt die Zeit groß stehen, bis du den nächsten startest — +2, DNF oder Löschen korrigierst du direkt unter dem Timer, jetzt auch im Zen-Modus",
     "solvingBullet4": "Scramble-Generator für alle WCA-Cubes (2x2 bis 7x7, Pyraminx, Skewb, Square-1, Megaminx, Clock), Big Cubes (8x8 bis 11x11) PLUS Inoffizielle (Ivy, Gear, Redi, Master Pyraminx, Master Skewb, FTO) — Picker direkt in der Scramble-Karte",
-    "solvingBullet5": "2D-Cube-Net-Vorschau direkt unter dem 3x3-Scramble: siehst auf einen Blick wie der Cube nach Anwendung aussehen muss — ideal zum Verifizieren ob du den Scramble korrekt ausgeführt hast (in den Einstellungen abschaltbar)",
+    "solvingBullet5": "2D-Cube-Net-Vorschau direkt unter dem Scramble (2x2, 3x3 und 4x4–7x7): siehst auf einen Blick wie der Cube nach Anwendung aussehen muss — ideal zum Verifizieren ob du den Scramble korrekt ausgeführt hast (in den Einstellungen abschaltbar)",
     "solvingBullet6": "Strukturiertes Training: Sessions gruppieren das Solving (z.B. OH, PLL-Drills, Cold-Solves) und Trainings-Sets planen Stapel von 5/12/25/50/100 Solves mit Set-Statistik + Coaching-Feedback am Ende.",
     "solvingBullet7": "Auto-Preselect: am häufigsten genutzte Hardware für den aktuellen Cube wird vorgeschlagen",
     "solvingBullet9": "Voice-Alerts in der Inspection: bei 8s und 12s ansage 'acht'/'zwölf' (DE oder EN) statt nur Beep — Mode pro Gerät umschaltbar (Beep / Voice DE / Voice EN / aus)",
