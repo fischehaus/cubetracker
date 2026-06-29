@@ -42,6 +42,8 @@ CUBE_TO_SCRTYPE = {
     "Clock": "clkwca",
     "Ivy": "ivyso",
     "Gear": "gearso",
+    # FTO → csTimers Haupt-Scramble-Code "ftoso" (W.fto-cstimer-roundtrip).
+    "FTO": "ftoso",
 }
 
 

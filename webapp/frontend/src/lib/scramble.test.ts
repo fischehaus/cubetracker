@@ -325,5 +325,7 @@ describe("Scramble-Type-Listen + Helpers", () => {
     expect(resolveScrambleTypeOverride("ivy")).toBe("ivy");
     expect(resolveScrambleTypeOverride("gear")).toBe("gear");
     expect(resolveScrambleTypeOverride("fto")).toBe("fto");
+    // W.fto-cstimer-roundtrip: csTimer-scrType "ftoso" → interner Code "fto".
+    expect(resolveScrambleTypeOverride("ftoso")).toBe("fto");
   });
 });

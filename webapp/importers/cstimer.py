@@ -61,6 +61,9 @@ SCRTYPE_TO_CUBE = {
     "clkwca": "Clock",
     "ivyso": "Ivy",
     "gearso": "Gear",
+    # FTO (Face-Turning Octahedron, WCA-Event seit 2025). csTimers Haupt-
+    # Scramble-Code ist "ftoso" (W.fto-cstimer-roundtrip) — analog pyrso/skbso.
+    "ftoso": "FTO",
 }
 
 # Wenn der Session-Name eine dieser Strings ist, hat er Vorrang vor scrType-Mapping
@@ -79,6 +82,7 @@ COMMON_CUBE_NAMES = {
     "Clock",
     "Ivy",
     "Gear",
+    "FTO",
     "3BLD",
     "4BLD",
     "5BLD",

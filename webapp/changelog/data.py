@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.fto-cstimer-roundtrip",
+        released=date(2026, 6, 29),
+        title="🔺 FTO beim csTimer-Import/-Export korrekt zugeordnet",
+        highlights=[
+            "FTO-Solves (Face-Turning Octahedron) aus einem csTimer-Export "
+            "werden jetzt als FTO übernommen statt fälschlich als 3x3 zu landen "
+            "— und beim Export zurück nach csTimer trägt die FTO-Session wieder "
+            "den richtigen Scramble-Typ. Damit stimmt der Round-Trip "
+            "csTimer ↔ Cubetracker auch für FTO.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.stackmat-idle-stop",
         released=date(2026, 6, 20),
         title="⏱️ Stackmat-Live-Timer läuft flüssig mit + speichert zuverlässig",

@@ -250,6 +250,9 @@ const CSTIMER_TO_SCRAMBOW: Record<string, string> = {
   "sqrs": "square-1",
   "mgmp": "megaminx",
   "clkwca": "clock",
+  // FTO (W.fto-cstimer-roundtrip): csTimer-scrType "ftoso" → unser interner
+  // Scramble-Code "fto". Konsistent mit SCRTYPE_TO_CUBE im Backend-Importer.
+  "ftoso": "fto",
 };
 
 /**

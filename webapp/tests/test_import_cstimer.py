@@ -196,3 +196,51 @@ def test_broken_or_wrong_format_is_4xx(client: TestClient, make_user) -> None:
 
     # Nichts davon hat Solves angelegt.
     assert client.get("/api/solves", headers=headers).json() == []
+
+
+# --- FTO Round-trip (W.fto-cstimer-roundtrip) ---------------------------------
+
+
+def _fto_payload() -> dict[str, Any]:
+    """csTimer-Export mit einer FTO-Session (scrType 'ftoso')."""
+    return {
+        "session1": [
+            [[0, 15230], "U R' F U R' BL R F'", "", 1700000000],
+            [[2000, 18800], "F R BL' U R BR' F' U'", "", 1700000060],
+        ],
+        "properties": {
+            "sessionData": json.dumps(
+                {"1": {"name": "Meine FTO", "opt": {"scrType": "ftoso"}, "rank": 1}}
+            )
+        },
+    }
+
+
+def test_fto_scrtype_maps_to_fto(client: TestClient, make_user) -> None:
+    """csTimer-scrType 'ftoso' → cube_type 'FTO' (war vorher unbekannt → 3x3)."""
+    _, headers = make_user()
+    r = _upload(client, headers, _fto_payload())
+    assert r.status_code == 200, r.text
+    solves = client.get("/api/solves", headers=headers).json()
+    assert {s["cube_type"] for s in solves} == {"FTO"}
+
+
+def test_fto_cstimer_roundtrip(client: TestClient, make_user) -> None:
+    """Import → Export → Re-Import: FTO bleibt FTO, Export traegt scrType 'ftoso'."""
+    _, headers = make_user()
+    assert _upload(client, headers, _fto_payload()).status_code == 200
+
+    # Export: die FTO-Session muss scrType 'ftoso' tragen (sonst zeigt csTimer 3x3).
+    exp = client.get("/api/export/cstimer", headers=headers)
+    assert exp.status_code == 200, exp.text
+    session_data = json.loads(exp.json()["properties"]["sessionData"])
+    scr_types = {meta["opt"]["scrType"] for meta in session_data.values()}
+    assert "ftoso" in scr_types
+
+    # Re-Import des Exports: idempotent (keine Duplikate), cube_type bleibt FTO.
+    before = len(client.get("/api/solves", headers=headers).json())
+    reimport = _upload(client, headers, exp.json())
+    assert reimport.status_code == 200, reimport.text
+    after = client.get("/api/solves", headers=headers).json()
+    assert len(after) == before
+    assert {s["cube_type"] for s in after} == {"FTO"}
