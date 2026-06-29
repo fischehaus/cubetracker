@@ -334,11 +334,11 @@ export const BIG_CUBE_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
 ];
 
 /**
- * Inoffizielle Puzzles. Teilweise via scrambow (fto), teils via
- * eigenem Random-Move-Generator (ivy, gear, redi, master pyraminx,
- * master skewb). Die eigenen Scrambles sind NICHT WCA-quality
- * (keine garantierte Mindest-Distanz), aber gut genug für Casual-
- * Training.
+ * Inoffizielle Puzzles. Die meisten via vendored csTimer (random-state,
+ * WCA-quality im Sinne garantierter Mindest-Distanz): ivy, gear, redi,
+ * master pyraminx, dino, floppy, tower, fto. Nur master skewb läuft über
+ * unseren eigenen Random-Move-Generator — der ist NICHT WCA-quality
+ * (keine garantierte Mindest-Distanz), aber gut genug für Casual-Training.
  */
 export const UNOFFICIAL_SCRAMBLE_TYPES: ScrambleTypeInfo[] = [
   // Phase 8a — urspruenglicher Bestand (Eigenbau-Random-Move / Eigenbau-BFS)
@@ -615,7 +615,7 @@ export function isWcaQualityCustomPuzzle(code: string): boolean {
  * Reihenfolge:
  *   1. Eigener Random-State-Solver verfügbar? → WCA-Quality
  *   2. Sonst: Custom-Puzzle-Spec? → Random-Move-Generator
- *   3. Sonst: scrambow probieren (WCA-Cubes + FTO)
+ *   3. Sonst: scrambow probieren (WCA-Cubes; FTO nur als csTimer-Fallback)
  *   4. Bei Fehler → leerer String (UI zeigt Fallback-Meldung)
  *
  * Wir crashen nicht, weil ein fehlender Scramble den Timer nicht

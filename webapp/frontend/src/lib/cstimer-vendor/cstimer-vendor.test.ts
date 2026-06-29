@@ -134,4 +134,12 @@ describe("csTimer-Vendor-Module", () => {
     const b = getCstimerScramble("gearso");
     expect(a).not.toBe(b);
   });
+
+  it("zwei aufeinanderfolgende ftoso-Scrambles sind verschieden", () => {
+    // FTO ist random-state (vendored ftocta.js) — wie gearso praktisch nie
+    // identisch. Flackern hier waere ein Seed-/Solver-Init-Hinweis.
+    const a = getCstimerScramble("ftoso");
+    const b = getCstimerScramble("ftoso");
+    expect(a).not.toBe(b);
+  });
 });

@@ -64,6 +64,15 @@ SCRTYPE_TO_CUBE = {
     # FTO (Face-Turning Octahedron, WCA-Event seit 2025). csTimers Haupt-
     # Scramble-Code ist "ftoso" (W.fto-cstimer-roundtrip) — analog pyrso/skbso.
     "ftoso": "FTO",
+    # FTO-Trainer-Subsets (csTimer registriert sie separat in scramble_fto.js)
+    # — alle ebenfalls FTO (W.fto-random-state QA-Fix), sonst landen FTO-
+    # Trainer-Sessions beim Import faelschlich als 3x3.
+    "ftol3t": "FTO",
+    "ftol4t": "FTO",
+    "ftotcp": "FTO",
+    "ftoedge": "FTO",
+    "ftocent": "FTO",
+    "ftocorn": "FTO",
 }
 
 # Wenn der Session-Name eine dieser Strings ist, hat er Vorrang vor scrType-Mapping

@@ -244,3 +244,15 @@ def test_fto_cstimer_roundtrip(client: TestClient, make_user) -> None:
     after = client.get("/api/solves", headers=headers).json()
     assert len(after) == before
     assert {s["cube_type"] for s in after} == {"FTO"}
+
+
+def test_fto_trainer_subsets_map_to_fto() -> None:
+    """FTO-Trainer-Subset-scrTypes (ftol3t etc.) → cube_type 'FTO' (QA-Fix).
+
+    csTimer registriert neben 'ftoso' sechs FTO-Trainer-Subsets; eine solche
+    Session soll als FTO (nicht 3x3) importiert werden.
+    """
+    from importers.cstimer import derive_cube_type
+
+    for sub in ("ftoso", "ftol3t", "ftol4t", "ftotcp", "ftoedge", "ftocent", "ftocorn"):
+        assert derive_cube_type("namenlos", sub) == "FTO", sub
