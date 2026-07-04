@@ -43,6 +43,27 @@ describe("puzzle-net: Pyraminx-Applier == cubing.js-Oracle", () => {
       }
     }
   });
+
+  it("feste Known-Good-Scrambles == cubing (reproduzierbar)", () => {
+    // Ergaenzend zu den 60 Random-Scrambles: fixe, seed-freie Faelle, damit ein
+    // (theoretischer) CI-Failure reproduzierbar ist (QA-Fix).
+    const fixed = [
+      "U R' L U' B r",
+      "L' U R U' l' b",
+      "R U R' U' u l' r'",
+      "B L R' U' L' u'",
+    ];
+    for (const scr of fixed) {
+      const mine = applyPuzzleScramble(PYRAMINX_NET, scr);
+      const oracle = kp.defaultPattern().applyAlg(scr).patternData;
+      for (const orbit of Object.keys(oracle)) {
+        expect(mine[orbit].pieces, `pieces ${orbit} @ "${scr}"`).toEqual([
+          ...oracle[orbit].pieces,
+        ]);
+        expect(mine[orbit].orientation).toEqual([...oracle[orbit].orientation]);
+      }
+    }
+  });
 });
 
 describe("puzzle-net: Invarianten + Render (Pyraminx)", () => {

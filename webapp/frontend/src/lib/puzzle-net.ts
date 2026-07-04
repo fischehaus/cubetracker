@@ -132,6 +132,12 @@ export function renderPuzzleNetSvg(
   });
   const vbX = minX - pad, vbY = minY - pad;
   const vbW = maxX - minX + 2 * pad, vbH = maxY - minY + 2 * pad;
+  if (!Number.isFinite(vbW) || !Number.isFinite(vbH)) {
+    // Leere/defekte Facelet-Liste → lieber werfen (der ScrambleNet-try/catch
+    // greift und zeigt nichts), statt ein NaN-SVG zu erzeugen. (QA-Fix, wird
+    // relevant sobald weitere Puzzles auf dieses Modul aufsetzen.)
+    throw new Error("renderPuzzleNetSvg: leere Facelet-Liste");
+  }
   const width = opts.width ?? 220;
   const height = Math.round((width * vbH) / vbW);
 
