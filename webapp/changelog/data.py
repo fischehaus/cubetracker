@@ -44,6 +44,18 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.scramble-net-pyraminx",
+        released=date(2026, 6, 29),
+        title="🔺 2D-Scramble-Vorschau jetzt auch für Pyraminx",
+        highlights=[
+            "Die 2D-Vorschau unter dem Scramble (zeigt, wie das Puzzle nach "
+            "Anwendung aussehen muss) gibt es jetzt auch für den Pyraminx — "
+            "inklusive Tip-Moves. Die Darstellung wird aus der Standard-Cubing-"
+            "Bibliothek abgeleitet, ist also notationstreu. In den Einstellungen "
+            "abschaltbar.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.scramble-net-nxn",
         released=date(2026, 6, 29),
         title="🟦 2D-Scramble-Vorschau jetzt auch für 2x2 und 4x4–7x7",

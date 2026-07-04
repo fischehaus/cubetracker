@@ -17,6 +17,11 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { renderScrambleSvg } from "../lib/cube-net";
 import { renderScrambleNxnSvg } from "../lib/cube-net-nxn";
+import {
+  renderScramblePuzzleNetSvg,
+  type PuzzleNetData,
+} from "../lib/puzzle-net";
+import { PYRAMINX_NET } from "../lib/puzzle-net-data/pyraminx";
 
 interface Props {
   /** Der Scramble-String. Leer / null → solved-Cube wird gerendert. */
@@ -32,14 +37,21 @@ interface Props {
 const THREE_BY_THREE = new Set(["3x3", "OH", "3BLD"]);
 
 /** Weitere NxN-Cubes (W.scramble-net-nxn, 2026-06-29) → generischer Renderer
- *  cube-net-nxn.ts. Pyraminx/Skewb/Square-1/Megaminx/Clock haben andere
- *  Geometrie → kein Net. */
+ *  cube-net-nxn.ts. */
 const NXN_BY_TYPE: Record<string, number> = {
   "2x2": 2,
   "4x4": 4,
   "5x5": 5,
   "6x6": 6,
   "7x7": 7,
+};
+
+/** Piece-basierte Nicht-Cube-Puzzles (W.scramble-net-pyraminx, 2026-06-29):
+ *  eigener leichter Applier/Renderer (puzzle-net.ts) mit aus cubing.js
+ *  gebackenen Daten (Geometrie + Move-Transforms). Skewb/Megaminx folgen;
+ *  Square-1 (shape-shifting) + Clock (Zifferblätter) separat/gar nicht. */
+const PUZZLE_NET_BY_TYPE: Record<string, PuzzleNetData> = {
+  Pyraminx: PYRAMINX_NET,
 };
 
 /**
@@ -49,7 +61,11 @@ const NXN_BY_TYPE: Record<string, number> = {
  * sonst wäre er irreführend ("Toggle tut nichts").
  */
 export function isScrambleNetSupported(cubeType: string): boolean {
-  return THREE_BY_THREE.has(cubeType) || cubeType in NXN_BY_TYPE;
+  return (
+    THREE_BY_THREE.has(cubeType) ||
+    cubeType in NXN_BY_TYPE ||
+    cubeType in PUZZLE_NET_BY_TYPE
+  );
 }
 
 /** Sticker-Größe je N, sodass die Gesamtbreite ~konstant bleibt: `base` ist
@@ -71,6 +87,12 @@ export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
       if (n) {
         return renderScrambleNxnSvg(n, scramble || "", {
           stickerPx: nxnStickerPx(n, stickerPx),
+        });
+      }
+      const puzzleData = PUZZLE_NET_BY_TYPE[cubeType];
+      if (puzzleData) {
+        return renderScramblePuzzleNetSvg(puzzleData, scramble || "", {
+          width: 220,
         });
       }
       return null;
