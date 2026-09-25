@@ -29,7 +29,12 @@ _Jetzt:_
    INNERHALB von Anführungszeichen → `grep -E "a|uvicorn"` wird blockiert.
    Fix: erst `shlex` mit `punctuation_chars`, dann trennen; Testfall in
    `tests/test_pre_bash_dev_server.py`; Regelebene → Gegenlesung.
-2. **Off-Site-Backup der DB** (Technik-Backlog B #9).
+2. **Software-Stand:** Coolify am 25.09. auf v4.3.23; `W.deps-security`
+   (npm audit 15 → 0, Actions v7). Offen: Majors TS 7 / Vitest 5 /
+   `@types/node` 26 · python-jose → PyJWT (`ecdsa`-Fund, HS256 nicht betroffen)
+   · `sqlalchemy<2.1`-Pin lösen (Treiber jetzt explizit) · ESLint: 27 Alt-
+   Fehler (nicht im CI-Gate) · lokal 21 winget-Updates.
+3. **Off-Site-Backup der DB** (Technik-Backlog B #9).
 
 _Bald:_ Solve-Notizen editierbar (#48; Detail-Modal zeigt sie nur an) ·
 Session/Hardware fixieren statt Auto (#49) · Coolify-TLS · MAINTENANCE-Lauf ·
