@@ -146,7 +146,7 @@ jobs:
         if: steps.changes.outputs.frontend == 'true'
         run: |
           echo "Triggere Frontend-Deploy ..."
-          curl -fsS -X GET \
+          curl -fsS -X POST \
             "http://178.105.103.78:8000/api/v1/deploy?uuid=pcixgncs671tifdx9e3rxr7h&force=false" \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
 
@@ -154,7 +154,7 @@ jobs:
         if: steps.changes.outputs.backend == 'true'
         run: |
           echo "Triggere Backend-Deploy ..."
-          curl -fsS -X GET \
+          curl -fsS -X POST \
             "http://178.105.103.78:8000/api/v1/deploy?uuid=w3dw05zc8nv2izxa3v2qi911&force=false" \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
 

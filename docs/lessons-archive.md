@@ -9,6 +9,13 @@ Konsequenz (was wurde im Setup geändert).
 
 ---
 
+## 2026-09-25 — Coolify-Update 4.0.0 → 4.3.23 bricht den Deploy-Aufruf
+
+Nach dem Update antwortete `/api/v1/deploy` auf GET mit **405**; ab 4.3.x ist
+der Endpunkt nur noch POST (openapi.yaml v4.3.23). Test-Gate grün, Deploy-Job
+rot, Frontend-Update blieb liegen. **Konsequenz:** `deploy.yml` nutzt POST; nach
+jedem Coolify-Update den nächsten Deploy-Lauf bewusst beobachten.
+
 ## 2026-09-25 — 2 h Backend-Ausfall: SQLAlchemy 2.1 wechselt den PG-Treiber
 
 Erster Backend-Build seit 04.07. zog SQLAlchemy 2.1.0 (`sqlalchemy>=2.0` ohne
