@@ -62,10 +62,8 @@ USB nicht) und #7 (Bluetooth teils live) umbenennen — nur mit User im Admin-UI
 - Timer-Zeit ragt bei großer Schrift auf dem Handy aus der Karte (der
   Clamp-Ansatz vom 07.06. wurde zurückgerollt, das Problem ist offen).
 - **MAINTENANCE-Lauf überfällig** (letzter 2026-05-26).
-- Werkstatt: untracked seit Mai/Juni — `frontend/src/assets/*.zip`/`*.png`,
-  `skins/` (Skin-Pakete → lokal behalten/.gitignore?), `scripts/*.py`
-  (OLL/PLL-Render → ins Repo?) + `scripts/*.png`, dazu
-  `docs/w3dw05…-all-logs-….txt` (Coolify-Log vom Ausfall, nicht committen).
+- Werkstatt: untracked seit Mai/Juni — am 25.09. eingeordnet: `scripts/*.py`
+  versioniert, Skin-Pakete/Prüfbilder per `.gitignore`, Coolify-Log gelöscht.
   Ungesichert in `.tmp/`: Fragebogen (Activity-Feed), `qa-oll/verify_oll.py`.
 - Hooks `pre-git-tag-check`, `post-git-commit`, `post-push-failure-diagnose`:
   „Maßgeblich:"-Zeile nachziehen, sobald sie ohnehin angefasst werden.
