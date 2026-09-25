@@ -77,9 +77,18 @@ export function describeChallenge(
  * Progress als 0-100-prozent-Wert (zum Rendern der bar).
  * Cap bei 100, weil monotonic-Progress > target möglich ist.
  */
+/**
+ * Erfüllungs-Schwelle für `progress`. Bei Speed ist `target_value` die
+ * Zielzeit in ms und `progress` nur 0/1 — das Ziel ist also 1.
+ */
+export function progressGoal(c: ChallengeItem): number {
+  return c.kind === "speed" ? 1 : c.target_value;
+}
+
 export function progressPercent(c: ChallengeItem): number {
-  if (c.target_value <= 0) return 0;
-  const pct = (c.progress / c.target_value) * 100;
+  const goal = progressGoal(c);
+  if (goal <= 0) return 0;
+  const pct = (c.progress / goal) * 100;
   return Math.max(0, Math.min(100, pct));
 }
 
@@ -91,5 +100,5 @@ export function progressLabel(
   t: (key: string) => string,
 ): string {
   if (c.completed_at) return t("challenges.progressDone");
-  return `${c.progress}/${c.target_value}`;
+  return `${c.progress}/${progressGoal(c)}`;
 }

@@ -22,6 +22,10 @@ VOLUME_MIN = 10  # mindestens 10 solves als challenge, nie weniger
 SPEED_PB_FACTOR = 1.05  # ziel = PB * 1.05 (5% schlechter — realistisch zu schaffen)
 COMEBACK_MIN_DAYS_UNUSED = 7  # ab wann ein cube als „vergessen" gilt
 DIVERSITY_TARGET = 3  # x verschiedene cubes als fallback
+# Solves darunter zählen nicht als PB-Basis der Speed-Challenge (Roadmap #47:
+# ein 9-ms-Solve aus Fehlauslösung/Import ergab „unter 0,01 s"). 300 ms liegt
+# unter jedem WCA-Single-Weltrekord (niedrigster: 2x2, ~0,4 s).
+MIN_PLAUSIBLE_MS = 300
 
 
 @dataclass(frozen=True)

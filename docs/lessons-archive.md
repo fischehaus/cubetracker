@@ -9,6 +9,20 @@ Konsequenz (was wurde im Setup geändert).
 
 ---
 
+## 2026-09-25 — 2 h Backend-Ausfall: SQLAlchemy 2.1 wechselt den PG-Treiber
+
+Erster Backend-Build seit 04.07. zog SQLAlchemy 2.1.0 (`sqlalchemy>=2.0` ohne
+Obergrenze). 2.1 nimmt für `postgresql://` psycopg v3; installiert ist nur
+psycopg2 → `ModuleNotFoundError: psycopg` beim Import, Container in Restart-
+Schleife (102×), `/api/health` 502 von ~09:03 bis 10:58 UTC. Build und
+Coolify-Deployment meldeten „Success"; CI (SQLite) war grün. Diagnose erst über
+das Coolify-Container-Log. Die eigene Überwachung meldete nichts (siehe
+Lesson darunter). **Konsequenz:** Treiber explizit (`postgresql+psycopg2://`,
+`db/database.py:normalize_database_url`) + `sqlalchemy<2.1` (Hotfix `18e2561`).
+Offen: CI gegen echtes Postgres (Service-Container) und Obergrenzen für die
+übrigen Backend-Abhängigkeiten — nach langer Pause baut jeder Deploy mit
+neuesten Versionen.
+
 ## 2026-09-25 — Live-Überwachung 23 Tage still: GitHub-60-Tage-Abschaltung
 
 `health-check.yml` (Cron alle 10 min) lief zuletzt geplant am 02.09. — GitHub

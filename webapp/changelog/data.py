@@ -44,6 +44,24 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.challenge-plausible-pb",
+        released=date(2026, 9, 25),
+        title="⚡ Tages-Challenges: keine unmöglichen Zeitziele mehr",
+        highlights=[
+            "Die Speed-Challenge verlangte manchmal einen Solve „unter 0,01 s\" — "
+            "weil ein versehentlich ausgelöster Mini-Solve als Bestzeit zählte. "
+            "Solves unter 0,3 s werden für das Challenge-Ziel jetzt ignoriert "
+            "(schneller ist auf keinem Puzzle je ein offizieller Rekord gelaufen). "
+            "Danke für die Meldung!",
+            "Speed-Challenges werden jetzt auch wirklich als erfüllt markiert, "
+            "sobald du das Ziel unterbietest. Vorher blieben sie bei „0/…\" "
+            "hängen.",
+            "Kurzer Ausfall am 25.09. (ca. 2 Stunden): Nach einem Update einer "
+            "Datenbank-Bibliothek startete der Server nicht mehr. Behoben, es "
+            "gingen keine Daten verloren.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.scramble-net-skewb",
         released=date(2026, 9, 25),
         title="🔷 2D-Scramble-Vorschau jetzt auch für Skewb",

@@ -20,7 +20,20 @@ def test_postgres_urls_pin_psycopg2(raw: str) -> None:
 
 @pytest.mark.parametrize(
     "raw",
-    ["postgresql+psycopg2://u:p@h/db", "sqlite:///x.db", "sqlite://"],
+    [
+        "postgresql+psycopg2://u:p@h/db",
+        "postgresql+asyncpg://u:p@h/db",
+        "postgresql+psycopg://u:p@h/db",
+        "sqlite:///x.db",
+        "sqlite://",
+    ],
 )
 def test_other_urls_unchanged(raw: str) -> None:
     assert normalize_database_url(raw) == raw
+
+
+def test_query_params_survive() -> None:
+    assert (
+        normalize_database_url("postgres://u:p@h/db?sslmode=require")
+        == "postgresql+psycopg2://u:p@h/db?sslmode=require"
+    )

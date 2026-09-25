@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session as OrmSession
 
 from db.models import Challenge, Solve
 
-from .generator import GeneratorInput, generate_daily_challenges
+from .generator import MIN_PLAUSIBLE_MS, GeneratorInput, generate_daily_challenges
 from .tracker import ChallengeState, SolveSnapshot, update_progress_for_solve
 
 ACTIVE_DAYS_WINDOW = 30
@@ -65,6 +65,8 @@ def _build_generator_snapshot(db: OrmSession, user_id: int) -> GeneratorInput:
     for s in db.scalars(
         select(Solve).where(Solve.user_id == user_id).where(Solve.dnf.is_(False))
     ).all():
+        if s.time_ms < MIN_PLAUSIBLE_MS:
+            continue  # Fehlauslösung/Import-Artefakt → keine PB-Basis (#47)
         eff = s.time_ms + (2000 if s.plus_two else 0)
         if best_per_cube.get(s.cube_type, 99_999_999) > eff:
             best_per_cube[s.cube_type] = eff
@@ -73,7 +75,11 @@ def _build_generator_snapshot(db: OrmSession, user_id: int) -> GeneratorInput:
     for s in db.scalars(select(Solve).where(Solve.user_id == user_id)).all():
         if s.cube_type not in last_per_cube or s.timestamp > last_per_cube[s.cube_type]:
             last_per_cube[s.cube_type] = s.timestamp
-    cubes_unused: dict[str, int] = {c: (now - ts).days for c, ts in last_per_cube.items()}
+    # SQLite (Tests) liefert naive datetimes, Postgres aware → vereinheitlichen.
+    cubes_unused: dict[str, int] = {
+        c: (now - (ts if ts.tzinfo else ts.replace(tzinfo=UTC))).days
+        for c, ts in last_per_cube.items()
+    }
 
     distinct_total = (
         db.scalar(
@@ -159,6 +165,10 @@ def update_today_progress_for_solve(
     )
     if not challenges:
         return []
+    # Unplausibler Solve (Fehlauslösung/Import, #47) zählt für keine Challenge —
+    # sonst erfüllte z. B. ein 5-ms-Tipp jede offene Speed-Challenge sofort.
+    if solve.time_ms < MIN_PLAUSIBLE_MS:
+        return []
 
     snap = SolveSnapshot(
         cube_type=solve.cube_type,
@@ -195,7 +205,9 @@ def update_today_progress_for_solve(
 
         if new_progress != ch.progress:
             ch.progress = new_progress
-            if new_progress >= ch.target_value and ch.completed_at is None:
+            # Speed: target_value ist die Zielzeit (ms), progress 0/1 → Ziel ist 1.
+            goal = 1 if ch.kind == "speed" else ch.target_value
+            if new_progress >= goal and ch.completed_at is None:
                 ch.completed_at = datetime.now(UTC)
                 newly_completed.append(ch.id)
 
