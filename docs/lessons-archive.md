@@ -16,6 +16,15 @@ der Endpunkt nur noch POST (openapi.yaml v4.3.23). Test-Gate grün, Deploy-Job
 rot, Frontend-Update blieb liegen. **Konsequenz:** `deploy.yml` nutzt POST; nach
 jedem Coolify-Update den nächsten Deploy-Lauf bewusst beobachten.
 
+Zweiter Bruch derselben Aktualisierung: Jeder neue Container-Start scheiterte an
+`ParseAddr("fde4:75c5:b9d4::1/64")` — Docker 27.5.1 hatte das IPv6-Gateway des
+Netzes `coolify` mit Maske gespeichert, neue Coolify-Versionen scheitern daran
+(coollabsio/coolify#11510, #11583). Laufende Container blieben ok, nur Deploys
+waren blockiert. **Fix (25.09., per SSH-Schlüssel dieses PCs):** Netz mit
+gleichen Subnetzen und expliziten Gateways neu angelegt, alle Container mit
+bisherigen IPs + Aliasen (`cubetracker-backend`, `postgres`, …) neu verbunden;
+Skript + Log unter `/root/coolify-net-fix*` auf dem Server, ~30 s Ausfall.
+
 ## 2026-09-25 — 2 h Backend-Ausfall: SQLAlchemy 2.1 wechselt den PG-Treiber
 
 Erster Backend-Build seit 04.07. zog SQLAlchemy 2.1.0 (`sqlalchemy>=2.0` ohne

@@ -13,7 +13,8 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 - Live: `v2.0.0-alpha.W.challenge-plausible-pb` (25.09.2026). Davor heute:
   Skewb-Net, Hotfix `18e2561` (SQLAlchemy 2.1 → Backend-Ausfall 09:03–10:58
   UTC, behoben). Roadmap #47, #32, #10 auf done. Live-Überwachung seit 25.09.
-  über UptimeRobot (extern, 5 min, Mail).
+  über UptimeRobot (extern, 5 min, Mail). Coolify 4.3.23 + Netz-Reparatur
+  (IPv6-Gateway) am 25.09.; Deploys laufen wieder.
 - Juli-Wellen (FTO-csTimer-Roundtrip, FTO-Random-State, Scramble-Net NxN +
   Pyraminx) sind getaggt, live und im Journal nachgetragen.
 - 25.09.2026: Harness auf SKHO-Verfahren umgestellt (Antwortformat mit
@@ -29,11 +30,11 @@ _Jetzt:_
    INNERHALB von Anführungszeichen → `grep -E "a|uvicorn"` wird blockiert.
    Fix: erst `shlex` mit `punctuation_chars`, dann trennen; Testfall in
    `tests/test_pre_bash_dev_server.py`; Regelebene → Gegenlesung.
-2. **Software-Stand:** Coolify am 25.09. auf v4.3.23; `W.deps-security`
-   (npm audit 15 → 0, Actions v7). Offen: Majors TS 7 / Vitest 5 /
-   `@types/node` 26 · python-jose → PyJWT (`ecdsa`-Fund, HS256 nicht betroffen)
-   · `sqlalchemy<2.1`-Pin lösen (Treiber jetzt explizit) · ESLint: 27 Alt-
-   Fehler (nicht im CI-Gate) · lokal 21 winget-Updates.
+2. **Software-Stand:** Coolify v4.3.23, `W.deps-security` live (npm audit 0,
+   Actions v7, Backend per `constraints.txt`). Offen: Majors TS 7 / Vitest 5 /
+   `@types/node` 26 · python-jose → PyJWT · `sqlalchemy<2.1`-Pin lösen ·
+   ESLint 27 Alt-Fehler (nicht im CI-Gate) · lokal 21 winget-Updates · Hetzner-
+   2FA einschalten (User).
 3. **Off-Site-Backup der DB** (Technik-Backlog B #9).
 
 _Bald:_ Solve-Notizen editierbar (#48; Detail-Modal zeigt sie nur an) ·
