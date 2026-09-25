@@ -1,4 +1,7 @@
-# Live-Health-Monitoring (W.ops-hardening, 2026-06-12).
+# Live-Health-Monitoring (W.ops-hardening, 2026-06-12) — seit 2026-09-25 nur
+# noch ZWEITE LINIE. Primaer: UptimeRobot (extern, /api/health alle 5 min,
+# Mail-Alarm). Grund: der GitHub-Cron ist gedrosselt (01.09. nur alle 2-5 h)
+# und lief ab 02.09. trotz aktivem Workflow gar nicht mehr.
 #
 # Problem davor: NIEMAND ueberwachte cubetracker.de — ein naechtlicher
 # Ausfall waere erst beim naechsten manuellen Besuch aufgefallen.

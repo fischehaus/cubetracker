@@ -23,7 +23,8 @@ Roadmap/Feedback/Patch-Notes in der App, Skins, i18n.
   (CI-Test-Gate: pytest + tsc + vitest) → Coolify-Deploy **nur der App, deren
   Pfade der Push ändert** (Frontend `webapp/frontend/`, Backend übriges `webapp/`
   außer `.md`). Doku im Repo-Root und `.claude/` lösen keinen Deploy aus.
-  `health-check.yml` überwacht live (ntfy bei Ausfall).
+  Live-Überwachung: UptimeRobot (extern, `/api/health` alle 5 min, Mail);
+  `health-check.yml` nur zweite Linie (GitHub-Cron unzuverlässig).
 
 ## 🗺️ SSOT-Landkarte — je Thema GENAU eine maßgebliche Datei
 

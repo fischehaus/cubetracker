@@ -10,8 +10,10 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 
 ## 📍 Stand
 
-- Live: `v2.0.0-alpha.W.scramble-net-pyraminx` (04.07.2026). Seitdem kein
-  Feature-Deploy.
+- Live: `v2.0.0-alpha.W.challenge-plausible-pb` (25.09.2026). Davor heute:
+  Skewb-Net, Hotfix `18e2561` (SQLAlchemy 2.1 → Backend-Ausfall 09:03–10:58
+  UTC, behoben). Roadmap #47, #32, #10 auf done. Live-Überwachung seit 25.09.
+  über UptimeRobot (extern, 5 min, Mail).
 - Juli-Wellen (FTO-csTimer-Roundtrip, FTO-Random-State, Scramble-Net NxN +
   Pyraminx) sind getaggt, live und im Journal nachgetragen.
 - 25.09.2026: Harness auf SKHO-Verfahren umgestellt (Antwortformat mit
@@ -20,13 +22,19 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 
 ## 🔜 Offen
 
-**Als Nächstes (vom User am 25.09. so gereiht):**
-1. **W.scramble-net-skewb fertig machen.** Lokal, uncommittet: Generator-Fix
-   (Loader-SVG statt PuzzleGeometry-SVG, Center-Dedupe) + Renderer-Fallback für
-   Ein-Sticker-Pieces; 10/10 `puzzle-net`-Tests grün. Fehlt: `Skewb: SKEWB_NET`
-   in `ScrambleNet.tsx` → Patch-Note, `features-data`, QA, Push, Tag, Live-Check.
-2. **Bug Tägliche Herausforderung:** verlangt teils „10 3x3-Solves unter 0,01 s"
-   (Roadmap P1, nur live).
+**Als Nächstes (priorisierte Liste, vom User am 25.09. freigegeben):**
+
+_Jetzt:_
+1. **CI gegen echtes Postgres + Obergrenzen für Backend-Deps** (Lesson
+   2026-09-25: SQLAlchemy 2.1 → 2 h Ausfall, CI mit SQLite sah es nicht).
+2. **Off-Site-Backup der DB** (Technik-Backlog B #9).
+
+_Bald:_ Solve-Notizen editierbar (#48; Detail-Modal zeigt sie nur an) ·
+Session/Hardware fixieren statt Auto (#49) · Coolify-TLS · MAINTENANCE-Lauf ·
+Timer-Schrift Handy · Stackmat-Polish · B #10 (permissions-matrix, confirm, A11y).
+
+_Roadmap-Pflege:_ #32 + #10 am 25.09. auf done gesetzt. #22 (Stackmat: Audio live,
+USB nicht) und #7 (Bluetooth teils live) umbenennen — nur mit User im Admin-UI.
 
 **Wartet auf dich:**
 - Activity-Feed (P1): Plan steht (`docs/session-journal.md`, Block „IN ARBEIT —
@@ -63,9 +71,9 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 - Hooks `pre-git-tag-check`, `post-git-commit`, `post-push-failure-diagnose`:
   „Maßgeblich:"-Zeile nachziehen, sobald sie ohnehin angefasst werden.
 
-**Nach dem Harness-Umbau prüfen:**
-- Einmal `/compact` ausführen → steht dieser Kopf danach im Kontext?
-- Nach einer Antwort mit End-Block: kein zweiter Turn, kein Fallback-ntfy?
+**Harness-Umbau geprüft (25.09.):** `/compact` lädt diesen Kopf ✅ · nach dem
+End-Block kein zweiter Turn, ntfy mit eigenem Text ✅ · Push `fc41040` hat
+nichts deployt ✅. → Zeile beim nächsten `/abschluss` streichen.
 
 ## 📌 Zeiger
 

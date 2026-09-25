@@ -33,7 +33,11 @@ abgeschalteten Workflows ist. Ein `gh workflow enable` am 25.09. brachte binnen
 Workflow (`PUT …/actions/workflows/health-check.yml/enable` bei jedem Lauf,
 `permissions: actions: write`); Workflow-Datei geändert + gepusht, damit der
 Zeitplan neu registriert wird. Grundproblem bleibt: ein Monitor, der von sich
-selbst abhängt — ein externer Monitor wäre robuster (Kopf „Offen").
+selbst abhängt. **Nachtrag (gleicher Tag):** Der Workflow war gar nicht
+deaktiviert — der Cron lief schon am 01.09. nur alle 2–5 h und ab 02.09. trotz
+„active" nicht mehr (GitHub führt schedule nur best effort aus). Der
+Keepalive war also nicht die Lösung. **Konsequenz:** UptimeRobot als externer
+Primär-Monitor (`/api/health`, 5 min, Mail); der Workflow bleibt zweite Linie.
 
 ## 2026-09-25 — Harness-Umbau nach SKHO-Vorbild: fünf Setup-Lessons
 
