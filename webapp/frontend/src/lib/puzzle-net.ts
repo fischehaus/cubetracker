@@ -105,10 +105,19 @@ interface RenderOptions {
 const SVG_BG = "#1f2937";
 const STROKE = "#0d1117";
 
-/** Baked-Farbe des Facelets (orbit, piece, sticker) — Solved-Farbe des Pieces. */
+/** Baked-Farbe des Facelets (orbit, piece, sticker) — Solved-Farbe des Pieces.
+ *  Pieces mit genau EINEM Facelet (Skewb-Center) sind optisch orientierungs-
+ *  unabhängig → zusätzlich unter `orbit.piece` abgelegt (Fallback im Render). */
 function colorLookup(data: PuzzleNetData): Map<string, string> {
   const map = new Map<string, string>();
-  for (const f of data.facelets) map.set(`${f.o}.${f.p}.${f.s}`, f.c);
+  const count = new Map<string, number>();
+  for (const f of data.facelets) {
+    map.set(`${f.o}.${f.p}.${f.s}`, f.c);
+    count.set(`${f.o}.${f.p}`, (count.get(`${f.o}.${f.p}`) ?? 0) + 1);
+  }
+  for (const f of data.facelets) {
+    if (count.get(`${f.o}.${f.p}`) === 1) map.set(`${f.o}.${f.p}`, f.c);
+  }
   return map;
 }
 
@@ -154,7 +163,10 @@ export function renderPuzzleNetSvg(
     const curPiece = s.pieces[f.p];
     const ori = s.orientation[f.p];
     const srcSticker = ((f.s - ori) % numOri + numOri) % numOri;
-    const fill = colors.get(`${f.o}.${curPiece}.${srcSticker}`) ?? "#000000";
+    const fill =
+      colors.get(`${f.o}.${curPiece}.${srcSticker}`) ??
+      colors.get(`${f.o}.${curPiece}`) ??
+      "#000000";
     parts.push(
       `<polygon points="${f.pts}" fill="${fill}" stroke="${STROKE}" stroke-width="1" stroke-linejoin="round" />`,
     );

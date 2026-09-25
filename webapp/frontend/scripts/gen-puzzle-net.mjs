@@ -8,13 +8,27 @@ import { writeFileSync } from "node:fs";
 
 const round = (s) => s.split(/\s+/).map((x) => (+x).toFixed(1)).join(" ");
 
-async function gen({ constName, pgName, loaderKey, tokens, file }) {
-  const pg = getPuzzleGeometryByName(pgName);
-  const svg = pg.generatesvg();
+// svgSource: "pg" = generische PuzzleGeometry-SVG (Pyraminx: Orbits identisch
+// zum Loader-KPuzzle). "loader" = die zum Loader-KPuzzle gehörende SVG — nötig,
+// wenn der Loader eine handgeschriebene Definition hat (Skewb: 1 Orbit à 8
+// Ecken in WCA-Notation vs. PG: CORNERS + CORNERS2 à 4 → Orbits passen nicht).
+async function gen({ constName, pgName, loaderKey, tokens, file, svgSource = "pg" }) {
+  const svg = svgSource === "loader"
+    ? await puzzles[loaderKey].svg()
+    : getPuzzleGeometryByName(pgName).generatesvg();
   const viewBox = (svg.match(/viewBox="([^"]+)"/) || [])[1] || "0 0 800 500";
   const re = /<polygon id="([A-Za-z0-9]+)-l(\d+)-o(\d+)"[^>]*fill: (#[0-9a-fA-F]+)[^>]*points="([^"]+)"/g;
   const facelets = []; let m;
-  while ((m = re.exec(svg))) facelets.push({ o: m[1], p: +m[2], s: +m[3], c: m[4], pts: round(m[5]) });
+  const seen = new Set();
+  while ((m = re.exec(svg))) {
+    // Deckungsgleiche Polygone desselben Pieces (Skewb-Center: 1 Polygon je
+    // Orientierung) nur einmal — der Renderer behandelt Ein-Sticker-Pieces
+    // als orientierungsunabhängig.
+    const key = `${m[1]}.${m[2]}.${round(m[5])}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    facelets.push({ o: m[1], p: +m[2], s: +m[3], c: m[4], pts: round(m[5]) });
+  }
   const orbitOri = {};
   const kp = await puzzles[loaderKey].kpuzzle();
   for (const orb of kp.definition.orbits) orbitOri[orb.orbitName] = orb.numOrientations;
@@ -35,3 +49,10 @@ async function gen({ constName, pgName, loaderKey, tokens, file }) {
 const pyraTokens = [];
 for (const b of ["U","L","R","B","u","l","r","b"]) { pyraTokens.push(b, b + "'"); }
 await gen({ constName: "PYRAMINX_NET", pgName: "pyraminx", loaderKey: "pyraminx", tokens: pyraTokens, file: "src/lib/puzzle-net-data/pyraminx.ts" });
+
+// Skewb (W.scramble-net-skewb, 2026-06-29): nur U/L/R/B + ' (120°-Corner-
+// Twists), KEIN 2-Modifier (verifiziert gegen cubing — Skewb-Moves sind
+// Ordnung 3, "R2" existiert nicht in der WCA-Notation).
+const skewbTokens = [];
+for (const b of ["U","L","R","B"]) { skewbTokens.push(b, b + "'"); }
+await gen({ constName: "SKEWB_NET", pgName: "skewb", loaderKey: "skewb", tokens: skewbTokens, file: "src/lib/puzzle-net-data/skewb.ts", svgSource: "loader" });

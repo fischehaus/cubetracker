@@ -7,6 +7,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { applyPuzzleScramble, renderScramblePuzzleNetSvg } from "./puzzle-net";
 import { PYRAMINX_NET } from "./puzzle-net-data/pyraminx";
+import { SKEWB_NET } from "./puzzle-net-data/skewb";
 import { puzzles } from "cubing/puzzles";
 
 const MODS = ["", "'"];
@@ -63,6 +64,68 @@ describe("puzzle-net: Pyraminx-Applier == cubing.js-Oracle", () => {
         expect(mine[orbit].orientation).toEqual([...oracle[orbit].orientation]);
       }
     }
+  });
+});
+
+describe("puzzle-net: Skewb-Applier == cubing.js-Oracle", () => {
+  let kp: Awaited<ReturnType<(typeof puzzles)["skewb"]["kpuzzle"]>>;
+  beforeAll(async () => {
+    kp = await puzzles["skewb"].kpuzzle();
+  });
+
+  it("Applier trifft cubing-KPuzzle-State für 60 Zufalls-Scrambles", () => {
+    const moves = ["U", "L", "R", "B"];
+    for (let i = 0; i < 60; i++) {
+      const scr = randomScramble(moves, 20);
+      const mine = applyPuzzleScramble(SKEWB_NET, scr);
+      const oracle = kp.defaultPattern().applyAlg(scr).patternData;
+      for (const orbit of Object.keys(oracle)) {
+        expect(mine[orbit].pieces, `pieces ${orbit} bei "${scr}"`).toEqual([
+          ...oracle[orbit].pieces,
+        ]);
+        expect(mine[orbit].orientation, `ori ${orbit} bei "${scr}"`).toEqual([
+          ...oracle[orbit].orientation,
+        ]);
+      }
+    }
+  });
+
+  it("feste Known-Good-Scrambles == cubing (reproduzierbar)", () => {
+    const fixed = ["U R' L B", "L' U R' U' B'", "R U R' U' R U R'", "B L U' R'"];
+    for (const scr of fixed) {
+      const mine = applyPuzzleScramble(SKEWB_NET, scr);
+      const oracle = kp.defaultPattern().applyAlg(scr).patternData;
+      for (const orbit of Object.keys(oracle)) {
+        expect(mine[orbit].pieces, `pieces ${orbit} @ "${scr}"`).toEqual([
+          ...oracle[orbit].pieces,
+        ]);
+        expect(mine[orbit].orientation).toEqual([...oracle[orbit].orientation]);
+      }
+    }
+  });
+});
+
+describe("puzzle-net: Invarianten + Render (Skewb)", () => {
+  it("jede der 6 Farben erscheint 5× nach beliebigem Scramble", () => {
+    const scr = randomScramble(["U", "L", "R", "B"], 25);
+    const svg = renderScramblePuzzleNetSvg(SKEWB_NET, scr);
+    const colors = [...new Set(SKEWB_NET.facelets.map((f) => f.c))];
+    expect(colors.length, "Skewb sollte 6 Farben haben").toBe(6);
+    for (const c of colors) {
+      const n = svg.split(`fill="${c}"`).length - 1;
+      expect(n, `Farbe ${c}`).toBe(5);
+    }
+  });
+
+  it("solved-Render zeigt 30 Facelet-Polygone", () => {
+    const svg = renderScramblePuzzleNetSvg(SKEWB_NET, "");
+    expect((svg.match(/<polygon/g) ?? []).length).toBe(30);
+  });
+
+  it("scrambled ≠ solved", () => {
+    const solved = renderScramblePuzzleNetSvg(SKEWB_NET, "");
+    const scrambled = renderScramblePuzzleNetSvg(SKEWB_NET, "U L' R B");
+    expect(scrambled).not.toBe(solved);
   });
 });
 

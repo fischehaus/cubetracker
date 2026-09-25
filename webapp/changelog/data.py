@@ -44,6 +44,17 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.scramble-net-skewb",
+        released=date(2026, 9, 25),
+        title="🔷 2D-Scramble-Vorschau jetzt auch für Skewb",
+        highlights=[
+            "Die 2D-Vorschau unter dem Scramble gibt es jetzt auch für den "
+            "Skewb (WCA-Notation R, L, U, B). Wie beim Pyraminx wird die "
+            "Darstellung aus der Standard-Cubing-Bibliothek abgeleitet. In den "
+            "Einstellungen abschaltbar.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.scramble-net-pyraminx",
         released=date(2026, 6, 29),
         title="🔺 2D-Scramble-Vorschau jetzt auch für Pyraminx",

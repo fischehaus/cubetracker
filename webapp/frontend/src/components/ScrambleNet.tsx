@@ -22,6 +22,7 @@ import {
   type PuzzleNetData,
 } from "../lib/puzzle-net";
 import { PYRAMINX_NET } from "../lib/puzzle-net-data/pyraminx";
+import { SKEWB_NET } from "../lib/puzzle-net-data/skewb";
 
 interface Props {
   /** Der Scramble-String. Leer / null → solved-Cube wird gerendert. */
@@ -48,10 +49,12 @@ const NXN_BY_TYPE: Record<string, number> = {
 
 /** Piece-basierte Nicht-Cube-Puzzles (W.scramble-net-pyraminx, 2026-06-29):
  *  eigener leichter Applier/Renderer (puzzle-net.ts) mit aus cubing.js
- *  gebackenen Daten (Geometrie + Move-Transforms). Skewb/Megaminx folgen;
+ *  gebackenen Daten (Geometrie + Move-Transforms). Skewb seit
+ *  W.scramble-net-skewb (2026-09-25); Megaminx folgt;
  *  Square-1 (shape-shifting) + Clock (Zifferblätter) separat/gar nicht. */
 const PUZZLE_NET_BY_TYPE: Record<string, PuzzleNetData> = {
   Pyraminx: PYRAMINX_NET,
+  Skewb: SKEWB_NET,
 };
 
 /**
