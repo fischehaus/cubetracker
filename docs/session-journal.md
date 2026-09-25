@@ -3026,3 +3026,34 @@ maßgeblich; Ranking/Level und die Hardware-Liste stehen im Seed.
 
 **Referenzwissen:** Die Deploy-Lesson vom 03.06. und die Mitternachts-Flake
 vom 13.06. stehen jetzt in `docs/lessons-archive.md`.
+
+## ✅ 2026-09-25 (Teil 2) — Aufgabenliste, Skewb, Ausfall + Hotfix, Ops-Härtung
+
+- Priorisierte Aufgabenliste (Kopf, Roadmap, GitHub, Code) → vom User freigegeben.
+  Roadmap #32 + #10 als erledigt geschlossen (waren umgesetzt).
+- `W.scramble-net-skewb` (`fccc875`, Tag) live; QA-SOLLTE nachgezogen
+  (Generator↔Applier-Test für Skewb + Pyraminx).
+- **Backend-Ausfall 09:03–10:58 UTC:** erster Backend-Build seit 04.07. zog
+  SQLAlchemy 2.1 (psycopg-v3-Default) → Crash-Loop. Hotfix `18e2561`
+  (Treiber explizit + `<2.1`). Diagnose über Coolify-Log (User).
+- `W.challenge-plausible-pb` (`49bf43f`, Tag) live: #47 (PB < 300 ms ignoriert)
+  + Speed-Challenges waren nie erfüllbar (progress 0/1 vs. ms). Roadmap #47 done.
+- Überwachung: GitHub-Cron gedrosselt/ausgefallen seit 02.09. → UptimeRobot
+  (extern, 5 min, Mail; Test-Mail ok). Keepalive `6df00e0` bleibt als 2. Linie.
+- `W.ci-postgres-lock` (`dacc3c2`): CI-Start-Smoke gegen Postgres 16 +
+  `webapp/constraints.txt` (Docker + CI).
+- Software-Bestandsaufnahme → Coolify 4.0.0 → 4.3.23 (User), `W.deps-security`
+  (`0c8cf3b`: npm audit 15 → 0, Actions v7). Coolify-Update brach zweimal:
+  Deploy-API nur noch POST (`6e8fa71`) + IPv6-Gateway-Bug im Netz `coolify`
+  (coollabsio/coolify#11510) → Netz per SSH neu angelegt (User führte Skript
+  aus), Deploys laufen wieder. Hetzner-2FA aktiviert; Server-Backups täglich
+  (7) bestätigt → Off-Site-Backup auf „Bald".
+- Lessons: 4 neue Einträge 2026-09-25 in `docs/lessons-archive.md`.
+- Gegenleser: entfallen (Bagatelle) — einzige Regelebenen-Änderung nach dem
+  Harness-Umbau war die Monitoring-Zeile in `CLAUDE.md` (Tatsachenkorrektur).
+
+Verlustprobe alter Kopf (fc41040):
+- ✅ W.scramble-net-skewb fertig machen. — erledigt (`fccc875`)
+- ✅ Bug Tägliche Herausforderung: — erledigt (`49bf43f`)
+- ✅ Einmal `/compact` ausführen — erledigt (Kopf nach /compact geladen)
+- ✅ Nach einer Antwort mit End-Block: — erledigt (kein 2. Turn, eigener ntfy-Text)
