@@ -75,3 +75,13 @@ cubetracker_colorparty_*
 cubetracker_*_mode.css
 preview_contact_sheet.*
 readability_test_*
+
+# Lokale Skin-/Design-Pakete + Prüfbilder (nicht versioniert, Abschluss 25.09.2026)
+frontend/src/assets/*.zip
+frontend/src/assets/Level_all_cubes.png
+frontend/src/assets/background_01_widescreen.png
+frontend/src/assets/main_logo.png
+frontend/src/assets/main_logo_2.png
+skins/*.zip
+scripts/*.png
+scripts/__pycache__/
