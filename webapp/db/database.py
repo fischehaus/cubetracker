@@ -20,10 +20,23 @@ from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 DEFAULT_LOCAL_DB = Path(__file__).resolve().parent.parent / "local-dev.db"
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_LOCAL_DB}")
 
-# Render liefert Postgres-URLs als "postgres://..." (alt), SQLAlchemy 2.0
-# erwartet "postgresql://" — ggf. patchen.
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+def normalize_database_url(url: str) -> str:
+    """Postgres-URL auf den installierten Treiber psycopg2 festnageln.
+
+    - "postgres://" (Render-Altformat) → SQLAlchemy kennt nur "postgresql".
+    - Hotfix 2026-09-25: SQLAlchemy 2.1 nimmt für "postgresql://" psycopg (v3)
+      statt psycopg2 → Backend-Crash beim Start ("No module named 'psycopg'").
+      Installiert ist nur psycopg2-binary, daher Treiber explizit setzen.
+    """
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    if url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+    return url
+
+
+DATABASE_URL = normalize_database_url(DATABASE_URL)
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
