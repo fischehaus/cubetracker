@@ -12,9 +12,9 @@ sollen automatisch aufgefangen werden:
 | 1 | Lokale Dev-Server starten, obwohl Cubetracker live auf cubetracker.de deployed ist | `pre-bash-dev-server.sh` (PreToolUse-Block) — siehe Klarstellung unten |
 | 2 | Commit vergessen zu pushen → Auto-Deploy (Coolify) triggert nicht | `post-git-commit.sh` Teil A (PostToolUse-Notice) |
 | 3 | Neuen Patch-Notes-Eintrag in `webapp/changelog/data.py` nicht getaggt | `post-git-commit.sh` Teil B (PostToolUse-Notice) |
-| 4 | Session-Start ohne Repo-Context → Mental-Model-Drift | `session-start-context.sh` (SessionStart-Notice) |
+| 4 | Session-Start (auch nach `/compact`/`/clear`) ohne Übergabe-Stand → Mental-Model-Drift | `session-start-context.sh` (lädt `NEXT_SESSION.md` + Werkstatt-Zeile + Repo-Stand, Budget 10.000 Zeichen) |
 | 5 | Hartkodiertes `localhost:` in TS/TSX-Files (v1.0.1-Klassiker-Bug) | `post-edit-hardcoded-url.sh` (PostToolUse-Notice) |
-| 6 | Session beenden mit uncommitted/unpushed Zeug oder fehlenden Tags | `stop-mini-check.sh` (Stop-Hook, 1×/Session) + `/abschluss` Slash-Command (voller Check) |
+| 6 | Session beenden mit uncommitted/unpushed Zeug oder fehlenden Tags | `stop-mini-check.sh` (Stop-Hook, 1×/Session, Meldung als `systemMessage` direkt an den User) + `/abschluss` Slash-Command (voller Check) |
 | 7 | Tag landet am falschen Commit, weil pre-commit den Commit abgebrochen hat (2× erlebt) | `pre-git-tag-check.sh` (PreToolUse-Block bei `git tag` + dirty tree) — siehe unten |
 | 8 | `git push` schlägt fehl (non-fast-forward / kein Upstream / Auth) → kryptischer Git-Stacktrace | `post-push-failure-diagnose.sh` (PostToolUseFailure-Notice) — siehe unten |
 
@@ -28,35 +28,34 @@ sollen automatisch aufgefangen werden:
 │   ├── qa-reviewer.md                 (Sub-Agent: strukturierte QA-Reviews)
 │   └── patch-notes-writer.md          (Sub-Agent: PatchNote aus Commit-Diff)
 ├── commands/
-│   ├── abschluss.md                   (Slash-Command /abschluss — 8-Punkte-Check)
-│   └── audit.md                       (Slash-Command /audit <sektion> — Doku-vs-Setup)
+│   ├── abschluss.md                   (Slash-Command /abschluss — 13 Checks, Kopf ersetzen)
+│   ├── audit.md                       (Slash-Command /audit <sektion> — Doku-vs-Setup)
+│   └── roadmap.md                     (Slash-Command /roadmap — Live-Roadmap + Auth)
 ├── rules/
 │   └── discipline.md                  (path-scoped Code-Disziplin, lädt bei Code-Work)
 └── hooks/
-    ├── session-start-context.sh       (Repo-Stand + Reminders beim Start)
+    ├── session-start-context.sh       (Übergabe-Kopf + Werkstatt + Repo-Stand beim Start)
     ├── pre-compact-checkpoint.sh      (PreCompact: git-Stand → .tmp/ vor Kompaktierung)
-    ├── pre-bash-dev-server.sh         (Block uvicorn / npm run dev / vite)
+    ├── pre-bash-dev-server.sh         (Block Dev-Server-Starts, je Befehlssegment)
     ├── pre-git-tag-check.sh           (Block git tag bei modifizierten tracked-Files)
     ├── post-git-commit.sh             (Push-Reminder + Tag-Reminder)
     ├── post-edit-hardcoded-url.sh     (Warn bei localhost: in *.ts/*.tsx)
     ├── post-push-failure-diagnose.sh  (Diagnose bei fehlgeschlagenem git push)
     ├── permission-request-auto-approve.sh (Auto-Approve safe Read-Commands)
-    ├── stop-mini-check.sh             (Stop-Hook, 1×/Session: uncommitted + unpushed)
-    └── stop-ntfy-notify.sh            (Stop-Hook: ntfy-Ping wenn Claude auf Eingabe wartet)
+    ├── stop-mini-check.sh             (Stop-Hook, 1×/Session: uncommitted + unpushed, als systemMessage)
+    ├── stop-ntfy-notify.sh            (Stop-Hook: ntfy-Ping wenn Claude auf Eingabe wartet)
+    └── tests/test_pre_bash_dev_server.py (Testmatrix Dev-Server-Hook, 38 Fälle)
 ```
 
 ### /abschluss — Session-Ende-Check
 
-Ruf am Ende einer Arbeits-Session `/abschluss` auf. Geht 8 Checks durch:
-
-1. uncommitted Aenderungen im Working-Tree
-2. ungepushte Commits
-3. `feat(W.*)`/`fix(W.*)`-Commits ohne Patch-Notes-Eintrag
-4. Patch-Notes-Versionen ohne Git-Tag
-5. neue User-facing-Features ohne `features-data.ts`-Update
-6. STATUS.md / NEXT_SESSION.md veraltet?
-7. offene Todos
-8. Backend-Smoke-Test (lokal mit venv)
+Ruf am Ende einer Arbeits-Session `/abschluss` auf. 13 Checks — maßgeblich
+ist `commands/abschluss.md`. Kern seit W.harness-v2 (2026-09-25): Check 11
+prüft die Gegenlesung bei Regelebene-Änderungen, Check 12 ordnet untracked
+Dateien ein (Löschen nur per `GO <n>`, nie still), Check 13 läuft **zuletzt** und
+**ersetzt** den Übergabe-Kopf `NEXT_SESSION.md` (Verlustprobe gegen den Stand
+beim letzten Abschluss), hängt den Verlauf an `docs/session-journal.md` und
+pusht nur, wenn der Push ausschließlich Doku trägt. Schluss mit End-Block.
 
 Bei ⚠ Befunden: bietet Fixes an. Bei allem grün: „Session kann sauber beendet werden."
 
@@ -90,19 +89,20 @@ Konvention: Tag-Name = `v` + Patch-Notes-Version-String. Beispiel:
 
 ## pre-bash-dev-server: Block-Logik
 
-Der Hook matched folgende Patterns (Glob, case-aware):
-- `*uvicorn*` — alle Aufrufe inkl. `pip install uvicorn` (False Positive!)
-- `npm run dev`, `yarn dev`, `pnpm dev`
-- `*vite*`, `npx vite` (außer `vite build`, das ist erlaubt)
-
-**Wichtig:** Pattern `*uvicorn*` blockt auch Dependency-Installation. Falls
-du legit `pip install uvicorn` o.ä. brauchst → Override:
-
-```bash
-CUBETRACKER_ALLOW_LOCAL_DEV=1 pip install uvicorn
-```
-
-Das deaktiviert den Hook für die gesamte Shell-Session.
+Seit W.harness-v2 (2026-09-25) prüft der Hook **je Befehlssegment** (getrennt
+an `&&`, `||`, `;`, `|`, `&`, Zeilenumbruch; Klammern entfernt; `bash -c "…"`
+rekursiv) nur das **ausgeführte Programm** — Wrapper (`npx`, `nohup`,
+`timeout N`, `env`, `FOO=1`) und Optionen (`npm --prefix X`, `python -X utf8`)
+werden übersprungen. JSON per Python geparst; Fast-Path ohne Python, wenn kein
+Kandidatenwort vorkommt. Blockiert: `uvicorn`, `python -m uvicorn`,
+`npm|yarn|pnpm [run] dev|start|preview|serve`, `vite` ohne Argument bzw.
+`vite dev|serve|preview|--…`, `node …/vite/bin/vite.js`.
+Durch: `vitest`, `vite build`, `npm test`, `npm run build`, `pip install uvicorn`,
+`grep uvicorn …`, `cat vite.config.ts`, Commit-Messages mit diesen Wörtern.
+Vorher traf das Glob-Muster `*vite*` auch `npx vitest` (reiner Testlauf).
+**Testmatrix (38 Fälle):** `python .claude/hooks/tests/test_pre_bash_dev_server.py
+> .tmp/devhook.txt 2>&1; echo "RC=$?"` — bei jeder Hook-Änderung vor der
+Gegenlesung laufen lassen.
 
 ## PermissionRequest: Auto-Approve safe commands
 
@@ -162,12 +162,14 @@ jeder Kontext-Kompaktierung (manuell via `/compact` oder automatisch am Limit) u
 friert den git-Stand (branch, status, letzte Commits, diff-stat) nach
 `.tmp/last-compact-checkpoint.md` ein (gitignored). Hintergrund: eine Session war
 nach Auto-Kompaktierung kontextlos. Ehrliche Grenze: erfasst nur git-Stand, nicht
-die Konversation — die inhaltliche Übergabe bleibt `NEXT_SESSION.md`. Nach einer
-Kompaktierung: `.tmp/last-compact-checkpoint.md` + `NEXT_SESSION.md` lesen.
+die Konversation — die inhaltliche Übergabe bleibt `NEXT_SESSION.md`. Seit
+W.harness-v2 lädt `session-start-context.sh` den Kopf nach `/compact` und
+`/clear` automatisch (Matcher `startup|resume|compact|clear|fork`);
+`.tmp/last-compact-checkpoint.md` ergänzt den git-Stand.
 
 ## stop-ntfy-notify
 
-`stop-ntfy-notify.sh` (Stop-Event, kein `once`) sendet bei jedem Turn-Ende einen
+`stop-ntfy-notify.sh` (Stop-Event, kein `once`; schweigt bei `stop_hook_active`) sendet bei jedem Turn-Ende einen
 ntfy-Ping an Topic `jjY2OjY`, damit der User weiss wann Claude fertig ist und auf
 Eingabe wartet. Als Hook statt manuellem Curl, weil manuelle Pings nach
 Kompaktierung verloren gehen (Claude „vergisst" die Gewohnheit) — der Hook
@@ -182,7 +184,10 @@ Neuen Hook hinzufuegen:
 2. In `settings.json` unter passendem Event (`PreToolUse`, `PostToolUse`,
    `PermissionRequest`, `Stop`, …) registrieren mit `matcher` + `if`-Bedingung
 3. Manuell testen mit `echo '{...}' | bash .claude/hooks/<script>.sh`
-4. Commit + push
+   (Treffer **und** Nicht-Treffer; Ausgabe in Datei, Exit-Code nicht hinter Pipe werten)
+4. Gegenlesung (Opus, frischer Kontext) — Hooks sind Regelebene (`CLAUDE.md` →
+   Subagenten, QA & Gegenlesung)
+5. Commit + push
 
 Hook-Doku: https://code.claude.com/docs/en/hooks
 

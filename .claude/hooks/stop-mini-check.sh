@@ -19,8 +19,15 @@
 # Bewusst minimal: 2 Checks, beide read-only, sub-100ms. Wenn beide ok →
 # stumm raus (kein Noise im Chat).
 #
+# W.harness-v2 (2026-09-25): Ausgabe jetzt als `systemMessage` (Meldung
+# direkt an den User) statt `additionalContext`. additionalContext hält laut
+# Claude-Code-Changelog (v2.1.163) den Turn am Laufen → Claude wurde nach
+# einem End-Block erneut geweckt, der End-Block rutschte nach oben und
+# stop-ntfy-notify schickte einen zweiten Push mit dem git-Fallback.
+# Die Warnung braucht keine Claude-Antwort — der User sieht sie direkt.
+#
 # Eingabe: Stop-Event-JSON auf stdin (session_id wird genutzt)
-# Ausgabe: additionalContext JSON wenn was zu sagen ist, sonst stumm.
+# Ausgabe: systemMessage-JSON wenn was zu sagen ist, sonst stumm.
 
 set -euo pipefail
 
@@ -59,10 +66,10 @@ mkdir -p .tmp
 touch "$marker"
 
 # Empfehle den vollen /abschluss-Check fuer mehr.
-notes+=$'\n→ Fuer einen vollstaendigen Session-Ende-Check ruf `/abschluss` auf.'
+notes+=$'\n→ Vollstaendiger Session-Ende-Check: /abschluss. (Hook: .claude/hooks/stop-mini-check.sh)'
 
 # JSON-Encoding
 escaped="$(printf '%s' "$notes" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' ' | sed 's/  */ /g')"
-printf '{"hookSpecificOutput":{"hookEventName":"Stop","additionalContext":"%s"}}\n' "$escaped"
+printf '{"systemMessage":"%s"}\n' "$escaped"
 
 exit 0

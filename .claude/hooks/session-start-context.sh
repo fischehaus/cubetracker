@@ -1,120 +1,143 @@
 #!/bin/bash
-# session-start-context.sh — SessionStart-Hook.
+# session-start-context.sh — SessionStart-Hook (startup|resume|compact|clear).
 #
-# Zweck: gegen Mental-Model-Drift. Beim Start einer neuen Claude-Code-
-# Session druckt der Hook einen kompakten Repo-Stand, damit Claude sofort
-# weiss:
-#   1. Cubetracker laeuft live auf cubetracker.de via Coolify (Hetzner) — Auto-Deploy per GitHub-Action bei git push
-#   2. Welcher Branch + welche Commits sind im Spiel
-#   3. Welche Doku zuerst zu lesen ist
-#   4. Ob ungepushte Commits rumlagen (Render sieht die nicht)
+# Zweck: Jede Session (auch nach /compact und /clear) startet mit dem
+# Übergabe-Kopf NEXT_SESSION.md im Kontext — nach /compact zählt nur, was in
+# Dateien steht. Dazu eine Werkstatt-Zeile (liegengebliebene Änderungen) und
+# bei startup/resume der Repo-Stand (Branch, Version, Commits, Issues, Roadmap).
 #
-# Hintergrund: heute (2026-05-16) habe ich am Anfang der Session vergessen,
-# dass die App schon deployed ist, und versucht lokale Dev-Server zu starten.
-# Plus: 26 ungetaggte Patch-Notes-Versionen lagen rum. Plus: Commits lagen
-# 30+ Minuten ungepusht. Dieser Hook gibt am Anfang die Realitaet vor.
+# Budget (W.harness-v2, 2026-09-25): Die GESAMTE Ausgabe bleibt unter
+# BUDGET Zeichen. Hintergrund: Im SKHO-Harness gemessen (CLI 2.1.233) kappt
+# Claude Code Hook-Ausgaben ab ~18.000 Zeichen still auf eine ~1.900-Zeichen-
+# Vorschau — die Session startet dann halbblind, ohne es zu merken. Bei
+# Überschreitung fallen zuerst Roadmap + Issues weg, erst dann der Kopf
+# (dann Lesebefehl + Warnung statt Inhalt).
 #
-# Eingabe (stdin): JSON mit session_id + source ("startup"|"resume"|...).
-# Ausgabe (stdout): plain text → wird Claude als Kontext mitgegeben.
-# Exit-Code: 0.
+# Netzaufrufe (gh, roadmap-fetch) laufen mit `timeout 3`, damit der Hook
+# sein eigenes Timeout nie reißt.
+#
+# Historie: 2026-05-16 angelegt (Mental-Model-Drift: App ist live).
+# Eingabe (stdin): JSON mit "source". Ausgabe: plain text → Kontext. Exit 0.
 
-set -euo pipefail
+set -uo pipefail
 
-cd "${CLAUDE_PROJECT_DIR:-$(pwd)}"
-
-# Wenn wir nicht in einem Git-Repo sind: stumm raus.
+cd "${CLAUDE_PROJECT_DIR:-$(pwd)}" || exit 0
 git rev-parse --git-dir >/dev/null 2>&1 || exit 0
 
-# Source bestimmen (startup/resume/clear/compact).
-input="$(cat || echo '{}')"
-source="$(echo "$input" | sed -n 's/.*"source":[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)"
+BUDGET=10000
+KOPF_FILE="${CUBETRACKER_KOPF_FILE:-NEXT_SESSION.md}"  # Override nur für Tests
 
-# Bei `clear` und `compact`: kein Voll-Dump (Lärm-Reduktion mitten in Session).
-# Nur bei `startup` und `resume` ist der Context wirklich neu wichtig.
-case "${source:-startup}" in
-  clear|compact) exit 0 ;;
-esac
+input="$(cat 2>/dev/null || echo '{}')"
+source="$(printf '%s' "$input" | sed -n 's/.*"source":[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)"
+source="${source:-startup}"
 
-branch="$(git branch --show-current 2>/dev/null || echo 'unknown')"
-remote_url="$(git config --get remote.origin.url 2>/dev/null || echo 'no-remote')"
-
-# Patch-Notes-Aktuell-Version: ruft Python-current_version() auf — skippt
-# internal-Eintraege (siehe W.patchnotes-intern-qa: PATCH_NOTES[0] kann internal
-# sein, App-Version ist immer der erste public-Eintrag). Konsistent mit
-# /api/health, das die selbe Funktion nutzt.
-current_version="$( (cd webapp 2>/dev/null && python -c 'from changelog.data import current_version; print(current_version())' 2>/dev/null) || echo 'unknown')"
-
-# Unpushed commits zaehlen.
-upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
-unpushed_msg=""
-if [[ -n "$upstream" ]]; then
-  unpushed_count="$(git log --oneline "$upstream"..HEAD 2>/dev/null | wc -l | tr -d ' ')"
-  if [[ "${unpushed_count:-0}" -gt 0 ]]; then
-    unpushed_msg=$'\n⚠️  '"$unpushed_count"' Commit(s) lokal noch nicht gepusht → Render hat sie nicht.'
-  fi
+# --- 1. Übergabe-Kopf --------------------------------------------------------
+if [[ -f "$KOPF_FILE" ]]; then
+  kopf_block="=== Übergabe-Kopf (NEXT_SESSION.md, maßgeblich für den Stand) ==="$'\n'"$(cat "$KOPF_FILE")"
+else
+  kopf_block="!!! NEXT_SESSION.md fehlt — Stand vor dem Arbeiten aus docs/session-journal.md (Dateiende) + git log rekonstruieren."
 fi
 
-# Letzte 5 Commits kompakt.
-recent="$(git log --oneline -5 2>/dev/null || echo '(kein log)')"
+# --- 2. Werkstatt: Liegengebliebenes (>12 h) ---------------------------------
+# Ein Python-Lauf statt `stat` je Datei (~45 ms/Datei in Git Bash → Timeout-
+# Risiko bei vielen untracked Dateien). Geänderte getrackte Dateien zuerst
+# (die eigentliche Warnung, z. B. liegengebliebene WIP), untracked nur
+# gebündelt nach Ordner. Gedeckelt auf 2.000 Einträge.
+werk_block="$(git -c core.quotePath=false status --porcelain -z -uall 2>/dev/null | python -c '
+import os, sys, time
+raw = sys.stdin.buffer.read().decode("utf-8", "replace").split("\0")
+now, changed, untracked, entries, i = time.time(), [], {}, [], 0
+while i < len(raw) and len(entries) < 2000:
+    e = raw[i]; i += 1
+    if len(e) < 4:
+        continue
+    code, path = e[:2], e[3:]
+    if code[0] in "RC":
+        i += 1  # bei -z folgt der Quellpfad einer Umbenennung als eigener Eintrag
+    if "D" in code or not os.path.exists(path):
+        continue
+    try:
+        age_h = (now - os.path.getmtime(path)) / 3600
+    except OSError:
+        continue
+    if age_h >= 12:
+        entries.append((code, path, age_h))
+def fmt(h):
+    return "%d d" % (h // 24) if h >= 48 else "%d h" % h
+for code, path, h in entries:
+    if code == "??":
+        top = path.split("/")[0] + ("/" if "/" in path else "")
+        n, oldest = untracked.get(top, (0, 0))
+        untracked[top] = (n + 1, max(oldest, h))
+    else:
+        changed.append((h, path))
+if not changed and not untracked:
+    sys.exit(0)
+out = ["🧰 Werkstatt (liegt seit >12 h):"]
+if changed:
+    changed.sort(reverse=True)
+    more = " + %d weitere" % (len(changed) - 5) if len(changed) > 5 else ""
+    out.append("   ⚠️ geändert, uncommittet: " + ", ".join("%s (%s)" % (p, fmt(h)) for h, p in changed[:5]) + more)
+if untracked:
+    total = sum(n for n, _ in untracked.values())
+    groups = sorted(untracked.items(), key=lambda kv: -kv[1][0])
+    more = " …" if len(groups) > 4 else ""
+    out.append("   untracked: %d Datei(en) — %s%s" % (total, ", ".join("%s %d (bis %s)" % (k, n, fmt(h)) for k, (n, h) in groups[:4]), more))
+out.append("   Eigene Arbeit? → in NEXT_SESSION unter Offen festhalten bzw. /abschluss (Werkstatt-Check).")
+sys.stdout.buffer.write("\n".join(out).encode("utf-8"))
+' 2>/dev/null || true)"
 
-# Phase W.session-scan-feedback (2026-05-28): bei Session-Start zwei
-# externe Inboxen scannen, damit Claude direkt weiss wo offene
-# Bugs / Wuensche hocken:
-#   1. GitHub-Issues (offen, via gh CLI — kein Token-Problem weil
-#      `gh` selbst authentifiziert ist)
-#   2. App-interne Feedback-Inbox /admin/feedback/stats — nur als
-#      *Hinweis*, weil der Hook keinen Admin-Token hat. Falls die
-#      .tmp/admin-token-File existiert (gitignored), curl-Scan; sonst
-#      Reminder fuer manuellen Check im Admin-Tab.
-github_issue_section=""
-if command -v gh >/dev/null 2>&1; then
-  # gh ist verfuegbar (CLI-Auth via gh auth login). 5 neueste offene
-  # Issues + Total-Count.
-  open_count="$(gh issue list --state open --json number 2>/dev/null | grep -c '"number"' || echo '0')"
-  if [[ "${open_count:-0}" -gt 0 ]]; then
-    issue_list="$(gh issue list --state open --limit 5 --json number,title 2>/dev/null \
-      | sed -n 's/.*"number":[[:space:]]*\([0-9]*\),[[:space:]]*"title":[[:space:]]*"\([^"]*\)".*/  #\1: \2/p')"
-    github_issue_section=$'\n🐛 Offene GitHub-Issues: '"$open_count"$'\n'"$issue_list"
+# --- 3. Repo-Stand (nur startup/resume) --------------------------------------
+repo_block=""
+extra_block=""
+# CUBETRACKER_HOOK_OFFLINE=1: Start simulieren ohne Netz und ohne Roadmap-
+# Snapshot (für die Budget-Probe in /abschluss).
+offline="${CUBETRACKER_HOOK_OFFLINE:-}"
+if [[ "$source" == "startup" || "$source" == "resume" || "$offline" == "1" ]]; then
+  branch="$(git branch --show-current 2>/dev/null || echo '?')"
+  current_version="$( (cd webapp 2>/dev/null && timeout 5 python -c 'from changelog.data import current_version; print(current_version())' 2>/dev/null) || echo '?')"
+  unpushed_msg=""
+  upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
+  if [[ -n "$upstream" ]]; then
+    n="$(git log --oneline "$upstream"..HEAD 2>/dev/null | wc -l | tr -d ' ')"
+    (( ${n:-0} > 0 )) && unpushed_msg=$'\n'"⚠️  ${n} Commit(s) lokal ungepusht → nicht live."
   fi
+  recent="$(git log --oneline -5 2>/dev/null)"
+  repo_block="=== Repo-Stand (${source}) ===
+Live: https://cubetracker.de (Hetzner/Coolify; Auto-Deploy der geänderten App bei Push)
+Branch: ${branch} · Patch-Notes-Version: ${current_version}${unpushed_msg}
+Letzte Commits:
+${recent}
+Reminder: keine lokalen Dev-Server (App ist live) · nach Patch-Note Tag setzen + pushen.
+Maßgeblich: CLAUDE.md (Session-Workflow, Antwortformat)."
+
+  # Issues + Roadmap: verzichtbar, fallen bei Budget-Druck zuerst weg.
+  # Übersprungen offline oder wenn der Hook schon > 8 s läuft (Timeout 20 s;
+  # reißt der Hook sein Timeout, verwirft Claude Code die GANZE Ausgabe).
+  if [[ "$offline" != "1" ]] && (( SECONDS <= 8 )) && command -v gh >/dev/null 2>&1; then
+    issues="$(timeout 3 gh issue list --state open --limit 5 --json number,title \
+      --template '{{range .}}  #{{.number}}: {{.title}}{{"\n"}}{{end}}' 2>/dev/null || true)"
+    [[ -n "$issues" ]] && extra_block+=$'\n'"🐛 Offene GitHub-Issues (max. 5):"$'\n'"${issues}"
+  fi
+  if [[ "$offline" != "1" ]] && (( SECONDS <= 8 )); then
+    roadmap_out="$(timeout 3 python .claude/hooks/roadmap-fetch.py --brief --update-snapshot 2>/dev/null || true)"
+    [[ -n "$roadmap_out" ]] && extra_block+=$'\n'"${roadmap_out}"
+  fi
+  extra_block+=$'\n'"💬 Admin-Feedback-Inbox vor neuer Welle prüfen (App → Verwaltung → Admin → Feedback-Inbox)."
 fi
 
-# Admin-Inbox-Hinweis (immer als Reminder — kein Auto-Scan ohne Token).
-inbox_hint=$'\n💬 Admin-Feedback-Inbox vor neuer Welle pruefen:\n'
-inbox_hint+="   https://www.cubetracker.de/ → Verwaltung → Admin → Feedback-Inbox"$'\n'
-inbox_hint+="   (Sortiert nach Neu/Bug/Feature/Allgemein; Antwort kommt zurueck zum User.)"
+# --- Budget ------------------------------------------------------------------
+assemble() { printf '%s\n\n%s\n\n%s\n%s\n' "$kopf_block" "$werk_block" "$repo_block" "$extra_block"; }
+out="$(assemble)"
+if (( ${#out} > BUDGET )) && [[ -n "$extra_block" ]]; then
+  extra_block="(Issues/Roadmap weggelassen: Hook-Budget ${BUDGET} Zeichen — bei Bedarf /roadmap.)"
+  out="$(assemble)"
+fi
+if (( ${#out} > BUDGET )); then
+  kopf_len=${#kopf_block}
+  kopf_block="!!! NEXT_SESSION.md NICHT geladen: die Hook-Ausgabe wäre ${#out} Zeichen (Budget ${BUDGET}; Kopf allein ${kopf_len}). Ab ~18.000 Zeichen kappt der Harness still auf ~1.900. JETZT per Read vollständig lesen: NEXT_SESSION.md — danach kürzen (Verlauf → docs/session-journal.md, Regeln → CLAUDE.md)."
+  out="$(assemble)"
+fi
 
-# Phase W.roadmap-session-fetch (2026-05-29): Live-Roadmap abrufen, wenn
-# .tmp/admin-token existiert. Zeigt neue Items seit letztem Start + Items
-# die nur live (im Admin-Panel) angelegt wurden (Code-Seed-Diff). Ohne
-# Token: kurzer Setup-Hinweis. Bricht den Hook nie ab (Script exit 0).
-roadmap_out="$(python .claude/hooks/roadmap-fetch.py --brief --update-snapshot 2>/dev/null || true)"
-roadmap_block=""
-[[ -n "$roadmap_out" ]] && roadmap_block=$'\n\n'"$roadmap_out"
-
-cat <<EOF
-=== Cubetracker — Repo-Stand beim Session-Start ===
-
-Live-App: https://cubetracker.de (Hetzner/Coolify, Auto-Deploy via GitHub-Action bei git push)
-Branch: $branch
-Remote: $remote_url
-Patch-Notes-Version (aktuell): $current_version$unpushed_msg
-
-Letzte 5 Commits:
-$recent$github_issue_section$inbox_hint$roadmap_block
-
-📖 Bevor du loslegst, kurz lesen wenn du den aktuellen Stand brauchst:
-   - webapp/README.md         (Multi-User-Web-Variante, live auf Hetzner)
-   - ROADMAP.md               (Phasen-Historie + offene Items)
-   - NEXT_SESSION.md          (Wiederaufnahme-Punkte)
-   - webapp/changelog/data.py (alle Patch-Notes seit v1.0.1)
-
-🚨 Reminder (Lessons aus 2026-05-16):
-   - Lokale Dev-Server NICHT starten — App ist live. Override via
-     CUBETRACKER_ALLOW_LOCAL_DEV=1 wenn du wirklich lokal debuggen willst.
-   - Nach Patch-Notes-Eintrag in changelog/data.py: Git-Tag setzen
-     (Konvention: v<version-string>) und mit push origin <tag> hochladen.
-   - Nach Commits: nicht vergessen zu pushen — Auto-Deploy (GitHub-Action → Coolify)
-     triggert nur bei Push, nicht bei Commit.
-EOF
-
+printf '%s\n' "$out"
 exit 0

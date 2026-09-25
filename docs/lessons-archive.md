@@ -9,6 +9,37 @@ Konsequenz (was wurde im Setup geändert).
 
 ---
 
+## 2026-09-25 — Harness-Umbau nach SKHO-Vorbild: fünf Setup-Lessons
+
+**Event:** Beim Vergleich mit dem SKHO-Harness und beim Umbau (W.harness-v2)
+fielen fünf Mechanik-Fehler auf, die still wirkten:
+1. **Hook-Ausgabe-Budget.** Im SKHO-Harness gemessen (CLI 2.1.233): Ab rund
+   18.000 Zeichen kappt Claude Code die Ausgabe eines SessionStart-Hooks still
+   auf eine Vorschau von etwa 1.900 Zeichen, und die Session startet halbblind.
+   **Konsequenz:** `session-start-context.sh` misst seine Gesamtausgabe
+   (Budget 10.000). Darüber fallen zuerst Roadmap/Issues weg, dann der Kopf,
+   und statt des Kopfs kommt ein Lesebefehl.
+2. **Stop-Hook mit `additionalContext` hält den Turn am Laufen** (Changelog
+   v2.1.163). `stop-mini-check.sh` weckte Claude nach jedem ersten Turn-Ende
+   erneut. Der End-Block rutschte nach oben, und `stop-ntfy-notify.sh` schickte
+   einen zweiten Push mit dem git-Fallback. **Konsequenz:** Die Meldung geht
+   jetzt als `systemMessage` direkt an den User, und ntfy schweigt bei
+   `stop_hook_active`.
+3. **Glob-Muster in Block-Hooks treffen Nachbarbefehle.** `*vite*` blockte
+   `npx vitest` (einen reinen Testlauf), `*uvicorn*` blockte `grep uvicorn`.
+   **Konsequenz:** Der Hook prüft jetzt je Befehlssegment nur das ausgeführte
+   Programm, abgesichert durch eine Testmatrix mit 38 Fällen (`.claude/hooks/tests/`).
+4. **Exit-Code hinter einer Pipe gehört dem letzten Glied.** `npm test … | tail`
+   meldet den Code von `tail`. **Konsequenz:** Regel in `CLAUDE.md`: Prüfläufe,
+   deren Ergebnis zählt, in eine Datei umleiten und `RC=$?` sichern.
+5. **Eine Verlustprobe per grep gegen ein Journal, das das alte Dokument *ist*,
+   ist immer grün** (Befund der Opus-Gegenlesung). **Konsequenz:** Der erste
+   Umbau wurde von Hand sortiert. Künftig prüft `/abschluss` Check 13 nur gegen
+   die „Offen"-Zeilen des alten Kopfs, und als Fundort zählt nur der
+   Journal-Block der laufenden Session.
+
+---
+
 ## 2026-06-19 — Ungepinnte Dependency-Drift bricht CI (FastAPI 0.137) + Frontend-Deploy-Lag
 
 **Event (W.stackmat):** Nach dem Push einer reinen Frontend-Welle (+ Patch-Note)
@@ -95,6 +126,41 @@ im Chat-Text") reichte für den Auto-Mode-Classifier **nicht in allen Fällen**:
   User-Freigabe im Chat-Text" — präzisiert ergänzen mit „bei funktionalen
   Änderungen muss der konkrete Diff im aktuellen Turn stehen".
 - Dokumentiert in den 3 Commits `f7e581a` / `0a81d2f` / `2b9c24f`.
+
+---
+
+## 2026-06-13 — Mitternachts-Flake: relative Test-Zeitstempel
+
+**Event (W.alg-diagrams-v2):** Ein CI-Lauf um 00:05 UTC kippte die neuen
+temporal-Tests, weil `now - 10min` schon „gestern" war. Das Test-Gate hat den
+Deploy korrekt gestoppt; es war sein erster echter Fang. **Konsequenz:**
+Test-Zeitstempel liegen Sekunden in der Zukunft (der Endpoint hat keine
+Obergrenze). Regel: Tests nie relativ in die Vergangenheit datieren, wenn
+„heute" geprüft wird.
+
+---
+
+## 2026-06-07 — `winget --silent` umgeht die UAC-Abfrage nicht
+
+**Event:** LibreOffice-Nachinstallation (für docx→PDF/Bild im docx-Skill) per
+`winget … --silent`. Der System-Install wartete **unsichtbar** im Hintergrund auf
+den UAC-Klick des Users. Es sah aus wie „hängt": keine Ausgabe, `msiexec` mit
+eingefrorenem Speicher. **Konsequenz:** Vor System-Installs ansagen („gleich
+kommt eine UAC-Abfrage, bitte bestätigen") und nicht blind warten. Fremde oder
+SYSTEM-Installer-Prozesse **nie hart killen** (Safety-Block + Risiko für den
+Installer-State). Regeltext: `CLAUDE.md` → Umgebung & Tooling.
+
+---
+
+## 2026-06-03 — Halber Deploy: Backend live, Frontend-Bundle alt
+
+**Event (W.hold-to-inspect, `3672589`):** Ein Commit, der Backend (Changelog)
+**und** Frontend anfasste, ging nur halb live. Die Health-Version flippte, das
+Frontend-Bundle blieb alt. Die Action lief grün, Coolify verwarf den
+Frontend-Build trotzdem (Monorepo-Dedup), und der User testete alten Timer-Code.
+**Konsequenz:** Deploy-Verify immer beidseitig: Health-Version **und**
+Bundle-Hash müssen flippen (`/abschluss` Check 9). Bei halbem Deploy hilft ein
+Frontend-only-Folge-Push oder `gh workflow run deploy.yml`.
 
 ---
 

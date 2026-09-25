@@ -52,9 +52,10 @@ fi
 # Hartkodierter URL gefunden → Warnung mit konkretem v1.0.1-Bug-Hinweis.
 reason="🚨 Hartkodierter localhost-URL in ${file_path}: ${suspicious}. "
 reason+="Klassiker-Bug aus v1.0.1: hardcoded baseURL ging in der "
-reason+="ausgerollten App tot, weil Render-Backend nicht auf localhost laeuft. "
+reason+="ausgerollten App tot, weil das Live-Backend (Hetzner/Coolify) nicht auf localhost laeuft. "
 reason+="Loesung: nutze import.meta.env.VITE_API_BASE oder import.meta.env.DEV "
-reason+="fuer Dev/Prod-Unterscheidung. Siehe lib/api.ts wie es gemacht ist."
+reason+="fuer Dev/Prod-Unterscheidung. Siehe lib/api.ts wie es gemacht ist. "
+reason+="Massgeblich: Hook .claude/hooks/post-edit-hardcoded-url.sh (Lesson v1.0.1)."
 
 # JSON-Encoding.
 escaped="$(printf '%s' "$reason" | sed 's/\\/\\\\/g; s/"/\\"/g')"

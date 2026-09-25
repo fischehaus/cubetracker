@@ -21,14 +21,23 @@ python .claude/hooks/roadmap-fetch.py
 „neu seit Session-Start"-Marker NICHT verbrauchen. Den setzt nur der
 Session-Start-Hook.)
 
-Das Skript liest `.tmp/admin-token` (gitignored) und ruft
-`GET /api/roadmap` mit `Authorization: Bearer <token>` auf.
+**Auth — zwei Pfade** (aus `CLAUDE.md` hierher verlegt, W.harness-v2):
 
-**Wenn die Ausgabe „keine .tmp/admin-token-Datei" zeigt:** sag dem User
-einmal kurz wie er den Token hinterlegt (als Admin auf cubetracker.de
-einloggen → DevTools → Application → Local Storage →
-`cubetracker_access_token` kopieren → in `.tmp/admin-token` ablegen) und
-stoppe hier — ohne Token kein Abruf.
+1. **Bevorzugt, langlebig (W.roadmap-export-key):** Secret aus ENV
+   `ROADMAP_EXPORT_KEY` bzw. `.tmp/roadmap-export-key` (gitignored, gleicher
+   Wert wie die ENV-Var in Coolify). Endpoint `GET /api/roadmap/export` mit
+   Header `X-Roadmap-Key`; `--mark-done` läuft über
+   `POST /api/roadmap/export/done`. Kein Ablauf. Serverseitig 404, solange die
+   ENV-Var nicht gesetzt ist (safe-by-default).
+2. **Fallback, kurzlebig:** Admin-`cubetracker_access_token` aus dem
+   Browser-localStorage in `.tmp/admin-token` → `GET /api/roadmap` mit
+   `Authorization: Bearer <token>`. Läuft stündlich ab.
+
+**Wenn die Ausgabe meldet, dass weder Key noch Token da ist:** dem User einmal
+kurz erklären, wie er den Export-Key (bevorzugt) oder den Token hinterlegt
+(als Admin auf cubetracker.de einloggen → DevTools → Application → Local
+Storage → `cubetracker_access_token` → in `.tmp/admin-token`) — und hier
+stoppen, ohne Auth kein Abruf.
 
 **Wenn „Token abgelaufen (HTTP 401)":** der Access-Token ist kurzlebig.
 Bitte den User, einen frischen `cubetracker_access_token` aus dem
@@ -63,11 +72,13 @@ zuerst), die im Reorder schon hinterlegt ist. Konkret:
 - Nimm die obersten `active` (nicht `done`) Items der frühesten Phase
   (P1 vor P3 vor P4 …).
 - Nenne 2–3 Kandidaten mit Phase + Effort.
-- Frag dann offen: **„Welches Item nehmen wir als Nächstes — oder hast du
-  was anderes im Kopf?"**
+- Dann End-Block „➡️ Jetzt bei dir" (`CLAUDE.md` → Antwortformat): die
+  Kandidaten als nummerierte Zeilen mit Empfehlungswort, dazu eine Zeile
+  „oder etwas anderes?" als `(offene Wahl)`.
 
 Wenn der User ein Item wählt: leg ggf. eine Task-Liste an (TaskCreate),
-denk den Modul-Check (`.claude/rules/discipline.md`) durch, und los.
+denk den Modul-Check (`.claude/rules/discipline.md`) durch, dann Ansage +
+Stopp (`CLAUDE.md` → Antwortformat).
 
 ---
 
@@ -79,6 +90,7 @@ denk den Modul-Check (`.claude/rules/discipline.md`) durch, und los.
   die Live-DB ist die laufende Wahrheit. `/roadmap` zeigt die Live-DB.
 - Item erledigt → auf done setzen:
   `python .claude/hooks/roadmap-fetch.py --mark-done "<title_de>"` (matcht
-  per Titel, idempotent, mehrere möglich; braucht gültigen Admin-Token).
+  per Titel, idempotent, mehrere möglich; braucht Export-Key (bevorzugt) oder
+  gültigen Admin-Token).
   Verbindlich nach Abschluss eines Roadmap-Items — nicht nur erinnern.
 - Phasen-Struktur P1..P6: `webapp/frontend/src/lib/roadmap-phases.ts`.

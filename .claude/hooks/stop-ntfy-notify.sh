@@ -19,12 +19,24 @@
 # Laeuft bei JEDEM Stop (kein "once"), im Gegensatz zu stop-mini-check.sh.
 # Topic: jjY2OjY (persoenlich, in ~/.claude/settings.json als trusted endpoint).
 #
-# Eingabe (stdin): JSON (ignoriert).
+# W.harness-v2 (2026-09-25):
+# - LEERE Nachrichtendatei = bewusst kein Push (Claude antwortet auf eine
+#   Aufweckung ohne neuen Stand nur mit „–", CLAUDE.md → ntfy). Datei wird
+#   geloescht, Hook endet ohne curl.
+# - `stop_hook_active` true → kein Push. Defensiv: seit stop-mini-check per
+#   systemMessage meldet (statt Claude zu wecken), greift das praktisch nie.
+#
+# Eingabe (stdin): Stop-Event-JSON (nur stop_hook_active wird gelesen).
 # Exit-Code: immer 0 — Netzwerk-Fehler duerfen den Stop nie blockieren.
 
 set -euo pipefail
 
 cd "${CLAUDE_PROJECT_DIR:-$(pwd)}"
+
+payload="$(cat 2>/dev/null || true)"
+if printf '%s' "$payload" | grep -qE '"stop_hook_active"[[:space:]]*:[[:space:]]*true'; then
+  exit 0
+fi
 
 msg_file=".tmp/last-ntfy-message.txt"
 title_file=".tmp/last-ntfy-title.txt"
@@ -33,6 +45,10 @@ title_file=".tmp/last-ntfy-title.txt"
 if [[ -f "$msg_file" ]]; then
   msg="$(cat "$msg_file")"
   rm -f "$msg_file"
+  if [[ -z "${msg//[[:space:]]/}" ]]; then
+    rm -f "$title_file"
+    exit 0
+  fi
   if [[ -f "$title_file" ]]; then
     title="$(cat "$title_file")"
     rm -f "$title_file"

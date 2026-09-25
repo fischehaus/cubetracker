@@ -1,3 +1,14 @@
+# Session-Journal — Cubetracker
+
+> **Append-only-Verlauf, wird NIE beim Session-Start geladen.** Hervorgegangen am
+> 2026-09-25 per `git mv` aus dem alten `NEXT_SESSION.md` (172 KB). Der neue
+> `NEXT_SESSION.md` ist nur noch der Übergabe-Kopf (Stand · Offen · Zeiger).
+>
+> **Reihenfolge:** Der Altbestand bis 2026-06-21 hat die **neuesten Blöcke oben**
+> (so wurde er geführt). **Ab 2026-09-25 werden neue Blöcke am Dateiende
+> angehängt** (`/abschluss` Check 6) — die jüngsten Einträge stehen also ganz
+> unten. Überschriften, die sich als „aktueller Stand" ausgeben, sind historisch.
+
 # NEXT_SESSION — Cubetracker Wiederaufnahme
 
 > **Zweck:** Damit die naechste Claude-Session ohne Reibungsverlust dort
@@ -2941,3 +2952,77 @@ nicht beruehrt wird.
   `D:\Claude-Projekte\code-orchestrator\01_phase_D_befunde_cubetracker.md`
   (fuer V5-Code-Schwester-Projekt)
 - **Memory:** `~/.claude/projects/.../memory/MEMORY.md`
+
+
+---
+
+## ✅ 2026-06-29 bis 07-04 — Juli-Wellen (nachgetragen am 2026-09-25)
+
+Damals ohne Doku-Abschluss; aus git rekonstruiert, alle getaggt und live:
+- `W.fto-cstimer-roundtrip` (`032b63c`): FTO bei csTimer-Import/-Export als `ftoso`.
+- `W.fto-random-state` (`c04fc12`, QA `32a97bc`): FTO-Scrambles auf csTimer-Random-State.
+- `W.scramble-net-nxn` (`fb054da`, QA `3fcb187`): 2D-Scramble-Net für 2x2 + 4x4–7x7.
+- `W.scramble-net-pyraminx` (`b8ab402`, QA `0ff0e1c`): 2D-Net Pyraminx, Daten aus
+  cubing.js gebacken (`scripts/gen-puzzle-net.mjs`).
+- Danach begonnen, **nicht abgeschlossen**: `W.scramble-net-skewb` (lag uncommittet
+  bis 25.09.; Stop-Hook hatte am 04.07. gewarnt, `/abschluss` lief nicht).
+
+## ✅ 2026-09-25 — Skewb-Tests repariert + Harness-Umbau nach SKHO-Vorbild
+
+- **Skewb:** 3 rote Tests → Ursache: Generator nahm die PuzzleGeometry-SVG
+  (Orbits `CORNERS`+`CORNERS2` à 4), die Moves aber aus dem Loader-KPuzzle
+  (`CORNERS` à 8, WCA-Notation). Fix: `svgSource: "loader"` + Dedupe der vier
+  deckungsgleichen Center-Polygone + Renderer-Fallback für Ein-Sticker-Pieces.
+  10/10 grün, Pyraminx-Daten byte-gleich. Noch nicht verdrahtet/committet.
+- **Harness-Umbau** (Plan: 21 Entscheidungen aus dem Vergleich mit dem SKHO-
+  Harness, Opus-Gegenlesung: 3 KRITISCH/7 SOLLTE, alle eingearbeitet):
+  - `CLAUDE.md` neu (15,1 → 11,6 KB): Antwortformat (Ansage+Stopp mit Serien-GO,
+    End-Block, GO-Semantik, Effort-Stopp, Regelstelle), SSOT-Landkarte,
+    Subagenten-/Gegenleser-/Pipe-Regel, Drift bereinigt (React 19, Webapp-Stack).
+  - `NEXT_SESSION.md` → dieses Journal (`git mv`); neuer Übergabe-Kopf.
+  - Start-Hook lädt den Kopf (auch nach compact/clear), Budget 10.000 Zeichen,
+    Werkstatt-Zeile, Netzaufrufe mit Timeout.
+  - Stop-Hook weckt nicht mehr, ntfy schweigt bei Hook-Aufweckungen.
+  - Dev-Server-Hook prüft je Befehlssegment (`vitest` blockte vorher).
+  - `/abschluss`: Kopf ersetzen + Verlustprobe, Gegenlesungs-Check, Werkstatt-Check.
+  - Memory ausgedünnt (Regeln nach `CLAUDE.md`).
+  - Gegenleser: opus/2026-09-25, zweimal (Plan: 3 KRITISCH/7 SOLLTE; Texte:
+    1 KRITISCH/18 SOLLTE/12 NICE; alle eingearbeitet außer: „Maßgeblich"-Zeile
+    für drei unveränderte Hooks → Kopf „Offen"; ntfy-Topic-Rotation → User-Entscheid).
+
+### Sortierliste des Umbaus (Verlustprobe von Hand, Altbestand Z. 27–215 + „Restplan" Z. 542)
+
+Die Restpläne ab Z. 594 sind durch Z. 542 („frischester Stand — ersetzt alle
+unten") ausdrücklich überholt.
+
+**→ in den neuen Kopf („Offen"):**
+- Stackmat-Polish (Fokus-Escape, Direkt-Scroll, Diagnose-Log-Toggle) · Z. 50/87
+- Produktfrage Zen-Pille (Mattis) · Z. 53
+- Duplikat-Solves aus den Stackmat-Tests · Z. 52
+- 15 OLL-Diagramme verdreht (Empfehlung: lassen) · Z. 107
+- Welle B Rest (#9, #10) + Welle C (#11–#13) · Z. 154 — laut git nicht begonnen
+- Coolify-API ohne TLS · Z. 180
+- Activity-Feed wartet auf Fragebogen · Z. 189
+- Timer-Schrift ragt auf dem Handy aus der Karte · Z. 216–234 (Clamp zurückgerollt)
+- MAINTENANCE überfällig (letzter Lauf 2026-05-26) · Z. 552
+- Branch-Endspiel Phase 6 (aus dem alten `CLAUDE.md`, ~05.06. geplant)
+
+**✅ erledigt:**
+- Doku-Drift „React 18" → in dieser Welle bereinigt · Z. 54/56
+- Public-Profile als Solving-Card · Z. 544 → Block 2026-06-06 (Z. 421)
+- Solve-Liste virtualisieren · Z. 545 → Block 2026-06-07 (Z. 330)
+- PLL-Bilder · Z. 548 → `W.alg-diagrams-v2` (Z. 113)
+- Welle B Teil 1+2 · Z. 183 → `W.core-tests` / `W.solve-hotpath` (Z. 134)
+
+**→ Live-Roadmap statt Kopf:** die P1–P6-Aufzählung aus Z. 542–551
+(Ranking/Level, kuratierte Hardware-Liste, P3–P6). Die Roadmap-DB ist dafür
+maßgeblich; Ranking/Level und die Hardware-Liste stehen im Seed.
+
+**✗ verworfen / nur Journal:**
+- Desktop-Abschnitte ab Z. 2656 (TL;DR, Walkthrough, Files-Map, „Wenn etwas
+  nicht startet") → betreffen die eingefrorene Desktop-Variante
+- ⏭️-Ideen in den Juni-Blöcken (Z. 259, 291, 325, 360, 416) → bewusst nicht
+  weiterverfolgt, bei Bedarf über die Roadmap neu aufnehmen
+
+**Referenzwissen:** Die Deploy-Lesson vom 03.06. und die Mitternachts-Flake
+vom 13.06. stehen jetzt in `docs/lessons-archive.md`.

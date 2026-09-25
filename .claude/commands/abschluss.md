@@ -1,28 +1,31 @@
 ---
-description: Session-Ende-Check fuer Cubetracker — geht eine 10-Punkte-Checkliste durch und meldet Luecken (Git, Patch-Notes, Tags, Features-Liste, Doku, Todos, Backend-Smoke, Live-Deploy-Verifikation, MAINTENANCE-Faelligkeit).
-allowed-tools: Bash, Read, Grep, Glob, TodoWrite
+description: Session-Ende-Check fuer Cubetracker — 13 Checks (Git, Patch-Notes, Tags, Features-Liste, Todos, Backend-Smoke, Bugs/Feedback, Live-Deploy, MAINTENANCE, Regelebene-Gegenlesung, Werkstatt, zuletzt Übergabe-Kopf ersetzen + Verlustprobe + Journal) und Abschluss-Übersicht mit End-Block.
+allowed-tools: Bash, Read, Grep, Glob, Edit, Write, TodoWrite
 ---
 
 # /abschluss — Cubetracker Session-Ende-Check
 
-Du wurdest vom User per `/abschluss` aufgerufen. **Geh die folgende 10-Punkte-Checkliste systematisch durch, jeden Punkt explizit reporten (✓ oder ⚠), am Ende eine Zusammenfassung.** Wenn etwas fehlt: konkret nachfragen ob du es jetzt fixt.
+Du wurdest per `/abschluss` aufgerufen (oder proaktiv bei „Session beenden"
+o. ä.). **Der Aufruf selbst ist die Freigabe — keine Ansage mit Stopp davor.**
+Jeden Check explizit reporten (✓ / ⚠ / – entfällt), am Ende Übersicht +
+End-Block (Format: `CLAUDE.md` → Antwortformat). Knapp. Checks, die nicht
+zutreffen, **entfallen still**. **Reihenfolge einhalten: Check 13 läuft zuletzt**
+— die Checks davor sammeln Punkte für den Kopf.
 
-Halte dich knapp — keine ausschweifenden Erklärungen, nur Checks + Befunde.
+Aus dem Repo-Root `D:\Projekte\cubetracker\`. ⚠️ Shell-Variablen überleben
+keinen Bash-Aufruf: jeder Block berechnet `LAST_TAG` selbst und bricht ab,
+wenn das nicht klappt (sonst wird `..HEAD` still leer = falsches Grün).
 
 ---
-
-## Reihenfolge
-
-Führe diese Schritte aus dem Cubetracker-Repo (`D:\Projekte\cubetracker\`) aus:
 
 ### 1. Git: uncommitted Änderungen?
 
 ```bash
-git status --porcelain | head -20
+git status --porcelain --untracked-files=no | head -20
 ```
 
-- **Wenn leer:** ✓ Working-Tree clean.
-- **Wenn nicht leer:** ⚠ Auflisten + fragen: „Sollen wir das committen?"
+- **Leer:** ✓. **Nicht leer:** ⚠ auflisten → End-Block-Zeile „committen?".
+  Untracked Dateien behandelt Check 12.
 
 ### 2. Git: ungepushte Commits?
 
@@ -30,108 +33,55 @@ git status --porcelain | head -20
 git log --oneline @{u}..HEAD 2>/dev/null
 ```
 
-- **Wenn leer:** ✓ Alles gepusht.
-- **Wenn nicht leer:** ⚠ Auflisten + Push anbieten.
+- **Leer:** ✓. **Nicht leer:** ⚠ auflisten → End-Block-Zeile „pushen (= live)?".
 
-### 3. Patch-Notes-Eintrag pro signifikantem Commit seit letztem Tag?
+### 3. Patch-Notes-Eintrag pro `feat`/`fix`-Commit seit letztem Tag?
 
 ```bash
-# letztes Tag finden
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
-echo "Letztes Tag: $LAST_TAG"
-# alle feat()-/fix()-Commits seit dem Tag
-git log "$LAST_TAG..HEAD" --oneline --grep="^feat\|^fix"
+LAST_TAG=$(git describe --tags --abbrev=0) || { echo "FEHLER: kein Tag"; exit 1; }
+echo "Letztes Tag: $LAST_TAG"; git log "$LAST_TAG..HEAD" --oneline --grep="^feat\|^fix"
 ```
 
-Pro Commit den Patch-Notes-Eintrag prüfen (extract `W.<name>` aus der Commit-Message, dann in `webapp/changelog/data.py` nach diesem Versions-String suchen):
+Pro Commit `W.<name>` extrahieren und prüfen:
+`grep -F 'version="2.0.0-alpha.W.<name>"' webapp/changelog/data.py`
+
+- **Alle da:** ✓. **Fehlt einer:** ⚠ → End-Block (Agent `patch-notes-writer`).
+
+### 4. Git-Tags für jeden Patch-Notes-Eintrag — gesetzt und gepusht?
 
 ```bash
-grep -F "version=\"2.0.0-alpha.<name>\"" webapp/changelog/data.py
-```
-
-- **Alle haben Eintrag:** ✓.
-- **Mindestens einer fehlt:** ⚠ Auflisten welche, fragen ob du sie ergänzt.
-
-### 4. Git-Tags für jeden Patch-Notes-Eintrag seit letztem Tag?
-
-```bash
-# alle Patch-Notes-Versions im File
 grep -oE 'version="[^"]+"' webapp/changelog/data.py | head -10
-# fuer jede: existiert ein Git-Tag mit Praefix "v"?
 git tag -l "v2.0.0-alpha.W.*" | sort
-```
-
-- **Alle Patch-Notes-Strings als Tags vorhanden + gepusht:** ✓.
-- **Mindestens einer fehlt:** ⚠ Liste + Tag-Befehle generieren, fragen ob du das nachholst.
-
-Prüfung „gepusht?":
-
-```bash
 git ls-remote --tags origin "refs/tags/v*" 2>&1 | grep -v '\^{}' | awk -F/ '{print $NF}' | sort
 ```
 
-### 5. `features-data.ts` aktualisiert wenn neue User-facing Features?
+- **Alle als Tag vorhanden + gepusht:** ✓. **Sonst:** ⚠ Tag-Befehle generieren.
 
-Heuristik: wenn ein `feat(W.<name>)`-Commit seit letztem Tag KEIN `qa`, `fix`, `hardening`, `deploy-fix`, `welle*-qa`, `hotfix` im Namen hat → vermutlich User-facing-Feature.
+### 5. `features-data.ts` bei User-facing Features?
+
+Heuristik: `feat(W.<name>)` ohne `qa`, `fix`, `hardening`, `deploy-fix`,
+`hotfix` im Namen → vermutlich User-facing.
 
 ```bash
+LAST_TAG=$(git describe --tags --abbrev=0) || { echo "FEHLER: kein Tag"; exit 1; }
 git log "$LAST_TAG..HEAD" --name-only --pretty=format:"COMMIT:%h %s" \
   | grep -E "^(COMMIT:|webapp/frontend/src/lib/features-data\.ts)"
 ```
 
-- **Für jeden User-facing-feat()-Commit wurde auch `features-data.ts` mit-geändert:** ✓.
-- **Mindestens eine User-facing-Welle ohne `features-data.ts`-Update:** ⚠ Auflisten, fragen ob du Bullets ergänzt.
+- **Jede User-facing-Welle hat `features-data.ts` mitgeändert:** ✓. **Sonst:** ⚠.
 
-### 6. NEXT_SESSION.md veraltet? (auto-fix wenn ja)
+### 6. Offene Todos der Session?
 
-```bash
-# letzte Modifikation der Doku
-git log -1 --format="%h %ai %s" -- ROADMAP.md NEXT_SESSION.md 2>&1
-# letzter Commit insgesamt
-git log -1 --format="%h %ai %s"
-# Lücke: wieviele Commits zwischen letzter NEXT_SESSION-Touch und HEAD?
-LAST_DOC=$(git log -1 --format="%H" -- NEXT_SESSION.md)
-git rev-list --count "$LAST_DOC..HEAD"
-```
+- **Alle `completed`:** ✓. **Offene:** ⚠ → Kandidat für den Kopf („Offen",
+  Check 13) — nicht nur im Chat nennen.
 
-- **Doku-Modifikation neuer als letzter signifikanter Commit (Lücke ≤ 3):** ✓.
-- **Doku veraltet (Lücke > 3 Commits):** ⚠ — **AUTOMATISCH AKTUALISIEREN
-  ohne nachzufragen.** NEXT_SESSION.md ist die Single-Source für die
-  Wiederaufnahme; wenn der `/abschluss` läuft, ist das genau der richtige
-  Moment um sie auf den finalen Stand zu bringen. Vorgehen:
-    1. Letzten ERLEDIGT-Block lesen + auf Sprint-Ende-Zustand bringen
-       (Header-Bilanz an die echten Commit/Tag-Zahlen anpassen).
-    2. Alle Wellen seit dem letzten Doku-Touch ergänzen (1-Zeilen-
-       Beschreibung pro Welle mit Tag-Name + Commit-Hash).
-    3. „🔜 Restplan"-Block neu schreiben — was offen ist nach dem
-       aktuellen Stand. Wenn der Sprint durch ist: „nur noch
-       Demo-Probe / Last-Polish".
-    4. Update committen + pushen direkt im selben Lauf
-       (`docs(session): Sprint-Abschluss-Stand` o.ä.).
-  Der User-Befund vom 2026-05-27 war der Trigger: vor der nächsten
-  Session muss eine korrekte Wiederaufnahme-Doku existieren, sonst
-  startet die folgende Session aus veraltetem Stand.
-
-  Wenn ROADMAP.md ebenfalls betroffen ist (neue Phase fertig, Items
-  abgehakt): mit-aktualisieren. STATUS.md liegt außerhalb des Repos
-  (`D:/Claude-Projekte/STATUS.md`) — nur erinnern, kein Auto-Edit.
-
-### 7. Offene Todos in der aktuellen Session?
-
-Nutze das `TodoWrite`-Tool oder lies aus dem aktuellen Kontext den Stand der Todo-Liste:
-
-- **Alle Items `completed`:** ✓.
-- **Items `in_progress` oder `pending`:** ⚠ Auflisten + fragen pro Item: ist das wirklich offen, oder kann es als „spätere Session" markiert werden?
-
-### 8. Backend-Smoke-Test (lokal)
-
-Damit Deploy-Fails (z.B. Syntax-/Quote-Bugs) BEVOR dem Push gefangen werden — der Coolify-Build bricht sonst ab.
+### 7. Backend-Smoke-Test (lokal)
 
 ```bash
 (cd webapp && python -c "import ast; ast.parse(open('changelog/data.py', encoding='utf-8').read()); print('Parse OK')")
 ```
 
-Wenn ein venv mit allen Deps existiert (`webapp/.venv/Scripts/python.exe`):
+Mit venv (`webapp/.venv/Scripts/python.exe`) zusätzlich:
 
 ```bash
 (cd webapp && .venv/Scripts/python.exe -c "
@@ -144,104 +94,157 @@ from db.database import Base, engine
 import db.models
 Base.metadata.create_all(engine)
 print('Backend startet sauber')
-" 2>&1 | tail -5; rm -f test-abschluss.db 2>/dev/null)
+" > ../.tmp/smoke.txt 2>&1; echo "RC=$?"; tail -5 ../.tmp/smoke.txt; rm -f test-abschluss.db)
 ```
 
-- **Beides grün:** ✓.
-- **Parse-Error / Import-Error:** ⚠ HARD STOP — das wäre im Coolify-Build gescheitert. Fix bevor du die Session beendest.
+- **Beides grün (RC=0):** ✓. **Fehler:** ⚠ HARD STOP — wäre im Coolify-Build
+  gescheitert. Vor Session-Ende fixen.
 
-### 9. Live-Deploy-Verifikation (ist der Push wirklich live?)
-
-Seit der Hetzner-Migration ist der Auto-Deploy NICHT garantiert (Monorepo-Dedup —
-Coolify deployt pro Push nur eine App; siehe Task #37 / NEXT_SESSION). Darum am
-Session-Ende prüfen, dass die Live-App läuft UND gepushte Frontend-Änderungen
-wirklich draußen sind. Live-Host = **www.cubetracker.de** (Hetzner).
+### 8. Offene Bugs / Feedback
 
 ```bash
-# App erreichbar? (erwartet: 200 bzw. {"status":"ok",...})
-curl -s -o /dev/null -w "Frontend www: %{http_code}\n" https://www.cubetracker.de/
-curl -s -w "\nHealth: %{http_code}\n" https://www.cubetracker.de/api/health
-
-# Wurden in dieser Session Frontend-Files gepusht?
-LAST_TAG=$(git -C "D:/Projekte/cubetracker" describe --tags --abbrev=0 2>/dev/null)
-git -C "D:/Projekte/cubetracker" log "$LAST_TAG..HEAD" --name-only --pretty=format:"%h %s" \
-  | grep -E "webapp/frontend/" | head
+command -v gh >/dev/null && gh issue list --state open --limit 5 --json number,title,labels
 ```
 
-- **App 200 + Health ok + KEINE Frontend-Commits seit letztem Tag:** ✓.
-- **Frontend-Commits vorhanden:** ⚠ Verifizieren, dass das Live-Bundle die Änderung
-  enthält — am verlässlichsten per String-Check auf einen Text, den du in dieser
-  Session NEU ins Frontend gebracht hast:
+Admin-Feedback-Inbox: App → Verwaltung → Admin → Feedback-Inbox (kein Auto-Scan).
+
+- **Nichts offen:** ✓. **Offene Bugs:** ⚠ → Kandidat für den Kopf („Offen")
+  oder bewusst liegen lassen. Nicht erzwingen.
+
+### 9. Live-Deploy-Verifikation
+
+Push ≠ live: Coolify deployt nur die App, deren Pfade der Push ändert, und ein
+rot gegateter Push deployt gar nicht. Live-Host: **www.cubetracker.de**.
+
+```bash
+LAST_TAG=$(git describe --tags --abbrev=0) || { echo "FEHLER: kein Tag"; exit 1; }
+curl -s -o /dev/null -w "Frontend www: %{http_code}\n" https://www.cubetracker.de/
+curl -s -w "\nHealth: %{http_code}\n" https://www.cubetracker.de/api/health
+git log "$LAST_TAG..HEAD" --name-only --pretty=format:"%h %s" | grep -E "webapp/frontend/" | head
+```
+
+- **200 + Health ok + keine Frontend-Commits:** ✓.
+- **Frontend-Commits:** Live-Bundle per String-Check auf einen in dieser Session
+  NEU eingebauten Text prüfen:
 
 ```bash
 b=$(curl -s https://www.cubetracker.de/ | grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' | head -1)
-curl -s "https://www.cubetracker.de/$b" | grep -c "HIER_EINEN_NEUEN_STRING_AUS_DIESER_SESSION"
+curl -s "https://www.cubetracker.de/$b" | grep -c "NEUER_STRING_AUS_DIESER_SESSION"
 ```
 
-  - **Treffer > 0:** ✓ Deploy ist live.
-  - **Treffer = 0:** ⚠ Push ist NICHT deployt → in Coolify die **Frontend-App
-    manuell „Redeploy"** + Build-Log prüfen. Dauerlösung: Task #37 (per-App-Webhook).
-
-### 11. Offene Bugs / Feedback-Items vor Session-Ende?
-
-Damit User-Bugs nicht zwischen Sessions verloren gehen. Zwei Quellen:
-
-```bash
-# 1. GitHub-Issues (offen) — Anzahl + Top-5
-if command -v gh >/dev/null 2>&1; then
-  echo "Offene GitHub-Issues:"
-  gh issue list --state open --limit 5 --json number,title,labels 2>&1 || echo "(gh nicht authentifiziert)"
-fi
-
-# 2. App-interne Feedback-Inbox: prüfen ob Admin-User in der App vor
-#    Session-Ende reingeschaut hat. Kein Auto-Scan möglich (kein Admin-
-#    Token im Hook-Kontext). Stattdessen: Reminder + Link.
-echo "Admin-Feedback-Inbox manuell prüfen:"
-echo "  https://www.cubetracker.de/ → Verwaltung → Admin → Feedback-Inbox"
-```
-
-- **Keine offenen Issues + Inbox sauber:** ✓.
-- **Offene Bug-Issues / neue Inbox-Items:** ⚠ — kurz auflisten, fragen
-  ob die in der aktuellen Welle/Sprint adressiert werden sollen oder
-  als „nächste Session" markiert bleiben. NICHT erzwingen.
+  Treffer > 0: ✓. Treffer = 0: ⚠ → `gh workflow run deploy.yml` (deployt FE+BE),
+  danach erneut prüfen. Health-Version **und** Bundle müssen flippen.
 
 ### 10. MAINTENANCE-Lauf fällig?
 
-`MAINTENANCE.md` ist der periodische Tiefen-Check (~monatlich). Hier NUR die
-Fälligkeit prüfen, nicht den ganzen Lauf machen.
-
 ```bash
-# jüngstes Datum im Lauf-Protokoll von MAINTENANCE.md (auch in **bold**-Form):
-grep -oE "^- (\*\*)?202[0-9]-[0-9]{2}-[0-9]{2}" "D:/Projekte/cubetracker/MAINTENANCE.md" | tr -d '*' | sort | tail -1
+grep -oE "^- (\*\*)?202[0-9]-[0-9]{2}-[0-9]{2}" MAINTENANCE.md | tr -d '*' | sort | tail -1
 ```
 
-- **Letzter Lauf < 4 Wochen her:** ✓.
-- **Letzter Lauf > 4 Wochen her / noch nie:** ⚠ anbieten: „Voller MAINTENANCE-Lauf
-  ist fällig — jetzt durchgehen? (`lauf MAINTENANCE.md durch`)". Nicht erzwingen.
+- **< 4 Wochen:** ✓. **Älter:** ⚠ → End-Block-Zeile „MAINTENANCE-Lauf jetzt?"
+  und Kandidat für den Kopf („Offen").
+
+### 11. Regelebene geändert → lief die Gegenlesung?
+
+Nur wenn die Session `CLAUDE.md` oder `.claude/**` geändert hat (Status + eigene
+Commits der Session). **Sonst entfällt der Check still.**
+
+- Hat die Änderung eine **Aussage** geändert, gestrichen oder neu eingeführt?
+  - **Ja** und die Gegenlesung lief (Opus, frischer Kontext, Critique): ✓, im
+    Journal-Block „Gegenleser: opus/<Datum>" vermerken.
+  - **Ja, aber ohne Gegenlesung:** ⚠ → jetzt nachholen **oder** als Punkt in den
+    Kopf („Offen") — nicht still übergehen.
+  - **Nein (Bagatelle):** ansagen und im Journal-Block „Gegenleser: entfallen
+    (Bagatelle)" vermerken.
+- Hooks geändert → liefen die mechanischen Tests (u. a.
+  `.claude/hooks/tests/test_pre_bash_dev_server.py`) **vor** der Gegenlesung?
+
+### 12. Werkstatt: Liegengebliebenes einordnen
+
+```bash
+git -c core.quotePath=false status --porcelain -uall | grep '^??'
+ls -1 .tmp/ | grep -vE '^(admin-token|roadmap-export-key)'
+```
+
+- **Untracked im Repo:** jede Datei in **eine von drei Klassen** einordnen und als
+  Liste zeigen: **(1) gehört ins Repo** → committen (welche Welle?) ·
+  **(2) lokal behalten** → `.gitignore` oder im Kopf nennen · **(3) Müll** → löschen.
+- **`.tmp/`** (gitignored, ohne Sicherung): **nur auflisten, nicht löschen**, nie
+  Inhalte von `admin-token*`/`roadmap-export-key*` anzeigen. Dateien, auf die der
+  Kopf verweist (z. B. Fragebogen, Prüfskripte), als **„sichern?"** markieren.
+- **Löschen ist Risikoklasse:** Jede Löschzeile im End-Block steht als
+  `(offene Wahl) — sonst behalten`, nie als `(empfohlen)` — ein bloßes `GO`
+  löscht also nichts, nur `GO <n>`. Gelöschte untracked Dateien sind nicht
+  wiederherstellbar. Im Zweifel: liegen lassen und im Kopf nennen.
+
+### 13. Übergabe-Kopf ersetzen + Journal fortschreiben (zuletzt)
+
+`NEXT_SESSION.md` ist der Übergabe-Kopf (Stand · Offen · Zeiger), wird beim
+Start automatisch geladen und hier **ersetzt statt ergänzt**. Der Verlauf geht
+ans Ende von `docs/session-journal.md`.
+
+1. **Alter Kopf = Stand beim letzten Abschluss:**
+   `REF=$(git log -1 --format=%h --grep='^docs(session)' -- NEXT_SESSION.md)`;
+   leer → `REF=HEAD`. `git show "$REF:NEXT_SESSION.md" > .tmp/kopf-alt.md`.
+   (Nicht die Arbeitskopie — die wurde in der Session fortgeschrieben, sonst
+   entgehen der Probe Punkte, die unterwegs gestrichen wurden.)
+2. **Schlüssel sammeln:** jede Zeile unter „## 🔜 Offen" in `kopf-alt.md` —
+   Schlüssel = fettgedruckter Anfang, sonst die ersten fünf Wörter.
+3. **Journal-Block anhängen** (Dateiende; nie beim Start geladen):
+   `## ✅ JJJJ-MM-TT — <Thema>` · Wellen mit Tag + Commit-Hash · Entscheidungen ·
+   für **jeden** alten Schlüssel, der nicht in den neuen Kopf wandert: `✅ <Schlüssel>
+   — erledigt (<Hash>)` bzw. `✗ <Schlüssel> — verworfen: <Grund>` · Lessons nur
+   als Verweis (die Lesson selbst → `docs/lessons-archive.md`). Anhängen per
+   `cat >> docs/session-journal.md <<'EOF'` — die Datei ist groß.
+4. **Kopf neu schreiben** (Write, ganzer Kopf, Rahmen-Kopfzeilen beibehalten);
+   übernommene Schlüssel **wörtlich**. Kandidaten aus Checks 1–12 aufnehmen.
+5. **Verlustprobe (Pflicht — Ersetzen ist destruktiv):** jeden Schlüssel
+   (Zeilenumbrüche vorher per `tr '\n' ' '` glätten) per `grep -cF` suchen in
+   (a) dem **neuen Kopf** oder (b) dem **Journal-Block dieser Session**
+   (`sed -n '/^## ✅ <heute>/,$p' docs/session-journal.md`) mit ✅/✗.
+   **Fehlt einer → Abbruch**, Punkt wiederherstellen, erneut prüfen.
+6. **Budget-Probe** (simuliert den echten Start, offline, ohne Snapshot):
+   `echo '{"source":"startup"}' | CUBETRACKER_HOOK_OFFLINE=1 bash
+   .claude/hooks/session-start-context.sh > .tmp/start-probe.txt; wc -m
+   .tmp/start-probe.txt` → ≤ 9.000 Zeichen (Reserve für Roadmap/Issues) und
+   **kein** „NICHT geladen". Sonst kürzen (Erledigtes → Journal, Regeln →
+   `CLAUDE.md`).
+7. **Commit nur dieser beiden Pfade:**
+   `git commit -m "docs(session): <Thema>" -- NEXT_SESSION.md docs/session-journal.md`.
+8. **Push nur, wenn er ausschließlich Doku trägt:**
+   `git log @{u}..HEAD --name-only --pretty=format: | sort -u | grep -vxE 'NEXT_SESSION.md|docs/session-journal.md|'`
+   → **leer:** `git push` (benannte Ausnahme vom Ansage-Stopp: Root-Doku löst
+   laut `.github/workflows/deploy.yml` keinen Deploy aus). **Nicht leer:** nicht
+   pushen — der Push enthielte Code (= live) → End-Block-Zeile „Push enthält
+   Code-Commits (= live): pushen?".
+
+Wenn `ROADMAP.md` betroffen ist (Phase fertig): mit-aktualisieren. Cross-Projekt-
+`D:/Claude-Projekte/STATUS.md` liegt außerhalb des Repos — nur erinnern.
+Roadmap-Items, die eine Welle abgeschlossen hat: `--mark-done` (`/roadmap`).
 
 ---
 
-## Am Ende: Zusammenfassung
-
-Tabellarisch:
+## Am Ende: Übersicht + End-Block
 
 | # | Check | Status |
 |---|---|---|
-| 1 | uncommitted | ✓ / ⚠ |
+| 1 | uncommitted | ✓ / ⚠ / – |
 | 2 | unpushed | … |
 | 3 | Patch-Notes | … |
 | 4 | Git-Tags | … |
 | 5 | features-data.ts | … |
-| 6 | Doku (auto-fix bei ⚠) | … |
-| 7 | Todos | … |
-| 8 | Backend-Smoke | … |
+| 6 | Todos | … |
+| 7 | Backend-Smoke | … |
+| 8 | Bugs / Feedback | … |
 | 9 | Live-Deploy | … |
-| 10 | MAINTENANCE faellig | … |
-| 11 | Offene Bugs / Feedback | … |
+| 10 | MAINTENANCE | … |
+| 11 | Regelebene-Gegenlesung | … |
+| 12 | Werkstatt | … |
+| 13 | Kopf ersetzt + Verlustprobe + Journal | … |
 
-**Wenn alles grün:** „Session kann sauber beendet werden."
-**Wenn ⚠:** „Ich empfehle folgendes vor Session-Ende zu fixen: [Liste]. Soll ich?"
+Danach drei Zeilen: **erreicht** · **offen** (steht jetzt im Kopf) · **weiter**
+(womit die nächste Session beginnt). Dann — nur wenn etwas offen ist — der
+End-Block „➡️ Jetzt bei dir" (`CLAUDE.md` → Antwortformat). **Alles grün → kein
+Block**; das ist das Erfolgssignal. ntfy-Nachricht entsprechend schreiben.
 
-**Sonderfall Check 6:** wenn nur die Doku ⚠ ist, NICHT fragen — direkt
-NEXT_SESSION.md aktualisieren + committen + pushen (siehe Auto-Fix-
-Anleitung im Check selbst). Erst danach das Schluss-Statement.
+Wenn `$ARGUMENTS` gesetzt ist: als Schwerpunkt oder Zusatznotiz berücksichtigen.

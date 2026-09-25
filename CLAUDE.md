@@ -2,316 +2,208 @@
 
 ## Was ist das?
 
-App fuer Speedcubing-Solve-Tracking. **Zwei Varianten im selben Repo:**
-- **`webapp/`** — Multi-User-Web-Variante, **LIVE auf cubetracker.de**
-  (Hetzner Cloud + Coolify). Das ist die aktive Produktarbeit.
-- **`backend/` + `frontend/`** — ältere Single-User-Desktop-Variante (SQLite,
-  PyInstaller-Installer), parallel intakt, aber nicht mehr aktiv erweitert.
+Speedcubing-Solve-Tracking. **Aktiv ist nur `webapp/`**, die Multi-User-Web-Variante,
+**LIVE auf cubetracker.de** (Hetzner + Coolify). `backend/` + `frontend/` sind die
+eingefrorene Single-User-Desktop-Variante (SQLite, PyInstaller) — intakt, nicht mehr
+erweitert.
 
-Features: csTimer-Import/Export, WCA-Profil-Lookup, Statistiken inkl.
-Multi-Cube-Performance-Vergleich, PB-Tracking, Trainer (PLL/OLL),
-Achievements, Friends/Leaderboard, Hardware-Analyse.
+Features: Timer (Tastatur/Touch, Stackmat per Klinke, Smart-Cube per BLE),
+csTimer-Import/-Export, WCA-Profil, Statistiken inkl. Multi-Cube-Vergleich,
+PB-Tracking, Trainer (PLL/OLL), Scramble-Nets, Hardware-Analyse, Achievements, Friends/Leaderboard,
+Roadmap/Feedback/Patch-Notes in der App, Skins, i18n.
 
-## Tech-Stack
+## Tech-Stack (`webapp/`)
 
-### Backend (`backend/`)
-- Python 3.14
-- FastAPI 0.110+ (REST-API)
-- SQLAlchemy 2.0 (ORM)
-- Alembic (DB-Migrations)
-- Pydantic 2 (Validierung)
-- SQLite (lokale Datei-DB, kein Server)
-- httpx (HTTP-Client fuer WCA-API)
-- BeautifulSoup4 (Webseiten-Scraping bei Bedarf)
-- pytest (Tests)
+- **Frontend** (`webapp/frontend`): React 19, Vite 8, TypeScript 6 (strict),
+  TanStack Query 5, Recharts 3, Tailwind 4, i18next, Vitest 4; ESLint + Prettier.
+- **Backend** (`webapp/`): Python ≥ 3.12 (Docker 3.12), FastAPI, SQLAlchemy 2,
+  Pydantic 2, Postgres in Prod (SQLite nur lokal/Tests), pytest; Black + Ruff.
+  Schema-Änderungen als Mini-Migration in `webapp/main.py:lifespan`.
+- **Deploy:** Push auf `feature/W-api-prefix` → `.github/workflows/deploy.yml`
+  (CI-Test-Gate: pytest + tsc + vitest) → Coolify-Deploy **nur der App, deren
+  Pfade der Push ändert** (Frontend `webapp/frontend/`, Backend übriges `webapp/`
+  außer `.md`). Doku im Repo-Root und `.claude/` lösen keinen Deploy aus.
+  `health-check.yml` überwacht live (ntfy bei Ausfall).
 
-### Frontend (`frontend/`)
-- React 18
-- Vite (Build-Tool)
-- TypeScript (strict mode)
-- Tanstack Query (API-State)
-- Recharts (Charts)
-- Tailwind CSS (Styling)
-- Vitest (Tests)
+## 🗺️ SSOT-Landkarte — je Thema GENAU eine maßgebliche Datei
 
-### Tooling
-- Black, Ruff (Python-Format/Lint)
-- Prettier, ESLint (TS-Format/Lint)
-- pre-commit (Hooks vor Commit)
+Andere Dateien verweisen darauf, kopieren nicht. **Regeln** stehen hier, der
+**Zustand** in `NEXT_SESSION.md`, **Persönliches** in der Memory. Bei Widerspruch
+gilt diese Tabelle — und ich weise auf den Widerspruch hin, statt still zu
+überschreiben.
 
-## Permission-Modes (Claude-Code-Workflow)
+| Thema | Maßgeblich |
+|---|---|
+| Verhalten, Regeln, diese Landkarte | `CLAUDE.md` |
+| Session-Übergabe (Stand · Offen · Zeiger) — wird beim `/abschluss` **ersetzt** | `NEXT_SESSION.md` |
+| Session-Verlauf (append-only, **nie** beim Start laden) | `docs/session-journal.md` |
+| Code-Disziplin (lädt nur bei `.py`/`.ts`-Arbeit) | `.claude/rules/discipline.md` |
+| Bug-Postmortems, Betriebs-Lessons | `docs/lessons-archive.md` |
+| Wer sieht welche Daten (Rollen, Endpoints, Privacy) | `docs/permissions-matrix.md` |
+| Patch-Notes | `webapp/changelog/data.py` |
+| User-facing Feature-Liste | `webapp/frontend/src/lib/features-data.ts` |
+| Roadmap-Items (live) / Phasen-Meta / Cold-Start-Seed | DB `roadmap_items` (Admin-UI) / `webapp/frontend/src/lib/roadmap-phases.ts` / `webapp/seeds/roadmap.py` |
+| Schema + Mini-Migrations | `webapp/db/models.py` + `webapp/main.py:lifespan` |
+| Frontend-API-Hooks | `webapp/frontend/src/lib/api.ts` |
+| Erlaubte `cube_type`-Werte | `webapp/frontend/src/lib/format.ts:COMMON_CUBE_TYPES` |
+| Periodischer Tiefen-Check | `MAINTENANCE.md` |
 
-Permission-Modes via **Shift+Tab** wechseln. Empfehlung pro Use-Case:
+## 💬 Antwortformat (verbindlich)
 
-| Mode | Wann nutzen |
-|------|------|
-| `default` | Standard, jeder Tool-Call wird gefragt |
-| `acceptEdits` | Iteratives Codieren in bekanntem Pfad — Edit/Write ohne Prompt |
-| `plan` | Major-Refactors, Architektur-Spikes — Claude plant, fragt vor Execution |
+- Deutsch, knapp, mit klarer Empfehlung. Belegzeichen: **● belegt** (Test, Repo,
+  Live-Check, Quelle) · **○ eigene Einschätzung**.
+- **📋 Ansage + Stopp vor jeder neuen Aufgabe:** (1) Plan- oder Auto-Modus,
+  abgewogen · (2) Modell · (3) Effort (`low`…`max`) · (4) Delegation — keiner /
+  Gegenleser / Panel, mit Modellnamen · (5) geplante Schreibzugriffe und ob
+  gepusht wird (**Push = live**). Dann **Antwort beenden**; erst deine nächste
+  Nachricht startet die Arbeit.
+  - **Serien-GO:** Eine Ansage kann mehrere Wellen bündeln (höchsten Effort
+    nennen); ein GO deckt die Serie. Darin stoppe ich nur bei Abweichung vom
+    Angesagten, beim Effort-Stopp oder bei **Risikoklassen**: Schema-Migration,
+    Auth/Rechte, Datenlöschung, Force-Push.
+  - **Ohne Stopp:** Kleinkram (eine Datei, kein Push) — nur Ansage; reine
+    Auskünfte und Meta-Bestätigungen — gar keine Ansage.
+  - **Ansage ≠ Einstellung:** Die Ansage stellt nichts um; was die Umgebung
+    meldet, schlägt meine Ansage.
+- **⏫ Effort-Stopp:** Braucht ein späterer Schritt mehr Effort als der laufende,
+  halte ich **davor** an: was fertig ist, was der Schritt ändert, woran er
+  scheitern könnte, worauf umzustellen ist.
+- **➡️ End-Block „Jetzt bei dir"** — nur wenn eine Entscheidung offen ist, immer
+  am Antwortende: nummerierte Zeilen, je eine Handlung mit ●/○ und genau einem
+  Empfehlungswort — `(empfohlen)` · `(offene Wahl)` (nennt immer den Default:
+  „sonst X") · `(nicht empfohlen)` (nur als gekennzeichnete Alternative, „statt 2").
+  Sortiert nach Empfehlungswort, darin nach Reihenfolge.
+  - **Aufnahmetest:** nur, was allein du tun kannst (freigeben, Effort umstellen,
+    extern prüfen) oder was ich erst nach deiner Antwort tue. Erledigtes, bloße
+    Infos und ohnehin Eigenes gehören nicht hinein.
+  - **Nichts offen → kein Block.** Sein Fehlen ist das Erfolgssignal. Bei
+    Zwei-Satz-Antworten entfällt er.
+  - **`🔭 Ohne dein Zutun`** (Bullets ohne Nummern) steht direkt **über** dem
+    Block. Die Rubrik zeigt an, sie verwahrt nicht — was nachzuhalten ist, steht
+    vorher in `NEXT_SESSION.md` → „Offen".
+  - `AskUserQuestion` nur, wenn genau **eine** blockierende Wahl ansteht und du
+    per Klick (Handy) antworten können sollst; sonst End-Block.
+- **✅ GO:** `GO` = alle `(empfohlen)` + Defaults der `(offene Wahl)`.
+  `GO 2` · `GO 1, 3` · `GO 1-3; 5` = nur diese. Nummern gelten für den **jüngsten**
+  Block; im Zweifel frage ich nach. Nicht Genanntes bleibt offen (nicht
+  abgelehnt). `(nicht empfohlen)` gilt nur mit ausdrücklicher Nummer. GO deckt nur
+  wörtlich im Block Stehendes — keine Sammelposten. **Löschzeilen** (nicht
+  wiederherstellbar) stehen nie als `(empfohlen)`, sondern als `(offene Wahl) —
+  sonst behalten`: Ein bloßes GO löscht nichts.
+- **🔎 Regelstelle nennen beim Bremsen:** Halte ich außerhalb der Ansage-/Effort-
+  Stopps an, weiche ab oder lehne ab, nenne ich die Stelle mit Kurzzitat und
+  Quellenart: Repo-Regel/Hook (`.claude/…`) · Memory · dein Zuruf (wann) ·
+  Plattform (nicht im Repo änderbar). Ohne Quelle heißt es „eigene Vorsicht".
 
-**Project-Permissions** in `.claude/settings.json` decken die wiederkehrenden
-Workflow-Patterns ab (`gh api repos/cs0x7f/*`, `npm test`, `python -c`,
-`git tag`, etc.). **Deny-Liste** schützt gegen `rm -rf /*`, force-push
-auf main, `.git/**`-Edits.
+## 🔄 Session-Workflow
 
-## Tooling-Autonomie (User-Anweisung 2026-06-07, verbindlich)
+- **Start:** Der SessionStart-Hook lädt `NEXT_SESSION.md` automatisch (auch nach
+  `/compact` und `/clear`) samt Werkstatt-Zeile (Liegengebliebenes). Meldet er
+  „NICHT geladen" (Budget), die Datei sofort per Read lesen und kürzen.
+- **Laufend:** Nach `/compact` zählt nur, was in Dateien steht. Bei mehrstufigen
+  Wellen nach **jedem** abgeschlossenen Schritt eine Zeile in
+  `NEXT_SESSION.md` → „Offen" — nicht erst beim Abschluss.
+- **Abschluss:** `/abschluss` (`.claude/commands/abschluss.md`). Bei „Session
+  beenden", „das wars für heute", „ich höre auf" o. ä. proaktiv aufrufen.
+- **ntfy (User-Wunsch, verbindlich):** Der Stop-Hook pingt bei jedem Turn-Ende.
+  **Vor jedem Turn-Ende** `.tmp/last-ntfy-message.txt` schreiben (optional
+  `.tmp/last-ntfy-title.txt`): was passiert ist · ob du gebraucht wirst · was als
+  Nächstes kommt. Mit End-Block: „Du bist dran: N Punkte — Empfehlung …"; ohne:
+  „Nichts liegt bei dir — …". Der git-Fallback darf praktisch nie feuern.
+  `AskUserQuestion` pingt separat (`pre-ask-question-ntfy.sh`).
+- **Aufweckung ohne neuen Stand** (Hintergrund-Task, Monitor, Hook): Wartezustand
+  **einmal** melden, danach nur „–" antworten und eine **leere**
+  `.tmp/last-ntfy-message.txt` schreiben — leere Datei = kein Push.
+- **ntfy-Topics sind öffentlich lesbar:** Das Repo ist public, das persönliche
+  Topic steht (noch) in den Hooks. Push-Texte daher ohne Tokens, Passwörter,
+  personenbezogene oder vertrauliche Inhalte. Monitoring-Topic nur als GH-Secret.
+- **Patch-Notes:** jeder `feat(W.X)`/`fix(W.X)`-Commit braucht einen Eintrag in
+  `webapp/changelog/data.py` (`version="2.0.0-alpha.W.X"`) + Git-Tag
+  `v2.0.0-alpha.W.X` nach Push. `post-git-commit.sh` erinnert.
+- **User-facing Features:** Bullet in `features-data.ts` (bzw. `features.*`-Locale);
+  `post-git-commit.sh` warnt bei `feat(W.X)` ohne solchen Bullet (außer Backstage-
+  Muster wie qa, fix, hardening, deps, hotfix).
+- **Lange Session:** `/context` prüfen; vor drohender Kompaktierung den Kopf
+  aktualisieren (`pre-compact-checkpoint.sh` sichert nur den git-Stand).
+- **Roadmap:** `/roadmap` (Abruf, Auth, Live-only-Abgleich). Schließt eine Welle
+  ein Roadmap-Item ab: `python .claude/hooks/roadmap-fetch.py --mark-done
+  "<title_de exakt>"` — verbindlich, vorher die `note_de` lesen, nie nur den Titel.
+- **Deploy verifizieren:** Health-Version **und** Bundle-Hash müssen flippen
+  (`/abschluss` Check 9); halber Deploy → `gh workflow run deploy.yml`.
 
-**Installiere selbstständig, was du für die Aufgabe brauchst** — Dependencies,
-CLI-Tools, System-Software. Nicht vorher fragen, einfach installieren und
-weitermachen (der User hat das ausdrücklich angewiesen). Auf Windows:
-`winget` ist da (z.B. `winget install --id <Pkg> -e --silent
---accept-package-agreements --accept-source-agreements --disable-interactivity`),
-npm-Deps via `npm install` (kein UAC nötig). Bei System-Installs ggf. Sandbox
-aus (`dangerouslyDisableSandbox`).
+## 🤖 Subagenten, QA & Gegenlesung
 
-⚠️ **Lesson 2026-06-07 (UAC):** `winget --silent` umgeht die Windows-UAC-Abfrage
-NICHT — ein System-Install wartet im Hintergrund UNSICHTBAR auf den UAC-Klick des
-Users (sieht aus wie „hängt", kein Output, msiexec läuft mit eingefrorenem
-Speicher). Darum bei System-Installs dem User VORHER sagen: „gleich kommt eine
-UAC-Abfrage, bitte bestätigen" — nicht blind im Hintergrund warten. Und einen
-fremden/SYSTEM-Install-Prozess NICHT hart killen (Safety-Block + Installer-State-
-Risiko). (LibreOffice am 2026-06-07 so nachinstalliert — fürs docx→PDF/Bild-
-Rendering im docx-Skill via LibreOffice + PyMuPDF.)
+- **Modell immer explizit** (`model`-Parameter): Suche/Recherche/Extraktion →
+  `sonnet` · Routine-Code-QA (`qa-reviewer`) → `sonnet` · Critique/Gegenlesung →
+  `opus` · kein `haiku`. Delegiert wird wegen Kontextschonung und Fan-out, nicht
+  wegen des Preises; die Bewertung bleibt in der Hauptsession.
+- **Prompt-Pflichtbestandteile:** exakte Pfade · „nur lesen" (wo zutreffend) ·
+  „keine weiteren Agenten, Ergebnis in dieser Antwort" · Rohdaten mit Fundstelle,
+  Nicht-Funde als „nicht gefunden" · lange Ergebnisse zusätzlich in eine
+  Scratchpad-Datei.
+- **QA nach wesentlichen Änderungen:** `qa-reviewer` — Trigger-Liste in
+  `discipline.md`. KRITISCH vor Deploy fixen.
+- **Gegenleser-Pflicht Regelebene:** Ändert eine Änderung an `CLAUDE.md` oder
+  `.claude/**` (inkl. `settings.json`, Hooks, Commands) eine **Aussage**, liest
+  ein Opus-Subagent mit frischem Kontext gegen — **nach** den mechanischen Tests
+  (Hooks per stdin). Auftrag ausdrücklich als Critique („greif die Annahmen an,
+  nenne die geprüften Nachbarregeln"), mit Vorher/Nachher und dem Satz „Entwurf,
+  kein Bestand"; Herleitung und Verteidigung gehören nicht hinein. Befunde gehen
+  als Kurzliste an dich, **bevor** geschrieben wird; nicht Übernommenes mit
+  Halbsatz-Grund. Bagatelle (Wortlaut, Tippfehler, Umsortierung) → ansagen statt
+  still annehmen. Kosten ~150–200 T je Lauf.
+- **Exit-Codes nie hinter einer Pipe werten:** Prüfläufe, deren Ergebnis zählt
+  (Tests, Gates vor Commit/Push), in eine Datei umleiten und den Code sichern
+  (`… > out.txt 2>&1; RC=$?`) — hinter `| tail` meldet die Shell den Code von
+  `tail`.
 
-## Code-Disziplin
+## 🌿 Branching & Deploy-Stand
 
-→ Siehe `.claude/rules/discipline.md` — wird automatisch geladen bei
-Arbeit an Python- oder TypeScript-Files (Path-scoped). Enthält:
-- Edit statt Write
-- Type-Hints durchgehend
-- Tests vor Merge
-- Modul-Check (Layout / Datensicherung / Cross-Modul) vor Bau
-- QA-Sub-Agent-Pflicht nach wesentlichen Änderungen
-- Sub-Agent-Nutzungs-Konventionen
+- **`feature/W-api-prefix`** = live-deployter Branch, GitHub-Default und einzige
+  Wahrheit für Code und Doku.
+- **`feature/W-multi-user-web`** ist **eingefroren** — nicht committen/pushen.
+- Branch-Endspiel (→ `main`, Altbranch + Render-Reste abbauen) steht aus →
+  `NEXT_SESSION.md` „Offen".
+- Rollback: `git revert <sha>` (bevorzugt, deployt sauber) · `git reset --soft
+  HEAD~1` nur für Ungepushtes · Tags `v2.0.0-alpha.W.*` als Sprungmarken.
 
-## Sub-Agents
+## 🛠️ Umgebung & Tooling
 
-Eigene Sub-Agent-Files unter `.claude/agents/`:
-- `qa-reviewer.md` — strukturierte QA-Reviews nach wesentlichen Änderungen
+- **Tooling-Autonomie (User-Anweisung 2026-06-07):** benötigte Dependencies,
+  CLI-Tools und System-Software selbst installieren, ohne vorher zu fragen
+  (`winget … --silent --accept-package-agreements --accept-source-agreements
+  --disable-interactivity`, `npm install`; bei System-Installs ggf. Sandbox aus
+  via `dangerouslyDisableSandbox`). Installationen ohne UAC gelten in einer
+  Serie **nicht** als Abweichung. ⚠️ System-Installs lösen eine **UAC-Abfrage**
+  aus, die `--silent` nicht umgeht → vorher ansagen („gleich kommt UAC, bitte
+  bestätigen") = Stopp; fremde Installer-Prozesse nie hart killen.
+  Herleitung: `docs/lessons-archive.md` 2026-06-07.
+- **pre-commit** (`.pre-commit-config.yaml`, installiert) läuft bei jedem Commit
+  über alle gestagten Dateien (Whitespace, EOF, Ruff/Black …) und kann Commits
+  abbrechen — dann fixen, neu stagen, erneut committen (Tag erst danach).
+- **Keine lokalen Dev-Server** — die App ist live (Hook `pre-bash-dev-server.sh`;
+  Override `CUBETRACKER_ALLOW_LOCAL_DEV=1`). Tests (`npm test`, `pytest`) laufen
+  lokal.
+- **Permission-Modes:** Wechsel mit Shift+Tab (default · acceptEdits · plan ·
+  auto). Allow-/Deny-Listen: `.claude/settings.json`.
+- **Sub-Agent-Files:** `.claude/agents/` (`qa-reviewer`, `patch-notes-writer`).
 
-Built-in Sub-Agents via `Agent`-Tool: `general-purpose`, `Plan`, `Explore`,
-`claude-code-guide`.
+## 🔐 Sichtbarkeit & Privacy
 
-## QA-Audit-Trail
-
-Wesentliche Welle-Reviews:
-- W.2 (Auth-Skeleton, 2026-05-10): 14 Findings, 3 KRITISCH gefixt
-- W.5 (Backup/csTimer, 2026-05-10): 7 KRITISCH+SOLLTE gefixt
-- W.8 (User-Management, 2026-05-11): 5 KRITISCH gefixt
-- W.admin-workflow (2026-05-17): 2 KRITISCH + 4 SOLLTE + 2 NICE gefixt
-- W.cstimer-more-puzzles (2026-05-17): 1 KRITISCH + 5 SOLLTE gefixt
-
-## Branching-Strategie
-
-> ⚠️ **Ist-Zustand (Web-Variante, Stand 2026-05-27):**
-> **`feature/W-api-prefix`** ist der live-deployte Branch UND die
-> **EINE Wahrheit** für Code *und* Doku (Code, Roadmap, NEXT_SESSION, alle .md).
-> **GitHub-Default-Branch zeigt seit 2026-05-27 auch hierhin** (vorher
-> noch auf den eingefrorenen `feature/W-multi-user-web`).
-> **`feature/W-multi-user-web` ist EINGEFROREN** — nur noch Render-Rollback bis
-> Phase 6, dort **NICHT mehr committen/pushen** (jeder Push würde Render neu
-> deployen). **Auto-Deploy ist live** via GitHub-Action (`.github/workflows/deploy.yml`):
-> ein Push auf `feature/W-api-prefix` deployt gezielt die geänderte App über Coolifys
-> per-App-Deploy-API — Frontend `uuid=pcixgncs671tifdx9e3rxr7h`, Backend
-> `uuid=w3dw05zc8nv2izxa3v2qi911` (Token = GH-Secret `COOLIFY_TOKEN`). Kein manueller
-> Redeploy mehr nötig. Branch-Endspiel (→ `main`, alten Branch löschen, Render
-> abbauen, GitHub-Default auf `main`) in Phase 6 (~2026-06-05). Das generische
-> Modell unten gilt erst nach der Konsolidierung.
-
-- `main`: immer deployable, nur gemergte Features
-- `feature/<name>`: pro Feature ein eigener Branch
-- Tags: `v0.1` nach Phase 1 (MVP), `v0.2` nach Phase 2, etc.
-
-Ablauf:
-```
-git checkout -b feature/f1-datenmodell
-# … arbeiten, committen, testen …
-git checkout main
-git merge feature/f1-datenmodell
-# nach Phase 1 abgeschlossen:
-git tag v0.1
-```
-
-## Rollback-Mechanik
-
-- Letzten Commit rueckgaengig: `git reset --soft HEAD~1`
-- Spezifisches Feature rausnehmen: `git revert <commit-sha>`
-- Zu altem Tag: `git checkout v0.1` (detached HEAD, dann
-  `git switch -c hotfix-from-v0.1`)
-- Branch komplett wegwerfen: `git branch -D feature/<name>`
-
-## Datenmodell (Kern, MVP-Stand)
-
-```python
-class Solve:
-    id: int
-    time_ms: int           # 12340 = 12.34 Sekunden
-    cube_type: str         # "3x3", "4x4", "OH", "Pyra", ...
-    scramble: str | None
-    notes: str | None
-    timestamp: datetime
-    plus_two: bool         # +2 Strafe
-    dnf: bool              # Did Not Finish
-    session_id: int | None  # Phase 3
-    hardware_id: int | None  # Phase 4 (Multi-Hardware-Tracking)
-```
-
-Spaetere Phasen erweitern via Alembic-Migrations:
-- Phase 3: `Session` + `session_id` FK
-- Phase 4: `Hardware` + `hardware_id` FK
+`docs/permissions-matrix.md` ist die Single-Source für „wer sieht was?"
+(anonym / user / friend / tester / admin, Endpoints, UI-Tabs, Anti-Tracking).
+**Pflicht-Lesen** bei neuen Endpoints, Auth-Code, Cross-User-Filtern,
+Privacy-Texten und Rollen-Änderungen — bei Änderung mit-aktualisieren.
+Das Repo ist **public**: keine Secrets, Tokens oder ntfy-Topics für Monitoring
+im Klartext (GH-Secrets nutzen).
 
 ## Externe Datenquellen
 
-- **WCA**: https://www.worldcubeassociation.org/api/v0/ (offizielle API)
-- **csTimer-CSV**: Standard-Export-Format der gaengigen Solve-Tracking-Webseite
-- **Optional Scraping**: cubingcontests.com fuer Turnier-Ergebnisse,
-  falls WCA-API nicht reicht
+WCA-API (`https://www.worldcubeassociation.org/api/v0/`) · csTimer-Export
+(Import/Export) · cubing.js (nur devDependency, Daten werden gebacken).
 
-## Ports (Default)
+## Archiv & Audits
 
-- Backend: `localhost:8000` (FastAPI mit uvicorn)
-- Frontend: `localhost:5173` (Vite-Dev-Server)
-- API-Calls: Frontend → `http://localhost:8000`
-
-## Session-Workflow (verbindlich)
-
-**Bei Session-Ende:** der User kann jederzeit `/abschluss` aufrufen, um eine
-8-Punkte-Checkliste laufen zu lassen (Git-Status, Patch-Notes, Tags,
-features-data.ts, Doku, Todos, Backend-Smoke). Skill liegt in
-`.claude/commands/abschluss.md`. Wenn der User sagt **„Session beenden"**,
-**„das wars für heute"**, **„ich höre auf"** oder ähnlich → ruf den Skill
-proaktiv auf, bevor du dich verabschiedest.
-
-**Stop-Hook (Mini-Backstop):** läuft automatisch 1× pro Session (siehe
-`.claude/hooks/stop-mini-check.sh`). Meldet uncommitted Änderungen +
-unpushed Commits. Greift als Backup falls der User vergisst `/abschluss`
-aufzurufen.
-
-**ntfy-Push: IMMER aussagekräftig (User-Wunsch 2026-05-31, verschärft
-2026-06-12, verbindlich):** Der `stop-ntfy-notify.sh`-Hook pingt bei JEDEM
-Turn-Ende das Topic `jjY2OjY` (mechanischer git-Fallback, wenn keine
-Override-Datei da ist). **Schreib VOR JEDEM Turn-Ende** eine aussagekräftige
-Nachricht nach `.tmp/last-ntfy-message.txt` (optional Title in
-`.tmp/last-ntfy-title.txt`) — der Hook nutzt sie als Push-Body (Single-Use,
-danach gelöscht). Inhalt: (1) was passiert ist / gerade läuft, (2) ob der
-User gebraucht wird oder nicht, (3) was als Nächstes kommt. Beispiele:
-„CI + Deploy laufen, ~5 min, nichts zu tun" · „Welle live + verifiziert ✅,
-du bist dran: …". Der git-Fallback („N uncommitted Dateien") darf praktisch
-nie mehr feuern — er sagt dem User nichts (User-Feedback 2026-06-12).
-Gilt auch nach Kompaktierung/Modell-Wechsel — diese Zeile ist die
-Erinnerung, die die Gewohnheit überlebt.
-
-**Klickbare Fragen (`AskUserQuestion`) pingen separat (W.ntfy-ask-question,
-2026-06-06):** Der Stop-Hook feuert NUR am Turn-Ende — `AskUserQuestion` ist
-aber ein Tool-Call mitten im Turn (der Turn endet nicht) → pingte früher
-nicht. Jetzt feuert `pre-ask-question-ntfy.sh` (PreToolUse-Matcher
-`AskUserQuestion`) direkt beim Stellen der Frage: nutzt
-`.tmp/last-ntfy-message.txt` falls vorhanden, sonst baut er den Push-Body
-automatisch aus Fragetext + Option-Labels. Für klickbare Fragen musst du also
-NICHTS mehr vorab schreiben (für eine reichere Nachricht kannst du es weiter).
-Prosa-Fragen + „fertig" laufen unverändert über den Stop-Hook.
-
-**Roadmap-Abruf (`/roadmap` + Session-Start):** die Live-Roadmap (inkl.
-interner Items) wird via `.claude/hooks/roadmap-fetch.py` geholt. Zwei
-Auth-Pfade:
-
-  1. **Bevorzugt (langlebig, W.roadmap-export-key):** Secret aus ENV
-     `ROADMAP_EXPORT_KEY` (Coolify) bzw. `.tmp/roadmap-export-key`
-     (gitignored, gleicher Wert). Endpoint `GET /api/roadmap/export` mit
-     Header `X-Roadmap-Key`. Auch `--mark-done` läuft darüber
-     (`POST /api/roadmap/export/done`). **Kein Ablauf**, kein Refresh
-     nötig. Endpoint ist deaktiviert (404) solange die ENV-Var nicht
-     gesetzt ist — safe-by-default.
-  2. **Fallback (kurzlebig):** Admin-`cubetracker_access_token` aus dem
-     Browser-localStorage in `.tmp/admin-token` (gitignored). Läuft
-     stündlich ab.
-
-Der SessionStart-Hook zeigt automatisch neue Items + Items die nur live (im
-Admin-Panel) existieren, nicht im Code-Seed. Manuell + ausführlich:
-`/roadmap` (Skill `.claude/commands/roadmap.md`). Reihenfolge pflegt der
-Admin im App-Tab „Verwaltung → Admin → Roadmap" per ▲/▼ (oben zuerst);
-Sichtbarkeit per „Öffentlich"-Toggle. Der Code-Seed
-(`webapp/seeds/roadmap.py`) ist nur Cold-Start-Bootstrap.
-
-**Roadmap-Item erledigt → auf „done" setzen (verbindlich, nicht nur
-erinnern):** Wenn eine `feat(W.X)`/`fix(W.X)`-Welle ein Roadmap-Item
-abschließt, das Item danach auf done setzen:
-`python .claude/hooks/roadmap-fetch.py --mark-done "<title_de exakt>" [...]`
-(matcht per title_de, idempotent, mehrere Titel möglich). Braucht einen
-gültigen Admin-Token in `.tmp/admin-token`; bei „kein Admin (abgelaufen)"
-→ User um frischen `cubetracker_access_token` bitten, dann erneut. Hält
-die Live-Roadmap akkurat, ohne dass der Admin manuell nachklicken muss.
-
-**Patch-Notes-Konvention:** jeder `feat(W.X)`/`fix(W.X)`-Commit braucht
-einen PatchNote-Eintrag in `webapp/changelog/data.py` mit
-`version="2.0.0-alpha.W.X"`. Plus Git-Tag `v2.0.0-alpha.W.X` nach Push.
-Der `post-git-commit.sh`-Hook erinnert daran.
-
-**Bei User-facing-Features:** Bullet in `webapp/frontend/src/lib/features-data.ts`
-ergänzen (zeigt sich auf Login-Seite + im „Was kann diese App?"-Modal).
-Wird im `/abschluss`-Check explizit kontrolliert. Plus: der
-`post-git-commit.sh`-Hook warnt nach jedem `feat(W.X)`-Commit, wenn weder
-`features-data.ts` noch ein neuer `features.*`-Locale-Key dabei war — es
-sei denn `W.X` matched ein bekanntes Backstage-Pattern (qa, fix,
-hardening, tsbuild, deps, hotfix, ...). Damit kein Marketing-Bullet mehr
-wochenlang im Drift hängt (Audit 2026-05-29: 7 Lücken in features-data
-aufgedeckt — Mehrsprachigkeit, Voice-Alerts, Multi-Cube-Compare,
-Outlier-Pflege, Feedback-Workflow, Roadmap-/Patch-Notes-Modal).
-
-## Context-Management & Session-Resume
-
-**Bei langer Session / drohender Kompaktierung:** mit `/context` die aktuelle
-Context-Auslastung prüfen. Bei hoher Auslastung ODER vor einem geplanten Stopp:
-`/compact` mit Fokus (z.B. `/compact konzentrier dich auf den aktuellen Task`)
-ODER NEXT_SESSION.md aktualisieren, BEVOR der Context kippt. Kontext-Verlust ist
-am 2026-05-20 real passiert (Session aus Auto-Kompaktierung gestartet, Stand
-musste aus einem manuell gespeicherten Protokoll rekonstruiert werden).
-
-**Automatischer Backstop:** der `pre-compact-checkpoint.sh`-Hook (PreCompact-Event)
-friert vor JEDER Kompaktierung den git-Stand nach `.tmp/last-compact-checkpoint.md`
-ein (gitignored). Ehrliche Grenze: erfasst nur git-Stand, nicht die Konversation.
-
-**Session-Wiederaufnahme (nach Kompaktierung / Crash / neuer Session):**
-1. `.tmp/last-compact-checkpoint.md` lesen (mechanischer git-Stand, falls vorhanden)
-2. `NEXT_SESSION.md` lesen (inhaltliche State-Übergabe — die Single-Source)
-3. `CLAUDE.md` ist beim Start schon geladen (Disziplin + Konventionen)
-
-→ Prompt-Vorlage: „Lies `.tmp/last-compact-checkpoint.md` + `NEXT_SESSION.md` und gib mir den Stand."
-
-**Memory-Konsolidierung (Ritual):** gelegentlich (z.B. beim `/abschluss` oder
-monatlich) die User-Memory `~/.claude/projects/.../memory/MEMORY.md` durchsehen:
-Duplikate mergen, veraltete Fakten korrigieren, Index ausdünnen. Der Skill
-`/consolidate-memory` automatisiert diesen Pass.
-
-## Lessons-Archive
-
-Spezifische Bug-Events / Postmortems / Architektur-Lessons liegen in
-`docs/lessons-archive.md` (chronologisch, neueste zuerst). Klassiker:
-- Browser-Polyfill-Risiko bei Node-Globals (cstimer_module-Crash 2026-05-16)
-- Bash-Heredoc-Quote-Bug (mehrfach 2026-05-16)
-- Pre-Commit-Tag-Falle (mehrfach 2026-05-17)
-- Auto-Mode-Classifier-Blocks + Permission-Allowlist-Pflege
-
-## Sichtbarkeits-Matrix (Wer sieht was?)
-
-`docs/permissions-matrix.md` ist die **Single-Source-of-Truth** für die
-Frage „wer sieht welche Daten?". 5 Rollen (anonym / user / friend /
-tester / admin), alle Datenmodelle + API-Endpoints + UI-Tabs + Privacy-
-Details (z.B. „was Admin NICHT sieht" → Plaintext-Passwörter, andere
-User-Backups, Solves anderer User außer in Aggregat-Stats). Auch
-Anti-Tracking-Audit (kein GA/Mixpanel/Hotjar etc., nur 1 funktionales
-Cookie). Stand 2026-05-28.
-
-**Pflicht-Lesen bei:** neue Endpoints, Auth-Code, Cross-User-Filter,
-Privacy-Texten auf Login-/Datenschutz-Seite, Tester-/Admin-Rolle-
-Änderungen. Bei Schema-/Endpoint-Änderung: Matrix mit-aktualisieren
-(sonst Single-Source verlogen).
-
-## Audit-Log (Setup-Reviews)
-
-- `docs/audit-2026-05-20.md` — Doku-vs-Setup-Audit. Welle 1: 10 Quick-Wins +
-  Phase-D P3/H2/S2 (Pre-Tag-Hook, Push-Failure-Diagnose, patch-notes-writer).
-  Welle 2: Context-Mgmt / Slash-Commands / Skills / Background-Tasks auditiert;
-  Bundle umgesetzt (`/audit`-Command, CM2/CM5-Doku, PreCompact-Checkpoint-Hook,
-  ntfy-Stop-Hook). Audit jetzt reproduzierbar via `/audit <sektion>`.
-  Offen: mcp, output-styles, status-line, plugins (+ M4, S3 zurückgestellt).
+`docs/lessons-archive.md` (Postmortems, neueste zuerst) ·
+`docs/audit-2026-05-20.md` + `/audit` (Setup-Audit) · QA-Befunde je Welle in den
+Patch-Notes (`…-qa`-Suffix) · Memory-Pflege gelegentlich per `/consolidate-memory`.

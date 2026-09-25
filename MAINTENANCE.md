@@ -78,10 +78,10 @@ Restart). Cert läuft bald ab → Traefik/Coolify-Logs zum ACME-Renew checken.
 
 ## 3. Doku-Konsistenz (Single-Sources) 🤖/👤
 
-Die kanonischen Files stehen in `NEXT_SESSION.md` → Tabelle „Single-Source-Files".
+Die kanonischen Files stehen in `CLAUDE.md` → „SSOT-Landkarte".
 Prüfen, dass sie zur Realität passen:
 
-- **`NEXT_SESSION.md`** ist jünger als der letzte Feature-Commit (sonst veraltet).
+- **`NEXT_SESSION.md`** (Übergabe-Kopf) ist jünger als der letzte Feature-Commit, passt ins Hook-Budget (≤ 10.000 Zeichen Start-Ausgabe) und enthält keine Regeln/Verlauf (→ `CLAUDE.md` bzw. `docs/session-journal.md`).
 - **Roadmap-Items** (DB-Tabelle `roadmap_items`, gepflegt via App → „Verwaltung
   → Admin → Roadmap"): erledigte Items als `done` markieren oder löschen, neue
   Wünsche aufnehmen. Phase-Meta P1..P6 in `webapp/frontend/src/lib/roadmap-phases.ts`.
