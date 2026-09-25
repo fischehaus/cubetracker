@@ -9,6 +9,18 @@ Konsequenz (was wurde im Setup geändert).
 
 ---
 
+## 2026-09-25 — Live-Überwachung 23 Tage still: GitHub-60-Tage-Abschaltung
+
+`health-check.yml` (Cron alle 10 min) lief zuletzt geplant am 02.09. — GitHub
+schaltet schedule-Workflows in public Repos nach 60 Tagen ohne Repo-Aktivität
+ab (letzter Push 04.07.). Kein Alarm, weil der Alarm selbst Teil des
+abgeschalteten Workflows ist. Ein `gh workflow enable` am 25.09. brachte binnen
+2,5 h keinen geplanten Lauf zurück. **Konsequenz:** Keepalive-Schritt im
+Workflow (`PUT …/actions/workflows/health-check.yml/enable` bei jedem Lauf,
+`permissions: actions: write`); Workflow-Datei geändert + gepusht, damit der
+Zeitplan neu registriert wird. Grundproblem bleibt: ein Monitor, der von sich
+selbst abhängt — ein externer Monitor wäre robuster (Kopf „Offen").
+
 ## 2026-09-25 — Harness-Umbau nach SKHO-Vorbild: fünf Setup-Lessons
 
 **Event:** Beim Vergleich mit dem SKHO-Harness und beim Umbau (W.harness-v2)

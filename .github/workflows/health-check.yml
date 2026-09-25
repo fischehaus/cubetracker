@@ -15,6 +15,11 @@
 #     bewusst so (Erinnerung statt Einmal-Alarm).
 #   - GitHub kann Cron-Laeufe um einige Minuten verzoegern; fuer
 #     Hobby-Monitoring voellig ok.
+#   - W.health-keepalive (2026-09-25): GitHub schaltet schedule-Workflows in
+#     public Repos nach 60 Tagen ohne Repo-Aktivitaet ab (hier: letzter Push
+#     04.07. -> kein Lauf mehr seit 02.09.). Der Keepalive-Schritt schaltet
+#     den Workflow bei jedem Lauf per API wieder ein und setzt so den Zaehler
+#     zurueck. Lesson: docs/lessons-archive.md 2026-09-25.
 name: Health-Check (Live)
 
 on:
@@ -26,7 +31,17 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      actions: write
+      contents: read
     steps:
+      - name: Keepalive (60-Tage-Abschaltung verhindern)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X PUT "repos/${{ github.repository }}/actions/workflows/health-check.yml/enable" \
+            && echo "Keepalive ok" || echo "Keepalive fehlgeschlagen (nicht kritisch)"
+
       - name: Frontend + API-Health pruefen (3 Versuche)
         run: |
           for i in 1 2 3; do
