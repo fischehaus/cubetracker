@@ -25,8 +25,10 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 **Als Nächstes (priorisierte Liste, vom User am 25.09. freigegeben):**
 
 _Jetzt:_
-1. **CI gegen echtes Postgres + Obergrenzen für Backend-Deps** (Lesson
-   2026-09-25: SQLAlchemy 2.1 → 2 h Ausfall, CI mit SQLite sah es nicht).
+1. **Hook-Fehlalarm `pre-bash-dev-server.sh`:** trennt Segmente an `|` auch
+   INNERHALB von Anführungszeichen → `grep -E "a|uvicorn"` wird blockiert.
+   Fix: erst `shlex` mit `punctuation_chars`, dann trennen; Testfall in
+   `tests/test_pre_bash_dev_server.py`; Regelebene → Gegenlesung.
 2. **Off-Site-Backup der DB** (Technik-Backlog B #9).
 
 _Bald:_ Solve-Notizen editierbar (#48; Detail-Modal zeigt sie nur an) ·

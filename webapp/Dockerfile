@@ -7,7 +7,12 @@ FROM python:3.12-slim
 WORKDIR /app
 
 COPY . .
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir .
+# W.ci-postgres-lock (2026-09-25): feste Versionen aus constraints.txt — nach
+# langer Deploy-Pause zog ein Build sonst still neue Major-/Minor-Versionen
+# (SQLAlchemy 2.1 -> 2 h Ausfall). Update: `uv pip compile pyproject.toml
+# --extra dev --python-version 3.12 --python-platform x86_64-manylinux_2_28
+# --no-header --annotation-style line -o constraints.txt`, dann testen + pushen.
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -c constraints.txt .
 
 EXPOSE 8000
 # --proxy-headers + --forwarded-allow-ips (W.ops-hardening, 2026-06-12):

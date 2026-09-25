@@ -19,9 +19,10 @@ Coolify-Deployment meldeten „Success"; CI (SQLite) war grün. Diagnose erst ü
 das Coolify-Container-Log. Die eigene Überwachung meldete nichts (siehe
 Lesson darunter). **Konsequenz:** Treiber explizit (`postgresql+psycopg2://`,
 `db/database.py:normalize_database_url`) + `sqlalchemy<2.1` (Hotfix `18e2561`).
-Offen: CI gegen echtes Postgres (Service-Container) und Obergrenzen für die
-übrigen Backend-Abhängigkeiten — nach langer Pause baut jeder Deploy mit
-neuesten Versionen.
+Nachgezogen in `W.ci-postgres-lock`: CI startet die App zweimal echt gegen
+Postgres 16 (Lifespan inkl. Migrationen/Seeds, Abbruch bei `WARN:`), und
+Docker + CI installieren mit `webapp/constraints.txt` (feste Versionen, per
+`uv pip compile` für Python 3.12/Linux; Befehl im `Dockerfile`).
 
 ## 2026-09-25 — Live-Überwachung 23 Tage still: GitHub-60-Tage-Abschaltung
 
