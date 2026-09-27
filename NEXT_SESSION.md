@@ -61,8 +61,9 @@ USB nicht) und #7 (Bluetooth teils live) umbenennen — nur mit User im Admin-UI
 - Timer-Zeit ragt bei großer Schrift auf dem Handy aus der Karte (der
   Clamp-Ansatz vom 07.06. wurde zurückgerollt, das Problem ist offen).
 - MAINTENANCE 27.09. (🤖-Teil) gelaufen, Protokoll in `MAINTENANCE.md`. Offen daraus:
-  **Server-Reboot** (Kernel 129 Tage alt; Claude-SSH zur Prod-IP vom Auto-Mode-
-  Classifier blockiert → User führt aus) · 👤-Dashboards (4/8/10). Alt-Tags gesetzt.
+  Reboot + OS-Updates 27.09. erledigt (App nach ~2 min zurück). **Docker-Pakete per
+  `apt-mark hold` gesperrt** (27.5→29.8, containerd 1.7→2.3) — eigenes, beobachtetes
+  Wartungsfenster; Risiko Coolify-Netz (s. Lessons 25.09.). 👤-Dashboards (4/8/10) offen.
 - Werkstatt: untracked seit Mai/Juni — am 25.09. eingeordnet: `scripts/*.py`
   versioniert, Skin-Pakete/Prüfbilder per `.gitignore`, Coolify-Log gelöscht.
   Ungesichert in `.tmp/`: Fragebogen (Activity-Feed), `qa-oll/verify_oll.py`.
