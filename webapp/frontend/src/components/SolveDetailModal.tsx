@@ -1,7 +1,7 @@
 // SolveDetailModal: Vollbild-Detail beim Klick auf einen Solve in der
 // SolveList. Zeigt was in der Tabelle nicht reinpasst:
 //  - Scramble (komplett, monospace)
-//  - Notiz (komplett, mehrzeilig)
+//  - Notiz (komplett, mehrzeilig; schreib-/editierbar seit Roadmap #48)
 //  - Hardware (Name + Cube-Type)
 //  - Session (Name)
 //  - rolling ao5/ao12 (vom Caller übergeben)
@@ -9,7 +9,7 @@
 //
 // Schliessen: Klick auf Backdrop, Esc, X-Button oben rechts.
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useDeleteSolve,
@@ -17,8 +17,14 @@ import {
   useSessions,
   useUpdateSolve,
 } from "../lib/api";
-import { formatDate, formatSolveTime, formatTime } from "../lib/format";
-import type { Solve } from "../lib/types";
+import {
+  formatDate,
+  formatSolveTime,
+  formatTime,
+  normalizeSolveNote,
+  SOLVE_NOTE_MAX_LENGTH,
+} from "../lib/format";
+import type { Solve, SolveUpdate } from "../lib/types";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import { ConfirmDialog } from "./ConfirmDialog";
 
@@ -30,10 +36,60 @@ interface Props {
   onClose: () => void;
 }
 
-export function SolveDetailModal({ solve, ao5, ao12, isPb, onClose }: Props) {
+export function SolveDetailModal({
+  solve: initialSolve,
+  ao5,
+  ao12,
+  isPb,
+  onClose,
+}: Props) {
   const { t } = useTranslation();
   const update = useUpdateSolve();
   const del = useDeleteSolve();
+
+  // Die Caller reichen einen Snapshot aus ihrem State durch, der nach einem
+  // PATCH nicht nachzieht → Antwort des Servers lokal übernehmen, sonst
+  // zeigt das Modal nach +2/DNF/Notiz den alten Stand.
+  const [solve, setSolve] = useState(initialSolve);
+  const patch = (payload: SolveUpdate, onDone?: () => void): void => {
+    // Doppel-Trigger (Doppelklick, Strg+Enter-Repeat) vor dem Re-Render abfangen.
+    if (update.isPending) return;
+    update.mutate(
+      { id: solve.id, payload },
+      {
+        onSuccess: (fresh) => {
+          setSolve(fresh);
+          onDone?.();
+        },
+      },
+    );
+  };
+
+  // Notiz-Editor (Roadmap #48): null = nicht im Bearbeiten-Modus.
+  const [noteDraft, setNoteDraft] = useState<string | null>(null);
+  // Nach dem Schließen des Editors den Fokus auf den Bearbeiten-Button
+  // zurückgeben, sonst fällt er auf <body> (a11y).
+  const noteButtonRef = useRef<HTMLButtonElement>(null);
+  const refocusNoteButton = useRef(false);
+  const closeNoteEditor = (): void => {
+    refocusNoteButton.current = true;
+    setNoteDraft(null);
+  };
+  useEffect(() => {
+    if (noteDraft === null && refocusNoteButton.current) {
+      refocusNoteButton.current = false;
+      noteButtonRef.current?.focus();
+    }
+  }, [noteDraft]);
+  const saveNote = (): void => {
+    if (noteDraft === null) return;
+    const next = normalizeSolveNote(noteDraft);
+    if (next === (solve.notes ?? null)) {
+      closeNoteEditor();
+      return;
+    }
+    patch({ notes: next }, closeNoteEditor);
+  };
 
   const { data: hardware } = useHardware();
   const { data: sessions } = useSessions();
@@ -49,7 +105,12 @@ export function SolveDetailModal({ solve, ao5, ao12, isPb, onClose }: Props) {
 
   // Fokus-Trap + Esc-zum-Schließen + Fokus-Restore (a11y, W.modal-focus-trap).
   const dialogRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(dialogRef, onClose);
+  // Esc im Notiz-Editor bricht nur das Bearbeiten ab, schließt nicht das Modal.
+  // Während des Speicherns bleibt der Editor offen, damit ein Fehler sichtbar wird.
+  useFocusTrap(dialogRef, () => {
+    if (noteDraft === null) onClose();
+    else if (!update.isPending) closeNoteEditor();
+  });
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
@@ -176,28 +237,87 @@ export function SolveDetailModal({ solve, ao5, ao12, isPb, onClose }: Props) {
 
           {/* Notes */}
           <div className="mb-5">
-            <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-              {t("solveDetail.notesLabel")}
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <label
+                htmlFor="solve-note-editor"
+                className="text-xs uppercase tracking-wide text-gray-500"
+              >
+                {t("solveDetail.notesLabel")}
+              </label>
+              {noteDraft === null && (
+                <button
+                  ref={noteButtonRef}
+                  onClick={() => {
+                    update.reset(); // alten Fehler (z. B. +2-Toggle) nicht im Editor zeigen
+                    setNoteDraft(solve.notes ?? "");
+                  }}
+                  className="rounded px-2 py-1 text-sm text-blue-300 hover:bg-gray-800 hover:text-blue-200"
+                >
+                  {solve.notes
+                    ? t("solveDetail.noteEdit")
+                    : t("solveDetail.noteAdd")}
+                </button>
+              )}
             </div>
-            <div
-              className={`rounded bg-gray-800/50 px-3 py-2 text-sm whitespace-pre-wrap ${
-                solve.notes ? "text-gray-200" : "text-gray-600 italic"
-              }`}
-            >
-              {solve.notes || "—"}
-            </div>
+            {noteDraft === null ? (
+              <div
+                className={`rounded bg-gray-800/50 px-3 py-2 text-sm whitespace-pre-wrap break-words ${
+                  solve.notes ? "text-gray-200" : "text-gray-600 italic"
+                }`}
+              >
+                {solve.notes || "—"}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <textarea
+                  id="solve-note-editor"
+                  autoFocus
+                  value={noteDraft}
+                  maxLength={SOLVE_NOTE_MAX_LENGTH}
+                  rows={4}
+                  placeholder={t("solveDetail.notePlaceholder")}
+                  onChange={(e) => setNoteDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                      e.preventDefault();
+                      saveNote();
+                    }
+                  }}
+                  className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-blue-500 focus:outline-none"
+                />
+                {update.isError && (
+                  <p className="text-sm text-red-400" role="alert">
+                    {t("solveDetail.noteSaveError")}
+                  </p>
+                )}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={saveNote}
+                    disabled={update.isPending}
+                    className="rounded bg-blue-600 px-3 py-2 text-base text-white hover:bg-blue-500 disabled:opacity-50"
+                  >
+                    {t("solveDetail.noteSave")}
+                  </button>
+                  <button
+                    onClick={closeNoteEditor}
+                    disabled={update.isPending}
+                    className="rounded bg-gray-700 px-3 py-2 text-base text-gray-300 hover:bg-gray-600 disabled:opacity-50"
+                  >
+                    {t("solveDetail.noteCancel")}
+                  </button>
+                  <span className="ml-auto text-xs text-gray-500">
+                    {t("solveDetail.noteHint")}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Aktionen */}
           <div className="flex gap-2 flex-wrap pt-3 border-t border-gray-800">
             {!solve.dnf && (
               <button
-                onClick={() =>
-                  update.mutate({
-                    id: solve.id,
-                    payload: { plus_two: !solve.plus_two },
-                  })
-                }
+                onClick={() => patch({ plus_two: !solve.plus_two })}
                 className={`text-base rounded px-3 py-2 ${
                   solve.plus_two
                     ? "bg-yellow-600/30 text-yellow-300 hover:bg-yellow-600/50"
@@ -210,12 +330,7 @@ export function SolveDetailModal({ solve, ao5, ao12, isPb, onClose }: Props) {
               </button>
             )}
             <button
-              onClick={() =>
-                update.mutate({
-                  id: solve.id,
-                  payload: { dnf: !solve.dnf },
-                })
-              }
+              onClick={() => patch({ dnf: !solve.dnf })}
               className={`text-base rounded px-3 py-2 ${
                 solve.dnf
                   ? "bg-red-600/30 text-red-300 hover:bg-red-600/50"

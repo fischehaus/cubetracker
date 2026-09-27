@@ -73,7 +73,8 @@ export function parseTimeInput(input: string): number | null {
     const [minStr, secStr] = trimmed.split(":");
     const min = parseInt(minStr, 10);
     const sec = parseFloat(secStr);
-    if (isNaN(min) || isNaN(sec) || min < 0 || sec < 0 || sec >= 60) return null;
+    if (isNaN(min) || isNaN(sec) || min < 0 || sec < 0 || sec >= 60)
+      return null;
     return Math.round((min * 60 + sec) * 1000);
   }
 
@@ -128,6 +129,18 @@ export function formatDate(iso: string): string {
   const hh = String(d.getHours()).padStart(2, "0");
   const min = String(d.getMinutes()).padStart(2, "0");
   return `${dd}.${mm}.${yyyy} ${hh}:${min}`;
+}
+
+/** Max. Länge einer Solve-Notiz im Editor (Backend-Spalte ist unbegrenzt). */
+export const SOLVE_NOTE_MAX_LENGTH = 1000;
+
+/**
+ * Normalisiert eine Solve-Notiz vor dem Speichern: Rand-Whitespace weg,
+ * leer → null (Notiz entfernen), sonst auf SOLVE_NOTE_MAX_LENGTH gekappt.
+ */
+export function normalizeSolveNote(draft: string): string | null {
+  const trimmed = draft.trim();
+  return trimmed ? trimmed.slice(0, SOLVE_NOTE_MAX_LENGTH) : null;
 }
 
 /**

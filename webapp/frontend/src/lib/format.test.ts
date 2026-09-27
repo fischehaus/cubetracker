@@ -1,7 +1,12 @@
 // Tests für parseTimeInput — speziell die csTimer-Stackmat-Konvention.
 
 import { describe, expect, it } from "vitest";
-import { parseTimeInput, formatTime } from "./format";
+import {
+  formatTime,
+  normalizeSolveNote,
+  parseTimeInput,
+  SOLVE_NOTE_MAX_LENGTH,
+} from "./format";
 
 describe("parseTimeInput — klassisch mit Punkt", () => {
   it("parst '12.34' zu 12340 ms", () => {
@@ -76,10 +81,13 @@ describe("parseTimeInput — Roundtrip mit formatTime", () => {
     [12340, "12.34"],
     [111020, "1:51.02"],
     [754560, "12:34.56"],
-  ])("formatTime(%i) === %s und parseTimeInput davon gibt %i zurück", (ms, str) => {
-    expect(formatTime(ms)).toBe(str);
-    expect(parseTimeInput(str)).toBe(ms);
-  });
+  ])(
+    "formatTime(%i) === %s und parseTimeInput davon gibt %i zurück",
+    (ms, str) => {
+      expect(formatTime(ms)).toBe(str);
+      expect(parseTimeInput(str)).toBe(ms);
+    },
+  );
 });
 
 describe("parseTimeInput — Edge Cases", () => {
@@ -95,5 +103,22 @@ describe("parseTimeInput — Edge Cases", () => {
   it("trimmt Whitespace", () => {
     expect(parseTimeInput("  945  ")).toBe(9450);
     expect(parseTimeInput(" 12.34 ")).toBe(12340);
+  });
+});
+
+describe("normalizeSolveNote", () => {
+  it("trimmt Rand-Whitespace, behält Zeilenumbrüche innen", () => {
+    expect(normalizeSolveNote("  gute F2L\nLL ok  \n")).toBe("gute F2L\nLL ok");
+  });
+
+  it("leer oder nur Whitespace → null (Notiz entfernen)", () => {
+    expect(normalizeSolveNote("")).toBeNull();
+    expect(normalizeSolveNote("  \n\t ")).toBeNull();
+  });
+
+  it("kappt auf SOLVE_NOTE_MAX_LENGTH", () => {
+    expect(
+      normalizeSolveNote("x".repeat(SOLVE_NOTE_MAX_LENGTH + 50)),
+    ).toHaveLength(SOLVE_NOTE_MAX_LENGTH);
   });
 });

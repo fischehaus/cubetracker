@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.solve-notes-edit",
+        released=date(2026, 9, 27),
+        title="📝 Notizen zu Solves nachträglich schreiben und ändern",
+        highlights=[
+            "Im Detail-Fenster eines Solves (ℹ oder Klick auf den Solve) kannst "
+            "du jetzt eine Notiz hinzufügen oder die vorhandene bearbeiten, "
+            "z. B. „OLL-Skip\" oder „Pop in der F2L\". Strg+Enter speichert, "
+            "Esc bricht ab. Danke für den Wunsch!",
+            "Nach +2 oder DNF zeigt das Detail-Fenster jetzt sofort den neuen "
+            "Stand. Vorher blieb die Anzeige bis zum erneuten Öffnen auf dem "
+            "alten Wert.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.challenge-plausible-pb",
         released=date(2026, 9, 25),
         title="⚡ Tages-Challenges: keine unmöglichen Zeitziele mehr",
