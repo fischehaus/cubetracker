@@ -3076,3 +3076,20 @@ aus Kopf, App-Analyse 06/2026, MAINTENANCE und Lessons. Gegenleser: opus/2026-09
 - ➜ Werkstatt: untracked seit Mai/Juni — — verify_oll.py ins Technik-Backlog (backlog#24); Fragebogen bleibt im Kopf
 - ➜ Hooks `pre-git-tag-check`, `post-git-commit`, `post-push-failure-diagnose`: — ins Technik-Backlog (backlog#23)
 - Dev-Server-Hook-Restlücke (Teil von „Erledigt 27.09.:") → backlog#20
+
+## ✅ 2026-09-27 — Session-Abschluss: Notizen, Hook, Maintenance, Backlog, Scramble-Net
+
+Wellen (Tag · Commit):
+- `v2.0.0-alpha.W.solve-notes-edit` · d45e03d — Solve-Notizen nachträglich schreiben/ändern (Roadmap #48 done); Modal übernimmt PATCH-Antwort (+2/DNF zeigten alten Stand). QA sonnet: 0 KRITISCH, 2 SOLLTE direkt behoben.
+- Dev-Server-Hook quote-bewusst · 398e473 (Matrix 55/55). Gegenleser: opus/2026-09-27.
+- MAINTENANCE-Lauf 🤖-Teil · 5732213; Server-Reboot + OS-Updates (Kernel 6.8.0-124) durch den User, Docker-Pakete per `apt-mark hold` (→ backlog#1). 4 Alt-Tags nachgetragen.
+- Technik-Backlog eingeführt · 2113a5d (privates Repo, 24 Issues, Regeln/Hook/Commands). Gegenleser: opus/2026-09-27 (2 Läufe). settings.json-Freigabe vom User aktiviert (Gegenlesung offen → backlog#25).
+- `v2.0.0-alpha.W.scramble-net-type` · fb1dcb0 — Scramble-Vorschau folgt dem effektiven Scramble-Typ (User-Meldung, vom User live bestätigt).
+
+Entscheidungen: Technik-Backlog privat statt Issues im Public-Repo; Off-Site-Backup via Coolify-S3 → Backblaze B2 EU (Runbook in backlog#3, User-Schritte auf später verschoben); Claude ändert eigene Permissions nicht selbst (Plattform-Block, User aktiviert).
+
+Beobachtung (keine Lesson): Plattform-Classifier blockt schreibende SSH-Aktionen auf Prod und Selbst-Änderung von Permissions → User-Handgriff mit fertigen Befehlen.
+
+Umzug der Kopf-Schlüssel: siehe Block „Technik-Backlog eingeführt (Kopf-Umzug)" oben; „Bald:" und „Wartet auf dich"-Punkte bleiben im Kopf.
+- ➜ Technik-Backlog (aus `docs/app-analyse-2026-06-12.md`): — Abschnitt vollständig ins Technik-Backlog (backlog#3, backlog#6, backlog#11, backlog#14, backlog#12, backlog#13, backlog#7, backlog#2, backlog#9)
+- ➜ Klein / Polish: — Abschnitt ins Technik-Backlog (backlog#16, backlog#15, backlog#1, backlog#24, backlog#23); 👤-Dashboards + Fragebogen im Kopf „Wartet auf dich"

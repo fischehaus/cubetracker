@@ -6,12 +6,12 @@ Zustand, keine Regeln** — Regeln stehen in `CLAUDE.md`. Wird beim `/abschluss`
 `docs/session-journal.md`. Budget: Die gesamte Hook-Ausgabe muss unter 10.000
 Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 
-**Zuletzt aktualisiert:** 2026-09-27 (Technik-Backlog eingeführt, Kopf verschlankt)
+**Zuletzt aktualisiert:** 2026-09-27 (Abschluss: Notizen, Hook, Maintenance, Backlog, Scramble-Net)
 
 ## 📍 Stand
 
-- Live: `v2.0.0-alpha.W.solve-notes-edit` (27.09.2026), Frontend-Bundle
-  `index-DVGAE6VG.js`. Backend mit festen Versionen (`webapp/constraints.txt`).
+- Live: `v2.0.0-alpha.W.scramble-net-type` (27.09.2026), Frontend-Bundle
+  `index-BHN_4xyu.js`. Backend mit festen Versionen (`webapp/constraints.txt`).
 - Server 27.09.: OS-Updates + Reboot (Kernel 6.8.0-124); Docker-Pakete per
   `apt-mark hold` gesperrt → backlog#1. MAINTENANCE-🤖-Teil 27.09. grün.
 - Betrieb: Coolify 4.3.23 (Netz `coolify` am 25.09. repariert), UptimeRobot
@@ -31,6 +31,10 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 nur mit User im Admin-UI.
 
 **Wartet auf dich:**
+- **Off-Site-Backup backlog#3:** Anleitung steht im Issue (Kommentar 27.09.). Du:
+  Backblaze-Konto (Region EU Central!) + Bucket + Key, dann Coolify S3 + Notification
+  (Schritte A+B) → „backup eingerichtet" → ich prüfe, Doku, Issue schließen. Auf
+  Wunsch des Users 27.09. verschoben.
 - Activity-Feed (P1): Plan steht (`docs/session-journal.md`, Block „IN ARBEIT —
   Activity-Feed"). Wartet auf die Fragebogen-Ergebnisse (`.tmp/Cubetracker-
   Fragebogen-Activity-Feed.docx`, nur lokal).
