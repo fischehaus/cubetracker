@@ -44,6 +44,7 @@ gilt diese Tabelle — und ich weise auf den Widerspruch hin, statt still zu
 | Patch-Notes | `webapp/changelog/data.py` |
 | User-facing Feature-Liste | `webapp/frontend/src/lib/features-data.ts` |
 | Roadmap-Items (live) / Phasen-Meta / Cold-Start-Seed | DB `roadmap_items` (Admin-UI) / `webapp/frontend/src/lib/roadmap-phases.ts` / `webapp/seeds/roadmap.py` |
+| Technik-Backlog (Ops, Security, Updates, Tooling, Code, UI-Bugs/Polish) — priorisiert | Issues im **privaten** Repo `fischehaus/cubetracker-backlog` (Vorlage + Labels dort; Mechanik: `/roadmap`) |
 | Schema + Mini-Migrations | `webapp/db/models.py` + `webapp/main.py:lifespan` |
 | Frontend-API-Hooks | `webapp/frontend/src/lib/api.ts` |
 | Erlaubte `cube_type`-Werte | `webapp/frontend/src/lib/format.ts:COMMON_CUBE_TYPES` |
@@ -63,7 +64,8 @@ gilt diese Tabelle — und ich weise auf den Widerspruch hin, statt still zu
     Angesagten, beim Effort-Stopp oder bei **Risikoklassen**: Schema-Migration,
     Auth/Rechte, Datenlöschung, Force-Push.
   - **Ohne Stopp:** Kleinkram (eine Datei, kein Push) — nur Ansage; reine
-    Auskünfte und Meta-Bestätigungen — gar keine Ansage.
+    Auskünfte, Meta-Bestätigungen und Backlog-Issues anlegen/labeln/
+    kommentieren — gar keine Ansage.
   - **Ansage ≠ Einstellung:** Die Ansage stellt nichts um; was die Umgebung
     meldet, schlägt meine Ansage.
 - **⏫ Effort-Stopp:** Braucht ein späterer Schritt mehr Effort als der laufende,
@@ -81,7 +83,7 @@ gilt diese Tabelle — und ich weise auf den Widerspruch hin, statt still zu
     Zwei-Satz-Antworten entfällt er.
   - **`🔭 Ohne dein Zutun`** (Bullets ohne Nummern) steht direkt **über** dem
     Block. Die Rubrik zeigt an, sie verwahrt nicht — was nachzuhalten ist, steht
-    vorher in `NEXT_SESSION.md` → „Offen".
+    vorher in `NEXT_SESSION.md` → „Offen" bzw. im Technik-Backlog.
   - `AskUserQuestion` nur, wenn genau **eine** blockierende Wahl ansteht und du
     per Klick (Handy) antworten können sollst; sonst End-Block.
 - **✅ GO:** `GO` = alle `(empfohlen)` + Defaults der `(offene Wahl)`.
@@ -103,7 +105,8 @@ gilt diese Tabelle — und ich weise auf den Widerspruch hin, statt still zu
   „NICHT geladen" (Budget), die Datei sofort per Read lesen und kürzen.
 - **Laufend:** Nach `/compact` zählt nur, was in Dateien steht. Bei mehrstufigen
   Wellen nach **jedem** abgeschlossenen Schritt eine Zeile in
-  `NEXT_SESSION.md` → „Offen" — nicht erst beim Abschluss.
+  `NEXT_SESSION.md` → „Offen" — nicht erst beim Abschluss. Bei Backlog-Wellen
+  steht der Fortschritt als Issue-Kommentar, im Kopf nur `backlog#N`.
 - **Abschluss:** `/abschluss` (`.claude/commands/abschluss.md`). Bei „Session
   beenden", „das wars für heute", „ich höre auf" o. ä. proaktiv aufrufen.
 - **ntfy (User-Wunsch, verbindlich):** Der Stop-Hook pingt bei jedem Turn-Ende.
@@ -126,6 +129,15 @@ gilt diese Tabelle — und ich weise auf den Widerspruch hin, statt still zu
   Muster wie qa, fix, hardening, deps, hotfix).
 - **Lange Session:** `/context` prüfen; vor drohender Kompaktierung den Kopf
   aktualisieren (`pre-compact-checkpoint.sh` sichert nur den git-Stand).
+- **Technik-Backlog** (s. Landkarte): Ops, Security, Updates, Tooling, Code/
+  Tests und UI-Bugs/Polish **ohne** Produktentscheidung → **sofort** als Issue
+  (Anlegen/Labeln ohne Stopp); Produktwünsche und alles mit Produktentscheidung
+  → Roadmap; Handgriffe, die nur du tun kannst (Dashboards, UAC, Admin-UI,
+  Fragebogen) → Kopf „Wartet auf dich". `NEXT_SESSION.md` trägt zum Backlog nur
+  Zeiger `backlog#N` (laufende Welle unter „Jetzt"). Erledigt → schließen mit
+  Commit-Hash. Keine Secrets/Nutzerdaten in Issues; Security-Details nie in ntfy,
+  Kopf, Journal oder öffentliche Commits (dort nur `backlog#N`). „Wie weiter?"
+  wägt Roadmap und Backlog gemeinsam und begründet die Reihenfolge.
 - **Roadmap:** `/roadmap` (Abruf, Auth, Live-only-Abgleich). Schließt eine Welle
   ein Roadmap-Item ab: `python .claude/hooks/roadmap-fetch.py --mark-done
   "<title_de exakt>"` — verbindlich, vorher die `note_de` lesen, nie nur den Titel.
@@ -164,7 +176,7 @@ gilt diese Tabelle — und ich weise auf den Widerspruch hin, statt still zu
   Wahrheit für Code und Doku.
 - **`feature/W-multi-user-web`** ist **eingefroren** — nicht committen/pushen.
 - Branch-Endspiel (→ `main`, Altbranch + Render-Reste abbauen) steht aus →
-  `NEXT_SESSION.md` „Offen".
+  `backlog#9`.
 - Rollback: `git revert <sha>` (bevorzugt, deployt sauber) · `git reset --soft
   HEAD~1` nur für Ungepushtes · Tags `v2.0.0-alpha.W.*` als Sprungmarken.
 

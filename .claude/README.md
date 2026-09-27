@@ -30,7 +30,7 @@ sollen automatisch aufgefangen werden:
 ├── commands/
 │   ├── abschluss.md                   (Slash-Command /abschluss — 13 Checks, Kopf ersetzen)
 │   ├── audit.md                       (Slash-Command /audit <sektion> — Doku-vs-Setup)
-│   └── roadmap.md                     (Slash-Command /roadmap — Live-Roadmap + Auth)
+│   └── roadmap.md                     (Slash-Command /roadmap — Live-Roadmap + Technik-Backlog, „wie weiter?“)
 ├── rules/
 │   └── discipline.md                  (path-scoped Code-Disziplin, lädt bei Code-Work)
 └── hooks/

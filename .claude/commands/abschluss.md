@@ -1,5 +1,5 @@
 ---
-description: Session-Ende-Check fuer Cubetracker — 13 Checks (Git, Patch-Notes, Tags, Features-Liste, Todos, Backend-Smoke, Bugs/Feedback, Live-Deploy, MAINTENANCE, Regelebene-Gegenlesung, Werkstatt, zuletzt Übergabe-Kopf ersetzen + Verlustprobe + Journal) und Abschluss-Übersicht mit End-Block.
+description: Session-Ende-Check fuer Cubetracker — 13 Checks (Git, Patch-Notes, Tags, Features-Liste, Todos, Backend-Smoke, Bugs/Feedback/Technik-Backlog, Live-Deploy, MAINTENANCE, Regelebene-Gegenlesung, Werkstatt, zuletzt Übergabe-Kopf ersetzen + Verlustprobe + Journal) und Abschluss-Übersicht mit End-Block.
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write, TodoWrite
 ---
 
@@ -10,7 +10,7 @@ o. ä.). **Der Aufruf selbst ist die Freigabe — keine Ansage mit Stopp davor.*
 Jeden Check explizit reporten (✓ / ⚠ / – entfällt), am Ende Übersicht +
 End-Block (Format: `CLAUDE.md` → Antwortformat). Knapp. Checks, die nicht
 zutreffen, **entfallen still**. **Reihenfolge einhalten: Check 13 läuft zuletzt**
-— die Checks davor sammeln Punkte für den Kopf.
+— die Checks davor sammeln Punkte für den Kopf bzw. das Technik-Backlog.
 
 Aus dem Repo-Root `D:\Projekte\cubetracker\`. ⚠️ Shell-Variablen überleben
 keinen Bash-Aufruf: jeder Block berechnet `LAST_TAG` selbst und bricht ab,
@@ -73,7 +73,7 @@ git log "$LAST_TAG..HEAD" --name-only --pretty=format:"COMMIT:%h %s" \
 ### 6. Offene Todos der Session?
 
 - **Alle `completed`:** ✓. **Offene:** ⚠ → Kandidat für den Kopf („Offen",
-  Check 13) — nicht nur im Chat nennen.
+  Check 13), technische als Backlog-Issue (`backlog#N`) — nicht nur im Chat nennen.
 
 ### 7. Backend-Smoke-Test (lokal)
 
@@ -100,15 +100,22 @@ print('Backend startet sauber')
 - **Beides grün (RC=0):** ✓. **Fehler:** ⚠ HARD STOP — wäre im Coolify-Build
   gescheitert. Vor Session-Ende fixen.
 
-### 8. Offene Bugs / Feedback
+### 8. Offene Bugs / Feedback / Technik-Backlog
 
 ```bash
 command -v gh >/dev/null && gh issue list --state open --limit 5 --json number,title,labels
+command -v gh >/dev/null && gh issue list -R fischehaus/cubetracker-backlog --state all --search "updated:>=$(date +%F)" --json number,title,state
 ```
+
+- **Technik-Funde der Session** (Updates, Ops, Security, Tooling, Lücken aus
+  QA/Gegenlesung): jeder als Issue im Backlog-Repo erfasst? Erledigte Issues
+  mit Commit-Verweis geschlossen? Fehlt etwas: ⚠ → jetzt anlegen, **nicht**
+  in den Kopf schreiben (Maßgeblich: `CLAUDE.md` → Session-Workflow).
 
 Admin-Feedback-Inbox: App → Verwaltung → Admin → Feedback-Inbox (kein Auto-Scan).
 
-- **Nichts offen:** ✓. **Offene Bugs:** ⚠ → Kandidat für den Kopf („Offen")
+- **Nichts offen:** ✓. **Offene Bugs:** ⚠ → technisch/ohne Produktentscheidung
+  → Backlog-Issue (im Kopf nur `backlog#N`), sonst Roadmap bzw. Kopf („Offen");
   oder bewusst liegen lassen. Nicht erzwingen.
 
 ### 9. Live-Deploy-Verifikation
@@ -142,7 +149,7 @@ grep -oE "^- (\*\*)?202[0-9]-[0-9]{2}-[0-9]{2}" MAINTENANCE.md | tr -d '*' | sor
 ```
 
 - **< 4 Wochen:** ✓. **Älter:** ⚠ → End-Block-Zeile „MAINTENANCE-Lauf jetzt?"
-  und Kandidat für den Kopf („Offen").
+  und Kandidat für den Kopf („Offen"). Funde eines Laufs → Backlog-Issues.
 
 ### 11. Regelebene geändert → lief die Gegenlesung?
 
@@ -152,8 +159,8 @@ Commits der Session). **Sonst entfällt der Check still.**
 - Hat die Änderung eine **Aussage** geändert, gestrichen oder neu eingeführt?
   - **Ja** und die Gegenlesung lief (Opus, frischer Kontext, Critique): ✓, im
     Journal-Block „Gegenleser: opus/<Datum>" vermerken.
-  - **Ja, aber ohne Gegenlesung:** ⚠ → jetzt nachholen **oder** als Punkt in den
-    Kopf („Offen") — nicht still übergehen.
+  - **Ja, aber ohne Gegenlesung:** ⚠ → jetzt nachholen **oder** als Backlog-Issue
+    (`bereich:tooling`, im Kopf `backlog#N`) — nicht still übergehen.
   - **Nein (Bagatelle):** ansagen und im Journal-Block „Gegenleser: entfallen
     (Bagatelle)" vermerken.
 - Hooks geändert → liefen die mechanischen Tests (u. a.
@@ -193,20 +200,26 @@ ans Ende von `docs/session-journal.md`.
 3. **Journal-Block anhängen** (Dateiende; nie beim Start geladen):
    `## ✅ JJJJ-MM-TT — <Thema>` · Wellen mit Tag + Commit-Hash · Entscheidungen ·
    für **jeden** alten Schlüssel, der nicht in den neuen Kopf wandert: `✅ <Schlüssel>
-   — erledigt (<Hash>)` bzw. `✗ <Schlüssel> — verworfen: <Grund>` · Lessons nur
+   — erledigt (<Hash>)` bzw. `✗ <Schlüssel> — verworfen: <Grund>` bzw. `➜ <Schlüssel>
+   — ins Technik-Backlog (backlog#N)` (technische Punkte gehören dorthin, nicht in
+   den Kopf) · Lessons nur
    als Verweis (die Lesson selbst → `docs/lessons-archive.md`). Anhängen per
    `cat >> docs/session-journal.md <<'EOF'` — die Datei ist groß.
 4. **Kopf neu schreiben** (Write, ganzer Kopf, Rahmen-Kopfzeilen beibehalten);
-   übernommene Schlüssel **wörtlich**. Kandidaten aus Checks 1–12 aufnehmen.
+   übernommene Schlüssel **wörtlich**. Kandidaten aus Checks 1–12 aufnehmen —
+   technische als Backlog-Issue, im Kopf nur `backlog#N`.
 5. **Verlustprobe (Pflicht — Ersetzen ist destruktiv):** jeden Schlüssel
    (Zeilenumbrüche vorher per `tr '\n' ' '` glätten) per `grep -cF` suchen in
    (a) dem **neuen Kopf** oder (b) dem **Journal-Block dieser Session**
-   (`sed -n '/^## ✅ <heute>/,$p' docs/session-journal.md`) mit ✅/✗.
-   **Fehlt einer → Abbruch**, Punkt wiederherstellen, erneut prüfen.
+   (`sed -n '/^## ✅ <heute>/,$p' docs/session-journal.md`) mit ✅/✗/➜.
+   **Fehlt einer → Abbruch**, Punkt wiederherstellen, erneut prüfen. Für jede
+   in ➜-Zeilen genannte `backlog#N`: `gh issue view -R fischehaus/cubetracker-backlog
+   N --json state` muss das Issue finden, sonst Abbruch. **gh nicht erreichbar** → Punkt bleibt
+   im Kopf unter „Offen" mit Vermerk „(Backlog-Anlage offen)", kein ➜.
 6. **Budget-Probe** (simuliert den echten Start, offline, ohne Snapshot):
    `echo '{"source":"startup"}' | CUBETRACKER_HOOK_OFFLINE=1 bash
    .claude/hooks/session-start-context.sh > .tmp/start-probe.txt; wc -m
-   .tmp/start-probe.txt` → ≤ 9.000 Zeichen (Reserve für Roadmap/Issues) und
+   .tmp/start-probe.txt` → ≤ 8.000 Zeichen (Reserve für Backlog/Roadmap/Issues) und
    **kein** „NICHT geladen". Sonst kürzen (Erledigtes → Journal, Regeln →
    `CLAUDE.md`).
 7. **Commit nur dieser beiden Pfade:**
@@ -235,15 +248,16 @@ Roadmap-Items, die eine Welle abgeschlossen hat: `--mark-done` (`/roadmap`).
 | 5 | features-data.ts | … |
 | 6 | Todos | … |
 | 7 | Backend-Smoke | … |
-| 8 | Bugs / Feedback | … |
+| 8 | Bugs / Feedback / Technik-Backlog | … |
 | 9 | Live-Deploy | … |
 | 10 | MAINTENANCE | … |
 | 11 | Regelebene-Gegenlesung | … |
 | 12 | Werkstatt | … |
 | 13 | Kopf ersetzt + Verlustprobe + Journal | … |
 
-Danach drei Zeilen: **erreicht** · **offen** (steht jetzt im Kopf) · **weiter**
-(womit die nächste Session beginnt). Dann — nur wenn etwas offen ist — der
+Danach drei Zeilen: **erreicht** · **offen** (steht jetzt im Kopf bzw. Backlog) ·
+**weiter** (womit die nächste Session beginnt — aus Roadmap **und** Backlog
+abgewogen, Reihenfolge in einem Satz begründet). Dann — nur wenn etwas offen ist — der
 End-Block „➡️ Jetzt bei dir" (`CLAUDE.md` → Antwortformat). **Alles grün → kein
 Block**; das ist das Erfolgssignal. ntfy-Nachricht entsprechend schreiben.
 

@@ -4,17 +4,18 @@
 # Zweck: Jede Session (auch nach /compact und /clear) startet mit dem
 # Übergabe-Kopf NEXT_SESSION.md im Kontext — nach /compact zählt nur, was in
 # Dateien steht. Dazu eine Werkstatt-Zeile (liegengebliebene Änderungen) und
-# bei startup/resume der Repo-Stand (Branch, Version, Commits, Issues, Roadmap).
+# bei startup/resume der Repo-Stand (Branch, Version, Commits, Issues,
+# Technik-Backlog aus dem privaten Repo, Roadmap).
 #
 # Budget (W.harness-v2, 2026-09-25): Die GESAMTE Ausgabe bleibt unter
 # BUDGET Zeichen. Hintergrund: Im SKHO-Harness gemessen (CLI 2.1.233) kappt
 # Claude Code Hook-Ausgaben ab ~18.000 Zeichen still auf eine ~1.900-Zeichen-
 # Vorschau — die Session startet dann halbblind, ohne es zu merken. Bei
-# Überschreitung fallen zuerst Roadmap + Issues weg, erst dann der Kopf
-# (dann Lesebefehl + Warnung statt Inhalt).
+# Überschreitung fallen zuerst Issues + Backlog + Roadmap weg, erst dann der
+# Kopf (dann Lesebefehl + Warnung statt Inhalt).
 #
-# Netzaufrufe (gh, roadmap-fetch) laufen mit `timeout 3`, damit der Hook
-# sein eigenes Timeout nie reißt.
+# Netzaufrufe (gh, roadmap-fetch) laufen mit `timeout 3` bzw. 4, damit der Hook
+# sein eigenes Timeout (20 s) nie reißt.
 #
 # Historie: 2026-05-16 angelegt (Mental-Model-Drift: App ist live).
 # Eingabe (stdin): JSON mit "source". Ausgabe: plain text → Kontext. Exit 0.
@@ -119,6 +120,32 @@ Maßgeblich: CLAUDE.md (Session-Workflow, Antwortformat)."
       --template '{{range .}}  #{{.number}}: {{.title}}{{"\n"}}{{end}}' 2>/dev/null || true)"
     [[ -n "$issues" ]] && extra_block+=$'\n'"🐛 Offene GitHub-Issues (max. 5):"$'\n'"${issues}"
   fi
+  # Technik-Backlog (privates Repo, seit 2026-09-27; Maßgeblich: CLAUDE.md →
+  # Session-Workflow): Top 5 nach prio:hoch > mittel > niedrig > ohne,
+  # blockierte ans Ende, Titel auf 90 Zeichen. Scheitert gh (Netz, Auth,
+  # Repo), sagt der Hook das — ein stilles Fehlen sähe aus wie „nichts offen".
+  if [[ "$offline" != "1" ]] && ! { (( SECONDS <= 10 )) && command -v gh >/dev/null 2>&1; }; then
+    extra_block+=$'\n'"🔧 Technik-Backlog übersprungen (kein gh oder Zeitbudget) — bei Bedarf /roadmap."
+  elif [[ "$offline" != "1" ]]; then
+    backlog_repo="${CUBETRACKER_BACKLOG_REPO:-fischehaus/cubetracker-backlog}"
+    backlog="$(timeout 4 gh issue list -R "$backlog_repo" \
+      --state open --limit 200 --json number,title,labels --jq '
+      def names: [.labels[].name];
+      def prio: names | if index("prio:hoch") then 0 elif index("prio:mittel") then 1
+                        elif index("prio:niedrig") then 2 else 3 end;
+      def tag: ["hoch","mittel","niedrig","ohne Prio"][prio]
+               + (if (names | index("blockiert")) then ", blockiert" else "" end)
+               + (if (names | index("wartungsfenster")) then ", Wartungsfenster" else "" end);
+      "\(length) offen", (sort_by([(names | index("blockiert") != null), prio, .number])
+      | .[:5][] | "  backlog#\(.number) [\(tag)] \(.title[:90])")' 2>/dev/null)"
+    backlog_rc=$?
+    if (( backlog_rc != 0 )) || [[ -z "$backlog" ]]; then
+      extra_block+=$'\n'"🔧 Technik-Backlog NICHT abrufbar (gh rc=${backlog_rc}) — manuell: gh issue list -R ${backlog_repo}"
+    else
+      extra_block+=$'\n'"🔧 Technik-Backlog (privat, ${backlog%%$'\n'*}; Top 5 — Reihenfolge prüfen, nicht blind übernehmen):"
+      [[ "$backlog" == *$'\n'* ]] && extra_block+=$'\n'"${backlog#*$'\n'}"
+    fi
+  fi
   if [[ "$offline" != "1" ]] && (( SECONDS <= 8 )); then
     roadmap_out="$(timeout 3 python .claude/hooks/roadmap-fetch.py --brief --update-snapshot 2>/dev/null || true)"
     [[ -n "$roadmap_out" ]] && extra_block+=$'\n'"${roadmap_out}"
@@ -130,7 +157,7 @@ fi
 assemble() { printf '%s\n\n%s\n\n%s\n%s\n' "$kopf_block" "$werk_block" "$repo_block" "$extra_block"; }
 out="$(assemble)"
 if (( ${#out} > BUDGET )) && [[ -n "$extra_block" ]]; then
-  extra_block="(Issues/Roadmap weggelassen: Hook-Budget ${BUDGET} Zeichen — bei Bedarf /roadmap.)"
+  extra_block="(Issues/Technik-Backlog/Roadmap weggelassen: Hook-Budget ${BUDGET} Zeichen — bei Bedarf /roadmap.)"
   out="$(assemble)"
 fi
 if (( ${#out} > BUDGET )); then

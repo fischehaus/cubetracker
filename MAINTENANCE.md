@@ -201,6 +201,10 @@ ssh root@178.105.103.78 "docker ps --format '{{.Names}}\t{{.Status}}'"
   erscheinen im App-Roadmap-Modal.
 - Claude-Task-Liste aufräumen (erledigte schließen, Stale löschen).
 - Offene GitHub-Issues sichten: `gh issue list` (Bug-Reports/Feature-Wünsche).
+- **Technik-Backlog sichten** (`gh issue list -R fischehaus/cubetracker-backlog
+  --state open`): Prio je Issue neu bewerten, `blockiert` prüfen (Voraussetzung
+  erfüllt?), Issues ohne Bewegung seit > 90 Tagen schließen oder begründen.
+  Findings dieses Laufs → Backlog-Issue; im Protokoll unten nur `backlog#N`.
 
 ---
 

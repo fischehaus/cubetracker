@@ -37,7 +37,8 @@ Session-Start-Hook.)
 kurz erklären, wie er den Export-Key (bevorzugt) oder den Token hinterlegt
 (als Admin auf cubetracker.de einloggen → DevTools → Application → Local
 Storage → `cubetracker_access_token` → in `.tmp/admin-token`) — und hier
-stoppen, ohne Auth kein Abruf.
+stoppen, ohne Auth kein Roadmap-Abruf — den **Technik-Backlog-Teil aus
+Schritt 3 trotzdem zeigen** (braucht nur `gh`).
 
 **Wenn „Token abgelaufen (HTTP 401)":** der Access-Token ist kurzlebig.
 Bitte den User, einen frischen `cubetracker_access_token` aus dem
@@ -71,7 +72,12 @@ zuerst), die im Reorder schon hinterlegt ist. Konkret:
 
 - Nimm die obersten `active` (nicht `done`) Items der frühesten Phase
   (P1 vor P3 vor P4 …).
-- Nenne 2–3 Kandidaten mit Phase + Effort.
+- **Technik-Backlog dazunehmen** (Maßgeblich: `CLAUDE.md` → Session-Workflow;
+  Befehle unten unter „Mechanik Technik-Backlog"): `prio:hoch` und
+  Sicherheit/Betrieb können ein Roadmap-Item überholen; `blockiert`/
+  `wartungsfenster` nur mit erfüllter Voraussetzung vorschlagen.
+- Nenne 2–3 Kandidaten (Produkt und/oder Technik) mit Phase bzw. `backlog#N`
+  + Effort/`aufwand:*` und begründe die Reihenfolge in einem Satz.
 - Dann End-Block „➡️ Jetzt bei dir" (`CLAUDE.md` → Antwortformat): die
   Kandidaten als nummerierte Zeilen mit Empfehlungswort, dazu eine Zeile
   „oder etwas anderes?" als `(offene Wahl)`.
@@ -94,3 +100,27 @@ Stopp (`CLAUDE.md` → Antwortformat).
   gültigen Admin-Token).
   Verbindlich nach Abschluss eines Roadmap-Items — nicht nur erinnern.
 - Phasen-Struktur P1..P6: `webapp/frontend/src/lib/roadmap-phases.ts`.
+
+## Mechanik Technik-Backlog
+
+Repo `fischehaus/cubetracker-backlog` (privat). Regeln: `CLAUDE.md` →
+Session-Workflow „Technik-Backlog". Vorlage: `.github/ISSUE_TEMPLATE/technik.md`
+dort (Warum/Risiko · Fundstelle · Erledigt, wenn … · Abhängigkeiten ·
+Wartungsfenster). Labels: genau ein `prio:hoch|mittel|niedrig`, ein
+`aufwand:S|M|L`, mind. ein `bereich:ops|security|deps|tooling|code|ui`; dazu
+`blockiert` (Voraussetzung im Issue benannt) und `wartungsfenster`.
+
+```bash
+# -R direkt nach dem Verb und ausgeschrieben: so kann eine Freigabe-Regel der Form
+# Bash(gh issue <verb> -R fischehaus/cubetracker-backlog *) greifen (richtet der User ein)
+gh issue list -R fischehaus/cubetracker-backlog --state open --limit 100 --json number,title,labels   # Überblick
+gh issue view -R fischehaus/cubetracker-backlog N                                                      # Details
+gh issue create -R fischehaus/cubetracker-backlog --title "…" --body "…" --label prio:mittel --label aufwand:S --label bereich:ops
+gh issue edit -R fischehaus/cubetracker-backlog N --add-label prio:hoch --remove-label prio:mittel     # Prio neu
+gh issue close -R fischehaus/cubetracker-backlog N -c "<sha>: <was erledigt>"                          # nur mit Beleg
+```
+
+Verweise überall als `backlog#N` (Roadmap-Items und die App-Analyse nutzen
+ebenfalls `#N`). Commits im Haupt-Repo: `Refs fischehaus/cubetracker-backlog#N`
+— ob ein Keyword über Repo-Grenzen automatisch schließt, ist ungeprüft; daher
+immer explizit `gh issue close`.

@@ -3057,3 +3057,22 @@ Verlustprobe alter Kopf (fc41040):
 - ✅ Bug Tägliche Herausforderung: — erledigt (`49bf43f`)
 - ✅ Einmal `/compact` ausführen — erledigt (Kopf nach /compact geladen)
 - ✅ Nach einer Antwort mit End-Block: — erledigt (kein 2. Turn, eigener ntfy-Text)
+
+## ✅ 2026-09-27 — Technik-Backlog eingeführt (Kopf-Umzug)
+
+Privates Repo `fischehaus/cubetracker-backlog` angelegt (Labels, Vorlage), 24 Issues
+aus Kopf, App-Analyse 06/2026, MAINTENANCE und Lessons. Gegenleser: opus/2026-09-27
+(2 Läufe: Entwurf + Umsetzung). Umzug der Kopf-Punkte (Schlüssel wörtlich):
+
+- ✅ Erledigt 27.09.: — #48 live (d45e03d), Dev-Server-Hook (398e473)
+- ➜ Software-Reste: — ins Technik-Backlog (backlog#17, backlog#5, backlog#18, backlog#19); winget bleibt im Kopf
+- ➜ Welle B: Off-Site-Backup (#9) · — ins Technik-Backlog (backlog#3, backlog#6, backlog#14, backlog#11)
+- ➜ Welle C: `user_cube_stats`-Aggregat (#11) · — ins Technik-Backlog (backlog#12, backlog#13, backlog#7)
+- ➜ Coolify-API ohne TLS (`docs/coolify-https-howto.md`). — ins Technik-Backlog (backlog#2)
+- ➜ Branch-Endspiel (→ `main`, `feature/W-multi-user-web` + — ins Technik-Backlog (backlog#9, backlog#22)
+- ➜ Stackmat: Fokus-Modus-Escape aus dem Stackmat-Modus — ins Technik-Backlog (backlog#16)
+- ➜ Timer-Zeit ragt bei großer Schrift — ins Technik-Backlog (backlog#15)
+- ➜ MAINTENANCE 27.09. (🤖-Teil) gelaufen, Protokoll — Docker ins Technik-Backlog (backlog#1); 👤-Dashboards bleiben im Kopf
+- ➜ Werkstatt: untracked seit Mai/Juni — — verify_oll.py ins Technik-Backlog (backlog#24); Fragebogen bleibt im Kopf
+- ➜ Hooks `pre-git-tag-check`, `post-git-commit`, `post-push-failure-diagnose`: — ins Technik-Backlog (backlog#23)
+- Dev-Server-Hook-Restlücke (Teil von „Erledigt 27.09.:") → backlog#20
