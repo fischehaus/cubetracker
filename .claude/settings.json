@@ -5,6 +5,12 @@
     "allow": [
       "Bash(gh api repos/cs0x7f/*)",
       "Bash(gh api repos/fischehaus/cubetracker/*)",
+      "Bash(gh issue list -R fischehaus/cubetracker-backlog *)",
+      "Bash(gh issue view -R fischehaus/cubetracker-backlog *)",
+      "Bash(gh issue create -R fischehaus/cubetracker-backlog *)",
+      "Bash(gh issue edit -R fischehaus/cubetracker-backlog *)",
+      "Bash(gh issue comment -R fischehaus/cubetracker-backlog *)",
+      "Bash(gh issue close -R fischehaus/cubetracker-backlog *)",
       "Bash(npm test*)",
       "Bash(npm run build*)",
       "Bash(npm run lint*)",
