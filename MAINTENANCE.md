@@ -157,9 +157,10 @@ npm --prefix "D:/Projekte/cubetracker/webapp/frontend" test
 pre-commit run --all-files
 ```
 
-- **Backend-Tests:** aktuell **0 Coverage** (kein `webapp/tests/`) — steht als
-  P6-Item in der Roadmap. Sobald vorhanden hier ergänzen:
-  `cd webapp && python -m pytest -q`.
+- **Backend-Tests:** `cd webapp && .venv/Scripts/python.exe -m pytest -q`
+  (Stand 2026-09-27: 269 Tests). Python-Deps: `python -m pip_audit -r
+  constraints.txt --no-deps --disable-pip` (ohne `--no-deps` scheitert es unter
+  Windows an `uvloop`).
 
 **Pass:** Build grün, Frontend-Tests grün, pre-commit ohne Fehler.
 **Fix:** rote Tests/Build vor jedem Deploy fixen (Coolify baut sonst kaputt).
@@ -226,4 +227,5 @@ ssh root@178.105.103.78 "docker ps --format '{{.Names}}\t{{.Status}}'"
 Jeder Durchlauf bekommt eine Zeile (neueste oben): Datum — Schnell/Voll —
 Befunde / behoben / offen.
 
+- **2026-09-27 — Voll, 🤖-Teil** (1–3, 5–7, 9; 👤 4/8/10 offen) — grün: Branch/Tree/unpushed sauber, `W-multi-user-web` unberührt (letzter Commit 25.05.), Frontend 200, Health `W.solve-notes-edit`, Certs bis 06.12. (apex) / 18.12. (www), apex weiter 301 → www; Build ok (Haupt-Bundle 1,17 MB / 347 kB gzip, >500-kB-Warnung bekannt), 282 Vitest + 269 pytest grün, pre-commit --all-files grün, npm audit 0 (auch dev); pip-audit nur `ecdsa` 0.19.2 (PYSEC-2026-1325, via python-jose, HS256 nicht betroffen → PyJWT-Umstieg steht in NEXT_SESSION); keine Secrets/.env im Repo; 0 offene GitHub-Issues; Server: Disk 15 %, RAM ok, alle Container healthy, Coolify-Dump täglich 03:00 UTC (jüngster heute, 129 Dumps / 212 MB, keine Rotation). **Findings:** (a) Server **seit 129 Tagen ohne Reboot**, läuft Kernel 6.8.0-52, installiert 6.8.0-124 + libc6 → Reboot nötig (~1–2 min Ausfall); 110 Pakete upgradebar, unattended-upgrades aktiv. (b) 4 alte Wellen ohne Git-Tag: `W.login-redesign-and-demo-code`, `W.roadmap-admin-reorder-qa`, `W.roadmap-doku-cleanup-qa`, `W.timer-font-clamp` (letztere zurückgerollt). (c) Coolify-Dumps ohne Aufbewahrungsgrenze (unkritisch bei 2 MB/Tag). (d) `webapp/README.md` DB-Zeile noch „Render-managed" → korrigiert. (e) Abschnitt 6 „0 Backend-Coverage" veraltet → korrigiert. (f) Abschnitt 10 (Phase 6 ~05.06.) überfällig, steht in NEXT_SESSION als Branch-Endspiel.
 - **2026-05-26 — Voll** (🤖 1-3, 5, 6, 9 + 👤 4, 7, 8, 10 offen) — Live-App / Tests / Build / Audit grün: Frontend 200, Health `W.meine-daten`, Bundle deployt (`Datenschutzerkl` 2× im aktuellen JS-Bundle), Cert gültig bis 2026-08-20, 158/158 Frontend-Tests, 0 npm-Vulnerabilities, Tree clean außer `scripts/`, keine unpushed, `W-multi-user-web` unberührt, 0 offene GitHub-Issues. **Findings:** (a) `.claude/README.md:13` + `webapp/auth/config.py:3` + `webapp/emailing/service.py:6` enthalten noch Render-Texte → wird mit der parallelen Hook-Drift-Korrektur mit-aktualisiert. (b) `pre-commit` CLI nicht im PATH / nicht in den venvs (Commit-Hooks laufen aber, siehe letzter Commit). (c) Bundle 1.4 MB / 430 kB gzip — >500 kB-Warning bekannt (P6 Bundle-Splitting). (d) `webapp/render.yaml` noch im Tree (Legacy, Phase-6-Abbau). **Offen 👤:** Coolify + Hetzner-Backup-Dashboards (Sektion 4), Server-Disk + Docker-Status via SSH (7 — Classifier blockt SSH zur Prod-IP, muss der User selbst checken), Off-Site-Backup-Sync, INWX-Auto-Renew, Kosten-Check (8/10). **Bekannte Altlast:** apex `cubetracker.de` = 301 → www (wird in Phase 6 ~05.06.2026 mit Render-Abbau erledigt).
