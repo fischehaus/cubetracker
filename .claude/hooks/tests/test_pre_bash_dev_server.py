@@ -38,6 +38,17 @@ BLOCK = [
     "yarn dev",
     "pnpm dev",
     'echo "x" ; npm start',
+    'grep -E "a|b" f | npm run dev',
+    "echo 'x;y' && npm run dev",
+    'echo "(" ; vite',
+    'bash -c "echo \\"a|b\\"; npm run dev"',
+    "bash -c 'cd webapp/frontend && npm run dev'",
+    # Unbalancierte Quotes (Apostroph in Kommentar/Heredoc): alte Trennung greift zusätzlich
+    "# don't start anything else\nnpm run dev",
+    "npx vitest run # it's only tests\nnpm run dev",
+    "cat > notes.txt <<'EOF'\nit's a note\nEOF\nnpm run dev",
+    "python - <<'EOF'\nprint(\"x\")  # user's data\nEOF\ncd webapp/frontend && npm run dev",
+    "echo $'it\\'s' ; npm run dev",
 ]
 ALLOW = [
     "npx vitest run src/lib/puzzle-net.test.ts",
@@ -54,6 +65,14 @@ ALLOW = [
     "ls webapp/frontend/src/dev-tools 2>&1",
     "npm install",
     "timeout 30 npm test",
+    # Trennzeichen INNERHALB von Anführungszeichen trennen keine Segmente (2026-09-27)
+    'grep -E "a|uvicorn" webapp/Dockerfile',
+    'grep -E "a|uvicorn main:app" webapp/Dockerfile',
+    'git commit -m "fix: x; npm run dev erklaert"',
+    "echo 'a && vite'",
+    'echo "a\nnpm run dev"',
+    r'echo a \| vite',
+    "git commit -m \"$(cat <<'EOF'\nfix\n\nnpm run dev\nEOF\n)\"",
 ]
 
 

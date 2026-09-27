@@ -6,7 +6,7 @@ Zustand, keine Regeln** — Regeln stehen in `CLAUDE.md`. Wird beim `/abschluss`
 `docs/session-journal.md`. Budget: Die gesamte Hook-Ausgabe muss unter 10.000
 Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 
-**Zuletzt aktualisiert:** 2026-09-25 (Abschluss: Skewb, Challenge-Fix, Ops-Härtung)
+**Zuletzt aktualisiert:** 2026-09-27 (Zwischenstand: #48 live, Hook-Fix)
 
 ## 📍 Stand
 
@@ -20,17 +20,16 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 ## 🔜 Offen
 
 **Jetzt:**
-1. **Hook-Fehlalarm `pre-bash-dev-server.sh`:** trennt Segmente an `|` auch
-   INNERHALB von Anführungszeichen → `grep -E "a|uvicorn"` wird blockiert.
-   Fix: erst `shlex` mit `punctuation_chars`, dann trennen; Testfall in
-   `tests/test_pre_bash_dev_server.py`; Regelebene → Gegenlesung.
+1. **Erledigt 27.09.:** #48 Solve-Notizen LIVE (`v2.0.0-alpha.W.solve-notes-edit`,
+   Bundle `index-DVGAE6VG.js`, Roadmap done) · Dev-Server-Hook quote-bewusst
+   (Matrix 55/55, Opus-gegengelesen). Rest-Lücke dort: Heredoc-Bodies gelten
+   weiter als Befehle, Backticks/`\`-Fortsetzung ungeprüft (vorbestehend).
 2. **Software-Reste:** Majors TS 7 / Vitest 5 / `@types/node` 26 · python-jose
    → PyJWT (`ecdsa`-Fund, HS256 nicht betroffen) · `sqlalchemy<2.1`-Pin lösen
    (Treiber jetzt explizit) · ESLint 27 Alt-Fehler (nicht im CI-Gate) · lokal
    21 winget-Updates.
 
-**Bald:** Solve-Notizen editierbar (#48; Detail-Modal zeigt sie nur an) ·
-Session/Hardware fixieren statt Auto (#49) · Roadmap #22 (Stackmat: Audio live,
+**Bald:** Session/Hardware fixieren statt Auto (#49) · Roadmap #22 (Stackmat: Audio live,
 USB nicht) und #7 (Bluetooth teils live) umbenennen — nur mit User im Admin-UI.
 
 **Wartet auf dich:**

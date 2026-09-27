@@ -7,7 +7,9 @@
 # ein Mental-Model-Fehler („ich teste lokal") statt echtem Debugging.
 #
 # W.harness-v2 (2026-09-25): Geprüft wird JE BEFEHLSSEGMENT (getrennt an &&,
-# ||, ;, |, &, Zeilenumbruch; Klammern entfernt; `bash -c "…"` rekursiv) und
+# ||, ;, |, &, Zeilenumbruch; Klammern entfernt — beides nur außerhalb von
+# Anführungszeichen, seit 2026-09-27; bleibt ein Quote offen, zusätzlich die
+# alte Trennung überall; `bash -c "…"` rekursiv) und
 # nur das AUSGEFÜHRTE Programm (Wrapper wie npx, nohup, timeout N, env, FOO=1
 # und Optionen wie `npm --prefix X`, `python -X utf8` werden übersprungen).
 # Vorher traf das Glob-Muster *vite* auch `npx vitest` (reiner Testlauf).
@@ -41,8 +43,37 @@ WRAPPERS = {"npx", "exec", "env", "sudo", "time", "nohup", "command"}
 OPT_WITH_VALUE = {"--prefix", "-C", "--dir", "--cwd", "-w", "--workspace", "--filter"}
 
 def split_segments(s):
-    s = re.sub(r"[(){}]", " ", s)
-    return [p.strip() for p in re.split(r"&&|\|\||;|\||&|\n", s) if p.strip()]
+    # Trennt an & | ; Zeilenumbruch und Klammern NUR ausserhalb von Quotes
+    # (vorher: `grep -E "a|uvicorn x"` -> Segment `uvicorn x"` -> Fehlalarm).
+    segs, cur, quote, i = [], [], None, 0
+    while i < len(s):
+        c = s[i]
+        if quote == "\x27":
+            cur.append(c)
+            if c == "\x27":
+                quote = None
+        elif c == "\\" and i + 1 < len(s):
+            cur.append(s[i:i + 2])
+            i += 1
+        elif quote == "\"":
+            cur.append(c)
+            if c == "\"":
+                quote = None
+        elif c in "\x27\"":
+            quote = c
+            cur.append(c)
+        elif c in "&|;\n":
+            segs.append("".join(cur))
+            cur = []
+        elif c in "(){}":
+            cur.append(" ")
+        else:
+            cur.append(c)
+        i += 1
+    segs.append("".join(cur))
+    if quote:  # unbalanciert (Kommentar, Heredoc, ANSI-C): alte Trennung zusaetzlich
+        segs += re.split(r"&&|\|\||;|\||&|\n", re.sub(r"[(){}]", " ", s))
+    return [p.strip() for p in segs if p.strip()]
 
 def is_dev_server(seg, depth=0):
     try:
