@@ -2,7 +2,8 @@
 // W.scramble-net-nxn 2026-06-29) — React-Wrapper um die Cube-Net-Renderer.
 // Rendert das 2D-Cross-Layout-Bild für einen Scramble.
 //
-// Dispatch nach cubeType:
+// Dispatch nach Net-Schlüssel — seit W.scramble-net-type (2026-09-27) aus dem
+// effektiven Scramble-Typ (resolveScrambleNetKey), vorher fälschlich cubeType:
 //   - 3x3/OH/3BLD → cube-net.ts (getesteter 3x3-Renderer, unverändert)
 //   - 2x2/4x4/5x5/6x6/7x7 → cube-net-nxn.ts (generischer NxN-Renderer)
 //   - alles andere (Pyraminx/Skewb/Sq1/Mega/Clock) → null (andere Geometrie)
@@ -23,12 +24,15 @@ import {
 } from "../lib/puzzle-net";
 import { PYRAMINX_NET } from "../lib/puzzle-net-data/pyraminx";
 import { SKEWB_NET } from "../lib/puzzle-net-data/skewb";
+import { resolveScrambleNetKey } from "../lib/scramble-net-type";
 
 interface Props {
   /** Der Scramble-String. Leer / null → solved-Cube wird gerendert. */
   scramble: string;
-  /** App-cube_type, z.B. "3x3". Nur "3x3" rendert aktuell. */
+  /** App-cube_type, z.B. "3x3" — nur Fallback, wenn scrambleType fehlt. */
   cubeType: string;
+  /** Effektiver Scramble-Typ (z.B. "222", "pyraminx") — bestimmt das Net. */
+  scrambleType?: string | null;
   /** Sticker-Kantenlaenge in px. Default 18 (passt zu typischer Card-Breite). */
   stickerPx?: number;
 }
@@ -63,11 +67,14 @@ const PUZZLE_NET_BY_TYPE: Record<string, PuzzleNetData> = {
  * Toggle-Button nur dann anzuzeigen wenn er auch eine Wirkung hat —
  * sonst wäre er irreführend ("Toggle tut nichts").
  */
-export function isScrambleNetSupported(cubeType: string): boolean {
+export function isScrambleNetSupported(
+  cubeType: string,
+  scrambleType?: string | null,
+): boolean {
+  const key = resolveScrambleNetKey(cubeType, scrambleType);
   return (
-    THREE_BY_THREE.has(cubeType) ||
-    cubeType in NXN_BY_TYPE ||
-    cubeType in PUZZLE_NET_BY_TYPE
+    key !== null &&
+    (THREE_BY_THREE.has(key) || key in NXN_BY_TYPE || key in PUZZLE_NET_BY_TYPE)
   );
 }
 
@@ -79,20 +86,27 @@ function nxnStickerPx(n: number, base: number): number {
   return Math.max(7, Math.min(28, Math.round((base * 3) / n)));
 }
 
-export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
+export function ScrambleNet({
+  scramble,
+  cubeType,
+  scrambleType,
+  stickerPx = 18,
+}: Props) {
   const { t } = useTranslation();
+  const netKey = resolveScrambleNetKey(cubeType, scrambleType);
   const svgString = useMemo(() => {
     try {
-      if (THREE_BY_THREE.has(cubeType)) {
+      if (netKey === null) return null;
+      if (THREE_BY_THREE.has(netKey)) {
         return renderScrambleSvg(scramble || "", { stickerPx });
       }
-      const n = NXN_BY_TYPE[cubeType];
+      const n = NXN_BY_TYPE[netKey];
       if (n) {
         return renderScrambleNxnSvg(n, scramble || "", {
           stickerPx: nxnStickerPx(n, stickerPx),
         });
       }
-      const puzzleData = PUZZLE_NET_BY_TYPE[cubeType];
+      const puzzleData = PUZZLE_NET_BY_TYPE[netKey];
       if (puzzleData) {
         return renderScramblePuzzleNetSvg(puzzleData, scramble || "", {
           width: 220,
@@ -104,7 +118,7 @@ export function ScrambleNet({ scramble, cubeType, stickerPx = 18 }: Props) {
       // zeigen wir lieber nichts als die ganze ScrambleCard zu killen.
       return null;
     }
-  }, [scramble, cubeType, stickerPx]);
+  }, [scramble, netKey, stickerPx]);
 
   if (!svgString) return null;
 

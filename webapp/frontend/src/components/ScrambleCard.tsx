@@ -68,7 +68,8 @@ type Category = "wca" | "big" | "unofficial";
 function categoryFor(code: string): Category | null {
   if (WCA_SCRAMBLE_TYPES.some((t) => t.code === code)) return "wca";
   if (BIG_CUBE_SCRAMBLE_TYPES.some((t) => t.code === code)) return "big";
-  if (UNOFFICIAL_SCRAMBLE_TYPES.some((t) => t.code === code)) return "unofficial";
+  if (UNOFFICIAL_SCRAMBLE_TYPES.some((t) => t.code === code))
+    return "unofficial";
   return null;
 }
 
@@ -93,11 +94,6 @@ export function ScrambleCard({
   const [skipCounter, setSkipCounter] = useState(0);
   const [settings, setSettings] = useAppSettings();
   const fontPx = TIMER_FONT_SCALE[settings.timer_font_size].scramble;
-
-  // Phase W.scramble-image (2026-05-17): ist das 2D-Net für den aktuellen
-  // Cube-Type überhaupt verfügbar? Wir blenden den Toggle dann nur ein,
-  // wenn er auch eine sichtbare Wirkung hat.
-  const netSupported = isScrambleNetSupported(cubeType);
 
   // Phase W.custom-scramble (2026-05-17): Edit-Modus lässt User einen
   // eigenen Scramble eintippen. Aktivieren via Edit-Button, speichern
@@ -132,6 +128,11 @@ export function ScrambleCard({
     userPickedType ??
     resolvedSessionOverride ??
     cubeTypeToScrambowType(cubeType);
+
+  // Phase W.scramble-image (2026-05-17): ist das 2D-Net überhaupt verfügbar?
+  // Toggle nur, wenn er eine sichtbare Wirkung hat. Seit W.scramble-net-type
+  // (2026-09-27) nach dem EFFEKTIVEN Scramble-Typ, nicht nach cube_type.
+  const netSupported = isScrambleNetSupported(cubeType, effectiveType);
 
   // Kategorie für den Toggle — derived aus dem effektivenType.
   const effectiveCategory = categoryFor(effectiveType);
@@ -208,7 +209,9 @@ export function ScrambleCard({
     const cubeDefault = defaultScrambleTypeForCube(cubeType);
     const defaultMatches = categoryFor(cubeDefault) === cat;
     if (cat === "wca") {
-      setUserPickedType(defaultMatches ? cubeDefault : WCA_SCRAMBLE_TYPES[0].code);
+      setUserPickedType(
+        defaultMatches ? cubeDefault : WCA_SCRAMBLE_TYPES[0].code,
+      );
     } else if (cat === "big") {
       setUserPickedType(
         defaultMatches ? cubeDefault : BIG_CUBE_SCRAMBLE_TYPES[0].code,
@@ -439,9 +442,13 @@ export function ScrambleCard({
             )}
           </div>
           {/* 2D-Net-Bild (Phase W.scramble-image): rendert sich selbst nur für
-              unterstützte Cube-Types (aktuell 3x3) und bei aktivem Setting. */}
+              unterstützte Scramble-Typen und bei aktivem Setting. */}
           {settings.show_scramble_image && scramble && (
-            <ScrambleNet scramble={scramble} cubeType={cubeType} />
+            <ScrambleNet
+              scramble={scramble}
+              cubeType={cubeType}
+              scrambleType={effectiveType}
+            />
           )}
         </>
       )}

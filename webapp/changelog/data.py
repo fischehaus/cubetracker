@@ -44,6 +44,19 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.scramble-net-type",
+        released=date(2026, 9, 27),
+        title="🧩 Scramble-Vorschau zeigt das richtige Puzzle",
+        highlights=[
+            "Die 2D-Vorschau unter dem Scramble richtet sich jetzt nach dem "
+            "Scramble, der tatsächlich angezeigt wird. Vorher zeigte sie oft ein "
+            "3x3-Bild, obwohl du im Scramble-Auswahlmenü z. B. 2x2, 4x4, "
+            "Pyraminx oder Skewb gewählt hattest. Danke für die Meldung!",
+            "Für Scrambles ohne passende Vorschau (z. B. Megaminx, Big Cubes) "
+            "erscheint kein falsches 3x3-Bild mehr, sondern keines.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.solve-notes-edit",
         released=date(2026, 9, 27),
         title="📝 Notizen zu Solves nachträglich schreiben und ändern",
