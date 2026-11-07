@@ -15,7 +15,7 @@
 ### Stack (gleicher wie Desktop fuer Code-Wiederverwendung)
 - **Backend**: Python 3.14 + FastAPI + SQLAlchemy 2.0 + Alembic + Pydantic 2
 - **DB**: PostgreSQL 16 (Coolify-Resource auf dem Hetzner-Server; lokal/Tests SQLite)
-- **Auth**: Email + Password mit `passlib[bcrypt]` Hashing + JWT-Tokens via `python-jose`
+- **Auth**: Email + Password mit `passlib[bcrypt]` Hashing + JWT-Tokens via `PyJWT`
 - **Frontend**: dasselbe React-Frontend wie Desktop, mit Auth-Wrapper drumrum
 - **Hosting**: Hetzner Cloud (CPX22) + Coolify v4 (Docker + Traefik). Migration von Render abgeschlossen 2026-05-22.
 
@@ -45,7 +45,7 @@
 ```
 webapp/
 ├── README.md              (dieses File)
-├── pyproject.toml         (separate deps: passlib, python-jose, psycopg2-binary)
+├── pyproject.toml         (separate deps: passlib, PyJWT, psycopg2-binary)
 ├── (kein render.yaml mehr) Deploy via Dockerfile + frontend/nginx.conf → Coolify (Live-Branch feature/W-api-prefix)
 ├── alembic/               (DB-Migrations, separat vom Desktop)
 ├── alembic.ini

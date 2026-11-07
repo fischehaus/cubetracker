@@ -28,7 +28,7 @@ from fastapi import (
     Response,
     status,
 )
-from jose import JWTError
+from auth.jwt import JWTError
 from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as OrmSession

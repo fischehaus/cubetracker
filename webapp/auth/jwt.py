@@ -10,6 +10,12 @@ Wird der Wert in der DB hochgezählt (Logout, Password-Change), invalidieren
 alle ausgegebenen Tokens dieses Users — der Decode prüft den Wert.
 
 Pure Funktionen + minimaler State — leicht testbar.
+
+Bibliothek: PyJWT (seit W.pyjwt, 2026-11-07; vorher python-jose, das kaum
+noch gepflegt wird und ecdsa/pyasn1 mit Sicherheitsmeldungen mitzog).
+HS256-Tokens sind formatgleich — vor dem Wechsel ausgegebene Tokens bleiben
+gültig (Test: tests/test_jwt_compat.py). `JWTError` bleibt der Name, den
+deps.py und api/auth.py fangen.
 """
 
 from __future__ import annotations
@@ -17,7 +23,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
-from jose import JWTError, jwt
+import jwt as pyjwt
 
 from .config import (
     JWT_ACCESS_EXPIRE_MIN,
@@ -27,6 +33,10 @@ from .config import (
 )
 
 TokenType = Literal["access", "refresh"]
+
+# Basisklasse aller PyJWT-Fehler (Signatur, Ablauf, Format) — eigene Fehler
+# unten (Typ-Mismatch, fehlende Claims) nutzen sie ebenfalls.
+JWTError = pyjwt.PyJWTError
 
 
 def create_token(
@@ -58,7 +68,7 @@ def create_token(
         "iat": int(now.timestamp()),
         "exp": int((now + expires_delta).timestamp()),
     }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return pyjwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
 def decode_token(token: str, expected_type: TokenType | None = None) -> dict[str, Any]:
@@ -70,7 +80,12 @@ def decode_token(token: str, expected_type: TokenType | None = None) -> dict[str
     Hinweis: `ver`-Check (Token-Revocation) passiert NICHT hier — der braucht
     den DB-Wert und gehört in die get_current_user-Dependency / Refresh-Endpoint.
     """
-    payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    payload: dict[str, Any] = pyjwt.decode(
+        token,
+        JWT_SECRET,
+        algorithms=[JWT_ALGORITHM],
+        options={"require": ["exp", "iat"]},
+    )
     if expected_type is not None:
         token_type = payload.get("type")
         if token_type != expected_type:
@@ -92,4 +107,8 @@ def extract_user_id_and_version(
         raise JWTError("Token hat kein 'sub' (User-ID)")
     if ver is None:
         raise JWTError("Token hat kein 'ver' (Token-Version)")
-    return int(sub), int(ver)
+    try:
+        return int(sub), int(ver)
+    except (TypeError, ValueError) as exc:
+        # Sonst schlüge ein roher ValueError als 500 statt 401 durch.
+        raise JWTError("Token-Claims 'sub'/'ver' nicht numerisch") from exc

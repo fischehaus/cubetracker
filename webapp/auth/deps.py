@@ -15,13 +15,12 @@ import logging
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
+from .jwt import JWTError, extract_user_id_and_version
 from sqlalchemy.orm import Session as OrmSession
 
 from db.database import get_db
 from db.models import User
 
-from .jwt import extract_user_id_and_version
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ def get_current_user(
     fehlt/invalid/expired/revoked oder User nicht mehr existiert/inaktiv ist.
 
     Sicherheits-Checks:
-    - JWT-Signatur valide + nicht expired (jose.jwt.decode)
+    - JWT-Signatur valide + nicht expired (PyJWT, auth/jwt.py)
     - type-Claim == "access"
     - User existiert + is_active
     - Token-Version == User.token_version (Revocation-Check)
