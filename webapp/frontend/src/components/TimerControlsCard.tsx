@@ -12,6 +12,10 @@
 //     auf dieselben Werte zugreifen.
 //   - userPickedSession / userPickedHardware → lokal, Reset bei
 //     cubeType-Wechsel (jeder Cube bekommt seinen Suggest).
+//   - Feste Auswahl je Cube-Typ (W.fixed-session-hardware, Roadmap #49):
+//     aus settings.fixed_selection_by_cube, schlägt den Suggest; eine
+//     Hand-Auswahl im Timer bleibt vorübergehend und kann per Link als
+//     feste Auswahl gemerkt werden. Logik: lib/timer-selection.ts.
 //   - showNewSessionForm / newSessionName → lokal (Inline-Anlegen).
 
 import { useEffect, useState } from "react";
@@ -25,6 +29,12 @@ import {
 } from "../lib/api";
 import { COMMON_CUBE_TYPES } from "../lib/format";
 import { useAppSettings } from "../lib/settings";
+import {
+  getFixedSelection,
+  resolveSelection,
+  withSelection,
+  type SelectionPart,
+} from "../lib/timer-selection";
 import { useIsTouchDevice } from "../hooks/useIsTouchDevice";
 import { InfoButton } from "./InfoButton";
 import { Button, Card } from "./ui";
@@ -66,9 +76,32 @@ export function TimerControlsCard({
 
   const createSession = useCreateSession();
   const { data: sessions } = useSessions();
-  const { data: hardware } = useHardware({ cube_type: cubeType, active_only: true });
+  const { data: hardware } = useHardware({
+    cube_type: cubeType,
+    active_only: true,
+  });
   const { data: sessionSuggestion } = useSuggestSession(cubeType);
   const { data: hardwareSuggestion } = useSuggestHardware(cubeType);
+
+  // Feste Auswahl je Cube-Typ (Roadmap #49). `…FixedId` ist undefined, wenn
+  // nicht fest (Auto oder feste ID gelöscht → Suggest greift, Hinweis unten).
+  const fixed = getFixedSelection(settings, cubeType);
+  const sessionRes = resolveSelection(
+    fixed.session_mode,
+    fixed.session_id,
+    sessions?.map((s) => s.id),
+  );
+  const hardwareRes = resolveSelection(
+    fixed.hardware_mode,
+    fixed.hardware_id,
+    hardware?.map((h) => h.id),
+  );
+  const sessionFixedId =
+    sessionRes.kind === "fixed" ? sessionRes.id : undefined;
+  const hardwareFixedId =
+    hardwareRes.kind === "fixed" ? hardwareRes.id : undefined;
+  const sessionFixed = sessionFixedId !== undefined;
+  const hardwareFixed = hardwareFixedId !== undefined;
 
   // Bei Cube-Wechsel: User-Pick-Flags reset
   useEffect(() => {
@@ -76,31 +109,78 @@ export function TimerControlsCard({
     setUserPickedHardware(false);
   }, [cubeType]);
 
-  // Session-Suggest anwenden, wenn User nicht manuell gewählt hat.
+  // Feste Auswahl anwenden (schlägt den Suggest), solange nicht von Hand
+  // im Timer umgestellt. Die aktuelle ID ist bewusst Dependency: App.tsx
+  // setzt die Hardware bei Cube-Wechsel NACH diesem (Kind-)Effekt auf null
+  // (Schutz gegen cube-fremde Hardware) — ohne erneutes Anwenden ginge die
+  // feste Auswahl dort verloren (QA-Befund W.fixed-session-hardware).
+  // Kein Loop: nach dem Setzen ist id === fixedId, der Effekt tut nichts.
+  useEffect(() => {
+    if (
+      sessionFixedId !== undefined &&
+      !userPickedSession &&
+      sessionId !== sessionFixedId
+    ) {
+      onSessionIdChange(sessionFixedId);
+    }
+  }, [sessionFixedId, userPickedSession, onSessionIdChange, sessionId]);
+
+  useEffect(() => {
+    if (
+      hardwareFixedId !== undefined &&
+      !userPickedHardware &&
+      hardwareId !== hardwareFixedId
+    ) {
+      onHardwareIdChange(hardwareFixedId);
+    }
+  }, [hardwareFixedId, userPickedHardware, onHardwareIdChange, hardwareId]);
+
+  // Session-Suggest anwenden, wenn weder fest noch manuell gewählt.
   // Race-Condition-Gate (vorher in BigTimerInput) — bei schnellem
   // Cube-Wechsel kann die alte Suggestion-Response noch ankommen während
   // cubeType schon ein anderer ist. cube_type-Match verhindert dass die
   // stale Antwort den neuen Cube überschreibt.
   useEffect(() => {
     if (
+      !sessionFixed &&
       sessionSuggestion &&
       sessionSuggestion.cube_type === cubeType &&
       !userPickedSession
     ) {
       onSessionIdChange(sessionSuggestion.session_id);
     }
-  }, [sessionSuggestion, userPickedSession, onSessionIdChange, cubeType]);
+  }, [
+    sessionFixed,
+    sessionSuggestion,
+    userPickedSession,
+    onSessionIdChange,
+    cubeType,
+  ]);
 
-  // Hardware-Suggest anwenden, wenn User nicht manuell gewählt hat.
+  // Hardware-Suggest anwenden, wenn weder fest noch manuell gewählt.
   useEffect(() => {
     if (
+      !hardwareFixed &&
       hardwareSuggestion &&
       hardwareSuggestion.cube_type === cubeType &&
       !userPickedHardware
     ) {
       onHardwareIdChange(hardwareSuggestion.hardware_id);
     }
-  }, [hardwareSuggestion, userPickedHardware, cubeType, onHardwareIdChange]);
+  }, [
+    hardwareFixed,
+    hardwareSuggestion,
+    userPickedHardware,
+    cubeType,
+    onHardwareIdChange,
+  ]);
+
+  /** Aktuelle Hand-Auswahl als feste Voreinstellung für diesen Cube merken. */
+  function rememberAsFixed(part: SelectionPart, id: number | null) {
+    setSettings(withSelection(settings, cubeType, part, "fixed", id));
+    if (part === "session") setUserPickedSession(false);
+    else setUserPickedHardware(false);
+  }
 
   function handleSessionChange(value: string) {
     if (value === "__new__") {
@@ -130,11 +210,13 @@ export function TimerControlsCard({
   // Hilfs-Variablen für UI-Hints
   const suggestedSessionLabel =
     sessionSuggestion && sessionSuggestion.session_id !== null
-      ? sessions?.find((s) => s.id === sessionSuggestion.session_id)?.name ?? null
+      ? (sessions?.find((s) => s.id === sessionSuggestion.session_id)?.name ??
+        null)
       : null;
   const suggestedHardwareLabel =
     hardwareSuggestion && hardwareSuggestion.hardware_id !== null
-      ? hardware?.find((h) => h.id === hardwareSuggestion.hardware_id)?.name ?? null
+      ? (hardware?.find((h) => h.id === hardwareSuggestion.hardware_id)?.name ??
+        null)
       : null;
 
   return (
@@ -161,14 +243,26 @@ export function TimerControlsCard({
         <label className="flex flex-col text-sm text-gray-400">
           <span className="flex items-center justify-between">
             {t("timerControls.session")}
-            {sessionSuggestion?.session_id !== null && !userPickedSession && (
+            {sessionFixed && !userPickedSession && (
               <span
-                className="text-[10px] text-emerald-400"
-                title={t("timerControls.sessionAutoTitle", { cube: cubeType })}
+                className="text-[10px] text-sky-400"
+                title={t("timerControls.fixedTitle", { cube: cubeType })}
               >
-                {t("timerControls.autoBadge")}
+                {t("timerControls.fixedBadge")}
               </span>
             )}
+            {!sessionFixed &&
+              sessionSuggestion?.session_id !== null &&
+              !userPickedSession && (
+                <span
+                  className="text-[10px] text-emerald-400"
+                  title={t("timerControls.sessionAutoTitle", {
+                    cube: cubeType,
+                  })}
+                >
+                  {t("timerControls.autoBadge")}
+                </span>
+              )}
           </span>
           <select
             value={sessionId === null ? "__none__" : String(sessionId)}
@@ -183,7 +277,7 @@ export function TimerControlsCard({
             ))}
             <option value="__new__">{t("timerControls.sessionNew")}</option>
           </select>
-          {suggestedSessionLabel && !userPickedSession && (
+          {!sessionFixed && suggestedSessionLabel && !userPickedSession && (
             <span className="mt-1 text-[11px] text-emerald-400/80 truncate">
               {t("timerControls.sessionSuggestion", {
                 name: suggestedSessionLabel,
@@ -192,24 +286,52 @@ export function TimerControlsCard({
               })}
             </span>
           )}
+          {sessionRes.kind === "fixed-missing" && (
+            <span className="mt-1 text-[11px] text-amber-400/90">
+              {t("timerControls.fixedMissing")}
+            </span>
+          )}
+          {userPickedSession && sessionFixedId !== sessionId && (
+            <button
+              type="button"
+              onClick={() => rememberAsFixed("session", sessionId)}
+              className="mt-1 self-start text-[11px] text-sky-400 hover:text-sky-300 underline"
+            >
+              {t("timerControls.rememberFixed", { cube: cubeType })}
+            </button>
+          )}
         </label>
 
         {/* Hardware */}
         <label className="flex flex-col text-sm text-gray-400">
           <span className="flex items-center justify-between">
             {t("timerControls.hardware")}
-            {hardwareSuggestion?.hardware_id !== null && !userPickedHardware && (
+            {hardwareFixed && !userPickedHardware && (
               <span
-                className="text-[10px] text-emerald-400"
-                title={
-                  hardwareSuggestion?.reason === "most_used"
-                    ? t("timerControls.hwAutoTitleMostUsed", { cube: cubeType })
-                    : t("timerControls.hwAutoTitleFirstActive", { cube: cubeType })
-                }
+                className="text-[10px] text-sky-400"
+                title={t("timerControls.fixedTitle", { cube: cubeType })}
               >
-                {t("timerControls.autoBadge")}
+                {t("timerControls.fixedBadge")}
               </span>
             )}
+            {!hardwareFixed &&
+              hardwareSuggestion?.hardware_id !== null &&
+              !userPickedHardware && (
+                <span
+                  className="text-[10px] text-emerald-400"
+                  title={
+                    hardwareSuggestion?.reason === "most_used"
+                      ? t("timerControls.hwAutoTitleMostUsed", {
+                          cube: cubeType,
+                        })
+                      : t("timerControls.hwAutoTitleFirstActive", {
+                          cube: cubeType,
+                        })
+                  }
+                >
+                  {t("timerControls.autoBadge")}
+                </span>
+              )}
           </span>
           <select
             value={hardwareId === null ? "__none__" : String(hardwareId)}
@@ -232,7 +354,21 @@ export function TimerControlsCard({
               {t("timerControls.hwNoneForCube", { cube: cubeType })}
             </span>
           )}
-          {suggestedHardwareLabel && !userPickedHardware && (
+          {hardwareRes.kind === "fixed-missing" && (
+            <span className="mt-1 text-[11px] text-amber-400/90">
+              {t("timerControls.fixedMissing")}
+            </span>
+          )}
+          {userPickedHardware && hardwareFixedId !== hardwareId && (
+            <button
+              type="button"
+              onClick={() => rememberAsFixed("hardware", hardwareId)}
+              className="mt-1 self-start text-[11px] text-sky-400 hover:text-sky-300 underline"
+            >
+              {t("timerControls.rememberFixed", { cube: cubeType })}
+            </button>
+          )}
+          {!hardwareFixed && suggestedHardwareLabel && !userPickedHardware && (
             <span className="mt-1 text-[11px] text-emerald-400/80 truncate">
               {hardwareSuggestion?.reason === "most_used"
                 ? t("timerControls.hwSuggestionMostUsed", {
@@ -264,7 +400,9 @@ export function TimerControlsCard({
                 }
               }}
               autoFocus
-              placeholder={t("timerControls.newSessionPlaceholder", { cube: cubeType })}
+              placeholder={t("timerControls.newSessionPlaceholder", {
+                cube: cubeType,
+              })}
               className="mt-1 rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none"
             />
           </label>
@@ -337,7 +475,9 @@ export function TimerControlsCard({
           </ModeButton>
           <ModeButton
             active={
-              !stackmatMode && spacebarMode && settings.inspection_mode === "wca"
+              !stackmatMode &&
+              spacebarMode &&
+              settings.inspection_mode === "wca"
             }
             onClick={() =>
               setSettings({

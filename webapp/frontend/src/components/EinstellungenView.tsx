@@ -18,6 +18,7 @@ import {
   StackmatConnectCard,
   SmartCubeConnectCard,
 } from "./HardwareConnectCards";
+import { FixedSelectionSettings } from "./FixedSelectionSettings";
 import {
   FONT_SIZE_LABELS,
   SETTINGS_DEFAULTS,
@@ -49,7 +50,10 @@ export function EinstellungenView({ onBack }: Props) {
       // mehr — auffuellen mit generischen Namen
       next = [
         ...cur,
-        ...Array.from({ length: clamped - cur.length }, (_, i) => `Phase ${cur.length + i + 1}`),
+        ...Array.from(
+          { length: clamped - cur.length },
+          (_, i) => `Phase ${cur.length + i + 1}`,
+        ),
       ];
     } else {
       next = cur.slice(0, clamped);
@@ -94,7 +98,9 @@ export function EinstellungenView({ onBack }: Props) {
             </div>
             <FontSizeToggle
               value={settings.timer_font_size}
-              onChange={(fs) => setSettings({ ...settings, timer_font_size: fs })}
+              onChange={(fs) =>
+                setSettings({ ...settings, timer_font_size: fs })
+              }
             />
           </div>
         </Section>
@@ -107,7 +113,9 @@ export function EinstellungenView({ onBack }: Props) {
             </div>
             <FontSizeToggle
               value={settings.drill_font_size}
-              onChange={(fs) => setSettings({ ...settings, drill_font_size: fs })}
+              onChange={(fs) =>
+                setSettings({ ...settings, drill_font_size: fs })
+              }
             />
           </div>
         </Section>
@@ -118,7 +126,9 @@ export function EinstellungenView({ onBack }: Props) {
             label={t("settingsPanel.scrambleImageEnableLabel")}
             hint={t("settingsPanel.scrambleImageEnableHint")}
             value={settings.show_scramble_image}
-            onChange={(v) => setSettings({ ...settings, show_scramble_image: v })}
+            onChange={(v) =>
+              setSettings({ ...settings, show_scramble_image: v })
+            }
           />
         </Section>
       </div>
@@ -156,18 +166,34 @@ export function EinstellungenView({ onBack }: Props) {
           />
         </Section>
 
+        {/* Session & Hardware je Cube-Typ (W.fixed-session-hardware, #49) */}
+        <Section title={t("fixedSelection.title")}>
+          <FixedSelectionSettings
+            settings={settings}
+            setSettings={setSettings}
+          />
+        </Section>
+
         {/* Inspection */}
         <Section title={t("settingsPanel.inspectionTitle")}>
           <Toggle
             label={t("settingsPanel.inspectionEnableLabel")}
             hint={t("settingsPanel.inspectionEnableHint")}
             value={settings.inspection_enabled}
-            onChange={(v) => setSettings({ ...settings, inspection_enabled: v })}
+            onChange={(v) =>
+              setSettings({ ...settings, inspection_enabled: v })
+            }
             disabled={!settings.spacebar_enabled}
           />
 
           {/* Inspection-Mode-Toggle */}
-          <div className={!settings.spacebar_enabled || !settings.inspection_enabled ? "opacity-50" : ""}>
+          <div
+            className={
+              !settings.spacebar_enabled || !settings.inspection_enabled
+                ? "opacity-50"
+                : ""
+            }
+          >
             <div className="text-base text-gray-100 mb-1">
               {t("settingsPanel.inspectionModeHeading")}
             </div>
@@ -188,8 +214,12 @@ export function EinstellungenView({ onBack }: Props) {
             </div>
             <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 inline-flex">
               <button
-                onClick={() => setSettings({ ...settings, inspection_mode: "wca" })}
-                disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
+                onClick={() =>
+                  setSettings({ ...settings, inspection_mode: "wca" })
+                }
+                disabled={
+                  !settings.spacebar_enabled || !settings.inspection_enabled
+                }
                 className={`rounded px-3 py-1.5 text-sm font-medium transition ${
                   settings.inspection_mode === "wca"
                     ? "bg-purple-600 text-white"
@@ -199,8 +229,12 @@ export function EinstellungenView({ onBack }: Props) {
                 {t("settingsPanel.inspectionModeWcaBtn")}
               </button>
               <button
-                onClick={() => setSettings({ ...settings, inspection_mode: "pragmatic" })}
-                disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
+                onClick={() =>
+                  setSettings({ ...settings, inspection_mode: "pragmatic" })
+                }
+                disabled={
+                  !settings.spacebar_enabled || !settings.inspection_enabled
+                }
                 className={`rounded px-3 py-1.5 text-sm font-medium transition ${
                   settings.inspection_mode === "pragmatic"
                     ? "bg-purple-600 text-white"
@@ -219,8 +253,12 @@ export function EinstellungenView({ onBack }: Props) {
             min={5}
             max={60}
             step={1}
-            onChange={(v) => setSettings({ ...settings, inspection_seconds: v })}
-            disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
+            onChange={(v) =>
+              setSettings({ ...settings, inspection_seconds: v })
+            }
+            disabled={
+              !settings.spacebar_enabled || !settings.inspection_enabled
+            }
           />
           {isTouch && (
             <NumberField
@@ -230,8 +268,12 @@ export function EinstellungenView({ onBack }: Props) {
               min={200}
               max={1500}
               step={100}
-              onChange={(v) => setSettings({ ...settings, inspection_hold_ms: v })}
-              disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
+              onChange={(v) =>
+                setSettings({ ...settings, inspection_hold_ms: v })
+              }
+              disabled={
+                !settings.spacebar_enabled || !settings.inspection_enabled
+              }
             />
           )}
           <Toggle
@@ -239,7 +281,9 @@ export function EinstellungenView({ onBack }: Props) {
             hint={t("settingsPanel.inspectionSoundHint")}
             value={settings.sound_enabled}
             onChange={(v) => setSettings({ ...settings, sound_enabled: v })}
-            disabled={!settings.spacebar_enabled || !settings.inspection_enabled}
+            disabled={
+              !settings.spacebar_enabled || !settings.inspection_enabled
+            }
           />
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-gray-300">
@@ -251,10 +295,7 @@ export function EinstellungenView({ onBack }: Props) {
                 setSettings({
                   ...settings,
                   inspection_audio_mode: e.target.value as
-                    | "beep"
-                    | "de"
-                    | "en"
-                    | "off",
+                    "beep" | "de" | "en" | "off",
                 })
               }
               disabled={
@@ -264,10 +305,18 @@ export function EinstellungenView({ onBack }: Props) {
               }
               className="rounded border border-gray-600 bg-gray-800 px-3 py-2 text-base text-gray-100 focus:border-purple-500 focus:outline-none disabled:opacity-50 max-w-xs"
             >
-              <option value="beep">{t("settingsPanel.inspectionAudioModeBeep")}</option>
-              <option value="de">{t("settingsPanel.inspectionAudioModeDe")}</option>
-              <option value="en">{t("settingsPanel.inspectionAudioModeEn")}</option>
-              <option value="off">{t("settingsPanel.inspectionAudioModeOff")}</option>
+              <option value="beep">
+                {t("settingsPanel.inspectionAudioModeBeep")}
+              </option>
+              <option value="de">
+                {t("settingsPanel.inspectionAudioModeDe")}
+              </option>
+              <option value="en">
+                {t("settingsPanel.inspectionAudioModeEn")}
+              </option>
+              <option value="off">
+                {t("settingsPanel.inspectionAudioModeOff")}
+              </option>
             </select>
             <span className="text-xs text-gray-500">
               {t("settingsPanel.inspectionAudioModeNote")}
@@ -305,7 +354,9 @@ export function EinstellungenView({ onBack }: Props) {
                   type="text"
                   value={name}
                   onChange={(e) => updatePhaseName(i, e.target.value)}
-                  disabled={!settings.spacebar_enabled || !settings.splits_enabled}
+                  disabled={
+                    !settings.spacebar_enabled || !settings.splits_enabled
+                  }
                   placeholder={`Phase ${i + 1}`}
                   className="rounded border border-gray-600 bg-gray-800 px-3 py-1.5 text-base text-gray-100 focus:border-purple-500 focus:outline-none disabled:opacity-50"
                 />
@@ -367,7 +418,9 @@ function FontSizeToggle({
   return (
     <div className="flex gap-1 rounded border border-gray-700 bg-gray-800 p-1 inline-flex flex-wrap">
       {/* W.timer-display-size-v2: 7 Stufen statt 5 — xxxl + xxxxl ergaenzt. */}
-      {(["sm", "md", "lg", "xl", "xxl", "xxxl", "xxxxl"] as TimerFontSize[]).map((fs) => {
+      {(
+        ["sm", "md", "lg", "xl", "xxl", "xxxl", "xxxxl"] as TimerFontSize[]
+      ).map((fs) => {
         const active = value === fs;
         return (
           <button
@@ -446,7 +499,16 @@ interface NumberFieldProps {
   disabled?: boolean;
 }
 
-function NumberField({ label, hint, value, min, max, step, onChange, disabled }: NumberFieldProps) {
+function NumberField({
+  label,
+  hint,
+  value,
+  min,
+  max,
+  step,
+  onChange,
+  disabled,
+}: NumberFieldProps) {
   return (
     <label className={`block ${disabled ? "opacity-50" : ""}`}>
       <div className="text-base text-gray-100">{label}</div>

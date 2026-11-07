@@ -44,6 +44,20 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.fixed-session-hardware",
+        released=date(2026, 11, 7),
+        title="📌 Session und Hardware fest voreinstellen",
+        highlights=[
+            "Neu in den Einstellungen unter „Session & Hardware je Cube-Typ“: "
+            "Statt der automatischen Auswahl (meiste Solves) kannst du pro "
+            "Cube-Typ eine feste Session und Hardware einstellen. Sie bleibt "
+            "auch nach dem Neuladen und gilt für dieses Gerät.",
+            "Im Timer kannst du eine von Hand gewählte Session oder Hardware "
+            "per Klick auf „Als feste Auswahl merken“ übernehmen. Danke für "
+            "den Wunsch!",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.jwt-secret-length",
         released=date(2026, 11, 7),
         title="🔐 Zusätzliche Sicherheitsprüfung beim Serverstart",

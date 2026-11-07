@@ -33,13 +33,7 @@ export type InspectionMode = "wca" | "pragmatic";
  * Wirkt auf font-size + line-height beider Karten konsistent.
  */
 export type TimerFontSize =
-  | "sm"
-  | "md"
-  | "lg"
-  | "xl"
-  | "xxl"
-  | "xxxl"
-  | "xxxxl";
+  "sm" | "md" | "lg" | "xl" | "xxl" | "xxxl" | "xxxxl";
 
 /**
  * Audio-Modus für die Inspection-Warnings bei 8s + 12s.
@@ -129,6 +123,23 @@ export interface AppSettings {
    * bestehende spacebar_enabled-Verzweigung unverändert greifen.
    */
   timer_input_source: TimerInputSource;
+  /**
+   * W.fixed-session-hardware (Roadmap #49, 2026-11-07): feste Session-/
+   * Hardware-Voreinstellung je Cube-Typ statt Auto-Suggest. Fehlt ein
+   * Cube-Typ oder steht der Modus auf "auto", gilt der Suggest wie bisher.
+   * Logik: lib/timer-selection.ts.
+   */
+  fixed_selection_by_cube: Record<string, FixedSelection>;
+}
+
+/** Auto = Suggest (meiste Solves), fixed = gespeicherte ID (null = „keine"). */
+export type SelectionMode = "auto" | "fixed";
+
+export interface FixedSelection {
+  session_mode: SelectionMode;
+  session_id: number | null;
+  hardware_mode: SelectionMode;
+  hardware_id: number | null;
 }
 
 export const SETTINGS_DEFAULTS: AppSettings = {
@@ -146,6 +157,7 @@ export const SETTINGS_DEFAULTS: AppSettings = {
   drill_font_size: "xxl",
   show_scramble_image: true,
   timer_input_source: "keyboard",
+  fixed_selection_by_cube: {},
 };
 
 /**
@@ -169,7 +181,10 @@ export function shouldSaveFromSmartCube(source: TimerInputSource): boolean {
  * Wird vom ScrambleCard, BigTimerInput, SpacebarTimerCard inline
  * gesetzt — wir vermeiden CSS-Variables für Build-Einfachheit.
  */
-export const TIMER_FONT_SCALE: Record<TimerFontSize, { timer: string; scramble: string }> = {
+export const TIMER_FONT_SCALE: Record<
+  TimerFontSize,
+  { timer: string; scramble: string }
+> = {
   sm: { timer: "3rem", scramble: "1rem" },
   md: { timer: "4rem", scramble: "1.125rem" },
   lg: { timer: "5rem", scramble: "1.25rem" },
@@ -225,6 +240,12 @@ export function loadSettings(): AppSettings {
     // Enum-Guard): ein unerwarteter timer_input_source fällt auf "keyboard".
     merged.timer_input_source =
       merged.timer_input_source === "stackmat" ? "stackmat" : "keyboard";
+    // W.fixed-session-hardware: nur ein echtes Objekt übernehmen.
+    const fixed = merged.fixed_selection_by_cube as unknown;
+    merged.fixed_selection_by_cube =
+      fixed && typeof fixed === "object" && !Array.isArray(fixed)
+        ? (fixed as Record<string, FixedSelection>)
+        : {};
     return merged;
   } catch {
     return SETTINGS_DEFAULTS;

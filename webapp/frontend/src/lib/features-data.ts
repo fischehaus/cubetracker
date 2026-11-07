@@ -76,6 +76,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
       { key: "features.solvingBullet6", audience: "public" }, // Trainings-Sets + Sessions (merged with 8)
       { key: "features.solvingBullet9", audience: "public" }, // Voice-Alerts
       { key: "features.solvingBullet7", audience: "expanded" }, // Auto-Preselect Hardware
+      { key: "features.solvingBullet12", audience: "expanded" }, // Feste Session/Hardware je Cube (Roadmap #49)
     ],
   },
   {

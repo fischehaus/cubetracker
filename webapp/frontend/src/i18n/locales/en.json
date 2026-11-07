@@ -357,7 +357,11 @@
     "modeStackmat": "⏱️ Stackmat",
     "tipPrefix": "💡 Tip:",
     "tipTouch": "on phone, text input through the soft keyboard is a bit tedious — spacebar tap is usually faster.",
-    "tipDesktop": "Try the spacebar timer — much smoother training, including inspection countdown. Just click one of the spacebar modes above."
+    "tipDesktop": "Try the spacebar timer — much smoother training, including inspection countdown. Just click one of the spacebar modes above.",
+    "fixedBadge": "Fixed",
+    "fixedTitle": "Fixed default for {{cube}} (Settings → Session & hardware per cube type)",
+    "fixedMissing": "The fixed choice no longer exists – using automatic. Pick a new one in Settings.",
+    "rememberFixed": "Remember as fixed choice for {{cube}}"
   },
   "scramble": {
     "title": "Scramble",
@@ -953,6 +957,7 @@
     "solvingBullet5": "2D net preview directly below the scramble (2x2, 3x3, 4x4–7x7, Pyraminx and Skewb): at a glance you see what the puzzle must look like after applying — perfect for verifying you executed the scramble correctly (toggleable in settings)",
     "solvingBullet6": "Structured training: sessions group your solving (e.g. OH, PLL drills, cold solves) and training sets plan batches of 5/12/25/50/100 solves with set statistics + coaching feedback at the end.",
     "solvingBullet7": "Auto-preselect: the most-used hardware for the current cube is suggested",
+    "solvingBullet12": "Fix session and hardware per cube type instead of automatic choice",
     "solvingBullet9": "Voice alerts during inspection: at 8s and 12s the app says 'eight'/'twelve' (DE or EN) instead of just a beep — mode is per-device (beep / voice DE / voice EN / off)",
     "analysisTitle": "Analysis",
     "analysisBullet1": "Best Times: Single, Mo3, AO5, AO12, AO100 — all WCA-compliant (+2 + DNF trim)",
@@ -1768,5 +1773,18 @@
       "description": "Cards with semi-transparent fill and blur. The background image shines through the cards.",
       "noSkinHint": "Note: the glass effect is only visible when a background image is active — otherwise there is nothing to shine through."
     }
+  },
+  "fixedSelection": {
+    "title": "Session & hardware per cube type",
+    "intro": "Automatic picks the session or hardware with the most solves for this cube type. With “Fixed” your choice stays after reloading. Applies to this device.",
+    "cubeType": "Cube type",
+    "session": "Session",
+    "hardware": "Hardware",
+    "auto": "Automatic",
+    "fixed": "Fixed",
+    "none": "– none –",
+    "deleted": "(deleted)",
+    "noHardware": "No active hardware for {{cube}}.",
+    "overview": "Fixed defaults"
   }
 }
