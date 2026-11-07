@@ -13,7 +13,7 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 - Live: `v2.0.0-alpha.W.scramble-net-type` (27.09.2026), Frontend-Bundle
   `index-BHN_4xyu.js`. Backend mit festen Versionen (`webapp/constraints.txt`).
 - Server 27.09.: OS-Updates + Reboot (Kernel 6.8.0-124); Docker-Pakete per
-  `apt-mark hold` gesperrt → backlog#1. MAINTENANCE-🤖-Teil 27.09. grün.
+  `apt-mark hold` gesperrt → backlog#1. MAINTENANCE-🤖-Teil zuletzt 07.11. (Funde → backlog#26–#28).
 - Betrieb: Coolify 4.3.23 (Netz `coolify` am 25.09. repariert), UptimeRobot
   überwacht `/api/health` (5 min, Mail), CI startet die App vor jedem Deploy
   gegen Postgres 16, Hetzner-Server-Backups täglich (7), Hetzner-2FA aktiv.
@@ -47,6 +47,8 @@ nur mit User im Admin-UI.
   reproduzierbar via `.tmp/qa-oll/verify_oll.py`, Sicherung: backlog#24).
 - Duplikat-Solves aus den Stackmat-Tests (Juni): Aufräumhilfe anbieten, falls
   noch vorhanden.
+- **Server-Reboot fällig** (07.11., Kernel-Updates; backlog#28): wie am 27.09. selbst
+  ausführen (Docker bleibt per Hold gesperrt) — Befehle gibt Claude auf Zuruf.
 - MAINTENANCE 👤-Teil (Abschnitte 4/8/10): Coolify-/Hetzner-Backup-Dashboards,
   INWX-Auto-Renew, Kosten. Lokal 21 winget-Updates (Claude kann, UAC-Stopp).
 
