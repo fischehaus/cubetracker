@@ -44,6 +44,16 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.security-deps-2611",
+        released=date(2026, 11, 7),
+        title="🔒 Sicherheitsupdates im Hintergrund",
+        highlights=[
+            "Mehrere Bibliotheken im Frontend und Backend wurden auf Versionen "
+            "mit geschlossenen Sicherheitslücken angehoben. Für dich ändert sich "
+            "nichts an der Bedienung.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.scramble-net-type",
         released=date(2026, 9, 27),
         title="🧩 Scramble-Vorschau zeigt das richtige Puzzle",

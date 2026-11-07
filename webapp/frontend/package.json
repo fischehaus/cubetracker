@@ -36,7 +36,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/web-bluetooth": "^0.0.21",
     "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/ui": "^4.1.5",
+    "@vitest/ui": "^4.1.12",
     "autoprefixer": "^10.5.0",
     "cubing": "^0.63.3",
     "eslint": "^10.2.1",
@@ -51,6 +51,6 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.10",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.12"
   }
 }
