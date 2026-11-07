@@ -7,6 +7,11 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
       - id: check-merge-conflict
+      # backlog#8 (2026-11-07): ungültiges JSON (z. B. Locale mit unescaptem
+      # Anführungszeichen, W.i18n-jsonfix-qa) vor dem Commit abfangen.
+      # tsconfig*.json sind JSONC (Kommentare) → ausgenommen.
+      - id: check-json
+        exclude: (^|/)tsconfig[^/]*\.json$
 
   - repo: https://github.com/psf/black
     rev: 24.3.0
