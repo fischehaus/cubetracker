@@ -31,10 +31,9 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 nur mit User im Admin-UI.
 
 **Wartet auf dich:**
-- **Off-Site-Backup backlog#3:** Anleitung steht im Issue (Kommentar 27.09.). Du:
-  Backblaze-Konto (Region EU Central!) + Bucket + Key, dann Coolify S3 + Notification
-  (Schritte A+B) → „backup eingerichtet" → ich prüfe, Doku, Issue schließen. Auf
-  Wunsch des Users 27.09. verschoben.
+- **Off-Site-Backup backlog#3:** Anbieter seit 07.11. **IONOS S3 Berlin** (DSGVO; Backblaze
+  verworfen). Anleitung im Issue (Kommentar 07.11.). Du: Konto + Bucket + Key, dann
+  Coolify → „backup eingerichtet" → ich prüfe, Datenschutzerklärung ergänzen (Deploy), schließen.
 - Activity-Feed (P1): Plan steht (`docs/session-journal.md`, Block „IN ARBEIT —
   Activity-Feed"). Wartet auf die Fragebogen-Ergebnisse (`.tmp/Cubetracker-
   Fragebogen-Activity-Feed.docx`, nur lokal).
