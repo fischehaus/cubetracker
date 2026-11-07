@@ -109,8 +109,8 @@ Historie/Legacy-Kontext.
 - **Restore-Probe (quartalsweise):** jüngsten Dump in eine **Wegwerf-DB**
   restoren und Tabellen-Counts gegen die Live-DB vergleichen. Ein Backup, das
   nie getestet wurde, ist kein Backup.
-- **Off-Site (offen):** S3/Backblaze-Sync der Coolify-Dumps — Status? (Alle
-  Backups liegen aktuell auf demselben Server = Single Point of Failure.)
+- **Off-Site (offen, backlog#3):** Pull der Dumps auf den Windows-Alltagsrechner des Users —
+  beim nächsten Lauf umsetzen (Plan im Issue). Bis dahin liegen alle Backups bei Hetzner.
 
 Details/Befehle: siehe `BACKUP.md`.
 

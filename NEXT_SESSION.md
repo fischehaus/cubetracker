@@ -31,9 +31,9 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 nur mit User im Admin-UI.
 
 **Wartet auf dich:**
-- **Off-Site-Backup backlog#3:** Anbieter seit 07.11. **IONOS S3 Berlin** (DSGVO; Backblaze
-  verworfen). Anleitung im Issue (Kommentar 07.11.). Du: Konto + Bucket + Key, dann
-  Coolify → „backup eingerichtet" → ich prüfe, Datenschutzerklärung ergänzen (Deploy), schließen.
+- **Off-Site-Backup backlog#3 — beim nächsten MAINTENANCE-Lauf (Wunsch 07.11.):** Pull der
+  DB-Dumps auf deinen Windows-Alltagsrechner (Lese-User `cubebackup` + PowerShell-Skript +
+  Aufgabenplanung); Plan + Ansage im Issue. IONOS nur optional als dritte Kopie.
 - Activity-Feed (P1): Plan steht (`docs/session-journal.md`, Block „IN ARBEIT —
   Activity-Feed"). Wartet auf die Fragebogen-Ergebnisse (`.tmp/Cubetracker-
   Fragebogen-Activity-Feed.docx`, nur lokal).
