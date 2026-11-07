@@ -34,13 +34,26 @@ IS_PROD = os.getenv("CUBETRACKER_PROD") == "1"
 # Mindest-Passwort-Länge — bewusst niedrig für Solo-Tool, kein Bank-System.
 PASSWORD_MIN_LEN = 8
 
+# Mindestlänge des JWT-Secrets in Prod (HS256, PyJWT-Empfehlung).
+JWT_SECRET_MIN_LEN = 32
+
 
 def require_strong_secret() -> None:
     """Bei Prod-Start sicherstellen dass JWT_SECRET aus Env kommt
     und nicht der Per-Process-Default ist. Aufruf in main.py-Lifespan.
     """
-    if IS_PROD and not os.getenv("JWT_SECRET"):
+    if not IS_PROD:
+        return
+    secret = os.getenv("JWT_SECRET", "")
+    if not secret:
         raise RuntimeError(
             "JWT_SECRET ist nicht in der Environment gesetzt — "
             "Production-Modus erfordert ein persistentes Secret."
+        )
+    # W.jwt-secret-length (2026-11-07): PyJWT empfiehlt für HS256 >= 32 Byte.
+    # Fehlermeldung nennt nur die Mindestlänge, nie den Wert.
+    if len(secret.encode("utf-8")) < JWT_SECRET_MIN_LEN:
+        raise RuntimeError(
+            f"JWT_SECRET ist zu kurz — Production-Modus erfordert mindestens "
+            f"{JWT_SECRET_MIN_LEN} Byte."
         )

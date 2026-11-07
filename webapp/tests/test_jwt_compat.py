@@ -90,3 +90,20 @@ def test_nicht_numerischer_sub_ergibt_jwterror_statt_500(compat_secret: None) ->
     )
     with pytest.raises(authjwt.JWTError):
         authjwt.extract_user_id_and_version(token)
+
+
+def test_prod_start_lehnt_kurzes_secret_ab(monkeypatch: pytest.MonkeyPatch) -> None:
+    import auth.config as cfg
+
+    monkeypatch.setattr(cfg, "IS_PROD", True)
+    monkeypatch.setenv("JWT_SECRET", "x" * 31)
+    with pytest.raises(RuntimeError, match="mindestens 32"):
+        cfg.require_strong_secret()
+
+
+def test_prod_start_akzeptiert_ausreichendes_secret(monkeypatch: pytest.MonkeyPatch) -> None:
+    import auth.config as cfg
+
+    monkeypatch.setattr(cfg, "IS_PROD", True)
+    monkeypatch.setenv("JWT_SECRET", "x" * 32)
+    cfg.require_strong_secret()

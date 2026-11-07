@@ -44,6 +44,15 @@ class PatchNote:
 # zum ersten public-Eintrag — die App-Version leakt also nie intern.
 PATCH_NOTES: list[PatchNote] = [
     PatchNote(
+        version="2.0.0-alpha.W.jwt-secret-length",
+        released=date(2026, 11, 7),
+        title="🔐 Zusätzliche Sicherheitsprüfung beim Serverstart",
+        highlights=[
+            "Der Server prüft beim Start, ob sein Signatur-Schlüssel für die "
+            "Anmeldung lang genug ist. Für dich ändert sich nichts.",
+        ],
+    ),
+    PatchNote(
         version="2.0.0-alpha.W.pyjwt",
         released=date(2026, 11, 7),
         title="🔐 Anmeldung auf neuer Sicherheits-Bibliothek",
