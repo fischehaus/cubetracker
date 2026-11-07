@@ -10,7 +10,7 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 
 ## 📍 Stand
 
-- Live: `v2.0.0-alpha.W.pyjwt` (07.11.2026), Frontend-Bundle
+- Live: `v2.0.0-alpha.W.jwt-secret-length` (07.11.2026), Frontend-Bundle
   `index-h1AAbgr6.js`. Backend mit festen Versionen (`webapp/constraints.txt`).
 - Server 07.11.: OS-Updates + Reboot durch User (Kernel 6.8.0-147); Docker-Pakete
   weiter per `apt-mark hold` gesperrt → backlog#1. MAINTENANCE-🤖-Teil zuletzt 07.11. (Funde → backlog#26–#28).
