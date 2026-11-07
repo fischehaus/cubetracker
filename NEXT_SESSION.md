@@ -10,8 +10,8 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 
 ## 📍 Stand
 
-- Live: `v2.0.0-alpha.W.jwt-secret-length` (07.11.2026), Frontend-Bundle
-  `index-h1AAbgr6.js`. Backend mit festen Versionen (`webapp/constraints.txt`).
+- Live: `v2.0.0-alpha.W.fixed-session-hardware` (07.11.2026), Frontend-Bundle
+  `index-bnVsEZMq.js`. Backend mit festen Versionen (`webapp/constraints.txt`).
 - Server 07.11.: OS-Updates + Reboot durch User (Kernel 6.8.0-147); Docker-Pakete
   weiter per `apt-mark hold` gesperrt → backlog#1. MAINTENANCE-🤖-Teil zuletzt 07.11. (Funde → backlog#26–#28).
 - Betrieb: Coolify 4.3.23 (Netz `coolify` am 25.09. repariert), UptimeRobot
@@ -26,7 +26,7 @@ Zeichen bleiben — jede Ergänzung hier braucht eine Streichung._
 
 **Jetzt:** – (nichts in Arbeit)
 
-**Bald:** Session/Hardware fixieren statt Auto (Roadmap #49) · Roadmap #22
+**Bald:** Roadmap #22
 (Stackmat: Audio live, USB nicht) und #7 (Bluetooth teils live) umbenennen —
 nur mit User im Admin-UI.
 
@@ -38,7 +38,7 @@ nur mit User im Admin-UI.
   Activity-Feed"). Wartet auf die Fragebogen-Ergebnisse (`.tmp/Cubetracker-
   Fragebogen-Activity-Feed.docx`, nur lokal).
 - 8 Roadmap-Items existieren nur live, nicht in `webapp/seeds/roadmap.py` —
-  Stand 27.09.: 7 erledigt, aktiv nur noch #49. Empfehlung: nichts in den
+  Stand 07.11.: alle 8 erledigt (#49 am 07.11.). Empfehlung: nichts in den
   Seed nachtragen (Schutz gegen DB-Verlust = Backups, backlog#3).
 - Produktfrage Zen-Pille (Mattis): nur im Spacebar-Modus sichtbar; Desktop-
   Default bzw. Zen im Text-Modus ändern? (kein Bug)
